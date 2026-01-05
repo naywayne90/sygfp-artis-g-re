@@ -87,8 +87,8 @@ const planificationPhysiqueItems = [
 
 // 4. Exécution Budgétaire - Sous-menus
 const executionItems = [
+  { title: "Notes AEF", url: "/notes-aef", icon: FileText },
   { title: "Notes SEF", url: "/notes-sef", icon: FileText },
-  { title: "Notes AEF", url: "/notes", icon: FileText },
   { title: "Imputation", url: "/execution/imputation", icon: Tag },
   { title: "Expression de Besoin", url: "/execution/expression-besoin", icon: Briefcase },
   { title: "Passation Marché", url: "/marches", icon: ShoppingCart },
