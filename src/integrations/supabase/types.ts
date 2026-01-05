@@ -1458,23 +1458,158 @@ export type Database = {
         }
         Relationships: []
       }
-      expressions_besoin: {
+      expression_besoin_attachments: {
         Row: {
           created_at: string
+          document_type: string
+          expression_besoin_id: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          expression_besoin_id: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          expression_besoin_id?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expression_besoin_attachments_expression_besoin_id_fkey"
+            columns: ["expression_besoin_id"]
+            isOneToOne: false
+            referencedRelation: "expressions_besoin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expression_besoin_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expression_besoin_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expression_besoin_validations: {
+        Row: {
+          comments: string | null
+          created_at: string
+          expression_besoin_id: string
+          id: string
+          ip_address: string | null
+          role: string
+          status: string | null
+          step_order: number
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          expression_besoin_id: string
+          id?: string
+          ip_address?: string | null
+          role: string
+          status?: string | null
+          step_order: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          expression_besoin_id?: string
+          id?: string
+          ip_address?: string | null
+          role?: string
+          status?: string | null
+          step_order?: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expression_besoin_validations_expression_besoin_id_fkey"
+            columns: ["expression_besoin_id"]
+            isOneToOne: false
+            referencedRelation: "expressions_besoin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expression_besoin_validations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expressions_besoin: {
+        Row: {
+          calendrier_debut: string | null
+          calendrier_fin: string | null
+          created_at: string
           created_by: string | null
+          current_validation_step: number | null
           date_differe: string | null
           deadline_correction: string | null
           description: string | null
           differe_by: string | null
           direction_id: string | null
+          dossier_id: string | null
+          exercice: number | null
           id: string
+          intitule_lot: string | null
           justification: string | null
+          marche_id: string | null
           montant_estime: number | null
           motif_differe: string | null
           numero: string | null
+          numero_lot: number | null
           objet: string
           quantite: number | null
           rejection_reason: string | null
+          specifications: string | null
           statut: string | null
           submitted_at: string | null
           unite: string | null
@@ -1482,23 +1617,33 @@ export type Database = {
           urgence: string | null
           validated_at: string | null
           validated_by: string | null
+          validation_status: string | null
         }
         Insert: {
+          calendrier_debut?: string | null
+          calendrier_fin?: string | null
           created_at?: string
           created_by?: string | null
+          current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
           description?: string | null
           differe_by?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
+          exercice?: number | null
           id?: string
+          intitule_lot?: string | null
           justification?: string | null
+          marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
           numero?: string | null
+          numero_lot?: number | null
           objet: string
           quantite?: number | null
           rejection_reason?: string | null
+          specifications?: string | null
           statut?: string | null
           submitted_at?: string | null
           unite?: string | null
@@ -1506,23 +1651,33 @@ export type Database = {
           urgence?: string | null
           validated_at?: string | null
           validated_by?: string | null
+          validation_status?: string | null
         }
         Update: {
+          calendrier_debut?: string | null
+          calendrier_fin?: string | null
           created_at?: string
           created_by?: string | null
+          current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
           description?: string | null
           differe_by?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
+          exercice?: number | null
           id?: string
+          intitule_lot?: string | null
           justification?: string | null
+          marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
           numero?: string | null
+          numero_lot?: number | null
           objet?: string
           quantite?: number | null
           rejection_reason?: string | null
+          specifications?: string | null
           statut?: string | null
           submitted_at?: string | null
           unite?: string | null
@@ -1530,6 +1685,7 @@ export type Database = {
           urgence?: string | null
           validated_at?: string | null
           validated_by?: string | null
+          validation_status?: string | null
         }
         Relationships: [
           {
@@ -1551,6 +1707,20 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
             referencedColumns: ["id"]
           },
           {
