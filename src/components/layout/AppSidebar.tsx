@@ -13,6 +13,7 @@ import {
   User,
   ChevronDown,
 } from "lucide-react";
+import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -105,13 +106,14 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-lg">
-            S
-          </div>
+          <img 
+            src={logoArti} 
+            alt="ARTI" 
+            className="h-10 w-auto object-contain"
+          />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-bold text-sidebar-foreground text-lg">SYGFP</span>
-              <span className="text-xs text-sidebar-foreground/70">ARTI</span>
             </div>
           )}
         </div>
