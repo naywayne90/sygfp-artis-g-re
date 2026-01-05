@@ -104,16 +104,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
         <div className="flex items-center gap-3">
-          <img 
-            src={logoArti} 
-            alt="ARTI" 
-            className="h-10 w-auto object-contain"
-          />
+          <div className="flex h-11 items-center justify-center rounded-lg bg-white/95 px-2 shadow-sm">
+            <img 
+              src={logoArti} 
+              alt="ARTI" 
+              className="h-8 w-auto object-contain"
+            />
+          </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-sidebar-foreground text-lg">SYGFP</span>
+              <span className="font-bold text-sidebar-foreground text-xl tracking-tight">SYGFP</span>
+              <span className="text-[10px] text-sidebar-primary font-medium uppercase tracking-wider">Gestion Financière</span>
             </div>
           )}
         </div>
