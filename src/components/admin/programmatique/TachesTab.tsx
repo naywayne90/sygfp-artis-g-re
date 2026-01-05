@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -14,55 +15,73 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ImportExportButtons } from "../referentiel/ImportExportButtons";
 import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
 
-type Mission = {
+type Tache = {
   id: string;
+  sous_activite_id: string;
   code: string;
   libelle: string;
   est_active: boolean;
+  sous_activite?: { code: string; libelle: string };
 };
 
-export default function MissionsTab() {
+export default function TachesTab() {
   const [isOpen, setIsOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<Mission | null>(null);
-  const [formData, setFormData] = useState({ code: "", libelle: "" });
+  const [editingItem, setEditingItem] = useState<Tache | null>(null);
+  const [formData, setFormData] = useState({ sous_activite_id: "", code: "", libelle: "" });
 
   const queryClient = useQueryClient();
   const { isImporting, importData, exportToCSV, downloadTemplate } = useReferentielImportExport(
-    "missions",
-    "missions",
-    ["code", "libelle"]
+    "taches",
+    "taches",
+    ["code", "libelle", "sous_activite_id"]
   );
 
-  const { data: missions, isLoading } = useQuery({
-    queryKey: ["missions"],
+  const { data: taches, isLoading } = useQuery({
+    queryKey: ["taches"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("missions").select("*").order("code");
+      const { data, error } = await supabase
+        .from("taches")
+        .select(`*, sous_activite:sous_activites(code, libelle)`)
+        .order("code");
       if (error) throw error;
-      return data as Mission[];
+      return data as Tache[];
+    },
+  });
+
+  const { data: sousActivites } = useQuery({
+    queryKey: ["sous-activites-select"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sous_activites")
+        .select("id, code, libelle")
+        .eq("est_active", true)
+        .order("code");
+      if (error) throw error;
+      return data;
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const { error } = await supabase.from("missions").insert(data);
+      const { error } = await supabase.from("taches").insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["missions"] });
-      toast.success("Mission créée avec succès");
+      queryClient.invalidateQueries({ queryKey: ["taches"] });
+      toast.success("Tâche créée");
       resetForm();
     },
     onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Mission> }) => {
-      const { error } = await supabase.from("missions").update(data).eq("id", id);
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Tache> }) => {
+      const { error } = await supabase.from("taches").update(data).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["missions"] });
-      toast.success("Mission mise à jour");
+      queryClient.invalidateQueries({ queryKey: ["taches"] });
+      toast.success("Tâche mise à jour");
       resetForm();
     },
     onError: (error: any) => toast.error("Erreur: " + error.message),
@@ -70,31 +89,35 @@ export default function MissionsTab() {
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, est_active }: { id: string; est_active: boolean }) => {
-      const { error } = await supabase.from("missions").update({ est_active }).eq("id", id);
+      const { error } = await supabase.from("taches").update({ est_active }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["missions"] });
+      queryClient.invalidateQueries({ queryKey: ["taches"] });
       toast.success("Statut mis à jour");
     },
     onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const resetForm = () => {
-    setFormData({ code: "", libelle: "" });
+    setFormData({ sous_activite_id: "", code: "", libelle: "" });
     setEditingItem(null);
     setIsOpen(false);
   };
 
-  const handleEdit = (item: Mission) => {
+  const handleEdit = (item: Tache) => {
     setEditingItem(item);
-    setFormData({ code: item.code, libelle: item.libelle });
+    setFormData({
+      sous_activite_id: item.sous_activite_id,
+      code: item.code,
+      libelle: item.libelle,
+    });
     setIsOpen(true);
   };
 
   const handleSubmit = () => {
-    if (!formData.code || !formData.libelle) {
-      toast.error("Le code et le libellé sont obligatoires");
+    if (!formData.sous_activite_id || !formData.code || !formData.libelle) {
+      toast.error("Tous les champs sont obligatoires");
       return;
     }
     if (editingItem) {
@@ -106,20 +129,21 @@ export default function MissionsTab() {
 
   const handleImport = async (file: File) => {
     await importData(file);
-    queryClient.invalidateQueries({ queryKey: ["missions"] });
+    queryClient.invalidateQueries({ queryKey: ["taches"] });
   };
 
   const handleExport = () => {
-    if (missions) exportToCSV(missions, "missions");
+    if (taches) exportToCSV(taches, "taches");
   };
 
   const handleDownloadTemplate = () => {
     downloadTemplate(
       [
-        { name: "code", example: "M1" },
-        { name: "libelle", example: "Régulation du secteur numérique" },
+        { name: "code", example: "T1.1.1" },
+        { name: "libelle", example: "Rédaction du cahier des charges" },
+        { name: "sous_activite_id", example: "uuid-de-la-sous-activite" },
       ],
-      "missions"
+      "taches"
     );
   };
 
@@ -127,8 +151,8 @@ export default function MissionsTab() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>Missions</CardTitle>
-          <CardDescription>Gérez les missions de l'ARTI</CardDescription>
+          <CardTitle>Tâches</CardTitle>
+          <CardDescription>Niveau le plus fin de la structure programmatique</CardDescription>
         </div>
         <div className="flex gap-2">
           <ImportExportButtons
@@ -139,23 +163,38 @@ export default function MissionsTab() {
           />
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
-              <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Mission</Button>
+              <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Tâche</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingItem ? "Modifier la mission" : "Nouvelle Mission"}</DialogTitle>
+                <DialogTitle>{editingItem ? "Modifier la tâche" : "Nouvelle Tâche"}</DialogTitle>
                 <DialogDescription>
-                  {editingItem ? "Modifiez les informations de la mission" : "Créez une nouvelle mission"}
+                  {editingItem ? "Modifiez les informations" : "Créez une nouvelle tâche"}
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Sous-activité *</Label>
+                  <Select value={formData.sous_activite_id} onValueChange={(v) => setFormData({ ...formData, sous_activite_id: v })}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Sélectionner..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sousActivites?.map((sa) => (
+                        <SelectItem key={sa.id} value={sa.id}>
+                          {sa.code} - {sa.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right">Code *</Label>
                   <Input
                     className="col-span-3"
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    placeholder="M1"
+                    placeholder="T1.1.1"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -164,7 +203,7 @@ export default function MissionsTab() {
                     className="col-span-3"
                     value={formData.libelle}
                     onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
-                    placeholder="Régulation du secteur numérique"
+                    placeholder="Rédaction du cahier des charges"
                   />
                 </div>
               </div>
@@ -185,6 +224,7 @@ export default function MissionsTab() {
               <TableRow>
                 <TableHead className="w-24">Code</TableHead>
                 <TableHead>Libellé</TableHead>
+                <TableHead>Sous-activité</TableHead>
                 <TableHead className="w-20">Statut</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
@@ -193,22 +233,25 @@ export default function MissionsTab() {
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 4 }).map((_, j) => (
+                    {Array.from({ length: 5 }).map((_, j) => (
                       <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : missions?.length === 0 ? (
+              ) : taches?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    Aucune mission définie
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    Aucune tâche définie
                   </TableCell>
                 </TableRow>
               ) : (
-                missions?.map((item) => (
+                taches?.map((item) => (
                   <TableRow key={item.id} className={!item.est_active ? "opacity-50" : ""}>
                     <TableCell className="font-mono font-bold">{item.code}</TableCell>
                     <TableCell className="font-medium">{item.libelle}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{item.sous_activite?.code}</Badge>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={item.est_active ? "default" : "secondary"}>
                         {item.est_active ? "Active" : "Inactive"}

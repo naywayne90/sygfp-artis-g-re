@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Edit, Archive, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ImportExportButtons } from "../referentiel/ImportExportButtons";
+import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
 
 type Direction = {
   id: string;
@@ -26,6 +28,11 @@ export default function DirectionsTab() {
   const [formData, setFormData] = useState({ code: "", label: "", sigle: "" });
 
   const queryClient = useQueryClient();
+  const { isImporting, importData, exportToCSV, downloadTemplate } = useReferentielImportExport(
+    "directions",
+    "directions-admin",
+    ["code", "label"]
+  );
 
   const { data: directions, isLoading } = useQuery({
     queryKey: ["directions-admin"],
@@ -50,9 +57,7 @@ export default function DirectionsTab() {
       toast.success("Direction créée avec succès");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const updateMutation = useMutation({
@@ -66,9 +71,7 @@ export default function DirectionsTab() {
       toast.success("Direction mise à jour");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const toggleActiveMutation = useMutation({
@@ -81,9 +84,7 @@ export default function DirectionsTab() {
       queryClient.invalidateQueries({ queryKey: ["directions-list"] });
       toast.success("Statut mis à jour");
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const resetForm = () => {
@@ -110,6 +111,27 @@ export default function DirectionsTab() {
     }
   };
 
+  const handleImport = async (file: File) => {
+    await importData(file);
+    queryClient.invalidateQueries({ queryKey: ["directions-admin"] });
+    queryClient.invalidateQueries({ queryKey: ["directions-list"] });
+  };
+
+  const handleExport = () => {
+    if (directions) exportToCSV(directions, "directions");
+  };
+
+  const handleDownloadTemplate = () => {
+    downloadTemplate(
+      [
+        { name: "code", example: "DIR-001" },
+        { name: "label", example: "Direction des Affaires Administratives" },
+        { name: "sigle", example: "DAA" },
+      ],
+      "directions"
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -117,54 +139,62 @@ export default function DirectionsTab() {
           <CardTitle>Directions</CardTitle>
           <CardDescription>Gérez les directions de l'ARTI</CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Direction</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingItem ? "Modifier la direction" : "Nouvelle Direction"}</DialogTitle>
-              <DialogDescription>
-                {editingItem ? "Modifiez les informations de la direction" : "Créez une nouvelle direction"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Code *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="DIR-001"
-                />
+        <div className="flex gap-2">
+          <ImportExportButtons
+            onImport={handleImport}
+            onExport={handleExport}
+            onDownloadTemplate={handleDownloadTemplate}
+            isImporting={isImporting}
+          />
+          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Direction</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingItem ? "Modifier la direction" : "Nouvelle Direction"}</DialogTitle>
+                <DialogDescription>
+                  {editingItem ? "Modifiez les informations de la direction" : "Créez une nouvelle direction"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Code *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    placeholder="DIR-001"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Libellé *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    placeholder="Direction des Affaires Administratives"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Sigle</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.sigle}
+                    onChange={(e) => setFormData({ ...formData, sigle: e.target.value })}
+                    placeholder="DAA"
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Libellé *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  placeholder="Direction des Affaires Administratives"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Sigle</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.sigle}
-                  onChange={(e) => setFormData({ ...formData, sigle: e.target.value })}
-                  placeholder="DAA"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={resetForm}>Annuler</Button>
-              <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                {editingItem ? "Modifier" : "Créer"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={resetForm}>Annuler</Button>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+                  {editingItem ? "Modifier" : "Créer"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
