@@ -5,7 +5,7 @@ import { Json } from "@/integrations/supabase/types";
 interface AuditLogParams {
   entityType: string;
   entityId: string;
-  action: "create" | "update" | "delete" | "validate" | "reject" | "archive";
+  action: "create" | "update" | "delete" | "validate" | "reject" | "archive" | "submit" | "defer" | "resume" | "update_locked_field";
   oldValues?: Json;
   newValues?: Json;
 }

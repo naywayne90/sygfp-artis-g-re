@@ -2,89 +2,98 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Plus, Search, Filter, MoreHorizontal, Eye, Edit, CreditCard } from "lucide-react";
-
-const mockEngagements = [
-  {
-    id: "1",
-    numero: "ENG-2024-0234",
-    objet: "Achat de serveurs informatiques",
-    fournisseur: "TECH SOLUTIONS SARL",
-    montant: 45000000,
-    ligneBudgetaire: "2.3.4",
-    statut: "valide",
-    dateEngagement: "2024-01-15",
-  },
-  {
-    id: "2",
-    numero: "ENG-2024-0233",
-    objet: "Fournitures de bureau - Q1",
-    fournisseur: "PAPETERIE PLUS",
-    montant: 3500000,
-    ligneBudgetaire: "6.1.2",
-    statut: "en_attente",
-    dateEngagement: "2024-01-14",
-  },
-  {
-    id: "3",
-    numero: "ENG-2024-0232",
-    objet: "Maintenance ascenseurs",
-    fournisseur: "OTIS CI",
-    montant: 12000000,
-    ligneBudgetaire: "6.2.1",
-    statut: "en_cours",
-    dateEngagement: "2024-01-13",
-  },
-  {
-    id: "4",
-    numero: "ENG-2024-0231",
-    objet: "Location véhicules",
-    fournisseur: "AUTO RENT",
-    montant: 8500000,
-    ligneBudgetaire: "6.3.1",
-    statut: "rejete",
-    dateEngagement: "2024-01-12",
-  },
-];
-
-const getStatusBadge = (status: string) => {
-  const variants: Record<string, { label: string; className: string }> = {
-    en_attente: { label: "En attente", className: "bg-warning/10 text-warning border-warning/20" },
-    en_cours: { label: "En cours", className: "bg-secondary/10 text-secondary border-secondary/20" },
-    valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
-    rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
-  };
-  const variant = variants[status] || variants.en_attente;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
-};
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
+import { useEngagements, Engagement } from "@/hooks/useEngagements";
+import { EngagementForm } from "@/components/engagement/EngagementForm";
+import { EngagementList } from "@/components/engagement/EngagementList";
+import { EngagementDetails } from "@/components/engagement/EngagementDetails";
+import { EngagementRejectDialog } from "@/components/engagement/EngagementRejectDialog";
+import { EngagementDeferDialog } from "@/components/engagement/EngagementDeferDialog";
+import { EngagementValidateDialog } from "@/components/engagement/EngagementValidateDialog";
+import { EngagementPrintDialog } from "@/components/engagement/EngagementPrintDialog";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 export default function Engagements() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const {
+    engagements,
+    engagementsAValider,
+    engagementsValides,
+    engagementsRejetes,
+    engagementsDifferes,
+    isLoading,
+    submitEngagement,
+    validateEngagement,
+    rejectEngagement,
+    deferEngagement,
+    resumeEngagement,
+    isValidating,
+  } = useEngagements();
 
-  const filteredEngagements = mockEngagements.filter(eng => 
-    eng.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    eng.objet.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    eng.fournisseur.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showValidateDialog, setShowValidateDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showDeferDialog, setShowDeferDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+
+  const filterEngagements = (list: Engagement[]) => {
+    return list.filter(eng =>
+      eng.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      eng.objet.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (eng.fournisseur?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+    );
+  };
+
+  const handleView = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowDetails(true);
+  };
+
+  const handleValidate = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowValidateDialog(true);
+  };
+
+  const handleReject = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowRejectDialog(true);
+  };
+
+  const handleDefer = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowDeferDialog(true);
+  };
+
+  const handlePrint = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowPrintDialog(true);
+  };
+
+  const confirmValidate = async (id: string, comments?: string) => {
+    await validateEngagement({ id, comments });
+    setShowValidateDialog(false);
+    setSelectedEngagement(null);
+  };
+
+  const confirmReject = async (id: string, reason: string) => {
+    await rejectEngagement({ id, reason });
+    setShowRejectDialog(false);
+    setSelectedEngagement(null);
+  };
+
+  const confirmDefer = async (id: string, motif: string, dateReprise?: string) => {
+    await deferEngagement({ id, motif, dateReprise });
+    setShowDeferDialog(false);
+    setSelectedEngagement(null);
+  };
+
+  const totalMontant = engagements.reduce((acc, e) => acc + e.montant, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -96,41 +105,20 @@ export default function Engagements() {
             Gestion des engagements budgétaires
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
           <Plus className="h-4 w-4" />
           Nouvel engagement
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Rechercher par numéro, objet ou fournisseur..." 
-                className="pl-9"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filtres
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total engagements</p>
-                <p className="text-2xl font-bold">{mockEngagements.length}</p>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{engagements.length}</p>
               </div>
               <CreditCard className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -138,13 +126,9 @@ export default function Engagements() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Montant total</p>
-                <p className="text-2xl font-bold text-primary">
-                  {formatMontant(mockEngagements.reduce((acc, e) => acc + e.montant, 0))}
-                </p>
-              </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Montant total</p>
+              <p className="text-xl font-bold text-primary">{formatMontant(totalMontant)}</p>
             </div>
           </CardContent>
         </Card>
@@ -152,11 +136,10 @@ export default function Engagements() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">En attente</p>
-                <p className="text-2xl font-bold text-warning">
-                  {mockEngagements.filter(n => n.statut === 'en_attente').length}
-                </p>
+                <p className="text-sm text-muted-foreground">À valider</p>
+                <p className="text-2xl font-bold text-warning">{engagementsAValider.length}</p>
               </div>
+              <Clock className="h-8 w-8 text-warning/50" />
             </div>
           </CardContent>
         </Card>
@@ -165,72 +148,192 @@ export default function Engagements() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Validés</p>
-                <p className="text-2xl font-bold text-success">
-                  {mockEngagements.filter(n => n.statut === 'valide').length}
-                </p>
+                <p className="text-2xl font-bold text-success">{engagementsValides.length}</p>
               </div>
+              <CheckCircle className="h-8 w-8 text-success/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Rejetés</p>
+                <p className="text-2xl font-bold text-destructive">{engagementsRejetes.length}</p>
+              </div>
+              <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Engagements Table */}
+      {/* Search */}
       <Card>
-        <CardHeader>
-          <CardTitle>Liste des engagements</CardTitle>
-          <CardDescription>
-            {filteredEngagements.length} engagement(s) trouvé(s)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Numéro</TableHead>
-                <TableHead className="hidden md:table-cell">Objet</TableHead>
-                <TableHead>Fournisseur</TableHead>
-                <TableHead className="text-right">Montant</TableHead>
-                <TableHead>Ligne budg.</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEngagements.map((engagement) => (
-                <TableRow key={engagement.id}>
-                  <TableCell className="font-medium">{engagement.numero}</TableCell>
-                  <TableCell className="hidden md:table-cell max-w-[200px] truncate">
-                    {engagement.objet}
-                  </TableCell>
-                  <TableCell>{engagement.fournisseur}</TableCell>
-                  <TableCell className="text-right">{formatMontant(engagement.montant)}</TableCell>
-                  <TableCell>{engagement.ligneBudgetaire}</TableCell>
-                  <TableCell>{getStatusBadge(engagement.statut)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Voir détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Modifier
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher par numéro, objet ou fournisseur..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </CardContent>
       </Card>
+
+      {/* Tabs */}
+      <Tabs defaultValue="tous" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="tous">Tous ({engagements.length})</TabsTrigger>
+          <TabsTrigger value="a_valider">À valider ({engagementsAValider.length})</TabsTrigger>
+          <TabsTrigger value="valides">Validés ({engagementsValides.length})</TabsTrigger>
+          <TabsTrigger value="rejetes">Rejetés ({engagementsRejetes.length})</TabsTrigger>
+          <TabsTrigger value="differes">Différés ({engagementsDifferes.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tous">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tous les engagements</CardTitle>
+              <CardDescription>
+                {filterEngagements(engagements).length} engagement(s)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <EngagementList
+                  engagements={filterEngagements(engagements)}
+                  onView={handleView}
+                  onValidate={handleValidate}
+                  onReject={handleReject}
+                  onDefer={handleDefer}
+                  onSubmit={submitEngagement}
+                  onResume={resumeEngagement}
+                  onPrint={handlePrint}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="a_valider">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagements à valider</CardTitle>
+              <CardDescription>
+                {filterEngagements(engagementsAValider).length} engagement(s) en attente de validation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EngagementList
+                engagements={filterEngagements(engagementsAValider)}
+                onView={handleView}
+                onValidate={handleValidate}
+                onReject={handleReject}
+                onDefer={handleDefer}
+                onPrint={handlePrint}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="valides">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagements validés</CardTitle>
+              <CardDescription>
+                {filterEngagements(engagementsValides).length} engagement(s) validé(s)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EngagementList
+                engagements={filterEngagements(engagementsValides)}
+                onView={handleView}
+                onPrint={handlePrint}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="rejetes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagements rejetés</CardTitle>
+              <CardDescription>
+                {filterEngagements(engagementsRejetes).length} engagement(s) rejeté(s)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EngagementList
+                engagements={filterEngagements(engagementsRejetes)}
+                onView={handleView}
+                onPrint={handlePrint}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="differes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Engagements différés</CardTitle>
+              <CardDescription>
+                {filterEngagements(engagementsDifferes).length} engagement(s) différé(s)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EngagementList
+                engagements={filterEngagements(engagementsDifferes)}
+                onView={handleView}
+                onResume={resumeEngagement}
+                onPrint={handlePrint}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialogs */}
+      <EngagementForm open={showCreateForm} onOpenChange={setShowCreateForm} />
+      
+      <EngagementDetails
+        engagement={selectedEngagement}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
+
+      <EngagementValidateDialog
+        engagement={selectedEngagement}
+        open={showValidateDialog}
+        onOpenChange={setShowValidateDialog}
+        onConfirm={confirmValidate}
+        isLoading={isValidating}
+      />
+
+      <EngagementRejectDialog
+        engagement={selectedEngagement}
+        open={showRejectDialog}
+        onOpenChange={setShowRejectDialog}
+        onConfirm={confirmReject}
+      />
+
+      <EngagementDeferDialog
+        engagement={selectedEngagement}
+        open={showDeferDialog}
+        onOpenChange={setShowDeferDialog}
+        onConfirm={confirmDefer}
+      />
+
+      <EngagementPrintDialog
+        engagement={selectedEngagement}
+        open={showPrintDialog}
+        onOpenChange={setShowPrintDialog}
+      />
     </div>
   );
 }
