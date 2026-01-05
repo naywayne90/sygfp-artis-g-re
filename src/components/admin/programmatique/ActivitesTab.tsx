@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Edit, Archive, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ImportExportButtons } from "../referentiel/ImportExportButtons";
+import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
 
 type Activite = {
   id: string;
@@ -28,6 +30,11 @@ export default function ActivitesTab() {
   const [formData, setFormData] = useState({ action_id: "", code: "", libelle: "" });
 
   const queryClient = useQueryClient();
+  const { isImporting, importData, exportToCSV, downloadTemplate } = useReferentielImportExport(
+    "activites",
+    "activites",
+    ["code", "libelle", "action_id"]
+  );
 
   const { data: activites, isLoading } = useQuery({
     queryKey: ["activites"],
@@ -64,9 +71,7 @@ export default function ActivitesTab() {
       toast.success("Activité créée avec succès");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const updateMutation = useMutation({
@@ -79,9 +84,7 @@ export default function ActivitesTab() {
       toast.success("Activité mise à jour");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const toggleActiveMutation = useMutation({
@@ -93,9 +96,7 @@ export default function ActivitesTab() {
       queryClient.invalidateQueries({ queryKey: ["activites"] });
       toast.success("Statut mis à jour");
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const resetForm = () => {
@@ -122,6 +123,26 @@ export default function ActivitesTab() {
     }
   };
 
+  const handleImport = async (file: File) => {
+    await importData(file);
+    queryClient.invalidateQueries({ queryKey: ["activites"] });
+  };
+
+  const handleExport = () => {
+    if (activites) exportToCSV(activites, "activites");
+  };
+
+  const handleDownloadTemplate = () => {
+    downloadTemplate(
+      [
+        { name: "code", example: "ACT-001" },
+        { name: "libelle", example: "Installation des équipements" },
+        { name: "action_id", example: "uuid-action" },
+      ],
+      "activites"
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -129,60 +150,68 @@ export default function ActivitesTab() {
           <CardTitle>Activités</CardTitle>
           <CardDescription>Gérez les activités liées aux actions</CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Activité</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingItem ? "Modifier l'activité" : "Nouvelle Activité"}</DialogTitle>
-              <DialogDescription>
-                {editingItem ? "Modifiez les informations de l'activité" : "Créez une nouvelle activité"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Action *</Label>
-                <Select value={formData.action_id} onValueChange={(v) => setFormData({ ...formData, action_id: v })}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionner une action" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {actions?.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.code} - {a.libelle}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="flex gap-2">
+          <ImportExportButtons
+            onImport={handleImport}
+            onExport={handleExport}
+            onDownloadTemplate={handleDownloadTemplate}
+            isImporting={isImporting}
+          />
+          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Activité</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingItem ? "Modifier l'activité" : "Nouvelle Activité"}</DialogTitle>
+                <DialogDescription>
+                  {editingItem ? "Modifiez les informations de l'activité" : "Créez une nouvelle activité"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Action *</Label>
+                  <Select value={formData.action_id} onValueChange={(v) => setFormData({ ...formData, action_id: v })}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Sélectionner une action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {actions?.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.code} - {a.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Code *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    placeholder="ACT-001"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Libellé *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.libelle}
+                    onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
+                    placeholder="Installation des équipements..."
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Code *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="ACT-001"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Libellé *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.libelle}
-                  onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
-                  placeholder="Installation des équipements..."
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={resetForm}>Annuler</Button>
-              <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                {editingItem ? "Modifier" : "Créer"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={resetForm}>Annuler</Button>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+                  {editingItem ? "Modifier" : "Créer"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">

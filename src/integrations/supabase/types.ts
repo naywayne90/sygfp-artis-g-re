@@ -1458,6 +1458,39 @@ export type Database = {
         }
         Relationships: []
       }
+      nomenclature_nbe: {
+        Row: {
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          niveau: string | null
+          parent_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          niveau?: string | null
+          parent_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          niveau?: string | null
+          parent_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       note_attachments: {
         Row: {
           created_at: string
@@ -1944,6 +1977,39 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           label?: string
+        }
+        Relationships: []
+      }
+      plan_comptable_sysco: {
+        Row: {
+          classe: string | null
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          classe?: string | null
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          classe?: string | null
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          type?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2483,6 +2549,44 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      taches: {
+        Row: {
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          sous_activite_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          sous_activite_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          sous_activite_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "taches_sous_activite_id_fkey"
+            columns: ["sous_activite_id"]
+            isOneToOne: false
+            referencedRelation: "sous_activites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       treasury_accounts: {
         Row: {

@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Edit, Archive, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ImportExportButtons } from "../referentiel/ImportExportButtons";
+import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
 
 type SousActivite = {
   id: string;
@@ -28,6 +30,11 @@ export default function SousActivitesTab() {
   const [formData, setFormData] = useState({ activite_id: "", code: "", libelle: "" });
 
   const queryClient = useQueryClient();
+  const { isImporting, importData, exportToCSV, downloadTemplate } = useReferentielImportExport(
+    "sous_activites",
+    "sous-activites",
+    ["code", "libelle", "activite_id"]
+  );
 
   const { data: sousActivites, isLoading } = useQuery({
     queryKey: ["sous-activites"],
@@ -64,9 +71,7 @@ export default function SousActivitesTab() {
       toast.success("Sous-activité créée avec succès");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const updateMutation = useMutation({
@@ -79,9 +84,7 @@ export default function SousActivitesTab() {
       toast.success("Sous-activité mise à jour");
       resetForm();
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const toggleActiveMutation = useMutation({
@@ -93,9 +96,7 @@ export default function SousActivitesTab() {
       queryClient.invalidateQueries({ queryKey: ["sous-activites"] });
       toast.success("Statut mis à jour");
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
-    },
+    onError: (error: any) => toast.error("Erreur: " + error.message),
   });
 
   const resetForm = () => {
@@ -122,6 +123,26 @@ export default function SousActivitesTab() {
     }
   };
 
+  const handleImport = async (file: File) => {
+    await importData(file);
+    queryClient.invalidateQueries({ queryKey: ["sous-activites"] });
+  };
+
+  const handleExport = () => {
+    if (sousActivites) exportToCSV(sousActivites, "sous_activites");
+  };
+
+  const handleDownloadTemplate = () => {
+    downloadTemplate(
+      [
+        { name: "code", example: "SA-001" },
+        { name: "libelle", example: "Sous-tâche spécifique" },
+        { name: "activite_id", example: "uuid-activite" },
+      ],
+      "sous_activites"
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -129,60 +150,68 @@ export default function SousActivitesTab() {
           <CardTitle>Sous-Activités</CardTitle>
           <CardDescription>Gérez les sous-activités liées aux activités</CardDescription>
         </div>
-        <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Sous-Activité</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingItem ? "Modifier la sous-activité" : "Nouvelle Sous-Activité"}</DialogTitle>
-              <DialogDescription>
-                {editingItem ? "Modifiez les informations" : "Créez une nouvelle sous-activité"}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Activité *</Label>
-                <Select value={formData.activite_id} onValueChange={(v) => setFormData({ ...formData, activite_id: v })}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionner une activité" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activites?.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.code} - {a.libelle}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="flex gap-2">
+          <ImportExportButtons
+            onImport={handleImport}
+            onExport={handleExport}
+            onDownloadTemplate={handleDownloadTemplate}
+            isImporting={isImporting}
+          />
+          <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Nouvelle Sous-Activité</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingItem ? "Modifier la sous-activité" : "Nouvelle Sous-Activité"}</DialogTitle>
+                <DialogDescription>
+                  {editingItem ? "Modifiez les informations" : "Créez une nouvelle sous-activité"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Activité *</Label>
+                  <Select value={formData.activite_id} onValueChange={(v) => setFormData({ ...formData, activite_id: v })}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Sélectionner une activité" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activites?.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.code} - {a.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Code *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    placeholder="SA-001"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Libellé *</Label>
+                  <Input
+                    className="col-span-3"
+                    value={formData.libelle}
+                    onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
+                    placeholder="Sous-tâche spécifique..."
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Code *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="SA-001"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Libellé *</Label>
-                <Input
-                  className="col-span-3"
-                  value={formData.libelle}
-                  onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
-                  placeholder="Sous-tâche spécifique..."
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={resetForm}>Annuler</Button>
-              <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                {editingItem ? "Modifier" : "Créer"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button variant="outline" onClick={resetForm}>Annuler</Button>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+                  {editingItem ? "Modifier" : "Créer"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
