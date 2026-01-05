@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
+import logoArti from "@/assets/logo-arti.jpg";
 
 export default function SelectExercice() {
   const navigate = useNavigate();
@@ -17,9 +17,11 @@ export default function SelectExercice() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-primary/20">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <Calendar className="h-8 w-8 text-primary" />
-          </div>
+          <img 
+            src={logoArti} 
+            alt="ARTI - Autorité de Régulation du Transport Intérieur" 
+            className="mx-auto h-20 w-auto object-contain"
+          />
           <CardTitle className="text-2xl text-primary">Sélection de l'exercice</CardTitle>
           <CardDescription className="text-base">
             Veuillez choisir l'exercice budgétaire sur lequel vous souhaitez travailler
