@@ -1,125 +1,183 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, FileText, CreditCard, Receipt, FileCheck, ShoppingCart } from "lucide-react";
+import { Plus, FolderOpen, FileText, TrendingUp, Clock } from "lucide-react";
+import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
+import { DossierSearch } from "@/components/dossier/DossierSearch";
+import { DossierList } from "@/components/dossier/DossierList";
+import { DossierForm } from "@/components/dossier/DossierForm";
+import { DossierDetails } from "@/components/dossier/DossierDetails";
+import { useExercice } from "@/contexts/ExerciceContext";
 
 export default function Recherche() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchType, setSearchType] = useState("all");
+  const { dossiers, loading, directions, fetchDossiers, createDossier, updateDossier } = useDossiers();
+  const { exercice } = useExercice();
+  const [filters, setFilters] = useState<DossierFilters>({
+    search: "",
+    direction_id: "",
+    exercice: null,
+    statut: "",
+    etape: "",
+  });
+  const [showForm, setShowForm] = useState(false);
+  const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [editingDossier, setEditingDossier] = useState<Dossier | null>(null);
+
+  // Générer la liste des exercices disponibles
+  const currentYear = new Date().getFullYear();
+  const exercices = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+  useEffect(() => {
+    fetchDossiers(filters);
+  }, [filters]);
+
+  const handleCreateDossier = async (data: any) => {
+    const result = await createDossier(data);
+    if (result) {
+      setShowForm(false);
+      fetchDossiers(filters);
+    }
+    return result;
+  };
+
+  const handleUpdateDossier = async (data: any) => {
+    if (!editingDossier) return null;
+    const result = await updateDossier(editingDossier.id, data);
+    if (result) {
+      setEditingDossier(null);
+      fetchDossiers(filters);
+    }
+    return result;
+  };
+
+  const handleViewDossier = (dossier: Dossier) => {
+    setSelectedDossier(dossier);
+    setShowDetails(true);
+  };
+
+  const handleEditDossier = (dossier: Dossier) => {
+    setEditingDossier(dossier);
+  };
+
+  // Statistiques
+  const stats = {
+    total: dossiers.length,
+    enCours: dossiers.filter((d) => d.statut_global === "en_cours").length,
+    termines: dossiers.filter((d) => d.statut_global === "termine").length,
+    montantTotal: dossiers.reduce((sum, d) => sum + (d.montant_estime || 0), 0),
+  };
+
+  const formatMontant = (montant: number) => {
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "XOF",
+      minimumFractionDigits: 0,
+      notation: "compact",
+    }).format(montant);
+  };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Page Header */}
-      <div className="page-header">
-        <h1 className="page-title">Recherche de Dossiers</h1>
-        <p className="page-description">
-          Recherche globale dans tous les modules de la chaîne de la dépense
-        </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Recherche Dossier</h1>
+          <p className="text-muted-foreground">
+            Recherchez et gérez tous les dossiers de l'exercice {exercice}
+          </p>
+        </div>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau dossier
+        </Button>
       </div>
 
-      {/* Search Section */}
+      {/* KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total dossiers</CardTitle>
+            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">En cours</CardTitle>
+            <Clock className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{stats.enCours}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Terminés</CardTitle>
+            <FileText className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.termines}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Montant total</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatMontant(stats.montantTotal)}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recherche et filtres */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Rechercher par numéro, objet, fournisseur..." 
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Select value={searchType} onValueChange={setSearchType}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Type de document" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les types</SelectItem>
-                  <SelectItem value="notes">Notes</SelectItem>
-                  <SelectItem value="marches">Marchés</SelectItem>
-                  <SelectItem value="engagements">Engagements</SelectItem>
-                  <SelectItem value="liquidations">Liquidations</SelectItem>
-                  <SelectItem value="ordonnancements">Ordonnancements</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button className="gap-2">
-                <Search className="h-4 w-4" />
-                Rechercher
-              </Button>
-            </div>
-          </div>
+          <DossierSearch
+            filters={filters}
+            onFiltersChange={setFilters}
+            directions={directions}
+            exercices={exercices}
+          />
         </CardContent>
       </Card>
 
-      {/* Quick Access */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="pt-6 text-center">
-            <FileText className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <p className="font-medium">Notes</p>
-            <p className="text-2xl font-bold mt-1">156</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="pt-6 text-center">
-            <ShoppingCart className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <p className="font-medium">Marchés</p>
-            <p className="text-2xl font-bold mt-1">34</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="pt-6 text-center">
-            <CreditCard className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <p className="font-medium">Engagements</p>
-            <p className="text-2xl font-bold mt-1">245</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="pt-6 text-center">
-            <Receipt className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <p className="font-medium">Liquidations</p>
-            <p className="text-2xl font-bold mt-1">198</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors">
-          <CardContent className="pt-6 text-center">
-            <FileCheck className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <p className="font-medium">Ordonnancements</p>
-            <p className="text-2xl font-bold mt-1">175</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Results Area */}
+      {/* Liste des dossiers */}
       <Card>
-        <CardHeader>
-          <CardTitle>Résultats de recherche</CardTitle>
-          <CardDescription>
-            Effectuez une recherche pour voir les résultats
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <Search className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p>Saisissez un terme de recherche pour trouver des dossiers</p>
-            <p className="text-sm mt-2">
-              Vous pouvez rechercher par numéro de dossier, objet, fournisseur ou montant
-            </p>
-          </div>
+        <CardContent className="pt-6">
+          <DossierList
+            dossiers={dossiers}
+            loading={loading}
+            onView={handleViewDossier}
+            onEdit={handleEditDossier}
+          />
         </CardContent>
       </Card>
+
+      {/* Formulaires et modales */}
+      <DossierForm
+        open={showForm}
+        onOpenChange={setShowForm}
+        onSubmit={handleCreateDossier}
+      />
+
+      <DossierForm
+        open={!!editingDossier}
+        onOpenChange={(open) => !open && setEditingDossier(null)}
+        onSubmit={handleUpdateDossier}
+        initialData={editingDossier}
+      />
+
+      <DossierDetails
+        dossier={selectedDossier}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
     </div>
   );
 }
