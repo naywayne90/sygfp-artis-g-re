@@ -12,6 +12,8 @@ import {
   LogOut,
   User,
   ChevronDown,
+  Users,
+  Target,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -89,6 +91,19 @@ const rapportsItems = [
     title: "États d'exécution",
     url: "/etats-execution",
     icon: BarChart3,
+  },
+];
+
+const adminItems = [
+  {
+    title: "Paramètres Programmatiques",
+    url: "/admin/parametres-programmatiques",
+    icon: Target,
+  },
+  {
+    title: "Gestion Utilisateurs",
+    url: "/admin/utilisateurs",
+    icon: Users,
   },
 ];
 
@@ -203,6 +218,41 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {rapportsItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <NavLink
+                      to={item.url}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
+                        isActive(item.url)
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Administration */}
+        <SidebarGroup className="mt-4">
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-xs font-semibold tracking-wider mb-2">
+              Administration
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

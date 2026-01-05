@@ -16,6 +16,8 @@ import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
+import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
+import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,9 @@ const App = () => (
                     <Route path="/marches" element={<Marches />} />
                     <Route path="/recherche" element={<Recherche />} />
                     <Route path="/etats-execution" element={<EtatsExecution />} />
+                    {/* Admin routes */}
+                    <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
+                    <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AppLayout>
