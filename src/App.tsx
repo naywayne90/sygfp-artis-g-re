@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ExerciceProvider } from "@/contexts/ExerciceContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Notes from "./pages/Notes";
@@ -13,6 +14,7 @@ import Reglements from "./pages/Reglements";
 import Marches from "./pages/Marches";
 import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
+import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,24 +22,34 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppLayout>
+      <ExerciceProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/notes" element={<Notes />} />
-            <Route path="/engagements" element={<Engagements />} />
-            <Route path="/liquidations" element={<Liquidations />} />
-            <Route path="/ordonnancements" element={<Ordonnancements />} />
-            <Route path="/reglements" element={<Reglements />} />
-            <Route path="/marches" element={<Marches />} />
-            <Route path="/recherche" element={<Recherche />} />
-            <Route path="/etats-execution" element={<EtatsExecution />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/select-exercice" element={<SelectExercice />} />
+            <Route
+              path="/*"
+              element={
+                <AppLayout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/notes" element={<Notes />} />
+                    <Route path="/engagements" element={<Engagements />} />
+                    <Route path="/liquidations" element={<Liquidations />} />
+                    <Route path="/ordonnancements" element={<Ordonnancements />} />
+                    <Route path="/reglements" element={<Reglements />} />
+                    <Route path="/marches" element={<Marches />} />
+                    <Route path="/recherche" element={<Recherche />} />
+                    <Route path="/etats-execution" element={<EtatsExecution />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </AppLayout>
+              }
+            />
           </Routes>
-        </AppLayout>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ExerciceProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
