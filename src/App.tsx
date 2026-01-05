@@ -23,6 +23,10 @@ import NotFound from "./pages/NotFound";
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
 import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
 import GestionExercices from "./pages/admin/GestionExercices";
+import GestionRoles from "./pages/admin/GestionRoles";
+import GestionAutorisations from "./pages/admin/GestionAutorisations";
+import GestionDelegations from "./pages/admin/GestionDelegations";
+import ParametresSysteme from "./pages/admin/ParametresSysteme";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -70,6 +74,10 @@ const App = () => (
                     <Route path="/admin/exercices" element={<GestionExercices />} />
                     <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
                     <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
+                    <Route path="/admin/roles" element={<GestionRoles />} />
+                    <Route path="/admin/autorisations" element={<GestionAutorisations />} />
+                    <Route path="/admin/delegations" element={<GestionDelegations />} />
+                    <Route path="/admin/parametres" element={<ParametresSysteme />} />
                     
                     {/* Planification */}
                     <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
