@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { Bell } from "lucide-react";
+import { Bell, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,12 +9,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useExercice } from "@/contexts/ExerciceContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const { exercice, clearExercice } = useExercice();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!exercice) {
+      navigate("/select-exercice");
+    }
+  }, [exercice, navigate]);
+
+  const handleChangeExercice = () => {
+    clearExercice();
+    navigate("/select-exercice");
+  };
+
+  if (!exercice) {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -25,6 +46,23 @@ export function AppLayout({ children }: AppLayoutProps) {
             <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
             
             <div className="flex-1" />
+
+            {/* Exercice Badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-primary/10 border border-primary/20">
+              <Calendar className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Exercice {exercice}</span>
+            </div>
+
+            {/* Change Exercice Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleChangeExercice}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Changer d'exercice</span>
+            </Button>
             
             {/* Notifications */}
             <DropdownMenu>
