@@ -168,6 +168,7 @@ export type Database = {
           created_at: string
           entity_id: string | null
           entity_type: string
+          exercice: number | null
           id: string
           ip_address: string | null
           new_values: Json | null
@@ -179,6 +180,7 @@ export type Database = {
           created_at?: string
           entity_id?: string | null
           entity_type: string
+          exercice?: number | null
           id?: string
           ip_address?: string | null
           new_values?: Json | null
@@ -190,6 +192,7 @@ export type Database = {
           created_at?: string
           entity_id?: string | null
           entity_type?: string
+          exercice?: number | null
           id?: string
           ip_address?: string | null
           new_values?: Json | null
@@ -973,6 +976,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      exercices_budgetaires: {
+        Row: {
+          annee: number
+          created_at: string
+          date_cloture: string | null
+          date_ouverture: string | null
+          est_actif: boolean
+          id: string
+          statut: string
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          created_at?: string
+          date_cloture?: string | null
+          date_ouverture?: string | null
+          est_actif?: boolean
+          id?: string
+          statut?: string
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          created_at?: string
+          date_cloture?: string | null
+          date_ouverture?: string | null
+          est_actif?: boolean
+          id?: string
+          statut?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       expressions_besoin: {
         Row: {
@@ -1954,6 +1990,7 @@ export type Database = {
           created_at: string | null
           direction_id: string | null
           email: string
+          exercice_actif: number | null
           first_name: string | null
           full_name: string | null
           id: string
@@ -1975,6 +2012,7 @@ export type Database = {
           created_at?: string | null
           direction_id?: string | null
           email: string
+          exercice_actif?: number | null
           first_name?: string | null
           full_name?: string | null
           id: string
@@ -1996,6 +2034,7 @@ export type Database = {
           created_at?: string | null
           direction_id?: string | null
           email?: string
+          exercice_actif?: number | null
           first_name?: string | null
           full_name?: string | null
           id?: string
@@ -2534,23 +2573,49 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
+          granted_at: string | null
+          granted_by: string | null
           id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          revoked_at: string | null
           role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          revoked_at?: string | null
           role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          revoked_at?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       validation_hierarchy: {
         Row: {
@@ -2730,6 +2795,21 @@ export type Database = {
       }
       is_expression_besoin_validated: {
         Args: { eb_id: string }
+        Returns: boolean
+      }
+      log_audit_with_exercice: {
+        Args: {
+          p_action: string
+          p_entity_id: string
+          p_entity_type: string
+          p_exercice?: number
+          p_new_values?: Json
+          p_old_values?: Json
+        }
+        Returns: string
+      }
+      user_has_any_role: {
+        Args: { p_roles: string[]; p_user_id: string }
         Returns: boolean
       }
     }

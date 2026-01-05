@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Users,
   Target,
+  Calendar,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -95,6 +96,11 @@ const rapportsItems = [
 ];
 
 const adminItems = [
+  {
+    title: "Exercices Budgétaires",
+    url: "/admin/exercices",
+    icon: Calendar,
+  },
   {
     title: "Paramètres Programmatiques",
     url: "/admin/parametres-programmatiques",
