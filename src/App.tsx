@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 // Pages principales
 import Dashboard from "./pages/Dashboard";
 import Notes from "./pages/Notes";
+import NotesSEF from "./pages/NotesSEF";
 import Engagements from "./pages/Engagements";
 import Liquidations from "./pages/Liquidations";
 import Ordonnancements from "./pages/Ordonnancements";
@@ -85,6 +86,7 @@ const App = () => (
                     
                     {/* Exécution Budgétaire */}
                     <Route path="/notes" element={<Notes />} />
+                    <Route path="/notes-sef" element={<NotesSEF />} />
                     <Route path="/execution/imputation" element={<Imputation />} />
                     <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
                     <Route path="/marches" element={<Marches />} />

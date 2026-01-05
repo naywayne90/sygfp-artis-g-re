@@ -2040,6 +2040,260 @@ export type Database = {
           },
         ]
       }
+      notes_sef: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          demandeur_id: string | null
+          description: string | null
+          differe_at: string | null
+          differe_by: string | null
+          differe_condition: string | null
+          differe_date_reprise: string | null
+          differe_motif: string | null
+          direction_id: string | null
+          exercice: number
+          id: string
+          numero: string | null
+          objet: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          statut: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+          urgence: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          demandeur_id?: string | null
+          description?: string | null
+          differe_at?: string | null
+          differe_by?: string | null
+          differe_condition?: string | null
+          differe_date_reprise?: string | null
+          differe_motif?: string | null
+          direction_id?: string | null
+          exercice?: number
+          id?: string
+          numero?: string | null
+          objet: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          urgence?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          demandeur_id?: string | null
+          description?: string | null
+          differe_at?: string | null
+          differe_by?: string | null
+          differe_condition?: string | null
+          differe_date_reprise?: string | null
+          differe_motif?: string | null
+          direction_id?: string | null
+          exercice?: number
+          id?: string
+          numero?: string | null
+          objet?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          urgence?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_sef_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_demandeur_id_fkey"
+            columns: ["demandeur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_differe_by_fkey"
+            columns: ["differe_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_sef_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          note_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          note_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          note_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_sef_attachments_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_sef_history: {
+        Row: {
+          action: string
+          commentaire: string | null
+          id: string
+          ip_address: string | null
+          new_statut: string | null
+          note_id: string
+          old_statut: string | null
+          performed_at: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          commentaire?: string | null
+          id?: string
+          ip_address?: string | null
+          new_statut?: string | null
+          note_id: string
+          old_statut?: string | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          commentaire?: string | null
+          id?: string
+          ip_address?: string | null
+          new_statut?: string | null
+          note_id?: string
+          old_statut?: string | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_sef_history_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_history_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_sef_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_preferences: {
         Row: {
           created_at: string
