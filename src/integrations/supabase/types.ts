@@ -1672,6 +1672,135 @@ export type Database = {
           },
         ]
       }
+      marche_attachments: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          is_required: boolean | null
+          marche_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          marche_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          is_required?: boolean | null
+          marche_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_attachments_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marche_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marche_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marche_validations: {
+        Row: {
+          comments: string | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          marche_id: string
+          role: string
+          status: string | null
+          step_order: number
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          marche_id: string
+          role: string
+          status?: string | null
+          step_order: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          marche_id?: string
+          role?: string
+          status?: string | null
+          step_order?: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_validations_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marche_validations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marches: {
         Row: {
           autorisation_path: string | null
