@@ -1063,6 +1063,221 @@ export type Database = {
           },
         ]
       }
+      dossier_documents: {
+        Row: {
+          categorie: string | null
+          created_at: string
+          dossier_id: string
+          etape_id: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          type_document: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          created_at?: string
+          dossier_id: string
+          etape_id?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          type_document: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          created_at?: string
+          dossier_id?: string
+          etape_id?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          type_document?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dossier_documents_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossier_documents_etape_id_fkey"
+            columns: ["etape_id"]
+            isOneToOne: false
+            referencedRelation: "dossier_etapes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossier_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dossier_etapes: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          dossier_id: string
+          entity_id: string | null
+          id: string
+          montant: number | null
+          statut: string | null
+          type_etape: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          dossier_id: string
+          entity_id?: string | null
+          id?: string
+          montant?: number | null
+          statut?: string | null
+          type_etape: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          dossier_id?: string
+          entity_id?: string | null
+          id?: string
+          montant?: number | null
+          statut?: string | null
+          type_etape?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dossier_etapes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossier_etapes_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dossier_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number
+          id: string
+          mois: number
+          updated_at: string
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number
+          id?: string
+          mois: number
+          updated_at?: string
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number
+          id?: string
+          mois?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dossiers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          demandeur_id: string | null
+          direction_id: string | null
+          etape_courante: string | null
+          exercice: number
+          id: string
+          montant_engage: number | null
+          montant_estime: number | null
+          montant_liquide: number | null
+          montant_ordonnance: number | null
+          numero: string
+          objet: string
+          statut_global: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          demandeur_id?: string | null
+          direction_id?: string | null
+          etape_courante?: string | null
+          exercice?: number
+          id?: string
+          montant_engage?: number | null
+          montant_estime?: number | null
+          montant_liquide?: number | null
+          montant_ordonnance?: number | null
+          numero: string
+          objet: string
+          statut_global?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          demandeur_id?: string | null
+          direction_id?: string | null
+          etape_courante?: string | null
+          exercice?: number
+          id?: string
+          montant_engage?: number | null
+          montant_estime?: number | null
+          montant_liquide?: number | null
+          montant_ordonnance?: number | null
+          numero?: string
+          objet?: string
+          statut_global?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dossiers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_demandeur_id_fkey"
+            columns: ["demandeur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           body_html: string
