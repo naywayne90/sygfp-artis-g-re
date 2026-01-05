@@ -450,10 +450,62 @@ export type Database = {
           },
         ]
       }
+      budget_line_history: {
+        Row: {
+          budget_line_id: string
+          change_reason: string | null
+          changed_at: string
+          changed_by: string | null
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+        }
+        Insert: {
+          budget_line_id: string
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          budget_line_id?: string
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_line_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_line_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_lines: {
         Row: {
+          action_id: string | null
+          activite_id: string | null
           code: string
+          commentaire: string | null
           created_at: string
+          direction_id: string | null
           dotation_initiale: number
           exercice: number
           id: string
@@ -461,12 +513,28 @@ export type Database = {
           label: string
           legacy_import: boolean | null
           level: string
+          mission_id: string | null
+          nbe_id: string | null
+          os_id: string | null
           parent_id: string | null
+          rejection_reason: string | null
+          source_financement: string | null
+          sous_activite_id: string | null
+          statut: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          sysco_id: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
+          action_id?: string | null
+          activite_id?: string | null
           code: string
+          commentaire?: string | null
           created_at?: string
+          direction_id?: string | null
           dotation_initiale?: number
           exercice?: number
           id?: string
@@ -474,12 +542,28 @@ export type Database = {
           label: string
           legacy_import?: boolean | null
           level: string
+          mission_id?: string | null
+          nbe_id?: string | null
+          os_id?: string | null
           parent_id?: string | null
+          rejection_reason?: string | null
+          source_financement?: string | null
+          sous_activite_id?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          sysco_id?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
+          action_id?: string | null
+          activite_id?: string | null
           code?: string
+          commentaire?: string | null
           created_at?: string
+          direction_id?: string | null
           dotation_initiale?: number
           exercice?: number
           id?: string
@@ -487,15 +571,97 @@ export type Database = {
           label?: string
           legacy_import?: boolean | null
           level?: string
+          mission_id?: string | null
+          nbe_id?: string | null
+          os_id?: string | null
           parent_id?: string | null
+          rejection_reason?: string | null
+          source_financement?: string | null
+          sous_activite_id?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          sysco_id?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "budget_lines_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_nbe_id_fkey"
+            columns: ["nbe_id"]
+            isOneToOne: false
+            referencedRelation: "nomenclature_nbe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "budget_lines_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_sous_activite_id_fkey"
+            columns: ["sous_activite_id"]
+            isOneToOne: false
+            referencedRelation: "sous_activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_sysco_id_fkey"
+            columns: ["sysco_id"]
+            isOneToOne: false
+            referencedRelation: "plan_comptable_sysco"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -614,6 +780,7 @@ export type Database = {
           amount: number
           approved_at: string | null
           approved_by: string | null
+          exercice: number | null
           from_budget_line_id: string
           id: string
           motif: string
@@ -627,6 +794,7 @@ export type Database = {
           amount: number
           approved_at?: string | null
           approved_by?: string | null
+          exercice?: number | null
           from_budget_line_id: string
           id?: string
           motif: string
@@ -640,6 +808,7 @@ export type Database = {
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
+          exercice?: number | null
           from_budget_line_id?: string
           id?: string
           motif?: string
