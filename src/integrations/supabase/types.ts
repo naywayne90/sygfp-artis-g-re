@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions: {
+        Row: {
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          mission_id: string
+          os_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          mission_id: string
+          os_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          mission_id?: string
+          os_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actions_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activites: {
+        Row: {
+          action_id: string
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_id: string
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activites_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archived_documents: {
         Row: {
           category: string
@@ -632,36 +718,42 @@ export type Database = {
           code: string
           created_at: string
           entity_type: string | null
+          est_active: boolean | null
           group_email: string | null
           id: string
           label: string
           parent_id: string | null
           position: number | null
           responsible_user_id: string | null
+          sigle: string | null
           updated_at: string
         }
         Insert: {
           code: string
           created_at?: string
           entity_type?: string | null
+          est_active?: boolean | null
           group_email?: string | null
           id?: string
           label: string
           parent_id?: string | null
           position?: number | null
           responsible_user_id?: string | null
+          sigle?: string | null
           updated_at?: string
         }
         Update: {
           code?: string
           created_at?: string
           entity_type?: string | null
+          est_active?: boolean | null
           group_email?: string | null
           id?: string
           label?: string
           parent_id?: string | null
           position?: number | null
           responsible_user_id?: string | null
+          sigle?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1239,6 +1331,33 @@ export type Database = {
         }
         Relationships: []
       }
+      missions: {
+        Row: {
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       note_attachments: {
         Row: {
           created_at: string
@@ -1539,6 +1658,42 @@ export type Database = {
         }
         Relationships: []
       }
+      objectifs_strategiques: {
+        Row: {
+          annee_debut: number
+          annee_fin: number
+          code: string
+          created_at: string | null
+          description: string | null
+          est_actif: boolean | null
+          id: string
+          libelle: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee_debut: number
+          annee_fin: number
+          code: string
+          created_at?: string | null
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee_debut?: number
+          annee_fin?: number
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ordonnancements: {
         Row: {
           banque: string | null
@@ -1804,7 +1959,15 @@ export type Database = {
           id: string
           is_active: boolean | null
           last_name: string | null
+          matricule: string | null
           poste: string | null
+          profil_fonctionnel:
+            | Database["public"]["Enums"]["profil_fonctionnel"]
+            | null
+          role_hierarchique:
+            | Database["public"]["Enums"]["role_hierarchique"]
+            | null
+          telephone: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1817,7 +1980,15 @@ export type Database = {
           id: string
           is_active?: boolean | null
           last_name?: string | null
+          matricule?: string | null
           poste?: string | null
+          profil_fonctionnel?:
+            | Database["public"]["Enums"]["profil_fonctionnel"]
+            | null
+          role_hierarchique?:
+            | Database["public"]["Enums"]["role_hierarchique"]
+            | null
+          telephone?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1830,7 +2001,15 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_name?: string | null
+          matricule?: string | null
           poste?: string | null
+          profil_fonctionnel?:
+            | Database["public"]["Enums"]["profil_fonctionnel"]
+            | null
+          role_hierarchique?:
+            | Database["public"]["Enums"]["role_hierarchique"]
+            | null
+          telephone?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -2130,6 +2309,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sous_activites: {
+        Row: {
+          activite_id: string
+          code: string
+          created_at: string | null
+          est_active: boolean | null
+          id: string
+          libelle: string
+          updated_at: string | null
+        }
+        Insert: {
+          activite_id: string
+          code: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          updated_at?: string | null
+        }
+        Update: {
+          activite_id?: string
+          code?: string
+          created_at?: string | null
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sous_activites_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_config: {
         Row: {
@@ -2528,6 +2745,18 @@ export type Database = {
         | "TRESORIER"
         | "INVITE"
       migration_staging_status: "PENDING" | "READY" | "IMPORTED" | "ERROR"
+      profil_fonctionnel:
+        | "Admin"
+        | "Validateur"
+        | "Operationnel"
+        | "Controleur"
+        | "Auditeur"
+      role_hierarchique:
+        | "Agent"
+        | "Chef de Service"
+        | "Sous-Directeur"
+        | "Directeur"
+        | "DG"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2667,6 +2896,20 @@ export const Constants = {
         "INVITE",
       ],
       migration_staging_status: ["PENDING", "READY", "IMPORTED", "ERROR"],
+      profil_fonctionnel: [
+        "Admin",
+        "Validateur",
+        "Operationnel",
+        "Controleur",
+        "Auditeur",
+      ],
+      role_hierarchique: [
+        "Agent",
+        "Chef de Service",
+        "Sous-Directeur",
+        "Directeur",
+        "DG",
+      ],
     },
   },
 } as const
