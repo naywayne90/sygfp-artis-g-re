@@ -26,6 +26,9 @@ import {
   Archive,
   DollarSign,
   Truck,
+  Shield,
+  Lock,
+  UserCog,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -66,6 +69,9 @@ const adminItems = [
   { title: "Exercices Budgétaires", url: "/admin/exercices", icon: Calendar },
   { title: "Paramètres Programmatiques", url: "/admin/parametres-programmatiques", icon: Target },
   { title: "Gestion Utilisateurs", url: "/admin/utilisateurs", icon: Users },
+  { title: "Profils & Rôles", url: "/admin/roles", icon: Shield },
+  { title: "Autorisations", url: "/admin/autorisations", icon: Lock },
+  { title: "Délégations", url: "/admin/delegations", icon: UserCog },
   { title: "Paramètres Système", url: "/admin/parametres", icon: Settings },
 ];
 

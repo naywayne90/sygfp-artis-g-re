@@ -716,6 +716,70 @@ export type Database = {
         }
         Relationships: []
       }
+      delegations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          delegataire_id: string
+          delegateur_id: string
+          est_active: boolean | null
+          id: string
+          motif: string | null
+          perimetre: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          delegataire_id: string
+          delegateur_id: string
+          est_active?: boolean | null
+          id?: string
+          motif?: string | null
+          perimetre?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          delegataire_id?: string
+          delegateur_id?: string
+          est_active?: boolean | null
+          id?: string
+          motif?: string | null
+          perimetre?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delegations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delegations_delegataire_id_fkey"
+            columns: ["delegataire_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delegations_delegateur_id_fkey"
+            columns: ["delegateur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       directions: {
         Row: {
           code: string
@@ -2781,6 +2845,13 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_active_delegation: {
+        Args: { p_delegataire_id: string; p_perimetre?: string }
+        Returns: {
+          delegateur_id: string
+          delegateur_name: string
+        }[]
       }
       has_permission: {
         Args: { _action_code: string; _user_id: string }
