@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
   FileText, 
   CreditCard, 
@@ -8,9 +9,10 @@ import {
   TrendingUp,
   Clock,
   AlertCircle,
-  ArrowUpRight,
   Wallet,
-  Loader2,
+  Plus,
+  CheckCircle,
+  ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +20,7 @@ import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useRecentActivities } from "@/hooks/useRecentActivities";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
 
 const formatMontant = (montant: number): string => {
   if (montant >= 1_000_000_000) {
@@ -62,6 +65,38 @@ const getTypeIcon = (type: string) => {
   }
 };
 
+// Raccourcis rapides
+const quickActions = [
+  { 
+    title: "Créer Note AEF", 
+    description: "Nouvelle autorisation d'engagement", 
+    icon: Plus, 
+    url: "/notes?action=create&type=aef",
+    color: "bg-primary/10 text-primary"
+  },
+  { 
+    title: "Créer Note SEF", 
+    description: "Nouvelle dépense sans engagement", 
+    icon: Plus, 
+    url: "/notes?action=create&type=sef",
+    color: "bg-secondary/10 text-secondary"
+  },
+  { 
+    title: "Notes à valider", 
+    description: "Notes en attente de validation", 
+    icon: CheckCircle, 
+    url: "/notes?filter=en_attente",
+    color: "bg-warning/10 text-warning"
+  },
+  { 
+    title: "Engagements à valider", 
+    description: "Engagements en attente", 
+    icon: CreditCard, 
+    url: "/engagements?filter=en_attente",
+    color: "bg-success/10 text-success"
+  },
+];
+
 export default function Dashboard() {
   const { exercice } = useExercice();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
@@ -79,6 +114,28 @@ export default function Dashboard() {
         <p className="page-description">
           Vue d'ensemble de la gestion financière - Exercice {exercice}
         </p>
+      </div>
+
+      {/* Raccourcis rapides */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        {quickActions.map((action) => (
+          <Link key={action.title} to={action.url}>
+            <Card className="hover:shadow-md transition-all hover:border-primary/30 cursor-pointer h-full">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${action.color}`}>
+                    <action.icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm">{action.title}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{action.description}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
 
       {/* Stats Grid */}
