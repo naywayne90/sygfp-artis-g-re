@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ExerciceProvider } from "@/contexts/ExerciceContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+
+// Pages principales
 import Dashboard from "./pages/Dashboard";
 import Notes from "./pages/Notes";
 import Engagements from "./pages/Engagements";
@@ -16,9 +18,33 @@ import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
+
+// Pages Admin
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
 import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
 import GestionExercices from "./pages/admin/GestionExercices";
+
+// Pages Planification
+import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
+import PlanificationPhysique from "./pages/planification/PlanificationPhysique";
+
+// Pages Exécution
+import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
+import Imputation from "./pages/execution/Imputation";
+
+// Pages Approvisionnement
+import Approvisionnement from "./pages/approvisionnement/Approvisionnement";
+
+// Pages Trésorerie
+import GestionTresorerie from "./pages/tresorerie/GestionTresorerie";
+
+// Pages Recettes
+import DeclarationRecette from "./pages/recettes/DeclarationRecette";
+
+// Pages Contractualisation
+import Prestataires from "./pages/contractualisation/Prestataires";
+import Contrats from "./pages/contractualisation/Contrats";
+import ComptabiliteMatiere from "./pages/contractualisation/ComptabiliteMatiere";
 
 const queryClient = new QueryClient();
 
@@ -36,19 +62,47 @@ const App = () => (
               element={
                 <AppLayout>
                   <Routes>
+                    {/* Accueil */}
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/recherche" element={<Recherche />} />
+                    
+                    {/* Administration */}
+                    <Route path="/admin/exercices" element={<GestionExercices />} />
+                    <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
+                    <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
+                    
+                    {/* Planification */}
+                    <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
+                    <Route path="/planification/physique" element={<PlanificationPhysique />} />
+                    
+                    {/* Exécution Budgétaire */}
                     <Route path="/notes" element={<Notes />} />
+                    <Route path="/execution/imputation" element={<Imputation />} />
+                    <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
+                    <Route path="/marches" element={<Marches />} />
                     <Route path="/engagements" element={<Engagements />} />
                     <Route path="/liquidations" element={<Liquidations />} />
                     <Route path="/ordonnancements" element={<Ordonnancements />} />
                     <Route path="/reglements" element={<Reglements />} />
-                    <Route path="/marches" element={<Marches />} />
-                    <Route path="/recherche" element={<Recherche />} />
+                    
+                    {/* États d'exécution */}
                     <Route path="/etats-execution" element={<EtatsExecution />} />
-                    {/* Admin routes */}
-                    <Route path="/admin/exercices" element={<GestionExercices />} />
-                    <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
-                    <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
+                    
+                    {/* Approvisionnement */}
+                    <Route path="/approvisionnement" element={<Approvisionnement />} />
+                    
+                    {/* Trésorerie */}
+                    <Route path="/tresorerie" element={<GestionTresorerie />} />
+                    
+                    {/* Recettes */}
+                    <Route path="/recettes" element={<DeclarationRecette />} />
+                    
+                    {/* Contractualisation */}
+                    <Route path="/contractualisation/prestataires" element={<Prestataires />} />
+                    <Route path="/contractualisation/contrats" element={<Contrats />} />
+                    <Route path="/contractualisation/comptabilite-matiere" element={<ComptabiliteMatiere />} />
+                    
+                    {/* 404 */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AppLayout>
