@@ -18,6 +18,7 @@ import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
 import GestionUtilisateurs from "./pages/admin/GestionUtilisateurs";
+import GestionExercices from "./pages/admin/GestionExercices";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                     <Route path="/recherche" element={<Recherche />} />
                     <Route path="/etats-execution" element={<EtatsExecution />} />
                     {/* Admin routes */}
+                    <Route path="/admin/exercices" element={<GestionExercices />} />
                     <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
                     <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
                     <Route path="*" element={<NotFound />} />
