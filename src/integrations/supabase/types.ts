@@ -2719,35 +2719,207 @@ export type Database = {
         }
         Relationships: []
       }
+      tache_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          tache_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          tache_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          tache_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tache_attachments_tache_id_fkey"
+            columns: ["tache_id"]
+            isOneToOne: false
+            referencedRelation: "taches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tache_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tache_progress_history: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          new_avancement: number
+          previous_avancement: number
+          tache_id: string
+          updated_by: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          new_avancement: number
+          previous_avancement: number
+          tache_id: string
+          updated_by?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          new_avancement?: number
+          previous_avancement?: number
+          tache_id?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tache_progress_history_tache_id_fkey"
+            columns: ["tache_id"]
+            isOneToOne: false
+            referencedRelation: "taches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tache_progress_history_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       taches: {
         Row: {
+          avancement: number | null
+          budget_line_id: string | null
+          budget_prevu: number | null
           code: string
           created_at: string | null
+          date_debut: string | null
+          date_fin: string | null
+          date_fin_reelle: string | null
+          description: string | null
+          duree_prevue: number | null
           est_active: boolean | null
+          exercice: number | null
           id: string
           libelle: string
+          livrables: string[] | null
+          priorite: string | null
+          raci_accountable: string | null
+          raci_consulted: string[] | null
+          raci_informed: string[] | null
+          raci_responsable: string | null
+          responsable_id: string | null
           sous_activite_id: string
+          statut: string | null
           updated_at: string | null
         }
         Insert: {
+          avancement?: number | null
+          budget_line_id?: string | null
+          budget_prevu?: number | null
           code: string
           created_at?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_fin_reelle?: string | null
+          description?: string | null
+          duree_prevue?: number | null
           est_active?: boolean | null
+          exercice?: number | null
           id?: string
           libelle: string
+          livrables?: string[] | null
+          priorite?: string | null
+          raci_accountable?: string | null
+          raci_consulted?: string[] | null
+          raci_informed?: string[] | null
+          raci_responsable?: string | null
+          responsable_id?: string | null
           sous_activite_id: string
+          statut?: string | null
           updated_at?: string | null
         }
         Update: {
+          avancement?: number | null
+          budget_line_id?: string | null
+          budget_prevu?: number | null
           code?: string
           created_at?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_fin_reelle?: string | null
+          description?: string | null
+          duree_prevue?: number | null
           est_active?: boolean | null
+          exercice?: number | null
           id?: string
           libelle?: string
+          livrables?: string[] | null
+          priorite?: string | null
+          raci_accountable?: string | null
+          raci_consulted?: string[] | null
+          raci_informed?: string[] | null
+          raci_responsable?: string | null
+          responsable_id?: string | null
           sous_activite_id?: string
+          statut?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "taches_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "taches_raci_accountable_fkey"
+            columns: ["raci_accountable"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "taches_raci_responsable_fkey"
+            columns: ["raci_responsable"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "taches_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "taches_sous_activite_id_fkey"
             columns: ["sous_activite_id"]
