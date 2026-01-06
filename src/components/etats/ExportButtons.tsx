@@ -52,6 +52,8 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
 
   const exportToPDF = () => {
     try {
+      const logoUrl = `${window.location.origin}/favicon.jpg`;
+      
       // Create printable HTML
       const html = `
         <!DOCTYPE html>
@@ -61,18 +63,36 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
           <style>
             @page { margin: 1cm; size: A4 landscape; }
             body { font-family: Arial, sans-serif; font-size: 10px; }
-            h1 { text-align: center; font-size: 14px; margin-bottom: 20px; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid #1e40af; padding-bottom: 10px; }
+            .header-left { display: flex; align-items: center; gap: 15px; }
+            .logo { height: 50px; width: auto; }
+            .header-info { text-align: right; font-size: 9px; color: #666; }
+            h1 { text-align: center; font-size: 16px; margin: 15px 0; color: #1e40af; }
+            .generated-at { text-align: center; font-size: 10px; color: #666; margin-bottom: 15px; }
             table { width: 100%; border-collapse: collapse; }
             th, td { border: 1px solid #333; padding: 4px 6px; text-align: left; }
-            th { background-color: #f0f0f0; font-weight: bold; }
+            th { background-color: #1e40af; color: white; font-weight: bold; }
             td.number { text-align: right; }
-            .footer { margin-top: 20px; font-size: 9px; color: #666; }
+            .footer { margin-top: 20px; font-size: 9px; color: #666; display: flex; justify-content: space-between; border-top: 1px solid #ddd; padding-top: 10px; }
             tfoot td { font-weight: bold; background-color: #f5f5f5; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
           </style>
         </head>
         <body>
+          <div class="header">
+            <div class="header-left">
+              <img src="${logoUrl}" alt="ARTI" class="logo" />
+              <div>
+                <strong>ARTI</strong><br/>
+                <span style="font-size: 9px;">Autorité de Régulation des Télécommunications/TIC de Côte d'Ivoire</span>
+              </div>
+            </div>
+            <div class="header-info">
+              ${new Date().toLocaleDateString("fr-FR")} ${new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
           <h1>${title}</h1>
-          <p>Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</p>
+          <p class="generated-at">Généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</p>
           <table>
             <thead>
               <tr>
@@ -100,7 +120,8 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
             </tbody>
           </table>
           <div class="footer">
-            SYGFP - Système de Gestion des Finances Publiques - ARTI
+            <span>SYGFP - Système de Gestion des Finances Publiques - ARTI</span>
+            <span>Page 1/1</span>
           </div>
         </body>
         </html>
