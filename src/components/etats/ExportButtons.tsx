@@ -82,10 +82,6 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
           <div class="header">
             <div class="header-left">
               <img src="${logoUrl}" alt="ARTI" class="logo" />
-              <div>
-                <strong>ARTI</strong><br/>
-                <span style="font-size: 9px;">Autorité de Régulation des Télécommunications/TIC de Côte d'Ivoire</span>
-              </div>
             </div>
             <div class="header-info">
               ${new Date().toLocaleDateString("fr-FR")} ${new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}
