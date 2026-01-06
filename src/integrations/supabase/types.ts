@@ -531,6 +531,51 @@ export type Database = {
           },
         ]
       }
+      budget_imports: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_rows: number | null
+          errors: Json | null
+          exercice: number
+          file_name: string
+          file_size: number | null
+          id: string
+          imported_by: string | null
+          status: string | null
+          success_rows: number | null
+          total_rows: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_rows?: number | null
+          errors?: Json | null
+          exercice: number
+          file_name: string
+          file_size?: number | null
+          id?: string
+          imported_by?: string | null
+          status?: string | null
+          success_rows?: number | null
+          total_rows?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_rows?: number | null
+          errors?: Json | null
+          exercice?: number
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          imported_by?: string | null
+          status?: string | null
+          success_rows?: number | null
+          total_rows?: number | null
+        }
+        Relationships: []
+      }
       budget_kpis: {
         Row: {
           activity_id: string
@@ -627,17 +672,23 @@ export type Database = {
         Row: {
           action_id: string | null
           activite_id: string | null
+          budget_import_id: string | null
+          budget_version_id: string | null
           code: string
           commentaire: string | null
           created_at: string
           direction_id: string | null
+          disponible_calcule: number | null
           dotation_initiale: number
+          dotation_modifiee: number | null
           exercice: number
           id: string
           is_active: boolean | null
           label: string
           legacy_import: boolean | null
           level: string
+          locked_at: string | null
+          locked_by: string | null
           mission_id: string | null
           nbe_id: string | null
           os_id: string | null
@@ -649,24 +700,32 @@ export type Database = {
           submitted_at: string | null
           submitted_by: string | null
           sysco_id: string | null
+          type_ligne: string | null
           updated_at: string
           validated_at: string | null
           validated_by: string | null
+          version: number | null
         }
         Insert: {
           action_id?: string | null
           activite_id?: string | null
+          budget_import_id?: string | null
+          budget_version_id?: string | null
           code: string
           commentaire?: string | null
           created_at?: string
           direction_id?: string | null
+          disponible_calcule?: number | null
           dotation_initiale?: number
+          dotation_modifiee?: number | null
           exercice?: number
           id?: string
           is_active?: boolean | null
           label: string
           legacy_import?: boolean | null
           level: string
+          locked_at?: string | null
+          locked_by?: string | null
           mission_id?: string | null
           nbe_id?: string | null
           os_id?: string | null
@@ -678,24 +737,32 @@ export type Database = {
           submitted_at?: string | null
           submitted_by?: string | null
           sysco_id?: string | null
+          type_ligne?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
+          version?: number | null
         }
         Update: {
           action_id?: string | null
           activite_id?: string | null
+          budget_import_id?: string | null
+          budget_version_id?: string | null
           code?: string
           commentaire?: string | null
           created_at?: string
           direction_id?: string | null
+          disponible_calcule?: number | null
           dotation_initiale?: number
+          dotation_modifiee?: number | null
           exercice?: number
           id?: string
           is_active?: boolean | null
           label?: string
           legacy_import?: boolean | null
           level?: string
+          locked_at?: string | null
+          locked_by?: string | null
           mission_id?: string | null
           nbe_id?: string | null
           os_id?: string | null
@@ -707,9 +774,11 @@ export type Database = {
           submitted_at?: string | null
           submitted_by?: string | null
           sysco_id?: string | null
+          type_ligne?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
+          version?: number | null
         }
         Relationships: [
           {
@@ -724,6 +793,20 @@ export type Database = {
             columns: ["activite_id"]
             isOneToOne: false
             referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_budget_import_id_fkey"
+            columns: ["budget_import_id"]
+            isOneToOne: false
+            referencedRelation: "budget_imports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_budget_version_id_fkey"
+            columns: ["budget_version_id"]
+            isOneToOne: false
+            referencedRelation: "budget_versions"
             referencedColumns: ["id"]
           },
           {
@@ -943,6 +1026,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      budget_versions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          exercice: number
+          id: string
+          label: string
+          status: string | null
+          total_depenses: number | null
+          total_dotation: number | null
+          total_recettes: number | null
+          validated_at: string | null
+          validated_by: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exercice: number
+          id?: string
+          label: string
+          status?: string | null
+          total_depenses?: number | null
+          total_dotation?: number | null
+          total_recettes?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          exercice?: number
+          id?: string
+          label?: string
+          status?: string | null
+          total_depenses?: number | null
+          total_dotation?: number | null
+          total_recettes?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          version?: number
+        }
+        Relationships: []
       }
       comptes_bancaires: {
         Row: {

@@ -3,13 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useBudgetLines, useCreditTransfers, BudgetLineWithRelations, BudgetLineFilters } from "@/hooks/useBudgetLines";
 import { BudgetLineTable } from "@/components/budget/BudgetLineTable";
 import { BudgetLineForm } from "@/components/budget/BudgetLineForm";
 import { BudgetFilters } from "@/components/budget/BudgetFilters";
-import { BudgetImport } from "@/components/budget/BudgetImport";
+import { BudgetImportAdvanced } from "@/components/budget/BudgetImportAdvanced";
 import { BudgetLineHistory } from "@/components/budget/BudgetLineHistory";
+import { BudgetValidation } from "@/components/budget/BudgetValidation";
+import { BudgetVersionHistory } from "@/components/budget/BudgetVersionHistory";
 import { CreditTransferForm } from "@/components/budget/CreditTransferForm";
 import { CreditTransferList } from "@/components/budget/CreditTransferList";
 import { 
@@ -19,8 +22,10 @@ import {
   Download, 
   ArrowLeftRight,
   Target,
-  TrendingUp,
-  FileCheck
+  FileCheck,
+  ShieldCheck,
+  History,
+  AlertTriangle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -40,6 +45,8 @@ export default function PlanificationBudgetaire() {
   const [showImport, setShowImport] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [editingLine, setEditingLine] = useState<BudgetLineWithRelations | null>(null);
   const [selectedLineForHistory, setSelectedLineForHistory] = useState<BudgetLineWithRelations | null>(null);
 
@@ -129,7 +136,9 @@ export default function PlanificationBudgetaire() {
   // Calculate stats
   const validatedLines = budgetLines?.filter((l) => l.statut === "valide").length || 0;
   const pendingLines = budgetLines?.filter((l) => l.statut === "soumis").length || 0;
+  const brouillonLines = budgetLines?.filter((l) => !l.statut || l.statut === "brouillon").length || 0;
   const pendingTransfers = transfers?.filter((t) => t.status === "en_attente").length || 0;
+  const isBudgetValidated = validatedLines === totals.count && totals.count > 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -144,8 +153,29 @@ export default function PlanificationBudgetaire() {
           <Badge variant="outline" className="text-lg px-4 py-2">
             Exercice {exercice}
           </Badge>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowVersionHistory(true)}>
+              <History className="mr-2 h-4 w-4" />
+              Historique
+            </Button>
+            <Button size="sm" onClick={() => setShowValidation(true)}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Valider le budget
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Alert if budget not validated */}
+      {totals.count > 0 && !isBudgetValidated && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Budget non validé</AlertTitle>
+          <AlertDescription>
+            Le budget n'est pas encore validé globalement. Il n'alimentera pas le tableau de bord tant qu'il n'est pas validé.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -316,12 +346,29 @@ export default function PlanificationBudgetaire() {
         isLoading={isCreating || isUpdating}
       />
 
-      <BudgetImport
+      <BudgetImportAdvanced
         open={showImport}
         onOpenChange={setShowImport}
         onSuccess={() => {
-          // Refresh data
+          // Refresh handled by react-query
         }}
+      />
+
+      <BudgetValidation
+        open={showValidation}
+        onOpenChange={setShowValidation}
+        totalLines={totals.count}
+        validatedLines={validatedLines}
+        pendingLines={pendingLines}
+        totalDotation={totals.dotation}
+        onSuccess={() => {
+          // Refresh handled by react-query
+        }}
+      />
+
+      <BudgetVersionHistory
+        open={showVersionHistory}
+        onOpenChange={setShowVersionHistory}
       />
 
       <CreditTransferForm
