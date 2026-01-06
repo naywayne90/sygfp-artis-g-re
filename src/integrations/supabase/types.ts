@@ -516,6 +516,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_engagements_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_engagements_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -2326,6 +2333,7 @@ export type Database = {
           calendrier_fin: string | null
           created_at: string
           created_by: string | null
+          criteres_evaluation: string | null
           current_validation_step: number | null
           date_differe: string | null
           deadline_correction: string | null
@@ -2337,9 +2345,11 @@ export type Database = {
           id: string
           intitule_lot: string | null
           justification: string | null
+          ligne_budgetaire_id: string | null
           marche_id: string | null
           montant_estime: number | null
           motif_differe: string | null
+          note_id: string | null
           numero: string | null
           numero_lot: number | null
           objet: string
@@ -2348,6 +2358,7 @@ export type Database = {
           specifications: string | null
           statut: string | null
           submitted_at: string | null
+          type_procedure: string | null
           unite: string | null
           updated_at: string
           urgence: string | null
@@ -2360,6 +2371,7 @@ export type Database = {
           calendrier_fin?: string | null
           created_at?: string
           created_by?: string | null
+          criteres_evaluation?: string | null
           current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
@@ -2371,9 +2383,11 @@ export type Database = {
           id?: string
           intitule_lot?: string | null
           justification?: string | null
+          ligne_budgetaire_id?: string | null
           marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
+          note_id?: string | null
           numero?: string | null
           numero_lot?: number | null
           objet: string
@@ -2382,6 +2396,7 @@ export type Database = {
           specifications?: string | null
           statut?: string | null
           submitted_at?: string | null
+          type_procedure?: string | null
           unite?: string | null
           updated_at?: string
           urgence?: string | null
@@ -2394,6 +2409,7 @@ export type Database = {
           calendrier_fin?: string | null
           created_at?: string
           created_by?: string | null
+          criteres_evaluation?: string | null
           current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
@@ -2405,9 +2421,11 @@ export type Database = {
           id?: string
           intitule_lot?: string | null
           justification?: string | null
+          ligne_budgetaire_id?: string | null
           marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
+          note_id?: string | null
           numero?: string | null
           numero_lot?: number | null
           objet?: string
@@ -2416,6 +2434,7 @@ export type Database = {
           specifications?: string | null
           statut?: string | null
           submitted_at?: string | null
+          type_procedure?: string | null
           unite?: string | null
           updated_at?: string
           urgence?: string | null
@@ -2453,10 +2472,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "expressions_besoin_marche_id_fkey"
             columns: ["marche_id"]
             isOneToOne: false
             referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
             referencedColumns: ["id"]
           },
           {
@@ -2902,6 +2942,75 @@ export type Database = {
           },
         ]
       }
+      marche_offres: {
+        Row: {
+          created_at: string
+          delai_execution: number | null
+          document_path: string | null
+          est_retenu: boolean | null
+          id: string
+          marche_id: string
+          montant_offre: number
+          motif_selection: string | null
+          nom_fournisseur: string | null
+          note_financiere: number | null
+          note_globale: number | null
+          note_technique: number | null
+          observations: string | null
+          prestataire_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delai_execution?: number | null
+          document_path?: string | null
+          est_retenu?: boolean | null
+          id?: string
+          marche_id: string
+          montant_offre: number
+          motif_selection?: string | null
+          nom_fournisseur?: string | null
+          note_financiere?: number | null
+          note_globale?: number | null
+          note_technique?: number | null
+          observations?: string | null
+          prestataire_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delai_execution?: number | null
+          document_path?: string | null
+          est_retenu?: boolean | null
+          id?: string
+          marche_id?: string
+          montant_offre?: number
+          motif_selection?: string | null
+          nom_fournisseur?: string | null
+          note_financiere?: number | null
+          note_globale?: number | null
+          note_technique?: number | null
+          observations?: string | null
+          prestataire_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_offres_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marche_offres_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marche_sequences: {
         Row: {
           annee: number
@@ -2979,7 +3088,13 @@ export type Database = {
       }
       marches: {
         Row: {
+          annee: number | null
           autorisation_path: string | null
+          calendrier_attribution: string | null
+          calendrier_lancement: string | null
+          calendrier_notification: string | null
+          calendrier_ouverture: string | null
+          commission_membres: string[] | null
           created_at: string
           created_by: string | null
           date_attribution: string | null
@@ -2996,11 +3111,18 @@ export type Database = {
           numero: string | null
           objet: string
           prestataire_id: string | null
+          pv_attribution_path: string | null
           statut: string | null
           updated_at: string
         }
         Insert: {
+          annee?: number | null
           autorisation_path?: string | null
+          calendrier_attribution?: string | null
+          calendrier_lancement?: string | null
+          calendrier_notification?: string | null
+          calendrier_ouverture?: string | null
+          commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
           date_attribution?: string | null
@@ -3017,11 +3139,18 @@ export type Database = {
           numero?: string | null
           objet: string
           prestataire_id?: string | null
+          pv_attribution_path?: string | null
           statut?: string | null
           updated_at?: string
         }
         Update: {
+          annee?: number | null
           autorisation_path?: string | null
+          calendrier_attribution?: string | null
+          calendrier_lancement?: string | null
+          calendrier_notification?: string | null
+          calendrier_ouverture?: string | null
+          commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
           date_attribution?: string | null
@@ -3038,6 +3167,7 @@ export type Database = {
           numero?: string | null
           objet?: string
           prestataire_id?: string | null
+          pv_attribution_path?: string | null
           statut?: string | null
           updated_at?: string
         }
@@ -3061,6 +3191,13 @@ export type Database = {
             columns: ["note_id"]
             isOneToOne: false
             referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marches_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
             referencedColumns: ["id"]
           },
           {
@@ -3327,6 +3464,13 @@ export type Database = {
             columns: ["note_id"]
             isOneToOne: false
             referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_attachments_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
             referencedColumns: ["id"]
           },
           {
@@ -6191,6 +6335,38 @@ export type Database = {
         }
         Relationships: []
       }
+      notes_imputees_disponibles: {
+        Row: {
+          budget_line_id: string | null
+          direction_id: string | null
+          direction_label: string | null
+          direction_sigle: string | null
+          exercice: number | null
+          id: string | null
+          imputed_at: string | null
+          ligne_code: string | null
+          ligne_label: string | null
+          montant_estime: number | null
+          numero: string | null
+          objet: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_dg_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects_with_financial: {
         Row: {
           budget_total: number | null
@@ -6230,6 +6406,15 @@ export type Database = {
       }
     }
     Functions: {
+      create_engagement_from_eb: {
+        Args: {
+          p_budget_line_id: string
+          p_expression_besoin_id: string
+          p_montant: number
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_imputation_numero: {
         Args: { p_exercice: number }
         Returns: string
