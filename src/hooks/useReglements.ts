@@ -83,8 +83,9 @@ export function useReglements() {
           ),
           created_by_profile:profiles!reglements_created_by_fkey(
             id,
-            nom,
-            prenom
+            first_name,
+            last_name,
+            full_name
           )
         `)
         .eq("exercice", exercice)
