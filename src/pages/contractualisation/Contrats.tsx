@@ -1,9 +1,29 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useContrats, STATUTS_CONTRAT } from "@/hooks/useContrats";
 import { FileSignature, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ContratList } from "@/components/contrats/ContratList";
 
 export default function Contrats() {
   const { exercice } = useExercice();
+  const { contrats } = useContrats();
+
+  const data = contrats.data || [];
+  const actifs = data.filter(c => c.statut === "en_cours" || c.statut === "signe").length;
+  const enNegociation = data.filter(c => c.statut === "en_negociation").length;
+  const signesCeMois = data.filter(c => {
+    if (!c.date_signature) return false;
+    const d = new Date(c.date_signature);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  const expirentBientot = data.filter(c => {
+    if (!c.date_fin) return false;
+    const dateFin = new Date(c.date_fin);
+    const dans30j = new Date();
+    dans30j.setDate(dans30j.getDate() + 30);
+    return dateFin <= dans30j && dateFin >= new Date();
+  }).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -23,7 +43,7 @@ export default function Contrats() {
             <FileSignature className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{actifs}</div>
             <p className="text-xs text-muted-foreground">En vigueur</p>
           </CardContent>
         </Card>
@@ -36,7 +56,7 @@ export default function Contrats() {
             <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{enNegociation}</div>
             <p className="text-xs text-muted-foreground">En cours</p>
           </CardContent>
         </Card>
@@ -49,7 +69,7 @@ export default function Contrats() {
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{signesCeMois}</div>
             <p className="text-xs text-muted-foreground">Ce mois</p>
           </CardContent>
         </Card>
@@ -62,26 +82,13 @@ export default function Contrats() {
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{expirentBientot}</div>
             <p className="text-xs text-muted-foreground">Dans 30 jours</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Liste des contrats</CardTitle>
-          <CardDescription>
-            Gérer les contrats, avenants et exécutions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <FileSignature className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Module en cours de développement</p>
-          </div>
-        </CardContent>
-      </Card>
+      <ContratList />
     </div>
   );
 }

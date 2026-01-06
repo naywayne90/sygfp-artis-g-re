@@ -944,6 +944,68 @@ export type Database = {
           },
         ]
       }
+      comptes_bancaires: {
+        Row: {
+          banque: string | null
+          bic: string | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          devise: string | null
+          est_actif: boolean | null
+          iban: string | null
+          id: string
+          libelle: string
+          numero_compte: string | null
+          solde_actuel: number | null
+          solde_initial: number | null
+          type_compte: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          banque?: string | null
+          bic?: string | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          devise?: string | null
+          est_actif?: boolean | null
+          iban?: string | null
+          id?: string
+          libelle: string
+          numero_compte?: string | null
+          solde_actuel?: number | null
+          solde_initial?: number | null
+          type_compte?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          banque?: string | null
+          bic?: string | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          devise?: string | null
+          est_actif?: boolean | null
+          iban?: string | null
+          id?: string
+          libelle?: string
+          numero_compte?: string | null
+          solde_actuel?: number | null
+          solde_initial?: number | null
+          type_compte?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comptes_bancaires_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contrat_attachments: {
         Row: {
           contrat_id: string
@@ -3677,6 +3739,122 @@ export type Database = {
         }
         Relationships: []
       }
+      operation_tresorerie_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      operations_tresorerie: {
+        Row: {
+          compte_destination_id: string | null
+          compte_id: string
+          created_at: string | null
+          created_by: string | null
+          date_operation: string
+          date_rapprochement: string | null
+          date_valeur: string | null
+          exercice: number | null
+          id: string
+          libelle: string
+          montant: number
+          numero: string | null
+          rapproche: boolean | null
+          recette_id: string | null
+          reference_externe: string | null
+          reglement_id: string | null
+          solde_apres: number | null
+          solde_avant: number | null
+          type_operation: string
+        }
+        Insert: {
+          compte_destination_id?: string | null
+          compte_id: string
+          created_at?: string | null
+          created_by?: string | null
+          date_operation?: string
+          date_rapprochement?: string | null
+          date_valeur?: string | null
+          exercice?: number | null
+          id?: string
+          libelle: string
+          montant: number
+          numero?: string | null
+          rapproche?: boolean | null
+          recette_id?: string | null
+          reference_externe?: string | null
+          reglement_id?: string | null
+          solde_apres?: number | null
+          solde_avant?: number | null
+          type_operation: string
+        }
+        Update: {
+          compte_destination_id?: string | null
+          compte_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          date_operation?: string
+          date_rapprochement?: string | null
+          date_valeur?: string | null
+          exercice?: number | null
+          id?: string
+          libelle?: string
+          montant?: number
+          numero?: string | null
+          rapproche?: boolean | null
+          recette_id?: string | null
+          reference_externe?: string | null
+          reglement_id?: string | null
+          solde_apres?: number | null
+          solde_avant?: number | null
+          type_operation?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_tresorerie_compte_destination_id_fkey"
+            columns: ["compte_destination_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_bancaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_tresorerie_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_bancaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_tresorerie_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_tresorerie_reglement_id_fkey"
+            columns: ["reglement_id"]
+            isOneToOne: false
+            referencedRelation: "reglements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordonnancement_attachments: {
         Row: {
           created_at: string
@@ -4546,6 +4724,170 @@ export type Database = {
           },
           {
             foreignKeyName: "receptions_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recette_attachments: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          recette_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          recette_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          recette_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recette_attachments_recette_id_fkey"
+            columns: ["recette_id"]
+            isOneToOne: false
+            referencedRelation: "recettes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recette_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recette_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      recettes: {
+        Row: {
+          categorie: string | null
+          compte_id: string | null
+          created_at: string | null
+          created_by: string | null
+          date_encaissement: string | null
+          date_recette: string
+          description: string | null
+          encaisse_par: string | null
+          exercice: number | null
+          id: string
+          montant: number
+          numero: string | null
+          origine: string
+          reference_justificatif: string | null
+          statut: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          compte_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_encaissement?: string | null
+          date_recette?: string
+          description?: string | null
+          encaisse_par?: string | null
+          exercice?: number | null
+          id?: string
+          montant: number
+          numero?: string | null
+          origine: string
+          reference_justificatif?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          compte_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_encaissement?: string | null
+          date_recette?: string
+          description?: string | null
+          encaisse_par?: string | null
+          exercice?: number | null
+          id?: string
+          montant?: number
+          numero?: string | null
+          origine?: string
+          reference_justificatif?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recettes_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_bancaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recettes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recettes_encaisse_par_fkey"
+            columns: ["encaisse_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recettes_validated_by_fkey"
             columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"

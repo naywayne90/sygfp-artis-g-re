@@ -72,6 +72,7 @@ const adminItems = [
   { title: "Profils & Rôles", url: "/admin/roles", icon: Shield },
   { title: "Autorisations", url: "/admin/autorisations", icon: Lock },
   { title: "Délégations", url: "/admin/delegations", icon: UserCog },
+  { title: "Journal d'Audit", url: "/admin/journal-audit", icon: ClipboardList },
   { title: "Paramètres Système", url: "/admin/parametres", icon: Settings },
 ];
 

@@ -20,6 +20,7 @@ import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
+import Notifications from "./pages/Notifications";
 
 // Pages Admin
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
@@ -29,6 +30,7 @@ import GestionRoles from "./pages/admin/GestionRoles";
 import GestionAutorisations from "./pages/admin/GestionAutorisations";
 import GestionDelegations from "./pages/admin/GestionDelegations";
 import ParametresSysteme from "./pages/admin/ParametresSysteme";
+import JournalAudit from "./pages/admin/JournalAudit";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -71,6 +73,7 @@ const App = () => (
                     {/* Accueil */}
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/recherche" element={<Recherche />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     
                     {/* Administration */}
                     <Route path="/admin/exercices" element={<GestionExercices />} />
@@ -80,6 +83,7 @@ const App = () => (
                     <Route path="/admin/autorisations" element={<GestionAutorisations />} />
                     <Route path="/admin/delegations" element={<GestionDelegations />} />
                     <Route path="/admin/parametres" element={<ParametresSysteme />} />
+                    <Route path="/admin/journal-audit" element={<JournalAudit />} />
                     
                     {/* Planification */}
                     <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
