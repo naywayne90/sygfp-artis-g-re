@@ -268,6 +268,72 @@ export type Database = {
           },
         ]
       }
+      avenants: {
+        Row: {
+          contrat_id: string
+          created_at: string | null
+          created_by: string | null
+          date_signature: string | null
+          id: string
+          montant_modification: number | null
+          nouveau_delai: number | null
+          nouveau_montant: number | null
+          nouvelle_date_fin: string | null
+          numero_avenant: number
+          objet: string
+          statut: string | null
+          type_avenant: string
+          updated_at: string | null
+        }
+        Insert: {
+          contrat_id: string
+          created_at?: string | null
+          created_by?: string | null
+          date_signature?: string | null
+          id?: string
+          montant_modification?: number | null
+          nouveau_delai?: number | null
+          nouveau_montant?: number | null
+          nouvelle_date_fin?: string | null
+          numero_avenant: number
+          objet: string
+          statut?: string | null
+          type_avenant: string
+          updated_at?: string | null
+        }
+        Update: {
+          contrat_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          date_signature?: string | null
+          id?: string
+          montant_modification?: number | null
+          nouveau_delai?: number | null
+          nouveau_montant?: number | null
+          nouvelle_date_fin?: string | null
+          numero_avenant?: number
+          objet?: string
+          statut?: string | null
+          type_avenant?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avenants_contrat_id_fkey"
+            columns: ["contrat_id"]
+            isOneToOne: false
+            referencedRelation: "contrats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avenants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_activities: {
         Row: {
           budget_line_id: string
@@ -874,6 +940,193 @@ export type Database = {
             columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contrat_attachments: {
+        Row: {
+          contrat_id: string
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          contrat_id: string
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          contrat_id?: string
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contrat_attachments_contrat_id_fkey"
+            columns: ["contrat_id"]
+            isOneToOne: false
+            referencedRelation: "contrats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrat_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contrat_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      contrats: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          date_notification: string | null
+          date_signature: string | null
+          delai_execution: number | null
+          dossier_id: string | null
+          engagement_id: string | null
+          exercice: number | null
+          id: string
+          lot_id: string | null
+          marche_id: string | null
+          montant_actuel: number | null
+          montant_initial: number
+          numero: string
+          objet: string
+          prestataire_id: string
+          statut: string | null
+          type_contrat: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_notification?: string | null
+          date_signature?: string | null
+          delai_execution?: number | null
+          dossier_id?: string | null
+          engagement_id?: string | null
+          exercice?: number | null
+          id?: string
+          lot_id?: string | null
+          marche_id?: string | null
+          montant_actuel?: number | null
+          montant_initial: number
+          numero: string
+          objet: string
+          prestataire_id: string
+          statut?: string | null
+          type_contrat: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          date_notification?: string | null
+          date_signature?: string | null
+          delai_execution?: number | null
+          dossier_id?: string | null
+          engagement_id?: string | null
+          exercice?: number | null
+          id?: string
+          lot_id?: string | null
+          marche_id?: string | null
+          montant_actuel?: number | null
+          montant_initial?: number
+          numero?: string
+          objet?: string
+          prestataire_id?: string
+          statut?: string | null
+          type_contrat?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contrats_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "budget_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "marche_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
             referencedColumns: ["id"]
           },
         ]
@@ -2377,6 +2630,66 @@ export type Database = {
           },
         ]
       }
+      marche_lots: {
+        Row: {
+          attributaire_id: string | null
+          created_at: string | null
+          date_attribution: string | null
+          description: string | null
+          id: string
+          intitule: string
+          marche_id: string
+          montant_attribue: number | null
+          montant_estime: number | null
+          numero_lot: number
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attributaire_id?: string | null
+          created_at?: string | null
+          date_attribution?: string | null
+          description?: string | null
+          id?: string
+          intitule: string
+          marche_id: string
+          montant_attribue?: number | null
+          montant_estime?: number | null
+          numero_lot: number
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attributaire_id?: string | null
+          created_at?: string | null
+          date_attribution?: string | null
+          description?: string | null
+          id?: string
+          intitule?: string
+          marche_id?: string
+          montant_attribue?: number | null
+          montant_estime?: number | null
+          numero_lot?: number
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_lots_attributaire_id_fkey"
+            columns: ["attributaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marche_lots_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marche_sequences: {
         Row: {
           annee: number
@@ -3278,6 +3591,8 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          date_email: string | null
+          email_envoye: boolean | null
           entity_id: string | null
           entity_type: string | null
           id: string
@@ -3287,11 +3602,14 @@ export type Database = {
           read_at: string | null
           title: string
           type: string
+          urgence: string | null
           user_id: string
         }
         Insert: {
           category?: string
           created_at?: string
+          date_email?: string | null
+          email_envoye?: boolean | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
@@ -3301,11 +3619,14 @@ export type Database = {
           read_at?: string | null
           title: string
           type?: string
+          urgence?: string | null
           user_id: string
         }
         Update: {
           category?: string
           created_at?: string
+          date_email?: string | null
+          email_envoye?: boolean | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
@@ -3315,6 +3636,7 @@ export type Database = {
           read_at?: string | null
           title?: string
           type?: string
+          urgence?: string | null
           user_id?: string
         }
         Relationships: []
@@ -4538,6 +4860,85 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      soumissions: {
+        Row: {
+          classement: number | null
+          created_at: string | null
+          created_by: string | null
+          date_soumission: string
+          delai_execution: number | null
+          id: string
+          lot_id: string
+          montant_offre: number
+          motif_rejet: string | null
+          note_financiere: number | null
+          note_globale: number | null
+          note_technique: number | null
+          observations: string | null
+          prestataire_id: string
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          classement?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          date_soumission?: string
+          delai_execution?: number | null
+          id?: string
+          lot_id: string
+          montant_offre: number
+          motif_rejet?: string | null
+          note_financiere?: number | null
+          note_globale?: number | null
+          note_technique?: number | null
+          observations?: string | null
+          prestataire_id: string
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          classement?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          date_soumission?: string
+          delai_execution?: number | null
+          id?: string
+          lot_id?: string
+          montant_offre?: number
+          motif_rejet?: string | null
+          note_financiere?: number | null
+          note_globale?: number | null
+          note_technique?: number | null
+          observations?: string | null
+          prestataire_id?: string
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soumissions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "soumissions_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "marche_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "soumissions_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sous_activites: {
         Row: {
