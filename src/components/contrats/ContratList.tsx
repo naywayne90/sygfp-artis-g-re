@@ -120,8 +120,8 @@ export function ContratList() {
   };
 
   const filteredContrats = contrats.data?.filter(c => {
-    if (filter.type && c.type_contrat !== filter.type) return false;
-    if (filter.statut && c.statut !== filter.statut) return false;
+    if (filter.type && filter.type !== "all" && c.type_contrat !== filter.type) return false;
+    if (filter.statut && filter.statut !== "all" && c.statut !== filter.statut) return false;
     return true;
   }) || [];
 
@@ -297,7 +297,7 @@ export function ContratList() {
                 <SelectValue placeholder="Tous types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous types</SelectItem>
+                <SelectItem value="all">Tous types</SelectItem>
                 {TYPES_CONTRAT.map((t) => (
                   <SelectItem key={t} value={t}>{t}</SelectItem>
                 ))}
@@ -308,7 +308,7 @@ export function ContratList() {
                 <SelectValue placeholder="Tous statuts" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous statuts</SelectItem>
+                <SelectItem value="all">Tous statuts</SelectItem>
                 {STATUTS_CONTRAT.map((s) => (
                   <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                 ))}
