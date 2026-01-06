@@ -112,6 +112,27 @@ export function useExpressionsBesoin() {
     },
   });
 
+  // Fetch notes imputées disponibles pour créer une EB
+  const { data: notesImputees = [] } = useQuery({
+    queryKey: ["notes-imputees-disponibles", exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notes_dg")
+        .select(`
+          id, numero, objet, montant_estime, budget_line_id, direction_id,
+          direction:directions(label, sigle),
+          budget_line:budget_lines(id, code, label)
+        `)
+        .eq("statut", "impute")
+        .eq("exercice", exercice || new Date().getFullYear())
+        .order("imputed_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!exercice,
+  });
+
   // Fetch marchés attribués (ready for execution) without expressions
   const { data: marchesValides = [] } = useQuery({
     queryKey: ["marches-valides-pour-expression", exercice],
@@ -345,6 +366,7 @@ export function useExpressionsBesoin() {
     expressionsRejetees,
     expressionsDifferees,
     marchesValides,
+    notesImputees,
     isLoading,
     error,
     createExpression: createMutation.mutateAsync,
