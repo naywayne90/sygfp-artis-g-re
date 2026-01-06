@@ -90,8 +90,8 @@ export function RecetteList() {
   };
 
   const filteredRecettes = recettes.data?.filter(r => {
-    if (filter.origine && r.origine !== filter.origine) return false;
-    if (filter.statut && r.statut !== filter.statut) return false;
+    if (filter.origine && filter.origine !== "all" && r.origine !== filter.origine) return false;
+    if (filter.statut && filter.statut !== "all" && r.statut !== filter.statut) return false;
     return true;
   }) || [];
 
@@ -221,7 +221,7 @@ export function RecetteList() {
               <SelectValue placeholder="Toutes origines" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Toutes origines</SelectItem>
+              <SelectItem value="all">Toutes origines</SelectItem>
               {ORIGINES_RECETTES.map((o) => (
                 <SelectItem key={o} value={o}>{o}</SelectItem>
               ))}
@@ -232,7 +232,7 @@ export function RecetteList() {
               <SelectValue placeholder="Tous statuts" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous statuts</SelectItem>
+              <SelectItem value="all">Tous statuts</SelectItem>
               <SelectItem value="brouillon">Brouillon</SelectItem>
               <SelectItem value="validee">Validée</SelectItem>
               <SelectItem value="encaissee">Encaissée</SelectItem>
