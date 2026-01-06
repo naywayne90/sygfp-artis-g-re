@@ -113,12 +113,12 @@ export function AuditLogList() {
           <div className="flex flex-wrap gap-4 mb-4 p-4 bg-muted/30 rounded-lg">
             <div className="space-y-1">
               <Label className="text-xs">Type d'entité</Label>
-              <Select value={filters.entityType || ""} onValueChange={(v) => setFilters({ ...filters, entityType: v || undefined })}>
+              <Select value={filters.entityType || "all"} onValueChange={(v) => setFilters({ ...filters, entityType: v === "all" ? undefined : v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes</SelectItem>
+                  <SelectItem value="all">Toutes</SelectItem>
                   {ENTITY_TYPES.map((e) => (
                     <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
                   ))}
@@ -127,12 +127,12 @@ export function AuditLogList() {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Action</Label>
-              <Select value={filters.action || ""} onValueChange={(v) => setFilters({ ...filters, action: v || undefined })}>
+              <Select value={filters.action || "all"} onValueChange={(v) => setFilters({ ...filters, action: v === "all" ? undefined : v })}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Toutes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes</SelectItem>
+                  <SelectItem value="all">Toutes</SelectItem>
                   {ACTION_TYPES.map((a) => (
                     <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
                   ))}
@@ -141,12 +141,12 @@ export function AuditLogList() {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Utilisateur</Label>
-              <Select value={filters.userId || ""} onValueChange={(v) => setFilters({ ...filters, userId: v || undefined })}>
+              <Select value={filters.userId || "all"} onValueChange={(v) => setFilters({ ...filters, userId: v === "all" ? undefined : v })}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Tous" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous</SelectItem>
+                  <SelectItem value="all">Tous</SelectItem>
                   {users.data?.map((u) => (
                     <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
                   ))}
