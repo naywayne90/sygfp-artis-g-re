@@ -2,19 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export const MODES_PAIEMENT = [
   { value: "virement", label: "Virement bancaire" },
   { value: "cheque", label: "Chèque" },
   { value: "especes", label: "Espèces" },
   { value: "mobile_money", label: "Mobile Money" },
-];
-
-export const COMPTES_BANCAIRES_ARTI = [
-  { value: "SGBCI-001", label: "SGBCI - Compte Principal", banque: "SGBCI" },
-  { value: "BICICI-001", label: "BICICI - Compte Courant", banque: "BICICI" },
-  { value: "ECOBANK-001", label: "ECOBANK - Compte Opérations", banque: "ECOBANK" },
-  { value: "BOA-001", label: "BOA - Compte Trésorerie", banque: "BOA" },
 ];
 
 // Documents requis pour le règlement
@@ -25,20 +19,56 @@ export const DOCUMENTS_REGLEMENT = [
   { type: "avis_credit", label: "Avis de crédit bancaire", obligatoire: false },
 ];
 
+export interface CompteBancaire {
+  id: string;
+  code: string;
+  libelle: string;
+  banque: string | null;
+  numero_compte: string | null;
+  iban: string | null;
+  solde_actuel: number | null;
+  est_actif: boolean | null;
+}
+
 export interface ReglementFormData {
   ordonnancement_id: string;
   date_paiement: string;
   mode_paiement: string;
   reference_paiement?: string;
-  compte_bancaire_arti: string;
-  banque_arti: string;
+  compte_id?: string;
+  compte_bancaire_arti?: string;
+  banque_arti?: string;
   montant: number;
   observation?: string;
 }
 
+// Fallback comptes bancaires (utilisés si la table est vide)
+export const COMPTES_BANCAIRES_ARTI = [
+  { value: "SGBCI-001", label: "SGBCI - Compte Principal", banque: "SGBCI" },
+  { value: "BICICI-001", label: "BICICI - Compte Courant", banque: "BICICI" },
+  { value: "ECOBANK-001", label: "ECOBANK - Compte Opérations", banque: "ECOBANK" },
+  { value: "BOA-001", label: "BOA - Compte Trésorerie", banque: "BOA" },
+];
+
 export function useReglements() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
+  const { logAction } = useAuditLog();
+
+  // Récupérer les comptes bancaires actifs
+  const { data: comptesBancaires = [] } = useQuery({
+    queryKey: ["comptes-bancaires"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("comptes_bancaires")
+        .select("*")
+        .eq("est_actif", true)
+        .order("libelle", { ascending: true });
+
+      if (error) throw error;
+      return data as CompteBancaire[];
+    },
+  });
 
   // Récupérer les règlements
   const {
@@ -393,6 +423,7 @@ export function useReglements() {
     isLoading,
     error,
     ordonnancementsValides,
+    comptesBancaires,
     createReglement,
     deleteReglement,
     calculateReglementAvailability,

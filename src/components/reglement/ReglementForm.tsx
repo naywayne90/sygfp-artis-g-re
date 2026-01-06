@@ -39,7 +39,8 @@ import {
   MODES_PAIEMENT, 
   COMPTES_BANCAIRES_ARTI,
   DOCUMENTS_REGLEMENT,
-  ReglementFormData 
+  ReglementFormData,
+  CompteBancaire
 } from "@/hooks/useReglements";
 
 const formSchema = z.object({
@@ -64,7 +65,12 @@ const formatMontant = (montant: number) => {
 };
 
 export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
-  const { ordonnancementsValides, createReglement, calculateReglementAvailability } = useReglements();
+  const { 
+    ordonnancementsValides, 
+    comptesBancaires,
+    createReglement, 
+    calculateReglementAvailability 
+  } = useReglements();
   const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<any>(null);
   const [availability, setAvailability] = useState<{
     montantOrdonnance: number;
@@ -73,6 +79,17 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
   } | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [preuvePaiementUploaded, setPreuvePaiementUploaded] = useState(false);
+
+  // Utiliser les vrais comptes bancaires ou le fallback
+  const comptesDisponibles: Array<{ value: string; label: string; banque: string; solde?: number | null }> = 
+    comptesBancaires.length > 0 
+      ? comptesBancaires.map(c => ({
+          value: c.id,
+          label: `${c.libelle}`,
+          banque: c.banque || "",
+          solde: c.solde_actuel,
+        }))
+      : COMPTES_BANCAIRES_ARTI.map(c => ({ ...c, solde: undefined }));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -89,6 +106,7 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
 
   const watchedOrdonnancementId = form.watch("ordonnancement_id");
   const watchedMontant = form.watch("montant");
+  const watchedCompte = form.watch("compte_bancaire_arti");
 
   // Charger l'ordonnancement sélectionné et calculer la disponibilité
   useEffect(() => {
@@ -103,14 +121,8 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
     }
   }, [watchedOrdonnancementId, ordonnancementsValides]);
 
-  // Gérer le changement de compte bancaire
-  const handleCompteBancaireChange = (value: string) => {
-    form.setValue("compte_bancaire_arti", value);
-    const compte = COMPTES_BANCAIRES_ARTI.find(c => c.value === value);
-    if (compte) {
-      // On stocke la banque implicitement via le compte
-    }
-  };
+  // Trouver le compte sélectionné
+  const selectedCompte = comptesDisponibles.find(c => c.value === watchedCompte);
 
   // Gérer l'upload de fichier
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,13 +144,14 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
       if (!confirm) return;
     }
 
-    const compte = COMPTES_BANCAIRES_ARTI.find(c => c.value === values.compte_bancaire_arti);
+    const compte = comptesDisponibles.find(c => c.value === values.compte_bancaire_arti);
     
     const data: ReglementFormData = {
       ordonnancement_id: values.ordonnancement_id,
       date_paiement: format(values.date_paiement, "yyyy-MM-dd"),
       mode_paiement: values.mode_paiement,
       reference_paiement: values.reference_paiement,
+      compte_id: comptesBancaires.length > 0 ? values.compte_bancaire_arti : undefined,
       compte_bancaire_arti: values.compte_bancaire_arti,
       banque_arti: compte?.banque || "",
       montant: values.montant,
@@ -388,20 +401,32 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Compte bancaire ARTI *</FormLabel>
-                    <Select onValueChange={handleCompteBancaireChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner le compte" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {COMPTES_BANCAIRES_ARTI.map((compte) => (
+                        {comptesDisponibles.map((compte) => (
                           <SelectItem key={compte.value} value={compte.value}>
-                            {compte.label}
+                            <div className="flex flex-col">
+                              <span>{compte.label}</span>
+                              {compte.solde !== undefined && (
+                                <span className="text-xs text-muted-foreground">
+                                  Solde: {formatMontant(compte.solde || 0)}
+                                </span>
+                              )}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedCompte && selectedCompte.banque && (
+                      <FormDescription>
+                        Banque: {selectedCompte.banque}
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
