@@ -62,12 +62,18 @@ export function DossierForm({ open, onOpenChange, onSubmit, initialData }: Dossi
   }, [open, initialData]);
 
   const fetchData = async () => {
-    const [{ data: dirs }, { data: benefs }] = await Promise.all([
-      supabase.from("directions").select("id, label, sigle").eq("est_active", true).order("label"),
-      supabase.from("prestataires").select("id, raison_sociale").eq("est_actif", true).order("raison_sociale"),
-    ]);
-    setDirections(dirs || []);
-    setBeneficiaires(benefs || []);
+    const dirsResult = await supabase
+      .from("directions")
+      .select("id, label, sigle")
+      .eq("est_active", true)
+      .order("label");
+    setDirections((dirsResult.data || []) as { id: string; label: string; sigle: string | null }[]);
+    
+    const benefsResult = await supabase
+      .from("prestataires")
+      .select("id, raison_sociale")
+      .order("raison_sociale");
+    setBeneficiaires((benefsResult.data || []) as { id: string; raison_sociale: string | null }[]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
