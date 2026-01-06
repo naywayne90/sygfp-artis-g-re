@@ -32,7 +32,14 @@ export interface NoteAEF {
   direction?: { id: string; label: string; sigle: string | null };
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
-  budget_line?: { id: string; code: string; label: string };
+  budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
+}
+
+export interface BudgetValidationStatus {
+  isValidated: boolean;
+  totalLines: number;
+  validatedLines: number;
+  message: string;
 }
 
 export function useNotesAEF() {
@@ -52,7 +59,7 @@ export function useNotesAEF() {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines(id, code, label)
+          budget_line:budget_lines(id, code, label, dotation_initiale)
         `)
         .order("created_at", { ascending: false });
 
@@ -62,7 +69,7 @@ export function useNotesAEF() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as NoteAEF[];
+      return (data || []) as unknown as NoteAEF[];
     },
     enabled: !!exercice,
   });
@@ -81,13 +88,26 @@ export function useNotesAEF() {
     },
   });
 
+  // Fetch beneficiaires (prestataires)
+  const { data: beneficiaires = [] } = useQuery({
+    queryKey: ["prestataires-for-notes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("prestataires")
+        .select("id, raison_sociale")
+        .order("raison_sociale");
+      if (error) throw error;
+      return data as { id: string; raison_sociale: string }[];
+    },
+  });
+
   // Fetch budget lines for imputation
   const { data: budgetLines = [] } = useQuery({
     queryKey: ["budget-lines-for-imputation", exercice],
     queryFn: async () => {
       let query = supabase
         .from("budget_lines")
-        .select("id, code, label, dotation_initiale")
+        .select("id, code, label, dotation_initiale, dotation_modifiee, statut")
         .eq("is_active", true)
         .order("code");
 
@@ -102,7 +122,139 @@ export function useNotesAEF() {
     enabled: !!exercice,
   });
 
-  // Create note
+  // Check if budget is validated
+  const { data: budgetValidationStatus } = useQuery({
+    queryKey: ["budget-validation-status", exercice],
+    queryFn: async (): Promise<BudgetValidationStatus> => {
+      if (!exercice) {
+        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucun exercice sélectionné" };
+      }
+
+      const { data: lines, error } = await supabase
+        .from("budget_lines")
+        .select("id, statut")
+        .eq("exercice", exercice)
+        .eq("is_active", true);
+
+      if (error) throw error;
+
+      const total = lines?.length || 0;
+      const validated = lines?.filter(l => l.statut === "valide").length || 0;
+
+      if (total === 0) {
+        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucune ligne budgétaire" };
+      }
+
+      const isValidated = validated > 0 && validated === total;
+
+      return {
+        isValidated,
+        totalLines: total,
+        validatedLines: validated,
+        message: isValidated ? "Budget validé" : `Budget non validé (${validated}/${total})`
+      };
+    },
+    enabled: !!exercice,
+  });
+
+  // Fetch budget lines for imputation
+  const { data: budgetLines = [] } = useQuery({
+    queryKey: ["budget-lines-for-imputation", exercice],
+    queryFn: async () => {
+      let query = supabase
+        .from("budget_lines")
+        .select("id, code, label, dotation_initiale, dotation_modifiee, statut")
+        .eq("is_active", true)
+        .order("code");
+
+      if (exercice) {
+        query = query.eq("exercice", exercice);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!exercice,
+  });
+
+  // Check if budget is validated
+  const { data: budgetValidationStatus } = useQuery({
+    queryKey: ["budget-validation-status", exercice],
+    queryFn: async (): Promise<BudgetValidationStatus> => {
+      if (!exercice) {
+        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucun exercice sélectionné" };
+      }
+
+      const { data: lines, error } = await supabase
+        .from("budget_lines")
+        .select("id, statut")
+        .eq("exercice", exercice)
+        .eq("is_active", true);
+
+      if (error) throw error;
+
+      const total = lines?.length || 0;
+      const validated = lines?.filter(l => l.statut === "valide").length || 0;
+
+      if (total === 0) {
+        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucune ligne budgétaire pour cet exercice" };
+      }
+
+      const isValidated = validated > 0 && validated === total;
+
+      return {
+        isValidated,
+        totalLines: total,
+        validatedLines: validated,
+        message: isValidated 
+          ? "Budget validé" 
+          : `Budget non validé (${validated}/${total} lignes validées)`
+      };
+    },
+    enabled: !!exercice,
+  });
+
+  // Check budget availability for a specific line
+  const checkBudgetAvailability = async (budgetLineId: string, montant: number): Promise<BudgetAvailabilityCheck> => {
+    // Get budget line dotation
+    const { data: line, error: lineError } = await supabase
+      .from("budget_lines")
+      .select("id, dotation_initiale, dotation_modifiee")
+      .eq("id", budgetLineId)
+      .single();
+
+    if (lineError || !line) {
+      return { isAvailable: false, dotation: 0, engaged: 0, disponible: 0, message: "Ligne budgétaire introuvable" };
+    }
+
+    const dotation = line.dotation_modifiee || line.dotation_initiale || 0;
+
+    // Get total engagements on this line
+    const { data: engagements, error: engError } = await supabase
+      .from("budget_engagements")
+      .select("montant")
+      .eq("budget_line_id", budgetLineId)
+      .neq("statut", "annule");
+
+    if (engError) throw engError;
+
+    const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+    const disponible = dotation - totalEngaged;
+    const isAvailable = montant <= disponible;
+
+    return {
+      isAvailable,
+      dotation,
+      engaged: totalEngaged,
+      disponible,
+      message: isAvailable 
+        ? `Disponible: ${disponible.toLocaleString("fr-FR")} FCFA` 
+        : `Insuffisant: ${disponible.toLocaleString("fr-FR")} FCFA disponibles`
+    };
+  };
+
+  // Create note - numéro généré automatiquement par trigger
   const createMutation = useMutation({
     mutationFn: async (noteData: Partial<NoteAEF>) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -116,9 +268,17 @@ export function useNotesAEF() {
           direction_id: noteData.direction_id,
           priorite: noteData.priorite || "normale",
           montant_estime: noteData.montant_estime || 0,
+          type_depense: noteData.type_depense || "fonctionnement",
+          justification: noteData.justification,
+          beneficiaire_id: noteData.beneficiaire_id,
+          ligne_budgetaire_id: noteData.ligne_budgetaire_id,
+          os_id: noteData.os_id,
+          action_id: noteData.action_id,
+          activite_id: noteData.activite_id,
           exercice: exercice || new Date().getFullYear(),
           created_by: user.id,
           statut: "brouillon",
+          // numero sera généré par trigger
         }])
         .select()
         .single();
@@ -134,9 +294,9 @@ export function useNotesAEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note AEF créée avec succès" });
+      toast({ title: `Note ${data.numero} créée avec succès` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -185,6 +345,11 @@ export function useNotesAEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier si le budget est validé
+      if (budgetValidationStatus && !budgetValidationStatus.isValidated) {
+        throw new Error("Le budget n'est pas encore validé. Veuillez attendre la validation du budget.");
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
@@ -200,18 +365,18 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "validate",
+        action: "submit",
         newValues: { statut: "soumis" },
       });
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note soumise pour validation" });
+      toast({ title: `Note ${data.numero} soumise pour validation` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Soumission impossible", description: error.message, variant: "destructive" });
     },
   });
 
@@ -243,9 +408,9 @@ export function useNotesAEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note validée - disponible pour imputation" });
+      toast({ title: `Note ${data.numero} validée - disponible pour imputation` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -374,9 +539,61 @@ export function useNotesAEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note imputée avec succès" });
+      queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
+      toast({ title: `Note ${data.numero} imputée avec succès` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Duplicate note
+  const duplicateMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      // Récupérer la note originale
+      const { data: original, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("*")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Créer une copie
+      const { data, error } = await supabase
+        .from("notes_dg")
+        .insert([{
+          objet: `[Copie] ${original.objet}`,
+          contenu: original.contenu,
+          direction_id: original.direction_id,
+          priorite: original.priorite,
+          montant_estime: original.montant_estime,
+          exercice: exercice || new Date().getFullYear(),
+          created_by: user.id,
+          statut: "brouillon",
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAction({
+        entityType: "note_aef",
+        entityId: data.id,
+        action: "create",
+        newValues: { ...data, duplicated_from: noteId },
+      });
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+      toast({ title: `Note ${data.numero} créée (copie)` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -416,7 +633,10 @@ export function useNotesAEF() {
     isLoading,
     refetch,
     directions,
+    beneficiaires,
     budgetLines,
+    budgetValidationStatus,
+    checkBudgetAvailability,
     createNote: createMutation.mutateAsync,
     updateNote: updateMutation.mutateAsync,
     submitNote: submitMutation.mutateAsync,
@@ -424,9 +644,11 @@ export function useNotesAEF() {
     rejectNote: rejectMutation.mutateAsync,
     deferNote: deferMutation.mutateAsync,
     imputeNote: imputeMutation.mutateAsync,
+    duplicateNote: duplicateMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isSubmitting: submitMutation.isPending,
     isImputing: imputeMutation.isPending,
   };
 }
