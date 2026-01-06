@@ -162,6 +162,65 @@ export type Database = {
           },
         ]
       }
+      articles: {
+        Row: {
+          categorie: string | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          emplacement: string | null
+          est_actif: boolean | null
+          id: string
+          libelle: string
+          prix_unitaire_moyen: number | null
+          seuil_mini: number | null
+          stock_actuel: number | null
+          unite: string
+          updated_at: string | null
+        }
+        Insert: {
+          categorie?: string | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          emplacement?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle: string
+          prix_unitaire_moyen?: number | null
+          seuil_mini?: number | null
+          stock_actuel?: number | null
+          unite?: string
+          updated_at?: string | null
+        }
+        Update: {
+          categorie?: string | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          emplacement?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle?: string
+          prix_unitaire_moyen?: number | null
+          seuil_mini?: number | null
+          stock_actuel?: number | null
+          unite?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -987,6 +1046,171 @@ export type Database = {
           {
             foreignKeyName: "delegations_delegateur_id_fkey"
             columns: ["delegateur_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demande_achat_lignes: {
+        Row: {
+          article_id: string | null
+          created_at: string | null
+          demande_id: string
+          designation: string
+          id: string
+          prix_unitaire_estime: number | null
+          quantite: number
+          unite: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string | null
+          demande_id: string
+          designation: string
+          id?: string
+          prix_unitaire_estime?: number | null
+          quantite?: number
+          unite?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string | null
+          demande_id?: string
+          designation?: string
+          id?: string
+          prix_unitaire_estime?: number | null
+          quantite?: number
+          unite?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demande_achat_lignes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demande_achat_lignes_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demande_achat_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      demandes_achat: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date_demande: string
+          direction_id: string | null
+          dossier_id: string | null
+          engagement_id: string | null
+          exercice: number | null
+          id: string
+          justification: string | null
+          montant_estime: number | null
+          numero: string
+          objet: string
+          statut: string | null
+          updated_at: string | null
+          urgence: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date_demande?: string
+          direction_id?: string | null
+          dossier_id?: string | null
+          engagement_id?: string | null
+          exercice?: number | null
+          id?: string
+          justification?: string | null
+          montant_estime?: number | null
+          numero: string
+          objet: string
+          statut?: string | null
+          updated_at?: string | null
+          urgence?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date_demande?: string
+          direction_id?: string | null
+          dossier_id?: string | null
+          engagement_id?: string | null
+          exercice?: number | null
+          id?: string
+          justification?: string | null
+          montant_estime?: number | null
+          numero?: string
+          objet?: string
+          statut?: string | null
+          updated_at?: string | null
+          urgence?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demandes_achat_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandes_achat_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandes_achat_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandes_achat_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "budget_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demandes_achat_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1838,6 +2062,141 @@ export type Database = {
           },
         ]
       }
+      inventaire_lignes: {
+        Row: {
+          ajustement_effectue: boolean | null
+          article_id: string
+          created_at: string | null
+          ecart: number | null
+          id: string
+          inventaire_id: string
+          justification: string | null
+          stock_physique: number | null
+          stock_theorique: number
+          updated_at: string | null
+        }
+        Insert: {
+          ajustement_effectue?: boolean | null
+          article_id: string
+          created_at?: string | null
+          ecart?: number | null
+          id?: string
+          inventaire_id: string
+          justification?: string | null
+          stock_physique?: number | null
+          stock_theorique: number
+          updated_at?: string | null
+        }
+        Update: {
+          ajustement_effectue?: boolean | null
+          article_id?: string
+          created_at?: string | null
+          ecart?: number | null
+          id?: string
+          inventaire_id?: string
+          justification?: string | null
+          stock_physique?: number | null
+          stock_theorique?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventaire_lignes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventaire_lignes_inventaire_id_fkey"
+            columns: ["inventaire_id"]
+            isOneToOne: false
+            referencedRelation: "inventaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventaire_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inventaires: {
+        Row: {
+          cloture_at: string | null
+          cloture_by: string | null
+          created_at: string | null
+          created_by: string | null
+          date_inventaire: string
+          exercice: number | null
+          id: string
+          libelle: string
+          numero: string
+          observations: string | null
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cloture_at?: string | null
+          cloture_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_inventaire?: string
+          exercice?: number | null
+          id?: string
+          libelle: string
+          numero: string
+          observations?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cloture_at?: string | null
+          cloture_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_inventaire?: string
+          exercice?: number | null
+          id?: string
+          libelle?: string
+          numero?: string
+          observations?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventaires_cloture_by_fkey"
+            columns: ["cloture_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventaires_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       liquidation_attachments: {
         Row: {
           created_at: string
@@ -2262,6 +2621,116 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      mouvement_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mouvements_stock: {
+        Row: {
+          article_id: string
+          beneficiaire: string | null
+          created_at: string | null
+          created_by: string | null
+          date_mouvement: string | null
+          demande_id: string | null
+          destination: string | null
+          exercice: number | null
+          id: string
+          motif: string
+          numero: string
+          quantite: number
+          reception_id: string | null
+          reference_document: string | null
+          stock_apres: number
+          stock_avant: number
+          type_mouvement: string
+        }
+        Insert: {
+          article_id: string
+          beneficiaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_mouvement?: string | null
+          demande_id?: string | null
+          destination?: string | null
+          exercice?: number | null
+          id?: string
+          motif: string
+          numero: string
+          quantite: number
+          reception_id?: string | null
+          reference_document?: string | null
+          stock_apres: number
+          stock_avant: number
+          type_mouvement: string
+        }
+        Update: {
+          article_id?: string
+          beneficiaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_mouvement?: string | null
+          demande_id?: string | null
+          destination?: string | null
+          exercice?: number | null
+          id?: string
+          motif?: string
+          numero?: string
+          quantite?: number
+          reception_id?: string | null
+          reference_document?: string | null
+          stock_apres?: number
+          stock_avant?: number
+          type_mouvement?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mouvements_stock_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mouvements_stock_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mouvements_stock_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mouvements_stock_reception_id_fkey"
+            columns: ["reception_id"]
+            isOneToOne: false
+            referencedRelation: "receptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nomenclature_nbe: {
         Row: {
@@ -3554,6 +4023,208 @@ export type Database = {
           {
             foreignKeyName: "projects_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reception_attachments: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          reception_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          reception_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          reception_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reception_attachments_reception_id_fkey"
+            columns: ["reception_id"]
+            isOneToOne: false
+            referencedRelation: "receptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reception_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reception_lignes: {
+        Row: {
+          article_id: string
+          created_at: string | null
+          ecart: number | null
+          id: string
+          motif_ecart: string | null
+          prix_unitaire: number | null
+          quantite_acceptee: number | null
+          quantite_commandee: number | null
+          quantite_recue: number
+          reception_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string | null
+          ecart?: number | null
+          id?: string
+          motif_ecart?: string | null
+          prix_unitaire?: number | null
+          quantite_acceptee?: number | null
+          quantite_commandee?: number | null
+          quantite_recue: number
+          reception_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string | null
+          ecart?: number | null
+          id?: string
+          motif_ecart?: string | null
+          prix_unitaire?: number | null
+          quantite_acceptee?: number | null
+          quantite_commandee?: number | null
+          quantite_recue?: number
+          reception_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reception_lignes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reception_lignes_reception_id_fkey"
+            columns: ["reception_id"]
+            isOneToOne: false
+            referencedRelation: "receptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reception_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      receptions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date_reception: string
+          demande_id: string | null
+          exercice: number | null
+          fournisseur: string | null
+          id: string
+          numero: string
+          numero_bl: string | null
+          numero_facture: string | null
+          observations: string | null
+          statut: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date_reception?: string
+          demande_id?: string | null
+          exercice?: number | null
+          fournisseur?: string | null
+          id?: string
+          numero: string
+          numero_bl?: string | null
+          numero_facture?: string | null
+          observations?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date_reception?: string
+          demande_id?: string | null
+          exercice?: number | null
+          fournisseur?: string | null
+          id?: string
+          numero?: string
+          numero_bl?: string | null
+          numero_facture?: string | null
+          observations?: string | null
+          statut?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receptions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receptions_demande_id_fkey"
+            columns: ["demande_id"]
+            isOneToOne: false
+            referencedRelation: "demandes_achat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receptions_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
