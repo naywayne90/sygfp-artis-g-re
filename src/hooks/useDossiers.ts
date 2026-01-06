@@ -256,12 +256,11 @@ export function useDossiers() {
   };
 
   const fetchBeneficiaires = async () => {
-    const { data } = await supabase
+    const result = await supabase
       .from("prestataires")
       .select("id, raison_sociale")
-      .eq("est_actif", true)
       .order("raison_sociale");
-    setBeneficiaires(data || []);
+    setBeneficiaires((result.data || []) as { id: string; raison_sociale: string }[]);
   };
 
   const fetchUsers = async () => {
