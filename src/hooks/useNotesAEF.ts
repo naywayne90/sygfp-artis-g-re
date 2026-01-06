@@ -28,6 +28,14 @@ export interface NoteAEF {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // New fields for AEF
+  type_depense?: string | null;
+  justification?: string | null;
+  beneficiaire_id?: string | null;
+  ligne_budgetaire_id?: string | null;
+  os_id?: string | null;
+  action_id?: string | null;
+  activite_id?: string | null;
   // Relations
   direction?: { id: string; label: string; sigle: string | null };
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
@@ -39,6 +47,14 @@ export interface BudgetValidationStatus {
   isValidated: boolean;
   totalLines: number;
   validatedLines: number;
+  message: string;
+}
+
+export interface BudgetAvailabilityCheck {
+  isAvailable: boolean;
+  dotation: number;
+  engaged: number;
+  disponible: number;
   message: string;
 }
 
@@ -157,63 +173,7 @@ export function useNotesAEF() {
     enabled: !!exercice,
   });
 
-  // Fetch budget lines for imputation
-  const { data: budgetLines = [] } = useQuery({
-    queryKey: ["budget-lines-for-imputation", exercice],
-    queryFn: async () => {
-      let query = supabase
-        .from("budget_lines")
-        .select("id, code, label, dotation_initiale, dotation_modifiee, statut")
-        .eq("is_active", true)
-        .order("code");
-
-      if (exercice) {
-        query = query.eq("exercice", exercice);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!exercice,
-  });
-
-  // Check if budget is validated
-  const { data: budgetValidationStatus } = useQuery({
-    queryKey: ["budget-validation-status", exercice],
-    queryFn: async (): Promise<BudgetValidationStatus> => {
-      if (!exercice) {
-        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucun exercice sélectionné" };
-      }
-
-      const { data: lines, error } = await supabase
-        .from("budget_lines")
-        .select("id, statut")
-        .eq("exercice", exercice)
-        .eq("is_active", true);
-
-      if (error) throw error;
-
-      const total = lines?.length || 0;
-      const validated = lines?.filter(l => l.statut === "valide").length || 0;
-
-      if (total === 0) {
-        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucune ligne budgétaire pour cet exercice" };
-      }
-
-      const isValidated = validated > 0 && validated === total;
-
-      return {
-        isValidated,
-        totalLines: total,
-        validatedLines: validated,
-        message: isValidated 
-          ? "Budget validé" 
-          : `Budget non validé (${validated}/${total} lignes validées)`
-      };
-    },
-    enabled: !!exercice,
-  });
+  // (Removed duplicate queries - already defined above)
 
   // Check budget availability for a specific line
   const checkBudgetAvailability = async (budgetLineId: string, montant: number): Promise<BudgetAvailabilityCheck> => {
