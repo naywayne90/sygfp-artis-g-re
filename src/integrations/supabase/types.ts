@@ -672,6 +672,7 @@ export type Database = {
           airsi_taux: number | null
           created_at: string
           created_by: string | null
+          current_step: number | null
           date_differe: string | null
           date_liquidation: string
           deadline_correction: string | null
@@ -685,21 +686,31 @@ export type Database = {
           motif_differe: string | null
           net_a_payer: number | null
           numero: string
+          observation: string | null
+          reference_facture: string | null
           regime_fiscal: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           retenue_source_montant: number | null
           retenue_source_taux: number | null
           service_fait: boolean | null
           service_fait_certifie_par: string | null
           service_fait_date: string | null
           statut: string | null
+          submitted_at: string | null
           tva_montant: number | null
           tva_taux: number | null
+          validated_at: string | null
+          validated_by: string | null
+          workflow_status: string | null
         }
         Insert: {
           airsi_montant?: number | null
           airsi_taux?: number | null
           created_at?: string
           created_by?: string | null
+          current_step?: number | null
           date_differe?: string | null
           date_liquidation?: string
           deadline_correction?: string | null
@@ -713,21 +724,31 @@ export type Database = {
           motif_differe?: string | null
           net_a_payer?: number | null
           numero: string
+          observation?: string | null
+          reference_facture?: string | null
           regime_fiscal?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           retenue_source_montant?: number | null
           retenue_source_taux?: number | null
           service_fait?: boolean | null
           service_fait_certifie_par?: string | null
           service_fait_date?: string | null
           statut?: string | null
+          submitted_at?: string | null
           tva_montant?: number | null
           tva_taux?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          workflow_status?: string | null
         }
         Update: {
           airsi_montant?: number | null
           airsi_taux?: number | null
           created_at?: string
           created_by?: string | null
+          current_step?: number | null
           date_differe?: string | null
           date_liquidation?: string
           deadline_correction?: string | null
@@ -741,15 +762,24 @@ export type Database = {
           motif_differe?: string | null
           net_a_payer?: number | null
           numero?: string
+          observation?: string | null
+          reference_facture?: string | null
           regime_fiscal?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           retenue_source_montant?: number | null
           retenue_source_taux?: number | null
           service_fait?: boolean | null
           service_fait_certifie_par?: string | null
           service_fait_date?: string | null
           statut?: string | null
+          submitted_at?: string | null
           tva_montant?: number | null
           tva_taux?: number | null
+          validated_at?: string | null
+          validated_by?: string | null
+          workflow_status?: string | null
         }
         Relationships: [
           {
@@ -767,8 +797,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_liquidations_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_liquidations_service_fait_certifie_par_fkey"
             columns: ["service_fait_certifie_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_liquidations_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1836,6 +1880,81 @@ export type Database = {
           {
             foreignKeyName: "liquidation_attachments_uploaded_by_fkey"
             columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liquidation_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      liquidation_validations: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          liquidation_id: string
+          role: string
+          status: string | null
+          step_order: number
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          liquidation_id: string
+          role: string
+          status?: string | null
+          step_order: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          liquidation_id?: string
+          role?: string
+          status?: string | null
+          step_order?: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidation_validations_liquidation_id_fkey"
+            columns: ["liquidation_id"]
+            isOneToOne: false
+            referencedRelation: "budget_liquidations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liquidation_validations_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
