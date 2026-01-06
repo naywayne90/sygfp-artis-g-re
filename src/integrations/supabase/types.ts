@@ -6230,6 +6230,18 @@ export type Database = {
       }
     }
     Functions: {
+      generate_imputation_numero: {
+        Args: { p_exercice: number }
+        Returns: string
+      }
+      generate_note_aef_numero: {
+        Args: { p_exercice: number }
+        Returns: string
+      }
+      generate_note_sef_numero: {
+        Args: { p_exercice: number }
+        Returns: string
+      }
       get_dossier_current_step: {
         Args: { p_dossier_id: string }
         Returns: {

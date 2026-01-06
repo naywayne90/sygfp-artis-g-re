@@ -10,6 +10,8 @@ export interface NoteSEF {
   exercice: number;
   direction_id: string | null;
   demandeur_id: string | null;
+  beneficiaire_id: string | null;
+  beneficiaire_interne_id: string | null;
   objet: string;
   description: string | null;
   urgence: string | null;
@@ -33,6 +35,8 @@ export interface NoteSEF {
   // Relations
   direction?: { id: string; label: string; sigle: string | null };
   demandeur?: { id: string; first_name: string | null; last_name: string | null };
+  beneficiaire?: { id: string; raison_sociale: string };
+  beneficiaire_interne?: { id: string; first_name: string | null; last_name: string | null };
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
 }
 
@@ -106,7 +110,20 @@ export function useNotesSEF() {
     },
   });
 
-  // Create note
+  // Fetch beneficiaires (prestataires)
+  const { data: beneficiaires = [] } = useQuery({
+    queryKey: ["prestataires-for-notes-sef"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("prestataires")
+        .select("id, raison_sociale")
+        .order("raison_sociale");
+      if (error) throw error;
+      return data as { id: string; raison_sociale: string }[];
+    },
+  });
+
+  // Create note - numéro généré automatiquement par trigger
   const createMutation = useMutation({
     mutationFn: async (noteData: Partial<NoteSEF>) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -119,10 +136,13 @@ export function useNotesSEF() {
           description: noteData.description,
           direction_id: noteData.direction_id,
           demandeur_id: noteData.demandeur_id || user.id,
+          beneficiaire_id: noteData.beneficiaire_id,
+          beneficiaire_interne_id: noteData.beneficiaire_interne_id,
           urgence: noteData.urgence,
           commentaire: noteData.commentaire,
           exercice: exercice || new Date().getFullYear(),
           created_by: user.id,
+          // numero sera généré par trigger
         }])
         .select()
         .single();
@@ -146,9 +166,9 @@ export function useNotesSEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: "Note SEF créée avec succès" });
+      toast({ title: `Note ${data.numero} créée avec succès` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -221,15 +241,15 @@ export function useNotesSEF() {
       await logAction({
         entityType: "note_sef",
         entityId: noteId,
-        action: "validate",
+        action: "submit",
         newValues: { statut: "soumis" },
       });
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: "Note soumise pour validation" });
+      toast({ title: `Note ${data.numero} soumise pour validation` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -308,9 +328,9 @@ export function useNotesSEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: "Note validée avec succès" });
+      toast({ title: `Note ${data.numero} validée avec succès` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -431,6 +451,55 @@ export function useNotesSEF() {
     },
   });
 
+  // Duplicate note
+  const duplicateMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      const { data: original, error: fetchError } = await supabase
+        .from("notes_sef")
+        .select("*")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const { data, error } = await supabase
+        .from("notes_sef")
+        .insert([{
+          objet: `[Copie] ${original.objet}`,
+          description: original.description,
+          direction_id: original.direction_id,
+          demandeur_id: original.demandeur_id,
+          urgence: original.urgence,
+          commentaire: original.commentaire,
+          exercice: exercice || new Date().getFullYear(),
+          created_by: user.id,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAction({
+        entityType: "note_sef",
+        entityId: data.id,
+        action: "create",
+        newValues: { ...data, duplicated_from: noteId },
+      });
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      toast({ title: `Note ${data.numero} créée (copie)` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Delete note
   const deleteMutation = useMutation({
     mutationFn: async (noteId: string) => {
@@ -478,6 +547,7 @@ export function useNotesSEF() {
     refetch,
     directions,
     profiles,
+    beneficiaires,
     createNote: createMutation.mutateAsync,
     updateNote: updateMutation.mutateAsync,
     submitNote: submitMutation.mutateAsync,
@@ -485,9 +555,11 @@ export function useNotesSEF() {
     validateNote: validateMutation.mutateAsync,
     rejectNote: rejectMutation.mutateAsync,
     deferNote: deferMutation.mutateAsync,
+    duplicateNote: duplicateMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,
     fetchHistory,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isSubmitting: submitMutation.isPending,
   };
 }
