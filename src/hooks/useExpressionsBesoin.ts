@@ -112,18 +112,19 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Fetch validated marchés without expressions
+  // Fetch marchés attribués (ready for execution) without expressions
   const { data: marchesValides = [] } = useQuery({
     queryKey: ["marches-valides-pour-expression", exercice],
     queryFn: async () => {
-      // Get marchés validés
+      // Get marchés with statuses that allow expressions de besoin
+      // Statuts valides: attribue, valide, validé, en_cours, en_execution
       const { data: marches, error } = await supabase
         .from("marches")
         .select(`
           id, numero, objet, montant, mode_passation,
           prestataire:prestataires(id, raison_sociale)
         `)
-        .eq("statut", "validé")
+        .in("statut", ["attribue", "valide", "validé", "en_cours", "en_execution"])
         .order("created_at", { ascending: false });
 
       if (error) throw error;
