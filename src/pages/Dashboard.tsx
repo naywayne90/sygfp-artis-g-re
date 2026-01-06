@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   FileText, 
   CreditCard, 
@@ -20,6 +21,7 @@ import {
   Banknote,
   Settings,
   CalendarDays,
+  AlertTriangle,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -76,6 +78,7 @@ const getTypeIcon = (type: string) => {
     case "liquidation": return <Receipt className="h-4 w-4" />;
     case "ordonnancement": return <FileCheck className="h-4 w-4" />;
     case "marche": return <ShoppingCart className="h-4 w-4" />;
+    case "user_role": return <User className="h-4 w-4" />;
     default: return <FileText className="h-4 w-4" />;
   }
 };
@@ -96,9 +99,9 @@ export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: activities, isLoading: activitiesLoading } = useRecentActivities();
 
-  const budgetExecute = stats && stats.budgetTotal > 0 
-    ? Math.round((stats.budgetEngage / stats.budgetTotal) * 100) 
-    : 0;
+  // Utiliser le tauxEngagement précalculé depuis le hook
+  const budgetExecute = stats?.tauxEngagement || 0;
+  const budgetDisponible = stats?.budgetDisponible || 0;
 
   // Déterminer les tabs accessibles selon les rôles
   const accessibleTabs = DASHBOARD_TABS.filter(tab => 
@@ -177,6 +180,23 @@ export default function Dashboard() {
 
         {/* Vue générale */}
         <TabsContent value="general" className="space-y-6">
+          {/* Alerte si budget non chargé */}
+          {!statsLoading && stats && !stats.isBudgetLoaded && (
+            <Alert variant="default" className="border-warning/50 bg-warning/10">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>
+                  Budget non chargé pour l'exercice {exercice}. Les indicateurs financiers affichent 0.
+                </span>
+                <Link to="/planification/budget">
+                  <Button variant="outline" size="sm" className="ml-4">
+                    Importer le budget
+                  </Button>
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Raccourcis rapides */}
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             {quickActions.map((action) => (
@@ -351,25 +371,30 @@ export default function Dashboard() {
                       <Progress value={budgetExecute} className="h-3" />
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-4">
+                    <div className="grid gap-4 md:grid-cols-5">
                       <div className="space-y-1 p-4 rounded-lg bg-muted/50">
                         <p className="text-xs text-muted-foreground">Budget alloué</p>
                         <p className="text-xl font-bold">{formatMontant(stats?.budgetTotal || 0)}</p>
                         <p className="text-xs text-muted-foreground">FCFA</p>
                       </div>
                       <div className="space-y-1 p-4 rounded-lg bg-primary/10">
-                        <p className="text-xs text-muted-foreground">Montant engagé</p>
+                        <p className="text-xs text-muted-foreground">Engagé (validé)</p>
                         <p className="text-xl font-bold text-primary">{formatMontant(stats?.budgetEngage || 0)}</p>
                         <p className="text-xs text-muted-foreground">FCFA</p>
                       </div>
                       <div className="space-y-1 p-4 rounded-lg bg-secondary/10">
-                        <p className="text-xs text-muted-foreground">Montant liquidé</p>
+                        <p className="text-xs text-muted-foreground">Liquidé</p>
                         <p className="text-xl font-bold text-secondary">{formatMontant(stats?.budgetLiquide || 0)}</p>
                         <p className="text-xs text-muted-foreground">FCFA</p>
                       </div>
                       <div className="space-y-1 p-4 rounded-lg bg-success/10">
-                        <p className="text-xs text-muted-foreground">Montant payé</p>
+                        <p className="text-xs text-muted-foreground">Payé</p>
                         <p className="text-xl font-bold text-success">{formatMontant(stats?.budgetPaye || 0)}</p>
+                        <p className="text-xs text-muted-foreground">FCFA</p>
+                      </div>
+                      <div className="space-y-1 p-4 rounded-lg bg-warning/10">
+                        <p className="text-xs text-muted-foreground">Disponible</p>
+                        <p className="text-xl font-bold text-warning">{formatMontant(budgetDisponible)}</p>
                         <p className="text-xs text-muted-foreground">FCFA</p>
                       </div>
                     </div>

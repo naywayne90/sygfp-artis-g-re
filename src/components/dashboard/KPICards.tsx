@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { 
   FolderOpen, 
@@ -8,7 +9,8 @@ import {
   TrendingUp, 
   Wallet,
   Building2,
-  Target
+  Target,
+  AlertTriangle
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -119,7 +121,7 @@ export function KPICards() {
     enabled: !!exercice,
   });
 
-  // Disponibilité budgétaire
+  // Disponibilité budgétaire - CORRIGÉ: utilise uniquement engagements validés
   const { data: disponibilite } = useQuery({
     queryKey: ["disponibilite-budget", exercice],
     queryFn: async () => {
@@ -130,16 +132,21 @@ export function KPICards() {
 
       const { data: engagements } = await supabase
         .from("budget_engagements")
-        .select("montant")
-        .eq("exercice", exercice)
-        .eq("statut", "valide");
+        .select("montant, statut")
+        .eq("exercice", exercice);
 
       const dotationTotale = budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
-      const engageTotal = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-      const disponible = dotationTotale - engageTotal;
+      // CORRECTION: Ne compter que les engagements validés
+      const engageTotal = engagements
+        ?.filter(e => e.statut === "valide")
+        .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      
+      // CORRECTION: Disponible ne peut pas être négatif
+      const disponible = Math.max(0, dotationTotale - engageTotal);
       const tauxDisponibilite = dotationTotale > 0 ? Math.round((disponible / dotationTotale) * 100) : 0;
+      const isBudgetLoaded = dotationTotale > 0;
 
-      return { dotationTotale, engageTotal, disponible, tauxDisponibilite };
+      return { dotationTotale, engageTotal, disponible, tauxDisponibilite, isBudgetLoaded };
     },
     enabled: !!exercice,
   });
@@ -244,16 +251,23 @@ export function KPICards() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Disponible</span>
-                <span className="font-medium">{formatMontant(disponibilite?.disponible || 0)}</span>
+            {!disponibilite?.isBudgetLoaded ? (
+              <div className="text-center py-2">
+                <AlertTriangle className="h-5 w-5 text-warning mx-auto mb-1" />
+                <p className="text-xs text-muted-foreground">Budget non chargé</p>
               </div>
-              <Progress value={disponibilite?.tauxDisponibilite || 0} className="h-2" />
-              <p className="text-xs text-muted-foreground text-center">
-                {disponibilite?.tauxDisponibilite || 0}% du budget disponible
-              </p>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Disponible</span>
+                  <span className="font-medium">{formatMontant(disponibilite?.disponible || 0)}</span>
+                </div>
+                <Progress value={disponibilite?.tauxDisponibilite || 0} className="h-2" />
+                <p className="text-xs text-muted-foreground text-center">
+                  {disponibilite?.tauxDisponibilite || 0}% du budget disponible
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
