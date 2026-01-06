@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Resend API client - using fetch directly
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -112,14 +112,24 @@ const handler = async (req: Request): Promise<Response> => {
 </body>
 </html>`;
 
-    const emailResponse = await resend.emails.send({
-      from: "SYGFP <notifications@resend.dev>",
-      to: [profile.email],
-      subject: `[SYGFP] ${typeLabel}: ${payload.title}`,
-      html: htmlContent,
+    // Send email using Resend API directly
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "SYGFP <notifications@resend.dev>",
+        to: [profile.email],
+        subject: `[SYGFP] ${typeLabel}: ${payload.title}`,
+        html: htmlContent,
+      }),
     });
 
-    console.log("Email sent:", emailResponse);
+    const emailData = await emailResponse.json();
+
+    console.log("Email sent:", emailData);
 
     // Update notification as email sent
     if (payload.entity_id) {
@@ -130,7 +140,7 @@ const handler = async (req: Request): Promise<Response> => {
         .eq("user_id", payload.user_id);
     }
 
-    return new Response(JSON.stringify({ success: true, ...emailResponse }), {
+    return new Response(JSON.stringify({ success: true, ...emailData }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

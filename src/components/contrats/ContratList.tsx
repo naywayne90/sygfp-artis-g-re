@@ -59,18 +59,21 @@ export function ContratList() {
   });
 
   // Récupérer les prestataires
-  const prestataires = useQuery({
-    queryKey: ["prestataires"],
+  // Récupérer les prestataires
+  const prestatairesQuery = useQuery({
+    queryKey: ["prestataires-list"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from("prestataires")
         .select("id, raison_sociale")
         .eq("est_actif", true)
         .order("raison_sociale");
       if (error) throw error;
-      return data as { id: string; raison_sociale: string }[];
+      return (data || []) as { id: string; raison_sociale: string }[];
     },
   });
+  const prestataires = prestatairesQuery.data || [];
 
   const resetForm = () => {
     setForm({
@@ -112,7 +115,7 @@ export function ContratList() {
   };
 
   const getPrestataireName = (id: string) => {
-    const p = prestataires.data?.find(x => x.id === id);
+    const p = prestataires.find(x => x.id === id);
     return p?.raison_sociale || "-";
   };
 
@@ -190,7 +193,7 @@ export function ContratList() {
                           <SelectValue placeholder="Sélectionner..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {prestataires.data?.map((p) => (
+                          {prestataires.map((p) => (
                             <SelectItem key={p.id} value={p.id}>{p.raison_sociale}</SelectItem>
                           ))}
                         </SelectContent>
