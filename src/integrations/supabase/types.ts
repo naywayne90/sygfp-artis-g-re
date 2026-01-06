@@ -1262,6 +1262,7 @@ export type Database = {
           numero: string
           objet: string
           statut_global: string | null
+          statut_paiement: string | null
           updated_at: string
         }
         Insert: {
@@ -1279,6 +1280,7 @@ export type Database = {
           numero: string
           objet: string
           statut_global?: string | null
+          statut_paiement?: string | null
           updated_at?: string
         }
         Update: {
@@ -1296,6 +1298,7 @@ export type Database = {
           numero?: string
           objet?: string
           statut_global?: string | null
+          statut_paiement?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3553,6 +3556,147 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reglement_attachments: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          reglement_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          reglement_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          reglement_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reglement_attachments_reglement_id_fkey"
+            columns: ["reglement_id"]
+            isOneToOne: false
+            referencedRelation: "reglements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglement_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reglement_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reglements: {
+        Row: {
+          banque_arti: string | null
+          compte_bancaire_arti: string | null
+          created_at: string | null
+          created_by: string | null
+          date_paiement: string
+          exercice: number | null
+          id: string
+          mode_paiement: string
+          montant: number
+          numero: string
+          observation: string | null
+          ordonnancement_id: string
+          reference_paiement: string | null
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          banque_arti?: string | null
+          compte_bancaire_arti?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_paiement?: string
+          exercice?: number | null
+          id?: string
+          mode_paiement: string
+          montant: number
+          numero: string
+          observation?: string | null
+          ordonnancement_id: string
+          reference_paiement?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          banque_arti?: string | null
+          compte_bancaire_arti?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_paiement?: string
+          exercice?: number | null
+          id?: string
+          mode_paiement?: string
+          montant?: number
+          numero?: string
+          observation?: string | null
+          ordonnancement_id?: string
+          reference_paiement?: string | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reglements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglements_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "ordonnancements"
             referencedColumns: ["id"]
           },
         ]
