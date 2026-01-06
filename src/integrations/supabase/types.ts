@@ -4221,6 +4221,57 @@ export type Database = {
         }
         Relationships: []
       }
+      ordonnancement_signatures: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          ordonnancement_id: string
+          required: boolean | null
+          role: string
+          signature_ip: string | null
+          signed_at: string | null
+          signed_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ordonnancement_id: string
+          required?: boolean | null
+          role: string
+          signature_ip?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ordonnancement_id?: string
+          required?: boolean | null
+          role?: string
+          signature_ip?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordonnancement_signatures_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "ordonnancements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancement_signatures_signed_by_fkey"
+            columns: ["signed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordonnancement_validations: {
         Row: {
           comments: string | null
@@ -4585,6 +4636,9 @@ export type Database = {
           id: string
           ninea: string | null
           raison_sociale: string
+          rib_banque: string | null
+          rib_cle: string | null
+          rib_numero: string | null
           secteur_activite: string | null
           statut: string | null
           statut_fiscal: string | null
@@ -4601,6 +4655,9 @@ export type Database = {
           id?: string
           ninea?: string | null
           raison_sociale: string
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
           secteur_activite?: string | null
           statut?: string | null
           statut_fiscal?: string | null
@@ -4617,6 +4674,9 @@ export type Database = {
           id?: string
           ninea?: string | null
           raison_sociale?: string
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
           secteur_activite?: string | null
           statut?: string | null
           statut_fiscal?: string | null
@@ -5265,6 +5325,7 @@ export type Database = {
         Row: {
           banque_arti: string | null
           compte_bancaire_arti: string | null
+          compte_id: string | null
           created_at: string | null
           created_by: string | null
           date_paiement: string
@@ -5282,6 +5343,7 @@ export type Database = {
         Insert: {
           banque_arti?: string | null
           compte_bancaire_arti?: string | null
+          compte_id?: string | null
           created_at?: string | null
           created_by?: string | null
           date_paiement?: string
@@ -5299,6 +5361,7 @@ export type Database = {
         Update: {
           banque_arti?: string | null
           compte_bancaire_arti?: string | null
+          compte_id?: string | null
           created_at?: string | null
           created_by?: string | null
           date_paiement?: string
@@ -5314,6 +5377,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reglements_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "comptes_bancaires"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reglements_created_by_fkey"
             columns: ["created_by"]
