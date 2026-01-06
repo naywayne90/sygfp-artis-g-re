@@ -1787,6 +1787,7 @@ export type Database = {
       }
       dossiers: {
         Row: {
+          beneficiaire_id: string | null
           created_at: string
           created_by: string | null
           demandeur_id: string | null
@@ -1802,9 +1803,11 @@ export type Database = {
           objet: string
           statut_global: string | null
           statut_paiement: string | null
+          type_dossier: string | null
           updated_at: string
         }
         Insert: {
+          beneficiaire_id?: string | null
           created_at?: string
           created_by?: string | null
           demandeur_id?: string | null
@@ -1820,9 +1823,11 @@ export type Database = {
           objet: string
           statut_global?: string | null
           statut_paiement?: string | null
+          type_dossier?: string | null
           updated_at?: string
         }
         Update: {
+          beneficiaire_id?: string | null
           created_at?: string
           created_by?: string | null
           demandeur_id?: string | null
@@ -1838,9 +1843,17 @@ export type Database = {
           objet?: string
           statut_global?: string | null
           statut_paiement?: string | null
+          type_dossier?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "dossiers_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dossiers_created_by_fkey"
             columns: ["created_by"]
@@ -2014,31 +2027,37 @@ export type Database = {
       exercices_budgetaires: {
         Row: {
           annee: number
+          code_exercice: string | null
           created_at: string
           date_cloture: string | null
           date_ouverture: string | null
           est_actif: boolean
           id: string
+          libelle: string | null
           statut: string
           updated_at: string
         }
         Insert: {
           annee: number
+          code_exercice?: string | null
           created_at?: string
           date_cloture?: string | null
           date_ouverture?: string | null
           est_actif?: boolean
           id?: string
+          libelle?: string | null
           statut?: string
           updated_at?: string
         }
         Update: {
           annee?: number
+          code_exercice?: string | null
           created_at?: string
           date_cloture?: string | null
           date_ouverture?: string | null
           est_actif?: boolean
           id?: string
+          libelle?: string | null
           statut?: string
           updated_at?: string
         }
@@ -5669,6 +5688,58 @@ export type Database = {
           },
         ]
       }
+      user_exercices: {
+        Row: {
+          can_read: boolean | null
+          can_write: boolean | null
+          created_at: string | null
+          exercice_id: string
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          exercice_id: string
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          exercice_id?: string
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_exercices_exercice_id_fkey"
+            columns: ["exercice_id"]
+            isOneToOne: false
+            referencedRelation: "exercices_budgetaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_exercices_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_exercices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_positions: {
         Row: {
           created_at: string
@@ -5831,6 +5902,113 @@ export type Database = {
           },
         ]
       }
+      workflow_etapes: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          libelle: string
+          ordre: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          libelle: string
+          ordre: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          libelle?: string
+          ordre?: number
+        }
+        Relationships: []
+      }
+      workflow_instances: {
+        Row: {
+          assigned_to: string | null
+          commentaire: string | null
+          created_at: string | null
+          created_by: string | null
+          date_debut: string | null
+          date_fin: string | null
+          dossier_id: string
+          entity_id: string | null
+          etape_code: string
+          id: string
+          pieces_jointes: string[] | null
+          statut: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          commentaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          dossier_id: string
+          entity_id?: string | null
+          etape_code: string
+          id?: string
+          pieces_jointes?: string[] | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          commentaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
+          dossier_id?: string
+          entity_id?: string | null
+          etape_code?: string
+          id?: string
+          pieces_jointes?: string[] | null
+          statut?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_instances_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_etape_code_fkey"
+            columns: ["etape_code"]
+            isOneToOne: false
+            referencedRelation: "workflow_etapes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       workflow_modules: {
         Row: {
           code: string
@@ -5921,6 +6099,27 @@ export type Database = {
       }
     }
     Functions: {
+      get_dossier_current_step: {
+        Args: { p_dossier_id: string }
+        Returns: {
+          etape_code: string
+          etape_libelle: string
+          etape_ordre: number
+          statut: string
+        }[]
+      }
+      get_dossier_workflow_progress: {
+        Args: { p_dossier_id: string }
+        Returns: {
+          assigned_to_name: string
+          date_debut: string
+          date_fin: string
+          etape_code: string
+          etape_libelle: string
+          etape_ordre: number
+          statut: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -5957,6 +6156,10 @@ export type Database = {
           p_old_values?: Json
         }
         Returns: string
+      }
+      user_can_access_exercice: {
+        Args: { p_exercice: number }
+        Returns: boolean
       }
       user_has_any_role: {
         Args: { p_roles: string[]; p_user_id: string }
