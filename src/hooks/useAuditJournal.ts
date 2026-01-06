@@ -60,18 +60,17 @@ export function useAuditJournal(filters: AuditFilters = {}) {
   return useQuery({
     queryKey: ["audit-journal", exercice, filters],
     queryFn: async () => {
+      if (!exercice) return [];
+      
       let query = supabase
         .from("audit_logs")
         .select(`
           *,
           user:profiles!audit_logs_user_id_fkey(full_name, email)
         `)
+        .eq("exercice", exercice)
         .order("created_at", { ascending: false })
         .limit(500);
-
-      if (exercice) {
-        query = query.eq("exercice", exercice);
-      }
 
       if (filters.entityType) {
         query = query.eq("entity_type", filters.entityType);
@@ -97,6 +96,7 @@ export function useAuditJournal(filters: AuditFilters = {}) {
       if (error) throw error;
       return data as AuditLogEntry[];
     },
+    enabled: !!exercice,
   });
 }
 
@@ -106,15 +106,13 @@ export function useAuditStats() {
   return useQuery({
     queryKey: ["audit-stats", exercice],
     queryFn: async () => {
-      let query = supabase
+      if (!exercice) return { total: 0, byEntityType: {}, byAction: {}, byDay: {} };
+      
+      const { data, error } = await supabase
         .from("audit_logs")
-        .select("entity_type, action, created_at");
+        .select("entity_type, action, created_at")
+        .eq("exercice", exercice);
 
-      if (exercice) {
-        query = query.eq("exercice", exercice);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
 
       // Stats par type d'entité
@@ -148,5 +146,6 @@ export function useAuditStats() {
         byDay,
       };
     },
+    enabled: !!exercice,
   });
 }
