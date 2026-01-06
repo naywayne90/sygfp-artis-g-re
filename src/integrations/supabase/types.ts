@@ -2883,23 +2883,159 @@ export type Database = {
         }
         Relationships: []
       }
+      ordonnancement_attachments: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          ordonnancement_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          ordonnancement_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          ordonnancement_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordonnancement_attachments_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "ordonnancements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancement_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordonnancement_sequences: {
+        Row: {
+          annee: number
+          dernier_numero: number | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ordonnancement_validations: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          ordonnancement_id: string
+          role: string
+          status: string | null
+          step_order: number
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          ordonnancement_id: string
+          role: string
+          status?: string | null
+          step_order: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          ordonnancement_id?: string
+          role?: string
+          status?: string | null
+          step_order?: number
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordonnancement_validations_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "ordonnancements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancement_validations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordonnancements: {
         Row: {
           banque: string | null
           beneficiaire: string
           created_at: string
           created_by: string | null
+          current_step: number | null
+          date_differe: string | null
+          date_prevue_paiement: string | null
+          deadline_correction: string | null
+          differe_by: string | null
           exercice: number | null
           id: string
+          is_locked: boolean | null
           legacy_import: boolean | null
           liquidation_id: string
           mode_paiement: string | null
           montant: number
+          montant_paye: number | null
           motif_differe: string | null
           numero: string | null
           objet: string
+          observation: string | null
           pdf_path: string | null
           reference_tresor: string | null
+          rejected_at: string | null
+          rejected_by: string | null
           rejection_reason: string | null
           requires_dg_signature: boolean | null
           rib: string | null
@@ -2908,26 +3044,40 @@ export type Database = {
           signed_dg_at: string | null
           signed_dg_by: string | null
           statut: string | null
+          submitted_at: string | null
           transmitted_at: string | null
           transmitted_by: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          workflow_status: string | null
         }
         Insert: {
           banque?: string | null
           beneficiaire: string
           created_at?: string
           created_by?: string | null
+          current_step?: number | null
+          date_differe?: string | null
+          date_prevue_paiement?: string | null
+          deadline_correction?: string | null
+          differe_by?: string | null
           exercice?: number | null
           id?: string
+          is_locked?: boolean | null
           legacy_import?: boolean | null
           liquidation_id: string
           mode_paiement?: string | null
           montant: number
+          montant_paye?: number | null
           motif_differe?: string | null
           numero?: string | null
           objet: string
+          observation?: string | null
           pdf_path?: string | null
           reference_tresor?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           requires_dg_signature?: boolean | null
           rib?: string | null
@@ -2936,26 +3086,40 @@ export type Database = {
           signed_dg_at?: string | null
           signed_dg_by?: string | null
           statut?: string | null
+          submitted_at?: string | null
           transmitted_at?: string | null
           transmitted_by?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          workflow_status?: string | null
         }
         Update: {
           banque?: string | null
           beneficiaire?: string
           created_at?: string
           created_by?: string | null
+          current_step?: number | null
+          date_differe?: string | null
+          date_prevue_paiement?: string | null
+          deadline_correction?: string | null
+          differe_by?: string | null
           exercice?: number | null
           id?: string
+          is_locked?: boolean | null
           legacy_import?: boolean | null
           liquidation_id?: string
           mode_paiement?: string | null
           montant?: number
+          montant_paye?: number | null
           motif_differe?: string | null
           numero?: string | null
           objet?: string
+          observation?: string | null
           pdf_path?: string | null
           reference_tresor?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           requires_dg_signature?: boolean | null
           rib?: string | null
@@ -2964,9 +3128,13 @@ export type Database = {
           signed_dg_at?: string | null
           signed_dg_by?: string | null
           statut?: string | null
+          submitted_at?: string | null
           transmitted_at?: string | null
           transmitted_by?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          workflow_status?: string | null
         }
         Relationships: [
           {
@@ -2977,10 +3145,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordonnancements_differe_by_fkey"
+            columns: ["differe_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ordonnancements_liquidation_id_fkey"
             columns: ["liquidation_id"]
             isOneToOne: false
             referencedRelation: "budget_liquidations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancements_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3000,6 +3182,13 @@ export type Database = {
           {
             foreignKeyName: "ordonnancements_transmitted_by_fkey"
             columns: ["transmitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancements_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
