@@ -13,7 +13,7 @@ export const TYPES_COMPTE = [
 export const TYPES_OPERATION = [
   { value: "entree", label: "Entrée" },
   { value: "sortie", label: "Sortie" },
-  { value: "virement_interne", label: "Virement interne" },
+  { value: "virement", label: "Virement interne" },
 ];
 
 export interface CompteBancaire {
@@ -36,10 +36,12 @@ export interface OperationTresorerie {
   id: string;
   numero: string;
   compte_id: string;
-  type_operation: "entree" | "sortie" | "virement_interne";
+  type_operation: "entree" | "sortie" | "virement";
   date_operation: string;
   date_valeur: string | null;
   montant: number;
+  solde_avant: number | null;
+  solde_apres: number | null;
   libelle: string;
   reference_externe: string | null;
   reglement_id: string | null;
