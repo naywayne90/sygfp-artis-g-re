@@ -66,8 +66,9 @@ export function useOrdonnancements() {
           ),
           created_by_profile:profiles!ordonnancements_created_by_fkey(
             id,
-            nom,
-            prenom
+            first_name,
+            last_name,
+            full_name
           )
         `)
         .order("created_at", { ascending: false });
@@ -107,7 +108,7 @@ export function useOrdonnancements() {
             )
           )
         `)
-        .eq("statut", "validee")
+        .eq("statut", "valide")
         .eq("exercice", exercice)
         .order("date_liquidation", { ascending: false });
 
@@ -417,8 +418,9 @@ export function useOrdonnancements() {
         *,
         validated_by_profile:profiles!ordonnancement_validations_validated_by_fkey(
           id,
-          nom,
-          prenom
+          first_name,
+          last_name,
+          full_name
         )
       `)
       .eq("ordonnancement_id", ordonnancementId)
