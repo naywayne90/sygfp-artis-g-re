@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useExercice } from "@/contexts/ExerciceContext";
@@ -11,17 +11,22 @@ export interface Dossier {
   direction_id: string | null;
   objet: string;
   demandeur_id: string | null;
+  beneficiaire_id: string | null;
+  type_dossier: string | null;
   montant_estime: number;
   montant_engage: number;
   montant_liquide: number;
   montant_ordonnance: number;
   statut_global: string;
+  statut_paiement: string | null;
   etape_courante: string;
   created_by: string | null;
   created_at: string;
   updated_at: string;
   direction?: { code: string; label: string; sigle: string | null };
   demandeur?: { full_name: string | null; email: string };
+  beneficiaire?: { raison_sociale: string | null };
+  creator?: { full_name: string | null };
 }
 
 export interface DossierEtape {
@@ -58,54 +63,163 @@ export interface DossierFilters {
   exercice: number | null;
   statut: string;
   etape: string;
+  type_dossier: string;
+  date_debut: string;
+  date_fin: string;
+  montant_min: number | null;
+  montant_max: number | null;
+  beneficiaire_id: string;
+  created_by: string;
+  en_retard: boolean;
 }
+
+export interface DossierStats {
+  total: number;
+  en_cours: number;
+  termines: number;
+  annules: number;
+  suspendus: number;
+  montant_total: number;
+  montant_engage: number;
+  montant_liquide: number;
+  montant_paye: number;
+}
+
+const DEFAULT_FILTERS: DossierFilters = {
+  search: "",
+  direction_id: "",
+  exercice: null,
+  statut: "",
+  etape: "",
+  type_dossier: "",
+  date_debut: "",
+  date_fin: "",
+  montant_min: null,
+  montant_max: null,
+  beneficiaire_id: "",
+  created_by: "",
+  en_retard: false,
+};
 
 export function useDossiers() {
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [loading, setLoading] = useState(true);
   const [directions, setDirections] = useState<{ id: string; code: string; label: string; sigle: string | null }[]>([]);
+  const [beneficiaires, setBeneficiaires] = useState<{ id: string; raison_sociale: string | null }[]>([]);
+  const [users, setUsers] = useState<{ id: string; full_name: string | null; email: string }[]>([]);
+  const [stats, setStats] = useState<DossierStats>({
+    total: 0,
+    en_cours: 0,
+    termines: 0,
+    annules: 0,
+    suspendus: 0,
+    montant_total: 0,
+    montant_engage: 0,
+    montant_liquide: 0,
+    montant_paye: 0,
+  });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 20,
+    total: 0,
+  });
   const { toast } = useToast();
   const { exercice } = useExercice();
   const { logAction } = useAuditLog();
 
-  const fetchDossiers = async (filters?: DossierFilters) => {
+  const fetchDossiers = useCallback(async (filters?: Partial<DossierFilters>, page = 1, pageSize = 20) => {
     setLoading(true);
     try {
+      const appliedFilters = { ...DEFAULT_FILTERS, ...filters };
+      
       let query = supabase
         .from("dossiers")
         .select(`
           *,
           direction:directions(code, label, sigle),
-          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email)
-        `)
-        .order("created_at", { ascending: false });
+          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
+          beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
+          creator:profiles!dossiers_created_by_fkey(full_name)
+        `, { count: "exact" })
+        .order("updated_at", { ascending: false });
 
-      if (filters?.exercice) {
-        query = query.eq("exercice", filters.exercice);
+      // Filtre exercice (priorité: filtre explicite > exercice courant)
+      if (appliedFilters.exercice) {
+        query = query.eq("exercice", appliedFilters.exercice);
       } else if (exercice) {
         query = query.eq("exercice", exercice);
       }
 
-      if (filters?.direction_id) {
-        query = query.eq("direction_id", filters.direction_id);
+      // Direction
+      if (appliedFilters.direction_id) {
+        query = query.eq("direction_id", appliedFilters.direction_id);
       }
 
-      if (filters?.statut) {
-        query = query.eq("statut_global", filters.statut);
+      // Statut
+      if (appliedFilters.statut) {
+        query = query.eq("statut_global", appliedFilters.statut);
       }
 
-      if (filters?.etape) {
-        query = query.eq("etape_courante", filters.etape);
+      // Étape
+      if (appliedFilters.etape) {
+        query = query.eq("etape_courante", appliedFilters.etape);
       }
 
-      if (filters?.search) {
-        query = query.or(`numero.ilike.%${filters.search}%,objet.ilike.%${filters.search}%`);
+      // Type dossier
+      if (appliedFilters.type_dossier) {
+        query = query.eq("type_dossier", appliedFilters.type_dossier);
       }
 
-      const { data, error } = await query;
+      // Bénéficiaire
+      if (appliedFilters.beneficiaire_id) {
+        query = query.eq("beneficiaire_id", appliedFilters.beneficiaire_id);
+      }
+
+      // Créateur
+      if (appliedFilters.created_by) {
+        query = query.eq("created_by", appliedFilters.created_by);
+      }
+
+      // Plage de dates
+      if (appliedFilters.date_debut) {
+        query = query.gte("created_at", appliedFilters.date_debut);
+      }
+      if (appliedFilters.date_fin) {
+        query = query.lte("created_at", appliedFilters.date_fin + "T23:59:59");
+      }
+
+      // Fourchette de montant
+      if (appliedFilters.montant_min !== null) {
+        query = query.gte("montant_estime", appliedFilters.montant_min);
+      }
+      if (appliedFilters.montant_max !== null) {
+        query = query.lte("montant_estime", appliedFilters.montant_max);
+      }
+
+      // Recherche globale (numéro, objet)
+      if (appliedFilters.search) {
+        const searchTerm = appliedFilters.search.toLowerCase();
+        query = query.or(`numero.ilike.%${searchTerm}%,objet.ilike.%${searchTerm}%`);
+      }
+
+      // Pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
+      
       setDossiers(data || []);
+      setPagination({
+        page,
+        pageSize,
+        total: count || 0,
+      });
+
+      // Calculer les stats
+      calculateStats(data || []);
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -115,6 +229,21 @@ export function useDossiers() {
     } finally {
       setLoading(false);
     }
+  }, [exercice, toast]);
+
+  const calculateStats = (data: Dossier[]) => {
+    const newStats: DossierStats = {
+      total: data.length,
+      en_cours: data.filter((d) => d.statut_global === "en_cours").length,
+      termines: data.filter((d) => d.statut_global === "termine").length,
+      annules: data.filter((d) => d.statut_global === "annule").length,
+      suspendus: data.filter((d) => d.statut_global === "suspendu").length,
+      montant_total: data.reduce((sum, d) => sum + (d.montant_estime || 0), 0),
+      montant_engage: data.reduce((sum, d) => sum + (d.montant_engage || 0), 0),
+      montant_liquide: data.reduce((sum, d) => sum + (d.montant_liquide || 0), 0),
+      montant_paye: data.reduce((sum, d) => sum + (d.montant_ordonnance || 0), 0),
+    };
+    setStats(newStats);
   };
 
   const fetchDirections = async () => {
@@ -126,22 +255,42 @@ export function useDossiers() {
     setDirections(data || []);
   };
 
+  const fetchBeneficiaires = async () => {
+    const { data } = await supabase
+      .from("prestataires")
+      .select("id, raison_sociale")
+      .eq("est_actif", true)
+      .order("raison_sociale");
+    setBeneficiaires(data || []);
+  };
+
+  const fetchUsers = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .order("full_name");
+    setUsers(data || []);
+  };
+
   const createDossier = async (dossier: {
     objet: string;
     direction_id?: string;
     demandeur_id?: string;
+    beneficiaire_id?: string;
+    type_dossier?: string;
     montant_estime?: number;
   }) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
       
-      // Le numéro est généré automatiquement par le trigger
       const { data, error } = await supabase
         .from("dossiers")
         .insert({
           objet: dossier.objet,
           direction_id: dossier.direction_id || null,
           demandeur_id: dossier.demandeur_id || null,
+          beneficiaire_id: dossier.beneficiaire_id || null,
+          type_dossier: dossier.type_dossier || "AEF",
           montant_estime: dossier.montant_estime || 0,
           exercice: exercice || new Date().getFullYear(),
           created_by: userData.user?.id,
@@ -149,7 +298,9 @@ export function useDossiers() {
         .select(`
           *,
           direction:directions(code, label, sigle),
-          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email)
+          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
+          beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
+          creator:profiles!dossiers_created_by_fkey(full_name)
         `)
         .single();
 
@@ -198,7 +349,9 @@ export function useDossiers() {
         .select(`
           *,
           direction:directions(code, label, sigle),
-          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email)
+          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
+          beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
+          creator:profiles!dossiers_created_by_fkey(full_name)
         `)
         .single();
 
@@ -208,8 +361,8 @@ export function useDossiers() {
         entityType: "dossier",
         entityId: id,
         action: "update",
-        oldValues: oldDossier ? { objet: oldDossier.objet } as any : null,
-        newValues: { objet: data.objet } as any,
+        oldValues: oldDossier ? { objet: oldDossier.objet, statut: oldDossier.statut_global } as any : null,
+        newValues: { objet: data.objet, statut: data.statut_global } as any,
       });
 
       setDossiers((prev) => prev.map((d) => (d.id === id ? data : d)));
@@ -225,6 +378,10 @@ export function useDossiers() {
     }
   };
 
+  const updateDossierStatus = async (id: string, statut: string) => {
+    return updateDossier(id, { statut_global: statut } as any);
+  };
+
   const getDossierById = async (id: string) => {
     try {
       const { data, error } = await supabase
@@ -232,7 +389,9 @@ export function useDossiers() {
         .select(`
           *,
           direction:directions(code, label, sigle),
-          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email)
+          demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
+          beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
+          creator:profiles!dossiers_created_by_fkey(full_name)
         `)
         .eq("id", id)
         .single();
@@ -414,20 +573,28 @@ export function useDossiers() {
   useEffect(() => {
     fetchDossiers();
     fetchDirections();
-  }, [exercice]);
+    fetchBeneficiaires();
+    fetchUsers();
+  }, [exercice, fetchDossiers]);
 
   return {
     dossiers,
     loading,
     directions,
+    beneficiaires,
+    users,
+    stats,
+    pagination,
     fetchDossiers,
     createDossier,
     updateDossier,
+    updateDossierStatus,
     getDossierById,
     getDossierEtapes,
     addEtape,
     getDossierDocuments,
     addDocument,
     deleteDocument,
+    DEFAULT_FILTERS,
   };
 }
