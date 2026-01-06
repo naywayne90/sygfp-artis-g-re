@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ExerciceProvider } from "@/contexts/ExerciceContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 
@@ -54,7 +54,23 @@ import Prestataires from "./pages/contractualisation/Prestataires";
 import Contrats from "./pages/contractualisation/Contrats";
 import ComptabiliteMatiere from "./pages/contractualisation/ComptabiliteMatiere";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
+
+// Layout wrapper component that renders Outlet for child routes
+function LayoutWrapper() {
+  return (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -64,66 +80,62 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Route indépendante pour sélection exercice */}
             <Route path="/select-exercice" element={<SelectExercice />} />
-            <Route
-              path="/*"
-              element={
-                <AppLayout>
-                  <Routes>
-                    {/* Accueil */}
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/recherche" element={<Recherche />} />
-                    <Route path="/notifications" element={<Notifications />} />
-                    
-                    {/* Administration */}
-                    <Route path="/admin/exercices" element={<GestionExercices />} />
-                    <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
-                    <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
-                    <Route path="/admin/roles" element={<GestionRoles />} />
-                    <Route path="/admin/autorisations" element={<GestionAutorisations />} />
-                    <Route path="/admin/delegations" element={<GestionDelegations />} />
-                    <Route path="/admin/parametres" element={<ParametresSysteme />} />
-                    <Route path="/admin/journal-audit" element={<JournalAudit />} />
-                    
-                    {/* Planification */}
-                    <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
-                    <Route path="/planification/physique" element={<PlanificationPhysique />} />
-                    
-                    {/* Exécution Budgétaire */}
-                    <Route path="/notes" element={<Notes />} />
-                    <Route path="/notes-sef" element={<NotesSEF />} />
-                    <Route path="/notes-aef" element={<NotesAEF />} />
-                    <Route path="/execution/imputation" element={<Imputation />} />
-                    <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
-                    <Route path="/marches" element={<Marches />} />
-                    <Route path="/engagements" element={<Engagements />} />
-                    <Route path="/liquidations" element={<Liquidations />} />
-                    <Route path="/ordonnancements" element={<Ordonnancements />} />
-                    <Route path="/reglements" element={<Reglements />} />
-                    
-                    {/* États d'exécution */}
-                    <Route path="/etats-execution" element={<EtatsExecution />} />
-                    
-                    {/* Approvisionnement */}
-                    <Route path="/approvisionnement" element={<Approvisionnement />} />
-                    
-                    {/* Trésorerie */}
-                    <Route path="/tresorerie" element={<GestionTresorerie />} />
-                    
-                    {/* Recettes */}
-                    <Route path="/recettes" element={<DeclarationRecette />} />
-                    
-                    {/* Contractualisation */}
-                    <Route path="/contractualisation/prestataires" element={<Prestataires />} />
-                    <Route path="/contractualisation/contrats" element={<Contrats />} />
-                    <Route path="/contractualisation/comptabilite-matiere" element={<ComptabiliteMatiere />} />
-                    
-                    {/* 404 */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AppLayout>
-              }
-            />
+            
+            {/* Routes avec layout */}
+            <Route element={<LayoutWrapper />}>
+              {/* Accueil */}
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/recherche" element={<Recherche />} />
+              <Route path="/notifications" element={<Notifications />} />
+              
+              {/* Administration */}
+              <Route path="/admin/exercices" element={<GestionExercices />} />
+              <Route path="/admin/parametres-programmatiques" element={<ParametresProgrammatiques />} />
+              <Route path="/admin/utilisateurs" element={<GestionUtilisateurs />} />
+              <Route path="/admin/roles" element={<GestionRoles />} />
+              <Route path="/admin/autorisations" element={<GestionAutorisations />} />
+              <Route path="/admin/delegations" element={<GestionDelegations />} />
+              <Route path="/admin/parametres" element={<ParametresSysteme />} />
+              <Route path="/admin/journal-audit" element={<JournalAudit />} />
+              
+              {/* Planification */}
+              <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
+              <Route path="/planification/physique" element={<PlanificationPhysique />} />
+              
+              {/* Exécution Budgétaire */}
+              <Route path="/notes" element={<Notes />} />
+              <Route path="/notes-sef" element={<NotesSEF />} />
+              <Route path="/notes-aef" element={<NotesAEF />} />
+              <Route path="/execution/imputation" element={<Imputation />} />
+              <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
+              <Route path="/marches" element={<Marches />} />
+              <Route path="/engagements" element={<Engagements />} />
+              <Route path="/liquidations" element={<Liquidations />} />
+              <Route path="/ordonnancements" element={<Ordonnancements />} />
+              <Route path="/reglements" element={<Reglements />} />
+              
+              {/* États d'exécution */}
+              <Route path="/etats-execution" element={<EtatsExecution />} />
+              
+              {/* Approvisionnement */}
+              <Route path="/approvisionnement" element={<Approvisionnement />} />
+              
+              {/* Trésorerie */}
+              <Route path="/tresorerie" element={<GestionTresorerie />} />
+              
+              {/* Recettes */}
+              <Route path="/recettes" element={<DeclarationRecette />} />
+              
+              {/* Contractualisation */}
+              <Route path="/contractualisation/prestataires" element={<Prestataires />} />
+              <Route path="/contractualisation/contrats" element={<Contrats />} />
+              <Route path="/contractualisation/comptabilite-matiere" element={<ComptabiliteMatiere />} />
+              
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </ExerciceProvider>
