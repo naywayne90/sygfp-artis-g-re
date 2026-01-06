@@ -96,7 +96,7 @@ export function useExpressionsBesoin() {
         .select(`
           *,
           direction:directions(id, code, label, sigle),
-          marche:marches(
+          marche:marches!expressions_besoin_marche_id_fkey(
             id, numero, objet, montant, mode_passation,
             prestataire:prestataires(id, raison_sociale)
           ),
