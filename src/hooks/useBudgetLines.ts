@@ -27,6 +27,9 @@ export interface BudgetLineWithRelations {
   date_cloture: string | null;
   numero_ligne: string | null;
   code_budgetaire: string | null;
+  code_budgetaire_v2: string | null;
+  code_version: string | null;
+  seq_code: number | null;
   total_engage: number | null;
   total_liquide: number | null;
   total_ordonnance: number | null;
@@ -55,6 +58,17 @@ export interface BudgetLineFilters {
   statut?: string;
   statut_execution?: string;
   nve_id?: string;
+}
+
+// Helper to get display code (V2 priority over V1)
+export function getDisplayBudgetCode(line: BudgetLineWithRelations): { code: string; version: string } {
+  if (line.code_version === 'V2' && line.code_budgetaire_v2) {
+    return { code: line.code_budgetaire_v2, version: 'V2' };
+  }
+  if (line.code_budgetaire) {
+    return { code: line.code_budgetaire, version: 'V1' };
+  }
+  return { code: line.code, version: 'V0' };
 }
 
 export function useBudgetLines(filters?: BudgetLineFilters) {
@@ -285,6 +299,24 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
     { dotation: 0, count: 0 }
   ) || { dotation: 0, count: 0 };
 
+  // Regenerate V2 codes
+  const regenerateCodesMutation = useMutation({
+    mutationFn: async (lineIds: string[]) => {
+      const { data, error } = await supabase.rpc('regenerate_budget_codes_v2', {
+        p_line_ids: lineIds
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
+      toast.success(`${data?.length || 0} code(s) V2 régénéré(s)`);
+    },
+    onError: (error: any) => {
+      toast.error("Erreur: " + error.message);
+    },
+  });
+
   return {
     budgetLines,
     isLoading,
@@ -297,8 +329,10 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
     validateBudgetLine: validateMutation.mutate,
     rejectBudgetLine: rejectMutation.mutate,
     deleteBudgetLine: deleteMutation.mutate,
+    regenerateCodesV2: regenerateCodesMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isRegenerating: regenerateCodesMutation.isPending,
   };
 }
 

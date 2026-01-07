@@ -16,8 +16,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Send, Check, X, Trash2, History } from "lucide-react";
-import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
+import { BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
 import { supabase } from "@/integrations/supabase/client";
+
+const getVersionBadge = (version: string) => {
+  switch (version) {
+    case "V2":
+      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1 border-primary text-primary">V2</Badge>;
+    case "V1":
+      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1">V1</Badge>;
+    default:
+      return null;
+  }
+};
 
 interface BudgetLineTableProps {
   lines: BudgetLineWithRelations[];
@@ -127,13 +138,17 @@ export function BudgetLineTable({
             lines.map((line) => {
               const engaged = engagements[line.id] || 0;
               const available = line.dotation_initiale - engaged;
+              const displayCode = getDisplayBudgetCode(line);
 
               return (
                 <TableRow key={line.id}>
                   <TableCell className="font-mono text-sm">
-                    <div>{line.code}</div>
-                    {line.code_budgetaire && (
-                      <div className="text-xs text-muted-foreground">{line.code_budgetaire}</div>
+                    <div className="flex items-center">
+                      <span>{displayCode.code}</span>
+                      {getVersionBadge(displayCode.version)}
+                    </div>
+                    {displayCode.version === 'V2' && line.code && (
+                      <div className="text-xs text-muted-foreground">Réf: {line.code}</div>
                     )}
                   </TableCell>
                   <TableCell>

@@ -394,6 +394,38 @@ export type Database = {
           },
         ]
       }
+      budget_code_sequences: {
+        Row: {
+          dernier_numero: number | null
+          direction_id: string | null
+          exercice: number
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          dernier_numero?: number | null
+          direction_id?: string | null
+          exercice: number
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          dernier_numero?: number | null
+          direction_id?: string | null
+          exercice?: number
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_code_sequences_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_engagements: {
         Row: {
           budget_line_id: string
@@ -683,6 +715,8 @@ export type Database = {
           budget_version_id: string | null
           code: string
           code_budgetaire: string | null
+          code_budgetaire_v2: string | null
+          code_version: string | null
           commentaire: string | null
           created_at: string
           date_cloture: string | null
@@ -706,6 +740,7 @@ export type Database = {
           os_id: string | null
           parent_id: string | null
           rejection_reason: string | null
+          seq_code: number | null
           source_financement: string | null
           sous_activite_id: string | null
           statut: string | null
@@ -731,6 +766,8 @@ export type Database = {
           budget_version_id?: string | null
           code: string
           code_budgetaire?: string | null
+          code_budgetaire_v2?: string | null
+          code_version?: string | null
           commentaire?: string | null
           created_at?: string
           date_cloture?: string | null
@@ -754,6 +791,7 @@ export type Database = {
           os_id?: string | null
           parent_id?: string | null
           rejection_reason?: string | null
+          seq_code?: number | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string | null
@@ -779,6 +817,8 @@ export type Database = {
           budget_version_id?: string | null
           code?: string
           code_budgetaire?: string | null
+          code_budgetaire_v2?: string | null
+          code_version?: string | null
           commentaire?: string | null
           created_at?: string
           date_cloture?: string | null
@@ -802,6 +842,7 @@ export type Database = {
           os_id?: string | null
           parent_id?: string | null
           rejection_reason?: string | null
+          seq_code?: number | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string | null
@@ -7115,6 +7156,18 @@ export type Database = {
         }
         Returns: string
       }
+      generate_budget_code_v2: {
+        Args: {
+          p_action_code: string
+          p_activite_code: string
+          p_direction_code: string
+          p_direction_id: string
+          p_exercice: number
+          p_mission_code: string
+          p_nve_code: string
+        }
+        Returns: string
+      }
       generate_imputation_numero: {
         Args: { p_exercice: number }
         Returns: string
@@ -7147,6 +7200,10 @@ export type Database = {
           etape_ordre: number
           statut: string
         }[]
+      }
+      get_next_budget_code_seq: {
+        Args: { p_direction_id: string; p_exercice: number }
+        Returns: number
       }
       get_user_permissions: {
         Args: { p_user_id: string }
@@ -7199,6 +7256,14 @@ export type Database = {
           p_validator_id: string
         }
         Returns: boolean
+      }
+      regenerate_budget_codes_v2: {
+        Args: { p_line_ids: string[] }
+        Returns: {
+          line_id: string
+          new_code: string
+          old_code: string
+        }[]
       }
       user_can_access_exercice: {
         Args: { p_exercice: number }

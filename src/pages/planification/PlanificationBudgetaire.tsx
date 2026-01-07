@@ -60,8 +60,10 @@ export default function PlanificationBudgetaire() {
     validateBudgetLine,
     rejectBudgetLine,
     deleteBudgetLine,
+    regenerateCodesV2,
     isCreating,
     isUpdating,
+    isRegenerating,
   } = useBudgetLines(filters);
 
   const {
@@ -267,6 +269,25 @@ export default function PlanificationBudgetaire() {
             <Button variant="outline" onClick={() => setShowTransferForm(true)}>
               <ArrowLeftRight className="mr-2 h-4 w-4" />
               Virement de crédits
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                const eligibleLines = budgetLines?.filter(
+                  l => !l.code_version || l.code_version === 'V2' || !l.code_budgetaire_v2
+                ).map(l => l.id) || [];
+                if (eligibleLines.length === 0) {
+                  toast.info("Aucune ligne éligible à la régénération");
+                  return;
+                }
+                if (confirm(`Régénérer ${eligibleLines.length} code(s) V2 ?`)) {
+                  regenerateCodesV2(eligibleLines);
+                }
+              }}
+              disabled={isRegenerating}
+            >
+              <Target className="mr-2 h-4 w-4" />
+              {isRegenerating ? "Régénération..." : "Régénérer codes V2"}
             </Button>
           </div>
 
