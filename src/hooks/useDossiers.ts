@@ -71,6 +71,7 @@ export interface DossierFilters {
   beneficiaire_id: string;
   created_by: string;
   en_retard: boolean;
+  mes_dossiers: boolean;
 }
 
 export interface DossierStats {
@@ -99,6 +100,7 @@ const DEFAULT_FILTERS: DossierFilters = {
   beneficiaire_id: "",
   created_by: "",
   en_retard: false,
+  mes_dossiers: false,
 };
 
 export function useDossiers() {
@@ -178,6 +180,14 @@ export function useDossiers() {
       // Créateur
       if (appliedFilters.created_by) {
         query = query.eq("created_by", appliedFilters.created_by);
+      }
+
+      // Mes dossiers (demandeur_id ou created_by = user courant)
+      if (appliedFilters.mes_dossiers) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          query = query.or(`demandeur_id.eq.${userData.user.id},created_by.eq.${userData.user.id}`);
+        }
       }
 
       // Plage de dates
@@ -569,6 +579,70 @@ export function useDossiers() {
     }
   };
 
+  const bloquerDossier = async (dossierId: string, motif: string) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase.rpc("bloquer_dossier", {
+        p_dossier_id: dossierId,
+        p_motif: motif,
+        p_user_id: userData.user?.id,
+      });
+
+      if (error) throw error;
+
+      await logAction({
+        entityType: "dossier",
+        entityId: dossierId,
+        action: "update",
+        newValues: { motif_blocage: motif, statut_global: "bloque" },
+      });
+
+      toast({ title: "Dossier bloqué" });
+      fetchDossiers();
+      return true;
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const debloquerDossier = async (dossierId: string, commentaire: string) => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase.rpc("debloquer_dossier", {
+        p_dossier_id: dossierId,
+        p_commentaire: commentaire,
+        p_user_id: userData.user?.id,
+      });
+
+      if (error) throw error;
+
+      await logAction({
+        entityType: "dossier",
+        entityId: dossierId,
+        action: "update",
+        newValues: { commentaire_deblocage: commentaire, statut_global: "en_cours" },
+      });
+
+      toast({ title: "Dossier débloqué" });
+      fetchDossiers();
+      return true;
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchDossiers();
     fetchDirections();
@@ -594,6 +668,8 @@ export function useDossiers() {
     getDossierDocuments,
     addDocument,
     deleteDocument,
+    bloquerDossier,
+    debloquerDossier,
     DEFAULT_FILTERS,
   };
 }

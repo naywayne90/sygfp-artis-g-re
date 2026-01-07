@@ -49,12 +49,14 @@ interface OrdonnancementFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   preselectedLiquidationId?: string;
+  dossierId?: string;
 }
 
 export function OrdonnancementForm({
   open,
   onOpenChange,
   preselectedLiquidationId,
+  dossierId,
 }: OrdonnancementFormProps) {
   const {
     liquidationsValidees,
@@ -142,6 +144,11 @@ export function OrdonnancementForm({
             <CreditCard className="h-5 w-5" />
             Créer un ordonnancement
           </DialogTitle>
+          {dossierId && (
+            <p className="text-sm text-muted-foreground">
+              Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+            </p>
+          )}
         </DialogHeader>
 
         <Form {...form}>

@@ -58,13 +58,14 @@ type FormValues = z.infer<typeof formSchema>;
 interface ReglementFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  dossierId?: string;
 }
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
 };
 
-export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
+export function ReglementForm({ onSuccess, onCancel, dossierId }: ReglementFormProps) {
   const { 
     ordonnancementsValides, 
     comptesBancaires,
@@ -169,6 +170,12 @@ export function ReglementForm({ onSuccess, onCancel }: ReglementFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {dossierId && (
+          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm">
+            Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+          </div>
+        )}
+        
         {/* Sélection de l'ordonnancement */}
         <Card>
           <CardHeader>

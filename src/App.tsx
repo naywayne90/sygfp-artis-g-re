@@ -42,6 +42,7 @@ import DocumentationModules from "./pages/admin/DocumentationModules";
 import MatriceRACI from "./pages/admin/MatriceRACI";
 import ChecklistProduction from "./pages/admin/ChecklistProduction";
 import LiensLambda from "./pages/admin/LiensLambda";
+import ParametresExercice from "./pages/admin/ParametresExercice";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -122,6 +123,7 @@ const App = () => (
               <Route path="/admin/raci" element={<MatriceRACI />} />
               <Route path="/admin/checklist-production" element={<ChecklistProduction />} />
               <Route path="/admin/liens-lambda" element={<LiensLambda />} />
+              <Route path="/admin/parametres-exercice" element={<ParametresExercice />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
