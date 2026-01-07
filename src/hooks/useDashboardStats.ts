@@ -21,9 +21,25 @@ export interface DashboardStats {
   budgetEngage: number;
   budgetLiquide: number;
   budgetPaye: number;
+  budgetOrdonnance: number;
   budgetDisponible: number;
   tauxEngagement: number;
+  tauxLiquidation: number;
+  tauxPaiement: number;
   isBudgetLoaded: boolean;
+  // Alertes d'incohérence
+  hasInconsistency: boolean;
+  inconsistencyType: 'none' | 'budget_not_loaded' | 'overspent' | 'data_mismatch';
+  inconsistencyMessage: string;
+  // Top lignes en dépassement
+  topLignesDepassement: Array<{
+    id: string;
+    code: string;
+    label: string;
+    dotation: number;
+    engage: number;
+    depassement: number;
+  }>;
 }
 
 export function useDashboardStats() {
@@ -108,24 +124,65 @@ export function useDashboardStats() {
       const marchesEnCours = marches?.filter(m => m.statut !== "termine" && m.statut !== "annule").length || 0;
       const marchesTotal = marches?.length || 0;
 
-      // Fetch budget lines for total budget
+      // Fetch budget lines for total budget with engagement details
       const { data: budgetLines, error: budgetError } = await supabase
         .from("budget_lines")
-        .select("dotation_initiale")
+        .select("id, code, label, dotation_initiale, total_engage")
         .eq("exercice", exercice);
 
       if (budgetError) throw budgetError;
 
       const budgetTotal = budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
       
-      // CORRECTION: Disponibilité = max(0, Budget - Engagé validé)
-      const budgetDisponible = Math.max(0, budgetTotal - budgetEngage);
+      // Fetch ordonnancement totals
+      const budgetOrdonnance = ordonnancements
+        ?.filter(o => o.statut === "valide" || o.statut === "signe")
+        .reduce((sum, o) => sum + ((o as any).montant || 0), 0) || 0;
+
+      // CORRECTION: Disponibilité = Budget - Engagé validé (peut être négatif pour détecter dépassement)
+      const budgetDisponibleRaw = budgetTotal - budgetEngage;
+      const budgetDisponible = Math.max(0, budgetDisponibleRaw);
       
       // CORRECTION: Taux d'engagement sécurisé
       const tauxEngagement = budgetTotal > 0 ? Math.round((budgetEngage / budgetTotal) * 100) : 0;
+      const tauxLiquidation = budgetEngage > 0 ? Math.round((budgetLiquide / budgetEngage) * 100) : 0;
+      const tauxPaiement = budgetLiquide > 0 ? Math.round((budgetPaye / budgetLiquide) * 100) : 0;
       
       // Indicateur si le budget est chargé
       const isBudgetLoaded = budgetTotal > 0;
+
+      // Détection des incohérences
+      let hasInconsistency = false;
+      let inconsistencyType: 'none' | 'budget_not_loaded' | 'overspent' | 'data_mismatch' = 'none';
+      let inconsistencyMessage = '';
+
+      if (!isBudgetLoaded && (budgetEngage > 0 || budgetLiquide > 0 || budgetPaye > 0)) {
+        hasInconsistency = true;
+        inconsistencyType = 'budget_not_loaded';
+        inconsistencyMessage = `Dotation non chargée mais ${engagementsTotal} engagement(s) enregistré(s) pour un total de ${new Intl.NumberFormat('fr-FR').format(budgetEngage)} FCFA. Veuillez importer les lignes budgétaires.`;
+      } else if (budgetDisponibleRaw < 0) {
+        hasInconsistency = true;
+        inconsistencyType = 'overspent';
+        inconsistencyMessage = `Dépassement budgétaire de ${new Intl.NumberFormat('fr-FR').format(Math.abs(budgetDisponibleRaw))} FCFA. Vérifiez les engagements sur les lignes en dépassement.`;
+      } else if (budgetLiquide > budgetEngage) {
+        hasInconsistency = true;
+        inconsistencyType = 'data_mismatch';
+        inconsistencyMessage = `Incohérence : montant liquidé (${new Intl.NumberFormat('fr-FR').format(budgetLiquide)} FCFA) supérieur au montant engagé (${new Intl.NumberFormat('fr-FR').format(budgetEngage)} FCFA).`;
+      }
+
+      // Calculer les top lignes en dépassement
+      const topLignesDepassement = (budgetLines || [])
+        .map(bl => ({
+          id: bl.id,
+          code: bl.code,
+          label: bl.label,
+          dotation: bl.dotation_initiale || 0,
+          engage: bl.total_engage || 0,
+          depassement: (bl.total_engage || 0) - (bl.dotation_initiale || 0),
+        }))
+        .filter(bl => bl.depassement > 0)
+        .sort((a, b) => b.depassement - a.depassement)
+        .slice(0, 5);
 
       return {
         notesEnAttente,
@@ -146,9 +203,16 @@ export function useDashboardStats() {
         budgetEngage,
         budgetLiquide,
         budgetPaye,
+        budgetOrdonnance,
         budgetDisponible,
         tauxEngagement,
+        tauxLiquidation,
+        tauxPaiement,
         isBudgetLoaded,
+        hasInconsistency,
+        inconsistencyType,
+        inconsistencyMessage,
+        topLignesDepassement,
       };
     },
     enabled: !!exercice,

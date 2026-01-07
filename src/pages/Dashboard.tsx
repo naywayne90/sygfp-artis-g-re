@@ -180,8 +180,54 @@ export default function Dashboard() {
 
         {/* Vue générale */}
         <TabsContent value="general" className="space-y-6">
-          {/* Alerte si budget non chargé */}
-          {!statsLoading && stats && !stats.isBudgetLoaded && (
+          {/* Alertes d'incohérence budgétaire */}
+          {!statsLoading && stats?.hasInconsistency && (
+            <Alert 
+              variant={stats.inconsistencyType === 'overspent' ? "destructive" : "default"} 
+              className={
+                stats.inconsistencyType === 'overspent' 
+                  ? "border-destructive/50 bg-destructive/10" 
+                  : "border-warning/50 bg-warning/10"
+              }
+            >
+              <AlertTriangle className={`h-4 w-4 ${stats.inconsistencyType === 'overspent' ? 'text-destructive' : 'text-warning'}`} />
+              <AlertDescription className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">
+                    {stats.inconsistencyType === 'budget_not_loaded' && '⚠️ Dotation non chargée'}
+                    {stats.inconsistencyType === 'overspent' && '🚨 Dépassement budgétaire'}
+                    {stats.inconsistencyType === 'data_mismatch' && '⚠️ Incohérence de données'}
+                  </span>
+                  <Link to="/planification/budget">
+                    <Button variant="outline" size="sm">
+                      Gérer le budget
+                    </Button>
+                  </Link>
+                </div>
+                <span className="text-sm">{stats.inconsistencyMessage}</span>
+                
+                {/* Top lignes en dépassement */}
+                {stats.topLignesDepassement.length > 0 && (
+                  <div className="mt-2 p-2 bg-background/50 rounded">
+                    <p className="text-xs font-medium mb-1">Lignes en dépassement :</p>
+                    <div className="space-y-1">
+                      {stats.topLignesDepassement.slice(0, 3).map(ligne => (
+                        <div key={ligne.id} className="flex justify-between text-xs">
+                          <span className="truncate max-w-[200px]">{ligne.code}</span>
+                          <span className="text-destructive font-medium">
+                            +{formatMontant(ligne.depassement)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Alerte simple si budget non chargé (sans incohérence) */}
+          {!statsLoading && stats && !stats.isBudgetLoaded && !stats.hasInconsistency && (
             <Alert variant="default" className="border-warning/50 bg-warning/10">
               <AlertTriangle className="h-4 w-4 text-warning" />
               <AlertDescription className="flex items-center justify-between">
@@ -363,12 +409,29 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Taux d'engagement</span>
-                        <span className="text-sm font-bold text-secondary">{budgetExecute}%</span>
+                    {/* Barre des taux */}
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Taux d'engagement</span>
+                          <span className="text-sm font-bold text-primary">{stats?.tauxEngagement || 0}%</span>
+                        </div>
+                        <Progress value={stats?.tauxEngagement || 0} className="h-2" />
                       </div>
-                      <Progress value={budgetExecute} className="h-3" />
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Taux de liquidation</span>
+                          <span className="text-sm font-bold text-secondary">{stats?.tauxLiquidation || 0}%</span>
+                        </div>
+                        <Progress value={stats?.tauxLiquidation || 0} className="h-2 [&>div]:bg-secondary" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Taux de paiement</span>
+                          <span className="text-sm font-bold text-success">{stats?.tauxPaiement || 0}%</span>
+                        </div>
+                        <Progress value={stats?.tauxPaiement || 0} className="h-2 [&>div]:bg-success" />
+                      </div>
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-5">
@@ -380,21 +443,29 @@ export default function Dashboard() {
                       <div className="space-y-1 p-4 rounded-lg bg-primary/10">
                         <p className="text-xs text-muted-foreground">Engagé (validé)</p>
                         <p className="text-xl font-bold text-primary">{formatMontant(stats?.budgetEngage || 0)}</p>
-                        <p className="text-xs text-muted-foreground">FCFA</p>
+                        <p className="text-xs text-primary/60">{stats?.tauxEngagement || 0}%</p>
                       </div>
                       <div className="space-y-1 p-4 rounded-lg bg-secondary/10">
                         <p className="text-xs text-muted-foreground">Liquidé</p>
                         <p className="text-xl font-bold text-secondary">{formatMontant(stats?.budgetLiquide || 0)}</p>
-                        <p className="text-xs text-muted-foreground">FCFA</p>
+                        <p className="text-xs text-secondary/60">{stats?.tauxLiquidation || 0}% de l'engagé</p>
                       </div>
                       <div className="space-y-1 p-4 rounded-lg bg-success/10">
                         <p className="text-xs text-muted-foreground">Payé</p>
                         <p className="text-xl font-bold text-success">{formatMontant(stats?.budgetPaye || 0)}</p>
-                        <p className="text-xs text-muted-foreground">FCFA</p>
+                        <p className="text-xs text-success/60">{stats?.tauxPaiement || 0}% du liquidé</p>
                       </div>
-                      <div className="space-y-1 p-4 rounded-lg bg-warning/10">
+                      <div className={`space-y-1 p-4 rounded-lg ${
+                        (stats?.budgetTotal || 0) > 0 && budgetDisponible === 0 
+                          ? "bg-destructive/10" 
+                          : "bg-warning/10"
+                      }`}>
                         <p className="text-xs text-muted-foreground">Disponible</p>
-                        <p className="text-xl font-bold text-warning">{formatMontant(budgetDisponible)}</p>
+                        <p className={`text-xl font-bold ${
+                          (stats?.budgetTotal || 0) > 0 && budgetDisponible === 0 
+                            ? "text-destructive" 
+                            : "text-warning"
+                        }`}>{formatMontant(budgetDisponible)}</p>
                         <p className="text-xs text-muted-foreground">FCFA</p>
                       </div>
                     </div>
