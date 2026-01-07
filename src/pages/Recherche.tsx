@@ -6,10 +6,11 @@ import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
 import { DossierSearch } from "@/components/dossier/DossierSearch";
 import { DossierList } from "@/components/dossier/DossierList";
 import { DossierForm } from "@/components/dossier/DossierForm";
-import { DossierDetails } from "@/components/dossier/DossierDetails";
+import { DossierDetailsEnhanced } from "@/components/dossier/DossierDetailsEnhanced";
 import { DossierStatusDialog } from "@/components/dossier/DossierStatusDialog";
 import { DossierAssignDialog } from "@/components/dossier/DossierAssignDialog";
 import { DossierAttachDialog } from "@/components/dossier/DossierAttachDialog";
+import { DossierBlockDialog } from "@/components/dossier/DossierBlockDialog";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -278,7 +279,7 @@ export default function Recherche() {
         initialData={editingDossier}
       />
 
-      <DossierDetails
+      <DossierDetailsEnhanced
         dossier={selectedDossier}
         open={showDetails}
         onOpenChange={setShowDetails}

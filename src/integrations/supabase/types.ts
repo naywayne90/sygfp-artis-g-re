@@ -652,6 +652,7 @@ export type Database = {
           date_engagement: string
           deadline_correction: string | null
           differe_by: string | null
+          dossier_id: string | null
           exercice: number | null
           expression_besoin_id: string | null
           fournisseur: string | null
@@ -681,6 +682,7 @@ export type Database = {
           date_engagement?: string
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           expression_besoin_id?: string | null
           fournisseur?: string | null
@@ -710,6 +712,7 @@ export type Database = {
           date_engagement?: string
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           expression_besoin_id?: string | null
           fournisseur?: string | null
@@ -743,6 +746,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "budget_engagements_expression_besoin_id_fkey"
@@ -1255,6 +1272,7 @@ export type Database = {
           date_liquidation: string
           deadline_correction: string | null
           differe_by: string | null
+          dossier_id: string | null
           engagement_id: string
           exercice: number | null
           id: string
@@ -1294,6 +1312,7 @@ export type Database = {
           date_liquidation?: string
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           engagement_id: string
           exercice?: number | null
           id?: string
@@ -1333,6 +1352,7 @@ export type Database = {
           date_liquidation?: string
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           engagement_id?: string
           exercice?: number | null
           id?: string
@@ -1368,6 +1388,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_liquidations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_liquidations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "budget_liquidations_engagement_id_fkey"
@@ -1668,6 +1702,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "dossiers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrats_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "contrats_engagement_id_fkey"
@@ -2149,6 +2190,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandes_achat_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "demandes_achat_engagement_id_fkey"
             columns: ["engagement_id"]
             isOneToOne: false
@@ -2327,6 +2375,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dossier_documents_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "dossier_documents_etape_id_fkey"
             columns: ["etape_id"]
             isOneToOne: false
@@ -2391,6 +2446,13 @@ export type Database = {
             referencedRelation: "dossiers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "dossier_etapes_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
         ]
       }
       dossier_sequences: {
@@ -2419,66 +2481,134 @@ export type Database = {
       }
       dossiers: {
         Row: {
+          action_id: string | null
+          activite_id: string | null
           beneficiaire_id: string | null
+          bloque_par: string | null
+          budget_line_id: string | null
+          code_budgetaire: string | null
+          commentaire_deblocage: string | null
           created_at: string
           created_by: string | null
+          date_blocage: string | null
+          date_cloture: string | null
+          date_deblocage: string | null
+          date_ouverture: string | null
+          debloque_par: string | null
           demandeur_id: string | null
           direction_id: string | null
           etape_courante: string | null
           exercice: number
           id: string
+          mission_id: string | null
           montant_engage: number | null
           montant_estime: number | null
           montant_liquide: number | null
           montant_ordonnance: number | null
+          montant_paye: number | null
+          motif_blocage: string | null
           numero: string
           objet: string
+          piece_principale_path: string | null
+          priorite: number | null
+          responsable_suivi_id: string | null
           statut_global: string | null
           statut_paiement: string | null
           type_dossier: string | null
           updated_at: string
+          urgence: string | null
         }
         Insert: {
+          action_id?: string | null
+          activite_id?: string | null
           beneficiaire_id?: string | null
+          bloque_par?: string | null
+          budget_line_id?: string | null
+          code_budgetaire?: string | null
+          commentaire_deblocage?: string | null
           created_at?: string
           created_by?: string | null
+          date_blocage?: string | null
+          date_cloture?: string | null
+          date_deblocage?: string | null
+          date_ouverture?: string | null
+          debloque_par?: string | null
           demandeur_id?: string | null
           direction_id?: string | null
           etape_courante?: string | null
           exercice?: number
           id?: string
+          mission_id?: string | null
           montant_engage?: number | null
           montant_estime?: number | null
           montant_liquide?: number | null
           montant_ordonnance?: number | null
+          montant_paye?: number | null
+          motif_blocage?: string | null
           numero: string
           objet: string
+          piece_principale_path?: string | null
+          priorite?: number | null
+          responsable_suivi_id?: string | null
           statut_global?: string | null
           statut_paiement?: string | null
           type_dossier?: string | null
           updated_at?: string
+          urgence?: string | null
         }
         Update: {
+          action_id?: string | null
+          activite_id?: string | null
           beneficiaire_id?: string | null
+          bloque_par?: string | null
+          budget_line_id?: string | null
+          code_budgetaire?: string | null
+          commentaire_deblocage?: string | null
           created_at?: string
           created_by?: string | null
+          date_blocage?: string | null
+          date_cloture?: string | null
+          date_deblocage?: string | null
+          date_ouverture?: string | null
+          debloque_par?: string | null
           demandeur_id?: string | null
           direction_id?: string | null
           etape_courante?: string | null
           exercice?: number
           id?: string
+          mission_id?: string | null
           montant_engage?: number | null
           montant_estime?: number | null
           montant_liquide?: number | null
           montant_ordonnance?: number | null
+          montant_paye?: number | null
+          motif_blocage?: string | null
           numero?: string
           objet?: string
+          piece_principale_path?: string | null
+          priorite?: number | null
+          responsable_suivi_id?: string | null
           statut_global?: string | null
           statut_paiement?: string | null
           type_dossier?: string | null
           updated_at?: string
+          urgence?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "dossiers_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "dossiers_beneficiaire_id_fkey"
             columns: ["beneficiaire_id"]
@@ -2494,8 +2624,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dossiers_bloque_par_fkey"
+            columns: ["bloque_par"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "dossiers_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_debloque_par_fkey"
+            columns: ["debloque_par"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2512,6 +2663,20 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_responsable_suivi_id_fkey"
+            columns: ["responsable_suivi_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2974,6 +3139,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "dossiers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
@@ -3726,6 +3898,7 @@ export type Database = {
           date_attribution: string | null
           date_lancement: string | null
           date_signature: string | null
+          dossier_id: string | null
           exercice: number | null
           expression_besoin_id: string | null
           id: string
@@ -3756,6 +3929,7 @@ export type Database = {
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
@@ -3786,6 +3960,7 @@ export type Database = {
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
@@ -3809,6 +3984,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marches_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marches_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "marches_expression_besoin_id_fkey"
@@ -4240,6 +4429,7 @@ export type Database = {
           deadline_correction: string | null
           differe_by: string | null
           direction_id: string | null
+          dossier_id: string | null
           exercice: number | null
           id: string
           imputed_at: string | null
@@ -4266,6 +4456,7 @@ export type Database = {
           deadline_correction?: string | null
           differe_by?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           imputed_at?: string | null
@@ -4292,6 +4483,7 @@ export type Database = {
           deadline_correction?: string | null
           differe_by?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           imputed_at?: string | null
@@ -4330,6 +4522,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "notes_dg_imputed_by_fkey"
@@ -5086,6 +5292,7 @@ export type Database = {
           date_prevue_paiement: string | null
           deadline_correction: string | null
           differe_by: string | null
+          dossier_id: string | null
           exercice: number | null
           id: string
           is_locked: boolean | null
@@ -5129,6 +5336,7 @@ export type Database = {
           date_prevue_paiement?: string | null
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           is_locked?: boolean | null
@@ -5172,6 +5380,7 @@ export type Database = {
           date_prevue_paiement?: string | null
           deadline_correction?: string | null
           differe_by?: string | null
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           is_locked?: boolean | null
@@ -5218,6 +5427,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "ordonnancements_liquidation_id_fkey"
@@ -6671,6 +6894,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           date_paiement: string
+          dossier_id: string | null
           exercice: number | null
           id: string
           mode_paiement: string
@@ -6690,6 +6914,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           date_paiement?: string
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           mode_paiement: string
@@ -6709,6 +6934,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           date_paiement?: string
+          dossier_id?: string | null
           exercice?: number | null
           id?: string
           mode_paiement?: string
@@ -6734,6 +6960,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "reglements_ordonnancement_id_fkey"
@@ -7938,6 +8178,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "workflow_instances_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "workflow_instances_etape_code_fkey"
             columns: ["etape_code"]
             isOneToOne: false
@@ -8196,11 +8443,38 @@ export type Database = {
           },
         ]
       }
+      v_dossier_chaine: {
+        Row: {
+          derniere_activite: string | null
+          direction_label: string | null
+          direction_sigle: string | null
+          dossier_id: string | null
+          dossier_numero: string | null
+          exercice: number | null
+          montant_engage: number | null
+          montant_estime: number | null
+          montant_liquide: number | null
+          montant_ordonnance: number | null
+          montant_paye: number | null
+          nb_engagements: number | null
+          nb_liquidations: number | null
+          nb_notes: number | null
+          nb_ordonnancements: number | null
+          nb_reglements: number | null
+          objet: string | null
+          statut_global: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       acknowledge_budget_alert: {
         Args: { p_alert_id: string }
         Returns: boolean
+      }
+      bloquer_dossier: {
+        Args: { p_dossier_id: string; p_motif: string; p_user_id: string }
+        Returns: undefined
       }
       can_engage_on_budget_line: {
         Args: { p_budget_line_id: string }
@@ -8256,6 +8530,10 @@ export type Database = {
           p_type_lien?: string
         }
         Returns: string
+      }
+      debloquer_dossier: {
+        Args: { p_commentaire: string; p_dossier_id: string; p_user_id: string }
+        Returns: undefined
       }
       execute_credit_transfer: {
         Args: { p_transfer_id: string; p_user_id?: string }
@@ -8396,6 +8674,10 @@ export type Database = {
           p_old_values?: Json
         }
         Returns: string
+      }
+      recalculer_montants_dossier: {
+        Args: { p_dossier_id: string }
+        Returns: undefined
       }
       refuse_prestataire_request: {
         Args: {
