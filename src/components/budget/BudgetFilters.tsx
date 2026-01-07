@@ -26,6 +26,13 @@ const STATUS_OPTIONS = [
   { value: "rejete", label: "Rejeté" },
 ];
 
+const EXECUTION_STATUS_OPTIONS = [
+  { value: "all", label: "Tous" },
+  { value: "OUVERTE", label: "Ouverte" },
+  { value: "FERMEE", label: "Fermée" },
+  { value: "CLOTUREE", label: "Clôturée" },
+];
+
 export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) {
   const { data: directions } = useQuery({
     queryKey: ["directions-filter"],
@@ -51,6 +58,18 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     },
   });
 
+  const { data: nves } = useQuery({
+    queryKey: ["ref-nve-filter"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("ref_nve")
+        .select("id, code_nve, libelle")
+        .eq("actif", true)
+        .order("code_nve");
+      return data || [];
+    },
+  });
+
   const clearFilters = () => {
     onFiltersChange({});
   };
@@ -59,7 +78,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     filters.direction_id || 
     filters.os_id || 
     filters.keyword || 
-    filters.statut;
+    filters.statut ||
+    filters.statut_execution ||
+    filters.nve_id;
 
   return (
     <div className="bg-muted/30 rounded-lg p-4 space-y-4">
@@ -73,7 +94,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div className="space-y-2">
           <Label>Recherche</Label>
           <div className="relative">
@@ -96,7 +117,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Toutes les directions" />
+              <SelectValue placeholder="Toutes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes les directions</SelectItem>
@@ -118,7 +139,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Tous les OS" />
+              <SelectValue placeholder="Tous" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les OS</SelectItem>
@@ -132,7 +153,29 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         </div>
 
         <div className="space-y-2">
-          <Label>Statut</Label>
+          <Label>Nature dépense (NVE)</Label>
+          <Select
+            value={filters.nve_id || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, nve_id: value === "all" ? undefined : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les NVE</SelectItem>
+              {nves?.map((n) => (
+                <SelectItem key={n.id} value={n.id}>
+                  {n.code_nve} - {n.libelle}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Statut validation</Label>
           <Select
             value={filters.statut || "all"}
             onValueChange={(value) =>
@@ -140,10 +183,31 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Tous les statuts" />
+              <SelectValue placeholder="Tous" />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Statut exécution</Label>
+          <Select
+            value={filters.statut_execution || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, statut_execution: value === "all" ? undefined : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Tous" />
+            </SelectTrigger>
+            <SelectContent>
+              {EXECUTION_STATUS_OPTIONS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
                 </SelectItem>

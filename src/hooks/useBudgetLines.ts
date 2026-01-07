@@ -17,10 +17,20 @@ export interface BudgetLineWithRelations {
   activite_id: string | null;
   sous_activite_id: string | null;
   nbe_id: string | null;
+  nve_id: string | null;
   sysco_id: string | null;
   source_financement: string | null;
   commentaire: string | null;
   statut: string | null;
+  statut_execution: string | null;
+  date_ouverture: string | null;
+  date_cloture: string | null;
+  numero_ligne: string | null;
+  code_budgetaire: string | null;
+  total_engage: number | null;
+  total_liquide: number | null;
+  total_ordonnance: number | null;
+  total_paye: number | null;
   is_active: boolean | null;
   parent_id: string | null;
   created_at: string;
@@ -33,6 +43,7 @@ export interface BudgetLineWithRelations {
   sous_activite?: { libelle: string; code: string } | null;
   nomenclature_nbe?: { libelle: string; code: string } | null;
   plan_comptable_sysco?: { libelle: string; code: string } | null;
+  ref_nve?: { code_nve: string; libelle: string } | null;
 }
 
 export interface BudgetLineFilters {
@@ -42,6 +53,8 @@ export interface BudgetLineFilters {
   sysco_code?: string;
   keyword?: string;
   statut?: string;
+  statut_execution?: string;
+  nve_id?: string;
 }
 
 export function useBudgetLines(filters?: BudgetLineFilters) {
@@ -62,7 +75,8 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
           activite:activites(libelle, code),
           sous_activite:sous_activites(libelle, code),
           nomenclature_nbe(libelle, code),
-          plan_comptable_sysco(libelle, code)
+          plan_comptable_sysco(libelle, code),
+          ref_nve(code_nve, libelle)
         `)
         .eq("exercice", exercice || new Date().getFullYear())
         .order("code");
@@ -76,8 +90,14 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       if (filters?.statut) {
         query = query.eq("statut", filters.statut);
       }
+      if (filters?.statut_execution) {
+        query = query.eq("statut_execution", filters.statut_execution);
+      }
+      if (filters?.nve_id) {
+        query = query.eq("nve_id", filters.nve_id);
+      }
       if (filters?.keyword) {
-        query = query.or(`label.ilike.%${filters.keyword}%,code.ilike.%${filters.keyword}%`);
+        query = query.or(`label.ilike.%${filters.keyword}%,code.ilike.%${filters.keyword}%,code_budgetaire.ilike.%${filters.keyword}%`);
       }
 
       const { data, error } = await query;

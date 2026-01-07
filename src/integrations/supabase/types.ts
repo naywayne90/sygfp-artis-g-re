@@ -682,8 +682,11 @@ export type Database = {
           budget_import_id: string | null
           budget_version_id: string | null
           code: string
+          code_budgetaire: string | null
           commentaire: string | null
           created_at: string
+          date_cloture: string | null
+          date_ouverture: string | null
           direction_id: string | null
           disponible_calcule: number | null
           dotation_initiale: number
@@ -698,15 +701,23 @@ export type Database = {
           locked_by: string | null
           mission_id: string | null
           nbe_id: string | null
+          numero_ligne: string | null
+          nve_id: string | null
           os_id: string | null
           parent_id: string | null
           rejection_reason: string | null
           source_financement: string | null
           sous_activite_id: string | null
           statut: string | null
+          statut_execution: string | null
           submitted_at: string | null
           submitted_by: string | null
           sysco_id: string | null
+          tache_id: string | null
+          total_engage: number | null
+          total_liquide: number | null
+          total_ordonnance: number | null
+          total_paye: number | null
           type_ligne: string | null
           updated_at: string
           validated_at: string | null
@@ -719,8 +730,11 @@ export type Database = {
           budget_import_id?: string | null
           budget_version_id?: string | null
           code: string
+          code_budgetaire?: string | null
           commentaire?: string | null
           created_at?: string
+          date_cloture?: string | null
+          date_ouverture?: string | null
           direction_id?: string | null
           disponible_calcule?: number | null
           dotation_initiale?: number
@@ -735,15 +749,23 @@ export type Database = {
           locked_by?: string | null
           mission_id?: string | null
           nbe_id?: string | null
+          numero_ligne?: string | null
+          nve_id?: string | null
           os_id?: string | null
           parent_id?: string | null
           rejection_reason?: string | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string | null
+          statut_execution?: string | null
           submitted_at?: string | null
           submitted_by?: string | null
           sysco_id?: string | null
+          tache_id?: string | null
+          total_engage?: number | null
+          total_liquide?: number | null
+          total_ordonnance?: number | null
+          total_paye?: number | null
           type_ligne?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -756,8 +778,11 @@ export type Database = {
           budget_import_id?: string | null
           budget_version_id?: string | null
           code?: string
+          code_budgetaire?: string | null
           commentaire?: string | null
           created_at?: string
+          date_cloture?: string | null
+          date_ouverture?: string | null
           direction_id?: string | null
           disponible_calcule?: number | null
           dotation_initiale?: number
@@ -772,15 +797,23 @@ export type Database = {
           locked_by?: string | null
           mission_id?: string | null
           nbe_id?: string | null
+          numero_ligne?: string | null
+          nve_id?: string | null
           os_id?: string | null
           parent_id?: string | null
           rejection_reason?: string | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string | null
+          statut_execution?: string | null
           submitted_at?: string | null
           submitted_by?: string | null
           sysco_id?: string | null
+          tache_id?: string | null
+          total_engage?: number | null
+          total_liquide?: number | null
+          total_ordonnance?: number | null
+          total_paye?: number | null
           type_ligne?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -835,6 +868,13 @@ export type Database = {
             columns: ["nbe_id"]
             isOneToOne: false
             referencedRelation: "nomenclature_nbe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_nve_id_fkey"
+            columns: ["nve_id"]
+            isOneToOne: false
+            referencedRelation: "ref_nve"
             referencedColumns: ["id"]
           },
           {
@@ -5614,6 +5654,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ref_nve: {
+        Row: {
+          actif: boolean | null
+          code_nve: string
+          created_at: string
+          id: string
+          libelle: string
+          updated_at: string
+        }
+        Insert: {
+          actif?: boolean | null
+          code_nve: string
+          created_at?: string
+          id?: string
+          libelle: string
+          updated_at?: string
+        }
+        Update: {
+          actif?: boolean | null
+          code_nve?: string
+          created_at?: string
+          id?: string
+          libelle?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ref_secteurs_activite: {
         Row: {
           actif: boolean | null
@@ -7035,6 +7102,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_engage_on_budget_line: {
+        Args: { p_budget_line_id: string }
+        Returns: boolean
+      }
       create_engagement_from_eb: {
         Args: {
           p_budget_line_id: string
