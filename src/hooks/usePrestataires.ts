@@ -6,16 +6,26 @@ export interface Prestataire {
   id: string;
   code: string;
   raison_sociale: string;
+  type_prestataire: string | null;
+  sigle: string | null;
   ninea: string | null;
+  nif: string | null;
+  ifu: string | null;
   adresse: string | null;
+  ville: string | null;
   telephone: string | null;
   email: string | null;
+  contact_nom: string | null;
+  contact_fonction: string | null;
+  contact_telephone: string | null;
+  contact_email: string | null;
   secteur_activite: string | null;
   secteur_principal_id: string | null;
   secteur_secondaire_id: string | null;
   statut: string | null;
   statut_fiscal: string | null;
   date_expiration_fiscale: string | null;
+  date_qualification: string | null;
   documents_fiscaux: Record<string, unknown> | null;
   rib_banque: string | null;
   rib_numero: string | null;
@@ -24,6 +34,9 @@ export interface Prestataire {
   cc: string | null;
   code_admission: string | null;
   code_comptable: string | null;
+  motif_suspension: string | null;
+  suspended_at: string | null;
+  suspended_by: string | null;
   created_by: string | null;
   validated_by: string | null;
   validated_at: string | null;
@@ -79,19 +92,113 @@ export function usePrestataires() {
 
   // Prestataires actifs uniquement (pour les selects)
   const prestatairesActifs = prestataires.filter(p => p.statut === "ACTIF");
+  
+  // Prestataires suspendus
+  const prestairesSuspendus = prestataires.filter(p => p.statut === "SUSPENDU");
+  
+  // Nouveaux (derniers 30 jours)
+  const nouveaux = prestataires.filter(p => {
+    const created = new Date(p.created_at);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return created >= thirtyDaysAgo;
+  });
 
   // Stats
   const stats = {
     total: prestataires.length,
-    actifs: prestataires.filter(p => p.statut === "ACTIF").length,
-    inactifs: prestataires.filter(p => p.statut === "INACTIF").length,
+    actifs: prestatairesActifs.length,
+    suspendus: prestairesSuspendus.length,
+    inactifs: prestataires.filter(p => p.statut === "INACTIF" || p.statut === "NOUVEAU" || p.statut === "EN_QUALIFICATION").length,
+    nouveaux: nouveaux.length,
+  };
+
+  // Suspend supplier
+  const suspendMutation = useMutation({
+    mutationFn: async ({ id, motif }: { id: string; motif: string }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from("prestataires")
+        .update({
+          statut: "SUSPENDU",
+          motif_suspension: motif,
+          suspended_at: new Date().toISOString(),
+          suspended_by: userData.user?.id,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Audit log
+      await supabase.from("audit_logs").insert({
+        entity_type: "prestataire",
+        entity_id: id,
+        action: "supplier_suspended",
+        new_values: { motif },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prestataires"] });
+      toast.success("Prestataire suspendu");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Activate supplier
+  const activateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("prestataires")
+        .update({
+          statut: "ACTIF",
+          date_qualification: new Date().toISOString(),
+          motif_suspension: null,
+          suspended_at: null,
+          suspended_by: null,
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // Audit log
+      await supabase.from("audit_logs").insert({
+        entity_type: "prestataire",
+        entity_id: id,
+        action: "supplier_activated",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["prestataires"] });
+      toast.success("Prestataire activé");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Check for duplicates
+  const checkDuplicate = async (raisonSociale: string, nif?: string) => {
+    let query = supabase.from("prestataires").select("id, code, raison_sociale");
+    
+    if (nif) {
+      query = query.or(`raison_sociale.ilike.%${raisonSociale}%,ninea.eq.${nif},nif.eq.${nif}`);
+    } else {
+      query = query.ilike("raison_sociale", `%${raisonSociale}%`);
+    }
+    
+    const { data } = await query.limit(5);
+    return data || [];
   };
 
   return {
     prestataires,
     prestatairesActifs,
+    prestairesSuspendus,
+    nouveaux,
     isLoading,
     stats,
+    suspendSupplier: suspendMutation.mutate,
+    activateSupplier: activateMutation.mutate,
+    checkDuplicate,
   };
 }
 

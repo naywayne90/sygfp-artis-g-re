@@ -89,33 +89,33 @@ export default function Prestataires() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.actifs}</div>
-            <p className="text-xs text-muted-foreground">Validés</p>
+            <p className="text-xs text-muted-foreground">Qualifiés et validés</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Demandes en attente
+              Nouveaux (30j)
+            </CardTitle>
+            <Users className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.nouveaux}</div>
+            <p className="text-xs text-muted-foreground">Ajoutés récemment</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Suspendus
             </CardTitle>
             <AlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{requestStats.enregistre + requestStats.enVerif}</div>
-            <p className="text-xs text-muted-foreground">À valider</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Inactifs
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.inactifs}</div>
-            <p className="text-xs text-muted-foreground">Suspendus</p>
+            <div className="text-2xl font-bold">{stats.suspendus}</div>
+            <p className="text-xs text-muted-foreground">Bloqués</p>
           </CardContent>
         </Card>
       </div>
