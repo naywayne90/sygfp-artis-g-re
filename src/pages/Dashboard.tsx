@@ -37,6 +37,7 @@ import { DashboardSDPM } from "@/components/dashboard/DashboardSDPM";
 import { DashboardTresorerie } from "@/components/dashboard/DashboardTresorerie";
 import { AlertsPanelEnhanced } from "@/components/dashboard/AlertsPanelEnhanced";
 import { RecentActivitiesPanel } from "@/components/dashboard/RecentActivitiesPanel";
+import { PendingTasksPanel } from "@/components/dashboard/PendingTasksPanel";
 import { KPICards } from "@/components/dashboard/KPICards";
 
 const formatMontant = (montant: number): string => {
@@ -477,9 +478,14 @@ export default function Dashboard() {
             <RecentActivitiesPanel maxItems={8} showViewAll={true} />
           </div>
 
-          {/* KPIs et alertes */}
+          {/* Tâches à traiter + Alertes */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <PendingTasksPanel maxItems={8} />
+            <AlertsPanelEnhanced maxItems={5} />
+          </div>
+
+          {/* KPIs */}
           <KPICards />
-          <AlertsPanelEnhanced maxItems={5} />
         </TabsContent>
 
         {/* Dashboard DG */}
