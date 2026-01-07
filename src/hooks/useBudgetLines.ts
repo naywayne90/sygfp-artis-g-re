@@ -55,6 +55,7 @@ export interface BudgetLineFilters {
   mission_id?: string;
   action_id?: string;
   activite_id?: string;
+  sous_activite_id?: string;
   nbe_code?: string;
   sysco_code?: string;
   keyword?: string;
@@ -113,6 +114,9 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       }
       if (filters?.activite_id) {
         query = query.eq("activite_id", filters.activite_id);
+      }
+      if (filters?.sous_activite_id) {
+        query = query.eq("sous_activite_id", filters.sous_activite_id);
       }
       if (filters?.statut) {
         query = query.eq("statut", filters.statut);

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { AlertTriangle } from "lucide-react";
 import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
 import { SYSCOTypeahead } from "./SYSCOTypeahead";
 
@@ -161,9 +163,35 @@ export function BudgetLineForm({
     },
   });
 
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const validateForm = (): boolean => {
+    const errors: string[] = [];
+    
+    if (!formData.code?.trim()) {
+      errors.push("Le code est obligatoire");
+    }
+    if (!formData.label?.trim()) {
+      errors.push("Le libellé est obligatoire");
+    }
+    if (!formData.level) {
+      errors.push("Le niveau est obligatoire");
+    }
+    if (formData.dotation_initiale === undefined || formData.dotation_initiale === null) {
+      errors.push("La dotation initiale est obligatoire");
+    } else if (formData.dotation_initiale < 0) {
+      errors.push("La dotation initiale doit être supérieure ou égale à 0");
+    }
+    
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (validateForm()) {
+      onSubmit(formData);
+    }
   };
 
   return (
@@ -176,6 +204,19 @@ export function BudgetLineForm({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {validationErrors.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <ul className="list-disc list-inside">
+                  {validationErrors.map((error, i) => (
+                    <li key={i}>{error}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="code">Code *</Label>
