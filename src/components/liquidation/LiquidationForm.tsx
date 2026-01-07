@@ -30,6 +30,7 @@ type FormData = z.infer<typeof formSchema>;
 interface LiquidationFormProps {
   onSuccess: () => void;
   onCancel: () => void;
+  dossierId?: string;
 }
 
 interface FileUpload {
@@ -45,7 +46,7 @@ const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
-export function LiquidationForm({ onSuccess, onCancel }: LiquidationFormProps) {
+export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationFormProps) {
   const { engagementsValides, createLiquidation, calculateAvailability, isCreating } = useLiquidations();
   const [selectedEngagement, setSelectedEngagement] = useState<typeof engagementsValides[0] | null>(null);
   const [availability, setAvailability] = useState<LiquidationAvailability | null>(null);
@@ -178,6 +179,12 @@ export function LiquidationForm({ onSuccess, onCancel }: LiquidationFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {dossierId && (
+          <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm">
+            Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+          </div>
+        )}
+        
         {/* Sélection de l'engagement */}
         <Card>
           <CardHeader>

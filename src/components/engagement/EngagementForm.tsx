@@ -17,9 +17,10 @@ import { useExercice } from "@/contexts/ExerciceContext";
 interface EngagementFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  dossierId?: string;
 }
 
-export function EngagementForm({ open, onOpenChange }: EngagementFormProps) {
+export function EngagementForm({ open, onOpenChange, dossierId }: EngagementFormProps) {
   const { expressionsValidees, createEngagement, calculateAvailability, isCreating } = useEngagements();
   const { budgetLines } = useBudgetLines();
   const { createLink, linkTypes } = useLambdaLinks();
@@ -104,6 +105,11 @@ export function EngagementForm({ open, onOpenChange }: EngagementFormProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Créer un engagement</DialogTitle>
+          {dossierId && (
+            <p className="text-sm text-muted-foreground">
+              Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-6">

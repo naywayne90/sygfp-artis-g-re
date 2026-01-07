@@ -70,13 +70,14 @@ export function DossierSearch({
       beneficiaire_id: "",
       created_by: "",
       en_retard: false,
+      mes_dossiers: false,
     });
   };
 
   const hasFilters = filters.search || filters.direction_id || filters.statut || filters.etape || 
     filters.type_dossier || filters.date_debut || filters.date_fin || 
     filters.montant_min !== null || filters.montant_max !== null ||
-    filters.beneficiaire_id || filters.created_by || filters.en_retard;
+    filters.beneficiaire_id || filters.created_by || filters.en_retard || filters.mes_dossiers;
 
   const countActiveFilters = () => {
     let count = 0;
@@ -89,6 +90,7 @@ export function DossierSearch({
     if (filters.beneficiaire_id) count++;
     if (filters.created_by) count++;
     if (filters.en_retard) count++;
+    if (filters.mes_dossiers) count++;
     return count;
   };
 
@@ -368,6 +370,18 @@ export function DossierSearch({
                     Dossiers en retard uniquement
                   </Label>
                 </div>
+              </div>
+
+              {/* Mes dossiers */}
+              <div className="flex items-center space-x-2 pt-2 border-t">
+                <Checkbox
+                  id="mes_dossiers"
+                  checked={filters.mes_dossiers || false}
+                  onCheckedChange={(checked) => onFiltersChange({ ...filters, mes_dossiers: !!checked })}
+                />
+                <Label htmlFor="mes_dossiers" className="text-sm cursor-pointer font-medium">
+                  Mes dossiers uniquement
+                </Label>
               </div>
             </CollapsibleContent>
           </Collapsible>

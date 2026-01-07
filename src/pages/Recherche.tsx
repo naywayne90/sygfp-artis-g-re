@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause } from "lucide-react";
+import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause, Lock, AlertTriangle } from "lucide-react";
 import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
 import { DossierSearch } from "@/components/dossier/DossierSearch";
 import { DossierList } from "@/components/dossier/DossierList";
@@ -15,6 +16,7 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Recherche() {
+  const navigate = useNavigate();
   const { 
     dossiers, 
     loading, 
@@ -28,6 +30,8 @@ export default function Recherche() {
     updateDossier,
     updateDossierStatus,
     addDocument,
+    bloquerDossier,
+    debloquerDossier,
     DEFAULT_FILTERS 
   } = useDossiers();
   const { exercice } = useExercice();
@@ -41,6 +45,8 @@ export default function Recherche() {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showAttachDialog, setShowAttachDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [blockMode, setBlockMode] = useState<"block" | "unblock">("block");
   const [sortField, setSortField] = useState<string>("updated_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
@@ -132,8 +138,6 @@ export default function Recherche() {
   };
 
   const handleConfirmAttach = async (dossierId: string, file: File, categorie: string, typeDocument: string) => {
-    // In a real implementation, we would upload the file to storage first
-    // For now, we'll just create a document record with a placeholder path
     await addDocument({
       dossier_id: dossierId,
       type_document: typeDocument,
@@ -144,6 +148,50 @@ export default function Recherche() {
       file_type: file.type,
     });
     toast({ title: "Document ajouté avec succès" });
+  };
+
+  const handleBlockDossier = (dossier: Dossier) => {
+    setSelectedDossier(dossier);
+    setBlockMode("block");
+    setShowBlockDialog(true);
+  };
+
+  const handleUnblockDossier = (dossier: Dossier) => {
+    setSelectedDossier(dossier);
+    setBlockMode("unblock");
+    setShowBlockDialog(true);
+  };
+
+  const handleConfirmBlock = async (dossierId: string, motif: string) => {
+    if (blockMode === "block") {
+      await bloquerDossier(dossierId, motif);
+    } else {
+      await debloquerDossier(dossierId, motif);
+    }
+    fetchDossiers(filters);
+  };
+
+  const handleCreateStep = (type: string, dossierId: string) => {
+    // Navigate to the appropriate creation page with dossier_id
+    switch (type) {
+      case "note":
+        navigate("/notes-aef", { state: { dossierId } });
+        break;
+      case "engagement":
+        navigate("/engagements", { state: { dossierId } });
+        break;
+      case "liquidation":
+        navigate("/liquidations", { state: { dossierId } });
+        break;
+      case "ordonnancement":
+        navigate("/ordonnancements", { state: { dossierId } });
+        break;
+      case "reglement":
+        navigate("/reglements", { state: { dossierId } });
+        break;
+      default:
+        break;
+    }
   };
 
   const formatMontant = (montant: number) => {
@@ -283,6 +331,15 @@ export default function Recherche() {
         dossier={selectedDossier}
         open={showDetails}
         onOpenChange={setShowDetails}
+        onCreateStep={handleCreateStep}
+        onBlock={(id) => {
+          const d = dossiers.find(x => x.id === id);
+          if (d) handleBlockDossier(d);
+        }}
+        onUnblock={(id) => {
+          const d = dossiers.find(x => x.id === id);
+          if (d) handleUnblockDossier(d);
+        }}
       />
 
       <DossierStatusDialog
@@ -304,6 +361,14 @@ export default function Recherche() {
         open={showAttachDialog}
         onOpenChange={setShowAttachDialog}
         onConfirm={handleConfirmAttach}
+      />
+
+      <DossierBlockDialog
+        dossier={selectedDossier}
+        open={showBlockDialog}
+        onOpenChange={setShowBlockDialog}
+        onConfirm={handleConfirmBlock}
+        mode={blockMode}
       />
     </div>
   );
