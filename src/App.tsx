@@ -34,6 +34,7 @@ import JournalAudit from "./pages/admin/JournalAudit";
 import ArchitectureSYGFP from "./pages/admin/ArchitectureSYGFP";
 import DictionnaireVariables from "./pages/admin/DictionnaireVariables";
 import ReferentielCodification from "./pages/admin/ReferentielCodification";
+import SecteursActivite from "./pages/admin/SecteursActivite";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -105,6 +106,7 @@ const App = () => (
               <Route path="/admin/architecture" element={<ArchitectureSYGFP />} />
               <Route path="/admin/dictionnaire" element={<DictionnaireVariables />} />
               <Route path="/admin/codification" element={<ReferentielCodification />} />
+              <Route path="/admin/secteurs-activite" element={<SecteursActivite />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

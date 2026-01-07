@@ -4739,6 +4739,8 @@ export type Database = {
           rib_cle: string | null
           rib_numero: string | null
           secteur_activite: string | null
+          secteur_principal_id: string | null
+          secteur_secondaire_id: string | null
           statut: string | null
           statut_fiscal: string | null
           telephone: string | null
@@ -4758,6 +4760,8 @@ export type Database = {
           rib_cle?: string | null
           rib_numero?: string | null
           secteur_activite?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
           statut?: string | null
           statut_fiscal?: string | null
           telephone?: string | null
@@ -4777,12 +4781,29 @@ export type Database = {
           rib_cle?: string | null
           rib_numero?: string | null
           secteur_activite?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
           statut?: string | null
           statut_fiscal?: string | null
           telephone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "prestataires_secteur_principal_id_fkey"
+            columns: ["secteur_principal_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_secteur_secondaire_id_fkey"
+            columns: ["secteur_secondaire_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -5392,6 +5413,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      ref_secteurs_activite: {
+        Row: {
+          actif: boolean | null
+          code: string
+          created_at: string | null
+          id: string
+          libelle: string
+          niveau: string
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          code: string
+          created_at?: string | null
+          id?: string
+          libelle: string
+          niveau: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          code?: string
+          created_at?: string | null
+          id?: string
+          libelle?: string
+          niveau?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ref_secteurs_activite_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reglement_attachments: {
         Row: {
