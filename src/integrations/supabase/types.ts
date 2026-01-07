@@ -1329,6 +1329,13 @@ export type Database = {
             referencedRelation: "prestataires"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contrats_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       credit_transfers: {
@@ -2044,6 +2051,13 @@ export type Database = {
             columns: ["beneficiaire_id"]
             isOneToOne: false
             referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
             referencedColumns: ["id"]
           },
           {
@@ -2988,6 +3002,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "marche_lots_attributaire_id_fkey"
+            columns: ["attributaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "marche_lots_marche_id_fkey"
             columns: ["marche_id"]
             isOneToOne: false
@@ -3061,6 +3082,13 @@ export type Database = {
             columns: ["prestataire_id"]
             isOneToOne: false
             referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marche_offres_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
             referencedColumns: ["id"]
           },
         ]
@@ -3259,6 +3287,13 @@ export type Database = {
             columns: ["prestataire_id"]
             isOneToOne: false
             referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marches_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
             referencedColumns: ["id"]
           },
         ]
@@ -4724,17 +4759,152 @@ export type Database = {
           },
         ]
       }
+      prestataire_requests: {
+        Row: {
+          adresse: string | null
+          cc: string | null
+          code_admission: string | null
+          code_comptable: string | null
+          commentaire_controle: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          ninea: string | null
+          prestataire_id: string | null
+          raison_sociale: string
+          rccm: string | null
+          rib_banque: string | null
+          rib_cle: string | null
+          rib_numero: string | null
+          secteur_principal_id: string | null
+          secteur_secondaire_id: string | null
+          source: string | null
+          statut: string
+          submitted_at: string | null
+          submitted_by: string | null
+          submitted_email: string | null
+          telephone: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          cc?: string | null
+          code_admission?: string | null
+          code_comptable?: string | null
+          commentaire_controle?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          ninea?: string | null
+          prestataire_id?: string | null
+          raison_sociale: string
+          rccm?: string | null
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
+          source?: string | null
+          statut?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_email?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          cc?: string | null
+          code_admission?: string | null
+          code_comptable?: string | null
+          commentaire_controle?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          ninea?: string | null
+          prestataire_id?: string | null
+          raison_sociale?: string
+          rccm?: string | null
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
+          source?: string | null
+          statut?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_email?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestataire_requests_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataire_requests_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataire_requests_secteur_principal_id_fkey"
+            columns: ["secteur_principal_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataire_requests_secteur_secondaire_id_fkey"
+            columns: ["secteur_secondaire_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataire_requests_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataire_requests_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prestataires: {
         Row: {
           adresse: string | null
+          cc: string | null
           code: string
+          code_admission: string | null
+          code_comptable: string | null
           created_at: string
+          created_by: string | null
           date_expiration_fiscale: string | null
           documents_fiscaux: Json | null
           email: string | null
           id: string
           ninea: string | null
           raison_sociale: string
+          rccm: string | null
           rib_banque: string | null
           rib_cle: string | null
           rib_numero: string | null
@@ -4745,17 +4915,24 @@ export type Database = {
           statut_fiscal: string | null
           telephone: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           adresse?: string | null
+          cc?: string | null
           code: string
+          code_admission?: string | null
+          code_comptable?: string | null
           created_at?: string
+          created_by?: string | null
           date_expiration_fiscale?: string | null
           documents_fiscaux?: Json | null
           email?: string | null
           id?: string
           ninea?: string | null
           raison_sociale: string
+          rccm?: string | null
           rib_banque?: string | null
           rib_cle?: string | null
           rib_numero?: string | null
@@ -4766,17 +4943,24 @@ export type Database = {
           statut_fiscal?: string | null
           telephone?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           adresse?: string | null
+          cc?: string | null
           code?: string
+          code_admission?: string | null
+          code_comptable?: string | null
           created_at?: string
+          created_by?: string | null
           date_expiration_fiscale?: string | null
           documents_fiscaux?: Json | null
           email?: string | null
           id?: string
           ninea?: string | null
           raison_sociale?: string
+          rccm?: string | null
           rib_banque?: string | null
           rib_cle?: string | null
           rib_numero?: string | null
@@ -4787,8 +4971,17 @@ export type Database = {
           statut_fiscal?: string | null
           telephone?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "prestataires_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "prestataires_secteur_principal_id_fkey"
             columns: ["secteur_principal_id"]
@@ -4801,6 +4994,13 @@ export type Database = {
             columns: ["secteur_secondaire_id"]
             isOneToOne: false
             referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -5850,6 +6050,13 @@ export type Database = {
             referencedRelation: "prestataires"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "soumissions_prestataire_id_fkey"
+            columns: ["prestataire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sous_activites: {
@@ -6673,6 +6880,122 @@ export type Database = {
           },
         ]
       }
+      prestataires_actifs: {
+        Row: {
+          adresse: string | null
+          cc: string | null
+          code: string | null
+          code_admission: string | null
+          code_comptable: string | null
+          created_at: string | null
+          created_by: string | null
+          date_expiration_fiscale: string | null
+          documents_fiscaux: Json | null
+          email: string | null
+          id: string | null
+          ninea: string | null
+          raison_sociale: string | null
+          rccm: string | null
+          rib_banque: string | null
+          rib_cle: string | null
+          rib_numero: string | null
+          secteur_activite: string | null
+          secteur_principal_id: string | null
+          secteur_secondaire_id: string | null
+          statut: string | null
+          statut_fiscal: string | null
+          telephone: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          cc?: string | null
+          code?: string | null
+          code_admission?: string | null
+          code_comptable?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_expiration_fiscale?: string | null
+          documents_fiscaux?: Json | null
+          email?: string | null
+          id?: string | null
+          ninea?: string | null
+          raison_sociale?: string | null
+          rccm?: string | null
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
+          secteur_activite?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
+          statut?: string | null
+          statut_fiscal?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          cc?: string | null
+          code?: string | null
+          code_admission?: string | null
+          code_comptable?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date_expiration_fiscale?: string | null
+          documents_fiscaux?: Json | null
+          email?: string | null
+          id?: string | null
+          ninea?: string | null
+          raison_sociale?: string | null
+          rccm?: string | null
+          rib_banque?: string | null
+          rib_cle?: string | null
+          rib_numero?: string | null
+          secteur_activite?: string | null
+          secteur_principal_id?: string | null
+          secteur_secondaire_id?: string | null
+          statut?: string | null
+          statut_fiscal?: string | null
+          telephone?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestataires_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_secteur_principal_id_fkey"
+            columns: ["secteur_principal_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_secteur_secondaire_id_fkey"
+            columns: ["secteur_secondaire_id"]
+            isOneToOne: false
+            referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects_with_financial: {
         Row: {
           budget_total: number | null
@@ -6798,6 +7121,14 @@ export type Database = {
         }
         Returns: string
       }
+      refuse_prestataire_request: {
+        Args: {
+          p_commentaire: string
+          p_request_id: string
+          p_validator_id: string
+        }
+        Returns: boolean
+      }
       user_can_access_exercice: {
         Args: { p_exercice: number }
         Returns: boolean
@@ -6813,6 +7144,10 @@ export type Database = {
       user_has_role: {
         Args: { p_role_code: string; p_user_id: string }
         Returns: boolean
+      }
+      validate_prestataire_request: {
+        Args: { p_request_id: string; p_validator_id: string }
+        Returns: string
       }
     }
     Enums: {
