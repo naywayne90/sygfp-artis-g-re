@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { 
   FolderOpen, 
@@ -141,12 +142,15 @@ export function KPICards() {
         ?.filter(e => e.statut === "valide")
         .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
       
-      // CORRECTION: Disponible ne peut pas être négatif
-      const disponible = Math.max(0, dotationTotale - engageTotal);
-      const tauxDisponibilite = dotationTotale > 0 ? Math.round((disponible / dotationTotale) * 100) : 0;
+      // Disponible brut (peut être négatif pour dépassement)
+      const disponibleRaw = dotationTotale - engageTotal;
+      // Disponible affiché (min 0 pour le progrès)
+      const disponible = disponibleRaw;
+      const tauxDisponibilite = dotationTotale > 0 ? Math.round((Math.max(0, disponibleRaw) / dotationTotale) * 100) : 0;
       const isBudgetLoaded = dotationTotale > 0;
+      const hasOverspent = disponibleRaw < 0;
 
-      return { dotationTotale, engageTotal, disponible, tauxDisponibilite, isBudgetLoaded };
+      return { dotationTotale, engageTotal, disponible, tauxDisponibilite, isBudgetLoaded, hasOverspent };
     },
     enabled: !!exercice,
   });
@@ -243,7 +247,13 @@ export function KPICards() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className={
+          !disponibilite?.isBudgetLoaded 
+            ? "border-warning/50" 
+            : (disponibilite?.tauxDisponibilite || 0) < 20 
+              ? "border-destructive/50"
+              : ""
+        }>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Wallet className="h-4 w-4" />
@@ -255,6 +265,22 @@ export function KPICards() {
               <div className="text-center py-2">
                 <AlertTriangle className="h-5 w-5 text-warning mx-auto mb-1" />
                 <p className="text-xs text-muted-foreground">Budget non chargé</p>
+                {(disponibilite?.engageTotal || 0) > 0 && (
+                  <p className="text-xs text-destructive mt-1">
+                    ⚠️ {formatMontant(disponibilite?.engageTotal || 0)} engagé sans dotation
+                  </p>
+                )}
+              </div>
+            ) : disponibilite?.disponible < 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-destructive font-medium">Dépassement</span>
+                  <span className="font-bold text-destructive">-{formatMontant(Math.abs(disponibilite?.disponible || 0))}</span>
+                </div>
+                <Progress value={100} className="h-2 bg-destructive/20" />
+                <p className="text-xs text-destructive text-center">
+                  ⚠️ Budget dépassé - Vérifiez les lignes
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -279,17 +305,24 @@ export function KPICards() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {osStats?.map((os, index) => (
-                <div key={os.id} className="flex items-center justify-between text-sm">
-                  <span className="truncate max-w-[150px]">{os.code}</span>
-                  <span className="font-medium">{formatMontant(os.dotation)}</span>
-                </div>
-              ))}
-              {(!osStats || osStats.length === 0) && (
-                <p className="text-xs text-muted-foreground text-center">Aucune donnée</p>
-              )}
-            </div>
+            {(!osStats || osStats.length === 0) ? (
+              <div className="text-center py-2">
+                <Building2 className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="text-xs text-muted-foreground">Structure de planification à charger</p>
+                <Button variant="link" size="sm" className="text-xs p-0 h-auto mt-1" asChild>
+                  <a href="/planification/budget">→ Importer la structure</a>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {osStats?.map((os, index) => (
+                  <div key={os.id} className="flex items-center justify-between text-sm">
+                    <span className="truncate max-w-[150px]">{os.code}</span>
+                    <span className="font-medium">{formatMontant(os.dotation)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
