@@ -12,6 +12,7 @@ import { EngagementRejectDialog } from "@/components/engagement/EngagementReject
 import { EngagementDeferDialog } from "@/components/engagement/EngagementDeferDialog";
 import { EngagementValidateDialog } from "@/components/engagement/EngagementValidateDialog";
 import { EngagementPrintDialog } from "@/components/engagement/EngagementPrintDialog";
+import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
@@ -32,6 +33,8 @@ export default function Engagements() {
     resumeEngagement,
     isValidating,
   } = useEngagements();
+
+  const { canPerform } = usePermissionCheck();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -105,10 +108,12 @@ export default function Engagements() {
             Gestion des engagements budgétaires
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
-          <Plus className="h-4 w-4" />
-          Nouvel engagement
-        </Button>
+        <PermissionGuard permission="engagement.create" showDelegationBadge>
+          <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
+            <Plus className="h-4 w-4" />
+            Nouvel engagement
+          </Button>
+        </PermissionGuard>
       </div>
 
       {/* Stats Cards */}
@@ -209,11 +214,11 @@ export default function Engagements() {
                 <EngagementList
                   engagements={filterEngagements(engagements)}
                   onView={handleView}
-                  onValidate={handleValidate}
-                  onReject={handleReject}
-                  onDefer={handleDefer}
-                  onSubmit={submitEngagement}
-                  onResume={resumeEngagement}
+                  onValidate={canPerform("engagement.validate") ? handleValidate : undefined}
+                  onReject={canPerform("engagement.reject") ? handleReject : undefined}
+                  onDefer={canPerform("engagement.defer") ? handleDefer : undefined}
+                  onSubmit={canPerform("engagement.submit") ? submitEngagement : undefined}
+                  onResume={canPerform("engagement.resume") ? resumeEngagement : undefined}
                   onPrint={handlePrint}
                 />
               )}
@@ -233,9 +238,9 @@ export default function Engagements() {
               <EngagementList
                 engagements={filterEngagements(engagementsAValider)}
                 onView={handleView}
-                onValidate={handleValidate}
-                onReject={handleReject}
-                onDefer={handleDefer}
+                onValidate={canPerform("engagement.validate") ? handleValidate : undefined}
+                onReject={canPerform("engagement.reject") ? handleReject : undefined}
+                onDefer={canPerform("engagement.defer") ? handleDefer : undefined}
                 onPrint={handlePrint}
               />
             </CardContent>
@@ -290,7 +295,7 @@ export default function Engagements() {
               <EngagementList
                 engagements={filterEngagements(engagementsDifferes)}
                 onView={handleView}
-                onResume={resumeEngagement}
+                onResume={canPerform("engagement.resume") ? resumeEngagement : undefined}
                 onPrint={handlePrint}
               />
             </CardContent>
