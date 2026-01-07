@@ -33,6 +33,14 @@ const EXECUTION_STATUS_OPTIONS = [
   { value: "CLOTUREE", label: "Clôturée" },
 ];
 
+const LEVEL_OPTIONS = [
+  { value: "all", label: "Tous les niveaux" },
+  { value: "chapitre", label: "Chapitre" },
+  { value: "article", label: "Article" },
+  { value: "paragraphe", label: "Paragraphe" },
+  { value: "ligne", label: "Ligne" },
+];
+
 export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) {
   const { data: directions } = useQuery({
     queryKey: ["directions-filter"],
@@ -70,6 +78,57 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     },
   });
 
+  // Missions - independent filter (no os_id in schema)
+  const { data: missions } = useQuery({
+    queryKey: ["missions-filter"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("missions")
+        .select("id, code, libelle")
+        .eq("est_active", true)
+        .order("code");
+      return data || [];
+    },
+  });
+
+  // Actions filtered by selected Mission
+  const { data: actions } = useQuery({
+    queryKey: ["actions-filter", filters.mission_id],
+    queryFn: async () => {
+      let query = supabase
+        .from("actions")
+        .select("id, code, libelle, mission_id")
+        .eq("est_active", true)
+        .order("code");
+      
+      if (filters.mission_id) {
+        query = query.eq("mission_id", filters.mission_id);
+      }
+      
+      const { data } = await query;
+      return data || [];
+    },
+  });
+
+  // Activités filtered by selected Action
+  const { data: activites } = useQuery({
+    queryKey: ["activites-filter", filters.action_id],
+    queryFn: async () => {
+      let query = supabase
+        .from("activites")
+        .select("id, code, libelle, action_id")
+        .eq("est_active", true)
+        .order("code");
+      
+      if (filters.action_id) {
+        query = query.eq("action_id", filters.action_id);
+      }
+      
+      const { data } = await query;
+      return data || [];
+    },
+  });
+
   const clearFilters = () => {
     onFiltersChange({});
   };
@@ -77,10 +136,14 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
   const hasActiveFilters = 
     filters.direction_id || 
     filters.os_id || 
+    filters.mission_id ||
+    filters.action_id ||
+    filters.activite_id ||
     filters.keyword || 
     filters.statut ||
     filters.statut_execution ||
-    filters.nve_id;
+    filters.nve_id ||
+    filters.level;
 
   return (
     <div className="bg-muted/30 rounded-lg p-4 space-y-4">
@@ -94,7 +157,8 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* Row 1 - Search + Direction + OS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label>Recherche</Label>
           <div className="relative">
@@ -106,6 +170,27 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
               className="pl-8"
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Niveau</Label>
+          <Select
+            value={filters.level || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, level: value === "all" ? undefined : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Tous" />
+            </SelectTrigger>
+            <SelectContent>
+              {LEVEL_OPTIONS.map((l) => (
+                <SelectItem key={l.value} value={l.value}>
+                  {l.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
@@ -135,7 +220,10 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
           <Select
             value={filters.os_id || "all"}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, os_id: value === "all" ? undefined : value })
+              onFiltersChange({ 
+                ...filters, 
+                os_id: value === "all" ? undefined : value,
+              })
             }
           >
             <SelectTrigger>
@@ -151,7 +239,91 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
             </SelectContent>
           </Select>
         </div>
+      </div>
 
+      {/* Row 2 - Cascade: Mission → Action → Activité */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Mission</Label>
+          <Select
+            value={filters.mission_id || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ 
+                ...filters, 
+                mission_id: value === "all" ? undefined : value,
+                action_id: undefined,
+                activite_id: undefined,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les missions</SelectItem>
+              {missions?.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.code} - {m.libelle}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Action</Label>
+          <Select
+            value={filters.action_id || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ 
+                ...filters, 
+                action_id: value === "all" ? undefined : value,
+                activite_id: undefined,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les actions</SelectItem>
+              {actions?.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.code} - {a.libelle}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Activité</Label>
+          <Select
+            value={filters.activite_id || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ 
+                ...filters, 
+                activite_id: value === "all" ? undefined : value,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les activités</SelectItem>
+              {activites?.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.code} - {a.libelle}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Row 3 - Other filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Nature dépense (NVE)</Label>
           <Select

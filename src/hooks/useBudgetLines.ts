@@ -52,12 +52,16 @@ export interface BudgetLineWithRelations {
 export interface BudgetLineFilters {
   direction_id?: string;
   os_id?: string;
+  mission_id?: string;
+  action_id?: string;
+  activite_id?: string;
   nbe_code?: string;
   sysco_code?: string;
   keyword?: string;
   statut?: string;
   statut_execution?: string;
   nve_id?: string;
+  level?: string;
 }
 
 // Helper to get display code (V2 priority over V1)
@@ -101,6 +105,15 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       if (filters?.os_id) {
         query = query.eq("os_id", filters.os_id);
       }
+      if (filters?.mission_id) {
+        query = query.eq("mission_id", filters.mission_id);
+      }
+      if (filters?.action_id) {
+        query = query.eq("action_id", filters.action_id);
+      }
+      if (filters?.activite_id) {
+        query = query.eq("activite_id", filters.activite_id);
+      }
       if (filters?.statut) {
         query = query.eq("statut", filters.statut);
       }
@@ -109,6 +122,9 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       }
       if (filters?.nve_id) {
         query = query.eq("nve_id", filters.nve_id);
+      }
+      if (filters?.level) {
+        query = query.eq("level", filters.level);
       }
       if (filters?.keyword) {
         query = query.or(`label.ilike.%${filters.keyword}%,code.ilike.%${filters.keyword}%,code_budgetaire.ilike.%${filters.keyword}%`);
