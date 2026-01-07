@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, CheckCircle2, Loader2, Calculator } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Calculator, Link2, Lock } from "lucide-react";
 import { useEngagements, BudgetAvailability } from "@/hooks/useEngagements";
 import { useBudgetLines } from "@/hooks/useBudgetLines";
+import { useLambdaLinks } from "@/hooks/useLambdaLinks";
+import { useExercice } from "@/contexts/ExerciceContext";
 
 interface EngagementFormProps {
   open: boolean;
@@ -20,6 +22,11 @@ interface EngagementFormProps {
 export function EngagementForm({ open, onOpenChange }: EngagementFormProps) {
   const { expressionsValidees, createEngagement, calculateAvailability, isCreating } = useEngagements();
   const { budgetLines } = useBudgetLines();
+  const { createLink, linkTypes } = useLambdaLinks();
+  const { exercice } = useExercice();
+  
+  // Check if expression→engagement link is active
+  const isLinkActive = linkTypes.find(lt => lt.code === 'expression_to_engagement')?.actif ?? true;
 
   const [selectedExpressionId, setSelectedExpressionId] = useState<string>("");
   const [selectedBudgetLineId, setSelectedBudgetLineId] = useState<string>("");
@@ -119,10 +126,36 @@ export function EngagementForm({ open, onOpenChange }: EngagementFormProps) {
 
           {selectedExpression && (
             <>
-              {/* Informations pré-remplies */}
+              {/* Section Source avec traçabilité */}
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link2 className="h-4 w-4 text-primary" />
+                    <h4 className="font-medium">Source (Lien Lambda)</h4>
+                    <Badge variant="outline" className="ml-auto">
+                      {isLinkActive ? 'Liaison active' : 'Liaison désactivée'}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Type:</span>{" "}
+                      <Badge variant="secondary">Expression de besoin</Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">ID Source:</span>{" "}
+                      <code className="bg-muted px-1 rounded text-xs">{selectedExpression.numero}</code>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Informations pré-remplies (read-only) */}
               <Card className="bg-muted/50">
                 <CardContent className="pt-4">
-                  <h4 className="font-medium mb-3">Informations héritées</h4>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <h4 className="font-medium">Informations héritées (lecture seule)</h4>
+                  </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Direction:</span>{" "}
@@ -146,6 +179,16 @@ export function EngagementForm({ open, onOpenChange }: EngagementFormProps) {
                       <span className="text-muted-foreground">Mode passation:</span>{" "}
                       <span className="font-medium">
                         {(selectedExpression.marche as any)?.mode_passation || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Exercice:</span>{" "}
+                      <Badge>{exercice}</Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Montant estimé:</span>{" "}
+                      <span className="font-medium">
+                        {formatMontant(selectedExpression.montant_estime || 0)}
                       </span>
                     </div>
                   </div>
