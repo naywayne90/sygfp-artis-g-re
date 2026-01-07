@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +29,11 @@ import {
   FolderTree
 } from "lucide-react";
 import { BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
+import { supabase } from "@/integrations/supabase/client";
+import { useExercice } from "@/contexts/ExerciceContext";
 
 interface BudgetTreeViewProps {
   lines: BudgetLineWithRelations[];
-  engagements: Record<string, number>;
   onEdit: (line: BudgetLineWithRelations) => void;
   onDuplicate: (line: BudgetLineWithRelations) => void;
   onSubmit: (id: string) => void;
@@ -111,7 +112,6 @@ interface TreeNode extends BudgetLineWithRelations {
 
 export function BudgetTreeView({
   lines,
-  engagements,
   onEdit,
   onDuplicate,
   onSubmit,
@@ -120,7 +120,35 @@ export function BudgetTreeView({
   onDelete,
   onViewHistory,
 }: BudgetTreeViewProps) {
+  const { exercice } = useExercice();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [engagements, setEngagements] = useState<Record<string, number>>({});
+
+  // Fetch engagements for all lines
+  useEffect(() => {
+    const fetchEngagements = async () => {
+      if (!lines.length || !exercice) return;
+
+      const lineIds = lines.map(l => l.id);
+      const { data } = await supabase
+        .from("budget_engagements")
+        .select("budget_line_id, montant")
+        .in("budget_line_id", lineIds)
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      const engMap: Record<string, number> = {};
+      lineIds.forEach(id => { engMap[id] = 0; });
+      data?.forEach(e => {
+        if (e.budget_line_id) {
+          engMap[e.budget_line_id] = (engMap[e.budget_line_id] || 0) + (e.montant || 0);
+        }
+      });
+      setEngagements(engMap);
+    };
+
+    fetchEngagements();
+  }, [lines, exercice]);
 
   // Build tree structure from flat list
   const treeData = useMemo(() => {

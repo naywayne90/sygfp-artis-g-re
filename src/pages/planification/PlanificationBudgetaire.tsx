@@ -54,7 +54,7 @@ export default function PlanificationBudgetaire() {
   const [editingLine, setEditingLine] = useState<BudgetLineWithRelations | null>(null);
   const [selectedLineForHistory, setSelectedLineForHistory] = useState<BudgetLineWithRelations | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "tree">("table");
-  const [engagements, setEngagements] = useState<Record<string, number>>({});
+  
 
   const {
     budgetLines,
@@ -113,26 +113,54 @@ export default function PlanificationBudgetaire() {
     setShowForm(true);
   };
 
-  // Fetch engagements for all lines
+  // Fetch execution totals for KPIs
+  const [executionTotals, setExecutionTotals] = useState<{
+    engage: number;
+    liquide: number;
+    paye: number;
+    disponible: number;
+  }>({ engage: 0, liquide: 0, paye: 0, disponible: 0 });
+
   useEffect(() => {
-    const fetchEngagements = async () => {
-      if (!budgetLines || budgetLines.length === 0) return;
-      
-      const engMap: Record<string, number> = {};
-      for (const line of budgetLines) {
-        const { data } = await supabase
-          .from("budget_engagements")
-          .select("montant")
-          .eq("budget_line_id", line.id)
-          .eq("exercice", exercice || new Date().getFullYear());
-        
-        engMap[line.id] = data?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-      }
-      setEngagements(engMap);
+    const fetchExecutionTotals = async () => {
+      if (!exercice) return;
+
+      // Fetch engagements validés
+      const { data: engagementsData } = await supabase
+        .from("budget_engagements")
+        .select("montant")
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      // Fetch liquidations validées
+      const { data: liquidationsData } = await supabase
+        .from("budget_liquidations")
+        .select("montant")
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      // Fetch règlements payés
+      const { data: reglementsData } = await supabase
+        .from("reglements")
+        .select("montant")
+        .eq("exercice", exercice)
+        .eq("statut", "paye");
+
+      const engageTotal = engagementsData?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const liquideTotal = liquidationsData?.reduce((sum, l) => sum + (l.montant || 0), 0) || 0;
+      const payeTotal = reglementsData?.reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
+      const disponibleTotal = totals.dotation - engageTotal;
+
+      setExecutionTotals({
+        engage: engageTotal,
+        liquide: liquideTotal,
+        paye: payeTotal,
+        disponible: disponibleTotal,
+      });
     };
 
-    fetchEngagements();
-  }, [budgetLines, exercice]);
+    fetchExecutionTotals();
+  }, [exercice, totals.dotation]);
 
   const handleExport = async () => {
     if (!budgetLines || budgetLines.length === 0) {
@@ -219,7 +247,7 @@ export default function PlanificationBudgetaire() {
       )}
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -236,14 +264,14 @@ export default function PlanificationBudgetaire() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Lignes budgétaires
+              Engagé
             </CardTitle>
-            <Target className="h-4 w-4 text-secondary" />
+            <Target className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totals.count}</div>
+            <div className="text-2xl font-bold text-orange-600">{formatCurrency(executionTotals.engage)}</div>
             <p className="text-xs text-muted-foreground">
-              {validatedLines} validée(s), {pendingLines} en attente
+              {totals.dotation > 0 ? Math.round((executionTotals.engage / totals.dotation) * 100) : 0}% du budget
             </p>
           </CardContent>
         </Card>
@@ -251,33 +279,64 @@ export default function PlanificationBudgetaire() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Taux validation
+              Liquidé
             </CardTitle>
-            <FileCheck className="h-4 w-4 text-green-500" />
+            <FileCheck className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {totals.count > 0 ? Math.round((validatedLines / totals.count) * 100) : 0}%
-            </div>
-            <p className="text-xs text-muted-foreground">Lignes validées</p>
+            <div className="text-2xl font-bold text-blue-600">{formatCurrency(executionTotals.liquide)}</div>
+            <p className="text-xs text-muted-foreground">
+              {executionTotals.engage > 0 ? Math.round((executionTotals.liquide / executionTotals.engage) * 100) : 0}% des engagements
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Virements
+              Payé
             </CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-orange-500" />
+            <ShieldCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingTransfers}</div>
-            <p className="text-xs text-muted-foreground">En attente d'approbation</p>
+            <div className="text-2xl font-bold text-green-600">{formatCurrency(executionTotals.paye)}</div>
+            <p className="text-xs text-muted-foreground">
+              {executionTotals.liquide > 0 ? Math.round((executionTotals.paye / executionTotals.liquide) * 100) : 0}% des liquidations
+            </p>
           </CardContent>
         </Card>
 
-        {/* Top OS Widget */}
-        <TopOSWidget lines={budgetLines || []} engagements={engagements} />
+        <Card className={executionTotals.disponible < 0 ? "border-destructive" : ""}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Disponible
+            </CardTitle>
+            <ArrowLeftRight className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${executionTotals.disponible < 0 ? "text-destructive" : "text-primary"}`}>
+              {formatCurrency(executionTotals.disponible)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {pendingTransfers} virement(s) en attente
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Lignes
+            </CardTitle>
+            <Target className="h-4 w-4 text-secondary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totals.count}</div>
+            <p className="text-xs text-muted-foreground">
+              {validatedLines} validée(s)
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="budget" className="space-y-4">
@@ -351,7 +410,6 @@ export default function PlanificationBudgetaire() {
               ) : viewMode === "tree" ? (
                 <BudgetTreeView
                   lines={budgetLines || []}
-                  engagements={engagements}
                   onEdit={handleEdit}
                   onDuplicate={handleDuplicate}
                   onSubmit={submitBudgetLine}

@@ -64,18 +64,6 @@ const getStatusBadge = (status: string | null) => {
   }
 };
 
-const getExecutionStatusBadge = (status: string | null) => {
-  switch (status) {
-    case "OUVERTE":
-      return <Badge variant="outline" className="border-green-500 text-green-600">Ouverte</Badge>;
-    case "FERMEE":
-      return <Badge variant="outline" className="border-orange-500 text-orange-600">Fermée</Badge>;
-    case "CLOTUREE":
-      return <Badge variant="outline" className="border-red-500 text-red-600">Clôturée</Badge>;
-    default:
-      return <Badge variant="outline">-</Badge>;
-  }
-};
 
 export function BudgetLineTable({
   lines,
@@ -87,28 +75,90 @@ export function BudgetLineTable({
   onViewHistory,
   exercice,
 }: BudgetLineTableProps) {
-  const [engagements, setEngagements] = useState<Record<string, number>>({});
+  const [executionData, setExecutionData] = useState<Record<string, {
+    engage: number;
+    liquide: number;
+    ordonnance: number;
+    paye: number;
+  }>>({});
 
   useEffect(() => {
-    const fetchEngagements = async () => {
-      const engMap: Record<string, number> = {};
-      
-      for (const line of lines) {
-        const { data } = await supabase
-          .from("budget_engagements")
-          .select("montant")
-          .eq("budget_line_id", line.id)
-          .eq("exercice", exercice);
-        
-        engMap[line.id] = data?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-      }
-      
-      setEngagements(engMap);
+    const fetchExecutionData = async () => {
+      if (lines.length === 0) return;
+
+      const lineIds = lines.map(l => l.id);
+
+      // Fetch engagements validés
+      const { data: engagements } = await supabase
+        .from("budget_engagements")
+        .select("budget_line_id, montant, statut")
+        .in("budget_line_id", lineIds)
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      // Fetch liquidations validées
+      const { data: liquidations } = await supabase
+        .from("budget_liquidations")
+        .select("engagement:budget_engagements(budget_line_id), montant, statut")
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      // Fetch ordonnancements validés
+      const { data: ordonnancements } = await supabase
+        .from("ordonnancements")
+        .select("liquidation:budget_liquidations(engagement:budget_engagements(budget_line_id)), montant, statut")
+        .eq("exercice", exercice)
+        .in("statut", ["valide", "signe"]);
+
+      // Fetch règlements payés
+      const { data: reglements } = await supabase
+        .from("reglements")
+        .select("ordonnancement:ordonnancements(liquidation:budget_liquidations(engagement:budget_engagements(budget_line_id))), montant, statut")
+        .eq("exercice", exercice)
+        .eq("statut", "paye");
+
+      const execMap: Record<string, { engage: number; liquide: number; ordonnance: number; paye: number }> = {};
+
+      // Initialize
+      lineIds.forEach(id => {
+        execMap[id] = { engage: 0, liquide: 0, ordonnance: 0, paye: 0 };
+      });
+
+      // Sum engagements
+      engagements?.forEach(e => {
+        if (e.budget_line_id && execMap[e.budget_line_id]) {
+          execMap[e.budget_line_id].engage += e.montant || 0;
+        }
+      });
+
+      // Sum liquidations
+      liquidations?.forEach(l => {
+        const lineId = (l.engagement as any)?.budget_line_id;
+        if (lineId && execMap[lineId]) {
+          execMap[lineId].liquide += l.montant || 0;
+        }
+      });
+
+      // Sum ordonnancements
+      ordonnancements?.forEach(o => {
+        const lineId = (o.liquidation as any)?.engagement?.budget_line_id;
+        if (lineId && execMap[lineId]) {
+          execMap[lineId].ordonnance += o.montant || 0;
+        }
+      });
+
+      // Sum règlements
+      reglements?.forEach(r => {
+        const lineId = (r.ordonnancement as any)?.liquidation?.engagement?.budget_line_id;
+        if (lineId && execMap[lineId]) {
+          execMap[lineId].paye += r.montant || 0;
+        }
+      });
+
+      setExecutionData(execMap);
     };
 
-    if (lines.length > 0) {
-      fetchEngagements();
-    }
+    fetchExecutionData();
   }, [lines, exercice]);
 
   return (
@@ -121,24 +171,28 @@ export function BudgetLineTable({
             <TableHead>Direction</TableHead>
             <TableHead className="text-right">Dotation</TableHead>
             <TableHead className="text-right">Engagé</TableHead>
+            <TableHead className="text-right">Liquidé</TableHead>
+            <TableHead className="text-right">Payé</TableHead>
             <TableHead className="text-right">Disponible</TableHead>
-            <TableHead>Validation</TableHead>
-            <TableHead>Exécution</TableHead>
+            <TableHead>Statut</TableHead>
             <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {lines.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                 Aucune ligne budgétaire trouvée
               </TableCell>
             </TableRow>
           ) : (
             lines.map((line) => {
-              const engaged = engagements[line.id] || 0;
-              const available = line.dotation_initiale - engaged;
+              const exec = executionData[line.id] || { engage: 0, liquide: 0, ordonnance: 0, paye: 0 };
+              const available = line.dotation_initiale - exec.engage;
               const displayCode = getDisplayBudgetCode(line);
+              const tauxExec = line.dotation_initiale > 0 
+                ? Math.round((exec.paye / line.dotation_initiale) * 100) 
+                : 0;
 
               return (
                 <TableRow key={line.id}>
@@ -171,13 +225,25 @@ export function BudgetLineTable({
                     {formatCurrency(line.dotation_initiale)}
                   </TableCell>
                   <TableCell className="text-right font-mono text-orange-600">
-                    {formatCurrency(engaged)}
+                    {formatCurrency(exec.engage)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-blue-600">
+                    {formatCurrency(exec.liquide)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-green-600">
+                    {formatCurrency(exec.paye)}
                   </TableCell>
                   <TableCell className={`text-right font-mono ${available < 0 ? "text-red-600" : "text-green-600"}`}>
                     {formatCurrency(available)}
                   </TableCell>
-                  <TableCell>{getStatusBadge(line.statut)}</TableCell>
-                  <TableCell>{getExecutionStatusBadge(line.statut_execution)}</TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      {getStatusBadge(line.statut)}
+                      {tauxExec > 0 && (
+                        <div className="text-xs text-muted-foreground">{tauxExec}% exécuté</div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
