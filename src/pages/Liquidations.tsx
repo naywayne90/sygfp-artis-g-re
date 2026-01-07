@@ -13,6 +13,7 @@ import { LiquidationDetails } from "@/components/liquidation/LiquidationDetails"
 import { LiquidationRejectDialog } from "@/components/liquidation/LiquidationRejectDialog";
 import { LiquidationDeferDialog } from "@/components/liquidation/LiquidationDeferDialog";
 import { LiquidationValidateDialog } from "@/components/liquidation/LiquidationValidateDialog";
+import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
@@ -41,6 +42,8 @@ export default function Liquidations() {
     isRejecting,
     isDeferring,
   } = useLiquidations();
+
+  const { canPerform } = usePermissionCheck();
 
   // Filter liquidations
   const filteredLiquidations = liquidations.filter(liq => 
@@ -128,10 +131,12 @@ export default function Liquidations() {
             Gestion des liquidations après constatation du service fait
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4" />
-          Nouvelle liquidation
-        </Button>
+        <PermissionGuard permission="liquidation.create" showDelegationBadge>
+          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4" />
+            Nouvelle liquidation
+          </Button>
+        </PermissionGuard>
       </div>
 
       {/* Search */}
@@ -230,11 +235,11 @@ export default function Liquidations() {
               <LiquidationList
                 liquidations={filteredLiquidations}
                 onView={handleView}
-                onSubmit={handleSubmit}
-                onValidate={handleValidate}
-                onReject={handleReject}
-                onDefer={handleDefer}
-                onResume={handleResume}
+                onSubmit={canPerform("liquidation.submit") ? handleSubmit : undefined}
+                onValidate={canPerform("liquidation.validate") ? handleValidate : undefined}
+                onReject={canPerform("liquidation.reject") ? handleReject : undefined}
+                onDefer={canPerform("liquidation.defer") ? handleDefer : undefined}
+                onResume={canPerform("liquidation.resume") ? handleResume : undefined}
               />
             </TabsContent>
 
@@ -242,9 +247,9 @@ export default function Liquidations() {
               <LiquidationList
                 liquidations={aValider}
                 onView={handleView}
-                onValidate={handleValidate}
-                onReject={handleReject}
-                onDefer={handleDefer}
+                onValidate={canPerform("liquidation.validate") ? handleValidate : undefined}
+                onReject={canPerform("liquidation.reject") ? handleReject : undefined}
+                onDefer={canPerform("liquidation.defer") ? handleDefer : undefined}
               />
             </TabsContent>
 
@@ -266,7 +271,7 @@ export default function Liquidations() {
               <LiquidationList
                 liquidations={differees}
                 onView={handleView}
-                onResume={handleResume}
+                onResume={canPerform("liquidation.resume") ? handleResume : undefined}
               />
             </TabsContent>
           </Tabs>
