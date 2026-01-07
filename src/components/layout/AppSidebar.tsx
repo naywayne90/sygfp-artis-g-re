@@ -33,6 +33,7 @@ import {
   Hash,
   Database,
   Layers,
+  ArrowRightLeft,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -91,6 +92,7 @@ const referentielItems = [
 // 2. Planification Budgétaire
 const planificationBudgetItems = [
   { title: "Structure Budgétaire", url: "/planification/budget", icon: Wallet },
+  { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
 ];
 
 // 3. Planification Exécution Physique
