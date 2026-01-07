@@ -316,6 +316,8 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     setIsProcessing(true);
     setImportProgress(0);
 
+    let importRecordId: string | null = null;
+
     try {
       // Create import record
       const { data: importRecord, error: importError } = await supabase
@@ -331,17 +333,20 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
         .single();
 
       if (importError) throw importError;
+      importRecordId = importRecord.id;
       setImportId(importRecord.id);
 
-      // Fetch reference maps
-      const [directions, objectifs, missions, actions, activites, nbe, sysco] = await Promise.all([
+      // Fetch reference maps in parallel
+      const [directions, objectifs, missions, actions, activites, sousActivites, nbe, sysco, existingLines] = await Promise.all([
         supabase.from("directions").select("id, code"),
         supabase.from("objectifs_strategiques").select("id, code"),
         supabase.from("missions").select("id, code"),
         supabase.from("actions").select("id, code"),
         supabase.from("activites").select("id, code"),
+        supabase.from("sous_activites").select("id, code"),
         supabase.from("nomenclature_nbe").select("id, code"),
         supabase.from("plan_comptable_sysco").select("id, code"),
+        supabase.from("budget_lines").select("id, code").eq("exercice", exercice || new Date().getFullYear()),
       ]);
 
       const directionMap = new Map(directions.data?.map(d => [d.code, d.id]) || []);
@@ -349,18 +354,19 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       const missionMap = new Map(missions.data?.map(m => [m.code, m.id]) || []);
       const actionMap = new Map(actions.data?.map(a => [a.code, a.id]) || []);
       const activiteMap = new Map(activites.data?.map(a => [a.code, a.id]) || []);
+      const sousActiviteMap = new Map(sousActivites.data?.map(sa => [sa.code, sa.id]) || []);
       const nbeMap = new Map(nbe.data?.map(n => [n.code, n.id]) || []);
       const syscoMap = new Map(sysco.data?.map(s => [s.code, s.id]) || []);
+      const existingMap = new Map(existingLines.data?.map(l => [l.code, l.id]) || []);
 
       const validRows = parsedRows.filter(r => r.isValid);
-      let successCount = 0;
-      let errorCount = 0;
-      const errors: { row: number; message: string }[] = [];
-
-      for (let i = 0; i < validRows.length; i++) {
-        const row = validRows[i];
+      
+      // Prepare all budget lines for batch operations
+      const toInsert: any[] = [];
+      const toUpdate: { id: string; data: any }[] = [];
+      
+      for (const row of validRows) {
         const data = row.data;
-
         const budgetLine = {
           code: data.code,
           label: data.label,
@@ -373,6 +379,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
           mission_id: data.mission_code ? missionMap.get(data.mission_code) : null,
           action_id: data.action_code ? actionMap.get(data.action_code) : null,
           activite_id: data.activite_code ? activiteMap.get(data.activite_code) : null,
+          sous_activite_id: data.sous_activite_code ? sousActiviteMap.get(data.sous_activite_code) : null,
           nbe_id: data.nbe_code ? nbeMap.get(data.nbe_code) : null,
           sysco_id: data.sysco_code ? syscoMap.get(data.sysco_code) : null,
           commentaire: data.commentaire || null,
@@ -381,54 +388,106 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
           budget_import_id: importRecord.id,
         };
 
-        // Check if exists
-        const { data: existing } = await supabase
-          .from("budget_lines")
-          .select("id")
-          .eq("code", data.code)
-          .eq("exercice", exercice || new Date().getFullYear())
-          .maybeSingle();
-
-        let error;
-        if (existing) {
-          const { error: updateError } = await supabase
-            .from("budget_lines")
-            .update(budgetLine)
-            .eq("id", existing.id);
-          error = updateError;
+        const existingId = existingMap.get(data.code);
+        if (existingId) {
+          toUpdate.push({ id: existingId, data: budgetLine });
         } else {
-          const { error: insertError } = await supabase
-            .from("budget_lines")
-            .insert(budgetLine);
-          error = insertError;
+          toInsert.push(budgetLine);
         }
+      }
 
-        if (error) {
+      setImportProgress(20);
+
+      // Batch insert new lines (transactional - if one fails, all fail)
+      let successCount = 0;
+      let errorCount = 0;
+      const errors: { row: number; message: string }[] = [];
+
+      if (toInsert.length > 0) {
+        const { error: insertError } = await supabase
+          .from("budget_lines")
+          .insert(toInsert);
+
+        if (insertError) {
+          // Rollback: delete the import record and mark as failed
+          await supabase
+            .from("budget_imports")
+            .update({
+              status: "echec",
+              errors: [{ row: 0, message: `Import annulé: ${insertError.message}` }],
+              completed_at: new Date().toISOString(),
+            })
+            .eq("id", importRecord.id);
+          
+          throw new Error(`Rollback: ${insertError.message}. Aucune ligne n'a été importée.`);
+        }
+        successCount += toInsert.length;
+      }
+
+      setImportProgress(60);
+
+      // Batch update existing lines (one by one for better error handling)
+      for (let i = 0; i < toUpdate.length; i++) {
+        const { id, data } = toUpdate[i];
+        const { error: updateError } = await supabase
+          .from("budget_lines")
+          .update(data)
+          .eq("id", id);
+
+        if (updateError) {
           errorCount++;
-          errors.push({ row: row.rowIndex, message: error.message });
+          errors.push({ row: i, message: updateError.message });
         } else {
           successCount++;
         }
-
-        setImportProgress(Math.round(((i + 1) / validRows.length) * 100));
+        
+        setImportProgress(60 + Math.round((i + 1) / toUpdate.length * 30));
       }
 
-      // Update import record
+      setImportProgress(95);
+
+      // Update import record with final stats
       await supabase
         .from("budget_imports")
         .update({
           success_rows: successCount,
           error_rows: errorCount,
           errors: errors.length > 0 ? errors : null,
-          status: "termine",
+          status: errorCount > 0 ? "partiel" : "termine",
           completed_at: new Date().toISOString(),
         })
         .eq("id", importRecord.id);
 
+      // Log to audit
+      await supabase.from("audit_logs").insert({
+        entity_type: "budget_import",
+        entity_id: importRecord.id,
+        action: "import_completed",
+        new_values: {
+          file_name: file?.name,
+          success_rows: successCount,
+          error_rows: errorCount,
+          total_rows: validationResult.totalRows,
+        },
+        exercice: exercice || new Date().getFullYear(),
+      });
+
+      setImportProgress(100);
       setCurrentStep(4);
-      toast.success(`Import terminé: ${successCount} ligne(s) importée(s)`);
+      toast.success(`Import terminé: ${successCount} ligne(s) importée(s)${errorCount > 0 ? `, ${errorCount} erreur(s)` : ""}`);
       onSuccess();
     } catch (error: any) {
+      // Mark import as failed if record exists
+      if (importRecordId) {
+        await supabase
+          .from("budget_imports")
+          .update({
+            status: "echec",
+            errors: [{ row: 0, message: error.message }],
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", importRecordId);
+      }
       toast.error("Erreur d'import: " + error.message);
     } finally {
       setIsProcessing(false);

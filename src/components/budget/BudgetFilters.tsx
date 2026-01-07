@@ -129,6 +129,25 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     },
   });
 
+  // Sous-activités filtered by selected Activité
+  const { data: sousActivites } = useQuery({
+    queryKey: ["sous-activites-filter", filters.activite_id],
+    queryFn: async () => {
+      let query = supabase
+        .from("sous_activites")
+        .select("id, code, libelle, activite_id")
+        .eq("est_active", true)
+        .order("code");
+      
+      if (filters.activite_id) {
+        query = query.eq("activite_id", filters.activite_id);
+      }
+      
+      const { data } = await query;
+      return data || [];
+    },
+  });
+
   const clearFilters = () => {
     onFiltersChange({});
   };
@@ -139,6 +158,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     filters.mission_id ||
     filters.action_id ||
     filters.activite_id ||
+    filters.sous_activite_id ||
     filters.keyword || 
     filters.statut ||
     filters.statut_execution ||
@@ -241,8 +261,8 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         </div>
       </div>
 
-      {/* Row 2 - Cascade: Mission → Action → Activité */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Row 2 - Cascade: Mission → Action → Activité → Sous-activité */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
           <Label>Mission</Label>
           <Select
@@ -304,6 +324,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
               onFiltersChange({ 
                 ...filters, 
                 activite_id: value === "all" ? undefined : value,
+                sous_activite_id: undefined,
               })
             }
           >
@@ -315,6 +336,31 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
               {activites?.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   {a.code} - {a.libelle}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Sous-activité</Label>
+          <Select
+            value={filters.sous_activite_id || "all"}
+            onValueChange={(value) =>
+              onFiltersChange({ 
+                ...filters, 
+                sous_activite_id: value === "all" ? undefined : value,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Toutes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les sous-activités</SelectItem>
+              {sousActivites?.map((sa) => (
+                <SelectItem key={sa.id} value={sa.id}>
+                  {sa.code} - {sa.libelle}
                 </SelectItem>
               ))}
             </SelectContent>
