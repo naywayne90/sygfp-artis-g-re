@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { useRecentActivities } from "@/hooks/useRecentActivities";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,7 +35,8 @@ import { DashboardDG } from "@/components/dashboard/DashboardDG";
 import { DashboardDAF } from "@/components/dashboard/DashboardDAF";
 import { DashboardSDPM } from "@/components/dashboard/DashboardSDPM";
 import { DashboardTresorerie } from "@/components/dashboard/DashboardTresorerie";
-import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+import { AlertsPanelEnhanced } from "@/components/dashboard/AlertsPanelEnhanced";
+import { RecentActivitiesPanel } from "@/components/dashboard/RecentActivitiesPanel";
 import { KPICards } from "@/components/dashboard/KPICards";
 
 const formatMontant = (montant: number): string => {
@@ -97,7 +97,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { userRoles, hasAnyRole } = usePermissions();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: activities, isLoading: activitiesLoading } = useRecentActivities();
 
   // Utiliser le tauxEngagement précalculé depuis le hook
   const budgetExecute = stats?.tauxEngagement || 0;
@@ -475,55 +474,12 @@ export default function Dashboard() {
             </Card>
 
             {/* Recent Activities */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-secondary" />
-                  Activités récentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activitiesLoading ? (
-                  <div className="space-y-4">
-                    {Array(5).fill(0).map((_, i) => (
-                      <div key={i} className="flex gap-3">
-                        <Skeleton className="h-8 w-8 rounded-full" />
-                        <div className="flex-1 space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/2" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : activities && activities.length > 0 ? (
-                  <div className="space-y-4">
-                    {activities.map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0 last:pb-0">
-                        <div className="p-2 rounded-full bg-muted">
-                          {getTypeIcon(activity.type)}
-                        </div>
-                        <div className="flex-1 space-y-1 min-w-0">
-                          <p className="text-sm font-medium leading-none truncate">{activity.title}</p>
-                          <p className="text-xs text-muted-foreground">{activity.action}</p>
-                          <p className="text-xs text-muted-foreground">{activity.time}</p>
-                        </div>
-                        {getStatusBadge(activity.status)}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Aucune activité récente</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <RecentActivitiesPanel maxItems={8} showViewAll={true} />
           </div>
 
           {/* KPIs et alertes */}
           <KPICards />
-          <AlertsPanel maxItems={5} />
+          <AlertsPanelEnhanced maxItems={5} />
         </TabsContent>
 
         {/* Dashboard DG */}
