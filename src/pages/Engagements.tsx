@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2, Lock } from "lucide-react";
 import { useEngagements, Engagement } from "@/hooks/useEngagements";
 import { EngagementForm } from "@/components/engagement/EngagementForm";
 import { EngagementList } from "@/components/engagement/EngagementList";
@@ -13,7 +14,7 @@ import { EngagementDeferDialog } from "@/components/engagement/EngagementDeferDi
 import { EngagementValidateDialog } from "@/components/engagement/EngagementValidateDialog";
 import { EngagementPrintDialog } from "@/components/engagement/EngagementPrintDialog";
 import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
-
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
@@ -35,6 +36,7 @@ export default function Engagements() {
   } = useEngagements();
 
   const { canPerform } = usePermissionCheck();
+  const { isReadOnly, getDisabledMessage, checkCanWrite } = useExerciceWriteGuard();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -109,10 +111,22 @@ export default function Engagements() {
           </p>
         </div>
         <PermissionGuard permission="engagement.create" showDelegationBadge>
-          <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
-            <Plus className="h-4 w-4" />
-            Nouvel engagement
-          </Button>
+          {isReadOnly ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button className="gap-2" disabled>
+                  <Lock className="h-4 w-4" />
+                  Nouvel engagement
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{getDisabledMessage()}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4" />
+              Nouvel engagement
+            </Button>
+          )}
         </PermissionGuard>
       </div>
 
