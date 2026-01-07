@@ -5429,12 +5429,20 @@ export type Database = {
           code: string
           code_admission: string | null
           code_comptable: string | null
+          contact_email: string | null
+          contact_fonction: string | null
+          contact_nom: string | null
+          contact_telephone: string | null
           created_at: string
           created_by: string | null
           date_expiration_fiscale: string | null
+          date_qualification: string | null
           documents_fiscaux: Json | null
           email: string | null
           id: string
+          ifu: string | null
+          motif_suspension: string | null
+          nif: string | null
           ninea: string | null
           raison_sociale: string
           rccm: string | null
@@ -5444,12 +5452,17 @@ export type Database = {
           secteur_activite: string | null
           secteur_principal_id: string | null
           secteur_secondaire_id: string | null
+          sigle: string | null
           statut: string | null
           statut_fiscal: string | null
+          suspended_at: string | null
+          suspended_by: string | null
           telephone: string | null
+          type_prestataire: string | null
           updated_at: string
           validated_at: string | null
           validated_by: string | null
+          ville: string | null
         }
         Insert: {
           adresse?: string | null
@@ -5457,12 +5470,20 @@ export type Database = {
           code: string
           code_admission?: string | null
           code_comptable?: string | null
+          contact_email?: string | null
+          contact_fonction?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
           created_at?: string
           created_by?: string | null
           date_expiration_fiscale?: string | null
+          date_qualification?: string | null
           documents_fiscaux?: Json | null
           email?: string | null
           id?: string
+          ifu?: string | null
+          motif_suspension?: string | null
+          nif?: string | null
           ninea?: string | null
           raison_sociale: string
           rccm?: string | null
@@ -5472,12 +5493,17 @@ export type Database = {
           secteur_activite?: string | null
           secteur_principal_id?: string | null
           secteur_secondaire_id?: string | null
+          sigle?: string | null
           statut?: string | null
           statut_fiscal?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
           telephone?: string | null
+          type_prestataire?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
+          ville?: string | null
         }
         Update: {
           adresse?: string | null
@@ -5485,12 +5511,20 @@ export type Database = {
           code?: string
           code_admission?: string | null
           code_comptable?: string | null
+          contact_email?: string | null
+          contact_fonction?: string | null
+          contact_nom?: string | null
+          contact_telephone?: string | null
           created_at?: string
           created_by?: string | null
           date_expiration_fiscale?: string | null
+          date_qualification?: string | null
           documents_fiscaux?: Json | null
           email?: string | null
           id?: string
+          ifu?: string | null
+          motif_suspension?: string | null
+          nif?: string | null
           ninea?: string | null
           raison_sociale?: string
           rccm?: string | null
@@ -5500,12 +5534,17 @@ export type Database = {
           secteur_activite?: string | null
           secteur_principal_id?: string | null
           secteur_secondaire_id?: string | null
+          sigle?: string | null
           statut?: string | null
           statut_fiscal?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
           telephone?: string | null
+          type_prestataire?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
+          ville?: string | null
         }
         Relationships: [
           {
@@ -5527,6 +5566,13 @@ export type Database = {
             columns: ["secteur_secondaire_id"]
             isOneToOne: false
             referencedRelation: "ref_secteurs_activite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestataires_suspended_by_fkey"
+            columns: ["suspended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -6851,6 +6897,184 @@ export type Database = {
           },
         ]
       }
+      supplier_bank_accounts: {
+        Row: {
+          banque: string
+          bic_swift: string | null
+          cle_rib: string | null
+          code_banque: string | null
+          code_guichet: string | null
+          created_at: string
+          est_actif: boolean | null
+          est_principal: boolean | null
+          iban: string | null
+          id: string
+          numero_compte: string
+          supplier_id: string
+          titulaire: string | null
+          updated_at: string
+        }
+        Insert: {
+          banque: string
+          bic_swift?: string | null
+          cle_rib?: string | null
+          code_banque?: string | null
+          code_guichet?: string | null
+          created_at?: string
+          est_actif?: boolean | null
+          est_principal?: boolean | null
+          iban?: string | null
+          id?: string
+          numero_compte: string
+          supplier_id: string
+          titulaire?: string | null
+          updated_at?: string
+        }
+        Update: {
+          banque?: string
+          bic_swift?: string | null
+          cle_rib?: string | null
+          code_banque?: string | null
+          code_guichet?: string | null
+          created_at?: string
+          est_actif?: boolean | null
+          est_principal?: boolean | null
+          iban?: string | null
+          id?: string
+          numero_compte?: string
+          supplier_id?: string
+          titulaire?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_bank_accounts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_bank_accounts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_documents: {
+        Row: {
+          created_at: string
+          date_delivrance: string | null
+          date_expiration: string | null
+          fichier_nom: string | null
+          fichier_path: string | null
+          id: string
+          notes: string | null
+          numero: string | null
+          rappel_jours: number | null
+          statut: string | null
+          supplier_id: string
+          type_document: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_delivrance?: string | null
+          date_expiration?: string | null
+          fichier_nom?: string | null
+          fichier_path?: string | null
+          id?: string
+          notes?: string | null
+          numero?: string | null
+          rappel_jours?: number | null
+          statut?: string | null
+          supplier_id: string
+          type_document: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_delivrance?: string | null
+          date_expiration?: string | null
+          fichier_nom?: string | null
+          fichier_path?: string | null
+          id?: string
+          notes?: string | null
+          numero?: string | null
+          rappel_jours?: number | null
+          statut?: string | null
+          supplier_id?: string
+          type_document?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_documents_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_documents_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_required_documents: {
+        Row: {
+          a_date_expiration: boolean | null
+          code: string
+          created_at: string
+          description: string | null
+          est_actif: boolean | null
+          est_obligatoire: boolean | null
+          id: string
+          libelle: string
+          ordre_affichage: number | null
+          rappel_jours_defaut: number | null
+        }
+        Insert: {
+          a_date_expiration?: boolean | null
+          code: string
+          created_at?: string
+          description?: string | null
+          est_actif?: boolean | null
+          est_obligatoire?: boolean | null
+          id?: string
+          libelle: string
+          ordre_affichage?: number | null
+          rappel_jours_defaut?: number | null
+        }
+        Update: {
+          a_date_expiration?: boolean | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          est_actif?: boolean | null
+          est_obligatoire?: boolean | null
+          id?: string
+          libelle?: string
+          ordre_affichage?: number | null
+          rappel_jours_defaut?: number | null
+        }
+        Relationships: []
+      }
       system_config: {
         Row: {
           category: string
@@ -7821,6 +8045,7 @@ export type Database = {
         Args: { p_budget_line_id: string }
         Returns: boolean
       }
+      can_qualify_supplier: { Args: { p_supplier_id: string }; Returns: Json }
       check_budget_alerts: {
         Args: { p_exercice: number }
         Returns: {
@@ -8002,6 +8227,7 @@ export type Database = {
         Args: { p_annee?: number; p_exercice?: number; p_rule_id: string }
         Returns: string
       }
+      update_supplier_document_statuses: { Args: never; Returns: number }
       user_can_access_exercice: {
         Args: { p_exercice: number }
         Returns: boolean
