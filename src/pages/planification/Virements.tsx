@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { useBudgetTransfers, BudgetTransfer } from "@/hooks/useBudgetTransfers";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,9 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Lock,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -79,7 +82,8 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
 };
 
 export default function Virements() {
-  const { exercice } = useExercice();
+  const { exercice, isReadOnly } = useExercice();
+  const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,15 +156,35 @@ export default function Virements() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Virements & Ajustements budgétaires</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">Virements & Ajustements budgétaires</h1>
+              {isReadOnly && <Lock className="h-5 w-5 text-warning" />}
+            </div>
             <p className="text-muted-foreground">
               Exercice {exercice} - Gestion des mouvements de crédits
+              {isReadOnly && <span className="ml-2 text-warning">(Lecture seule)</span>}
             </p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button 
+                    onClick={() => setShowCreateDialog(true)}
+                    disabled={!canWrite}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Nouveau
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Stats Cards */}

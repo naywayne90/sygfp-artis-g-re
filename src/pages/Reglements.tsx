@@ -25,9 +25,14 @@ import {
   CheckCircle, 
   Clock, 
   TrendingUp,
-  CreditCard
+  CreditCard,
+  Lock
 } from "lucide-react";
 import { useReglements } from "@/hooks/useReglements";
+import { useExercice } from "@/contexts/ExerciceContext";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ReglementForm } from "@/components/reglement/ReglementForm";
 import { ReglementList } from "@/components/reglement/ReglementList";
 import { ReglementDetails } from "@/components/reglement/ReglementDetails";
@@ -37,6 +42,8 @@ const formatMontant = (montant: number) => {
 };
 
 export default function Reglements() {
+  const { exercice } = useExercice();
+  const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { reglements, isLoading, stats, ordonnancementsValides } = useReglements();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -87,20 +94,31 @@ export default function Reglements() {
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Règlements</h1>
-          <p className="page-description">
-            Enregistrement des paiements effectués (étape 4)
-          </p>
-        </div>
-        <Button 
-          className="gap-2" 
-          onClick={() => setShowCreateDialog(true)}
-          disabled={ordonnancementsValides.length === 0}
-        >
-          <Plus className="h-4 w-4" />
-          Enregistrer un règlement
-        </Button>
+        <ExerciceSubtitle 
+          title="Règlements" 
+          description="Enregistrement des paiements effectués (étape 4)" 
+        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button 
+                  className="gap-2" 
+                  onClick={() => setShowCreateDialog(true)}
+                  disabled={!canWrite || ordonnancementsValides.length === 0}
+                >
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Enregistrer un règlement
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Filters */}

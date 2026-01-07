@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { useMarches, Marche } from "@/hooks/useMarches";
 import { MarcheForm } from "@/components/marches/MarcheForm";
 import { MarcheList } from "@/components/marches/MarcheList";
@@ -18,11 +20,14 @@ import {
   Clock, 
   CheckCircle2, 
   XCircle, 
-  AlertCircle 
+  AlertCircle,
+  Lock
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Marches() {
   const { exercice } = useExercice();
+  const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const {
     allMarches,
     marchesAValider,
@@ -51,16 +56,31 @@ export default function Marches() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Passation de Marchés (SDPM)</h1>
-          <p className="page-description">
-            Gestion des marchés et workflow de validation - Exercice {exercice}
-          </p>
-        </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nouveau marché
-        </Button>
+        <ExerciceSubtitle 
+          title="Passation de Marchés (SDPM)" 
+          description="Gestion des marchés et workflow de validation" 
+        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button 
+                  onClick={() => setShowForm(true)} 
+                  className="gap-2"
+                  disabled={!canWrite}
+                >
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouveau marché
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* KPIs */}
