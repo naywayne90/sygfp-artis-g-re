@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import Notifications from "./pages/Notifications";
 import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 import Alertes from "./pages/Alertes";
+import MonProfil from "./pages/MonProfil";
 
 // Pages Admin
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
@@ -102,6 +103,7 @@ const App = () => (
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/alertes-budgetaires" element={<AlertesBudgetaires />} />
               <Route path="/alertes" element={<Alertes />} />
+              <Route path="/mon-profil" element={<MonProfil />} />
               
               {/* Administration */}
               <Route path="/admin/exercices" element={<GestionExercices />} />
