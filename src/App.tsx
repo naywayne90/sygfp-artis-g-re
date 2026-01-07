@@ -39,6 +39,7 @@ import SecteursActivite from "./pages/admin/SecteursActivite";
 import DocumentationModules from "./pages/admin/DocumentationModules";
 import MatriceRACI from "./pages/admin/MatriceRACI";
 import ChecklistProduction from "./pages/admin/ChecklistProduction";
+import LiensLambda from "./pages/admin/LiensLambda";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -112,6 +113,10 @@ const App = () => (
               <Route path="/admin/dictionnaire" element={<DictionnaireVariables />} />
               <Route path="/admin/codification" element={<ReferentielCodification />} />
               <Route path="/admin/secteurs-activite" element={<SecteursActivite />} />
+              <Route path="/admin/documentation" element={<DocumentationModules />} />
+              <Route path="/admin/raci" element={<MatriceRACI />} />
+              <Route path="/admin/checklist-production" element={<ChecklistProduction />} />
+              <Route path="/admin/liens-lambda" element={<LiensLambda />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

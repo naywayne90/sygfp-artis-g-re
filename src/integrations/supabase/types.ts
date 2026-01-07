@@ -2985,6 +2985,113 @@ export type Database = {
           },
         ]
       }
+      lambda_link_types: {
+        Row: {
+          actif: boolean | null
+          cible_table: string
+          code: string
+          created_at: string | null
+          default_mapping: Json | null
+          description: string | null
+          id: string
+          libelle: string
+          ordre: number | null
+          source_table: string
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          cible_table: string
+          code: string
+          created_at?: string | null
+          default_mapping?: Json | null
+          description?: string | null
+          id?: string
+          libelle: string
+          ordre?: number | null
+          source_table: string
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          cible_table?: string
+          code?: string
+          created_at?: string | null
+          default_mapping?: Json | null
+          description?: string | null
+          id?: string
+          libelle?: string
+          ordre?: number | null
+          source_table?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lambda_links: {
+        Row: {
+          cible_id: string | null
+          cible_table: string
+          commentaire: string | null
+          created_at: string | null
+          created_by: string | null
+          erreur_detail: string | null
+          exercice: number | null
+          id: string
+          last_sync_at: string | null
+          mapping_json: Json
+          source_id: string
+          source_table: string
+          statut_sync: string
+          sync_count: number | null
+          type_lien: string
+          updated_at: string | null
+        }
+        Insert: {
+          cible_id?: string | null
+          cible_table: string
+          commentaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          erreur_detail?: string | null
+          exercice?: number | null
+          id?: string
+          last_sync_at?: string | null
+          mapping_json?: Json
+          source_id: string
+          source_table: string
+          statut_sync?: string
+          sync_count?: number | null
+          type_lien?: string
+          updated_at?: string | null
+        }
+        Update: {
+          cible_id?: string | null
+          cible_table?: string
+          commentaire?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          erreur_detail?: string | null
+          exercice?: number | null
+          id?: string
+          last_sync_at?: string | null
+          mapping_json?: Json
+          source_id?: string
+          source_table?: string
+          statut_sync?: string
+          sync_count?: number | null
+          type_lien?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lambda_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       liquidation_attachments: {
         Row: {
           created_at: string
@@ -6063,6 +6170,57 @@ export type Database = {
           },
         ]
       }
+      ref_variables: {
+        Row: {
+          actif: boolean | null
+          code_variable: string
+          created_at: string | null
+          description: string | null
+          exemple: string | null
+          id: string
+          libelle: string
+          module_cible: string | null
+          module_source: string | null
+          obligatoire: boolean | null
+          source_of_truth: string | null
+          tables_concernees: Json | null
+          type_variable: string
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          code_variable: string
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          id?: string
+          libelle: string
+          module_cible?: string | null
+          module_source?: string | null
+          obligatoire?: boolean | null
+          source_of_truth?: string | null
+          tables_concernees?: Json | null
+          type_variable?: string
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          code_variable?: string
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          id?: string
+          libelle?: string
+          module_cible?: string | null
+          module_source?: string | null
+          obligatoire?: boolean | null
+          source_of_truth?: string | null
+          tables_concernees?: Json | null
+          type_variable?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reglement_attachments: {
         Row: {
           created_at: string | null
@@ -7470,6 +7628,18 @@ export type Database = {
         }
         Returns: string
       }
+      create_lambda_link: {
+        Args: {
+          p_cible_id?: string
+          p_cible_table: string
+          p_exercice?: number
+          p_mapping?: Json
+          p_source_id: string
+          p_source_table: string
+          p_type_lien?: string
+        }
+        Returns: string
+      }
       generate_budget_code_v2: {
         Args: {
           p_action_code: string
@@ -7591,6 +7761,7 @@ export type Database = {
         Args: { p_alert_id: string; p_comment?: string }
         Returns: boolean
       }
+      sync_lambda_link: { Args: { p_link_id: string }; Returns: boolean }
       user_can_access_exercice: {
         Args: { p_exercice: number }
         Returns: boolean
