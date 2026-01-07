@@ -44,6 +44,7 @@ import LiensLambda from "./pages/admin/LiensLambda";
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
 import PlanificationPhysique from "./pages/planification/PlanificationPhysique";
+import Virements from "./pages/planification/Virements";
 
 // Pages Exécution
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
@@ -121,6 +122,7 @@ const App = () => (
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
               <Route path="/planification/physique" element={<PlanificationPhysique />} />
+              <Route path="/planification/virements" element={<Virements />} />
               
               {/* Exécution Budgétaire */}
               <Route path="/notes" element={<Notes />} />
