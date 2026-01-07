@@ -334,6 +334,140 @@ export type Database = {
           },
         ]
       }
+      budg_alert_rules: {
+        Row: {
+          actif: boolean
+          canal: string | null
+          created_at: string | null
+          description: string | null
+          destinataires_roles: string[] | null
+          destinataires_users: string[] | null
+          exercice: number | null
+          id: string
+          scope: string
+          seuil_pct: number
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean
+          canal?: string | null
+          created_at?: string | null
+          description?: string | null
+          destinataires_roles?: string[] | null
+          destinataires_users?: string[] | null
+          exercice?: number | null
+          id?: string
+          scope?: string
+          seuil_pct: number
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean
+          canal?: string | null
+          created_at?: string | null
+          description?: string | null
+          destinataires_roles?: string[] | null
+          destinataires_users?: string[] | null
+          exercice?: number | null
+          id?: string
+          scope?: string
+          seuil_pct?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      budg_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          context: Json | null
+          created_at: string | null
+          exercice: number
+          id: string
+          ligne_budgetaire_id: string | null
+          message: string
+          montant_disponible: number | null
+          montant_dotation: number | null
+          montant_engage: number | null
+          niveau: string
+          resolution_comment: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          rule_id: string | null
+          seuil_atteint: number
+          taux_actuel: number | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          context?: Json | null
+          created_at?: string | null
+          exercice: number
+          id?: string
+          ligne_budgetaire_id?: string | null
+          message: string
+          montant_disponible?: number | null
+          montant_dotation?: number | null
+          montant_engage?: number | null
+          niveau?: string
+          resolution_comment?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          seuil_atteint: number
+          taux_actuel?: number | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          context?: Json | null
+          created_at?: string | null
+          exercice?: number
+          id?: string
+          ligne_budgetaire_id?: string | null
+          message?: string
+          montant_disponible?: number | null
+          montant_dotation?: number | null
+          montant_engage?: number | null
+          niveau?: string
+          resolution_comment?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          seuil_atteint?: number
+          taux_actuel?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budg_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budg_alerts_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budg_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budg_alerts_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "budg_alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_activities: {
         Row: {
           budget_line_id: string
@@ -7143,9 +7277,23 @@ export type Database = {
       }
     }
     Functions: {
+      acknowledge_budget_alert: {
+        Args: { p_alert_id: string }
+        Returns: boolean
+      }
       can_engage_on_budget_line: {
         Args: { p_budget_line_id: string }
         Returns: boolean
+      }
+      check_budget_alerts: {
+        Args: { p_exercice: number }
+        Returns: {
+          alerte_id: string
+          ligne_code: string
+          niveau: string
+          seuil: number
+          taux: number
+        }[]
       }
       create_engagement_from_eb: {
         Args: {
@@ -7264,6 +7412,10 @@ export type Database = {
           new_code: string
           old_code: string
         }[]
+      }
+      resolve_budget_alert: {
+        Args: { p_alert_id: string; p_comment?: string }
+        Returns: boolean
       }
       user_can_access_exercice: {
         Args: { p_exercice: number }

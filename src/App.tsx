@@ -21,6 +21,7 @@ import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
 import Notifications from "./pages/Notifications";
+import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 
 // Pages Admin
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
@@ -93,6 +94,7 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/recherche" element={<Recherche />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/alertes-budgetaires" element={<AlertesBudgetaires />} />
               
               {/* Administration */}
               <Route path="/admin/exercices" element={<GestionExercices />} />
