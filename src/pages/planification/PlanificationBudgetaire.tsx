@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useBudgetLines, useCreditTransfers, BudgetLineWithRelations, BudgetLineFilters } from "@/hooks/useBudgetLines";
 import { BudgetLineTable } from "@/components/budget/BudgetLineTable";
+import { BudgetTreeView } from "@/components/budget/BudgetTreeView";
+import { TopOSWidget } from "@/components/budget/TopOSWidget";
 import { BudgetLineForm } from "@/components/budget/BudgetLineForm";
 import { BudgetFilters } from "@/components/budget/BudgetFilters";
 import { BudgetImportAdvanced } from "@/components/budget/BudgetImportAdvanced";
@@ -25,7 +27,9 @@ import {
   FileCheck,
   ShieldCheck,
   History,
-  AlertTriangle
+  AlertTriangle,
+  TreePine,
+  List
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -49,6 +53,8 @@ export default function PlanificationBudgetaire() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [editingLine, setEditingLine] = useState<BudgetLineWithRelations | null>(null);
   const [selectedLineForHistory, setSelectedLineForHistory] = useState<BudgetLineWithRelations | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "tree">("table");
+  const [engagements, setEngagements] = useState<Record<string, number>>({});
 
   const {
     budgetLines,
@@ -94,6 +100,39 @@ export default function PlanificationBudgetaire() {
     setSelectedLineForHistory(line);
     setShowHistory(true);
   };
+
+  const handleDuplicate = (line: BudgetLineWithRelations) => {
+    const duplicated = {
+      ...line,
+      id: undefined,
+      code: line.code + "_COPY",
+      label: line.label + " (copie)",
+      statut: "brouillon",
+    };
+    setEditingLine(duplicated as BudgetLineWithRelations);
+    setShowForm(true);
+  };
+
+  // Fetch engagements for all lines
+  useEffect(() => {
+    const fetchEngagements = async () => {
+      if (!budgetLines || budgetLines.length === 0) return;
+      
+      const engMap: Record<string, number> = {};
+      for (const line of budgetLines) {
+        const { data } = await supabase
+          .from("budget_engagements")
+          .select("montant")
+          .eq("budget_line_id", line.id)
+          .eq("exercice", exercice || new Date().getFullYear());
+        
+        engMap[line.id] = data?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      }
+      setEngagements(engMap);
+    };
+
+    fetchEngagements();
+  }, [budgetLines, exercice]);
 
   const handleExport = async () => {
     if (!budgetLines || budgetLines.length === 0) {
@@ -180,7 +219,7 @@ export default function PlanificationBudgetaire() {
       )}
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -236,6 +275,9 @@ export default function PlanificationBudgetaire() {
             <p className="text-xs text-muted-foreground">En attente d'approbation</p>
           </CardContent>
         </Card>
+
+        {/* Top OS Widget */}
+        <TopOSWidget lines={budgetLines || []} engagements={engagements} />
       </div>
 
       <Tabs defaultValue="budget" className="space-y-4">
@@ -253,42 +295,41 @@ export default function PlanificationBudgetaire() {
 
         <TabsContent value="budget" className="space-y-4">
           {/* Actions */}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle ligne
-            </Button>
-            <Button variant="outline" onClick={() => setShowImport(true)}>
-              <Upload className="mr-2 h-4 w-4" />
-              Importer CSV
-            </Button>
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="mr-2 h-4 w-4" />
-              Exporter CSV
-            </Button>
-            <Button variant="outline" onClick={() => setShowTransferForm(true)}>
-              <ArrowLeftRight className="mr-2 h-4 w-4" />
-              Virement de crédits
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                const eligibleLines = budgetLines?.filter(
-                  l => !l.code_version || l.code_version === 'V2' || !l.code_budgetaire_v2
-                ).map(l => l.id) || [];
-                if (eligibleLines.length === 0) {
-                  toast.info("Aucune ligne éligible à la régénération");
-                  return;
-                }
-                if (confirm(`Régénérer ${eligibleLines.length} code(s) V2 ?`)) {
-                  regenerateCodesV2(eligibleLines);
-                }
-              }}
-              disabled={isRegenerating}
-            >
-              <Target className="mr-2 h-4 w-4" />
-              {isRegenerating ? "Régénération..." : "Régénérer codes V2"}
-            </Button>
+          <div className="flex flex-wrap gap-2 items-center justify-between">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Nouvelle ligne
+              </Button>
+              <Button variant="outline" onClick={() => setShowImport(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Importer CSV
+              </Button>
+              <Button variant="outline" onClick={handleExport}>
+                <Download className="mr-2 h-4 w-4" />
+                Exporter CSV
+              </Button>
+              <Button variant="outline" onClick={() => setShowTransferForm(true)}>
+                <ArrowLeftRight className="mr-2 h-4 w-4" />
+                Virement de crédits
+              </Button>
+            </div>
+            <div className="flex gap-1 border rounded-md p-1">
+              <Button 
+                variant={viewMode === "table" ? "secondary" : "ghost"} 
+                size="sm"
+                onClick={() => setViewMode("table")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant={viewMode === "tree" ? "secondary" : "ghost"} 
+                size="sm"
+                onClick={() => setViewMode("tree")}
+              >
+                <TreePine className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Filters */}
@@ -307,6 +348,18 @@ export default function PlanificationBudgetaire() {
                 <div className="text-center py-8 text-muted-foreground">
                   Chargement...
                 </div>
+              ) : viewMode === "tree" ? (
+                <BudgetTreeView
+                  lines={budgetLines || []}
+                  engagements={engagements}
+                  onEdit={handleEdit}
+                  onDuplicate={handleDuplicate}
+                  onSubmit={submitBudgetLine}
+                  onValidate={validateBudgetLine}
+                  onReject={(id, reason) => rejectBudgetLine({ id, reason })}
+                  onDelete={deleteBudgetLine}
+                  onViewHistory={handleViewHistory}
+                />
               ) : (
                 <BudgetLineTable
                   lines={budgetLines || []}

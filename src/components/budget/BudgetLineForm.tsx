@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
+import { SYSCOTypeahead } from "./SYSCOTypeahead";
 
 interface BudgetLineFormProps {
   open: boolean;
@@ -391,27 +392,10 @@ export function BudgetLineForm({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sysco_id">Plan Comptable SYSCO</Label>
-            <Select
-              value={formData.sysco_id || "none"}
-              onValueChange={(value) =>
-                setFormData({ ...formData, sysco_id: value === "none" ? null : value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">-- Aucun --</SelectItem>
-                {planComptable?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.code} - {p.libelle}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <SYSCOTypeahead
+            value={formData.sysco_id || null}
+            onChange={(value) => setFormData({ ...formData, sysco_id: value })}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="commentaire">Commentaires</Label>
