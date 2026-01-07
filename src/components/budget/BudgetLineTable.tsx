@@ -53,6 +53,19 @@ const getStatusBadge = (status: string | null) => {
   }
 };
 
+const getExecutionStatusBadge = (status: string | null) => {
+  switch (status) {
+    case "OUVERTE":
+      return <Badge variant="outline" className="border-green-500 text-green-600">Ouverte</Badge>;
+    case "FERMEE":
+      return <Badge variant="outline" className="border-orange-500 text-orange-600">Fermée</Badge>;
+    case "CLOTUREE":
+      return <Badge variant="outline" className="border-red-500 text-red-600">Clôturée</Badge>;
+    default:
+      return <Badge variant="outline">-</Badge>;
+  }
+};
+
 export function BudgetLineTable({
   lines,
   onEdit,
@@ -98,14 +111,15 @@ export function BudgetLineTable({
             <TableHead className="text-right">Dotation</TableHead>
             <TableHead className="text-right">Engagé</TableHead>
             <TableHead className="text-right">Disponible</TableHead>
-            <TableHead>Statut</TableHead>
+            <TableHead>Validation</TableHead>
+            <TableHead>Exécution</TableHead>
             <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {lines.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                 Aucune ligne budgétaire trouvée
               </TableCell>
             </TableRow>
@@ -116,12 +130,22 @@ export function BudgetLineTable({
 
               return (
                 <TableRow key={line.id}>
-                  <TableCell className="font-mono text-sm">{line.code}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    <div>{line.code}</div>
+                    {line.code_budgetaire && (
+                      <div className="text-xs text-muted-foreground">{line.code_budgetaire}</div>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="font-medium">{line.label}</div>
                     {line.nomenclature_nbe && (
                       <div className="text-xs text-muted-foreground">
                         NBE: {line.nomenclature_nbe.code}
+                      </div>
+                    )}
+                    {line.ref_nve && (
+                      <div className="text-xs text-muted-foreground">
+                        NVE: {line.ref_nve.code_nve}
                       </div>
                     )}
                   </TableCell>
@@ -138,6 +162,7 @@ export function BudgetLineTable({
                     {formatCurrency(available)}
                   </TableCell>
                   <TableCell>{getStatusBadge(line.statut)}</TableCell>
+                  <TableCell>{getExecutionStatusBadge(line.statut_execution)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
