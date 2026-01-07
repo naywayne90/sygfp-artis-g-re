@@ -6330,6 +6330,30 @@ export type Database = {
           },
         ]
       }
+      ref_actions: {
+        Row: {
+          code: string
+          description: string | null
+          est_actif: boolean | null
+          id: string
+          libelle: string
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle: string
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle?: string
+        }
+        Relationships: []
+      }
       ref_codification_rules: {
         Row: {
           actif: boolean | null
@@ -6384,6 +6408,36 @@ export type Database = {
           reset_seq?: string | null
           separateur?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ref_modules: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          est_actif: boolean | null
+          id: string
+          libelle: string
+          ordre_affichage: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle: string
+          ordre_affichage?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          est_actif?: boolean | null
+          id?: string
+          libelle?: string
+          ordre_affichage?: number | null
         }
         Relationships: []
       }
@@ -6827,28 +6881,37 @@ export type Database = {
       role_permissions: {
         Row: {
           action_code: string
+          conditions_json: Json | null
           created_at: string
+          description: string | null
           granted_by: string | null
           id: string
           is_granted: boolean | null
+          module: string | null
           role_code: string
           updated_at: string
         }
         Insert: {
           action_code: string
+          conditions_json?: Json | null
           created_at?: string
+          description?: string | null
           granted_by?: string | null
           id?: string
           is_granted?: boolean | null
+          module?: string | null
           role_code: string
           updated_at?: string
         }
         Update: {
           action_code?: string
+          conditions_json?: Json | null
           created_at?: string
+          description?: string | null
           granted_by?: string | null
           id?: string
           is_granted?: boolean | null
+          module?: string | null
           role_code?: string
           updated_at?: string
         }
@@ -7963,6 +8026,20 @@ export type Database = {
           },
         ]
       }
+      pending_tasks_by_role: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          entity_code: string | null
+          entity_id: string | null
+          entity_type: string | null
+          exercice: number | null
+          status: string | null
+          target_role: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       prestataires_actifs: {
         Row: {
           adresse: string | null
@@ -8136,6 +8213,25 @@ export type Database = {
           seuil: number
           taux: number
         }[]
+      }
+      check_permission_with_conditions: {
+        Args: {
+          p_action_code: string
+          p_direction_id?: string
+          p_entity_id?: string
+          p_exercice?: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      check_separation_of_duties: {
+        Args: {
+          p_action: string
+          p_entity_id: string
+          p_entity_type: string
+          p_user_id?: string
+        }
+        Returns: Json
       }
       create_engagement_from_eb: {
         Args: {
@@ -8360,6 +8456,17 @@ export type Database = {
         | "OPERATEUR"
         | "TRESORIER"
         | "INVITE"
+        | "BUDGET_PLANNER"
+        | "BUDGET_VALIDATOR"
+        | "EXPENSE_REQUESTER"
+        | "EXPENSE_VALIDATOR"
+        | "AUDITOR"
+        | "DAF"
+        | "SDCT"
+        | "SAF"
+        | "SDPM"
+        | "TRESORERIE"
+        | "COMPTABILITE"
       migration_staging_status: "PENDING" | "READY" | "IMPORTED" | "ERROR"
       profil_fonctionnel:
         | "Admin"
@@ -8510,6 +8617,17 @@ export const Constants = {
         "OPERATEUR",
         "TRESORIER",
         "INVITE",
+        "BUDGET_PLANNER",
+        "BUDGET_VALIDATOR",
+        "EXPENSE_REQUESTER",
+        "EXPENSE_VALIDATOR",
+        "AUDITOR",
+        "DAF",
+        "SDCT",
+        "SAF",
+        "SDPM",
+        "TRESORERIE",
+        "COMPTABILITE",
       ],
       migration_staging_status: ["PENDING", "READY", "IMPORTED", "ERROR"],
       profil_fonctionnel: [
