@@ -31,6 +31,9 @@ import GestionAutorisations from "./pages/admin/GestionAutorisations";
 import GestionDelegations from "./pages/admin/GestionDelegations";
 import ParametresSysteme from "./pages/admin/ParametresSysteme";
 import JournalAudit from "./pages/admin/JournalAudit";
+import ArchitectureSYGFP from "./pages/admin/ArchitectureSYGFP";
+import DictionnaireVariables from "./pages/admin/DictionnaireVariables";
+import ReferentielCodification from "./pages/admin/ReferentielCodification";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -99,6 +102,9 @@ const App = () => (
               <Route path="/admin/delegations" element={<GestionDelegations />} />
               <Route path="/admin/parametres" element={<ParametresSysteme />} />
               <Route path="/admin/journal-audit" element={<JournalAudit />} />
+              <Route path="/admin/architecture" element={<ArchitectureSYGFP />} />
+              <Route path="/admin/dictionnaire" element={<DictionnaireVariables />} />
+              <Route path="/admin/codification" element={<ReferentielCodification />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

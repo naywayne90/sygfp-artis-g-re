@@ -29,6 +29,9 @@ import {
   Shield,
   Lock,
   UserCog,
+  BookOpen,
+  Hash,
+  Database,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -74,6 +77,13 @@ const adminItems = [
   { title: "Délégations", url: "/admin/delegations", icon: UserCog },
   { title: "Journal d'Audit", url: "/admin/journal-audit", icon: ClipboardList },
   { title: "Paramètres Système", url: "/admin/parametres", icon: Settings },
+];
+
+// Référentiels & Modélisation (sous Administration)
+const referentielItems = [
+  { title: "Architecture SYGFP", url: "/admin/architecture", icon: Database },
+  { title: "Dictionnaire Variables", url: "/admin/dictionnaire", icon: BookOpen },
+  { title: "Règles de Codification", url: "/admin/codification", icon: Hash },
 ];
 
 // 2. Planification Budgétaire
@@ -260,6 +270,14 @@ export function AppSidebar() {
         <MenuSection 
           title="Administration" 
           items={adminItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+        />
+
+        {/* Référentiels & Modélisation */}
+        <MenuSection 
+          title="Référentiels" 
+          items={referentielItems} 
           collapsed={collapsed} 
           isActive={isActive} 
         />
