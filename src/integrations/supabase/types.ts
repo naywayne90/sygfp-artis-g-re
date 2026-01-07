@@ -1441,6 +1441,60 @@ export type Database = {
         }
         Relationships: []
       }
+      data_dictionary: {
+        Row: {
+          actif: boolean | null
+          created_at: string | null
+          description: string | null
+          exemple: string | null
+          field_name: string
+          id: string
+          label_fr: string
+          module: string
+          obligatoire: boolean | null
+          regles_validation: string | null
+          source: string | null
+          table_name: string
+          type_donnee: string
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          field_name: string
+          id?: string
+          label_fr: string
+          module: string
+          obligatoire?: boolean | null
+          regles_validation?: string | null
+          source?: string | null
+          table_name: string
+          type_donnee?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          field_name?: string
+          id?: string
+          label_fr?: string
+          module?: string
+          obligatoire?: boolean | null
+          regles_validation?: string | null
+          source?: string | null
+          table_name?: string
+          type_donnee?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
       delegations: {
         Row: {
           created_at: string
@@ -3281,6 +3335,51 @@ export type Database = {
           id?: string
           libelle?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      module_registry: {
+        Row: {
+          actif: boolean | null
+          created_at: string | null
+          dependances: Json | null
+          description: string | null
+          id: string
+          module_key: string
+          module_name: string
+          owner_role: string | null
+          tables_concernees: Json | null
+          updated_at: string | null
+          variables_entree: Json | null
+          variables_sortie: Json | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string | null
+          dependances?: Json | null
+          description?: string | null
+          id?: string
+          module_key: string
+          module_name: string
+          owner_role?: string | null
+          tables_concernees?: Json | null
+          updated_at?: string | null
+          variables_entree?: Json | null
+          variables_sortie?: Json | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string | null
+          dependances?: Json | null
+          description?: string | null
+          id?: string
+          module_key?: string
+          module_name?: string
+          owner_role?: string | null
+          tables_concernees?: Json | null
+          updated_at?: string | null
+          variables_entree?: Json | null
+          variables_sortie?: Json | null
         }
         Relationships: []
       }
@@ -5249,6 +5348,51 @@ export type Database = {
           },
         ]
       }
+      ref_codification_rules: {
+        Row: {
+          actif: boolean | null
+          code_type: string
+          created_at: string | null
+          description: string | null
+          exemple: string | null
+          format: string
+          id: string
+          longueur_seq: number | null
+          ordre_composants: Json | null
+          prefixe: string | null
+          separateur: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          code_type: string
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          format: string
+          id?: string
+          longueur_seq?: number | null
+          ordre_composants?: Json | null
+          prefixe?: string | null
+          separateur?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          code_type?: string
+          created_at?: string | null
+          description?: string | null
+          exemple?: string | null
+          format?: string
+          id?: string
+          longueur_seq?: number | null
+          ordre_composants?: Json | null
+          prefixe?: string | null
+          separateur?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reglement_attachments: {
         Row: {
           created_at: string | null
@@ -5714,6 +5858,36 @@ export type Database = {
           label?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      system_variables_connexion: {
+        Row: {
+          actif: boolean | null
+          description: string | null
+          environnement: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value_masked: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          description?: string | null
+          environnement?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value_masked?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          description?: string | null
+          environnement?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value_masked?: string | null
         }
         Relationships: []
       }
