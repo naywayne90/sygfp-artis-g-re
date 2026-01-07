@@ -707,6 +707,69 @@ export type Database = {
           },
         ]
       }
+      budget_history: {
+        Row: {
+          budget_line_id: string
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          delta: number
+          disponible_apres: number | null
+          disponible_avant: number | null
+          dotation_apres: number | null
+          dotation_avant: number | null
+          event_type: string
+          id: string
+          ref_code: string | null
+          ref_id: string | null
+        }
+        Insert: {
+          budget_line_id: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          delta?: number
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          dotation_apres?: number | null
+          dotation_avant?: number | null
+          event_type: string
+          id?: string
+          ref_code?: string | null
+          ref_id?: string | null
+        }
+        Update: {
+          budget_line_id?: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          delta?: number
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          dotation_apres?: number | null
+          dotation_avant?: number | null
+          event_type?: string
+          id?: string
+          ref_code?: string | null
+          ref_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_imports: {
         Row: {
           completed_at: string | null
@@ -1567,51 +1630,113 @@ export type Database = {
           amount: number
           approved_at: string | null
           approved_by: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          code: string | null
           code_locked: boolean | null
+          executed_at: string | null
+          executed_by: string | null
           exercice: number | null
-          from_budget_line_id: string
+          from_budget_line_id: string | null
+          from_disponible_apres: number | null
+          from_disponible_avant: number | null
+          from_dotation_apres: number | null
+          from_dotation_avant: number | null
           id: string
+          justification_renforcee: string | null
           motif: string
           rejection_reason: string | null
           requested_at: string
           requested_by: string | null
           status: string | null
           to_budget_line_id: string
+          to_disponible_apres: number | null
+          to_disponible_avant: number | null
+          to_dotation_apres: number | null
+          to_dotation_avant: number | null
+          type_transfer: string | null
         }
         Insert: {
           amount: number
           approved_at?: string | null
           approved_by?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          code?: string | null
           code_locked?: boolean | null
+          executed_at?: string | null
+          executed_by?: string | null
           exercice?: number | null
-          from_budget_line_id: string
+          from_budget_line_id?: string | null
+          from_disponible_apres?: number | null
+          from_disponible_avant?: number | null
+          from_dotation_apres?: number | null
+          from_dotation_avant?: number | null
           id?: string
+          justification_renforcee?: string | null
           motif: string
           rejection_reason?: string | null
           requested_at?: string
           requested_by?: string | null
           status?: string | null
           to_budget_line_id: string
+          to_disponible_apres?: number | null
+          to_disponible_avant?: number | null
+          to_dotation_apres?: number | null
+          to_dotation_avant?: number | null
+          type_transfer?: string | null
         }
         Update: {
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          code?: string | null
           code_locked?: boolean | null
+          executed_at?: string | null
+          executed_by?: string | null
           exercice?: number | null
-          from_budget_line_id?: string
+          from_budget_line_id?: string | null
+          from_disponible_apres?: number | null
+          from_disponible_avant?: number | null
+          from_dotation_apres?: number | null
+          from_dotation_avant?: number | null
           id?: string
+          justification_renforcee?: string | null
           motif?: string
           rejection_reason?: string | null
           requested_at?: string
           requested_by?: string | null
           status?: string | null
           to_budget_line_id?: string
+          to_disponible_apres?: number | null
+          to_disponible_avant?: number | null
+          to_dotation_apres?: number | null
+          to_dotation_avant?: number | null
+          type_transfer?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "credit_transfers_approved_by_fkey"
             columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_executed_by_fkey"
+            columns: ["executed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -6999,6 +7124,30 @@ export type Database = {
           },
         ]
       }
+      transfer_sequences: {
+        Row: {
+          dernier_numero: number
+          exercice: number
+          id: string
+          type_transfer: string
+          updated_at: string
+        }
+        Insert: {
+          dernier_numero?: number
+          exercice: number
+          id?: string
+          type_transfer: string
+          updated_at?: string
+        }
+        Update: {
+          dernier_numero?: number
+          exercice?: number
+          id?: string
+          type_transfer?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       treasury_accounts: {
         Row: {
           code: string
@@ -7703,6 +7852,10 @@ export type Database = {
         }
         Returns: string
       }
+      execute_credit_transfer: {
+        Args: { p_transfer_id: string; p_user_id?: string }
+        Returns: Json
+      }
       generate_budget_code_v2: {
         Args: {
           p_action_code: string
@@ -7725,6 +7878,10 @@ export type Database = {
       }
       generate_note_sef_numero: {
         Args: { p_exercice: number }
+        Returns: string
+      }
+      generate_transfer_code: {
+        Args: { p_exercice: number; p_type?: string }
         Returns: string
       }
       generate_unique_code: {
