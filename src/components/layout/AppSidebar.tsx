@@ -32,6 +32,7 @@ import {
   BookOpen,
   Hash,
   Database,
+  Layers,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation } from "react-router-dom";
@@ -84,6 +85,7 @@ const referentielItems = [
   { title: "Architecture SYGFP", url: "/admin/architecture", icon: Database },
   { title: "Dictionnaire Variables", url: "/admin/dictionnaire", icon: BookOpen },
   { title: "Règles de Codification", url: "/admin/codification", icon: Hash },
+  { title: "Secteurs d'Activité", url: "/admin/secteurs-activite", icon: Layers },
 ];
 
 // 2. Planification Budgétaire
