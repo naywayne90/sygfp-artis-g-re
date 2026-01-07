@@ -12,8 +12,11 @@ import { NoteAEFImputeDialog } from "@/components/notes-aef/NoteAEFImputeDialog"
 import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import {
   Plus,
+  Lock,
   Search,
   FileText,
   Send,
@@ -23,9 +26,11 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function NotesAEF() {
   const { exercice } = useExercice();
+  const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
   const {
     notes,
@@ -120,16 +125,31 @@ export default function NotesAEF() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Notes AEF</h1>
-          <p className="page-description">
-            Gestion des Notes Avec Effet Financier - Exercice {exercice}
-          </p>
-        </div>
-        <Button onClick={() => setFormOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nouvelle note AEF
-        </Button>
+        <ExerciceSubtitle 
+          title="Notes AEF" 
+          description="Gestion des Notes Avec Effet Financier" 
+        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button 
+                  onClick={() => setFormOpen(true)} 
+                  className="gap-2"
+                  disabled={!canWrite}
+                >
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvelle note AEF
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* KPIs */}

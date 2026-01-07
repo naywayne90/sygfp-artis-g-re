@@ -3,15 +3,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Filter, FileCheck, FileSignature, Clock, XCircle } from "lucide-react";
+import { Plus, Search, Filter, FileCheck, FileSignature, Clock, XCircle, Lock } from "lucide-react";
 import { OrdonnancementForm } from "@/components/ordonnancement/OrdonnancementForm";
 import { OrdonnancementList } from "@/components/ordonnancement/OrdonnancementList";
 import { useOrdonnancements } from "@/hooks/useOrdonnancements";
+import { useExercice } from "@/contexts/ExerciceContext";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const formatMontant = (montant: number) =>
   new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
 
 export default function Ordonnancements() {
+  const { exercice } = useExercice();
+  const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { ordonnancements, isLoading } = useOrdonnancements();
   const [searchQuery, setSearchQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -39,16 +45,31 @@ export default function Ordonnancements() {
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Ordonnancements</h1>
-          <p className="page-description">
-            Ordres de paiement et mandats à transmettre au Trésor
-          </p>
-        </div>
-        <Button className="gap-2" onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4" />
-          Nouvel ordonnancement
-        </Button>
+        <ExerciceSubtitle 
+          title="Ordonnancements" 
+          description="Ordres de paiement et mandats à transmettre au Trésor" 
+        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button 
+                  className="gap-2" 
+                  onClick={() => setShowForm(true)}
+                  disabled={!canWrite}
+                >
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvel ordonnancement
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Stats Cards */}

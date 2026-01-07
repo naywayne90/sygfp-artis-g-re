@@ -3726,6 +3726,7 @@ export type Database = {
           date_attribution: string | null
           date_lancement: string | null
           date_signature: string | null
+          exercice: number | null
           expression_besoin_id: string | null
           id: string
           justification_derogation: string | null
@@ -3755,6 +3756,7 @@ export type Database = {
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
           justification_derogation?: string | null
@@ -3784,6 +3786,7 @@ export type Database = {
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
           justification_derogation?: string | null
