@@ -1,14 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-type RolePermission = {
-  role_code: string;
-  action_code: string;
-  is_granted: boolean | null;
-};
-
 type UserRole = {
   role: string;
+};
+
+type UserPermission = {
+  action_code: string;
+  via_delegation: boolean;
 };
 
 export function usePermissions() {
@@ -37,27 +36,33 @@ export function usePermissions() {
     enabled: !!currentUser?.id,
   });
 
-  // Récupérer toutes les permissions
-  const { data: permissions } = useQuery({
-    queryKey: ["all-permissions"],
+  // Récupérer les permissions via la fonction SECURITY DEFINER (inclut délégations)
+  const { data: userPermissions } = useQuery({
+    queryKey: ["user-permissions", currentUser?.id],
     queryFn: async () => {
+      if (!currentUser?.id) return [];
       const { data, error } = await supabase
-        .from("role_permissions")
-        .select("role_code, action_code, is_granted")
-        .eq("is_granted", true);
-      if (error) throw error;
-      return data as RolePermission[];
+        .rpc("get_user_permissions", { p_user_id: currentUser.id });
+      if (error) {
+        console.error("Error fetching permissions:", error);
+        return [];
+      }
+      return (data || []) as UserPermission[];
     },
+    enabled: !!currentUser?.id,
   });
 
   // Vérifier si l'utilisateur a une permission spécifique
   const hasPermission = (actionCode: string): boolean => {
-    if (!userRoles || !permissions) return false;
-    
-    const roleCodes = userRoles.map((r) => r.role);
-    return permissions.some(
-      (p) => roleCodes.includes(p.role_code) && p.action_code === actionCode && p.is_granted
-    );
+    if (!userPermissions) return false;
+    return userPermissions.some((p) => p.action_code === actionCode);
+  };
+
+  // Vérifier si la permission est via délégation
+  const isViaDelegation = (actionCode: string): boolean => {
+    if (!userPermissions) return false;
+    const perm = userPermissions.find((p) => p.action_code === actionCode);
+    return perm?.via_delegation ?? false;
   };
 
   // Vérifier si l'utilisateur a au moins une des permissions
@@ -81,13 +86,35 @@ export function usePermissions() {
     return roleCodes.some((code) => hasRole(code));
   };
 
+  // Vérifier si l'utilisateur est admin
+  const isAdmin = hasRole("ADMIN") || hasRole("admin");
+
+  // Vérifier l'accès à un module entier (ex: "budget", "engagement")
+  const hasModuleAccess = (module: string): boolean => {
+    if (isAdmin) return true;
+    if (!userPermissions) return false;
+    const modulePrefix = `${module}_`;
+    return userPermissions.some((p) => p.action_code.startsWith(modulePrefix));
+  };
+
+  // Récupérer toutes les permissions avec info délégation
+  const getAllPermissions = (): UserPermission[] => {
+    return userPermissions || [];
+  };
+
   return {
+    userId: currentUser?.id,
     userRoles: userRoles?.map((r) => r.role) || [],
+    permissions: userPermissions || [],
     hasPermission,
+    isViaDelegation,
     hasAnyPermission,
     hasAllPermissions,
     hasRole,
     hasAnyRole,
-    isLoading: !userRoles || !permissions,
+    isAdmin,
+    hasModuleAccess,
+    getAllPermissions,
+    isLoading: !userRoles || !userPermissions,
   };
 }
