@@ -6518,6 +6518,13 @@ export type Database = {
           statut: string
         }[]
       }
+      get_user_permissions: {
+        Args: { p_user_id: string }
+        Returns: {
+          action_code: string
+          via_delegation: boolean
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -6561,6 +6568,14 @@ export type Database = {
       }
       user_has_any_role: {
         Args: { p_roles: string[]; p_user_id: string }
+        Returns: boolean
+      }
+      user_has_permission: {
+        Args: { p_action_code: string; p_user_id: string }
+        Returns: boolean
+      }
+      user_has_role: {
+        Args: { p_role_code: string; p_user_id: string }
         Returns: boolean
       }
     }
