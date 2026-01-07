@@ -563,6 +563,7 @@ export type Database = {
       budget_engagements: {
         Row: {
           budget_line_id: string
+          code_locked: boolean | null
           created_at: string
           created_by: string | null
           current_step: number | null
@@ -591,6 +592,7 @@ export type Database = {
         }
         Insert: {
           budget_line_id: string
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -619,6 +621,7 @@ export type Database = {
         }
         Update: {
           budget_line_id?: string
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -1100,6 +1103,7 @@ export type Database = {
         Row: {
           airsi_montant: number | null
           airsi_taux: number | null
+          code_locked: boolean | null
           created_at: string
           created_by: string | null
           current_step: number | null
@@ -1138,6 +1142,7 @@ export type Database = {
         Insert: {
           airsi_montant?: number | null
           airsi_taux?: number | null
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -1176,6 +1181,7 @@ export type Database = {
         Update: {
           airsi_montant?: number | null
           airsi_taux?: number | null
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -1433,6 +1439,7 @@ export type Database = {
       }
       contrats: {
         Row: {
+          code_locked: boolean | null
           created_at: string | null
           created_by: string | null
           date_debut: string | null
@@ -1456,6 +1463,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          code_locked?: boolean | null
           created_at?: string | null
           created_by?: string | null
           date_debut?: string | null
@@ -1479,6 +1487,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          code_locked?: boolean | null
           created_at?: string | null
           created_by?: string | null
           date_debut?: string | null
@@ -1558,6 +1567,7 @@ export type Database = {
           amount: number
           approved_at: string | null
           approved_by: string | null
+          code_locked: boolean | null
           exercice: number | null
           from_budget_line_id: string
           id: string
@@ -1572,6 +1582,7 @@ export type Database = {
           amount: number
           approved_at?: string | null
           approved_by?: string | null
+          code_locked?: boolean | null
           exercice?: number | null
           from_budget_line_id: string
           id?: string
@@ -1586,6 +1597,7 @@ export type Database = {
           amount?: number
           approved_at?: string | null
           approved_by?: string | null
+          code_locked?: boolean | null
           exercice?: number | null
           from_budget_line_id?: string
           id?: string
@@ -2614,6 +2626,7 @@ export type Database = {
         Row: {
           calendrier_debut: string | null
           calendrier_fin: string | null
+          code_locked: boolean | null
           created_at: string
           created_by: string | null
           criteres_evaluation: string | null
@@ -2652,6 +2665,7 @@ export type Database = {
         Insert: {
           calendrier_debut?: string | null
           calendrier_fin?: string | null
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           criteres_evaluation?: string | null
@@ -2690,6 +2704,7 @@ export type Database = {
         Update: {
           calendrier_debut?: string | null
           calendrier_fin?: string | null
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           criteres_evaluation?: string | null
@@ -3498,6 +3513,7 @@ export type Database = {
           calendrier_lancement: string | null
           calendrier_notification: string | null
           calendrier_ouverture: string | null
+          code_locked: boolean | null
           commission_membres: string[] | null
           created_at: string
           created_by: string | null
@@ -3526,6 +3542,7 @@ export type Database = {
           calendrier_lancement?: string | null
           calendrier_notification?: string | null
           calendrier_ouverture?: string | null
+          code_locked?: boolean | null
           commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
@@ -3554,6 +3571,7 @@ export type Database = {
           calendrier_lancement?: string | null
           calendrier_notification?: string | null
           calendrier_ouverture?: string | null
+          code_locked?: boolean | null
           commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
@@ -4851,6 +4869,7 @@ export type Database = {
         Row: {
           banque: string | null
           beneficiaire: string
+          code_locked: boolean | null
           created_at: string
           created_by: string | null
           current_step: number | null
@@ -4893,6 +4912,7 @@ export type Database = {
         Insert: {
           banque?: string | null
           beneficiaire: string
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -4935,6 +4955,7 @@ export type Database = {
         Update: {
           banque?: string | null
           beneficiaire?: string
+          code_locked?: boolean | null
           created_at?: string
           created_by?: string | null
           current_step?: number | null
@@ -6060,43 +6081,55 @@ export type Database = {
       ref_codification_rules: {
         Row: {
           actif: boolean | null
+          champs_contexte: Json | null
           code_type: string
           created_at: string | null
           description: string | null
           exemple: string | null
           format: string
+          format_numero: string | null
           id: string
           longueur_seq: number | null
+          objet: string | null
           ordre_composants: Json | null
           prefixe: string | null
+          reset_seq: string | null
           separateur: string | null
           updated_at: string | null
         }
         Insert: {
           actif?: boolean | null
+          champs_contexte?: Json | null
           code_type: string
           created_at?: string | null
           description?: string | null
           exemple?: string | null
           format: string
+          format_numero?: string | null
           id?: string
           longueur_seq?: number | null
+          objet?: string | null
           ordre_composants?: Json | null
           prefixe?: string | null
+          reset_seq?: string | null
           separateur?: string | null
           updated_at?: string | null
         }
         Update: {
           actif?: boolean | null
+          champs_contexte?: Json | null
           code_type?: string
           created_at?: string | null
           description?: string | null
           exemple?: string | null
           format?: string
+          format_numero?: string | null
           id?: string
           longueur_seq?: number | null
+          objet?: string | null
           ordre_composants?: Json | null
           prefixe?: string | null
+          reset_seq?: string | null
           separateur?: string | null
           updated_at?: string | null
         }
@@ -6169,6 +6202,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ref_sequences: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_value: number
+          objet: string
+          scope_key: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_value?: number
+          objet: string
+          scope_key: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_value?: number
+          objet?: string
+          scope_key?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       ref_variables: {
         Row: {
@@ -6296,6 +6356,7 @@ export type Database = {
       reglements: {
         Row: {
           banque_arti: string | null
+          code_locked: boolean | null
           compte_bancaire_arti: string | null
           compte_id: string | null
           created_at: string | null
@@ -6314,6 +6375,7 @@ export type Database = {
         }
         Insert: {
           banque_arti?: string | null
+          code_locked?: boolean | null
           compte_bancaire_arti?: string | null
           compte_id?: string | null
           created_at?: string | null
@@ -6332,6 +6394,7 @@ export type Database = {
         }
         Update: {
           banque_arti?: string | null
+          code_locked?: boolean | null
           compte_bancaire_arti?: string | null
           compte_id?: string | null
           created_at?: string | null
@@ -7664,6 +7727,15 @@ export type Database = {
         Args: { p_exercice: number }
         Returns: string
       }
+      generate_unique_code: {
+        Args: {
+          p_annee?: number
+          p_exercice?: number
+          p_mois?: number
+          p_objet: string
+        }
+        Returns: string
+      }
       get_dossier_current_step: {
         Args: { p_dossier_id: string }
         Returns: {
@@ -7730,6 +7802,13 @@ export type Database = {
         Args: { eb_id: string }
         Returns: boolean
       }
+      is_prefix_reserved: {
+        Args: { p_code: string }
+        Returns: {
+          is_reserved: boolean
+          reserved_for: string
+        }[]
+      }
       log_audit_with_exercice: {
         Args: {
           p_action: string
@@ -7762,6 +7841,10 @@ export type Database = {
         Returns: boolean
       }
       sync_lambda_link: { Args: { p_link_id: string }; Returns: boolean }
+      test_codification_rule: {
+        Args: { p_annee?: number; p_exercice?: number; p_rule_id: string }
+        Returns: string
+      }
       user_can_access_exercice: {
         Args: { p_exercice: number }
         Returns: boolean
