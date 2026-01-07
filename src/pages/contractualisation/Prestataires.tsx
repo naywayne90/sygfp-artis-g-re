@@ -41,6 +41,8 @@ import { toast } from "sonner";
 import { SupplierIdentityTab } from "@/components/prestataires/SupplierIdentityTab";
 import { SupplierBankTab } from "@/components/prestataires/SupplierBankTab";
 import { SupplierDocumentsTab } from "@/components/prestataires/SupplierDocumentsTab";
+import { SupplierHistoryTab } from "@/components/prestataires/SupplierHistoryTab";
+import { SupplierQualificationDialog } from "@/components/prestataires/SupplierQualificationDialog";
 
 export default function Prestataires() {
   const { exercice } = useExercice();
@@ -434,10 +436,10 @@ export default function Prestataires() {
               </TabsContent>
 
               <TabsContent value="historique" className="mt-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Historique des engagements et paiements à venir</p>
-                </div>
+                <SupplierHistoryTab 
+                  supplierId={selectedPrestataire.id} 
+                  supplierName={selectedPrestataire.raison_sociale}
+                />
               </TabsContent>
             </Tabs>
           )}

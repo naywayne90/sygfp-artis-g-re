@@ -4,7 +4,7 @@ import { useExercice } from "@/contexts/ExerciceContext";
 
 export interface DashboardAlert {
   id: string;
-  type: "depassement" | "retard" | "echeance" | "piece_manquante" | "seuil";
+  type: "depassement" | "retard" | "echeance" | "piece_manquante" | "seuil" | "prestataire_doc_expire";
   severity: "critical" | "warning" | "info";
   title: string;
   description: string;
