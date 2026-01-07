@@ -37,7 +37,7 @@ export function useParametresExercice() {
           console.warn("Error fetching parametres:", error);
           return [];
         }
-        return (data || []) as ParametreExercice[];
+        return (data || []) as unknown as ParametreExercice[];
       } catch (e) {
         console.warn("Table ref_parametres_exercice not available:", e);
         return [];
@@ -118,7 +118,7 @@ export function useParametresExercice() {
         throw new Error(`Aucun paramètre trouvé pour l'exercice ${previousExercice}`);
       }
 
-      const newParams = (previousParams as ParametreExercice[]).map(p => ({
+      const newParams = (previousParams as unknown as ParametreExercice[]).map(p => ({
         exercice: exercice,
         code_parametre: p.code_parametre,
         libelle: p.libelle,
