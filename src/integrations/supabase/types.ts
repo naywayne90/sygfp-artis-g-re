@@ -100,6 +100,87 @@ export type Database = {
           },
         ]
       }
+      alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          auto_generated: boolean | null
+          created_at: string
+          description: string | null
+          entity_code: string | null
+          entity_id: string | null
+          entity_table: string | null
+          id: string
+          metadata: Json | null
+          module: string | null
+          owner_role: string | null
+          resolution_comment: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          title: string
+          type: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          auto_generated?: boolean | null
+          created_at?: string
+          description?: string | null
+          entity_code?: string | null
+          entity_id?: string | null
+          entity_table?: string | null
+          id?: string
+          metadata?: Json | null
+          module?: string | null
+          owner_role?: string | null
+          resolution_comment?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title: string
+          type: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          auto_generated?: boolean | null
+          created_at?: string
+          description?: string | null
+          entity_code?: string | null
+          entity_id?: string | null
+          entity_table?: string | null
+          id?: string
+          metadata?: Json | null
+          module?: string | null
+          owner_role?: string | null
+          resolution_comment?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archived_documents: {
         Row: {
           category: string
@@ -8191,6 +8272,21 @@ export type Database = {
           reserved_for: string
         }[]
       }
+      log_audit_action: {
+        Args: {
+          p_action: string
+          p_entity_code?: string
+          p_entity_id: string
+          p_entity_type: string
+          p_exercice?: number
+          p_justification?: string
+          p_module?: string
+          p_new_values?: Json
+          p_old_values?: Json
+          p_resume?: string
+        }
+        Returns: string
+      }
       log_audit_with_exercice: {
         Args: {
           p_action: string
@@ -8217,6 +8313,10 @@ export type Database = {
           new_code: string
           old_code: string
         }[]
+      }
+      resolve_alert: {
+        Args: { p_alert_id: string; p_comment?: string }
+        Returns: undefined
       }
       resolve_budget_alert: {
         Args: { p_alert_id: string; p_comment?: string }
