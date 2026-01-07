@@ -4,22 +4,20 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export interface Activity {
+export interface EnhancedActivity {
   id: string;
-  type: "note" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "virement" | "prestataire" | "contrat" | "other";
+  type: "note" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "virement" | "prestataire" | "contrat" | "user" | "other";
   action: string;
   actionLabel: string;
   title: string;
+  resume: string | null;
   code: string | null;
-  time: string;
-  timeGroup: "today" | "yesterday" | "thisWeek" | "older";
+  timeAgo: string;
+  timeGroup: "Aujourd'hui" | "Hier" | "Cette semaine" | "Plus ancien";
   date: Date;
   entityTable: string;
   entityId: string | null;
-  user: {
-    name: string | null;
-    role: string | null;
-  };
+  userName: string | null;
   link: string | null;
 }
 
@@ -65,15 +63,15 @@ const ENTITY_ROUTES: Record<string, string> = {
   contrat: "/contractualisation/contrats",
 };
 
-function getTimeGroup(date: Date): Activity["timeGroup"] {
-  if (isToday(date)) return "today";
-  if (isYesterday(date)) return "yesterday";
-  if (isThisWeek(date)) return "thisWeek";
-  return "older";
+function getTimeGroup(date: Date): EnhancedActivity["timeGroup"] {
+  if (isToday(date)) return "Aujourd'hui";
+  if (isYesterday(date)) return "Hier";
+  if (isThisWeek(date)) return "Cette semaine";
+  return "Plus ancien";
 }
 
-function mapEntityType(entityType: string): Activity["type"] {
-  const mapping: Record<string, Activity["type"]> = {
+function mapEntityType(entityType: string): EnhancedActivity["type"] {
+  const mapping: Record<string, EnhancedActivity["type"]> = {
     notes_dg: "note",
     note: "note",
     budget_engagements: "engagement",
@@ -90,17 +88,25 @@ function mapEntityType(entityType: string): Activity["type"] {
     prestataire: "prestataire",
     contrats: "contrat",
     contrat: "contrat",
+    user_role: "user",
+    profiles: "user",
   };
   return mapping[entityType] || "other";
 }
 
-export function useRecentActivitiesEnhanced(limit: number = 10) {
+export interface GroupedActivities {
+  "Aujourd'hui": EnhancedActivity[];
+  "Hier": EnhancedActivity[];
+  "Cette semaine": EnhancedActivity[];
+  "Plus ancien": EnhancedActivity[];
+}
+
+export function useRecentActivitiesEnhanced(limit: number = 15) {
   const { exercice } = useExercice();
 
   return useQuery({
     queryKey: ["recent-activities-enhanced", exercice, limit],
-    queryFn: async (): Promise<Activity[]> => {
-      // Use raw query to access new columns that might not be in types yet
+    queryFn: async (): Promise<GroupedActivities> => {
       const { data: logs, error } = await supabase
         .from("audit_logs")
         .select(`
@@ -110,8 +116,7 @@ export function useRecentActivitiesEnhanced(limit: number = 10) {
           action, 
           created_at, 
           user_id,
-          exercice,
-          user:profiles!audit_logs_user_id_fkey(full_name, email)
+          exercice
         `)
         .eq("exercice", exercice)
         .order("created_at", { ascending: false })
@@ -119,82 +124,64 @@ export function useRecentActivitiesEnhanced(limit: number = 10) {
 
       if (error) {
         console.error("Error fetching audit logs:", error);
-        return [];
-      }
-
-      if (!logs || logs.length === 0) return [];
-
-      const activities = (logs as any[]).map((log) => {
-        if (!log || Array.isArray(log)) return null;
-
-      if (error) {
-        console.error("Error fetching audit logs:", error);
-        return [];
+        return { "Aujourd'hui": [], "Hier": [], "Cette semaine": [], "Plus ancien": [] };
       }
 
       if (!logs || logs.length === 0) {
-        return [];
+        return { "Aujourd'hui": [], "Hier": [], "Cette semaine": [], "Plus ancien": [] };
       }
 
+      const activities: EnhancedActivity[] = logs.map((log) => {
         const date = new Date(log.created_at);
         const entityType = mapEntityType(log.entity_type);
         const baseRoute = ENTITY_ROUTES[log.entity_type] || "/";
         
         // Build display title
-        const entityCode = log.entity_code || null;
-        const resume = log.resume || null;
-        let title = resume || "";
-        if (!title) {
-          const typeLabels: Record<string, string> = {
-            note: "Note",
-            engagement: "Engagement",
-            liquidation: "Liquidation",
-            ordonnancement: "Ordonnancement",
-            marche: "Marché",
-            virement: "Virement",
-            prestataire: "Prestataire",
-            contrat: "Contrat",
-          };
-          title = `${typeLabels[entityType] || "Élément"} ${entityCode || log.entity_id?.slice(0, 8) || ""}`;
-        }
+        const typeLabels: Record<string, string> = {
+          note: "Note",
+          engagement: "Engagement",
+          liquidation: "Liquidation",
+          ordonnancement: "Ordonnancement",
+          marche: "Marché",
+          virement: "Virement",
+          prestataire: "Prestataire",
+          contrat: "Contrat",
+          user: "Utilisateur",
+        };
+        const title = `${typeLabels[entityType] || "Élément"} ${log.entity_id?.slice(0, 8) || ""}`;
 
         return {
           id: log.id,
           type: entityType,
-          action: log.action,
-          actionLabel: ACTION_LABELS[log.action] || log.action.replace(/_/g, " "),
+          action: log.action.toLowerCase(),
+          actionLabel: ACTION_LABELS[log.action.toLowerCase()] || log.action.replace(/_/g, " "),
           title,
-          code: entityCode,
-          time: formatDistanceToNow(date, { addSuffix: true, locale: fr }),
+          resume: null,
+          code: null,
+          timeAgo: formatDistanceToNow(date, { addSuffix: true, locale: fr }),
           timeGroup: getTimeGroup(date),
           date,
           entityTable: log.entity_type,
           entityId: log.entity_id,
-          user: {
-            name: log.user?.full_name || log.user?.email || null,
-            role: log.user_role || null,
-          },
+          userName: null,
           link: log.entity_id ? `${baseRoute}?id=${log.entity_id}` : baseRoute,
         };
-      }).filter(Boolean) as Activity[];
+      }).slice(0, limit);
 
-      return activities.slice(0, limit);
+      // Group by time
+      const grouped: GroupedActivities = {
+        "Aujourd'hui": [],
+        "Hier": [],
+        "Cette semaine": [],
+        "Plus ancien": [],
+      };
+
+      for (const activity of activities) {
+        grouped[activity.timeGroup].push(activity);
+      }
+
+      return grouped;
     },
     enabled: !!exercice,
   });
-}
-
-// Group activities by time period
-export function groupActivitiesByTime(activities: Activity[]): {
-  today: Activity[];
-  yesterday: Activity[];
-  thisWeek: Activity[];
-  older: Activity[];
-} {
-  return {
-    today: activities.filter(a => a.timeGroup === "today"),
-    yesterday: activities.filter(a => a.timeGroup === "yesterday"),
-    thisWeek: activities.filter(a => a.timeGroup === "thisWeek"),
-    older: activities.filter(a => a.timeGroup === "older"),
-  };
 }
