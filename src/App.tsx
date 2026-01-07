@@ -36,6 +36,9 @@ import ArchitectureSYGFP from "./pages/admin/ArchitectureSYGFP";
 import DictionnaireVariables from "./pages/admin/DictionnaireVariables";
 import ReferentielCodification from "./pages/admin/ReferentielCodification";
 import SecteursActivite from "./pages/admin/SecteursActivite";
+import DocumentationModules from "./pages/admin/DocumentationModules";
+import MatriceRACI from "./pages/admin/MatriceRACI";
+import ChecklistProduction from "./pages/admin/ChecklistProduction";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";

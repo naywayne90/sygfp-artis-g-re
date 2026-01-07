@@ -3588,6 +3588,71 @@ export type Database = {
         }
         Relationships: []
       }
+      module_documentation: {
+        Row: {
+          cas_limites: string | null
+          champs_cles: Json | null
+          controles: Json | null
+          created_at: string | null
+          dependances: Json | null
+          id: string
+          module_key: string
+          module_label: string | null
+          objectif: string | null
+          perimetre: string | null
+          regles_metier: string | null
+          statuts_workflow: Json | null
+          tables_utilisees: Json | null
+          updated_at: string | null
+          updated_by: string | null
+          version: string | null
+        }
+        Insert: {
+          cas_limites?: string | null
+          champs_cles?: Json | null
+          controles?: Json | null
+          created_at?: string | null
+          dependances?: Json | null
+          id?: string
+          module_key: string
+          module_label?: string | null
+          objectif?: string | null
+          perimetre?: string | null
+          regles_metier?: string | null
+          statuts_workflow?: Json | null
+          tables_utilisees?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: string | null
+        }
+        Update: {
+          cas_limites?: string | null
+          champs_cles?: Json | null
+          controles?: Json | null
+          created_at?: string | null
+          dependances?: Json | null
+          id?: string
+          module_key?: string
+          module_label?: string | null
+          objectif?: string | null
+          perimetre?: string | null
+          regles_metier?: string | null
+          statuts_workflow?: Json | null
+          tables_utilisees?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_documentation_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_registry: {
         Row: {
           actif: boolean | null
@@ -5220,6 +5285,59 @@ export type Database = {
           },
         ]
       }
+      production_checklist: {
+        Row: {
+          check_category: string | null
+          check_key: string
+          check_label: string
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string | null
+          exercice: number
+          id: string
+          is_checked: boolean | null
+          notes: string | null
+          ordre: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          check_category?: string | null
+          check_key: string
+          check_label: string
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string | null
+          exercice: number
+          id?: string
+          is_checked?: boolean | null
+          notes?: string | null
+          ordre?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          check_category?: string | null
+          check_key?: string
+          check_label?: string
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string | null
+          exercice?: number
+          id?: string
+          is_checked?: boolean | null
+          notes?: string | null
+          ordre?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_checklist_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -5417,6 +5535,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      raci_matrix: {
+        Row: {
+          actif: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          module_key: string | null
+          ordre: number | null
+          processus: string
+          processus_code: string
+          role_accountable: string | null
+          role_responsible: string | null
+          roles_consulted: Json | null
+          roles_informed: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module_key?: string | null
+          ordre?: number | null
+          processus: string
+          processus_code: string
+          role_accountable?: string | null
+          role_responsible?: string | null
+          roles_consulted?: Json | null
+          roles_informed?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          module_key?: string | null
+          ordre?: number | null
+          processus?: string
+          processus_code?: string
+          role_accountable?: string | null
+          role_responsible?: string | null
+          roles_consulted?: Json | null
+          roles_informed?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       reception_attachments: {
         Row: {
@@ -7353,6 +7519,10 @@ export type Database = {
         Args: { p_direction_id: string; p_exercice: number }
         Returns: number
       }
+      get_raci_informed_roles: {
+        Args: { p_processus_code: string }
+        Returns: Json
+      }
       get_user_permissions: {
         Args: { p_user_id: string }
         Returns: {
@@ -7381,6 +7551,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      init_production_checklist: {
+        Args: { p_exercice: number }
+        Returns: undefined
       }
       is_expression_besoin_validated: {
         Args: { eb_id: string }
