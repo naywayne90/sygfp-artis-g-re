@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Upload, Download, FileSpreadsheet } from "lucide-react";
 import { BudgetImportWizard } from "@/components/import-export/BudgetImportWizard";
 import { BudgetExport } from "@/components/import-export/BudgetExport";
+import { BudgetTemplateDownload } from "@/components/budget/BudgetTemplateDownload";
 
 export default function ImportExport() {
   const [activeTab, setActiveTab] = useState("import");
@@ -22,11 +23,16 @@ export default function ImportExport() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Gestion des données budgétaires</CardTitle>
-          <CardDescription>
-            Utilisez l'assistant pour importer votre structure budgétaire depuis un fichier Excel, 
-            ou exportez les données existantes.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Gestion des données budgétaires</CardTitle>
+              <CardDescription>
+                Utilisez l'assistant pour importer votre structure budgétaire depuis un fichier Excel, 
+                ou exportez les données existantes.
+              </CardDescription>
+            </div>
+            <BudgetTemplateDownload />
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
