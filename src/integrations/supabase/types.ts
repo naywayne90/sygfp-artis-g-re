@@ -1503,6 +1503,63 @@ export type Database = {
         }
         Relationships: []
       }
+      codif_variables: {
+        Row: {
+          created_at: string | null
+          default_value: string | null
+          description: string | null
+          est_active: boolean | null
+          format_type: string
+          id: string
+          is_system: boolean | null
+          key: string
+          label: string
+          pad_char: string | null
+          pad_length: number | null
+          pad_side: string | null
+          source_field: string | null
+          source_table: string | null
+          transform: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          default_value?: string | null
+          description?: string | null
+          est_active?: boolean | null
+          format_type?: string
+          id?: string
+          is_system?: boolean | null
+          key: string
+          label: string
+          pad_char?: string | null
+          pad_length?: number | null
+          pad_side?: string | null
+          source_field?: string | null
+          source_table?: string | null
+          transform?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          default_value?: string | null
+          description?: string | null
+          est_active?: boolean | null
+          format_type?: string
+          id?: string
+          is_system?: boolean | null
+          key?: string
+          label?: string
+          pad_char?: string | null
+          pad_length?: number | null
+          pad_side?: string | null
+          source_field?: string | null
+          source_table?: string | null
+          transform?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comptes_bancaires: {
         Row: {
           banque: string | null
@@ -7005,17 +7062,23 @@ export type Database = {
           code_type: string
           created_at: string | null
           description: string | null
+          example_input: Json | null
+          example_output: string | null
           exemple: string | null
           format: string
           format_numero: string | null
           id: string
           longueur_seq: number | null
+          module: string | null
+          notes: string | null
           objet: string | null
           ordre_composants: Json | null
+          pattern: Json | null
           prefixe: string | null
           reset_seq: string | null
           separateur: string | null
           updated_at: string | null
+          version: number | null
         }
         Insert: {
           actif?: boolean | null
@@ -7023,17 +7086,23 @@ export type Database = {
           code_type: string
           created_at?: string | null
           description?: string | null
+          example_input?: Json | null
+          example_output?: string | null
           exemple?: string | null
           format: string
           format_numero?: string | null
           id?: string
           longueur_seq?: number | null
+          module?: string | null
+          notes?: string | null
           objet?: string | null
           ordre_composants?: Json | null
+          pattern?: Json | null
           prefixe?: string | null
           reset_seq?: string | null
           separateur?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
           actif?: boolean | null
@@ -7041,17 +7110,23 @@ export type Database = {
           code_type?: string
           created_at?: string | null
           description?: string | null
+          example_input?: Json | null
+          example_output?: string | null
           exemple?: string | null
           format?: string
           format_numero?: string | null
           id?: string
           longueur_seq?: number | null
+          module?: string | null
+          notes?: string | null
           objet?: string | null
           ordre_composants?: Json | null
+          pattern?: Json | null
           prefixe?: string | null
           reset_seq?: string | null
           separateur?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Relationships: []
       }
@@ -8985,6 +9060,14 @@ export type Database = {
         }
         Returns: string
       }
+      generate_code_from_pattern: {
+        Args: { p_exercice?: number; p_rule_id: string; p_values: Json }
+        Returns: {
+          code: string
+          is_valid: boolean
+          warnings: string[]
+        }[]
+      }
       generate_imputation_numero: {
         Args: { p_exercice: number }
         Returns: string
@@ -9159,6 +9242,14 @@ export type Database = {
           p_sous_activites?: Json
         }
         Returns: Json
+      }
+      test_codification_pattern: {
+        Args: { p_exercice?: number; p_pattern: Json; p_values: Json }
+        Returns: {
+          code: string
+          is_valid: boolean
+          segments: Json
+        }[]
       }
       test_codification_rule: {
         Args: { p_annee?: number; p_exercice?: number; p_rule_id: string }
