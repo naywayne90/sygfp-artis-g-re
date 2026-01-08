@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Check, Loader2, Lock, Search } from "lucide-react";
+import { Calendar, Check, Loader2, Lock, Search, Plus, Settings2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ExerciceInitWizard } from "./ExerciceInitWizard";
 
 interface ExerciceChangeModalProps {
   open: boolean;
@@ -26,6 +27,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
   const { exercice, setExercice } = useExercice();
   const [search, setSearch] = useState("");
   const [statutFilter, setStatutFilter] = useState<string>("tous");
+  const [showInitWizard, setShowInitWizard] = useState(false);
 
   const { data: exercices, isLoading } = useQuery({
     queryKey: ["exercices-modal", statutFilter],
@@ -177,14 +179,31 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
           )}
         </div>
 
-        {/* Info lecture seule */}
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
-          <Lock className="h-4 w-4 shrink-0" />
-          <span>
-            Les exercices clôturés ou archivés sont consultables mais ne permettent pas de créer ou modifier des données.
-          </span>
+        {/* Actions */}
+        <div className="flex items-center justify-between gap-2 pt-2 border-t">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>Exercices clôturés = lecture seule</span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              onOpenChange(false);
+              setShowInitWizard(true);
+            }}
+          >
+            <Settings2 className="h-4 w-4 mr-2" />
+            Assistant d'initialisation
+          </Button>
         </div>
       </DialogContent>
+
+      {/* Wizard d'initialisation */}
+      <ExerciceInitWizard 
+        open={showInitWizard} 
+        onOpenChange={setShowInitWizard} 
+      />
     </Dialog>
   );
 }

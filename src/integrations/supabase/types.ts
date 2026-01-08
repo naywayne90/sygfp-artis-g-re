@@ -2916,6 +2916,11 @@ export type Database = {
       exercices_budgetaires: {
         Row: {
           annee: number
+          budget_lignes_count: number | null
+          budget_total: number | null
+          budget_valide: boolean | null
+          budget_valide_at: string | null
+          budget_valide_by: string | null
           code_exercice: string | null
           created_at: string
           date_cloture: string | null
@@ -2928,6 +2933,11 @@ export type Database = {
         }
         Insert: {
           annee: number
+          budget_lignes_count?: number | null
+          budget_total?: number | null
+          budget_valide?: boolean | null
+          budget_valide_at?: string | null
+          budget_valide_by?: string | null
           code_exercice?: string | null
           created_at?: string
           date_cloture?: string | null
@@ -2940,6 +2950,11 @@ export type Database = {
         }
         Update: {
           annee?: number
+          budget_lignes_count?: number | null
+          budget_total?: number | null
+          budget_valide?: boolean | null
+          budget_valide_at?: string | null
+          budget_valide_by?: string | null
           code_exercice?: string | null
           created_at?: string
           date_cloture?: string | null
@@ -9096,6 +9111,15 @@ export type Database = {
         }
         Returns: Json
       }
+      copy_budget_structure: {
+        Args: {
+          p_copy_dotations?: boolean
+          p_source_exercice: number
+          p_target_exercice: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
       create_engagement_from_eb: {
         Args: {
           p_budget_line_id: string
@@ -9201,6 +9225,10 @@ export type Database = {
           etape_ordre: number
           statut: string
         }[]
+      }
+      get_exercice_budget_summary: {
+        Args: { p_exercice: number }
+        Returns: Json
       }
       get_next_budget_code_seq: {
         Args: { p_direction_id: string; p_exercice: number }
@@ -9400,6 +9428,10 @@ export type Database = {
       user_has_role: {
         Args: { p_role_code: string; p_user_id: string }
         Returns: boolean
+      }
+      validate_budget: {
+        Args: { p_exercice: number; p_user_id: string }
+        Returns: Json
       }
       validate_import_run: { Args: { p_run_id: string }; Returns: Json }
       validate_prestataire_request: {

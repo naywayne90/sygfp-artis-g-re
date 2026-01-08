@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -27,10 +28,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Calendar, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Plus, Pencil, Calendar, Loader2, Lock, Unlock, CheckCircle2, AlertTriangle, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ExerciceInitWizard } from "@/components/exercice/ExerciceInitWizard";
 
 interface Exercice {
   id: string;
@@ -39,11 +43,26 @@ interface Exercice {
   date_ouverture: string | null;
   date_cloture: string | null;
   est_actif: boolean;
+  budget_valide: boolean;
+  budget_valide_at: string | null;
+  budget_total: number | null;
+  budget_lignes_count: number | null;
 }
+
+const formatMontant = (montant: number): string => {
+  if (montant >= 1_000_000_000) {
+    return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
+  }
+  if (montant >= 1_000_000) {
+    return `${(montant / 1_000_000).toFixed(1)} M`;
+  }
+  return new Intl.NumberFormat('fr-FR').format(montant);
+};
 
 export default function GestionExercices() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showInitWizard, setShowInitWizard] = useState(false);
   const [editingExercice, setEditingExercice] = useState<Exercice | null>(null);
   const [formData, setFormData] = useState({
     annee: new Date().getFullYear() + 1,
@@ -165,15 +184,62 @@ export default function GestionExercices() {
         <div>
           <h1 className="text-2xl font-bold">Gestion des Exercices Budgétaires</h1>
           <p className="text-muted-foreground">
-            Gérez les exercices budgétaires de l'application
+            Gérez les exercices budgétaires et leur initialisation
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvel exercice
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowInitWizard(true)}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Assistant d'initialisation
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvel exercice
+          </Button>
+        </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Total exercices</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{exercices?.length || 0}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Exercice actif</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-primary">
+              {exercices?.find(e => e.statut === "en_cours")?.annee || "-"}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Budgets validés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-success">
+              {exercices?.filter(e => e.budget_valide).length || 0}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">En attente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-warning">
+              {exercices?.filter(e => e.statut === "ouvert" && !e.budget_valide).length || 0}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -185,8 +251,9 @@ export default function GestionExercices() {
               <TableRow>
                 <TableHead>Année</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead>Date d'ouverture</TableHead>
-                <TableHead>Date de clôture</TableHead>
+                <TableHead>Budget</TableHead>
+                <TableHead>Lignes</TableHead>
+                <TableHead>Dates</TableHead>
                 <TableHead>Actif</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -196,19 +263,22 @@ export default function GestionExercices() {
                 <TableRow key={ex.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      {ex.budget_valide ? (
+                        <Lock className="h-4 w-4 text-success" />
+                      ) : (
+                        <Unlock className="h-4 w-4 text-muted-foreground" />
+                      )}
                       {ex.annee}
                     </div>
                   </TableCell>
                   <TableCell>{getStatutBadge(ex.statut)}</TableCell>
                   <TableCell>
-                    {ex.date_ouverture
-                      ? format(new Date(ex.date_ouverture), "dd MMM yyyy", { locale: fr })
-                      : "-"}
+                    {ex.budget_total ? formatMontant(ex.budget_total) + " FCFA" : "-"}
                   </TableCell>
+                  <TableCell>{ex.budget_lignes_count || 0}</TableCell>
                   <TableCell>
-                    {ex.date_cloture
-                      ? format(new Date(ex.date_cloture), "dd MMM yyyy", { locale: fr })
+                    {ex.date_ouverture
+                      ? format(new Date(ex.date_ouverture), "dd/MM/yyyy", { locale: fr })
                       : "-"}
                   </TableCell>
                   <TableCell>
@@ -237,6 +307,8 @@ export default function GestionExercices() {
         </div>
       )}
 
+      {/* Init Wizard */}
+      <ExerciceInitWizard open={showInitWizard} onOpenChange={setShowInitWizard} />
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
