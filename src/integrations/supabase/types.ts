@@ -3184,6 +3184,129 @@ export type Database = {
           },
         ]
       }
+      import_budget_staging: {
+        Row: {
+          budget_line_id: string | null
+          computed_action_id: string | null
+          computed_activite_id: string | null
+          computed_direction_id: string | null
+          computed_imputation: string | null
+          computed_libelle: string | null
+          computed_montant: number | null
+          computed_nature_depense_code: string | null
+          computed_nbe_code: string | null
+          computed_nbe_id: string | null
+          computed_os_id: string | null
+          computed_source_financement: string | null
+          computed_sous_activite_id: string | null
+          created_at: string
+          id: string
+          raw_action: string | null
+          raw_activite: string | null
+          raw_data: Json | null
+          raw_direction: string | null
+          raw_imputation: string | null
+          raw_libelle: string | null
+          raw_montant: string | null
+          raw_nature_depense: string | null
+          raw_nbe: string | null
+          raw_os: string | null
+          raw_source_financement: string | null
+          raw_sous_activite: string | null
+          row_number: number
+          run_id: string
+          validation_details: Json | null
+          validation_errors: string | null
+          validation_status: string
+          validation_warnings: string | null
+        }
+        Insert: {
+          budget_line_id?: string | null
+          computed_action_id?: string | null
+          computed_activite_id?: string | null
+          computed_direction_id?: string | null
+          computed_imputation?: string | null
+          computed_libelle?: string | null
+          computed_montant?: number | null
+          computed_nature_depense_code?: string | null
+          computed_nbe_code?: string | null
+          computed_nbe_id?: string | null
+          computed_os_id?: string | null
+          computed_source_financement?: string | null
+          computed_sous_activite_id?: string | null
+          created_at?: string
+          id?: string
+          raw_action?: string | null
+          raw_activite?: string | null
+          raw_data?: Json | null
+          raw_direction?: string | null
+          raw_imputation?: string | null
+          raw_libelle?: string | null
+          raw_montant?: string | null
+          raw_nature_depense?: string | null
+          raw_nbe?: string | null
+          raw_os?: string | null
+          raw_source_financement?: string | null
+          raw_sous_activite?: string | null
+          row_number: number
+          run_id: string
+          validation_details?: Json | null
+          validation_errors?: string | null
+          validation_status?: string
+          validation_warnings?: string | null
+        }
+        Update: {
+          budget_line_id?: string | null
+          computed_action_id?: string | null
+          computed_activite_id?: string | null
+          computed_direction_id?: string | null
+          computed_imputation?: string | null
+          computed_libelle?: string | null
+          computed_montant?: number | null
+          computed_nature_depense_code?: string | null
+          computed_nbe_code?: string | null
+          computed_nbe_id?: string | null
+          computed_os_id?: string | null
+          computed_source_financement?: string | null
+          computed_sous_activite_id?: string | null
+          created_at?: string
+          id?: string
+          raw_action?: string | null
+          raw_activite?: string | null
+          raw_data?: Json | null
+          raw_direction?: string | null
+          raw_imputation?: string | null
+          raw_libelle?: string | null
+          raw_montant?: string | null
+          raw_nature_depense?: string | null
+          raw_nbe?: string | null
+          raw_os?: string | null
+          raw_source_financement?: string | null
+          raw_sous_activite?: string | null
+          row_number?: number
+          run_id?: string
+          validation_details?: Json | null
+          validation_errors?: string | null
+          validation_status?: string
+          validation_warnings?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_budget_staging_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_budget_staging_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "import_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_history: {
         Row: {
           completed_at: string | null
@@ -3237,6 +3360,155 @@ export type Database = {
           {
             foreignKeyName: "import_history_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_logs: {
+        Row: {
+          details: Json | null
+          id: string
+          level: string
+          message: string
+          row_number: number | null
+          run_id: string
+          step: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          details?: Json | null
+          id?: string
+          level?: string
+          message: string
+          row_number?: number | null
+          run_id: string
+          step?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          details?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          row_number?: number | null
+          run_id?: string
+          step?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_logs_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "import_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_runs: {
+        Row: {
+          column_mapping: Json | null
+          created_at: string
+          created_by: string | null
+          error_rows: number | null
+          error_summary: Json | null
+          exercice: number | null
+          exercice_id: string | null
+          filename: string
+          id: string
+          imported_at: string | null
+          imported_by: string | null
+          notes: string | null
+          ok_rows: number | null
+          sheet_name: string | null
+          status: string
+          total_rows: number | null
+          updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          warning_rows: number | null
+        }
+        Insert: {
+          column_mapping?: Json | null
+          created_at?: string
+          created_by?: string | null
+          error_rows?: number | null
+          error_summary?: Json | null
+          exercice?: number | null
+          exercice_id?: string | null
+          filename: string
+          id?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          notes?: string | null
+          ok_rows?: number | null
+          sheet_name?: string | null
+          status?: string
+          total_rows?: number | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          warning_rows?: number | null
+        }
+        Update: {
+          column_mapping?: Json | null
+          created_at?: string
+          created_by?: string | null
+          error_rows?: number | null
+          error_summary?: Json | null
+          exercice?: number | null
+          exercice_id?: string | null
+          filename?: string
+          id?: string
+          imported_at?: string | null
+          imported_by?: string | null
+          notes?: string | null
+          ok_rows?: number | null
+          sheet_name?: string | null
+          status?: string
+          total_rows?: number | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          warning_rows?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_runs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_runs_exercice_id_fkey"
+            columns: ["exercice_id"]
+            isOneToOne: false
+            referencedRelation: "exercices_budgetaires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_runs_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_runs_validated_by_fkey"
+            columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -8519,6 +8791,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_import_run: {
+        Args: {
+          p_column_mapping?: Json
+          p_exercice: number
+          p_filename: string
+          p_sheet_name?: string
+        }
+        Returns: string
+      }
       create_lambda_link: {
         Args: {
           p_cible_id?: string
@@ -8539,6 +8820,7 @@ export type Database = {
         Args: { p_transfer_id: string; p_user_id?: string }
         Returns: Json
       }
+      finalize_import_run: { Args: { p_run_id: string }; Returns: Json }
       generate_budget_code_v2: {
         Args: {
           p_action_code: string
@@ -8675,6 +8957,17 @@ export type Database = {
         }
         Returns: string
       }
+      log_import_event: {
+        Args: {
+          p_details?: Json
+          p_level: string
+          p_message: string
+          p_row_number?: number
+          p_run_id: string
+          p_step?: string
+        }
+        Returns: string
+      }
       recalculer_montants_dossier: {
         Args: { p_dossier_id: string }
         Returns: undefined
@@ -8708,6 +9001,10 @@ export type Database = {
         Args: { p_annee?: number; p_exercice?: number; p_rule_id: string }
         Returns: string
       }
+      update_import_run_stats: {
+        Args: { p_run_id: string }
+        Returns: undefined
+      }
       update_supplier_document_statuses: { Args: never; Returns: number }
       user_can_access_exercice: {
         Args: { p_exercice: number }
@@ -8725,6 +9022,7 @@ export type Database = {
         Args: { p_role_code: string; p_user_id: string }
         Returns: boolean
       }
+      validate_import_run: { Args: { p_run_id: string }; Returns: Json }
       validate_prestataire_request: {
         Args: { p_request_id: string; p_validator_id: string }
         Returns: string
