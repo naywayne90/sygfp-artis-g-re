@@ -28,9 +28,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Plus, Pencil, Calendar, Loader2, Lock, Unlock, CheckCircle2, AlertTriangle, FileSpreadsheet } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, Pencil, Calendar, Loader2, Lock, Unlock, CheckCircle2, AlertTriangle, FileSpreadsheet, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -63,6 +64,7 @@ export default function GestionExercices() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showInitWizard, setShowInitWizard] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [editingExercice, setEditingExercice] = useState<Exercice | null>(null);
   const [formData, setFormData] = useState({
     annee: new Date().getFullYear() + 1,
@@ -188,6 +190,10 @@ export default function GestionExercices() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowHelp(!showHelp)}>
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Aide
+          </Button>
           <Button variant="outline" onClick={() => setShowInitWizard(true)}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Assistant d'initialisation
@@ -198,6 +204,73 @@ export default function GestionExercices() {
           </Button>
         </div>
       </div>
+
+      {/* Section d'aide */}
+      <Collapsible open={showHelp} onOpenChange={setShowHelp}>
+        <CollapsibleContent>
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <HelpCircle className="h-5 w-5 text-primary" />
+                À propos de ce module
+              </CardTitle>
+              <CardDescription>
+                Comprendre et gérer les exercices budgétaires de votre organisation
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-semibold mb-2">📅 Qu'est-ce qu'un exercice budgétaire ?</h4>
+                <p className="text-muted-foreground">
+                  Un exercice budgétaire représente une année fiscale de gestion. Il définit la période pendant laquelle 
+                  le budget est planifié, exécuté et suivi. Chaque exercice contient les lignes budgétaires, les engagements, 
+                  liquidations et paiements associés à cette année.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">📊 Les indicateurs affichés</h4>
+                  <ul className="text-muted-foreground space-y-1">
+                    <li>• <strong>Total exercices</strong> : Nombre d'exercices créés dans le système</li>
+                    <li>• <strong>Exercice actif</strong> : L'année de l'exercice actuellement en cours d'exécution</li>
+                    <li>• <strong>Budgets validés</strong> : Exercices dont le budget a été officiellement validé</li>
+                    <li>• <strong>En attente</strong> : Exercices ouverts mais non encore validés</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">🔄 Cycle de vie d'un exercice</h4>
+                  <ul className="text-muted-foreground space-y-1">
+                    <li>• <strong>Ouvert</strong> : L'exercice est créé, le budget peut être préparé</li>
+                    <li>• <strong>En cours</strong> : L'exercice est actif, les opérations peuvent être effectuées</li>
+                    <li>• <strong>Clôturé</strong> : L'exercice est terminé, plus de nouvelles opérations</li>
+                    <li>• <strong>Archivé</strong> : L'exercice est archivé pour consultation uniquement</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">⚙️ Actions disponibles</h4>
+                <ul className="text-muted-foreground space-y-1">
+                  <li>• <strong>Nouvel exercice</strong> : Créer un nouvel exercice pour une année donnée</li>
+                  <li>• <strong>Assistant d'initialisation</strong> : Importer les lignes budgétaires depuis un fichier Excel</li>
+                  <li>• <strong>Modifier</strong> : Changer le statut ou les dates d'un exercice existant</li>
+                  <li>• <strong>Actif/Inactif</strong> : Activer ou désactiver l'accès à un exercice</li>
+                </ul>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 className="font-semibold mb-1 text-amber-700 dark:text-amber-400">💡 Bon à savoir</h4>
+                <p className="text-muted-foreground">
+                  Un seul exercice peut être "En cours" à la fois. Le budget doit être validé avant de pouvoir 
+                  effectuer des engagements. Les exercices clôturés restent consultables mais ne permettent plus 
+                  de nouvelles opérations.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
