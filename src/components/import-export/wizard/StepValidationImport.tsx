@@ -23,7 +23,7 @@ interface StepValidationImportProps {
   isValidating: boolean;
   isImporting: boolean;
   importComplete: boolean;
-  importStats: { success: number; errors: number } | null;
+  importStats: { success: number; inserted?: number; updated?: number; errors: number } | null;
   onValidate: () => Promise<boolean>;
   onImport: () => Promise<void>;
   parsedRows?: ParsedRow[];
@@ -45,6 +45,9 @@ export function StepValidationImport({
   const canImport = errorCount === 0 && !isImporting && !importComplete;
 
   if (importComplete && importStats) {
+    const insertedCount = importStats.inserted || 0;
+    const updatedCount = importStats.updated || 0;
+    
     return (
       <Card>
         <CardContent className="pt-6">
@@ -52,20 +55,37 @@ export function StepValidationImport({
             <PartyPopper className="h-16 w-16 mx-auto text-green-600 mb-4" />
             <h3 className="text-2xl font-bold text-foreground mb-2">Import terminé !</h3>
             <p className="text-muted-foreground mb-6">
-              Les données ont été importées dans la base de données.
+              Les données ont été importées dans les lignes budgétaires.
             </p>
-            <div className="flex justify-center gap-4">
-              <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                <p className="text-3xl font-bold text-green-600">{importStats.success}</p>
-                <p className="text-sm text-muted-foreground">Lignes importées</p>
-              </div>
+            <div className="flex justify-center gap-4 flex-wrap">
+              {insertedCount > 0 && (
+                <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-lg min-w-[120px]">
+                  <p className="text-3xl font-bold text-green-600">{insertedCount}</p>
+                  <p className="text-sm text-muted-foreground">Lignes créées</p>
+                </div>
+              )}
+              {updatedCount > 0 && (
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg min-w-[120px]">
+                  <p className="text-3xl font-bold text-blue-600">{updatedCount}</p>
+                  <p className="text-sm text-muted-foreground">Lignes mises à jour</p>
+                </div>
+              )}
+              {insertedCount === 0 && updatedCount === 0 && (
+                <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-lg min-w-[120px]">
+                  <p className="text-3xl font-bold text-green-600">{importStats.success}</p>
+                  <p className="text-sm text-muted-foreground">Lignes traitées</p>
+                </div>
+              )}
               {importStats.errors > 0 && (
-                <div className="text-center p-4 bg-red-50 dark:bg-red-950/30 rounded-lg">
+                <div className="text-center p-4 bg-red-50 dark:bg-red-950/30 rounded-lg min-w-[120px]">
                   <p className="text-3xl font-bold text-red-600">{importStats.errors}</p>
                   <p className="text-sm text-muted-foreground">Erreurs</p>
                 </div>
               )}
             </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Les lignes sont visibles dans "Planification Budget" → "Structure Budgétaire"
+            </p>
           </div>
         </CardContent>
       </Card>

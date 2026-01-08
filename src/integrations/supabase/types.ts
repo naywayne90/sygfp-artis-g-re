@@ -1025,6 +1025,7 @@ export type Database = {
           dotation_modifiee: number | null
           exercice: number
           id: string
+          import_run_id: string | null
           is_active: boolean | null
           label: string
           legacy_import: boolean | null
@@ -1076,6 +1077,7 @@ export type Database = {
           dotation_modifiee?: number | null
           exercice?: number
           id?: string
+          import_run_id?: string | null
           is_active?: boolean | null
           label: string
           legacy_import?: boolean | null
@@ -1127,6 +1129,7 @@ export type Database = {
           dotation_modifiee?: number | null
           exercice?: number
           id?: string
+          import_run_id?: string | null
           is_active?: boolean | null
           label?: string
           legacy_import?: boolean | null
@@ -1193,6 +1196,13 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_import_run_id_fkey"
+            columns: ["import_run_id"]
+            isOneToOne: false
+            referencedRelation: "import_runs"
             referencedColumns: ["id"]
           },
           {

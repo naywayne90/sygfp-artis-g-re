@@ -238,6 +238,8 @@ export function useImportStaging() {
   const executeImport = useCallback(async (runId: string): Promise<{
     success: boolean;
     importedCount: number;
+    insertedCount: number;
+    updatedCount: number;
     errorCount: number;
   }> => {
     setIsLoading(true);
@@ -246,11 +248,19 @@ export function useImportStaging() {
 
       if (result.error) throw result.error;
 
-      const data = result.data as { imported_count: number; error_count: number };
+      const data = result.data as { 
+        success: boolean;
+        imported_count: number;
+        inserted: number;
+        updated: number;
+        error_count: number;
+      };
       
       return {
-        success: data.error_count === 0,
+        success: data.success && data.error_count === 0,
         importedCount: data.imported_count,
+        insertedCount: data.inserted || 0,
+        updatedCount: data.updated || 0,
         errorCount: data.error_count,
       };
     } catch (error) {
@@ -265,6 +275,8 @@ export function useImportStaging() {
       return {
         success: false,
         importedCount: 0,
+        insertedCount: 0,
+        updatedCount: 0,
         errorCount: 1,
       };
     } finally {

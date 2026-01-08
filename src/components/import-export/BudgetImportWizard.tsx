@@ -62,7 +62,12 @@ export function BudgetImportWizard() {
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
-  const [importStats, setImportStats] = useState<{ success: number; errors: number } | null>(null);
+  const [importStats, setImportStats] = useState<{ 
+    success: number; 
+    inserted: number;
+    updated: number;
+    errors: number 
+  } | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
@@ -210,12 +215,14 @@ export function BudgetImportWizard() {
       
       setImportStats({ 
         success: result.importedCount, 
+        inserted: result.insertedCount,
+        updated: result.updatedCount,
         errors: result.errorCount 
       });
       setImportComplete(true);
       
       if (result.success) {
-        toast.success(`Import réussi: ${result.importedCount} lignes importées`);
+        toast.success(`Import réussi: ${result.insertedCount} créées, ${result.updatedCount} mises à jour`);
       } else {
         toast.warning(`Import partiel: ${result.importedCount} réussies, ${result.errorCount} erreurs`);
       }
