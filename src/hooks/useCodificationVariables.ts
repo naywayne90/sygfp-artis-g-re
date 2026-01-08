@@ -148,8 +148,8 @@ export function useCodificationVariables() {
     testExercice?: number
   ) => {
     const { data, error } = await supabase.rpc("test_codification_pattern", {
-      p_pattern: pattern,
-      p_values: values,
+      p_pattern: JSON.parse(JSON.stringify(pattern)),
+      p_values: values as Record<string, string>,
       p_exercice: testExercice || exercice,
     });
 
