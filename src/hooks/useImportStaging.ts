@@ -68,24 +68,32 @@ export function useImportStaging() {
         .eq("run_id", runId);
 
       // Prepare staging records
-      const stagingRecords = parsedRows.map((row) => ({
-        run_id: runId,
-        row_number: row.rowNumber,
-        raw_imputation: row.raw.imputation,
-        raw_os: row.raw.os,
-        raw_action: row.raw.action,
-        raw_activite: row.raw.activite,
-        raw_sous_activite: row.raw.sousActivite,
-        raw_direction: row.raw.direction,
-        raw_nature_depense: row.raw.natureDepense,
-        raw_nbe: row.raw.nbe,
-        raw_montant: row.raw.montant,
-        computed_imputation: row.computed.imputation,
-        computed_nbe_code: row.computed.nbeCode,
-        computed_nature_depense_code: row.computed.natureDepenseCode?.toString() || null,
-        validation_status: row.isValid ? "ok" : "error",
-        validation_errors: row.errors.length > 0 ? row.errors.join("; ") : null,
-      }));
+      const stagingRecords = parsedRows.map((row) => {
+        // Combine errors and warnings for validation_errors field
+        const allMessages = [
+          ...row.errors,
+          ...row.warnings.map(w => `[Warning] ${w}`)
+        ];
+        
+        return {
+          run_id: runId,
+          row_number: row.rowNumber,
+          raw_imputation: row.raw.imputation,
+          raw_os: row.raw.os,
+          raw_action: row.raw.action,
+          raw_activite: row.raw.activite,
+          raw_sous_activite: row.raw.sousActivite,
+          raw_direction: row.raw.direction,
+          raw_nature_depense: row.raw.natureDepense,
+          raw_nbe: row.raw.nbe,
+          raw_montant: row.raw.montant,
+          computed_imputation: row.computed.calculatedImputation || row.computed.imputation,
+          computed_nbe_code: row.computed.nbeCode,
+          computed_nature_depense_code: row.computed.natureDepenseCode?.toString() || null,
+          validation_status: row.isValid ? (row.warnings.length > 0 ? "warning" : "ok") : "error",
+          validation_errors: allMessages.length > 0 ? allMessages.join("; ") : null,
+        };
+      });
 
       // Insert in batches
       const batchSize = 100;

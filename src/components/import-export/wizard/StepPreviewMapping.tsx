@@ -187,61 +187,87 @@ export function StepPreviewMapping({
                   <TableHeader className="sticky top-0 bg-background">
                     <TableRow>
                       <TableHead className="w-12 text-center">#</TableHead>
-                      <TableHead>Imputation</TableHead>
+                      <TableHead>Imputation (fichier)</TableHead>
+                      <TableHead>Imputation (calculée)</TableHead>
+                      <TableHead className="text-center">Format</TableHead>
                       <TableHead className="text-center">OS</TableHead>
-                      <TableHead className="text-center">Action</TableHead>
-                      <TableHead className="text-center">Activité</TableHead>
-                      <TableHead className="text-center">S/Activ</TableHead>
-                      <TableHead className="text-center">Direction</TableHead>
-                      <TableHead className="text-center">Nat. Dép.</TableHead>
-                      <TableHead>NBE (6 car.)</TableHead>
+                      <TableHead className="text-center">Act</TableHead>
+                      <TableHead className="text-center">Activ</TableHead>
+                      <TableHead className="text-center">S/Act</TableHead>
+                      <TableHead className="text-center">Dir</TableHead>
+                      <TableHead className="text-center">Nat</TableHead>
+                      <TableHead>NBE</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
                       <TableHead className="text-center">Statut</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {parsedPreview.map((row) => (
-                      <TableRow key={row.rowNumber} className={!row.isValid ? "bg-red-50 dark:bg-red-950/20" : ""}>
+                      <TableRow key={row.rowNumber} className={!row.isValid ? "bg-red-50 dark:bg-red-950/20" : row.warnings.length > 0 ? "bg-yellow-50 dark:bg-yellow-950/20" : ""}>
                         <TableCell className="text-center text-muted-foreground text-xs">
                           {row.rowNumber}
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {row.computed.imputation || <span className="text-destructive">—</span>}
+                        <TableCell className="font-mono text-xs">
+                          {row.raw.imputation || <span className="text-muted-foreground">—</span>}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          {row.computed.osCode ?? <span className="text-muted-foreground">—</span>}
+                        <TableCell className="font-mono text-xs">
+                          {row.computed.calculatedImputation ? (
+                            <span className={row.raw.imputation && row.raw.imputation !== row.computed.calculatedImputation ? "text-destructive" : "text-green-600"}>
+                              {row.computed.calculatedImputation}
+                            </span>
+                          ) : (
+                            <span className="text-destructive">—</span>
+                          )}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          {row.computed.actionCode ?? <span className="text-muted-foreground">—</span>}
+                        <TableCell className="text-center">
+                          {row.computed.imputationFormat ? (
+                            <Badge variant="outline" className="text-xs">
+                              {row.computed.imputationFormat}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          {row.computed.activiteCode ?? <span className="text-muted-foreground">—</span>}
+                        <TableCell className="text-center font-mono text-xs">
+                          {row.computed.osCode !== null ? String(row.computed.osCode).padStart(2, "0") : <span className="text-muted-foreground">—</span>}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          {row.computed.sousActiviteCode ?? <span className="text-muted-foreground">—</span>}
+                        <TableCell className="text-center font-mono text-xs">
+                          {row.computed.actionCode !== null ? String(row.computed.actionCode).padStart(2, "0") : <span className="text-muted-foreground italic">∅</span>}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          {row.computed.directionCode ?? <span className="text-muted-foreground">—</span>}
+                        <TableCell className="text-center font-mono text-xs">
+                          {row.computed.activiteCode !== null ? String(row.computed.activiteCode).padStart(3, "0") : <span className="text-muted-foreground">—</span>}
                         </TableCell>
-                        <TableCell className="text-center font-mono">
+                        <TableCell className="text-center font-mono text-xs">
+                          {row.computed.sousActiviteCode !== null ? String(row.computed.sousActiviteCode).padStart(3, "0") : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-xs">
+                          {row.computed.directionCode !== null ? String(row.computed.directionCode).padStart(2, "0") : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-xs">
                           {row.computed.natureDepenseCode ?? <span className="text-muted-foreground">—</span>}
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {row.computed.nbeCode || <span className="text-muted-foreground">—</span>}
+                        <TableCell className="font-mono text-xs">
+                          {row.computed.nbeCode || <span className="text-destructive">—</span>}
                         </TableCell>
-                        <TableCell className="text-right font-mono">
+                        <TableCell className="text-right font-mono text-xs">
                           {row.computed.montant !== null 
                             ? row.computed.montant.toLocaleString("fr-FR") 
                             : <span className="text-destructive">—</span>}
                         </TableCell>
                         <TableCell className="text-center">
                           {row.isValid ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400">
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              OK
-                            </Badge>
+                            row.warnings.length > 0 ? (
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400 text-xs">
+                                Alerte
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400 text-xs">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                OK
+                              </Badge>
+                            )
                           ) : (
-                            <Badge variant="destructive" className="gap-1">
+                            <Badge variant="destructive" className="gap-1 text-xs">
                               <AlertCircle className="h-3 w-3" />
                               Erreur
                             </Badge>
@@ -257,14 +283,14 @@ export function StepPreviewMapping({
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2 text-sm font-medium mb-2">
                     <Code className="h-4 w-4" />
-                    Extraction automatique des codes
+                    Règles de calcul de l'imputation
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• <strong>OS, Action, Activité, Direction</strong> : convertis en nombres entiers</li>
-                    <li>• <strong>Nature dépense</strong> : code numérique extrait (ex: "2 Biens et services" → 2)</li>
-                    <li>• <strong>NBE</strong> : 6 premiers chiffres extraits (ex: "671700 : Achats" → 671700)</li>
-                    <li>• <strong>Montant</strong> : nombre en FCFA</li>
-                    <li>• Action peut être vide (null autorisé)</li>
+                    <li>• <strong>Format 17 chiffres</strong> (Action vide) : OS(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)</li>
+                    <li>• <strong>Format 19 chiffres</strong> (Action rempli) : OS(2) + Action(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)</li>
+                    <li>• <strong>Validation croisée</strong> : si l'imputation du fichier diffère de celle calculée → erreur</li>
+                    <li>• <strong>NBE</strong> : doit être exactement 6 chiffres</li>
+                    <li>• <strong>Montant</strong> : doit être positif (FCFA)</li>
                   </ul>
                 </div>
               )}
