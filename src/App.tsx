@@ -49,6 +49,7 @@ import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetai
 import PlanificationPhysique from "./pages/planification/PlanificationPhysique";
 import Virements from "./pages/planification/Virements";
 import ImportExport from "./pages/planification/ImportExport";
+import DocumentationImport from "./pages/planification/DocumentationImport";
 
 // Pages Exécution
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
@@ -131,6 +132,7 @@ const App = () => (
               <Route path="/planification/physique" element={<PlanificationPhysique />} />
               <Route path="/planification/virements" element={<Virements />} />
               <Route path="/planification/import-export" element={<ImportExport />} />
+              <Route path="/planification/documentation-import" element={<DocumentationImport />} />
               
               {/* Exécution Budgétaire */}
               <Route path="/notes" element={<Notes />} />

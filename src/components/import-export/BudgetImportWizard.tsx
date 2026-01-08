@@ -3,14 +3,18 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { StepExerciceUpload } from "./wizard/StepExerciceUpload";
 import { StepSheetSelection } from "./wizard/StepSheetSelection";
 import { StepPreviewMapping } from "./wizard/StepPreviewMapping";
 import { StepValidationImport } from "./wizard/StepValidationImport";
-import { ChevronLeft, ChevronRight, Check, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, RotateCcw, ShieldAlert, Lock } from "lucide-react";
 import { useExcelParser, SheetData, ColumnMapping, ParsedRow } from "@/hooks/useExcelParser";
 import { useImportStaging } from "@/hooks/useImportStaging";
 import { useReferentielSync } from "@/hooks/useReferentielSync";
+import { useImportSecurity } from "@/hooks/useImportSecurity";
 
 export type { SheetData, ColumnMapping } from "@/hooks/useExcelParser";
 
@@ -46,6 +50,15 @@ export function BudgetImportWizard() {
     detectReferenceSheets,
     syncReferentiels,
   } = useReferentielSync();
+  const {
+    canImport,
+    isBudgetLockedForUser,
+    isCheckingValidation,
+    budgetValidation,
+    getImportBlockReason,
+    logImportAction,
+    hasImportOverrideRole,
+  } = useImportSecurity();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedExercice, setSelectedExercice] = useState<number>(exercice || new Date().getFullYear());
@@ -80,6 +93,12 @@ export function BudgetImportWizard() {
   const [syncReferentielsEnabled, setSyncReferentielsEnabled] = useState(false);
   const [detectedRefSheets, setDetectedRefSheets] = useState<{ name: string; type: string }[]>([]);
   const [refsSynced, setRefsSynced] = useState(false);
+  
+  // Override justification for validated budgets
+  const [overrideJustification, setOverrideJustification] = useState("");
+
+  // Block reason for display
+  const importBlockReason = getImportBlockReason();
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     setFile(uploadedFile);
@@ -227,9 +246,21 @@ export function BudgetImportWizard() {
       return;
     }
 
+    // Check if justification is required for validated budget
+    if (budgetValidation?.isValidated && hasImportOverrideRole && !overrideJustification.trim()) {
+      toast.error("Une justification est requise pour importer sur un budget validé");
+      return;
+    }
+
     setIsImporting(true);
     
     try {
+      // Log import start
+      await logImportAction(runId, file?.name || "unknown", "start", {
+        totalRows: parsedRows.length,
+        justification: overrideJustification || undefined,
+      });
+
       const result = await executeImport(runId);
       
       setImportStats({ 
@@ -240,6 +271,20 @@ export function BudgetImportWizard() {
       });
       setImportComplete(true);
       
+      // Log import result
+      await logImportAction(
+        runId, 
+        file?.name || "unknown", 
+        result.success ? "success" : "error",
+        {
+          totalRows: parsedRows.length,
+          insertedRows: result.insertedCount,
+          updatedRows: result.updatedCount,
+          errorRows: result.errorCount,
+          justification: overrideJustification || undefined,
+        }
+      );
+      
       if (result.success) {
         toast.success(`Import réussi: ${result.insertedCount} créées, ${result.updatedCount} mises à jour`);
       } else {
@@ -247,11 +292,19 @@ export function BudgetImportWizard() {
       }
     } catch (error) {
       console.error("Import error:", error);
+      
+      // Log import error
+      if (runId) {
+        await logImportAction(runId, file?.name || "unknown", "error", {
+          errorRows: parsedRows.length,
+        });
+      }
+      
       toast.error("Erreur lors de l'import");
     } finally {
       setIsImporting(false);
     }
-  }, [runId, executeImport]);
+  }, [runId, executeImport, budgetValidation, hasImportOverrideRole, overrideJustification, logImportAction, file, parsedRows]);
 
   const resetWizard = useCallback(() => {
     setCurrentStep(1);
@@ -277,7 +330,19 @@ export function BudgetImportWizard() {
     setSyncReferentielsEnabled(false);
     setDetectedRefSheets([]);
     setRefsSynced(false);
+    setOverrideJustification("");
   }, []);
+
+  // Block import if user doesn't have permission
+  if (!canImport && importBlockReason) {
+    return (
+      <Alert variant="destructive" className="my-4">
+        <Lock className="h-4 w-4" />
+        <AlertTitle>Import bloqué</AlertTitle>
+        <AlertDescription>{importBlockReason}</AlertDescription>
+      </Alert>
+    );
+  }
 
   const canProceed = useCallback(() => {
     switch (currentStep) {
