@@ -173,9 +173,24 @@ export function useContrats() {
   const createContrat = useMutation({
     mutationFn: async (contrat: Omit<Contrat, "id" | "numero" | "created_at" | "prestataire" | "marche">) => {
       const { data: { user } } = await supabase.auth.getUser();
+
+      // Generate atomic sequence number
+      const { data: seqData, error: seqError } = await supabase.rpc("get_next_sequence", {
+        p_doc_type: "CONTRAT",
+        p_exercice: exercice || new Date().getFullYear(),
+        p_direction_code: null,
+        p_scope: "global",
+      });
+
+      if (seqError) throw seqError;
+      if (!seqData || seqData.length === 0) throw new Error("Échec génération numéro");
+
+      const numero = seqData[0].full_code;
+
       const { data, error } = await supabase
         .from("contrats" as any)
         .insert([{
+          numero,
           prestataire_id: contrat.prestataire_id,
           type_contrat: contrat.type_contrat,
           objet: contrat.objet,
