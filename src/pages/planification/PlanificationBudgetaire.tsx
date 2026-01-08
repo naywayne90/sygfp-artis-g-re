@@ -12,6 +12,7 @@ import { TopOSWidget } from "@/components/budget/TopOSWidget";
 import { BudgetLineForm } from "@/components/budget/BudgetLineForm";
 import { BudgetFilters } from "@/components/budget/BudgetFilters";
 import { BudgetImportAdvanced } from "@/components/budget/BudgetImportAdvanced";
+import { ImportExcelWizard } from "@/components/budget/ImportExcelWizard";
 import { BudgetLineHistory } from "@/components/budget/BudgetLineHistory";
 import { BudgetValidation } from "@/components/budget/BudgetValidation";
 import { BudgetVersionHistory } from "@/components/budget/BudgetVersionHistory";
@@ -47,6 +48,7 @@ export default function PlanificationBudgetaire() {
   const [filters, setFilters] = useState<BudgetLineFilters>({});
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showExcelImport, setShowExcelImport] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
@@ -360,6 +362,10 @@ export default function PlanificationBudgetaire() {
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle ligne
               </Button>
+              <Button onClick={() => setShowExcelImport(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Importer Excel
+              </Button>
               <Button variant="outline" onClick={() => setShowImport(true)}>
                 <Upload className="mr-2 h-4 w-4" />
                 Importer CSV
@@ -517,6 +523,15 @@ export default function PlanificationBudgetaire() {
         open={showHistory}
         onOpenChange={setShowHistory}
         budgetLine={selectedLineForHistory}
+      />
+
+      <ImportExcelWizard
+        open={showExcelImport}
+        onOpenChange={setShowExcelImport}
+        onImportComplete={() => {
+          // Refresh data after import
+          window.location.reload();
+        }}
       />
     </div>
   );
