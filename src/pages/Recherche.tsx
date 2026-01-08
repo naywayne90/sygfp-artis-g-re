@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause, Lock, AlertTriangle } from "lucide-react";
+import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause, Lock, AlertTriangle, HelpCircle, ChevronDown, ChevronUp, Search, Filter, Eye, Edit, Paperclip, UserPlus } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
 import { DossierSearch } from "@/components/dossier/DossierSearch";
 import { DossierList } from "@/components/dossier/DossierList";
@@ -49,6 +50,7 @@ export default function Recherche() {
   const [blockMode, setBlockMode] = useState<"block" | "unblock">("block");
   const [sortField, setSortField] = useState<string>("updated_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [showHelp, setShowHelp] = useState(false);
 
   // Générer la liste des exercices disponibles
   const currentYear = new Date().getFullYear();
@@ -213,11 +215,106 @@ export default function Recherche() {
             Recherchez et gérez tous les dossiers de l'exercice {exercice}
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau dossier
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowHelp(!showHelp)}>
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Aide
+          </Button>
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau dossier
+          </Button>
+        </div>
       </div>
+
+      {/* Section d'aide */}
+      <Collapsible open={showHelp} onOpenChange={setShowHelp}>
+        <CollapsibleContent>
+          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <HelpCircle className="h-5 w-5" />
+                À quoi sert ce module ?
+              </CardTitle>
+              <CardDescription className="text-blue-600 dark:text-blue-400">
+                Guide d'utilisation du module Recherche Dossier
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">📁 Qu'est-ce qu'un dossier ?</h4>
+                <p className="text-muted-foreground">
+                  Un <strong>dossier</strong> représente une opération de dépense complète dans SYGFP. Il regroupe 
+                  toutes les étapes de la chaîne de dépense : de l'expression de besoin jusqu'au règlement final.
+                  C'est le fil conducteur qui permet de suivre l'avancement d'une dépense de bout en bout.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Search className="h-4 w-4 text-blue-500" />
+                    Rechercher un dossier
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li>Utilisez la barre de recherche pour trouver par numéro, objet ou bénéficiaire</li>
+                    <li>Cliquez sur "Filtres" pour affiner par statut, direction, période ou montant</li>
+                    <li>Les KPIs en haut affichent les statistiques globales</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Plus className="h-4 w-4 text-green-500" />
+                    Créer un nouveau dossier
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li>Cliquez sur "Nouveau dossier" pour initier une nouvelle opération</li>
+                    <li>Renseignez l'objet, le bénéficiaire, la direction et le montant estimé</li>
+                    <li>Un numéro unique sera automatiquement attribué</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-purple-500" />
+                    Consulter un dossier
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li>Cliquez sur l'icône œil pour voir les détails complets</li>
+                    <li>Visualisez la timeline des étapes (note, engagement, liquidation...)</li>
+                    <li>Consultez les documents attachés et l'historique</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Edit className="h-4 w-4 text-orange-500" />
+                    Actions possibles
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li><strong>Modifier</strong> : Mettre à jour les informations du dossier</li>
+                    <li><strong>Attacher</strong> : Joindre des documents justificatifs</li>
+                    <li><strong>Assigner</strong> : Affecter le dossier à un agent</li>
+                    <li><strong>Bloquer/Débloquer</strong> : Suspendre ou reprendre le traitement</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <h4 className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-2 mb-1">
+                  <AlertTriangle className="h-4 w-4" />
+                  Bon à savoir
+                </h4>
+                <p className="text-amber-600 dark:text-amber-400 text-sm">
+                  Chaque dossier suit automatiquement la chaîne de dépense : <strong>Note → Engagement → Liquidation → Ordonnancement → Règlement</strong>. 
+                  Les étapes se débloquent au fur et à mesure de la validation des précédentes.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* KPIs Summary */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
