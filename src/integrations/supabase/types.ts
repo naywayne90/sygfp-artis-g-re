@@ -9167,6 +9167,7 @@ export type Database = {
         Args: { p_exercice: number }
         Returns: string
       }
+      generate_prestataire_code: { Args: never; Returns: string }
       generate_transfer_code: {
         Args: { p_exercice: number; p_type?: string }
         Returns: string
@@ -9252,6 +9253,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      import_prestataires: {
+        Args: { p_rows: Json; p_user_id: string }
+        Returns: Json
       }
       init_production_checklist: {
         Args: { p_exercice: number }
