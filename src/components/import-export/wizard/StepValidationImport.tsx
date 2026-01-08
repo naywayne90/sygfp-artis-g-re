@@ -11,9 +11,12 @@ import {
   FileCheck, 
   Loader2, 
   Upload,
-  PartyPopper
+  PartyPopper,
+  Database,
+  FileSpreadsheet
 } from "lucide-react";
 import { ValidationError } from "../BudgetImportWizard";
+import { ParsedRow } from "@/hooks/useExcelParser";
 
 interface StepValidationImportProps {
   validationErrors: ValidationError[];
@@ -23,6 +26,7 @@ interface StepValidationImportProps {
   importStats: { success: number; errors: number } | null;
   onValidate: () => Promise<boolean>;
   onImport: () => Promise<void>;
+  parsedRows?: ParsedRow[];
 }
 
 export function StepValidationImport({
@@ -33,9 +37,11 @@ export function StepValidationImport({
   importStats,
   onValidate,
   onImport,
+  parsedRows = [],
 }: StepValidationImportProps) {
   const errorCount = validationErrors.filter(e => e.severity === "error").length;
   const warningCount = validationErrors.filter(e => e.severity === "warning").length;
+  const validRowsCount = parsedRows.filter(r => r.isValid).length;
   const canImport = errorCount === 0 && !isImporting && !importComplete;
 
   if (importComplete && importStats) {
@@ -68,6 +74,54 @@ export function StepValidationImport({
 
   return (
     <div className="space-y-6">
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
+              <div>
+                <p className="text-2xl font-bold">{parsedRows.length}</p>
+                <p className="text-xs text-muted-foreground">Lignes totales</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-2xl font-bold text-green-600">{validRowsCount}</p>
+                <p className="text-xs text-muted-foreground">Lignes valides</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+              <div>
+                <p className="text-2xl font-bold text-destructive">{errorCount}</p>
+                <p className="text-xs text-muted-foreground">Erreurs</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-yellow-600" />
+              <div>
+                <p className="text-2xl font-bold text-yellow-600">{warningCount}</p>
+                <p className="text-xs text-muted-foreground">Avertissements</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Validation status */}
       <Card>
         <CardHeader>
@@ -76,21 +130,22 @@ export function StepValidationImport({
             Validation des données
           </CardTitle>
           <CardDescription>
-            Vérification des données avant import
+            Vérification des données avant import dans la zone de staging
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isValidating ? (
             <div className="flex items-center gap-3 py-4">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <span>Validation en cours...</span>
+              <span>Validation et chargement dans la zone de staging...</span>
             </div>
           ) : validationErrors.length === 0 ? (
             <Alert className="border-green-500 bg-green-50 dark:bg-green-950/30">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertTitle className="text-green-600">Validation réussie</AlertTitle>
               <AlertDescription>
-                Aucune erreur détectée. Vous pouvez procéder à l'import.
+                Aucune erreur détectée. Les données ont été chargées dans la zone de staging. 
+                Vous pouvez procéder à l'import final.
               </AlertDescription>
             </Alert>
           ) : (
@@ -100,7 +155,7 @@ export function StepValidationImport({
                 {errorCount > 0 && (
                   <Badge variant="destructive" className="gap-1">
                     <AlertCircle className="h-3 w-3" />
-                    {errorCount} erreur(s)
+                    {errorCount} erreur(s) bloquante(s)
                   </Badge>
                 )}
                 {warningCount > 0 && (
@@ -160,12 +215,12 @@ export function StepValidationImport({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <Upload className="h-5 w-5" />
+            <Database className="h-5 w-5" />
             Importer les données
           </CardTitle>
           <CardDescription>
             {canImport
-              ? "Cliquez sur le bouton ci-dessous pour lancer l'import"
+              ? "Les données sont en zone de staging. Cliquez pour finaliser l'import vers les lignes budgétaires."
               : errorCount > 0
               ? "Corrigez les erreurs avant de pouvoir importer"
               : "Import en cours..."}
@@ -203,7 +258,7 @@ export function StepValidationImport({
               ) : (
                 <>
                   <Upload className="h-4 w-4" />
-                  Importer
+                  Importer ({validRowsCount} lignes)
                 </>
               )}
             </Button>
@@ -213,7 +268,7 @@ export function StepValidationImport({
             <div className="mt-4">
               <Progress value={undefined} className="h-2" />
               <p className="text-sm text-muted-foreground mt-2">
-                Import des lignes budgétaires en cours...
+                Import des lignes budgétaires en cours depuis la zone de staging...
               </p>
             </div>
           )}

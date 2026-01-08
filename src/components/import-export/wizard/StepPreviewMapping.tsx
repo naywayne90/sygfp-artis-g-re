@@ -4,14 +4,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, Columns, Eye } from "lucide-react";
-import { SheetData, ColumnMapping } from "../BudgetImportWizard";
+import { AlertCircle, CheckCircle2, Columns, Eye, Code } from "lucide-react";
+import { SheetData, ColumnMapping, ParsedRow } from "@/hooks/useExcelParser";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface StepPreviewMappingProps {
   sheet: SheetData;
   mapping: ColumnMapping;
   onMappingChange: (mapping: ColumnMapping) => void;
   missingRequired: (keyof ColumnMapping)[];
+  parsedRows?: ParsedRow[];
 }
 
 const COLUMN_LABELS: Record<keyof ColumnMapping, { label: string; required: boolean }> = {
@@ -22,7 +24,7 @@ const COLUMN_LABELS: Record<keyof ColumnMapping, { label: string; required: bool
   sousActivite: { label: "Sous-activité", required: false },
   direction: { label: "Direction", required: false },
   natureDépense: { label: "Nature dépense", required: false },
-  nbe: { label: "NBE", required: false },
+  nbe: { label: "NBE (Nature éco)", required: false },
   montant: { label: "Montant", required: true },
 };
 
@@ -31,6 +33,7 @@ export function StepPreviewMapping({
   mapping,
   onMappingChange,
   missingRequired,
+  parsedRows = [],
 }: StepPreviewMappingProps) {
   const previewRows = sheet.data.slice(1, 21); // First 20 data rows
   const hasBlockingError = missingRequired.length > 0;
@@ -41,6 +44,9 @@ export function StepPreviewMapping({
       [key]: value === "__none__" ? null : value,
     });
   };
+
+  // Get first 20 parsed rows for computed preview
+  const parsedPreview = parsedRows.slice(0, 20);
 
   return (
     <div className="space-y-6">
@@ -115,7 +121,7 @@ export function StepPreviewMapping({
         </CardContent>
       </Card>
 
-      {/* Data preview */}
+      {/* Data preview with tabs */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -123,47 +129,147 @@ export function StepPreviewMapping({
             Aperçu des données
           </CardTitle>
           <CardDescription>
-            20 premières lignes du fichier (sur {sheet.data.length - 1} au total)
+            {sheet.data.length - 1} lignes au total (colonnes "Total" ignorées automatiquement)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="border rounded-lg overflow-auto max-h-[400px]">
-            <Table>
-              <TableHeader className="sticky top-0 bg-background">
-                <TableRow>
-                  <TableHead className="w-12 text-center">#</TableHead>
-                  {sheet.headers.filter(h => h).map((header, idx) => (
-                    <TableHead key={idx} className="min-w-[120px]">
-                      <div className="flex items-center gap-1">
-                        {header}
-                        {Object.entries(mapping).some(([_, v]) => v === header) && (
-                          <Badge variant="secondary" className="text-xs ml-1">
-                            mappé
-                          </Badge>
-                        )}
-                      </div>
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {previewRows.map((row, rowIdx) => (
-                  <TableRow key={rowIdx}>
-                    <TableCell className="text-center text-muted-foreground text-xs">
-                      {rowIdx + 2}
-                    </TableCell>
-                    {sheet.headers.filter(h => h).map((_, colIdx) => (
-                      <TableCell key={colIdx} className="text-sm">
-                        {row[colIdx] !== undefined && row[colIdx] !== null
-                          ? String(row[colIdx]).substring(0, 50)
-                          : <span className="text-muted-foreground italic">vide</span>}
-                      </TableCell>
+          <Tabs defaultValue="raw" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="raw">Données brutes</TabsTrigger>
+              <TabsTrigger value="extracted">Codes extraits</TabsTrigger>
+            </TabsList>
+
+            {/* Raw data tab */}
+            <TabsContent value="raw">
+              <div className="border rounded-lg overflow-auto max-h-[400px]">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead className="w-12 text-center">#</TableHead>
+                      {sheet.headers.filter(h => h).map((header, idx) => (
+                        <TableHead key={idx} className="min-w-[120px]">
+                          <div className="flex items-center gap-1">
+                            {header}
+                            {Object.entries(mapping).some(([_, v]) => v === header) && (
+                              <Badge variant="secondary" className="text-xs ml-1">
+                                mappé
+                              </Badge>
+                            )}
+                          </div>
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {previewRows.map((row, rowIdx) => (
+                      <TableRow key={rowIdx}>
+                        <TableCell className="text-center text-muted-foreground text-xs">
+                          {rowIdx + 2}
+                        </TableCell>
+                        {sheet.headers.filter(h => h).map((_, colIdx) => (
+                          <TableCell key={colIdx} className="text-sm">
+                            {row[colIdx] !== undefined && row[colIdx] !== null
+                              ? String(row[colIdx]).substring(0, 50)
+                              : <span className="text-muted-foreground italic">vide</span>}
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            {/* Extracted codes tab */}
+            <TabsContent value="extracted">
+              <div className="border rounded-lg overflow-auto max-h-[400px]">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    <TableRow>
+                      <TableHead className="w-12 text-center">#</TableHead>
+                      <TableHead>Imputation</TableHead>
+                      <TableHead className="text-center">OS</TableHead>
+                      <TableHead className="text-center">Action</TableHead>
+                      <TableHead className="text-center">Activité</TableHead>
+                      <TableHead className="text-center">S/Activ</TableHead>
+                      <TableHead className="text-center">Direction</TableHead>
+                      <TableHead className="text-center">Nat. Dép.</TableHead>
+                      <TableHead>NBE (6 car.)</TableHead>
+                      <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="text-center">Statut</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {parsedPreview.map((row) => (
+                      <TableRow key={row.rowNumber} className={!row.isValid ? "bg-red-50 dark:bg-red-950/20" : ""}>
+                        <TableCell className="text-center text-muted-foreground text-xs">
+                          {row.rowNumber}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {row.computed.imputation || <span className="text-destructive">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.osCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.actionCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.activiteCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.sousActiviteCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.directionCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center font-mono">
+                          {row.computed.natureDepenseCode ?? <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {row.computed.nbeCode || <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {row.computed.montant !== null 
+                            ? row.computed.montant.toLocaleString("fr-FR") 
+                            : <span className="text-destructive">—</span>}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {row.isValid ? (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              OK
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive" className="gap-1">
+                              <AlertCircle className="h-3 w-3" />
+                              Erreur
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {parsedPreview.length > 0 && (
+                <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                    <Code className="h-4 w-4" />
+                    Extraction automatique des codes
+                  </div>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• <strong>OS, Action, Activité, Direction</strong> : convertis en nombres entiers</li>
+                    <li>• <strong>Nature dépense</strong> : code numérique extrait (ex: "2 Biens et services" → 2)</li>
+                    <li>• <strong>NBE</strong> : 6 premiers chiffres extraits (ex: "671700 : Achats" → 671700)</li>
+                    <li>• <strong>Montant</strong> : nombre en FCFA</li>
+                    <li>• Action peut être vide (null autorisé)</li>
+                  </ul>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

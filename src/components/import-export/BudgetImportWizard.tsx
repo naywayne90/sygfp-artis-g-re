@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,25 +8,10 @@ import { StepSheetSelection } from "./wizard/StepSheetSelection";
 import { StepPreviewMapping } from "./wizard/StepPreviewMapping";
 import { StepValidationImport } from "./wizard/StepValidationImport";
 import { ChevronLeft, ChevronRight, Check, RotateCcw } from "lucide-react";
-import * as XLSX from "xlsx";
+import { useExcelParser, SheetData, ColumnMapping, ParsedRow } from "@/hooks/useExcelParser";
+import { useImportStaging } from "@/hooks/useImportStaging";
 
-export interface SheetData {
-  name: string;
-  data: any[][];
-  headers: string[];
-}
-
-export interface ColumnMapping {
-  imputation: string | null;
-  os: string | null;
-  action: string | null;
-  activite: string | null;
-  sousActivite: string | null;
-  direction: string | null;
-  natureDépense: string | null;
-  nbe: string | null;
-  montant: string | null;
-}
+export type { SheetData, ColumnMapping } from "@/hooks/useExcelParser";
 
 export interface ValidationError {
   row: number;
@@ -46,7 +30,17 @@ const STEPS = [
 const REQUIRED_COLUMNS: (keyof ColumnMapping)[] = ["imputation", "montant"];
 
 export function BudgetImportWizard() {
-  const { exercice, exerciceId } = useExercice();
+  const { exercice } = useExercice();
+  const { parseExcelFile, autoDetectMapping, parseSheetData } = useExcelParser();
+  const { 
+    currentRunId, 
+    isLoading: isStagingLoading, 
+    createImportRun, 
+    loadStagingData, 
+    validateImportRun, 
+    executeImport 
+  } = useImportStaging();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedExercice, setSelectedExercice] = useState<number>(exercice || new Date().getFullYear());
   const [file, setFile] = useState<File | null>(null);
@@ -63,41 +57,13 @@ export function BudgetImportWizard() {
     nbe: null,
     montant: null,
   });
+  const [parsedRows, setParsedRows] = useState<ParsedRow[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
   const [importStats, setImportStats] = useState<{ success: number; errors: number } | null>(null);
-
-  const parseExcelFile = useCallback(async (file: File): Promise<SheetData[]> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: "array" });
-          
-          const sheetsData: SheetData[] = workbook.SheetNames.map((name) => {
-            const sheet = workbook.Sheets[name];
-            const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
-            const headers = jsonData[0]?.map((h: any) => String(h || "")) || [];
-            
-            return {
-              name,
-              data: jsonData,
-              headers,
-            };
-          });
-          
-          resolve(sheetsData);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.onerror = () => reject(new Error("Erreur de lecture du fichier"));
-      reader.readAsArrayBuffer(file);
-    });
-  }, []);
+  const [runId, setRunId] = useState<string | null>(null);
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     setFile(uploadedFile);
@@ -107,16 +73,21 @@ export function BudgetImportWizard() {
       
       // Auto-select sheet: prioritize "Groupé (2)", then "Feuil3"
       const groupeSheet = parsedSheets.find(s => 
-        s.name.toLowerCase().includes("groupé") || s.name.includes("Groupe") || s.name === "Groupé (2)"
+        s.name.toLowerCase().includes("groupé") || 
+        s.name.includes("Groupe") || 
+        s.name === "Groupé (2)"
       );
       const feuil3Sheet = parsedSheets.find(s => s.name === "Feuil3");
       
       if (groupeSheet) {
         setSelectedSheet(groupeSheet.name);
+        setMapping(autoDetectMapping(groupeSheet.headers));
       } else if (feuil3Sheet) {
         setSelectedSheet(feuil3Sheet.name);
+        setMapping(autoDetectMapping(feuil3Sheet.headers));
       } else if (parsedSheets.length > 0) {
         setSelectedSheet(parsedSheets[0].name);
+        setMapping(autoDetectMapping(parsedSheets[0].headers));
       }
       
       toast.success(`Fichier chargé: ${parsedSheets.length} onglet(s) détecté(s)`);
@@ -124,48 +95,7 @@ export function BudgetImportWizard() {
       toast.error("Erreur lors de la lecture du fichier Excel");
       console.error(error);
     }
-  }, [parseExcelFile]);
-
-  const autoDetectMapping = useCallback((headers: string[]): ColumnMapping => {
-    const newMapping: ColumnMapping = {
-      imputation: null,
-      os: null,
-      action: null,
-      activite: null,
-      sousActivite: null,
-      direction: null,
-      natureDépense: null,
-      nbe: null,
-      montant: null,
-    };
-
-    const mappingRules: { key: keyof ColumnMapping; patterns: RegExp[] }[] = [
-      { key: "imputation", patterns: [/imputation/i, /code.*budg/i, /ligne/i] },
-      { key: "os", patterns: [/^os$/i, /objectif.*strat/i, /o\.s\./i] },
-      { key: "action", patterns: [/^action$/i, /^act$/i] },
-      { key: "activite", patterns: [/activit[ée]/i, /^activ$/i] },
-      { key: "sousActivite", patterns: [/sous.*activ/i, /s\/activ/i, /sous-activ/i] },
-      { key: "direction", patterns: [/direction/i, /^dir$/i, /service/i] },
-      { key: "natureDépense", patterns: [/nature.*d[ée]pense/i, /nature/i, /type.*d[ée]pense/i] },
-      { key: "nbe", patterns: [/^nbe$/i, /nomenclature/i] },
-      { key: "montant", patterns: [/montant/i, /dotation/i, /budget/i, /pr[ée]vision/i, /cr[ée]dit/i] },
-    ];
-
-    headers.forEach((header) => {
-      for (const rule of mappingRules) {
-        if (newMapping[rule.key] === null) {
-          for (const pattern of rule.patterns) {
-            if (pattern.test(header)) {
-              newMapping[rule.key] = header;
-              break;
-            }
-          }
-        }
-      }
-    });
-
-    return newMapping;
-  }, []);
+  }, [parseExcelFile, autoDetectMapping]);
 
   const handleSheetSelect = useCallback((sheetName: string) => {
     setSelectedSheet(sheetName);
@@ -180,21 +110,23 @@ export function BudgetImportWizard() {
     return REQUIRED_COLUMNS.filter(col => !mapping[col]);
   }, [mapping]);
 
+  // Parse data when mapping changes or sheet is selected
+  useEffect(() => {
+    if (selectedSheet && currentStep >= 3) {
+      const sheet = sheets.find(s => s.name === selectedSheet);
+      if (sheet) {
+        const parsed = parseSheetData(sheet, mapping);
+        setParsedRows(parsed);
+      }
+    }
+  }, [selectedSheet, mapping, sheets, currentStep, parseSheetData]);
+
   const validateData = useCallback(async () => {
     setIsValidating(true);
     setValidationErrors([]);
     
     const errors: ValidationError[] = [];
-    const sheet = sheets.find(s => s.name === selectedSheet);
     
-    if (!sheet) {
-      setIsValidating(false);
-      return false;
-    }
-
-    const headerRow = sheet.data[0] as string[];
-    const dataRows = sheet.data.slice(1);
-
     // Check for missing required mappings
     const missingCols = getMissingRequiredColumns();
     if (missingCols.length > 0) {
@@ -208,59 +140,33 @@ export function BudgetImportWizard() {
       });
     }
 
-    // Validate each row
-    const imputationIdx = mapping.imputation ? headerRow.indexOf(mapping.imputation) : -1;
-    const montantIdx = mapping.montant ? headerRow.indexOf(mapping.montant) : -1;
-    const seenImputations = new Set<string>();
+    // Collect validation errors from parsed rows
+    const seenImputations = new Map<string, number>();
+    
+    parsedRows.forEach((row) => {
+      // Add row-specific errors
+      row.errors.forEach((errorMsg) => {
+        errors.push({
+          row: row.rowNumber,
+          column: errorMsg.includes("Imputation") ? "imputation" : 
+                  errorMsg.includes("Montant") ? "montant" : "général",
+          message: errorMsg,
+          severity: "error",
+        });
+      });
 
-    dataRows.forEach((row, rowIndex) => {
-      const actualRow = rowIndex + 2; // +1 for header, +1 for 1-based index
-
-      // Skip empty rows
-      if (!row || row.every(cell => cell === null || cell === undefined || cell === "")) {
-        return;
-      }
-
-      // Validate imputation
-      if (imputationIdx >= 0) {
-        const imputation = String(row[imputationIdx] || "").trim();
-        if (!imputation) {
+      // Check for duplicates
+      if (row.computed.imputation) {
+        const existingRow = seenImputations.get(row.computed.imputation);
+        if (existingRow) {
           errors.push({
-            row: actualRow,
+            row: row.rowNumber,
             column: "imputation",
-            message: "Code d'imputation manquant",
-            severity: "error",
-          });
-        } else if (seenImputations.has(imputation)) {
-          errors.push({
-            row: actualRow,
-            column: "imputation",
-            message: `Doublon: "${imputation}" déjà présent`,
+            message: `Doublon: "${row.computed.imputation}" déjà présent (ligne ${existingRow})`,
             severity: "warning",
           });
         } else {
-          seenImputations.add(imputation);
-        }
-      }
-
-      // Validate montant
-      if (montantIdx >= 0) {
-        const montant = row[montantIdx];
-        const numMontant = parseFloat(String(montant).replace(/\s/g, "").replace(",", "."));
-        if (isNaN(numMontant)) {
-          errors.push({
-            row: actualRow,
-            column: "montant",
-            message: `Montant invalide: "${montant}"`,
-            severity: "error",
-          });
-        } else if (numMontant < 0) {
-          errors.push({
-            row: actualRow,
-            column: "montant",
-            message: `Montant négatif: ${numMontant}`,
-            severity: "warning",
-          });
+          seenImputations.set(row.computed.imputation, row.rowNumber);
         }
       }
     });
@@ -269,93 +175,49 @@ export function BudgetImportWizard() {
     setIsValidating(false);
     
     const hasBlockingErrors = errors.some(e => e.severity === "error");
+    
+    // If validation passed, create import run and load staging data
+    if (!hasBlockingErrors && file && selectedSheet) {
+      const newRunId = await createImportRun(selectedExercice, file.name, selectedSheet);
+      if (newRunId) {
+        setRunId(newRunId);
+        await loadStagingData(newRunId, parsedRows);
+        toast.success("Données chargées dans la zone de staging");
+      }
+    }
+    
     return !hasBlockingErrors;
-  }, [sheets, selectedSheet, mapping, getMissingRequiredColumns]);
+  }, [
+    getMissingRequiredColumns, 
+    parsedRows, 
+    file, 
+    selectedSheet, 
+    selectedExercice, 
+    createImportRun, 
+    loadStagingData
+  ]);
 
   const handleImport = useCallback(async () => {
+    if (!runId) {
+      toast.error("Aucun import en cours");
+      return;
+    }
+
     setIsImporting(true);
     
     try {
-      const sheet = sheets.find(s => s.name === selectedSheet);
-      if (!sheet) throw new Error("Onglet non trouvé");
-
-      const headerRow = sheet.data[0] as string[];
-      const dataRows = sheet.data.slice(1).filter(row => 
-        row && !row.every(cell => cell === null || cell === undefined || cell === "")
-      );
-
-      const getColIndex = (mappedValue: string | null) => 
-        mappedValue ? headerRow.indexOf(mappedValue) : -1;
-
-      const imputationIdx = getColIndex(mapping.imputation);
-      const osIdx = getColIndex(mapping.os);
-      const actionIdx = getColIndex(mapping.action);
-      const activiteIdx = getColIndex(mapping.activite);
-      const sousActiviteIdx = getColIndex(mapping.sousActivite);
-      const directionIdx = getColIndex(mapping.direction);
-      const natureIdx = getColIndex(mapping.natureDépense);
-      const nbeIdx = getColIndex(mapping.nbe);
-      const montantIdx = getColIndex(mapping.montant);
-
-      let successCount = 0;
-      let errorCount = 0;
-
-      // Process in batches
-      const batchSize = 50;
-      for (let i = 0; i < dataRows.length; i += batchSize) {
-        const batch = dataRows.slice(i, i + batchSize);
-        
-        const linesToInsert = batch.map((row) => {
-          const code = imputationIdx >= 0 ? String(row[imputationIdx] || "") : "";
-          const montantRaw = montantIdx >= 0 ? row[montantIdx] : 0;
-          const montant = parseFloat(String(montantRaw).replace(/\s/g, "").replace(",", ".")) || 0;
-          
-          return {
-            exercice: selectedExercice,
-            code: code.trim(),
-            label: `Ligne ${code}`,
-            level: "ligne",
-            dotation_initiale: montant,
-            statut: "brouillon",
-            commentaire: `Import Excel - ${file?.name || "fichier"} - Onglet: ${selectedSheet}`,
-          };
-        }).filter(line => line.code);
-
-        if (linesToInsert.length > 0) {
-          const { error } = await supabase
-            .from("budget_lines")
-            .upsert(linesToInsert, { 
-              onConflict: "code,exercice",
-              ignoreDuplicates: false 
-            });
-
-          if (error) {
-            console.error("Batch insert error:", error);
-            errorCount += linesToInsert.length;
-          } else {
-            successCount += linesToInsert.length;
-          }
-        }
-      }
-
-      // Log the import
-      await supabase.from("budget_imports").insert({
-        exercice: selectedExercice,
-        file_name: file?.name || "unknown",
-        file_size: file?.size,
-        total_rows: dataRows.length,
-        success_rows: successCount,
-        error_rows: errorCount,
-        status: errorCount === 0 ? "completed" : "partial",
+      const result = await executeImport(runId);
+      
+      setImportStats({ 
+        success: result.importedCount, 
+        errors: result.errorCount 
       });
-
-      setImportStats({ success: successCount, errors: errorCount });
       setImportComplete(true);
       
-      if (errorCount === 0) {
-        toast.success(`Import réussi: ${successCount} lignes importées`);
+      if (result.success) {
+        toast.success(`Import réussi: ${result.importedCount} lignes importées`);
       } else {
-        toast.warning(`Import partiel: ${successCount} réussies, ${errorCount} erreurs`);
+        toast.warning(`Import partiel: ${result.importedCount} réussies, ${result.errorCount} erreurs`);
       }
     } catch (error) {
       console.error("Import error:", error);
@@ -363,7 +225,7 @@ export function BudgetImportWizard() {
     } finally {
       setIsImporting(false);
     }
-  }, [sheets, selectedSheet, mapping, selectedExercice, file]);
+  }, [runId, executeImport]);
 
   const resetWizard = useCallback(() => {
     setCurrentStep(1);
@@ -381,9 +243,11 @@ export function BudgetImportWizard() {
       nbe: null,
       montant: null,
     });
+    setParsedRows([]);
     setValidationErrors([]);
     setImportComplete(false);
     setImportStats(null);
+    setRunId(null);
   }, []);
 
   const canProceed = useCallback(() => {
@@ -426,6 +290,9 @@ export function BudgetImportWizard() {
   }, [currentStep]);
 
   const progressPercent = (currentStep / 4) * 100;
+
+  // Get current sheet for preview
+  const currentSheet = sheets.find(s => s.name === selectedSheet);
 
   return (
     <div className="space-y-6">
@@ -485,24 +352,26 @@ export function BudgetImportWizard() {
           />
         )}
 
-        {currentStep === 3 && selectedSheet && (
+        {currentStep === 3 && currentSheet && (
           <StepPreviewMapping
-            sheet={sheets.find(s => s.name === selectedSheet)!}
+            sheet={currentSheet}
             mapping={mapping}
             onMappingChange={setMapping}
             missingRequired={getMissingRequiredColumns()}
+            parsedRows={parsedRows}
           />
         )}
 
         {currentStep === 4 && (
           <StepValidationImport
             validationErrors={validationErrors}
-            isValidating={isValidating}
+            isValidating={isValidating || isStagingLoading}
             isImporting={isImporting}
             importComplete={importComplete}
             importStats={importStats}
             onValidate={validateData}
             onImport={handleImport}
+            parsedRows={parsedRows}
           />
         )}
       </div>
