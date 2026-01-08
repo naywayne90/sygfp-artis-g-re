@@ -7653,6 +7653,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sequence_counters: {
+        Row: {
+          created_at: string | null
+          direction_code: string | null
+          doc_type: string
+          exercice: number
+          id: string
+          last_number: number
+          prefix_override: string | null
+          scope: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction_code?: string | null
+          doc_type: string
+          exercice: number
+          id?: string
+          last_number?: number
+          prefix_override?: string | null
+          scope?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction_code?: string | null
+          doc_type?: string
+          exercice?: number
+          id?: string
+          last_number?: number
+          prefix_override?: string | null
+          scope?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       soumissions: {
         Row: {
           classement: number | null
@@ -9118,6 +9154,21 @@ export type Database = {
         Args: { p_direction_id: string; p_exercice: number }
         Returns: number
       }
+      get_next_sequence: {
+        Args: {
+          p_direction_code?: string
+          p_doc_type: string
+          p_exercice: number
+          p_scope?: string
+        }
+        Returns: {
+          full_code: string
+          number_padded: string
+          number_raw: number
+          prefix: string
+          year: number
+        }[]
+      }
       get_raci_informed_roles: {
         Args: { p_processus_code: string }
         Returns: Json
@@ -9203,6 +9254,14 @@ export type Database = {
         }
         Returns: string
       }
+      parse_sequence_code: {
+        Args: { p_code: string }
+        Returns: {
+          number_raw: number
+          prefix: string
+          year: number
+        }[]
+      }
       recalculer_montants_dossier: {
         Args: { p_dossier_id: string }
         Returns: undefined
@@ -9242,6 +9301,16 @@ export type Database = {
           p_sous_activites?: Json
         }
         Returns: Json
+      }
+      sync_sequence_counter: {
+        Args: {
+          p_direction_code?: string
+          p_doc_type: string
+          p_exercice: number
+          p_imported_number: number
+          p_scope?: string
+        }
+        Returns: boolean
       }
       test_codification_pattern: {
         Args: { p_exercice?: number; p_pattern: Json; p_values: Json }

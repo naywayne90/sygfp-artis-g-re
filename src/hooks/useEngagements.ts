@@ -194,20 +194,21 @@ export function useEngagements() {
     };
   };
 
-  // Generate engagement number
+  // Generate engagement number using atomic sequence
   const generateNumero = async (): Promise<string> => {
     const year = exercice || new Date().getFullYear();
     
-    // Count existing engagements for this year
-    const { count, error } = await supabase
-      .from("budget_engagements")
-      .select("*", { count: "exact", head: true })
-      .eq("exercice", year);
+    const { data, error } = await supabase.rpc("get_next_sequence", {
+      p_doc_type: "ENG",
+      p_exercice: year,
+      p_direction_code: null,
+      p_scope: "global",
+    });
 
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error("Échec génération numéro");
 
-    const nextNum = (count || 0) + 1;
-    return `ENG-${year}-${String(nextNum).padStart(4, "0")}`;
+    return data[0].full_code;
   };
 
   // Create engagement

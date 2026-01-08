@@ -168,10 +168,24 @@ export function useExpressionsBesoin() {
       numero_lot?: number | null;
       intitule_lot?: string | null;
     }) => {
+      // Generate atomic sequence number
+      const { data: seqData, error: seqError } = await supabase.rpc("get_next_sequence", {
+        p_doc_type: "EB",
+        p_exercice: exercice || new Date().getFullYear(),
+        p_direction_code: null,
+        p_scope: "global",
+      });
+
+      if (seqError) throw seqError;
+      if (!seqData || seqData.length === 0) throw new Error("Échec génération numéro");
+
+      const numero = seqData[0].full_code;
+
       const { data: result, error } = await supabase
         .from("expressions_besoin")
         .insert({
           ...data,
+          numero,
           exercice,
           statut: "brouillon",
         })
