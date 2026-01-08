@@ -578,7 +578,8 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                       <Unlock className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <strong>Terminer sans validation</strong> : L'exercice est créé mais le budget reste modifiable. 
-                        Vous pourrez ajouter/modifier des lignes librement et valider plus tard. 
+                        Vous pourrez ensuite ajouter/modifier des lignes depuis le module <strong>Planification → Planification Budgétaire</strong>, 
+                        puis valider le budget quand il sera finalisé. 
                         <span className="text-amber-700 dark:text-amber-300"> Utile si le budget n'est pas encore finalisé.</span>
                       </div>
                     </div>
