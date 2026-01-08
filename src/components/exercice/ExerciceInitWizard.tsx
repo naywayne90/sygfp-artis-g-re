@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Calendar, Plus, Upload, Copy, FileSpreadsheet, CheckCircle2, 
-  AlertTriangle, Loader2, ArrowRight, Lock, Unlock
+  AlertTriangle, Loader2, ArrowRight, Lock, Unlock, HelpCircle, Info
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -412,6 +412,19 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           {/* Step: Method */}
           {step === "method" && (
             <div className="space-y-4 py-4">
+              {/* Aide contextuelle */}
+              <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
+                <HelpCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Comment choisir ?</strong>
+                  <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
+                    <li><strong>Import Excel</strong> : Idéal si vous avez déjà un fichier avec votre structure budgétaire.</li>
+                    <li><strong>Copier N-1</strong> : Récupère la structure de l'année précédente (codes, libellés). Utile pour la continuité.</li>
+                    <li><strong>Vide</strong> : Créez les lignes manuellement après. Pour repartir de zéro.</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
+
               <RadioGroup value={initMethod} onValueChange={(v) => setInitMethod(v as InitMethod)}>
                 <Card className={`cursor-pointer ${initMethod === "import" ? "border-primary ring-2 ring-primary/20" : ""}`}>
                   <CardContent className="p-4 flex items-start gap-4">
@@ -468,26 +481,43 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           {step === "config" && (
             <div className="space-y-4 py-4">
               {initMethod === "import" && (
-                <label 
-                  htmlFor="budget-file-import"
-                  className="border-2 border-dashed rounded-lg p-8 text-center block cursor-pointer hover:border-primary/50 transition-colors"
-                >
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p>
-                    <span className="text-primary font-medium">Cliquez pour sélectionner</span>
-                    <span className="text-muted-foreground"> un fichier Excel</span>
-                  </p>
-                  <input
-                    id="budget-file-import"
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-                    className="sr-only"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Colonnes attendues: code, label/libelle, dotation_initiale, level/niveau
-                  </p>
-                </label>
+                <>
+                  <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+                      <strong>Format du fichier Excel</strong>
+                      <p className="mt-1 text-xs">
+                        Votre fichier doit contenir au minimum les colonnes suivantes :
+                      </p>
+                      <ul className="list-disc list-inside mt-1 text-xs space-y-0.5">
+                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">code</code> : Code unique de la ligne budgétaire</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">label</code> ou <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">libelle</code> : Intitulé de la ligne</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">dotation_initiale</code> : Montant alloué (peut être 0)</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">level</code> ou <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">niveau</code> : Niveau hiérarchique (ex: ligne, section)</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                  <label 
+                    htmlFor="budget-file-import"
+                    className="border-2 border-dashed rounded-lg p-8 text-center block cursor-pointer hover:border-primary/50 transition-colors"
+                  >
+                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p>
+                      <span className="text-primary font-medium">Cliquez pour sélectionner</span>
+                      <span className="text-muted-foreground"> un fichier Excel</span>
+                    </p>
+                    <input
+                      id="budget-file-import"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                      className="sr-only"
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Formats acceptés : .xlsx, .xls
+                    </p>
+                  </label>
+                </>
               )}
 
               {initMethod === "copy" && (
@@ -530,6 +560,32 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           {/* Step: Summary */}
           {step === "summary" && (
             <div className="space-y-4 py-4">
+              {/* Aide sur les options de finalisation */}
+              <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
+                <HelpCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
+                  <strong>Quelle action choisir ?</strong>
+                  <div className="mt-2 space-y-2 text-xs">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong>Valider le budget</strong> : Verrouille la structure budgétaire. 
+                        Toute modification ultérieure nécessitera un virement ou mouvement budgétaire officiel. 
+                        <span className="text-amber-700 dark:text-amber-300"> Recommandé après vérification complète.</span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Unlock className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong>Terminer sans validation</strong> : L'exercice est créé mais le budget reste modifiable. 
+                        Vous pourrez ajouter/modifier des lignes librement et valider plus tard. 
+                        <span className="text-amber-700 dark:text-amber-300"> Utile si le budget n'est pas encore finalisé.</span>
+                      </div>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+
               <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="p-6">
                   <div className="text-center space-y-2">
@@ -582,6 +638,23 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
                     Aucune ligne budgétaire chargée. Revenez à l'étape précédente pour importer ou copier des données.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {initMethod === "empty" && (
+                <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>Mode vide sélectionné</strong>
+                    <p className="mt-1 text-xs">
+                      L'exercice sera créé sans lignes budgétaires. Vous pourrez ensuite :
+                    </p>
+                    <ul className="list-disc list-inside mt-1 text-xs space-y-0.5">
+                      <li>Créer des lignes manuellement depuis la Planification Budgétaire</li>
+                      <li>Importer un fichier Excel ultérieurement</li>
+                      <li>Valider le budget une fois la structure complète</li>
+                    </ul>
                   </AlertDescription>
                 </Alert>
               )}
