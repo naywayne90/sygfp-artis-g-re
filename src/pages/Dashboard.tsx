@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   FileText, 
   CreditCard, 
@@ -22,6 +24,11 @@ import {
   Settings,
   CalendarDays,
   AlertTriangle,
+  HelpCircle,
+  BarChart3,
+  Search,
+  FileSearch,
+  FolderOpen,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -94,6 +101,7 @@ const DASHBOARD_TABS = [
 ];
 
 export default function Dashboard() {
+  const [showHelp, setShowHelp] = useState(false);
   const { exercice } = useExercice();
   const navigate = useNavigate();
   const { userRoles, hasAnyRole } = usePermissions();
@@ -160,12 +168,118 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowHelp(!showHelp)}>
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Aide
+          </Button>
           <Button variant="outline" size="sm" onClick={() => navigate("/select-exercice")}>
             <CalendarDays className="h-4 w-4 mr-2" />
             Changer d'exercice
           </Button>
         </div>
       </div>
+
+      {/* Section d'aide */}
+      <Collapsible open={showHelp} onOpenChange={setShowHelp}>
+        <CollapsibleContent>
+          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <HelpCircle className="h-5 w-5" />
+                Bienvenue sur SYGFP - Système de Gestion Financière et Programmatique
+              </CardTitle>
+              <CardDescription className="text-blue-600 dark:text-blue-400">
+                Guide d'utilisation du tableau de bord
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <h4 className="font-semibold text-foreground mb-2">📊 Qu'est-ce que ce tableau de bord ?</h4>
+                <p className="text-muted-foreground">
+                  Le <strong>tableau de bord</strong> est votre point d'entrée central dans SYGFP. Il vous offre une 
+                  vue synthétique de l'exécution budgétaire de l'ARTI, avec des indicateurs clés, des raccourcis 
+                  vers les actions fréquentes et un suivi en temps réel de la chaîne de dépense.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-blue-500" />
+                    Les indicateurs (KPIs)
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li><strong>Notes</strong> : Demandes d'autorisation de dépense en attente</li>
+                    <li><strong>Marchés</strong> : Procédures de passation en cours</li>
+                    <li><strong>Engagements</strong> : Réservations budgétaires actives</li>
+                    <li><strong>Liquidations</strong> : Factures à traiter après service fait</li>
+                    <li><strong>Ordonnancements</strong> : Ordres de paiement en signature</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <Plus className="h-4 w-4 text-green-500" />
+                    Raccourcis rapides
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li><strong>Note AEF</strong> : Créer une autorisation d'engagement financier</li>
+                    <li><strong>Note SEF</strong> : Créer une dépense sans engagement préalable</li>
+                    <li><strong>Notes à valider</strong> : Accéder aux notes en attente de visa</li>
+                    <li><strong>Engagements à valider</strong> : Traiter les engagements soumis</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-purple-500" />
+                    Exécution budgétaire
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li><strong>Taux d'engagement</strong> : % du budget réservé pour des dépenses</li>
+                    <li><strong>Taux de liquidation</strong> : % des engagements facturés</li>
+                    <li><strong>Taux de paiement</strong> : % des liquidations payées</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4 text-orange-500" />
+                    Recherche Dossier
+                  </h4>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
+                    <li>Accédez au module <strong>Recherche Dossier</strong> dans le menu</li>
+                    <li>Suivez l'avancement complet de chaque opération de dépense</li>
+                    <li>Visualisez la timeline de la chaîne de dépense</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <h4 className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-2 mb-1">
+                  <AlertTriangle className="h-4 w-4" />
+                  La chaîne de dépense
+                </h4>
+                <p className="text-amber-600 dark:text-amber-400 text-sm">
+                  Chaque dépense suit un processus réglementaire : <strong>Note (autorisation) → Engagement (réservation budget) → Liquidation (constat service fait) → Ordonnancement (ordre de payer) → Règlement (paiement effectif)</strong>.
+                  Ce tableau de bord vous permet de suivre l'avancement à chaque étape.
+                </p>
+              </div>
+
+              <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <h4 className="font-semibold text-green-700 dark:text-green-300 flex items-center gap-2 mb-1">
+                  <User className="h-4 w-4" />
+                  Vues par rôle
+                </h4>
+                <p className="text-green-600 dark:text-green-400 text-sm">
+                  Les onglets ci-dessous s'adaptent à votre profil. Chaque rôle (DG, DAF, SDPM, Trésorerie) 
+                  dispose d'une vue personnalisée avec les indicateurs et actions qui lui sont propres.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Tabs par rôle */}
       <Tabs defaultValue={getDefaultTab()} className="space-y-6">
