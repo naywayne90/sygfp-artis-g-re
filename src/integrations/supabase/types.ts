@@ -3394,6 +3394,62 @@ export type Database = {
           },
         ]
       }
+      import_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          errors_count: number | null
+          exercice_id: number | null
+          filename: string
+          id: string
+          module: string
+          notes: string | null
+          stats: Json | null
+          status: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          errors_count?: number | null
+          exercice_id?: number | null
+          filename: string
+          id?: string
+          module?: string
+          notes?: string | null
+          stats?: Json | null
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          errors_count?: number | null
+          exercice_id?: number | null
+          filename?: string
+          id?: string
+          module?: string
+          notes?: string | null
+          stats?: Json | null
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_logs: {
         Row: {
           details: Json | null
@@ -3441,6 +3497,56 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_rows: {
+        Row: {
+          created_at: string
+          error_messages: string[] | null
+          id: string
+          job_id: string
+          normalized: Json | null
+          raw: Json
+          row_index: number
+          sheet_name: string | null
+          status: string
+          target_action: string | null
+          target_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_messages?: string[] | null
+          id?: string
+          job_id: string
+          normalized?: Json | null
+          raw: Json
+          row_index: number
+          sheet_name?: string | null
+          status?: string
+          target_action?: string | null
+          target_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_messages?: string[] | null
+          id?: string
+          job_id?: string
+          normalized?: Json | null
+          raw?: Json
+          row_index?: number
+          sheet_name?: string | null
+          status?: string
+          target_action?: string | null
+          target_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_rows_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "import_jobs"
             referencedColumns: ["id"]
           },
         ]
