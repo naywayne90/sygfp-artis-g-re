@@ -468,23 +468,26 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           {step === "config" && (
             <div className="space-y-4 py-4">
               {initMethod === "import" && (
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <label 
+                  htmlFor="budget-file-import"
+                  className="border-2 border-dashed rounded-lg p-8 text-center block cursor-pointer hover:border-primary/50 transition-colors"
+                >
                   <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <Label htmlFor="budget-file" className="cursor-pointer">
+                  <p>
                     <span className="text-primary font-medium">Cliquez pour sélectionner</span>
                     <span className="text-muted-foreground"> un fichier Excel</span>
-                  </Label>
-                  <Input
-                    id="budget-file"
+                  </p>
+                  <input
+                    id="budget-file-import"
                     type="file"
                     accept=".xlsx,.xls"
                     onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-                    className="hidden"
+                    className="sr-only"
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     Colonnes attendues: code, label/libelle, dotation_initiale, level/niveau
                   </p>
-                </div>
+                </label>
               )}
 
               {initMethod === "copy" && (
