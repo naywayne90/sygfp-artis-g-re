@@ -48,7 +48,8 @@ export function BudgetImportWizard() {
   const {
     isSyncing,
     detectReferenceSheets,
-    syncReferentiels,
+    importAllReferentiels,
+    refreshDropdowns,
   } = useReferentielSync();
   const {
     canImport,
@@ -108,7 +109,8 @@ export function BudgetImportWizard() {
       setSheets(parsedSheets);
       
       // Detect reference sheets
-      const refDetection = detectReferenceSheets(parsedSheets);
+      const sheetNames = parsedSheets.map(s => s.name);
+      const refDetection = detectReferenceSheets(sheetNames);
       setDetectedRefSheets(refDetection.detectedSheets);
       if (refDetection.hasReferenceData) {
         setSyncReferentielsEnabled(true); // Enable by default if refs detected
@@ -362,7 +364,11 @@ export function BudgetImportWizard() {
   const handleNext = useCallback(async () => {
     // Sync referentiels before moving to step 3 if enabled
     if (currentStep === 2 && syncReferentielsEnabled && !refsSynced && file) {
-      await syncReferentiels(file.name, sheets);
+      const result = await importAllReferentiels(file);
+      if (result.summary.totalInserted + result.summary.totalUpdated > 0) {
+        toast.success(`Référentiels synchronisés: ${result.summary.totalInserted} créés, ${result.summary.totalUpdated} mis à jour`);
+        refreshDropdowns();
+      }
       setRefsSynced(true);
     }
     
@@ -381,7 +387,7 @@ export function BudgetImportWizard() {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-  }, [currentStep, selectedSheet, sheets, autoDetectMapping, validateData, syncReferentielsEnabled, refsSynced, file, syncReferentiels]);
+  }, [currentStep, selectedSheet, sheets, autoDetectMapping, validateData, syncReferentielsEnabled, refsSynced, file, importAllReferentiels, refreshDropdowns]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
