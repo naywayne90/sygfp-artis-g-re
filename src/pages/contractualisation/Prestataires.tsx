@@ -26,7 +26,7 @@ import {
   FileText,
   History,
   User,
-  Download
+  Upload
 } from "lucide-react";
 import { usePrestataires, usePrestaireRequests } from "@/hooks/usePrestataires";
 import { useSupplierExpiredDocuments } from "@/hooks/useSupplierDocuments";
@@ -43,6 +43,8 @@ import { SupplierBankTab } from "@/components/prestataires/SupplierBankTab";
 import { SupplierDocumentsTab } from "@/components/prestataires/SupplierDocumentsTab";
 import { SupplierHistoryTab } from "@/components/prestataires/SupplierHistoryTab";
 import { SupplierQualificationDialog } from "@/components/prestataires/SupplierQualificationDialog";
+import { PrestatairesImportDialog } from "@/components/prestataires/PrestatairesImportDialog";
+import { PrestatairesExportButton } from "@/components/prestataires/PrestatairesExportButton";
 
 export default function Prestataires() {
   const { exercice } = useExercice();
@@ -60,6 +62,9 @@ export default function Prestataires() {
   // Suspend dialog
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [suspendMotif, setSuspendMotif] = useState("");
+  
+  // Import dialog
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   // Get document stats for expiry alerts
   const { stats: docStats } = useSupplierExpiredDocuments();
@@ -212,9 +217,13 @@ export default function Prestataires() {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
+          <PrestatairesExportButton 
+            prestataires={filteredPrestataires}
+            filters={{ search, statut: selectedTab }}
+          />
+          <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Excel
           </Button>
           <Button variant="outline" asChild>
             <Link to="/contractualisation/validation-prestataires">
@@ -501,6 +510,12 @@ export default function Prestataires() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <PrestatairesImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   );
 }
