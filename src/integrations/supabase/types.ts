@@ -2952,6 +2952,57 @@ export type Database = {
         }
         Relationships: []
       }
+      export_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          entity_id: string | null
+          entity_type: string
+          error_message: string | null
+          expires_at: string | null
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          filters: Json | null
+          id: string
+          status: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type: string
+          error_message?: string | null
+          expires_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filters?: Json | null
+          id?: string
+          status?: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          error_message?: string | null
+          expires_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          filters?: Json | null
+          id?: string
+          status?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       expression_besoin_attachments: {
         Row: {
           created_at: string
