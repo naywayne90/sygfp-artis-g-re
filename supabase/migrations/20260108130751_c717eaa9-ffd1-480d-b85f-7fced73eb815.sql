@@ -1,0 +1,91 @@
+-- CHARGEMENT LIGNES BUDGETAIRES ARTI 2026 (level = 'paragraphe')
+
+INSERT INTO public.budget_lines (code, label, exercice, dotation_initiale, dotation_modifiee, disponible_calcule, os_id, direction_id, nbe_id, level, source_financement, statut, is_active)
+SELECT bl.code, bl.label, 2026, bl.montant, bl.montant, bl.montant, os.id, dir.id, nbe.id, 'paragraphe', 'Budget État', 'brouillon', true
+FROM (VALUES
+  ('110110102022671700', 'Intérêts emprunts - Prêt BHCI', 106666667, '11', '02', '671700'),
+  ('110110102022671100', 'Charges exceptionnelles - Prêt BHCI', 93333333, '11', '02', '671100'),
+  ('110110102022604100', 'Fournitures de bureau DAAF', 50000000, '11', '02', '604100'),
+  ('110110102022605100', 'Carburants DAAF', 75000000, '11', '02', '605100'),
+  ('110110102022612100', 'Location bâtiments DAAF', 120000000, '11', '02', '612100'),
+  ('110110102022613100', 'Entretien bâtiments DAAF', 45000000, '11', '02', '613100'),
+  ('110110102022616200', 'Télécommunications DAAF', 35000000, '11', '02', '616200'),
+  ('110110102022618100', 'Missions intérieures DAAF', 60000000, '11', '02', '618100'),
+  ('110110102022618200', 'Missions extérieures DAAF', 80000000, '11', '02', '618200'),
+  ('110110102022619100', 'Honoraires DAAF', 40000000, '11', '02', '619100'),
+  ('110110102022602100', 'Eau DAAF', 18000000, '11', '02', '602100'),
+  ('110110102022602200', 'Électricité DAAF', 95000000, '11', '02', '602200'),
+  ('110110102022621100', 'Salaires personnel permanent', 850000000, '11', '02', '621100'),
+  ('110110102022621200', 'Indemnités personnel permanent', 250000000, '11', '02', '621200'),
+  ('110110102022621300', 'Primes personnel permanent', 150000000, '11', '02', '621300'),
+  ('110110102022624100', 'Charges sociales patronales', 180000000, '11', '02', '624100'),
+  ('110110102022624200', 'Cotisations retraite', 120000000, '11', '02', '624200'),
+  ('110110102022242100', 'Mobilier bureau DAAF', 65000000, '11', '02', '242100'),
+  ('110110102022242200', 'Matériel informatique DAAF', 95000000, '11', '02', '242200'),
+  ('110110102022243100', 'Véhicules administratifs DAAF', 180000000, '11', '02', '243100'),
+  ('110110102022231200', 'Construction bureaux', 500000000, '11', '02', '231200'),
+  ('110110102022232100', 'Aménagements locaux', 150000000, '11', '02', '232100'),
+  ('110110102022244100', 'Mobilier logement', 75000000, '11', '02', '244100'),
+  ('110110102022244200', 'Matériel audiovisuel', 45000000, '11', '02', '244200'),
+  ('110110102022614100', 'Assurance bâtiments', 35000000, '11', '02', '614100'),
+  ('110110102022614300', 'Assurance RC', 25000000, '11', '02', '614300'),
+  ('110110102022616100', 'Frais postaux', 12000000, '11', '02', '616100'),
+  ('110110102022631100', 'Impôts fonciers', 28000000, '11', '02', '631100'),
+  ('110110102022633100', 'Taxes diverses', 15000000, '11', '02', '633100'),
+  ('120210104022615100', 'Études et recherches DSESP', 85000000, '12', '04', '615100'),
+  ('120210104022615200', 'Séminaires conférences DSESP', 45000000, '12', '04', '615200'),
+  ('120210104022606100', 'Documentation DSESP', 25000000, '12', '04', '606100'),
+  ('120210104022604100', 'Fournitures bureau DSESP', 15000000, '12', '04', '604100'),
+  ('120210104022618100', 'Missions terrain DSESP', 55000000, '12', '04', '618100'),
+  ('120210104022242200', 'Équipements informatiques DSESP', 45000000, '12', '04', '242200'),
+  ('130310106022605100', 'Carburants contrôle DCSTI', 120000000, '13', '06', '605100'),
+  ('130310106022618100', 'Missions contrôle DCSTI', 95000000, '13', '06', '618100'),
+  ('130310106022604100', 'Fournitures DCSTI', 25000000, '13', '06', '604100'),
+  ('130310106022613300', 'Entretien véhicules DCSTI', 55000000, '13', '06', '613300'),
+  ('130310106022614200', 'Assurance véhicules DCSTI', 35000000, '13', '06', '614200'),
+  ('130310106022243100', 'Véhicules contrôle DCSTI', 250000000, '13', '06', '243100'),
+  ('140410107022619200', 'Frais contentieux DRRN', 75000000, '14', '07', '619200'),
+  ('140410107022615100', 'Études juridiques DRRN', 45000000, '14', '07', '615100'),
+  ('140410107022604100', 'Fournitures DRRN', 18000000, '14', '07', '604100'),
+  ('140410107022606100', 'Documentation juridique DRRN', 22000000, '14', '07', '606100'),
+  ('150510109022211200', 'Logiciels et licences DSI', 185000000, '15', '09', '211200'),
+  ('150510109022242200', 'Matériel informatique DSI', 220000000, '15', '09', '242200'),
+  ('150510109022613200', 'Maintenance matériel DSI', 65000000, '15', '09', '613200'),
+  ('150510109022616200', 'Télécommunications DSI', 85000000, '15', '09', '616200'),
+  ('150510109022619100', 'Prestations informatiques DSI', 125000000, '15', '09', '619100'),
+  ('150510109022604100', 'Fournitures DSI', 20000000, '15', '09', '604100'),
+  ('110110108022617100', 'Publicité DCP', 75000000, '11', '08', '617100'),
+  ('110110108022617200', 'Relations publiques DCP', 55000000, '11', '08', '617200'),
+  ('110110108022618300', 'Réceptions DCP', 45000000, '11', '08', '618300'),
+  ('110110108022615200', 'Événements DCP', 65000000, '11', '08', '615200'),
+  ('110110108022604100', 'Fournitures DCP', 12000000, '11', '08', '604100'),
+  ('130310114022612100', 'Location antennes DCZ', 95000000, '13', '14', '612100'),
+  ('130310114022605100', 'Carburants DCZ', 85000000, '13', '14', '605100'),
+  ('130310114022604100', 'Fournitures DCZ', 28000000, '13', '14', '604100'),
+  ('130310114022618100', 'Missions DCZ', 65000000, '13', '14', '618100'),
+  ('110110101022618200', 'Missions internationales DG', 150000000, '11', '01', '618200'),
+  ('110110101022618300', 'Réceptions officielles DG', 85000000, '11', '01', '618300'),
+  ('110110101022619100', 'Consultants DG', 95000000, '11', '01', '619100'),
+  ('110110101022604100', 'Fournitures DG', 25000000, '11', '01', '604100'),
+  ('110110101022243100', 'Véhicule fonction DG', 120000000, '11', '01', '243100'),
+  ('150510115022615100', 'Audits qualité DQ', 55000000, '15', '15', '615100'),
+  ('150510115022615200', 'Formation qualité DQ', 35000000, '15', '15', '615200'),
+  ('150510115022619100', 'Certification DQ', 45000000, '15', '15', '619100'),
+  ('150510115022604100', 'Fournitures DQ', 10000000, '15', '15', '604100'),
+  ('110110105022651100', 'Bourses formation DGPECRP', 85000000, '11', '05', '651100'),
+  ('110110105022615200', 'Séminaires RH DGPECRP', 55000000, '11', '05', '615200'),
+  ('110110105022604100', 'Fournitures DGPECRP', 15000000, '11', '05', '604100'),
+  ('110110105022618100', 'Missions DGPECRP', 35000000, '11', '05', '618100')
+) AS bl(code, label, montant, os_code, dir_code, nbe_code)
+JOIN public.objectifs_strategiques os ON os.code = bl.os_code
+JOIN public.directions dir ON dir.code = bl.dir_code
+JOIN public.nomenclature_nbe nbe ON nbe.code = bl.nbe_code
+WHERE NOT EXISTS (SELECT 1 FROM public.budget_lines b WHERE b.code = bl.code AND b.exercice = 2026);
+
+-- Mise à jour des statistiques de l'exercice 2026
+UPDATE public.exercices_budgetaires
+SET 
+  budget_lignes_count = (SELECT COUNT(*) FROM public.budget_lines WHERE exercice = 2026),
+  budget_total = (SELECT COALESCE(SUM(dotation_initiale), 0) FROM public.budget_lines WHERE exercice = 2026),
+  updated_at = NOW()
+WHERE annee = 2026;
