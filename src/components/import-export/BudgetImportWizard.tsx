@@ -10,6 +10,7 @@ import { StepValidationImport } from "./wizard/StepValidationImport";
 import { ChevronLeft, ChevronRight, Check, RotateCcw } from "lucide-react";
 import { useExcelParser, SheetData, ColumnMapping, ParsedRow } from "@/hooks/useExcelParser";
 import { useImportStaging } from "@/hooks/useImportStaging";
+import { useReferentielSync } from "@/hooks/useReferentielSync";
 
 export type { SheetData, ColumnMapping } from "@/hooks/useExcelParser";
 
@@ -40,6 +41,11 @@ export function BudgetImportWizard() {
     validateImportRun, 
     executeImport 
   } = useImportStaging();
+  const {
+    isSyncing,
+    detectReferenceSheets,
+    syncReferentiels,
+  } = useReferentielSync();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedExercice, setSelectedExercice] = useState<number>(exercice || new Date().getFullYear());
@@ -69,12 +75,25 @@ export function BudgetImportWizard() {
     errors: number 
   } | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
+  
+  // Reference sync state
+  const [syncReferentielsEnabled, setSyncReferentielsEnabled] = useState(false);
+  const [detectedRefSheets, setDetectedRefSheets] = useState<{ name: string; type: string }[]>([]);
+  const [refsSynced, setRefsSynced] = useState(false);
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     setFile(uploadedFile);
+    setRefsSynced(false);
     try {
       const parsedSheets = await parseExcelFile(uploadedFile);
       setSheets(parsedSheets);
+      
+      // Detect reference sheets
+      const refDetection = detectReferenceSheets(parsedSheets);
+      setDetectedRefSheets(refDetection.detectedSheets);
+      if (refDetection.hasReferenceData) {
+        setSyncReferentielsEnabled(true); // Enable by default if refs detected
+      }
       
       // Auto-select sheet: prioritize "Groupé (2)", then "Feuil3"
       const groupeSheet = parsedSheets.find(s => 
@@ -100,7 +119,7 @@ export function BudgetImportWizard() {
       toast.error("Erreur lors de la lecture du fichier Excel");
       console.error(error);
     }
-  }, [parseExcelFile, autoDetectMapping]);
+  }, [parseExcelFile, autoDetectMapping, detectReferenceSheets]);
 
   const handleSheetSelect = useCallback((sheetName: string) => {
     setSelectedSheet(sheetName);
@@ -255,6 +274,9 @@ export function BudgetImportWizard() {
     setImportComplete(false);
     setImportStats(null);
     setRunId(null);
+    setSyncReferentielsEnabled(false);
+    setDetectedRefSheets([]);
+    setRefsSynced(false);
   }, []);
 
   const canProceed = useCallback(() => {
@@ -273,6 +295,12 @@ export function BudgetImportWizard() {
   }, [currentStep, file, selectedExercice, selectedSheet, getMissingRequiredColumns, validationErrors]);
 
   const handleNext = useCallback(async () => {
+    // Sync referentiels before moving to step 3 if enabled
+    if (currentStep === 2 && syncReferentielsEnabled && !refsSynced && file) {
+      await syncReferentiels(file.name, sheets);
+      setRefsSynced(true);
+    }
+    
     if (currentStep === 2 && selectedSheet) {
       const sheet = sheets.find(s => s.name === selectedSheet);
       if (sheet) {
@@ -288,7 +316,7 @@ export function BudgetImportWizard() {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
-  }, [currentStep, selectedSheet, sheets, autoDetectMapping, validateData]);
+  }, [currentStep, selectedSheet, sheets, autoDetectMapping, validateData, syncReferentielsEnabled, refsSynced, file, syncReferentiels]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 1) {
@@ -356,6 +384,9 @@ export function BudgetImportWizard() {
             sheets={sheets}
             selectedSheet={selectedSheet}
             onSheetSelect={handleSheetSelect}
+            syncReferentiels={syncReferentielsEnabled}
+            onSyncReferentielsChange={setSyncReferentielsEnabled}
+            detectedRefSheets={detectedRefSheets}
           />
         )}
 

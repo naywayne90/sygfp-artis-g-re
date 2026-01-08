@@ -20,6 +20,8 @@ export type Database = {
           created_at: string | null
           est_active: boolean | null
           id: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           libelle: string
           mission_id: string
           os_id: string
@@ -30,6 +32,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle: string
           mission_id: string
           os_id: string
@@ -40,6 +44,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle?: string
           mission_id?: string
           os_id?: string
@@ -69,6 +75,8 @@ export type Database = {
           created_at: string | null
           est_active: boolean | null
           id: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           libelle: string
           updated_at: string | null
         }
@@ -78,6 +86,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle: string
           updated_at?: string | null
         }
@@ -87,6 +97,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle?: string
           updated_at?: string | null
         }
@@ -2231,6 +2243,8 @@ export type Database = {
           group_email: string | null
           id: string
           label: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           parent_id: string | null
           position: number | null
           responsible_user_id: string | null
@@ -2245,6 +2259,8 @@ export type Database = {
           group_email?: string | null
           id?: string
           label: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           parent_id?: string | null
           position?: number | null
           responsible_user_id?: string | null
@@ -2259,6 +2275,8 @@ export type Database = {
           group_email?: string | null
           id?: string
           label?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           parent_id?: string | null
           position?: number | null
           responsible_user_id?: string | null
@@ -4619,6 +4637,8 @@ export type Database = {
           created_at: string | null
           est_active: boolean | null
           id: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           libelle: string
           niveau: string | null
           parent_code: string | null
@@ -4629,6 +4649,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle: string
           niveau?: string | null
           parent_code?: string | null
@@ -4639,6 +4661,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle?: string
           niveau?: string | null
           parent_code?: string | null
@@ -5242,6 +5266,8 @@ export type Database = {
           description: string | null
           est_actif: boolean | null
           id: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           libelle: string
           updated_at: string | null
         }
@@ -5253,6 +5279,8 @@ export type Database = {
           description?: string | null
           est_actif?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle: string
           updated_at?: string | null
         }
@@ -5264,6 +5292,8 @@ export type Database = {
           description?: string | null
           est_actif?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle?: string
           updated_at?: string | null
         }
@@ -7535,6 +7565,8 @@ export type Database = {
           created_at: string | null
           est_active: boolean | null
           id: string
+          last_sync_at: string | null
+          last_sync_file: string | null
           libelle: string
           updated_at: string | null
         }
@@ -7544,6 +7576,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle: string
           updated_at?: string | null
         }
@@ -7553,6 +7587,8 @@ export type Database = {
           created_at?: string | null
           est_active?: boolean | null
           id?: string
+          last_sync_at?: string | null
+          last_sync_file?: string | null
           libelle?: string
           updated_at?: string | null
         }
@@ -9007,6 +9043,17 @@ export type Database = {
         Returns: boolean
       }
       sync_lambda_link: { Args: { p_link_id: string }; Returns: boolean }
+      sync_referentiels_from_import: {
+        Args: {
+          p_activites?: Json
+          p_directions?: Json
+          p_filename: string
+          p_nbe?: Json
+          p_objectifs_strategiques?: Json
+          p_sous_activites?: Json
+        }
+        Returns: Json
+      }
       test_codification_rule: {
         Args: { p_annee?: number; p_exercice?: number; p_rule_id: string }
         Returns: string
