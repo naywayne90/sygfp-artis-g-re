@@ -22,6 +22,8 @@ export interface ParsedRow {
   };
   computed: {
     imputation: string | null;
+    calculatedImputation: string | null;
+    imputationFormat: "17" | "19" | null;
     osCode: number | null;
     actionCode: number | null;
     activiteCode: number | null;
@@ -33,6 +35,7 @@ export interface ParsedRow {
   };
   isValid: boolean;
   errors: string[];
+  warnings: string[];
 }
 
 export interface ColumnMapping {
@@ -153,6 +156,90 @@ function cleanString(value: any): string | null {
   if (value === null || value === undefined) return null;
   const str = String(value).trim();
   return str === "" ? null : str;
+}
+
+// Pad a number to a fixed width with leading zeros
+function padCode(value: number | null, width: number): string | null {
+  if (value === null || value === undefined) return null;
+  return String(value).padStart(width, "0");
+}
+
+// Calculate imputation code based on the business rules
+// Format 17 digits (no Action): OS(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
+// Format 19 digits (with Action): OS(2) + Action(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
+function calculateImputation(
+  osCode: number | null,
+  actionCode: number | null,
+  activiteCode: number | null,
+  sousActiviteCode: number | null,
+  directionCode: number | null,
+  natureDepenseCode: number | null,
+  nbeCode: string | null
+): { imputation: string | null; format: "17" | "19" | null; errors: string[] } {
+  const errors: string[] = [];
+  
+  // NBE is required and must be 6 digits
+  if (!nbeCode) {
+    errors.push("NBE absent ou invalide (6 chiffres requis)");
+  } else if (nbeCode.length !== 6 || !/^\d{6}$/.test(nbeCode)) {
+    errors.push(`NBE invalide: "${nbeCode}" (doit être 6 chiffres)`);
+  }
+  
+  // OS is required
+  if (osCode === null) {
+    errors.push("OS manquant pour le calcul de l'imputation");
+  }
+  
+  // Activité is required
+  if (activiteCode === null) {
+    errors.push("Activité manquante pour le calcul de l'imputation");
+  }
+  
+  // Sous-activité is required
+  if (sousActiviteCode === null) {
+    errors.push("Sous-activité manquante pour le calcul de l'imputation");
+  }
+  
+  // Direction is required
+  if (directionCode === null) {
+    errors.push("Direction manquante pour le calcul de l'imputation");
+  }
+  
+  // Nature dépense is required
+  if (natureDepenseCode === null) {
+    errors.push("Nature dépense manquante pour le calcul de l'imputation");
+  }
+  
+  // If there are errors, we can't calculate
+  if (errors.length > 0) {
+    return { imputation: null, format: null, errors };
+  }
+  
+  // Build the imputation code
+  const osPadded = padCode(osCode, 2)!;
+  const activitePadded = padCode(activiteCode, 3)!;
+  const sousActivitePadded = padCode(sousActiviteCode, 3)!;
+  const directionPadded = padCode(directionCode, 2)!;
+  const naturePadded = padCode(natureDepenseCode, 1)!;
+  const nbePadded = nbeCode!;
+  
+  if (actionCode !== null) {
+    // Format 19 digits: OS(2) + Action(2) + Activité(3) + Sous(3) + Direction(2) + Nature(1) + NBE(6)
+    const actionPadded = padCode(actionCode, 2)!;
+    const imputation = `${osPadded}${actionPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
+    return { imputation, format: "19", errors: [] };
+  } else {
+    // Format 17 digits: OS(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
+    const imputation = `${osPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
+    return { imputation, format: "17", errors: [] };
+  }
+}
+
+// Normalize imputation for comparison (remove spaces, dashes, leading zeros variations)
+function normalizeImputation(imputation: string | null): string | null {
+  if (!imputation) return null;
+  // Remove all non-digit characters and trim
+  return imputation.replace(/\D/g, "");
 }
 
 export function useExcelParser() {
@@ -295,6 +382,7 @@ export function useExcelParser() {
     };
 
     const errors: string[] = [];
+    const warnings: string[] = [];
 
     // Extract raw values
     const rawImputation = cleanString(getCellValue(mapping.imputation));
@@ -317,20 +405,48 @@ export function useExcelParser() {
     const nbeCode = extractNBECode(rawNbe);
     const montant = parseMontant(rawMontant);
 
-    // Validation
-    if (!rawImputation) {
-      errors.push("Imputation manquante");
-    }
+    // Calculate the imputation based on business rules
+    const imputationCalc = calculateImputation(
+      osResult.code,
+      actionResult.code,
+      activiteResult.code,
+      sousActiviteResult.code,
+      directionResult.code,
+      natureDepenseCode,
+      nbeCode
+    );
 
+    // Add imputation calculation errors
+    imputationCalc.errors.forEach(err => errors.push(err));
+
+    // Validate montant
     if (rawMontant !== null && montant === null) {
       errors.push(`Montant invalide: "${rawMontant}"`);
     }
 
     if (montant !== null && montant < 0) {
-      errors.push(`Montant négatif: ${montant}`);
+      errors.push(`Montant négatif: ${montant} FCFA`);
     }
 
-    // Note: Action can be null, so no error if missing
+    // Cross-validation: compare raw imputation with calculated imputation
+    let finalImputation = imputationCalc.imputation;
+    
+    if (rawImputation && imputationCalc.imputation) {
+      const normalizedRaw = normalizeImputation(rawImputation);
+      const normalizedCalc = normalizeImputation(imputationCalc.imputation);
+      
+      if (normalizedRaw !== normalizedCalc) {
+        errors.push(`Imputation mismatch: fichier="${rawImputation}" vs calculée="${imputationCalc.imputation}"`);
+      }
+      // Use raw imputation if provided (as reference)
+      finalImputation = rawImputation;
+    } else if (rawImputation && !imputationCalc.imputation) {
+      // Use raw imputation if we couldn't calculate
+      finalImputation = rawImputation;
+      warnings.push("Imputation calculée impossible - utilisation de la valeur du fichier");
+    } else if (!rawImputation && !imputationCalc.imputation) {
+      errors.push("Aucune imputation disponible (fichier ou calculée)");
+    }
 
     return {
       rowNumber,
@@ -346,7 +462,9 @@ export function useExcelParser() {
         montant: rawMontant,
       },
       computed: {
-        imputation: rawImputation,
+        imputation: finalImputation,
+        calculatedImputation: imputationCalc.imputation,
+        imputationFormat: imputationCalc.format,
         osCode: osResult.code,
         actionCode: actionResult.code,
         activiteCode: activiteResult.code,
@@ -358,6 +476,7 @@ export function useExcelParser() {
       },
       isValid: errors.length === 0,
       errors,
+      warnings,
     };
   }, []);
 
@@ -385,5 +504,6 @@ export function useExcelParser() {
     extractRowData,
     parseSheetData,
     isTotalColumn,
+    calculateImputation,
   };
 }
