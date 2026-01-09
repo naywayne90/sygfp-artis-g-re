@@ -99,6 +99,7 @@ const planificationBudgetItems = [
   { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
   { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
+  { title: "Aide Import", url: "/planification/aide-import", icon: BookOpen },
 ];
 
 // 3. Planification Exécution Physique
