@@ -121,6 +121,42 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
       motif: string;
       justification_renforcee?: string;
     }) => {
+      // Si c'est un virement (pas un ajustement), vérifier le disponible de la source
+      if (data.type_transfer === "virement" && data.from_budget_line_id) {
+        // Récupérer la ligne source avec dotation et engagements
+        const { data: fromLine } = await supabase
+          .from("budget_lines")
+          .select("dotation_initiale, total_engage")
+          .eq("id", data.from_budget_line_id)
+          .single();
+
+        // Récupérer les virements déjà effectués depuis cette ligne
+        const { data: virementsEmis } = await supabase
+          .from("credit_transfers")
+          .select("amount")
+          .eq("from_budget_line_id", data.from_budget_line_id)
+          .eq("status", "execute");
+
+        // Récupérer les virements reçus par cette ligne
+        const { data: virementsRecus } = await supabase
+          .from("credit_transfers")
+          .select("amount")
+          .eq("to_budget_line_id", data.from_budget_line_id)
+          .eq("status", "execute");
+
+        const dotation = fromLine?.dotation_initiale || 0;
+        const engaged = fromLine?.total_engage || 0;
+        const emis = virementsEmis?.reduce((s, v) => s + v.amount, 0) || 0;
+        const recus = virementsRecus?.reduce((s, v) => s + v.amount, 0) || 0;
+        const disponible = dotation + recus - emis - engaged;
+
+        if (disponible < data.amount) {
+          throw new Error(
+            `Virement impossible : ${new Intl.NumberFormat("fr-FR").format(disponible)} FCFA disponibles, ${new Intl.NumberFormat("fr-FR").format(data.amount)} FCFA demandés`
+          );
+        }
+      }
+
       // Generate code
       const { data: code } = await supabase.rpc("generate_transfer_code", {
         p_exercice: exercice || new Date().getFullYear(),

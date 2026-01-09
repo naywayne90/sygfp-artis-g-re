@@ -8,11 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, CheckCircle2, Loader2, Calculator, Link2, Lock } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2, Loader2, Calculator, Link2, Lock, ShoppingCart } from "lucide-react";
 import { useEngagements, BudgetAvailability } from "@/hooks/useEngagements";
 import { useBudgetLines } from "@/hooks/useBudgetLines";
 import { useLambdaLinks } from "@/hooks/useLambdaLinks";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EngagementFormProps {
   open: boolean;
@@ -26,11 +29,32 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
   const { createLink, linkTypes } = useLambdaLinks();
   const { exercice } = useExercice();
   
+  // Fetch marchés validés
+  const { data: marchesValides = [] } = useQuery({
+    queryKey: ["marches-valides-for-engagement", exercice],
+    queryFn: async () => {
+      // @ts-ignore - Supabase type instantiation issue workaround
+      const { data, error } = await supabase
+        .from("marches")
+        .select(`
+          id, numero, objet, montant, mode_passation,
+          prestataire:prestataires(id, raison_sociale),
+          dossier_id
+        `)
+        .eq("validation_status", "valide")
+        .eq("exercice", exercice || new Date().getFullYear());
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!exercice,
+  });
+
   // Check if expression→engagement link is active
   const isLinkActive = linkTypes.find(lt => lt.code === 'expression_to_engagement')?.actif ?? true;
 
   const [selectedExpressionId, setSelectedExpressionId] = useState<string>("");
   const [selectedBudgetLineId, setSelectedBudgetLineId] = useState<string>("");
+  const [selectedMarcheId, setSelectedMarcheId] = useState<string>("");
   const [objet, setObjet] = useState("");
   const [montant, setMontant] = useState<number>(0);
   const [montantHT, setMontantHT] = useState<number>(0);
@@ -38,32 +62,62 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
   const [fournisseur, setFournisseur] = useState("");
   const [availability, setAvailability] = useState<BudgetAvailability | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
   const selectedExpression = expressionsValidees.find((e) => e.id === selectedExpressionId);
+  const selectedMarche = marchesValides.find(m => m.id === selectedMarcheId);
 
-  // Pre-fill from selected expression
+  // Filtrer les marchés selon le dossier de l'expression sélectionnée
+  const filteredMarches = marchesValides.filter(m => {
+    if (!selectedExpression?.dossier_id) return true;
+    return m.dossier_id === selectedExpression.dossier_id || !m.dossier_id;
+  });
+
+  // Pre-fill from selected expression or marché
   useEffect(() => {
-    if (selectedExpression) {
+    if (selectedMarche) {
+      setObjet(selectedMarche.objet);
+      setMontant(selectedMarche.montant || 0);
+      setFournisseur((selectedMarche.prestataire as any)?.raison_sociale || "");
+    } else if (selectedExpression) {
       setObjet(selectedExpression.objet);
       setMontant(selectedExpression.montant_estime || (selectedExpression.marche as any)?.montant || 0);
       setFournisseur((selectedExpression.marche as any)?.prestataire?.raison_sociale || "");
+      // Auto-sélectionner le marché si lié à l'expression
+      if ((selectedExpression.marche as any)?.id) {
+        setSelectedMarcheId((selectedExpression.marche as any).id);
+      }
     }
-  }, [selectedExpression]);
+  }, [selectedExpression, selectedMarche]);
 
   // Calculate availability when budget line or amount changes
   useEffect(() => {
     if (selectedBudgetLineId && montant > 0) {
       setIsCalculating(true);
+      setAvailabilityError(null);
       calculateAvailability(selectedBudgetLineId, montant)
-        .then(setAvailability)
+        .then(result => {
+          setAvailability(result);
+          if (!result.is_sufficient) {
+            setAvailabilityError(
+              `Disponible insuffisant : ${new Intl.NumberFormat("fr-FR").format(result.disponible)} FCFA disponibles, ${new Intl.NumberFormat("fr-FR").format(montant)} FCFA demandés`
+            );
+          }
+        })
         .finally(() => setIsCalculating(false));
     } else {
       setAvailability(null);
+      setAvailabilityError(null);
     }
   }, [selectedBudgetLineId, montant]);
 
   const handleSubmit = async () => {
     if (!selectedExpressionId || !selectedBudgetLineId || !objet || montant <= 0) {
+      return;
+    }
+
+    // Vérification stricte de la disponibilité
+    if (availability && !availability.is_sufficient) {
       return;
     }
 
@@ -76,7 +130,8 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
         montant_ht: montantHT || undefined,
         tva: tva || undefined,
         fournisseur,
-        marche_id: selectedExpression?.marche?.id,
+        marche_id: selectedMarcheId || selectedExpression?.marche?.id,
+        dossier_id: selectedExpression?.dossier_id || dossierId,
       });
       onOpenChange(false);
       resetForm();
@@ -88,12 +143,14 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
   const resetForm = () => {
     setSelectedExpressionId("");
     setSelectedBudgetLineId("");
+    setSelectedMarcheId("");
     setObjet("");
     setMontant(0);
     setMontantHT(0);
     setTva(0);
     setFournisseur("");
     setAvailability(null);
+    setAvailabilityError(null);
   };
 
   const formatMontant = (value: number) => {
