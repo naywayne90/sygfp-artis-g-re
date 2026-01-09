@@ -29,11 +29,14 @@ import {
   Shield,
   Eye,
   Settings2,
+  Database,
+  Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useImportJobs } from "@/hooks/useImportJobs";
 import { useARTIImport, ARTIParsedRow } from "@/hooks/useARTIImport";
+import { useReferentielSync, AllReferentielsResult } from "@/hooks/useReferentielSync";
 import logoArti from "@/assets/logo-arti.jpg";
 
 interface ImportExcelWizardProps {
@@ -61,7 +64,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   } = useImportJobs();
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
-
+  const { importAllReferentiels, refreshDropdowns, isSyncing, detectReferenceSheets } = useReferentielSync();
   // Step 1: Exercice & File
   const [selectedExercice, setSelectedExercice] = useState<number>(contextExercice);
   const [file, setFile] = useState<File | null>(null);
@@ -83,9 +86,11 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   
   // Step 4: Import options - SAFE MODE by default
   const [safeMode, setSafeMode] = useState(true); // Never replace existing lines
+  const [syncReferentiels, setSyncReferentiels] = useState(true); // Sync referentials option
   const [isProcessing, setIsProcessing] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
   const [importStats, setImportStats] = useState<{ inserted: number; updated: number; skipped: number; errors: number } | null>(null);
+  const [referentielStats, setReferentielStats] = useState<AllReferentielsResult | null>(null);
 
   const resetWizard = useCallback(() => {
     setStep("exercice");
@@ -94,9 +99,11 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     setParseInfo(null);
     setStatusFilter("all");
     setSafeMode(true);
+    setSyncReferentiels(true);
     setIsProcessing(false);
     setImportComplete(false);
     setImportStats(null);
+    setReferentielStats(null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -165,11 +172,25 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
 
   // Step 4: Execute import
   const handleImport = useCallback(async () => {
-    if (!currentJob) return;
+    if (!currentJob || !file) return;
 
     setIsProcessing(true);
     try {
-      // Filter rows based on SAFE mode
+      // Step 1: Sync referentials first if enabled
+      if (syncReferentiels) {
+        toast.info("Synchronisation des référentiels en cours...");
+        const refResult = await importAllReferentiels(file);
+        setReferentielStats(refResult);
+        
+        if (refResult.summary.totalInserted > 0 || refResult.summary.totalUpdated > 0) {
+          toast.success(`Référentiels: ${refResult.summary.totalInserted} ajouté(s), ${refResult.summary.totalUpdated} mis à jour`);
+        }
+        
+        // Refresh dropdowns after referential sync
+        refreshDropdowns();
+      }
+
+      // Step 2: Filter rows based on SAFE mode
       const rowsToImport = safeMode 
         ? parsedRows.filter(r => r.decision === "NEW" && r.isValid) // Only new lines in SAFE mode
         : parsedRows.filter(r => r.isValid); // All valid lines otherwise
@@ -186,6 +207,9 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       });
       setImportComplete(true);
       
+      // Refresh all data
+      refreshDropdowns();
+      
       if (result.errors === 0 && onImportComplete) {
         onImportComplete();
       }
@@ -196,7 +220,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     } finally {
       setIsProcessing(false);
     }
-  }, [currentJob, parsedRows, selectedExercice, safeMode, executeARTIImport, onImportComplete]);
+  }, [currentJob, file, parsedRows, selectedExercice, safeMode, syncReferentiels, executeARTIImport, importAllReferentiels, refreshDropdowns, onImportComplete]);
 
   // Export errors
   const handleExportErrors = useCallback(() => {
@@ -624,6 +648,69 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             </CardContent>
           </Card>
 
+          {/* Sync referentiels toggle */}
+          <Card className={syncReferentiels ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/10" : ""}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Database className={`h-5 w-5 ${syncReferentiels ? "text-blue-600" : "text-muted-foreground"}`} />
+                Synchronisation des référentiels
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="sync-ref" className="text-base font-medium">
+                    Charger automatiquement les référentiels
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {syncReferentiels 
+                      ? "Les onglets OS, Direction, Action, Activité, Sous-Activité, NBE, Nature de dépense seront synchronisés (UPSERT par code, sans suppression)"
+                      : "Les référentiels ne seront pas mis à jour depuis ce fichier"
+                    }
+                  </p>
+                </div>
+                <Switch
+                  id="sync-ref"
+                  checked={syncReferentiels}
+                  onCheckedChange={setSyncReferentiels}
+                />
+              </div>
+              
+              {syncReferentiels && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    OS
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    Direction
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    Action
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    Activité
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    Sous-Activité
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    NBE
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Layers className="h-3 w-3" />
+                    Nature Dépense
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Summary */}
           <Card>
             <CardHeader>
@@ -726,8 +813,15 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
             </p>
           </div>
 
+          {/* Budget lines stats */}
           <Card className="max-w-md mx-auto">
-            <CardContent className="pt-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Lignes budgétaires
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-blue-600">{importStats?.inserted}</div>
@@ -740,6 +834,39 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               </div>
             </CardContent>
           </Card>
+
+          {/* Referentiels stats */}
+          {referentielStats && referentielStats.summary.sheetsFound > 0 && (
+            <Card className="max-w-md mx-auto">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  Référentiels synchronisés
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{referentielStats.summary.totalInserted}</div>
+                    <div className="text-sm text-muted-foreground">Ajoutés</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{referentielStats.summary.totalUpdated}</div>
+                    <div className="text-sm text-muted-foreground">Mis à jour</div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1 justify-center pt-2 border-t">
+                  {referentielStats.os.sheetFound && <Badge variant="outline" className="text-xs">OS: {referentielStats.os.inserted + referentielStats.os.updated}</Badge>}
+                  {referentielStats.directions.sheetFound && <Badge variant="outline" className="text-xs">Dir: {referentielStats.directions.inserted + referentielStats.directions.updated}</Badge>}
+                  {referentielStats.actions.sheetFound && <Badge variant="outline" className="text-xs">Action: {referentielStats.actions.inserted + referentielStats.actions.updated}</Badge>}
+                  {referentielStats.activites.sheetFound && <Badge variant="outline" className="text-xs">Activ: {referentielStats.activites.inserted + referentielStats.activites.updated}</Badge>}
+                  {referentielStats.sousActivites.sheetFound && <Badge variant="outline" className="text-xs">S/Act: {referentielStats.sousActivites.inserted + referentielStats.sousActivites.updated}</Badge>}
+                  {referentielStats.nbe.sheetFound && <Badge variant="outline" className="text-xs">NBE: {referentielStats.nbe.inserted + referentielStats.nbe.updated}</Badge>}
+                  {referentielStats.natureDepense.sheetFound && <Badge variant="outline" className="text-xs">NatDep: {referentielStats.natureDepense.inserted + referentielStats.natureDepense.updated}</Badge>}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex justify-center gap-4">
             <Button variant="outline" onClick={resetWizard}>

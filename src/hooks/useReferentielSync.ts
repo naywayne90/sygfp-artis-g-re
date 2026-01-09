@@ -56,8 +56,8 @@ const COLUMN_PATTERNS = {
     libelle: ["nature eco", "libelle", "designation", "nbe", "nature economique", "intitule"],
   },
   natureDepense: {
-    code: ["code nature", "code", "codenature", "nature code", "type", "n°"],
-    libelle: ["nature depense", "nature", "libelle", "designation", "nature de depense"],
+    code: ["code nature", "code", "codenature", "nature code", "type", "n°", "code_nature_depense"],
+    libelle: ["nature depense", "nature", "libelle", "designation", "nature de depense", "libelle_nature_depense"],
   },
 };
 
@@ -81,6 +81,7 @@ export interface AllReferentielsResult {
   activites: ReferentielImportResult;
   sousActivites: ReferentielImportResult;
   nbe: ReferentielImportResult;
+  natureDepense: ReferentielImportResult;
   summary: {
     totalInserted: number;
     totalUpdated: number;
@@ -642,6 +643,80 @@ export function useReferentielSync() {
     return result;
   }, [findSheet, findColumn, parseSheetData, cleanCode]);
 
+  // Import Nature de Dépense referential
+  const importNatureDepense = useCallback(async (
+    workbook: XLSX.WorkBook,
+    sheetNames: string[]
+  ): Promise<ReferentielImportResult> => {
+    const result = createEmptyResult("Nature de Dépense", "ref_nature_depense");
+
+    const sheetName = findSheet(sheetNames, SHEET_PATTERNS.natureDepense);
+    if (!sheetName) return result;
+
+    result.sheetFound = true;
+    result.sheetName = sheetName;
+
+    const { headers, rows } = parseSheetData(workbook, sheetName);
+    const codeCol = findColumn(headers, COLUMN_PATTERNS.natureDepense.code);
+    const libelleCol = findColumn(headers, COLUMN_PATTERNS.natureDepense.libelle);
+
+    if (!codeCol) {
+      result.errorDetails.push(`Colonne code non trouvée dans "${sheetName}"`);
+      return result;
+    }
+
+    const seenCodes = new Set<string>();
+    result.total = rows.length;
+
+    for (const row of rows) {
+      let code = cleanCode(row[codeCol]);
+      const libelle = libelleCol ? String(row[libelleCol] || "").trim() : `Nature ${code}`;
+
+      if (!code) {
+        result.errors++;
+        continue;
+      }
+
+      // Nature de dépense is a single digit (1-9)
+      if (code.length > 1) {
+        code = code.charAt(0);
+      }
+
+      if (seenCodes.has(code)) {
+        result.duplicates.push(code);
+        continue;
+      }
+      seenCodes.add(code);
+
+      try {
+        // Check in ref_nve table (which stores nature de dépense)
+        const { data: existing } = await supabase
+          .from("ref_nve")
+          .select("id")
+          .eq("code_nve", code)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase
+            .from("ref_nve")
+            .update({ libelle, updated_at: new Date().toISOString() })
+            .eq("id", existing.id);
+          result.updated++;
+        } else {
+          await supabase
+            .from("ref_nve")
+            .insert({ code_nve: code, libelle, actif: true });
+          result.inserted++;
+        }
+      } catch (err) {
+        result.errors++;
+        result.errorDetails.push(`Nature ${code}: ${String(err)}`);
+      }
+    }
+
+    return result;
+  }, [findSheet, findColumn, parseSheetData, cleanCode]);
+
   // Import all referentials from Excel file
   const importAllReferentiels = useCallback(async (
     file: File
@@ -666,8 +741,9 @@ export function useReferentielSync() {
       const sousActivitesResult = await importSousActivites(workbook, sheetNames);
       const directionsResult = await importDirections(workbook, sheetNames);
       const nbeResult = await importNBE(workbook, sheetNames);
+      const natureDepenseResult = await importNatureDepense(workbook, sheetNames);
 
-      const allResults = [osResult, actionsResult, activitesResult, sousActivitesResult, directionsResult, nbeResult];
+      const allResults = [osResult, actionsResult, activitesResult, sousActivitesResult, directionsResult, nbeResult, natureDepenseResult];
       const sheetsFound = allResults.filter(r => r.sheetFound).length;
       const sheetsMissing: string[] = [];
       
@@ -677,6 +753,7 @@ export function useReferentielSync() {
       if (!sousActivitesResult.sheetFound) sheetsMissing.push("Sous-Activités");
       if (!directionsResult.sheetFound) sheetsMissing.push("Directions");
       if (!nbeResult.sheetFound) sheetsMissing.push("NBE");
+      if (!natureDepenseResult.sheetFound) sheetsMissing.push("Nature de Dépense");
 
       const result: AllReferentielsResult = {
         os: osResult,
@@ -685,6 +762,7 @@ export function useReferentielSync() {
         activites: activitesResult,
         sousActivites: sousActivitesResult,
         nbe: nbeResult,
+        natureDepense: natureDepenseResult,
         summary: {
           totalInserted: allResults.reduce((sum, r) => sum + r.inserted, 0),
           totalUpdated: allResults.reduce((sum, r) => sum + r.updated, 0),
@@ -698,7 +776,7 @@ export function useReferentielSync() {
     } finally {
       setIsSyncing(false);
     }
-  }, [importOS, importActions, importActivites, importSousActivites, importDirections, importNBE]);
+  }, [importOS, importActions, importActivites, importSousActivites, importDirections, importNBE, importNatureDepense]);
 
   // Refresh all dropdown caches
   const refreshDropdowns = useCallback(() => {
@@ -709,6 +787,8 @@ export function useReferentielSync() {
     queryClient.invalidateQueries({ queryKey: ["directions"] });
     queryClient.invalidateQueries({ queryKey: ["nomenclature-nbe"] });
     queryClient.invalidateQueries({ queryKey: ["ref-data"] });
+    queryClient.invalidateQueries({ queryKey: ["ref-nve"] });
+    queryClient.invalidateQueries({ queryKey: ["nature-depense"] });
   }, [queryClient]);
 
   // Auto-create missing reference
