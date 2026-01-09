@@ -102,6 +102,71 @@ export function usePermissions() {
     return userPermissions || [];
   };
 
+  // ============================================
+  // DÉFINITIONS STRICTES "QUI VALIDE QUOI"
+  // ============================================
+  
+  // Vérifier si l'utilisateur peut valider une Note SEF (DG uniquement)
+  const canValidateNoteSEF = (): boolean => {
+    return isAdmin || hasRole("DG") || hasPermission("notes_sef_validate");
+  };
+
+  // Vérifier si l'utilisateur peut valider une Note AEF (Directeur ou DG)
+  const canValidateNoteAEF = (): boolean => {
+    return isAdmin || hasAnyRole(["DG", "DIRECTEUR"]) || hasPermission("notes_aef_validate");
+  };
+
+  // Vérifier si l'utilisateur peut imputer (CB uniquement)
+  const canImpute = (): boolean => {
+    return isAdmin || hasRole("CB") || hasPermission("imputation_create");
+  };
+
+  // Vérifier si l'utilisateur peut valider un engagement (CB uniquement)
+  const canValidateEngagement = (): boolean => {
+    return isAdmin || hasRole("CB") || hasPermission("engagement_validate");
+  };
+
+  // Vérifier si l'utilisateur peut valider une liquidation (DAAF)
+  const canValidateLiquidation = (): boolean => {
+    return isAdmin || hasAnyRole(["DAAF", "CB"]) || hasPermission("liquidation_validate");
+  };
+
+  // Vérifier si l'utilisateur peut signer un ordonnancement (DG uniquement)
+  const canSignOrdonnancement = (): boolean => {
+    return isAdmin || hasRole("DG") || hasPermission("ordonnancement_sign");
+  };
+
+  // Vérifier si l'utilisateur peut exécuter un règlement (Trésorerie/Agent Comptable)
+  const canExecuteReglement = (): boolean => {
+    return isAdmin || hasAnyRole(["TRESORERIE", "AGENT_COMPTABLE", "AC"]) || hasPermission("reglement_execute");
+  };
+
+  // Vérifier si l'utilisateur peut valider un marché (Commission/DG)
+  const canValidateMarche = (): boolean => {
+    return isAdmin || hasAnyRole(["DG", "COMMISSION_MARCHES"]) || hasPermission("marche_validate");
+  };
+
+  // Vérifier si l'utilisateur peut approuver un virement (CB)
+  const canApproveVirement = (): boolean => {
+    return isAdmin || hasRole("CB") || hasPermission("virement_approve");
+  };
+
+  // Message d'erreur pour rôle insuffisant
+  const getRequiredRoleMessage = (action: string): string => {
+    const roleMap: Record<string, string> = {
+      "validate_note_sef": "DG",
+      "validate_note_aef": "Directeur ou DG",
+      "impute": "CB (Contrôleur Budgétaire)",
+      "validate_engagement": "CB (Contrôleur Budgétaire)",
+      "validate_liquidation": "DAAF",
+      "sign_ordonnancement": "DG (Directeur Général)",
+      "execute_reglement": "Trésorerie / Agent Comptable",
+      "validate_marche": "Commission des Marchés ou DG",
+      "approve_virement": "CB (Contrôleur Budgétaire)",
+    };
+    return roleMap[action] || "Administrateur";
+  };
+
   return {
     userId: currentUser?.id,
     userRoles: userRoles?.map((r) => r.role) || [],
@@ -116,5 +181,16 @@ export function usePermissions() {
     hasModuleAccess,
     getAllPermissions,
     isLoading: !userRoles || !userPermissions,
+    // Nouvelles fonctions de validation par rôle
+    canValidateNoteSEF,
+    canValidateNoteAEF,
+    canImpute,
+    canValidateEngagement,
+    canValidateLiquidation,
+    canSignOrdonnancement,
+    canExecuteReglement,
+    canValidateMarche,
+    canApproveVirement,
+    getRequiredRoleMessage,
   };
 }

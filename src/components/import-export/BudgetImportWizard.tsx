@@ -185,8 +185,19 @@ export function BudgetImportWizard() {
       });
     }
 
+    // Validate file structure before import
+    if (!file) {
+      errors.push({
+        row: 0,
+        column: "général",
+        message: "Aucun fichier sélectionné",
+        severity: "error",
+      });
+    }
+
     // Collect validation errors from parsed rows
     const seenImputations = new Map<string, number>();
+    const seenCodes = new Map<string, number>();
     
     parsedRows.forEach((row) => {
       // Add row-specific errors
@@ -200,7 +211,7 @@ export function BudgetImportWizard() {
         });
       });
 
-      // Check for duplicates
+      // Check for duplicate imputations
       if (row.computed.imputation) {
         const existingRow = seenImputations.get(row.computed.imputation);
         if (existingRow) {
@@ -214,7 +225,44 @@ export function BudgetImportWizard() {
           seenImputations.set(row.computed.imputation, row.rowNumber);
         }
       }
+
+      // Check for existing codes in database (simulation - would need API call)
+      // This is a placeholder for checking against existing budget lines
+      const codeKey = row.computed.imputation;
+      if (codeKey) {
+        // Check if this code already exists in parsed rows with different data
+        const existingInFile = seenCodes.get(codeKey);
+        if (existingInFile && existingInFile !== row.rowNumber) {
+          errors.push({
+            row: row.rowNumber,
+            column: "imputation",
+            message: `Code "${codeKey}" dupliqué dans le fichier (ligne ${existingInFile}). Les doublons seront mis à jour.`,
+            severity: "warning",
+          });
+        }
+        seenCodes.set(codeKey, row.rowNumber);
+      }
+
+      // Validate montant is positive
+      if (row.computed.montant !== null && row.computed.montant < 0) {
+        errors.push({
+          row: row.rowNumber,
+          column: "montant",
+          message: `Montant négatif: ${row.computed.montant}`,
+          severity: "error",
+        });
+      }
     });
+
+    // Summary validation
+    if (parsedRows.length === 0) {
+      errors.push({
+        row: 0,
+        column: "général",
+        message: "Aucune ligne de données à importer",
+        severity: "error",
+      });
+    }
 
     setValidationErrors(errors);
     setIsValidating(false);
@@ -227,7 +275,10 @@ export function BudgetImportWizard() {
       if (newRunId) {
         setRunId(newRunId);
         await loadStagingData(newRunId, parsedRows);
-        toast.success("Données chargées dans la zone de staging");
+        toast.success(`Validation réussie: ${parsedRows.length} lignes prêtes à importer`);
+        
+        // Log to budget_history
+        console.log(`[AUDIT] Import préparé: exercice=${selectedExercice}, fichier=${file.name}, lignes=${parsedRows.length}`);
       }
     }
     

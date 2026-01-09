@@ -44,14 +44,29 @@ interface DossierDetailsEnhancedProps {
 }
 
 const ETAPE_LABELS: Record<string, string> = {
+  note_sef: "Note SEF",
+  note_aef: "Note AEF",
   note: "Note",
   expression_besoin: "Expression de besoin",
+  imputation: "Imputation",
   marche: "Marché",
   engagement: "Engagement",
   liquidation: "Liquidation",
   ordonnancement: "Ordonnancement",
   reglement: "Règlement",
 };
+
+// Ordre des 8 étapes de la chaîne de dépense
+const ETAPES_CHAINE = [
+  { key: "note_sef", label: "Note SEF", icon: "📝" },
+  { key: "note_aef", label: "Note AEF", icon: "📄" },
+  { key: "imputation", label: "Imputation", icon: "🎯" },
+  { key: "marche", label: "Marché", icon: "📋" },
+  { key: "engagement", label: "Engagement", icon: "✍️" },
+  { key: "liquidation", label: "Liquidation", icon: "📊" },
+  { key: "ordonnancement", label: "Ordonnancement", icon: "📑" },
+  { key: "reglement", label: "Règlement", icon: "💰" },
+];
 
 const STATUT_COLORS: Record<string, string> = {
   en_cours: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -334,13 +349,87 @@ export function DossierDetailsEnhanced({
               </Card>
             </TabsContent>
 
-            {/* ONGLET CHAÎNE DE LA DÉPENSE */}
+            {/* ONGLET CHAÎNE DE LA DÉPENSE - Timeline visuelle des 8 étapes */}
             <TabsContent value="chaine" className="space-y-4">
+              {/* Barre de progression visuelle des 8 étapes */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Chaîne de la dépense</CardTitle>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <ArrowRight className="h-4 w-4" />
+                    Progression dans la chaîne de dépense
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
+                    {ETAPES_CHAINE.map((etapeConfig, index) => {
+                      const etapeDossier = etapes.find(e => e.type_etape === etapeConfig.key);
+                      const isCompleted = etapeDossier?.statut === 'valide';
+                      const isCurrent = dossier.etape_courante === etapeConfig.key;
+                      const isPending = etapeDossier && etapeDossier.statut !== 'valide' && etapeDossier.statut !== 'rejete';
+                      const isRejected = etapeDossier?.statut === 'rejete';
+                      
+                      return (
+                        <div key={etapeConfig.key} className="flex items-center flex-1 min-w-[100px]">
+                          <div className="flex flex-col items-center w-full">
+                            <div className={`
+                              w-10 h-10 rounded-full flex items-center justify-center text-lg
+                              transition-all duration-300
+                              ${isCompleted ? 'bg-green-500 text-white shadow-lg shadow-green-200' :
+                                isRejected ? 'bg-red-500 text-white' :
+                                isCurrent ? 'bg-primary text-primary-foreground ring-4 ring-primary/30' :
+                                isPending ? 'bg-yellow-500 text-white' :
+                                'bg-muted text-muted-foreground'}
+                            `}>
+                              {isCompleted ? <CheckCircle className="h-5 w-5" /> : etapeConfig.icon}
+                            </div>
+                            <span className={`text-xs mt-1 text-center font-medium ${
+                              isCurrent ? 'text-primary' : 'text-muted-foreground'
+                            }`}>
+                              {etapeConfig.label}
+                            </span>
+                            {etapeDossier && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {format(new Date(etapeDossier.created_at), "dd/MM", { locale: fr })}
+                              </span>
+                            )}
+                          </div>
+                          {index < ETAPES_CHAINE.length - 1 && (
+                            <div className={`h-0.5 flex-1 mx-1 ${
+                              isCompleted ? 'bg-green-500' : 'bg-muted'
+                            }`} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Détail des étapes avec montants */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Évolution des montants</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 gap-4 text-center text-sm mb-4 bg-muted/50 p-3 rounded-lg">
+                    <div>
+                      <p className="text-muted-foreground">Estimé</p>
+                      <p className="font-bold">{formatMontant(dossier.montant_estime)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Engagé</p>
+                      <p className="font-bold text-blue-600">{formatMontant(dossier.montant_engage)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Liquidé</p>
+                      <p className="font-bold text-orange-600">{formatMontant(dossier.montant_liquide)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Payé</p>
+                      <p className="font-bold text-green-600">{formatMontant(dossier.montant_ordonnance)}</p>
+                    </div>
+                  </div>
+
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -350,18 +439,21 @@ export function DossierDetailsEnhanced({
                   ) : (
                     <div className="space-y-3">
                       {etapes.map((etape) => (
-                        <div key={etape.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                        <div key={etape.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
                           <div className={`w-3 h-3 rounded-full ${
                             etape.statut === 'valide' ? 'bg-green-500' :
                             etape.statut === 'rejete' ? 'bg-red-500' :
                             'bg-yellow-500'
                           }`} />
-                          <Badge variant="outline">{ETAPE_LABELS[etape.type_etape]}</Badge>
+                          <Badge variant="outline">{ETAPE_LABELS[etape.type_etape] || etape.type_etape}</Badge>
                           <span className="text-sm text-muted-foreground">
-                            {format(new Date(etape.created_at), "dd/MM/yyyy", { locale: fr })}
+                            {format(new Date(etape.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
                           </span>
+                          <Badge variant={etape.statut === 'valide' ? 'default' : etape.statut === 'rejete' ? 'destructive' : 'secondary'} className="ml-auto">
+                            {etape.statut === 'valide' ? 'Validé' : etape.statut === 'rejete' ? 'Rejeté' : 'En cours'}
+                          </Badge>
                           {etape.montant > 0 && (
-                            <span className="ml-auto font-medium">{formatMontant(etape.montant)}</span>
+                            <span className="font-medium">{formatMontant(etape.montant)}</span>
                           )}
                         </div>
                       ))}
