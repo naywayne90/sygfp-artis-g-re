@@ -14,6 +14,7 @@ import { Plus, Edit, Archive, RotateCcw, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImportExportButtons } from "../referentiel/ImportExportButtons";
 import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
+import { TabHelpSection } from "./TabHelpSection";
 
 type PlanComptable = {
   id: string;
@@ -246,6 +247,7 @@ export default function PlanComptableSYSCOTab() {
         </div>
       </CardHeader>
       <CardContent>
+        <TabHelpSection tabKey="sysco" />
         <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

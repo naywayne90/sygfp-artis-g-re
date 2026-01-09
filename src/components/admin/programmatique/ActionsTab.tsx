@@ -14,6 +14,7 @@ import { Plus, Edit, Archive, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImportExportButtons } from "../referentiel/ImportExportButtons";
 import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
+import { TabHelpSection } from "./TabHelpSection";
 
 type Action = {
   id: string;
@@ -250,6 +251,7 @@ export default function ActionsTab() {
         </div>
       </CardHeader>
       <CardContent>
+        <TabHelpSection tabKey="actions" />
         <div className="rounded-md border">
           <Table>
             <TableHeader>

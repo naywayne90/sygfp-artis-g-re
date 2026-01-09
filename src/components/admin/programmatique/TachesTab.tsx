@@ -14,6 +14,7 @@ import { Plus, Edit, Archive, RotateCcw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ImportExportButtons } from "../referentiel/ImportExportButtons";
 import { useReferentielImportExport } from "@/hooks/useReferentielImportExport";
+import { TabHelpSection } from "./TabHelpSection";
 
 type Tache = {
   id: string;
@@ -218,6 +219,7 @@ export default function TachesTab() {
         </div>
       </CardHeader>
       <CardContent>
+        <TabHelpSection tabKey="taches" />
         <div className="rounded-md border">
           <Table>
             <TableHeader>
