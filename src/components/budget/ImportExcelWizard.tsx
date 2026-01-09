@@ -5,11 +5,12 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Upload, 
   FileSpreadsheet, 
@@ -25,12 +26,15 @@ import {
   Plus,
   RefreshCw,
   Info,
+  Shield,
+  Eye,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useImportJobs } from "@/hooks/useImportJobs";
 import { useARTIImport, ARTIParsedRow } from "@/hooks/useARTIImport";
-import { Json } from "@/integrations/supabase/types";
+import logoArti from "@/assets/logo-arti.jpg";
 
 interface ImportExcelWizardProps {
   open: boolean;
@@ -38,28 +42,32 @@ interface ImportExcelWizardProps {
   onImportComplete?: () => void;
 }
 
-type WizardStep = "upload" | "preview" | "validate";
+type WizardStep = "exercice" | "detect" | "preview" | "confirm";
 
-const STEPS: { id: WizardStep; title: string; description: string }[] = [
-  { id: "upload", title: "Téléchargement", description: "Charger le fichier Excel" },
-  { id: "preview", title: "Aperçu & Erreurs", description: "Vérifier les données" },
-  { id: "validate", title: "Validation", description: "Confirmer l'import" },
+const STEPS: { id: WizardStep; title: string; description: string; icon: React.ReactNode }[] = [
+  { id: "exercice", title: "Exercice & Fichier", description: "Charger le fichier Excel", icon: <Upload className="h-4 w-4" /> },
+  { id: "detect", title: "Détection", description: "Analyse automatique", icon: <Settings2 className="h-4 w-4" /> },
+  { id: "preview", title: "Prévisualisation", description: "Vérifier les données", icon: <Eye className="h-4 w-4" /> },
+  { id: "confirm", title: "Confirmation", description: "Valider l'import", icon: <Shield className="h-4 w-4" /> },
 ];
 
 export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: ImportExcelWizardProps) {
-  const { exercice } = useExercice();
+  const { exercice: contextExercice } = useExercice();
   const {
     currentJob,
     createImportJob,
     uploadFile,
     markJobFailed,
-    exportErrors,
   } = useImportJobs();
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
 
-  const [step, setStep] = useState<WizardStep>("upload");
+  // Step 1: Exercice & File
+  const [selectedExercice, setSelectedExercice] = useState<number>(contextExercice);
   const [file, setFile] = useState<File | null>(null);
+  
+  // Step 2: Detection results
+  const [step, setStep] = useState<WizardStep>("exercice");
   const [parsedRows, setParsedRows] = useState<ARTIParsedRow[]>([]);
   const [parseInfo, setParseInfo] = useState<{
     sheetUsed: string;
@@ -69,17 +77,23 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     allSheets: string[];
     stats: { total: number; ok: number; warning: number; error: number; new: number; update: number };
   } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "ok" | "error" | "warning" | "new" | "update">("all");
+  
+  // Step 3: Preview filter
+  const [statusFilter, setStatusFilter] = useState<"all" | "ok" | "error" | "warning" | "new" | "update" | "duplicate">("all");
+  
+  // Step 4: Import options - SAFE MODE by default
+  const [safeMode, setSafeMode] = useState(true); // Never replace existing lines
   const [isProcessing, setIsProcessing] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
-  const [importStats, setImportStats] = useState<{ inserted: number; updated: number; errors: number } | null>(null);
+  const [importStats, setImportStats] = useState<{ inserted: number; updated: number; skipped: number; errors: number } | null>(null);
 
   const resetWizard = useCallback(() => {
-    setStep("upload");
+    setStep("exercice");
     setFile(null);
     setParsedRows([]);
     setParseInfo(null);
     setStatusFilter("all");
+    setSafeMode(true);
     setIsProcessing(false);
     setImportComplete(false);
     setImportStats(null);
@@ -90,35 +104,40 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     onOpenChange(false);
   }, [resetWizard, onOpenChange]);
 
+  // Step 1: File selection
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    // Validate file type
     if (!selectedFile.name.endsWith(".xlsx") && !selectedFile.name.endsWith(".xls")) {
       toast.error("Seuls les fichiers .xlsx et .xls sont acceptés");
       return;
     }
 
-    // Validate file size (20 MB)
     if (selectedFile.size > 20 * 1024 * 1024) {
       toast.error("Le fichier ne doit pas dépasser 20 Mo");
       return;
     }
 
     setFile(selectedFile);
+  }, []);
+
+  // Step 2: Auto-detection and parsing
+  const handleDetection = useCallback(async () => {
+    if (!file) return;
+
     setIsProcessing(true);
+    setStep("detect");
 
     try {
-      // Create import job
-      const job = await createImportJob("budget_structure", exercice, selectedFile.name);
-      if (!job) throw new Error("Failed to create import job");
+      // Create import job for audit trail
+      const job = await createImportJob("budget_structure", selectedExercice, file.name);
+      if (!job) throw new Error("Échec de création du job d'import");
 
-      // Upload file to storage
-      await uploadFile(job.id, selectedFile);
+      await uploadFile(job.id, file);
 
-      // Parse with ARTI format
-      const result = await parseARTIExcel(selectedFile, exercice);
+      // Parse with ARTI format - prioritizes "Groupé (2)" sheet
+      const result = await parseARTIExcel(file, selectedExercice);
 
       setParsedRows(result.rows);
       setParseInfo({
@@ -138,21 +157,31 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       if (currentJob) {
         await markJobFailed(currentJob.id, String(error));
       }
+      setStep("exercice");
     } finally {
       setIsProcessing(false);
     }
-  }, [exercice, createImportJob, uploadFile, parseARTIExcel, markJobFailed, currentJob]);
+  }, [file, selectedExercice, createImportJob, uploadFile, parseARTIExcel, markJobFailed, currentJob]);
 
+  // Step 4: Execute import
   const handleImport = useCallback(async () => {
     if (!currentJob) return;
 
     setIsProcessing(true);
     try {
-      const result = await executeARTIImport(parsedRows, exercice, currentJob.id);
+      // Filter rows based on SAFE mode
+      const rowsToImport = safeMode 
+        ? parsedRows.filter(r => r.decision === "NEW" && r.isValid) // Only new lines in SAFE mode
+        : parsedRows.filter(r => r.isValid); // All valid lines otherwise
+
+      const result = await executeARTIImport(rowsToImport, selectedExercice, currentJob.id);
+      
+      const skipped = safeMode ? parsedRows.filter(r => r.decision === "UPDATE").length : 0;
       
       setImportStats({
         inserted: result.inserted,
         updated: result.updated,
+        skipped,
         errors: result.errors,
       });
       setImportComplete(true);
@@ -160,17 +189,19 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       if (result.errors === 0 && onImportComplete) {
         onImportComplete();
       }
+
+      toast.success(`Import terminé: ${result.inserted} créée(s), ${result.updated} mise(s) à jour`);
     } catch (error) {
       toast.error(`Erreur lors de l'import: ${String(error)}`);
     } finally {
       setIsProcessing(false);
     }
-  }, [currentJob, parsedRows, exercice, executeARTIImport, onImportComplete]);
+  }, [currentJob, parsedRows, selectedExercice, safeMode, executeARTIImport, onImportComplete]);
 
+  // Export errors
   const handleExportErrors = useCallback(() => {
     const errorRows = parsedRows.filter(r => !r.isValid || r.warnings.length > 0);
     
-    // Build CSV
     const headers = ["Ligne", "Statut", "Décision", "Code", "Libellé", "Montant", "OS", "Direction", "NBE", "Erreurs", "Avertissements"];
     const csvRows = errorRows.map(row => [
       row.rowIndex,
@@ -191,23 +222,14 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `rapport_erreurs_import_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `rapport_erreurs_import_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     
     toast.success("Rapport d'erreurs exporté");
-  }, [parsedRows]);
+  }, [parsedRows, selectedExercice]);
 
-  const filteredRows = parsedRows.filter((row) => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "ok") return row.isValid && row.warnings.length === 0;
-    if (statusFilter === "warning") return row.isValid && row.warnings.length > 0;
-    if (statusFilter === "error") return !row.isValid;
-    if (statusFilter === "new") return row.decision === "NEW";
-    if (statusFilter === "update") return row.decision === "UPDATE";
-    return true;
-  });
-
+  // Computed stats
   const stats = parseInfo?.stats || {
     total: parsedRows.length,
     ok: parsedRows.filter(r => r.isValid && r.warnings.length === 0).length,
@@ -217,157 +239,218 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     update: parsedRows.filter(r => r.decision === "UPDATE").length,
   };
 
-  const progressPercent = step === "upload" ? 33 : step === "preview" ? 66 : 100;
+  const duplicates = stats.update;
 
-  const renderUploadStep = () => (
+  const filteredRows = parsedRows.filter((row) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "ok") return row.isValid && row.warnings.length === 0;
+    if (statusFilter === "warning") return row.isValid && row.warnings.length > 0;
+    if (statusFilter === "error") return !row.isValid;
+    if (statusFilter === "new") return row.decision === "NEW";
+    if (statusFilter === "update" || statusFilter === "duplicate") return row.decision === "UPDATE";
+    return true;
+  });
+
+  const stepIndex = STEPS.findIndex(s => s.id === step);
+  const progressPercent = ((stepIndex + 1) / STEPS.length) * 100;
+
+  // Available years
+  const currentYear = new Date().getFullYear();
+  const availableYears = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
+
+  // ==================== STEP RENDERERS ====================
+
+  const renderExerciceStep = () => (
     <div className="space-y-6">
-      <Alert>
-        <FileSpreadsheet className="h-4 w-4" />
-        <AlertTitle>Format ARTI accepté</AlertTitle>
-        <AlertDescription>
-          Fichiers Excel (.xlsx, .xls) jusqu'à 20 Mo. L'onglet "Groupé (2)" sera priorisé.
-          Les codes seront préservés comme texte (zéros conservés: "001", "02").
-        </AlertDescription>
-      </Alert>
-
-      <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
-        <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <Label htmlFor="file-upload" className="cursor-pointer">
-          <span className="text-lg font-medium text-primary hover:underline">
-            Cliquez pour sélectionner un fichier
-          </span>
-          <p className="text-sm text-muted-foreground mt-2">
-            ou glissez-déposez votre fichier Excel ARTI ici
-          </p>
-        </Label>
-        <Input
-          id="file-upload"
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={handleFileSelect}
-          disabled={isProcessing}
-        />
+      {/* Header with ARTI branding */}
+      <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg text-white">
+        <img src={logoArti} alt="ARTI" className="h-12 w-12 rounded-lg object-cover" />
+        <div>
+          <h3 className="font-semibold text-lg">Import Structure Budgétaire ARTI</h3>
+          <p className="text-blue-100 text-sm">Assistant d'importation Excel en 4 étapes</p>
+        </div>
       </div>
 
-      {isProcessing && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Analyse du fichier ARTI en cours...</span>
-          </div>
-          <Progress value={50} />
-        </div>
-      )}
+      {/* Exercise selection */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+            Choisir l'exercice budgétaire
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select value={String(selectedExercice)} onValueChange={(v) => setSelectedExercice(Number(v))}>
+            <SelectTrigger className="w-full max-w-xs">
+              <SelectValue placeholder="Sélectionner l'exercice" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableYears.map(year => (
+                <SelectItem key={year} value={String(year)}>
+                  Exercice {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-      {file && !isProcessing && (
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-3">
+      {/* File upload */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+            Charger le fichier Excel
+          </CardTitle>
+          <CardDescription>
+            Fichiers .xlsx ou .xls jusqu'à 20 Mo
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+            <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+            <Label htmlFor="file-upload" className="cursor-pointer">
+              <span className="text-primary hover:underline font-medium">
+                Cliquez pour sélectionner un fichier
+              </span>
+              <p className="text-sm text-muted-foreground mt-1">
+                ou glissez-déposez votre fichier Excel ici
+              </p>
+            </Label>
+            <Input
+              id="file-upload"
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleFileSelect}
+              disabled={isProcessing}
+            />
+          </div>
+
+          {file && (
+            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
               <FileSpreadsheet className="h-8 w-8 text-green-600" />
-              <div>
+              <div className="flex-1">
                 <p className="font-medium">{file.name}</p>
                 <p className="text-sm text-muted-foreground">
                   {(file.size / 1024 / 1024).toFixed(2)} Mo
                 </p>
               </div>
+              <Badge variant="secondary">Prêt</Badge>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="bg-muted/50 rounded-lg p-4">
-        <h4 className="font-medium flex items-center gap-2 mb-2">
-          <Info className="h-4 w-4" />
-          Colonnes attendues (format ARTI)
-        </h4>
-        <ul className="text-sm text-muted-foreground space-y-1 grid grid-cols-2 gap-x-4">
-          <li>• N° imputation</li>
-          <li>• OS (Objectif Stratégique)</li>
-          <li>• ACTIVITE</li>
-          <li>• SOUS ACTIVITE</li>
-          <li>• LIB_PROJET</li>
-          <li>• DIRECTION</li>
-          <li>• NATURE DEPENSE</li>
-          <li>• NATURE ECO (NBE)</li>
-          <li>• MONTANT</li>
-        </ul>
-      </div>
+      {/* Info about expected format */}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertTitle>Format attendu (ARTI)</AlertTitle>
+        <AlertDescription>
+          <p className="mb-2">L'assistant recherchera automatiquement l'onglet <strong>"Groupé (2)"</strong> en priorité, sinon <strong>"Feuil3"</strong>.</p>
+          <div className="grid grid-cols-2 gap-x-4 text-sm">
+            <div>• OS (2 chiffres)</div>
+            <div>• Action (2 chiffres)</div>
+            <div>• Activité (3 chiffres)</div>
+            <div>• Sous-Activité (2 chiffres)</div>
+            <div>• Direction (2 chiffres)</div>
+            <div>• Nature Dépense (1 chiffre)</div>
+            <div>• NBE (6 chiffres)</div>
+            <div>• Montant</div>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            L'imputation (18 chiffres) sera recalculée automatiquement pour éviter les erreurs de précision Excel.
+          </p>
+        </AlertDescription>
+      </Alert>
+    </div>
+  );
+
+  const renderDetectStep = () => (
+    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+      <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      <h3 className="text-lg font-medium">Analyse du fichier en cours...</h3>
+      <p className="text-muted-foreground text-center max-w-md">
+        Détection automatique de l'onglet principal, mapping des colonnes et validation des données.
+      </p>
+      <Progress value={50} className="w-64" />
     </div>
   );
 
   const renderPreviewStep = () => (
     <div className="space-y-4">
-      {/* Sheet info */}
+      {/* Detection result */}
       {parseInfo && (
-        <Alert>
-          <FileSpreadsheet className="h-4 w-4" />
-          <AlertTitle>Onglet utilisé: {parseInfo.sheetUsed}</AlertTitle>
-          <AlertDescription>
-            {parseInfo.sheetReason}. 
+        <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
+          <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-800 dark:text-blue-200">
+            Onglet détecté: {parseInfo.sheetUsed}
+          </AlertTitle>
+          <AlertDescription className="text-blue-700 dark:text-blue-300">
+            {parseInfo.sheetReason}
             {parseInfo.allSheets.length > 1 && (
-              <span className="text-muted-foreground ml-1">
-                (Onglets disponibles: {parseInfo.allSheets.join(", ")})
+              <span className="block text-sm mt-1">
+                Autres onglets disponibles: {parseInfo.allSheets.filter(s => s !== parseInfo.sheetUsed).join(", ")}
               </span>
             )}
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Stats */}
+      {/* Stats cards */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
         <Card 
-          className={`cursor-pointer hover:border-primary ${statusFilter === "all" ? "border-primary" : ""}`}
+          className={`cursor-pointer hover:border-primary transition-colors ${statusFilter === "all" ? "border-primary ring-1 ring-primary" : ""}`}
           onClick={() => setStatusFilter("all")}
         >
           <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold">{stats.total}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
             <div className="text-xs text-muted-foreground">Total</div>
           </CardContent>
         </Card>
         <Card 
-          className={`cursor-pointer hover:border-green-500 ${statusFilter === "ok" ? "border-green-500" : ""}`}
+          className={`cursor-pointer hover:border-green-500 transition-colors ${statusFilter === "ok" ? "border-green-500 ring-1 ring-green-500" : ""}`}
           onClick={() => setStatusFilter("ok")}
         >
           <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold text-green-600">{stats.ok}</div>
-            <div className="text-xs text-muted-foreground">OK</div>
+            <div className="text-2xl font-bold text-green-600">{stats.ok}</div>
+            <div className="text-xs text-muted-foreground">Valides</div>
           </CardContent>
         </Card>
         <Card 
-          className={`cursor-pointer hover:border-yellow-500 ${statusFilter === "warning" ? "border-yellow-500" : ""}`}
+          className={`cursor-pointer hover:border-blue-500 transition-colors ${statusFilter === "new" ? "border-blue-500 ring-1 ring-blue-500" : ""}`}
+          onClick={() => setStatusFilter("new")}
+        >
+          <CardContent className="pt-3 pb-2 text-center">
+            <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
+            <div className="text-xs text-muted-foreground">Nouvelles</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer hover:border-orange-500 transition-colors ${statusFilter === "duplicate" ? "border-orange-500 ring-1 ring-orange-500" : ""}`}
+          onClick={() => setStatusFilter("duplicate")}
+        >
+          <CardContent className="pt-3 pb-2 text-center">
+            <div className="text-2xl font-bold text-orange-600">{duplicates}</div>
+            <div className="text-xs text-muted-foreground">Doublons</div>
+          </CardContent>
+        </Card>
+        <Card 
+          className={`cursor-pointer hover:border-yellow-500 transition-colors ${statusFilter === "warning" ? "border-yellow-500 ring-1 ring-yellow-500" : ""}`}
           onClick={() => setStatusFilter("warning")}
         >
           <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold text-yellow-600">{stats.warning}</div>
+            <div className="text-2xl font-bold text-yellow-600">{stats.warning}</div>
             <div className="text-xs text-muted-foreground">Alertes</div>
           </CardContent>
         </Card>
         <Card 
-          className={`cursor-pointer hover:border-destructive ${statusFilter === "error" ? "border-destructive" : ""}`}
+          className={`cursor-pointer hover:border-destructive transition-colors ${statusFilter === "error" ? "border-destructive ring-1 ring-destructive" : ""}`}
           onClick={() => setStatusFilter("error")}
         >
           <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold text-destructive">{stats.error}</div>
-            <div className="text-xs text-muted-foreground">Erreurs</div>
-          </CardContent>
-        </Card>
-        <Card 
-          className={`cursor-pointer hover:border-blue-500 ${statusFilter === "new" ? "border-blue-500" : ""}`}
-          onClick={() => setStatusFilter("new")}
-        >
-          <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold text-blue-600">{stats.new}</div>
-            <div className="text-xs text-muted-foreground">Nouveaux</div>
-          </CardContent>
-        </Card>
-        <Card 
-          className={`cursor-pointer hover:border-orange-500 ${statusFilter === "update" ? "border-orange-500" : ""}`}
-          onClick={() => setStatusFilter("update")}
-        >
-          <CardContent className="pt-3 pb-2 text-center">
-            <div className="text-xl font-bold text-orange-600">{stats.update}</div>
-            <div className="text-xs text-muted-foreground">Mises à jour</div>
+            <div className="text-2xl font-bold text-destructive">{stats.error}</div>
+            <div className="text-xs text-muted-foreground">Invalides</div>
           </CardContent>
         </Card>
       </div>
@@ -377,72 +460,65 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         <div className="flex justify-end">
           <Button variant="outline" size="sm" onClick={handleExportErrors}>
             <Download className="h-4 w-4 mr-2" />
-            Télécharger rapport d'erreurs (CSV)
+            Télécharger rapport (CSV)
           </Button>
         </div>
       )}
 
-      {/* Data table */}
+      {/* Preview table - first 50 lines */}
       <Card>
         <CardHeader className="py-3">
-          <CardTitle className="text-base">Aperçu des données ({filteredRows.length} lignes)</CardTitle>
+          <CardTitle className="text-base flex items-center justify-between">
+            <span>Aperçu des données (50 premières lignes)</span>
+            <Badge variant="outline">{filteredRows.length} / {stats.total}</Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[350px]">
+          <ScrollArea className="h-[300px]">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-14 sticky left-0 bg-background">Ligne</TableHead>
                   <TableHead className="w-20">Décision</TableHead>
-                  <TableHead className="w-20">Statut</TableHead>
-                  <TableHead className="min-w-[160px]">Code</TableHead>
+                  <TableHead className="min-w-[180px]">Code Imputation</TableHead>
                   <TableHead className="min-w-[200px]">Libellé</TableHead>
-                  <TableHead className="text-right min-w-[100px]">Montant</TableHead>
-                  <TableHead className="w-16">OS</TableHead>
-                  <TableHead className="w-20">Direction</TableHead>
+                  <TableHead className="text-right min-w-[120px]">Montant</TableHead>
+                  <TableHead className="w-14">OS</TableHead>
+                  <TableHead className="w-14">Dir</TableHead>
                   <TableHead>Messages</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRows.slice(0, 100).map((row) => (
-                  <TableRow key={row.rowIndex} className={!row.isValid ? "bg-red-50/50 dark:bg-red-950/10" : row.warnings.length > 0 ? "bg-yellow-50/50 dark:bg-yellow-950/10" : ""}>
-                    <TableCell className="font-mono text-xs sticky left-0 bg-background">{row.rowIndex}</TableCell>
+                {filteredRows.slice(0, 50).map((row) => (
+                  <TableRow 
+                    key={row.rowIndex} 
+                    className={
+                      !row.isValid 
+                        ? "bg-red-50/50 dark:bg-red-950/10" 
+                        : row.decision === "UPDATE" 
+                        ? "bg-orange-50/50 dark:bg-orange-950/10"
+                        : row.warnings.length > 0 
+                        ? "bg-yellow-50/50 dark:bg-yellow-950/10" 
+                        : ""
+                    }
+                  >
+                    <TableCell className="font-mono text-xs sticky left-0 bg-inherit">{row.rowIndex}</TableCell>
                     <TableCell>
                       {row.decision === "NEW" && (
-                        <Badge variant="outline" className="text-blue-600 border-blue-600 gap-1">
+                        <Badge variant="outline" className="text-blue-600 border-blue-600 gap-1 text-xs">
                           <Plus className="h-3 w-3" />
-                          NEW
+                          Créer
                         </Badge>
                       )}
                       {row.decision === "UPDATE" && (
-                        <Badge variant="outline" className="text-orange-600 border-orange-600 gap-1">
+                        <Badge variant="outline" className="text-orange-600 border-orange-600 gap-1 text-xs">
                           <RefreshCw className="h-3 w-3" />
-                          MAJ
+                          Doublon
                         </Badge>
                       )}
                       {row.decision === "ERROR" && (
-                        <Badge variant="destructive" className="gap-1">
+                        <Badge variant="destructive" className="gap-1 text-xs">
                           <XCircle className="h-3 w-3" />
-                          ERR
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {row.isValid ? (
-                        row.warnings.length > 0 ? (
-                          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            Alerte
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            OK
-                          </Badge>
-                        )
-                      ) : (
-                        <Badge variant="destructive">
-                          <XCircle className="h-3 w-3 mr-1" />
                           Erreur
                         </Badge>
                       )}
@@ -454,20 +530,16 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                       {row.normalized?.label || row.raw.libelle || <span className="text-muted-foreground italic">vide</span>}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm">
-                      {row.normalized?.dotation_initiale?.toLocaleString("fr-FR") || row.raw.montant || "—"}
+                      {row.normalized?.dotation_initiale?.toLocaleString("fr-FR") || row.raw.montant || "—"} FCFA
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {row.raw.os || "—"}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {row.raw.direction || "—"}
-                    </TableCell>
-                    <TableCell className="text-xs max-w-[200px]">
+                    <TableCell className="font-mono text-xs">{row.raw.os || "—"}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.raw.direction || "—"}</TableCell>
+                    <TableCell className="text-xs max-w-[180px]">
                       {row.errors.length > 0 && (
-                        <span className="text-destructive">{row.errors.join("; ")}</span>
+                        <span className="text-destructive block">{row.errors[0]}</span>
                       )}
                       {row.warnings.length > 0 && (
-                        <span className="text-yellow-600">{row.errors.length > 0 ? " | " : ""}{row.warnings.join("; ")}</span>
+                        <span className="text-yellow-600 block">{row.warnings[0]}</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -475,24 +547,28 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               </TableBody>
             </Table>
           </ScrollArea>
-          {filteredRows.length > 100 && (
+          {filteredRows.length > 50 && (
             <p className="text-sm text-muted-foreground text-center py-2 border-t">
-              ... et {filteredRows.length - 100} autres lignes
+              ... et {filteredRows.length - 50} autres lignes
             </p>
           )}
         </CardContent>
       </Card>
 
-      {/* Mapping info */}
+      {/* Column mapping info */}
       {parseInfo && (
         <Card>
           <CardHeader className="py-3">
-            <CardTitle className="text-sm">Colonnes détectées</CardTitle>
+            <CardTitle className="text-sm">Colonnes détectées automatiquement</CardTitle>
           </CardHeader>
           <CardContent className="py-2">
             <div className="flex flex-wrap gap-2">
               {Object.entries(parseInfo.mapping).map(([key, value]) => (
-                <Badge key={key} variant={value ? "secondary" : "outline"} className={!value ? "text-muted-foreground" : ""}>
+                <Badge 
+                  key={key} 
+                  variant={value ? "secondary" : "outline"} 
+                  className={!value ? "text-muted-foreground border-dashed" : ""}
+                >
                   {key}: {value || "non mappé"}
                 </Badge>
               ))}
@@ -503,22 +579,58 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     </div>
   );
 
-  const renderValidateStep = () => (
+  const renderConfirmStep = () => (
     <div className="space-y-6">
       {!importComplete ? (
         <>
-          <Alert>
-            <Check className="h-4 w-4" />
-            <AlertTitle>Prêt pour l'import</AlertTitle>
-            <AlertDescription>
-              {stats.new + stats.update} ligne(s) seront importées ({stats.new} nouvelles, {stats.update} mises à jour).
-              {stats.error > 0 && ` ${stats.error} ligne(s) avec erreurs seront ignorées.`}
-            </AlertDescription>
-          </Alert>
+          {/* SAFE mode toggle */}
+          <Card className={safeMode ? "border-green-500 bg-green-50/50 dark:bg-green-950/10" : "border-orange-500 bg-orange-50/50 dark:bg-orange-950/10"}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Shield className={`h-5 w-5 ${safeMode ? "text-green-600" : "text-orange-600"}`} />
+                Mode d'import
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="safe-mode" className="text-base font-medium">
+                    Mode SAFE (recommandé)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {safeMode 
+                      ? "Ajouter uniquement les nouvelles imputations, ne jamais remplacer les existantes"
+                      : "Attention: les lignes existantes seront mises à jour avec les nouvelles valeurs"
+                    }
+                  </p>
+                </div>
+                <Switch
+                  id="safe-mode"
+                  checked={safeMode}
+                  onCheckedChange={setSafeMode}
+                />
+              </div>
+              
+              {!safeMode && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Attention</AlertTitle>
+                  <AlertDescription>
+                    En désactivant le mode SAFE, {duplicates} ligne(s) existante(s) seront modifiées.
+                    Cette action est irréversible.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
 
+          {/* Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Résumé de l'import</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5" />
+                Résumé de l'import
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between py-2 border-b">
@@ -526,39 +638,56 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                 <span className="font-medium">{file?.name}</span>
               </div>
               <div className="flex justify-between py-2 border-b">
-                <span>Onglet</span>
+                <span>Onglet source</span>
                 <span className="font-medium">{parseInfo?.sheetUsed}</span>
               </div>
               <div className="flex justify-between py-2 border-b">
-                <span>Exercice</span>
-                <span className="font-medium">{exercice}</span>
+                <span>Exercice cible</span>
+                <span className="font-medium">{selectedExercice}</span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="flex items-center gap-2">
                   <Plus className="h-4 w-4 text-blue-600" />
-                  Nouvelles lignes
+                  Nouvelles lignes à créer
                 </span>
                 <span className="font-medium text-blue-600">{stats.new}</span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="flex items-center gap-2">
                   <RefreshCw className="h-4 w-4 text-orange-600" />
-                  Mises à jour
+                  Doublons détectés
                 </span>
-                <span className="font-medium text-orange-600">{stats.update}</span>
+                <span className={`font-medium ${safeMode ? "text-muted-foreground line-through" : "text-orange-600"}`}>
+                  {duplicates} {safeMode && "(ignorés)"}
+                </span>
               </div>
               <div className="flex justify-between py-2">
-                <span>Lignes ignorées (erreurs)</span>
-                <span className="font-medium text-destructive">{stats.error}</span>
+                <span className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-destructive" />
+                  Lignes invalides
+                </span>
+                <span className="font-medium text-muted-foreground">{stats.error} (ignorées)</span>
               </div>
             </CardContent>
           </Card>
 
+          {/* Audit notice */}
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Traçabilité complète</AlertTitle>
+            <AlertDescription>
+              Toutes les actions seront enregistrées dans le Journal d'Audit. 
+              Aucune suppression ni reset ne sera effectué.
+            </AlertDescription>
+          </Alert>
+
+          {/* Import button */}
           <div className="flex justify-center">
             <Button 
               size="lg" 
               onClick={handleImport} 
-              disabled={isProcessing || (stats.new + stats.update) === 0}
+              disabled={isProcessing || (safeMode ? stats.new === 0 : (stats.new + stats.update) === 0)}
+              className="min-w-[200px]"
             >
               {isProcessing ? (
                 <>
@@ -568,31 +697,49 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
               ) : (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  Valider l'import ({stats.new + stats.update} lignes)
+                  Valider l'import ({safeMode ? stats.new : stats.new + stats.update} ligne{(safeMode ? stats.new : stats.new + stats.update) > 1 ? "s" : ""})
                 </>
               )}
             </Button>
           </div>
         </>
       ) : (
-        <div className="text-center space-y-6">
+        /* Import complete */
+        <div className="text-center space-y-6 py-8">
           <div className="flex justify-center">
             {importStats?.errors === 0 ? (
-              <CheckCircle2 className="h-16 w-16 text-green-600" />
+              <CheckCircle2 className="h-20 w-20 text-green-600" />
             ) : (
-              <AlertTriangle className="h-16 w-16 text-yellow-600" />
+              <AlertTriangle className="h-20 w-20 text-yellow-600" />
             )}
           </div>
           
           <div>
-            <h3 className="text-xl font-semibold">
+            <h3 className="text-2xl font-semibold">
               {importStats?.errors === 0 ? "Import réussi !" : "Import terminé avec des erreurs"}
             </h3>
             <p className="text-muted-foreground mt-2">
-              {importStats?.inserted} nouvelle(s) ligne(s), {importStats?.updated} mise(s) à jour
+              {importStats?.inserted} nouvelle(s) ligne(s) créée(s)
+              {importStats?.updated ? `, ${importStats.updated} mise(s) à jour` : ""}
+              {importStats?.skipped ? `, ${importStats.skipped} doublon(s) ignoré(s)` : ""}
               {importStats?.errors ? `, ${importStats.errors} erreur(s)` : ""}
             </p>
           </div>
+
+          <Card className="max-w-md mx-auto">
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{importStats?.inserted}</div>
+                  <div className="text-sm text-muted-foreground">Créées</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">{importStats?.updated}</div>
+                  <div className="text-sm text-muted-foreground">Mises à jour</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="flex justify-center gap-4">
             <Button variant="outline" onClick={resetWizard}>
@@ -611,44 +758,40 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5" />
-            Import Excel ARTI - Structure Budgétaire (Exercice {exercice})
+          <DialogTitle className="flex items-center gap-3">
+            <img src={logoArti} alt="ARTI" className="h-8 w-8 rounded object-cover" />
+            <span>Import Structure Budgétaire — Exercice {selectedExercice}</span>
           </DialogTitle>
         </DialogHeader>
 
-        {/* Progress */}
-        <div className="space-y-4">
-          <div className="flex justify-between text-sm">
+        {/* Progress stepper */}
+        <div className="space-y-3">
+          <div className="flex justify-between">
             {STEPS.map((s, idx) => (
               <div
                 key={s.id}
                 className={`flex-1 text-center ${
                   s.id === step
-                    ? "text-primary font-medium"
-                    : STEPS.findIndex(st => st.id === step) > idx
+                    ? "text-primary"
+                    : stepIndex > idx
                     ? "text-muted-foreground"
                     : "text-muted-foreground/50"
                 }`}
               >
                 <div className="flex items-center justify-center mb-1">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      STEPS.findIndex(st => st.id === step) > idx
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                      stepIndex > idx
                         ? "bg-primary text-primary-foreground"
                         : s.id === step
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
-                    {STEPS.findIndex(st => st.id === step) > idx ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      idx + 1
-                    )}
+                    {stepIndex > idx ? <Check className="h-4 w-4" /> : s.icon}
                   </div>
                 </div>
-                <p className="font-medium hidden sm:block">{s.title}</p>
+                <p className="text-xs font-medium hidden sm:block">{s.title}</p>
               </div>
             ))}
           </div>
@@ -658,33 +801,44 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         {/* Content */}
         <ScrollArea className="flex-1 pr-4">
           <div className="py-4">
-            {step === "upload" && renderUploadStep()}
+            {step === "exercice" && renderExerciceStep()}
+            {step === "detect" && renderDetectStep()}
             {step === "preview" && renderPreviewStep()}
-            {step === "validate" && renderValidateStep()}
+            {step === "confirm" && renderConfirmStep()}
           </div>
         </ScrollArea>
 
         {/* Navigation */}
-        {!importComplete && (
+        {!importComplete && step !== "detect" && (
           <div className="flex justify-between pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => {
-                if (step === "preview") setStep("upload");
-                else if (step === "validate") setStep("preview");
+                if (step === "preview") setStep("exercice");
+                else if (step === "confirm") setStep("preview");
               }}
-              disabled={step === "upload" || isProcessing}
+              disabled={step === "exercice" || isProcessing}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Précédent
             </Button>
 
+            {step === "exercice" && (
+              <Button
+                onClick={handleDetection}
+                disabled={!file || isProcessing}
+              >
+                Analyser le fichier
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+
             {step === "preview" && (
               <Button
-                onClick={() => setStep("validate")}
+                onClick={() => setStep("confirm")}
                 disabled={isProcessing || (stats.new + stats.update) === 0}
               >
-                Suivant
+                Continuer
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             )}
