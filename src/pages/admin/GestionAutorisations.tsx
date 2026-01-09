@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Shield, Eye, Plus, Pencil, CheckCircle, XCircle, RotateCcw, Users } from "lucide-react";
+import { Save, Shield, Eye, Plus, Pencil, CheckCircle, XCircle, RotateCcw, Users, HelpCircle, Lock, Grid3X3, AlertTriangle, Layers } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type CustomRole = {
   id: string;
@@ -210,6 +212,8 @@ export default function GestionAutorisations() {
     return { total, granted };
   }, [roles, actions, permissions]);
 
+  const [helpOpen, setHelpOpen] = useState(true);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -235,6 +239,129 @@ export default function GestionAutorisations() {
           </Button>
         </div>
       </div>
+
+      {/* Section d'aide explicative */}
+      <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
+        <Alert className="border-primary/30 bg-primary/5">
+          <HelpCircle className="h-5 w-5 text-primary" />
+          <AlertTitle className="flex items-center justify-between">
+            <span className="text-lg font-semibold">Aide – Module Autorisations d'Accès</span>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {helpOpen ? "Réduire" : "Afficher"}
+              </Button>
+            </CollapsibleTrigger>
+          </AlertTitle>
+          <CollapsibleContent>
+            <AlertDescription className="mt-4 space-y-4">
+              {/* Introduction */}
+              <div className="p-4 bg-background rounded-lg border">
+                <p className="text-sm leading-relaxed">
+                  Ce module permet de <strong>configurer les permissions</strong> accordées à chaque rôle 
+                  dans SYGFP via une matrice visuelle. Chaque ligne représente une action (voir, créer, 
+                  modifier, valider...) et chaque colonne un rôle. Cochez les cases pour accorder les 
+                  droits correspondants. Les modifications sont appliquées immédiatement après enregistrement.
+                </p>
+              </div>
+
+              {/* Concepts clés */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Grid3X3 className="h-4 w-4" />
+                    <span>Matrice Rôle × Permission</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    La matrice croise les <strong>rôles</strong> (en colonnes) avec les 
+                    <strong> actions</strong> (en lignes). Une case cochée signifie que le rôle 
+                    dispose de cette permission.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Layers className="h-4 w-4" />
+                    <span>Catégories de Permissions</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Les permissions sont regroupées par module : <strong>Budget</strong>, 
+                    <strong> Engagement</strong>, <strong>Liquidation</strong>, <strong>Ordonnancement</strong>, 
+                    <strong> Règlement</strong>, <strong>Administration</strong>, <strong>Export</strong>.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Lock className="h-4 w-4" />
+                    <span>Types de Rôles</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Les <strong>rôles système</strong> (ADMIN, CB, DAF...) ont un badge coloré plein. 
+                    Les <strong>rôles personnalisés</strong> ont un badge contour. Tous peuvent recevoir 
+                    des permissions.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Modifications en Attente</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Les cases modifiées sont surlignées en <span className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">jaune</span>. 
+                    Cliquez sur "Enregistrer" pour appliquer les changements ou "Annuler" pour revenir en arrière.
+                  </p>
+                </div>
+              </div>
+
+              {/* Types d'actions */}
+              <div className="p-4 bg-background rounded-lg border space-y-3">
+                <h4 className="font-medium">Types d'actions disponibles</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-blue-500" />
+                    <span><strong>Voir</strong> – Consulter les données</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Plus className="h-4 w-4 text-green-500" />
+                    <span><strong>Créer</strong> – Ajouter de nouvelles entrées</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Pencil className="h-4 w-4 text-orange-500" />
+                    <span><strong>Modifier</strong> – Éditer les données</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    <span><strong>Valider</strong> – Approuver les étapes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4 text-red-500" />
+                    <span><strong>Rejeter</strong> – Refuser une validation</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Pencil className="h-4 w-4 text-purple-500" />
+                    <span><strong>Signer</strong> – Apposer une signature</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Avertissement */}
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Points d'attention
+                </h4>
+                <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-disc">
+                  <li>Le rôle <strong>ADMIN</strong> doit conserver toutes les permissions d'administration.</li>
+                  <li>Utilisez le filtre par module pour naviguer plus facilement dans la matrice.</li>
+                  <li>Les modifications prennent effet immédiatement après enregistrement.</li>
+                  <li>Toutes les modifications sont tracées dans le Journal d'Audit.</li>
+                </ul>
+              </div>
+            </AlertDescription>
+          </CollapsibleContent>
+        </Alert>
+      </Collapsible>
 
       <Card>
         <CardHeader>
