@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, Edit, UserCheck, UserX, Filter } from "lucide-react";
+import { Search, Edit, UserCheck, UserX, Filter, HelpCircle, Users, Shield, Building2, Briefcase, CheckCircle2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type Profile = {
   id: string;
@@ -134,6 +136,8 @@ export default function GestionUtilisateurs() {
     }
   };
 
+  const [helpOpen, setHelpOpen] = useState(true);
+
   return (
     <div className="space-y-6">
       <div>
@@ -142,6 +146,118 @@ export default function GestionUtilisateurs() {
           Gérez les profils utilisateurs, leurs rôles et leurs droits d'accès.
         </p>
       </div>
+
+      {/* Section d'aide explicative */}
+      <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
+        <Alert className="border-primary/30 bg-primary/5">
+          <HelpCircle className="h-5 w-5 text-primary" />
+          <AlertTitle className="flex items-center justify-between">
+            <span className="text-lg font-semibold">Aide – Module Gestion des Utilisateurs</span>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {helpOpen ? "Réduire" : "Afficher"}
+              </Button>
+            </CollapsibleTrigger>
+          </AlertTitle>
+          <CollapsibleContent>
+            <AlertDescription className="mt-4 space-y-4">
+              {/* Introduction */}
+              <div className="p-4 bg-background rounded-lg border">
+                <p className="text-sm leading-relaxed">
+                  Ce module permet de <strong>gérer les comptes utilisateurs</strong> de SYGFP. 
+                  Vous pouvez modifier les informations des utilisateurs, leur attribuer des rôles 
+                  hiérarchiques et fonctionnels, les rattacher à une direction, et activer/désactiver 
+                  leurs accès. La gestion centralisée des utilisateurs assure la traçabilité et la 
+                  sécurité du système.
+                </p>
+              </div>
+
+              {/* Concepts clés */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Users className="h-4 w-4" />
+                    <span>Rôle Hiérarchique</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Définit la position dans l'organigramme : <strong>Agent</strong>, <strong>Chef de Service</strong>, 
+                    <strong> Sous-Directeur</strong>, <strong>Directeur</strong>, ou <strong>DG</strong>. 
+                    Ce rôle détermine les droits de validation et la visibilité des données.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Shield className="h-4 w-4" />
+                    <span>Profil Fonctionnel</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Définit les permissions système : <strong>Admin</strong> (accès total), 
+                    <strong> Validateur</strong> (validation des workflows), <strong>Opérationnel</strong> (saisie), 
+                    <strong> Contrôleur</strong> (contrôle), <strong>Auditeur</strong> (lecture seule).
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Building2 className="h-4 w-4" />
+                    <span>Direction</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Rattache l'utilisateur à une direction métier. Cela limite la visibilité 
+                    aux données de sa direction (sauf pour les profils Admin/Auditeur qui ont 
+                    une vue transversale).
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Briefcase className="h-4 w-4" />
+                    <span>Matricule</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Identifiant unique de l'agent dans l'organisation (ex: MAT-001). 
+                    Utilisé pour la traçabilité dans le journal d'audit et les rapports.
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions disponibles */}
+              <div className="p-4 bg-background rounded-lg border space-y-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  Actions disponibles
+                </h4>
+                <ul className="text-sm text-muted-foreground space-y-2 ml-6 list-disc">
+                  <li>
+                    <strong>Modifier</strong> (icône crayon) : Éditer le matricule, téléphone, direction, 
+                    rôle hiérarchique et profil fonctionnel d'un utilisateur.
+                  </li>
+                  <li>
+                    <strong>Activer/Désactiver</strong> (icône utilisateur) : Un utilisateur désactivé 
+                    ne peut plus se connecter au système. Ses données restent conservées.
+                  </li>
+                  <li>
+                    <strong>Filtrer</strong> : Utilisez la barre de recherche et les filtres par direction 
+                    et rôle pour trouver rapidement un utilisateur.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Bonnes pratiques */}
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2">💡 Bonnes pratiques</h4>
+                <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-disc">
+                  <li>Attribuez le profil "Admin" uniquement aux administrateurs système.</li>
+                  <li>Vérifiez que chaque utilisateur est bien rattaché à sa direction.</li>
+                  <li>Désactivez les comptes des agents ayant quitté l'organisation.</li>
+                  <li>Les modifications sont tracées dans le Journal d'Audit.</li>
+                </ul>
+              </div>
+            </AlertDescription>
+          </CollapsibleContent>
+        </Alert>
+      </Collapsible>
 
       <Card>
         <CardHeader>
