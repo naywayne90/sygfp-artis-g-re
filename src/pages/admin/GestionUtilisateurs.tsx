@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, Edit, UserCheck, UserX, Filter, HelpCircle, Users, Shield, Building2, Briefcase, CheckCircle2 } from "lucide-react";
+import { Search, Edit, UserCheck, UserX, Filter, HelpCircle, Users, Shield, Building2, Briefcase, CheckCircle2, Plus, Loader2, Eye, EyeOff } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -45,6 +45,22 @@ export default function GestionUtilisateurs() {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [editingUser, setEditingUser] = useState<Profile | null>(null);
   const [formData, setFormData] = useState<Partial<Profile>>({});
+  
+  // État pour la création d'utilisateur
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    matricule: "",
+    telephone: "",
+    direction_id: "",
+    role_hierarchique: "Agent",
+    profil_fonctionnel: "Operationnel",
+  });
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users-profiles"],
@@ -133,6 +149,49 @@ export default function GestionUtilisateurs() {
       refetch();
     } catch (error: any) {
       toast.error("Erreur: " + error.message);
+    }
+  };
+
+  // Créer un nouvel utilisateur via edge function
+  const handleCreateUser = async () => {
+    if (!createFormData.email || !createFormData.password || !createFormData.first_name || !createFormData.last_name) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    if (createFormData.password.length < 6) {
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-user", {
+        body: createFormData,
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success(`Utilisateur ${createFormData.first_name} ${createFormData.last_name} créé avec succès`);
+      setIsCreateDialogOpen(false);
+      setCreateFormData({
+        email: "",
+        password: "",
+        first_name: "",
+        last_name: "",
+        matricule: "",
+        telephone: "",
+        direction_id: "",
+        role_hierarchique: "Agent",
+        profil_fonctionnel: "Operationnel",
+      });
+      refetch();
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast.error(error.message || "Erreur lors de la création de l'utilisateur");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -260,11 +319,17 @@ export default function GestionUtilisateurs() {
       </Collapsible>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Liste des Utilisateurs</CardTitle>
-          <CardDescription>
-            {filteredUsers?.length || 0} utilisateur(s) trouvé(s)
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Liste des Utilisateurs</CardTitle>
+            <CardDescription>
+              {filteredUsers?.length || 0} utilisateur(s) trouvé(s)
+            </CardDescription>
+          </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvel utilisateur
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Filtres */}
@@ -470,6 +535,165 @@ export default function GestionUtilisateurs() {
             </Button>
             <Button onClick={handleSave}>
               Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de création */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Créer un nouvel utilisateur</DialogTitle>
+            <DialogDescription>
+              Renseignez les informations du nouvel utilisateur. Un compte sera créé automatiquement.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Email et mot de passe */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-email">Email *</Label>
+                <Input
+                  id="create-email"
+                  type="email"
+                  value={createFormData.email}
+                  onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                  placeholder="utilisateur@arti.ci"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-password">Mot de passe *</Label>
+                <div className="relative">
+                  <Input
+                    id="create-password"
+                    type={showPassword ? "text" : "password"}
+                    value={createFormData.password}
+                    onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+                    placeholder="Min. 6 caractères"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Prénom et nom */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-firstname">Prénom *</Label>
+                <Input
+                  id="create-firstname"
+                  value={createFormData.first_name}
+                  onChange={(e) => setCreateFormData({ ...createFormData, first_name: e.target.value })}
+                  placeholder="Prénom"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-lastname">Nom *</Label>
+                <Input
+                  id="create-lastname"
+                  value={createFormData.last_name}
+                  onChange={(e) => setCreateFormData({ ...createFormData, last_name: e.target.value })}
+                  placeholder="Nom"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Matricule et téléphone */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-matricule">Matricule</Label>
+                <Input
+                  id="create-matricule"
+                  value={createFormData.matricule}
+                  onChange={(e) => setCreateFormData({ ...createFormData, matricule: e.target.value })}
+                  placeholder="MAT-001"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-telephone">Téléphone</Label>
+                <Input
+                  id="create-telephone"
+                  value={createFormData.telephone}
+                  onChange={(e) => setCreateFormData({ ...createFormData, telephone: e.target.value })}
+                  placeholder="+225 07 00 00 00 00"
+                />
+              </div>
+            </div>
+
+            {/* Direction */}
+            <div className="space-y-2">
+              <Label>Direction</Label>
+              <Select
+                value={createFormData.direction_id}
+                onValueChange={(value) => setCreateFormData({ ...createFormData, direction_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  {directions?.map((dir) => (
+                    <SelectItem key={dir.id} value={dir.id}>{dir.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Rôles */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Rôle Hiérarchique</Label>
+                <Select
+                  value={createFormData.role_hierarchique}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, role_hierarchique: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES_HIERARCHIQUES.map((role) => (
+                      <SelectItem key={role} value={role}>{role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Profil Fonctionnel</Label>
+                <Select
+                  value={createFormData.profil_fonctionnel}
+                  onValueChange={(value) => setCreateFormData({ ...createFormData, profil_fonctionnel: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROFILS_FONCTIONNELS.map((profil) => (
+                      <SelectItem key={profil} value={profil}>{profil}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} disabled={isCreating}>
+              Annuler
+            </Button>
+            <Button onClick={handleCreateUser} disabled={isCreating}>
+              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Créer l'utilisateur
             </Button>
           </DialogFooter>
         </DialogContent>
