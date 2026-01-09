@@ -28,6 +28,9 @@ export interface NoteAEF {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // POINT 2: Liaison Note SEF
+  note_sef_id?: string | null;
+  dossier_id?: string | null;
   // New fields for AEF
   type_depense?: string | null;
   justification?: string | null;
@@ -41,6 +44,7 @@ export interface NoteAEF {
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
+  note_sef?: { id: string; numero: string | null; objet: string; dossier_id?: string | null };
 }
 
 export interface BudgetValidationStatus {
@@ -102,6 +106,22 @@ export function useNotesAEF() {
       if (error) throw error;
       return data;
     },
+  });
+
+  // POINT 2: Fetch validated Notes SEF for linking
+  const { data: notesSEFValidees = [] } = useQuery({
+    queryKey: ["notes-sef-validees-for-aef", exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notes_sef")
+        .select("id, numero, objet, direction_id, validated_at")
+        .eq("statut", "valide")
+        .eq("exercice", exercice || new Date().getFullYear())
+        .order("validated_at", { ascending: false });
+      if (error) throw error;
+      return data as { id: string; numero: string | null; objet: string; direction_id: string | null; validated_at: string | null }[];
+    },
+    enabled: !!exercice,
   });
 
   // Fetch beneficiaires (prestataires)
@@ -596,6 +616,7 @@ export function useNotesAEF() {
     beneficiaires,
     budgetLines,
     budgetValidationStatus,
+    notesSEFValidees, // POINT 2: Notes SEF validées pour liaison
     checkBudgetAvailability,
     createNote: createMutation.mutateAsync,
     updateNote: updateMutation.mutateAsync,

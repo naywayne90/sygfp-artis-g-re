@@ -290,14 +290,15 @@ export function useNotesSEF() {
     },
   });
 
-  // Validate note
+  // Validate note - CREATION AUTOMATIQUE DU DOSSIER
   const validateMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: oldNote } = await supabase.from("notes_sef").select("statut").eq("id", noteId).single();
+      const { data: oldNote } = await supabase.from("notes_sef").select("*, direction:directions(sigle)").eq("id", noteId).single();
 
+      // Mise à jour de la Note SEF
       const { data, error } = await supabase
         .from("notes_sef")
         .update({
@@ -311,11 +312,79 @@ export function useNotesSEF() {
 
       if (error) throw error;
 
+      // ========================================
+      // POINT 1: CRÉATION AUTOMATIQUE DU DOSSIER
+      // ========================================
+      
+      // Générer le numéro de dossier au format: ARTI/{ANNEE}/{DIR}/{SEQ}
+      const year = exercice || new Date().getFullYear();
+      const dirSigle = oldNote?.direction?.sigle || "GEN";
+      
+      // Récupérer le prochain numéro de séquence pour les dossiers
+      const { data: seqData, error: seqError } = await supabase.rpc("get_next_sequence", {
+        p_doc_type: "DOSSIER",
+        p_exercice: year,
+        p_direction_code: dirSigle,
+        p_scope: "direction",
+      });
+
+      let numeroDossier = `ARTI/${year}/${dirSigle}/0001`;
+      if (!seqError && seqData && seqData.length > 0) {
+        numeroDossier = seqData[0].full_code;
+      }
+
+      // Créer le dossier
+      const { data: dossier, error: dossierError } = await supabase
+        .from("dossiers")
+        .insert({
+          numero: numeroDossier,
+          objet: oldNote?.objet || data.objet,
+          type_dossier: "SEF",
+          direction_id: oldNote?.direction_id || data.direction_id,
+          demandeur_id: oldNote?.demandeur_id || data.demandeur_id,
+          beneficiaire_id: (oldNote as any)?.beneficiaire_id,
+          note_sef_id: noteId,
+          statut_global: "en_cours",
+          etape_courante: "note_sef",
+          exercice: year,
+          created_by: user.id,
+          montant_estime: 0,
+          montant_engage: 0,
+          montant_liquide: 0,
+          montant_ordonnance: 0,
+          montant_paye: 0,
+        } as any)
+        .select()
+        .single();
+
+      if (dossierError) {
+        console.error("Erreur création dossier:", dossierError);
+        // Ne pas bloquer la validation de la note si le dossier échoue
+      } else if (dossier) {
+        // Mettre à jour la note avec le dossier_id (cast to any for flexibility)
+        await supabase
+          .from("notes_sef")
+          .update({ dossier_id: dossier.id } as any)
+          .eq("id", noteId);
+
+        // Ajouter l'entrée dans dossier_etapes
+        await supabase.from("dossier_etapes").insert({
+          dossier_id: dossier.id,
+          type_etape: "note_sef",
+          reference_id: noteId,
+          reference_numero: data.numero,
+          statut: "valide",
+          montant: 0,
+          created_by: user.id,
+        });
+      }
+
       await supabase.from("notes_sef_history").insert([{
         note_id: noteId,
         action: "validation",
         old_statut: oldNote?.statut,
         new_statut: "valide",
+        commentaire: dossier ? `Dossier ${dossier.numero} créé automatiquement` : undefined,
         performed_by: user.id,
       }]);
 
@@ -323,14 +392,22 @@ export function useNotesSEF() {
         entityType: "note_sef",
         entityId: noteId,
         action: "validate",
-        newValues: { statut: "valide" },
+        newValues: { statut: "valide", dossier_id: dossier?.id },
       });
 
-      return data;
+      return { ...data, dossier };
     },
-    onSuccess: (data) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: `Note ${data.numero} validée avec succès` });
+      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
+      if (result.dossier) {
+        toast({ 
+          title: `Note ${result.numero} validée`, 
+          description: `Dossier ${result.dossier.numero} créé automatiquement` 
+        });
+      } else {
+        toast({ title: `Note ${result.numero} validée avec succès` });
+      }
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
