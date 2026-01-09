@@ -6,13 +6,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Shield } from "lucide-react";
+import { Plus, Edit, Trash2, Shield, HelpCircle, Lock, Palette, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type CustomRole = {
   id: string;
@@ -141,6 +143,8 @@ export default function GestionRoles() {
     }
   };
 
+  const [helpOpen, setHelpOpen] = useState(true);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -155,6 +159,121 @@ export default function GestionRoles() {
           Nouveau Rôle
         </Button>
       </div>
+
+      {/* Section d'aide explicative */}
+      <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
+        <Alert className="border-primary/30 bg-primary/5">
+          <HelpCircle className="h-5 w-5 text-primary" />
+          <AlertTitle className="flex items-center justify-between">
+            <span className="text-lg font-semibold">Aide – Module Profils & Rôles</span>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {helpOpen ? "Réduire" : "Afficher"}
+              </Button>
+            </CollapsibleTrigger>
+          </AlertTitle>
+          <CollapsibleContent>
+            <AlertDescription className="mt-4 space-y-4">
+              {/* Introduction */}
+              <div className="p-4 bg-background rounded-lg border">
+                <p className="text-sm leading-relaxed">
+                  Ce module permet de <strong>configurer les rôles</strong> qui définissent les permissions 
+                  des utilisateurs dans SYGFP. Chaque rôle représente un profil métier avec des droits 
+                  d'accès spécifiques aux différents modules. Les rôles sont ensuite attribués aux 
+                  utilisateurs dans le module "Gestion des Autorisations".
+                </p>
+              </div>
+
+              {/* Types de rôles */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Lock className="h-4 w-4" />
+                    <span>Rôles Système</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Rôles prédéfinis et protégés (ADMIN, CB, DAF, DG, etc.). 
+                    Leur code ne peut pas être modifié et ils ne peuvent pas être supprimés. 
+                    Vous pouvez cependant modifier leur libellé et description.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Shield className="h-4 w-4" />
+                    <span>Rôles Personnalisés</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Rôles créés par l'administrateur pour répondre à des besoins spécifiques. 
+                    Ils peuvent être modifiés ou supprimés à tout moment. 
+                    Exemple : "Responsable Marchés", "Agent Comptable".
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <Palette className="h-4 w-4" />
+                    <span>Code & Couleur</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Le <strong>code</strong> est un identifiant court (ex: ADMIN, CB) utilisé 
+                    dans les règles d'autorisation. La <strong>couleur</strong> permet de 
+                    distinguer visuellement les rôles dans l'interface.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-background rounded-lg border space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-medium">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Statut Actif/Inactif</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Un rôle désactivé n'est plus proposé lors de l'attribution des permissions. 
+                    Les utilisateurs ayant ce rôle conservent leurs droits jusqu'à modification.
+                  </p>
+                </div>
+              </div>
+
+              {/* Rôles système prédéfinis */}
+              <div className="p-4 bg-background rounded-lg border space-y-3">
+                <h4 className="font-medium">Rôles système prédéfinis</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-blue-500 text-blue-500">ADMIN</Badge>
+                    <span className="text-muted-foreground">Administrateur</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-green-500 text-green-500">CB</Badge>
+                    <span className="text-muted-foreground">Contrôleur Budgétaire</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-purple-500 text-purple-500">DAAF</Badge>
+                    <span className="text-muted-foreground">Dir. Admin & Financier</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-orange-500 text-orange-500">DG</Badge>
+                    <span className="text-muted-foreground">Directeur Général</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Avertissement */}
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <h4 className="font-medium text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Points d'attention
+                </h4>
+                <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-disc">
+                  <li>Les codes de rôle doivent être uniques et en majuscules.</li>
+                  <li>La suppression d'un rôle retire les permissions associées aux utilisateurs.</li>
+                  <li>Après création d'un rôle, configurez ses permissions dans "Autorisations".</li>
+                  <li>Les modifications sont tracées dans le Journal d'Audit.</li>
+                </ul>
+              </div>
+            </AlertDescription>
+          </CollapsibleContent>
+        </Alert>
+      </Collapsible>
 
       <Card>
         <CardHeader>
