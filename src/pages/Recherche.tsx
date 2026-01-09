@@ -268,11 +268,19 @@ export default function Recherche() {
                     <Plus className="h-4 w-4 text-green-500" />
                     Créer un nouveau dossier
                   </h4>
-                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
-                    <li>Cliquez sur "Nouveau dossier" pour initier une nouvelle opération</li>
-                    <li>Renseignez l'objet, le bénéficiaire, la direction et le montant estimé</li>
-                    <li>Un numéro unique sera automatiquement attribué</li>
+                  <p className="text-muted-foreground text-xs mb-2">
+                    <strong>Pourquoi créer un dossier ?</strong> Chaque dépense que l'ARTI souhaite effectuer 
+                    doit être formalisée dans un dossier. C'est le point de départ obligatoire qui permet de 
+                    tracer, valider et exécuter la dépense de manière structurée.
+                  </p>
+                  <ul className="text-muted-foreground space-y-1 ml-6 list-disc text-xs">
+                    <li><strong>AEF (Achat/Engagement/Facture)</strong> : Pour l'achat de biens, fournitures et équipements</li>
+                    <li><strong>SEF (Service/Engagement/Facture)</strong> : Pour les prestations de services (consultants, entretien...)</li>
+                    <li><strong>Marché</strong> : Pour les procédures de passation de marchés publics</li>
                   </ul>
+                  <p className="text-muted-foreground text-xs mt-2">
+                    Une fois créé, le dossier suivra automatiquement la chaîne de dépense avec toutes ses étapes de validation.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
