@@ -37,6 +37,7 @@ import { ReglementForm } from "@/components/reglement/ReglementForm";
 import { ReglementList } from "@/components/reglement/ReglementList";
 import { ReglementDetails } from "@/components/reglement/ReglementDetails";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
@@ -95,6 +96,9 @@ export default function Reglements() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={8} />
+
+      {/* Aide contextuelle */}
+      <ModuleHelp {...MODULE_HELP_CONFIG.reglements} />
 
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

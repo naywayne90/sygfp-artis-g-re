@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useDGDashboard } from "@/hooks/useDashboardByRole";
 import { useDashboardAlerts } from "@/hooks/useDashboardAlerts";
 import { 
@@ -12,7 +13,12 @@ import {
   CheckCircle2, 
   Clock, 
   XCircle,
-  Wallet 
+  Wallet,
+  FileText,
+  CreditCard,
+  Receipt,
+  FileCheck,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -150,6 +156,75 @@ export function DashboardDG() {
               <p className="text-xl font-bold">{formatMontant(stats?.budgetPaye || 0)}</p>
               <Progress value={stats?.budgetOrdonnance ? ((stats.budgetPaye / stats.budgetOrdonnance) * 100) : 0} className="h-2" />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pipeline Chaîne de Dépense */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ArrowRight className="h-5 w-5 text-primary" />
+            Pipeline de la Chaîne de Dépense
+          </CardTitle>
+          <CardDescription>Progression de l'exécution budgétaire</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 grid-cols-5">
+            <Link to="/notes-aef" className="block">
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 hover:shadow-md transition-all border border-transparent hover:border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <Badge variant="secondary" className="text-xs">Notes</Badge>
+                </div>
+                <p className="text-lg font-bold">Étape 1</p>
+                <p className="text-xs text-muted-foreground">Autorisation</p>
+              </div>
+            </Link>
+            
+            <Link to="/engagements" className="block">
+              <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 hover:shadow-md transition-all border border-transparent hover:border-emerald-200">
+                <div className="flex items-center justify-between mb-2">
+                  <CreditCard className="h-5 w-5 text-emerald-600" />
+                  <Badge variant="secondary" className="text-xs">Eng.</Badge>
+                </div>
+                <p className="text-lg font-bold">{formatMontant(stats?.budgetEngage || 0)}</p>
+                <p className="text-xs text-muted-foreground">engagé</p>
+              </div>
+            </Link>
+            
+            <Link to="/liquidations" className="block">
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 hover:shadow-md transition-all border border-transparent hover:border-amber-200">
+                <div className="flex items-center justify-between mb-2">
+                  <Receipt className="h-5 w-5 text-amber-600" />
+                  <Badge variant="secondary" className="text-xs">Liq.</Badge>
+                </div>
+                <p className="text-lg font-bold">{formatMontant(stats?.budgetLiquide || 0)}</p>
+                <p className="text-xs text-muted-foreground">liquidé</p>
+              </div>
+            </Link>
+            
+            <Link to="/ordonnancements" className="block">
+              <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 hover:shadow-md transition-all border border-transparent hover:border-purple-200">
+                <div className="flex items-center justify-between mb-2">
+                  <FileCheck className="h-5 w-5 text-purple-600" />
+                  <Badge variant="secondary" className="text-xs">Ord.</Badge>
+                </div>
+                <p className="text-lg font-bold">{formatMontant(stats?.budgetOrdonnance || 0)}</p>
+                <p className="text-xs text-muted-foreground">ordonnancé</p>
+              </div>
+            </Link>
+            
+            <Link to="/reglements" className="block">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 hover:shadow-md transition-all border border-transparent hover:border-green-200">
+                <div className="flex items-center justify-between mb-2">
+                  <Wallet className="h-5 w-5 text-green-600" />
+                  <Badge variant="secondary" className="text-xs">Règl.</Badge>
+                </div>
+                <p className="text-lg font-bold">{formatMontant(stats?.budgetPaye || 0)}</p>
+                <p className="text-xs text-muted-foreground">payé</p>
+              </div>
+            </Link>
           </div>
         </CardContent>
       </Card>

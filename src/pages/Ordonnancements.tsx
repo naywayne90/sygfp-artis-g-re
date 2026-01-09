@@ -12,6 +12,7 @@ import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 
 const formatMontant = (montant: number) =>
   new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
@@ -46,6 +47,9 @@ export default function Ordonnancements() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={7} />
+
+      {/* Aide contextuelle */}
+      <ModuleHelp {...MODULE_HELP_CONFIG.ordonnancements} />
 
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
