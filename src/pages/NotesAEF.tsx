@@ -15,6 +15,7 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 import {
   Plus,
   Lock,
@@ -126,6 +127,9 @@ export default function NotesAEF() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={2} />
+      
+      {/* Aide contextuelle */}
+      <ModuleHelp {...MODULE_HELP_CONFIG.notes_aef} />
 
       {/* Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
