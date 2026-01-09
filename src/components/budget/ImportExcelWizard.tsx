@@ -31,12 +31,15 @@ import {
   Settings2,
   Database,
   Layers,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useImportJobs } from "@/hooks/useImportJobs";
 import { useARTIImport, ARTIParsedRow } from "@/hooks/useARTIImport";
 import { useReferentielSync, AllReferentielsResult } from "@/hooks/useReferentielSync";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import logoArti from "@/assets/logo-arti.jpg";
 
 interface ImportExcelWizardProps {
@@ -56,6 +59,7 @@ const STEPS: { id: WizardStep; title: string; description: string; icon: React.R
 
 export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: ImportExcelWizardProps) {
   const { exercice: contextExercice } = useExercice();
+  const { logAction } = useAuditLog();
   const {
     currentJob,
     createImportJob,
@@ -65,6 +69,9 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
   const { importAllReferentiels, refreshDropdowns, isSyncing, detectReferenceSheets } = useReferentielSync();
+  
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   // Step 1: Exercice & File
   const [selectedExercice, setSelectedExercice] = useState<number>(contextExercice);
   const [file, setFile] = useState<File | null>(null);
@@ -172,8 +179,14 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     }
   }, [file, selectedExercice, createImportJob, uploadFile, parseARTIExcel, markJobFailed, currentJob]);
 
-  // Step 4: Execute import
+  // Step 4: Execute import with audit logging
   const handleImport = useCallback(async () => {
+    // Guard: Require exercice
+    if (!selectedExercice) {
+      toast.error("Veuillez sélectionner un exercice avant d'importer");
+      return;
+    }
+    
     if (!currentJob || !file) return;
 
     setIsProcessing(true);
@@ -212,6 +225,25 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       
       const skipped = (safeMode && !replaceAmount) ? parsedRows.filter(r => r.decision === "UPDATE").length : 0;
       
+      // AUDIT: Log the import action
+      await logAction({
+        entityType: "budget_import",
+        entityId: currentJob.id,
+        action: "create",
+        newValues: {
+          filename: file.name,
+          exercice: selectedExercice,
+          sheet_used: parseInfo?.sheetUsed || "",
+          total_rows: parsedRows.length,
+          inserted: result.inserted,
+          updated: result.updated,
+          skipped: result.skipped + skipped,
+          errors: result.errors,
+          mode: safeMode ? (replaceAmount ? "safe_update_amount" : "safe") : "replace",
+          sync_referentiels: syncReferentiels,
+        },
+      });
+      
       setImportStats({
         inserted: result.inserted,
         updated: result.updated,
@@ -230,6 +262,21 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
       toast.success(`Import terminé: ${result.inserted} créée(s), ${result.updated} mise(s) à jour`);
     } catch (error) {
       toast.error(`Erreur lors de l'import: ${String(error)}`);
+      
+      // AUDIT: Log failed import
+      if (currentJob) {
+        await logAction({
+          entityType: "budget_import",
+          entityId: currentJob.id,
+          action: "create",
+          newValues: {
+            filename: file?.name || "",
+            exercice: selectedExercice,
+            error: String(error),
+            status: "failed",
+          },
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -478,6 +525,25 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
           </p>
         </AlertDescription>
       </Alert>
+
+      {/* Help link */}
+      <div className="flex items-center justify-center">
+        <Link to="/planification/aide-import" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <HelpCircle className="h-4 w-4" />
+          Consulter l'aide complète sur l'import
+        </Link>
+      </div>
+
+      {/* Guard: Exercise required */}
+      {!selectedExercice && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Exercice requis</AlertTitle>
+          <AlertDescription>
+            Vous devez sélectionner un exercice budgétaire avant de pouvoir importer des données.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 

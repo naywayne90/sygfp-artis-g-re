@@ -51,6 +51,7 @@ import Virements from "./pages/planification/Virements";
 import ImportExport from "./pages/planification/ImportExport";
 import DocumentationImport from "./pages/planification/DocumentationImport";
 import HistoriqueImports from "./pages/planification/HistoriqueImports";
+import AideImportBudget from "./pages/planification/AideImportBudget";
 
 // Pages Exécution
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
@@ -135,6 +136,7 @@ const App = () => (
               <Route path="/planification/import-export" element={<ImportExport />} />
               <Route path="/planification/documentation-import" element={<DocumentationImport />} />
               <Route path="/planification/historique-imports" element={<HistoriqueImports />} />
+              <Route path="/planification/aide-import" element={<AideImportBudget />} />
               
               {/* Exécution Budgétaire */}
               <Route path="/notes" element={<Notes />} />
