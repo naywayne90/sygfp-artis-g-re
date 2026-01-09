@@ -4860,6 +4860,33 @@ export type Database = {
           },
         ]
       }
+      natures_depense: {
+        Row: {
+          code: string
+          created_at: string
+          est_active: boolean | null
+          id: string
+          libelle: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          est_active?: boolean | null
+          id?: string
+          libelle: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          est_active?: boolean | null
+          id?: string
+          libelle?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       nomenclature_nbe: {
         Row: {
           code: string
