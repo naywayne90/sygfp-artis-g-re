@@ -221,7 +221,12 @@ export function useARTIImport() {
     return null;
   }, []);
 
-  // Calculate imputation code from components
+  /**
+   * RÈGLE CRITIQUE - SOURCE DE VÉRITÉ
+   * Reconstruire TOUJOURS l'imputation à partir des composants pour éviter la perte de précision Excel.
+   * Format 18 chiffres: OS(2) + Action(2) + Activité(3) + SousActivité(2) + Direction(2) + NatureDépense(1) + NBE(6) = 18
+   * Attention: ne JAMAIS importer l'imputation directement car Excel convertit 18 chiffres en notation scientifique (1.10E+17)
+   */
   const calculateImputation = useCallback((
     osCode: string | null,
     actionCode: string | null,
@@ -230,26 +235,36 @@ export function useARTIImport() {
     directionCode: string | null,
     natureDepenseCode: string | null,
     nbeCode: string | null
-  ): string | null => {
-    if (!osCode || !activiteCode || !sousActiviteCode || !directionCode || !nbeCode) {
-      return null;
-    }
+  ): { code: string | null; format: "18" | "17" | null; missingComponents: string[] } => {
+    const missingComponents: string[] = [];
+    
+    // Validate required components
+    if (!osCode) missingComponents.push("OS");
+    if (!actionCode) missingComponents.push("Action");
+    if (!activiteCode) missingComponents.push("Activité");
+    if (!sousActiviteCode) missingComponents.push("Sous-Activité");
+    if (!directionCode) missingComponents.push("Direction");
+    if (!natureDepenseCode) missingComponents.push("Nature Dépense");
+    if (!nbeCode) missingComponents.push("NBE");
 
-    const osPadded = osCode.padStart(2, "0");
-    const activitePadded = activiteCode.padStart(3, "0");
-    const sousActivitePadded = sousActiviteCode.padStart(3, "0");
-    const directionPadded = directionCode.padStart(2, "0");
+    // Build imputation code from components
+    const osPadded = (osCode || "0").padStart(2, "0");
+    const actionPadded = (actionCode || "0").padStart(2, "0");
+    const activitePadded = (activiteCode || "0").padStart(3, "0");
+    const sousActivitePadded = (sousActiviteCode || "0").padStart(2, "0"); // 2 digits, not 3
+    const directionPadded = (directionCode || "0").padStart(2, "0");
     const naturePadded = (natureDepenseCode || "0").substring(0, 1);
-    const nbePadded = nbeCode.padStart(6, "0");
+    const nbePadded = (nbeCode || "000000").padStart(6, "0");
 
-    if (actionCode) {
-      // Format 19 digits
-      const actionPadded = actionCode.padStart(2, "0");
-      return `${osPadded}${actionPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
-    } else {
-      // Format 17 digits
-      return `${osPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
+    // Format 18 chiffres (avec Action): OS(2) + Action(2) + Activité(3) + SousAct(2) + Dir(2) + Nat(1) + NBE(6) = 18
+    const code18 = `${osPadded}${actionPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
+    
+    if (missingComponents.length > 0) {
+      // Return partial code for display but mark as incomplete
+      return { code: code18, format: null, missingComponents };
     }
+    
+    return { code: code18, format: "18", missingComponents: [] };
   }, []);
 
   // Match reference by code or label
@@ -400,22 +415,36 @@ export function useARTIImport() {
         warnings.push(`Référentiel manquant: NBE "${rawNbe}"`);
       }
 
-      // Calculate imputation if not provided
-      let finalCode = rawImputation;
-      if (!finalCode) {
-        finalCode = calculateImputation(
-          rawOs,
-          rawAction,
-          rawActivite,
-          rawSousActivite,
-          rawDirection,
-          rawNatureDepense,
-          rawNbe
-        );
+      /**
+       * RÈGLE CRITIQUE: TOUJOURS reconstruire l'imputation à partir des composants
+       * Ne jamais faire confiance à la colonne "imputation" du fichier Excel car:
+       * - Excel peut convertir 18 chiffres en notation scientifique (1.10E+17)
+       * - Les parseurs peuvent perdre des chiffres significatifs
+       */
+      const imputationResult = calculateImputation(
+        rawOs,
+        rawAction,
+        rawActivite,
+        rawSousActivite,
+        rawDirection,
+        rawNatureDepense,
+        rawNbe
+      );
+
+      let finalCode = imputationResult.code;
+      
+      // Add errors for missing components
+      if (imputationResult.missingComponents.length > 0) {
+        errors.push(`Composants manquants pour l'imputation: ${imputationResult.missingComponents.join(", ")}`);
       }
 
-      if (!finalCode) {
-        errors.push("Impossible de déterminer le code imputation");
+      // Compare with raw imputation for validation (if available and looks valid)
+      if (rawImputation && rawImputation.length >= 17 && finalCode) {
+        const normalizedRaw = rawImputation.replace(/\D/g, "");
+        const normalizedCalc = finalCode.replace(/\D/g, "");
+        if (normalizedRaw !== normalizedCalc && normalizedRaw.length >= 17) {
+          warnings.push(`Imputation recalculée: "${finalCode}" (fichier: "${rawImputation}")`);
+        }
       }
 
       // Build label
