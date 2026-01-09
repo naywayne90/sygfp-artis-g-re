@@ -36,6 +36,12 @@ import {
   ArrowRightLeft,
   FileUp,
   History,
+  Cog,
+  FileEdit,
+  CircleDollarSign,
+  HandCoins,
+  FileOutput,
+  Banknote,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -72,79 +78,73 @@ import {
 } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
-// 1. Administration & Paramétrage
-const adminItems = [
+// ============================================
+// NOUVELLE ORGANISATION DU MENU
+// ============================================
+
+// PARAMÉTRAGE (fusion Administration + Référentiels)
+const parametrageItems = [
   { title: "Exercices Budgétaires", url: "/admin/exercices", icon: Calendar },
   { title: "Paramètres Programmatiques", url: "/admin/parametres-programmatiques", icon: Target },
+  { title: "Architecture SYGFP", url: "/admin/architecture", icon: Database },
+  { title: "Règles de Codification", url: "/admin/codification", icon: Hash },
+  { title: "Secteurs d'Activité", url: "/admin/secteurs-activite", icon: Layers },
+  { title: "Dictionnaire Variables", url: "/admin/dictionnaire", icon: BookOpen },
+];
+
+const utilisateursItems = [
   { title: "Gestion Utilisateurs", url: "/admin/utilisateurs", icon: Users },
   { title: "Profils & Rôles", url: "/admin/roles", icon: Shield },
   { title: "Autorisations", url: "/admin/autorisations", icon: Lock },
   { title: "Délégations", url: "/admin/delegations", icon: UserCog },
-  { title: "Journal d'Audit", url: "/admin/journal-audit", icon: ClipboardList },
+];
+
+const systemeItems = [
   { title: "Paramètres Système", url: "/admin/parametres", icon: Settings },
+  { title: "Journal d'Audit", url: "/admin/journal-audit", icon: ClipboardList },
 ];
 
-// Référentiels & Modélisation (sous Administration)
-const referentielItems = [
-  { title: "Architecture SYGFP", url: "/admin/architecture", icon: Database },
-  { title: "Dictionnaire Variables", url: "/admin/dictionnaire", icon: BookOpen },
-  { title: "Règles de Codification", url: "/admin/codification", icon: Hash },
-  { title: "Secteurs d'Activité", url: "/admin/secteurs-activite", icon: Layers },
-];
-
-// 2. Planification Budgétaire
-const planificationBudgetItems = [
+// BUDGET (fusion Planification Budget + Physique)
+const budgetItems = [
   { title: "Structure Budgétaire", url: "/planification/budget", icon: Wallet },
+  { title: "Plan de Travail", url: "/planification/physique", icon: ClipboardList },
   { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
   { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
-  { title: "Aide Import", url: "/planification/aide-import", icon: BookOpen },
 ];
 
-// 3. Planification Exécution Physique
-const planificationPhysiqueItems = [
-  { title: "Plan de Travail", url: "/planification/physique", icon: ClipboardList },
+// CHAÎNE DE LA DÉPENSE (ordre logique strict avec numéros)
+const chaineDepenseItems = [
+  { title: "1. Notes SEF", url: "/notes-sef", icon: FileText, step: 1, description: "Sans Engagement Financier" },
+  { title: "2. Notes AEF", url: "/notes-aef", icon: FileEdit, step: 2, description: "Avec Engagement Financier" },
+  { title: "3. Expression Besoin", url: "/execution/expression-besoin", icon: Briefcase, step: 3, description: "Formalisation du besoin" },
+  { title: "4. Passation Marché", url: "/marches", icon: ShoppingCart, step: 4, description: "Si montant > seuil" },
+  { title: "5. Engagement", url: "/engagements", icon: CreditCard, step: 5, description: "Réservation crédits" },
+  { title: "6. Liquidation", url: "/liquidations", icon: Receipt, step: 6, description: "Constatation service fait" },
+  { title: "7. Ordonnancement", url: "/ordonnancements", icon: FileCheck, step: 7, description: "Ordre de paiement" },
+  { title: "8. Règlement", url: "/reglements", icon: Banknote, step: 8, description: "Paiement effectif" },
 ];
 
-// 4. Exécution Budgétaire - Sous-menus
-const executionItems = [
-  { title: "Notes SEF", url: "/notes-sef", icon: FileText },
-  { title: "Notes AEF", url: "/notes-aef", icon: FileText },
-  { title: "Imputation", url: "/execution/imputation", icon: Tag },
-  { title: "Expression de Besoin", url: "/execution/expression-besoin", icon: Briefcase },
-  { title: "Passation Marché", url: "/marches", icon: ShoppingCart },
-  { title: "Engagement", url: "/engagements", icon: CreditCard },
-  { title: "Liquidation", url: "/liquidations", icon: Receipt },
-  { title: "Ordonnancement", url: "/ordonnancements", icon: FileCheck },
-  { title: "Règlement", url: "/reglements", icon: Wallet },
-];
-
-// 5. États d'Exécution
-const etatsItems = [
-  { title: "États d'exécution", url: "/etats-execution", icon: BarChart3 },
-];
-
-// 6. Approvisionnement
-const approvisionnementItems = [
-  { title: "Commandes & Livraisons", url: "/approvisionnement", icon: Truck },
-];
-
-// 7. Gestion de la Trésorerie
-const tresorerieItems = [
-  { title: "Trésorerie", url: "/tresorerie", icon: Landmark },
-];
-
-// 8. Déclaration Recette
-const recettesItems = [
-  { title: "Déclaration Recettes", url: "/recettes", icon: DollarSign },
-];
-
-// Compléments
-const complementsItems = [
+// PARTENAIRES
+const partenairesItems = [
   { title: "Prestataires", url: "/contractualisation/prestataires", icon: Building2 },
   { title: "Contrats", url: "/contractualisation/contrats", icon: FileSignature },
+];
+
+// GESTION COMPLÉMENTAIRE
+const gestionItems = [
+  { title: "Approvisionnement", url: "/approvisionnement", icon: Truck },
+  { title: "Trésorerie", url: "/tresorerie", icon: Landmark },
+  { title: "Recettes", url: "/recettes", icon: DollarSign },
   { title: "Comptabilité Matière", url: "/contractualisation/comptabilite-matiere", icon: Archive },
+];
+
+// RAPPORTS
+const rapportsItems = [
+  { title: "États d'exécution", url: "/etats-execution", icon: BarChart3 },
+  { title: "Alertes Budgétaires", url: "/alertes-budgetaires", icon: Target },
 ];
 
 interface MenuSectionProps {
@@ -156,7 +156,7 @@ interface MenuSectionProps {
 
 function MenuSection({ title, items, collapsed, isActive }: MenuSectionProps) {
   return (
-    <SidebarGroup className="mt-3">
+    <SidebarGroup className="mt-2">
       {!collapsed && (
         <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
           {title}
@@ -197,7 +197,8 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const navigate = useNavigate();
-  const [executionOpen, setExecutionOpen] = useState(true);
+  const [chaineOpen, setChaineOpen] = useState(true);
+  const [parametrageOpen, setParametrageOpen] = useState(false);
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -207,7 +208,8 @@ export function AppSidebar() {
     return location.pathname.startsWith(path);
   };
 
-  const isExecutionActive = executionItems.some(item => isActive(item.url));
+  const isChaineActive = chaineDepenseItems.some(item => isActive(item.url));
+  const isParametrageActive = [...parametrageItems, ...utilisateursItems, ...systemeItems].some(item => isActive(item.url));
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -230,7 +232,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-3 overflow-y-auto">
-        {/* Accueil */}
+        {/* ========== ACCUEIL ========== */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -263,7 +265,7 @@ export function AppSidebar() {
                   <NavLink
                     to="/recherche"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium",
                       isActive("/recherche")
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
                         : "text-sidebar-foreground hover:bg-sidebar-accent"
@@ -278,76 +280,221 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* 1. Administration */}
-        <MenuSection 
-          title="Administration" 
-          items={adminItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* Référentiels & Modélisation */}
-        <MenuSection 
-          title="Référentiels" 
-          items={referentielItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 2. Planification Budgétaire */}
-        <MenuSection 
-          title="Planification Budget" 
-          items={planificationBudgetItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 3. Planification Physique */}
-        <MenuSection 
-          title="Planification Physique" 
-          items={planificationPhysiqueItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 4. Exécution Budgétaire (avec sous-menus) */}
-        <SidebarGroup className="mt-3">
+        {/* ========== CHAÎNE DE LA DÉPENSE (Section principale) ========== */}
+        <SidebarGroup className="mt-4">
           {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
-              Exécution Budgétaire
+            <SidebarGroupLabel className="text-sidebar-primary uppercase text-[10px] font-bold tracking-wider mb-1 px-3 flex items-center gap-2">
+              <CircleDollarSign className="h-3.5 w-3.5" />
+              Chaîne de la Dépense
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
               <Collapsible
-                open={executionOpen}
-                onOpenChange={setExecutionOpen}
+                open={chaineOpen}
+                onOpenChange={setChaineOpen}
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton 
-                      tooltip="Chaîne de la dépense"
+                      tooltip="8 étapes du flux de dépense"
                       className={cn(
                         "w-full justify-between",
-                        isExecutionActive && "bg-sidebar-accent"
+                        isChaineActive && "bg-sidebar-accent"
                       )}
                     >
                       <div className="flex items-center gap-3">
-                        <CreditCard className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="text-sm">Chaîne de la dépense</span>}
+                        <HandCoins className="h-4 w-4 shrink-0" />
+                        {!collapsed && (
+                          <span className="text-sm font-medium">Flux de dépense</span>
+                        )}
+                      </div>
+                      {!collapsed && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                            8 étapes
+                          </Badge>
+                          <ChevronRight className={cn(
+                            "h-4 w-4 transition-transform",
+                            chaineOpen && "rotate-90"
+                          )} />
+                        </div>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {chaineDepenseItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                            <NavLink
+                              to={item.url}
+                              className={cn(
+                                "flex items-center gap-2 text-sm py-1.5",
+                                isActive(item.url) && "text-sidebar-primary font-medium"
+                              )}
+                            >
+                              <span className={cn(
+                                "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold",
+                                isActive(item.url) 
+                                  ? "bg-sidebar-primary text-sidebar-primary-foreground" 
+                                  : "bg-sidebar-accent text-sidebar-foreground"
+                              )}>
+                                {item.step}
+                              </span>
+                              <span>{item.title.replace(/^\d+\.\s/, '')}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+              
+              {/* Imputation (lié à la chaîne) */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/execution/imputation")}
+                  tooltip="Imputation budgétaire"
+                >
+                  <NavLink
+                    to="/execution/imputation"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                      isActive("/execution/imputation")
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                    )}
+                  >
+                    <Tag className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>Imputation</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ========== BUDGET ========== */}
+        <MenuSection 
+          title="Budget" 
+          items={budgetItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+        />
+
+        {/* ========== PARTENAIRES ========== */}
+        <MenuSection 
+          title="Partenaires" 
+          items={partenairesItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+        />
+
+        {/* ========== GESTION COMPLÉMENTAIRE ========== */}
+        <MenuSection 
+          title="Gestion" 
+          items={gestionItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+        />
+
+        {/* ========== RAPPORTS ========== */}
+        <MenuSection 
+          title="Rapports" 
+          items={rapportsItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+        />
+
+        {/* ========== PARAMÉTRAGE (Collapsible) ========== */}
+        <SidebarGroup className="mt-4">
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
+              <Cog className="h-3.5 w-3.5" />
+              Paramétrage
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <Collapsible
+                open={parametrageOpen}
+                onOpenChange={setParametrageOpen}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      tooltip="Configuration système"
+                      className={cn(
+                        "w-full justify-between",
+                        isParametrageActive && "bg-sidebar-accent"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Settings className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span className="text-sm">Configuration</span>}
                       </div>
                       {!collapsed && (
                         <ChevronRight className={cn(
                           "h-4 w-4 transition-transform",
-                          executionOpen && "rotate-90"
+                          parametrageOpen && "rotate-90"
                         )} />
                       )}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {executionItems.map((item) => (
+                      {/* Référentiels */}
+                      <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                        Référentiels
+                      </div>
+                      {parametrageItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                            <NavLink
+                              to={item.url}
+                              className={cn(
+                                "flex items-center gap-2 text-sm py-1.5",
+                                isActive(item.url) && "text-sidebar-primary font-medium"
+                              )}
+                            >
+                              <item.icon className="h-3.5 w-3.5" />
+                              <span>{item.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                      
+                      {/* Utilisateurs */}
+                      <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                        Utilisateurs
+                      </div>
+                      {utilisateursItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                            <NavLink
+                              to={item.url}
+                              className={cn(
+                                "flex items-center gap-2 text-sm py-1.5",
+                                isActive(item.url) && "text-sidebar-primary font-medium"
+                              )}
+                            >
+                              <item.icon className="h-3.5 w-3.5" />
+                              <span>{item.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                      
+                      {/* Système */}
+                      <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                        Système
+                      </div>
+                      {systemeItems.map((item) => (
                         <SidebarMenuSubItem key={item.title}>
                           <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
                             <NavLink
@@ -370,46 +517,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {/* 5. États d'Exécution */}
-        <MenuSection 
-          title="Rapports" 
-          items={etatsItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 6. Approvisionnement */}
-        <MenuSection 
-          title="Approvisionnement" 
-          items={approvisionnementItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 7. Trésorerie */}
-        <MenuSection 
-          title="Trésorerie" 
-          items={tresorerieItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* 8. Recettes */}
-        <MenuSection 
-          title="Recettes" 
-          items={recettesItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
-
-        {/* Compléments */}
-        <MenuSection 
-          title="Contractualisation" 
-          items={complementsItems} 
-          collapsed={collapsed} 
-          isActive={isActive} 
-        />
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-2">

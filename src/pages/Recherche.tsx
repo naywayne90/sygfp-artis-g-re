@@ -13,6 +13,7 @@ import { DossierStatusDialog } from "@/components/dossier/DossierStatusDialog";
 import { DossierAssignDialog } from "@/components/dossier/DossierAssignDialog";
 import { DossierAttachDialog } from "@/components/dossier/DossierAttachDialog";
 import { DossierBlockDialog } from "@/components/dossier/DossierBlockDialog";
+import { ChaineDepenseVisuel } from "@/components/workflow/ChaineDepenseVisuel";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -212,7 +213,7 @@ export default function Recherche() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Recherche Dossier</h1>
           <p className="text-muted-foreground">
-            Recherchez et gérez tous les dossiers de l'exercice {exercice}
+            Point d'entrée principal - Exercice {exercice}
           </p>
         </div>
         <div className="flex gap-2">
@@ -226,6 +227,9 @@ export default function Recherche() {
           </Button>
         </div>
       </div>
+
+      {/* Schéma visuel de la chaîne de dépense */}
+      <ChaineDepenseVisuel />
 
       {/* Section d'aide */}
       <Collapsible open={showHelp} onOpenChange={setShowHelp}>
