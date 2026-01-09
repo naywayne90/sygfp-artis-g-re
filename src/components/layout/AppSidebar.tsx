@@ -35,6 +35,7 @@ import {
   Layers,
   ArrowRightLeft,
   FileUp,
+  History,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -97,6 +98,7 @@ const planificationBudgetItems = [
   { title: "Structure Budgétaire", url: "/planification/budget", icon: Wallet },
   { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
+  { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
 ];
 
 // 3. Planification Exécution Physique
