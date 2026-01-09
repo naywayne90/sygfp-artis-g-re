@@ -271,6 +271,23 @@ export function useMarches() {
         } as any);
       }
 
+      // Si lié à un dossier, créer une entrée dans dossier_etapes
+      if (data.dossier_id) {
+        await supabase.from("dossier_etapes").insert({
+          dossier_id: data.dossier_id,
+          type_etape: "marche",
+          ref_id: marche.id,
+          montant: data.montant,
+          statut: "en_cours",
+        } as any);
+
+        // Mettre à jour l'étape courante du dossier
+        await supabase
+          .from("dossiers")
+          .update({ etape_courante: "marche" })
+          .eq("id", data.dossier_id);
+      }
+
       await logAction({
         entityType: "marche",
         entityId: marche.id,

@@ -222,11 +222,31 @@ export function useEngagements() {
       tva?: number;
       fournisseur: string;
       marche_id?: string;
+      dossier_id?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier la disponibilité budgétaire avant création
+      const availability = await calculateAvailability(data.budget_line_id, data.montant);
+      if (!availability.is_sufficient) {
+        throw new Error(
+          `Disponible insuffisant : ${new Intl.NumberFormat("fr-FR").format(availability.disponible)} FCFA disponibles, ${new Intl.NumberFormat("fr-FR").format(data.montant)} FCFA demandés`
+        );
+      }
+
       const numero = await generateNumero();
+
+      // Récupérer le dossier_id depuis l'expression de besoin si non fourni
+      let dossierId = data.dossier_id;
+      if (!dossierId && data.expression_besoin_id) {
+        const { data: expr } = await supabase
+          .from("expressions_besoin")
+          .select("dossier_id")
+          .eq("id", data.expression_besoin_id)
+          .single();
+        dossierId = expr?.dossier_id;
+      }
 
       const { data: engagement, error } = await supabase
         .from("budget_engagements")
@@ -241,6 +261,7 @@ export function useEngagements() {
           budget_line_id: data.budget_line_id,
           expression_besoin_id: data.expression_besoin_id,
           marche_id: data.marche_id || null,
+          dossier_id: dossierId || null,
           exercice,
           statut: "brouillon",
           workflow_status: "en_attente",
@@ -261,6 +282,40 @@ export function useEngagements() {
           status: "en_attente",
         });
       }
+
+      // Si lié à un dossier, créer une entrée dans dossier_etapes
+      if (dossierId) {
+        await supabase.from("dossier_etapes").insert({
+          dossier_id: dossierId,
+          type_etape: "engagement",
+          ref_id: engagement.id,
+          montant: data.montant,
+          statut: "en_cours",
+        } as any);
+
+        // Mettre à jour l'étape courante du dossier et le montant engagé
+        await supabase
+          .from("dossiers")
+          .update({ 
+            etape_courante: "engagement",
+            montant_engage: data.montant,
+          })
+          .eq("id", dossierId);
+      }
+
+      // Mettre à jour le total engagé de la ligne budgétaire
+      const { data: currentLine } = await supabase
+        .from("budget_lines")
+        .select("total_engage")
+        .eq("id", data.budget_line_id)
+        .single();
+
+      await supabase
+        .from("budget_lines")
+        .update({
+          total_engage: (currentLine?.total_engage || 0) + data.montant,
+        })
+        .eq("id", data.budget_line_id);
 
       await logAction({
         entityType: "engagement",

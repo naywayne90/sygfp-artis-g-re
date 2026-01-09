@@ -368,7 +368,14 @@ export default function Virements() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatCurrency(transfer.amount)}
+                        <div>{formatCurrency(transfer.amount)}</div>
+                        {transfer.status === "execute" && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            <span className="text-destructive">-{formatCurrency(transfer.from_dotation_avant || 0)}</span>
+                            {" → "}
+                            <span className="text-success">+{formatCurrency(transfer.to_dotation_apres || 0)}</span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant={STATUS_LABELS[transfer.status || "brouillon"]?.variant || "secondary"}>
