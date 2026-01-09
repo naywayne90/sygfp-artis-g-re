@@ -235,38 +235,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     }
   }, [currentJob, file, parsedRows, selectedExercice, safeMode, replaceAmount, syncReferentiels, executeARTIImport, importAllReferentiels, refreshDropdowns, onImportComplete]);
 
-  // Export errors
-  const handleExportErrors = useCallback(() => {
-    const errorRows = parsedRows.filter(r => !r.isValid || r.warnings.length > 0);
-    
-    const headers = ["Ligne", "Statut", "Décision", "Code", "Libellé", "Montant", "OS", "Direction", "NBE", "Erreurs", "Avertissements"];
-    const csvRows = errorRows.map(row => [
-      row.rowIndex,
-      row.isValid ? "Valide" : "Erreur",
-      row.decision,
-      row.normalized?.code || row.raw.imputation || "",
-      row.normalized?.label || row.raw.libelle || "",
-      row.normalized?.dotation_initiale || row.raw.montant || "",
-      row.raw.os || "",
-      row.raw.direction || "",
-      row.raw.nbe || "",
-      row.errors.join("; "),
-      row.warnings.join("; "),
-    ]);
-
-    const csvContent = [headers, ...csvRows].map(r => r.map(c => `"${c}"`).join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `rapport_erreurs_import_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    
-    toast.success("Rapport d'erreurs exporté");
-  }, [parsedRows, selectedExercice]);
-
-  // Computed stats
+  // Computed stats (must be before export functions that use them)
   const stats = parseInfo?.stats || {
     total: parsedRows.length,
     ok: parsedRows.filter(r => r.isValid && r.warnings.length === 0).length,
@@ -277,6 +246,115 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   };
 
   const duplicates = stats.update;
+
+  // Export full import report (all rows with status)
+  const handleExportFullReport = useCallback(() => {
+    const headers = [
+      "Ligne Excel",
+      "Statut",
+      "Décision",
+      "Code Imputation (18 chiffres)",
+      "Libellé Projet",
+      "Montant Initial",
+      "OS",
+      "Action",
+      "Activité",
+      "Sous-Activité",
+      "Direction",
+      "Nature Dépense",
+      "NBE (6 chiffres)",
+      "Erreurs",
+      "Avertissements"
+    ];
+
+    const csvRows = parsedRows.map(row => {
+      let statut = "";
+      if (!row.isValid) {
+        statut = "REJETÉE";
+      } else if (row.decision === "UPDATE") {
+        statut = "DOUBLON (ignorée)";
+      } else if (row.warnings.length > 0) {
+        statut = "VALIDE (avec alertes)";
+      } else {
+        statut = "VALIDE";
+      }
+
+      return [
+        row.rowIndex,
+        statut,
+        row.decision,
+        row.normalized?.code || "",
+        row.normalized?.label || row.raw.libelle || "",
+        row.normalized?.dotation_initiale?.toLocaleString("fr-FR") || row.raw.montant || "",
+        row.raw.os || "",
+        row.raw.action || "",
+        row.raw.activite || "",
+        row.raw.sousActivite || "",
+        row.raw.direction || "",
+        row.raw.natureDepense || "",
+        row.raw.nbe || "",
+        row.errors.join(" | "),
+        row.warnings.join(" | "),
+      ];
+    });
+
+    // Add summary section at the end
+    csvRows.push([]);
+    csvRows.push(["=== RÉSUMÉ DU RAPPORT D'IMPORT ===", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["Fichier source", file?.name || "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["Exercice", selectedExercice.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["Onglet utilisé", parseInfo?.sheetUsed || "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["Date d'analyse", new Date().toLocaleString("fr-FR"), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push([]);
+    csvRows.push(["LIGNES VALIDES (prêtes à importer)", stats.new.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["LIGNES AVEC ALERTES", stats.warning.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["LIGNES REJETÉES (erreurs)", stats.error.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["DOUBLONS DÉTECTÉS", duplicates.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    csvRows.push(["TOTAL ANALYSÉ", stats.total.toString(), "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+
+    const csvContent = [headers, ...csvRows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `RAPPORT_IMPORT_BUDGET_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success("Rapport d'import complet téléchargé");
+  }, [parsedRows, selectedExercice, file, parseInfo, stats, duplicates]);
+
+  // Export only errors (for quick review)
+  const handleExportErrors = useCallback(() => {
+    const errorRows = parsedRows.filter(r => !r.isValid);
+    
+    if (errorRows.length === 0) {
+      toast.info("Aucune erreur à exporter");
+      return;
+    }
+    
+    const headers = ["Ligne Excel", "Code Imputation", "Montant", "OS", "Direction", "NBE", "Erreur(s)"];
+    const csvRows = errorRows.map(row => [
+      row.rowIndex,
+      row.normalized?.code || row.raw.imputation || "",
+      row.raw.montant || "",
+      row.raw.os || "",
+      row.raw.direction || "",
+      row.raw.nbe || "",
+      row.errors.join(" | "),
+    ]);
+
+    const csvContent = [headers, ...csvRows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ERREURS_IMPORT_${selectedExercice}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    toast.success(`${errorRows.length} erreur(s) exportée(s)`);
+  }, [parsedRows, selectedExercice]);
 
   const filteredRows = parsedRows.filter((row) => {
     if (statusFilter === "all") return true;
@@ -492,15 +570,39 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         </Card>
       </div>
 
-      {/* Export errors button */}
-      {(stats.error > 0 || stats.warning > 0) && (
-        <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={handleExportErrors}>
+      {/* Export buttons */}
+      <div className="flex flex-wrap gap-2 justify-between">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportFullReport}>
             <Download className="h-4 w-4 mr-2" />
-            Télécharger rapport (CSV)
+            Télécharger le rapport d'import (CSV)
           </Button>
+          {stats.error > 0 && (
+            <Button variant="outline" size="sm" onClick={handleExportErrors} className="text-destructive">
+              <XCircle className="h-4 w-4 mr-2" />
+              Exporter {stats.error} erreur(s)
+            </Button>
+          )}
         </div>
-      )}
+        <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <span><strong>{stats.new}</strong> prêtes à importer</span>
+          {stats.error > 0 && (
+            <>
+              <span className="text-muted-foreground">•</span>
+              <XCircle className="h-4 w-4 text-destructive" />
+              <span><strong>{stats.error}</strong> rejetées</span>
+            </>
+          )}
+          {duplicates > 0 && (
+            <>
+              <span className="text-muted-foreground">•</span>
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <span><strong>{duplicates}</strong> doublons</span>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Preview table - first 50 lines */}
       <Card>

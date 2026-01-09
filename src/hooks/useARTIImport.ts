@@ -526,27 +526,49 @@ export function useARTIImport() {
       const errors: string[] = [];
       const warnings: string[] = [];
 
-      // Validate required fields
-      if (rawMontant === null) {
-        errors.push("Montant invalide, manquant ou ≤ 0");
+      // ============================================================================
+      // VALIDATION STRICTE DES DONNÉES
+      // ============================================================================
+
+      // 1. Valider montant_initial >= 0
+      if (rawMontant === null || rawMontant < 0) {
+        errors.push("Montant invalide, manquant ou < 0");
       }
 
-      // Match references
+      // 2. Valider NBE = 6 chiffres
+      if (!rawNbe) {
+        errors.push("NBE absent ou invalide");
+      } else if (!/^\d{6}$/.test(rawNbe)) {
+        errors.push(`NBE doit être 6 chiffres (reçu: "${rawNbe}")`);
+      }
+
+      // 3. Valider composants obligatoires
+      if (!rawOs) {
+        errors.push("OS absent");
+      }
+      if (!rawDirection) {
+        errors.push("Direction absente");
+      }
+      if (!rawNatureDepense) {
+        errors.push("Nature de dépense absente");
+      }
+
+      // 4. Vérifier existence dans référentiels
       const osRef = findReference(refData.objectifsStrategiques, rawOs, "libelle" as any);
       const dirRef = findReference(refData.directions, rawDirection, "label");
       const actRef = findReference(refData.activites, rawActivite, "libelle" as any);
       const sousActRef = findReference(refData.sousActivites, rawSousActivite, "libelle" as any);
       const nbeRef = findReference(refData.nomenclatureNBE, rawNbe, "libelle" as any);
 
-      // Add warnings for missing references (non-blocking)
+      // Références manquantes - WARNING si peut être créée, ERROR si critique
       if (rawOs && !osRef) {
-        warnings.push(`Référentiel manquant: OS "${rawOs}"`);
+        warnings.push(`Référentiel manquant: OS "${rawOs}" (sera créé à l'import)`);
       }
       if (rawDirection && !dirRef) {
-        warnings.push(`Référentiel manquant: Direction "${rawDirection}"`);
+        warnings.push(`Référentiel manquant: Direction "${rawDirection}" (sera créée à l'import)`);
       }
       if (rawNbe && !nbeRef) {
-        warnings.push(`Référentiel manquant: NBE "${rawNbe}"`);
+        warnings.push(`Référentiel manquant: NBE "${rawNbe}" (sera créé à l'import)`);
       }
 
       /**
@@ -568,13 +590,19 @@ export function useARTIImport() {
 
       let finalCode = imputationResult.code;
       
-      // Add errors for missing components
+      // 5. Valider imputation = 18 chiffres
+      if (!finalCode || finalCode.length !== 18) {
+        errors.push(`Imputation doit être 18 chiffres (calculée: "${finalCode || 'null'}", longueur: ${finalCode?.length || 0})`);
+      } else if (!/^\d{18}$/.test(finalCode)) {
+        errors.push(`Imputation doit contenir uniquement des chiffres (reçu: "${finalCode}")`);
+      }
+      
+      // Log composants manquants comme erreurs bloquantes
       if (imputationResult.missingComponents.length > 0) {
-        errors.push(`Composants manquants pour l'imputation: ${imputationResult.missingComponents.join(", ")}`);
+        errors.push(`Composants manquants: ${imputationResult.missingComponents.join(", ")}`);
       }
 
       // Compare with raw imputation for validation (if available and looks valid)
-      // This is WARNING only - we always use the recalculated code
       if (rawImputationStr && rawImputationStr.length >= 17 && finalCode) {
         const normalizedRaw = rawImputationStr.replace(/\D/g, "");
         const normalizedCalc = finalCode.replace(/\D/g, "");
