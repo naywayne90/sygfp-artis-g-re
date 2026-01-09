@@ -15,6 +15,7 @@ import { EngagementValidateDialog } from "@/components/engagement/EngagementVali
 import { EngagementPrintDialog } from "@/components/engagement/EngagementPrintDialog";
 import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
@@ -102,6 +103,9 @@ export default function Engagements() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Indicateur de workflow */}
+      <WorkflowStepIndicator currentStep={5} />
+
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
