@@ -86,6 +86,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   
   // Step 4: Import options - SAFE MODE by default
   const [safeMode, setSafeMode] = useState(true); // Never replace existing lines
+  const [replaceAmount, setReplaceAmount] = useState(false); // Advanced: replace only montant if line exists
   const [syncReferentiels, setSyncReferentiels] = useState(true); // Sync referentials option
   const [isProcessing, setIsProcessing] = useState(false);
   const [importComplete, setImportComplete] = useState(false);
@@ -99,6 +100,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     setParseInfo(null);
     setStatusFilter("all");
     setSafeMode(true);
+    setReplaceAmount(false);
     setSyncReferentiels(true);
     setIsProcessing(false);
     setImportComplete(false);
@@ -190,19 +192,30 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
         refreshDropdowns();
       }
 
-      // Step 2: Filter rows based on SAFE mode
-      const rowsToImport = safeMode 
-        ? parsedRows.filter(r => r.decision === "NEW" && r.isValid) // Only new lines in SAFE mode
-        : parsedRows.filter(r => r.isValid); // All valid lines otherwise
-
-      const result = await executeARTIImport(rowsToImport, selectedExercice, currentJob.id);
+      // Step 2: Filter rows based on mode and execute import
+      let rowsToImport: ARTIParsedRow[];
+      let importOptions: { replaceAmountOnly?: boolean } = {};
       
-      const skipped = safeMode ? parsedRows.filter(r => r.decision === "UPDATE").length : 0;
+      if (safeMode && !replaceAmount) {
+        // SAFE mode: Only new lines
+        rowsToImport = parsedRows.filter(r => r.decision === "NEW" && r.isValid);
+      } else if (safeMode && replaceAmount) {
+        // SAFE mode + Replace Amount: All valid lines, but only update montant
+        rowsToImport = parsedRows.filter(r => r.isValid);
+        importOptions.replaceAmountOnly = true;
+      } else {
+        // Full replace mode: All valid lines with full update
+        rowsToImport = parsedRows.filter(r => r.isValid);
+      }
+
+      const result = await executeARTIImport(rowsToImport, selectedExercice, currentJob.id, importOptions);
+      
+      const skipped = (safeMode && !replaceAmount) ? parsedRows.filter(r => r.decision === "UPDATE").length : 0;
       
       setImportStats({
         inserted: result.inserted,
         updated: result.updated,
-        skipped,
+        skipped: result.skipped + skipped,
         errors: result.errors,
       });
       setImportComplete(true);
@@ -220,7 +233,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
     } finally {
       setIsProcessing(false);
     }
-  }, [currentJob, file, parsedRows, selectedExercice, safeMode, syncReferentiels, executeARTIImport, importAllReferentiels, refreshDropdowns, onImportComplete]);
+  }, [currentJob, file, parsedRows, selectedExercice, safeMode, replaceAmount, syncReferentiels, executeARTIImport, importAllReferentiels, refreshDropdowns, onImportComplete]);
 
   // Export errors
   const handleExportErrors = useCallback(() => {
@@ -635,12 +648,33 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
                 />
               </div>
               
+              {safeMode && (
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <div>
+                    <Label htmlFor="replace-amount" className="text-sm font-medium text-muted-foreground">
+                      Option avancée: Remplacer le montant si la ligne existe
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {replaceAmount 
+                        ? `Les ${duplicates} doublon(s) détectés verront leur montant mis à jour (autres champs inchangés)`
+                        : "Les doublons seront ignorés (comportement par défaut)"
+                      }
+                    </p>
+                  </div>
+                  <Switch
+                    id="replace-amount"
+                    checked={replaceAmount}
+                    onCheckedChange={setReplaceAmount}
+                  />
+                </div>
+              )}
+              
               {!safeMode && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Attention</AlertTitle>
                   <AlertDescription>
-                    En désactivant le mode SAFE, {duplicates} ligne(s) existante(s) seront modifiées.
+                    En désactivant le mode SAFE, {duplicates} ligne(s) existante(s) seront entièrement remplacées.
                     Cette action est irréversible.
                   </AlertDescription>
                 </Alert>

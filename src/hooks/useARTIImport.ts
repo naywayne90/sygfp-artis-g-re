@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import * as XLSX from "xlsx";
 
 // ARTI Excel column names mapping
@@ -689,13 +690,16 @@ export function useARTIImport() {
   const executeARTIImport = useCallback(async (
     rows: ARTIParsedRow[],
     exercice: number,
-    jobId?: string
-  ): Promise<{ inserted: number; updated: number; errors: number; errorDetails: string[] }> => {
+    jobId?: string,
+    options?: { replaceAmountOnly?: boolean }
+  ): Promise<{ inserted: number; updated: number; skipped: number; errors: number; errorDetails: string[] }> => {
     const validRows = rows.filter(r => r.isValid && r.normalized);
     let inserted = 0;
     let updated = 0;
+    let skipped = 0;
     let errors = 0;
     const errorDetails: string[] = [];
+    const replaceAmountOnly = options?.replaceAmountOnly ?? false;
 
     for (const row of validRows) {
       try {
@@ -720,25 +724,49 @@ export function useARTIImport() {
         };
 
         if (row.normalized!.decision === "UPDATE" && row.normalized!.existing_id) {
-          // Update existing line
-          const { error } = await supabase
-            .from("budget_lines")
-            .update({
-              label: data.label,
-              dotation_initiale: data.dotation_initiale,
-              dotation_modifiee: data.dotation_initiale,
-              os_id: data.os_id,
-              direction_id: data.direction_id,
-              activite_id: data.activite_id,
-              sous_activite_id: data.sous_activite_id,
-              nbe_id: data.nbe_id,
-              source_financement: data.source_financement,
-              legacy_import: true,
-            })
-            .eq("id", row.normalized!.existing_id);
+          if (replaceAmountOnly) {
+            // Advanced mode: Only update the amount (montant)
+            const { error } = await supabase
+              .from("budget_lines")
+              .update({
+                dotation_initiale: data.dotation_initiale,
+                dotation_modifiee: data.dotation_initiale,
+                legacy_import: true,
+              })
+              .eq("id", row.normalized!.existing_id);
 
-          if (error) throw error;
-          updated++;
+            if (error) throw error;
+            updated++;
+            
+            // Log to import_rows as "updated_amount"
+            if (jobId) {
+              await supabase.from("import_rows").insert({
+                job_id: jobId,
+                row_index: row.rowIndex,
+                sheet_name: row.sheetName,
+                raw: row.raw.rawData as Json,
+                normalized: { code: row.normalized!.code, label: row.normalized!.label, montant: row.normalized!.dotation_initiale } as Json,
+                status: "updated_amount",
+                target_action: "update",
+              });
+            }
+          } else {
+            // SAFE mode: Skip existing lines
+            skipped++;
+            
+            // Log to import_rows as "skipped_existing"
+            if (jobId) {
+              await supabase.from("import_rows").insert({
+                job_id: jobId,
+                row_index: row.rowIndex,
+                sheet_name: row.sheetName,
+                raw: row.raw.rawData as Json,
+                normalized: { code: row.normalized!.code, label: row.normalized!.label, montant: row.normalized!.dotation_initiale } as Json,
+                status: "skipped_existing",
+                target_action: "skip",
+              });
+            }
+          }
         } else {
           // Insert new line
           const { error } = await supabase
@@ -747,14 +775,54 @@ export function useARTIImport() {
 
           if (error) throw error;
           inserted++;
+          
+          // Log to import_rows as "inserted"
+          if (jobId) {
+            await supabase.from("import_rows").insert({
+              job_id: jobId,
+              row_index: row.rowIndex,
+              sheet_name: row.sheetName,
+              raw: row.raw.rawData as Json,
+              normalized: { code: row.normalized!.code, label: row.normalized!.label, montant: row.normalized!.dotation_initiale } as Json,
+              status: "inserted",
+              target_action: "insert",
+            });
+          }
         }
       } catch (err) {
         errors++;
         errorDetails.push(`Ligne ${row.rowIndex}: ${String(err)}`);
+        
+        // Log to import_rows as "error"
+        if (jobId) {
+          await supabase.from("import_rows").insert({
+            job_id: jobId,
+            row_index: row.rowIndex,
+            sheet_name: row.sheetName,
+            raw: (row.raw.rawData || {}) as Json,
+            normalized: row.normalized ? { code: row.normalized.code } as Json : null,
+            status: "error",
+            error_messages: [String(err)],
+            target_action: "error",
+          });
+        }
       }
     }
 
-    return { inserted, updated, errors, errorDetails };
+    // Update job summary
+    if (jobId) {
+      await supabase.from("import_jobs").update({
+        total_rows: validRows.length,
+        new_rows: inserted,
+        updated_rows: updated,
+        error_rows: errors,
+        status: errors === 0 ? "completed" : "completed_with_errors",
+        completed_at: new Date().toISOString(),
+        notes: `Inserted: ${inserted}, Updated: ${updated}, Skipped: ${skipped}, Errors: ${errors}`,
+      }).eq("id", jobId);
+    }
+
+    return { inserted, updated, skipped, errors, errorDetails };
   }, []);
 
   return {
