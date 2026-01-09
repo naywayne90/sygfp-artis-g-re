@@ -18,6 +18,8 @@ import { BudgetValidation } from "@/components/budget/BudgetValidation";
 import { BudgetVersionHistory } from "@/components/budget/BudgetVersionHistory";
 import { CreditTransferForm } from "@/components/budget/CreditTransferForm";
 import { CreditTransferList } from "@/components/budget/CreditTransferList";
+import { BudgetFormulas } from "@/components/budget/BudgetFormulas";
+import { useBudgetSummary } from "@/hooks/useBudgetAvailability";
 import { 
   Wallet, 
   Plus, 
@@ -30,7 +32,8 @@ import {
   History,
   AlertTriangle,
   TreePine,
-  List
+  List,
+  TrendingDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -236,6 +239,9 @@ export default function PlanificationBudgetaire() {
           </div>
         </div>
       </div>
+
+      {/* Formules de référence */}
+      <BudgetFormulas />
 
       {/* Alert if budget not validated */}
       {totals.count > 0 && !isBudgetValidated && (
