@@ -29,8 +29,9 @@ const STATUTS = [
 ];
 
 const ETAPES = [
-  { value: "note", label: "Note" },
-  { value: "expression_besoin", label: "Expression de besoin" },
+  { value: "note_sef", label: "Note SEF" },
+  { value: "note_aef", label: "Note AEF" },
+  { value: "imputation", label: "Imputation" },
   { value: "marche", label: "Marché" },
   { value: "engagement", label: "Engagement" },
   { value: "liquidation", label: "Liquidation" },

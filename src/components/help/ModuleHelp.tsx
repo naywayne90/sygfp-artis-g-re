@@ -29,6 +29,12 @@ interface FAQItem {
   reponse: string;
 }
 
+interface DocumentRequis {
+  nom: string;
+  obligatoire: boolean;
+  description?: string;
+}
+
 interface ModuleHelpProps {
   module: string;
   titre: string;
@@ -36,6 +42,7 @@ interface ModuleHelpProps {
   etapes?: StepInfo[];
   faq?: FAQItem[];
   validateurs?: { role: string; action: string }[];
+  documentsRequis?: DocumentRequis[];
   className?: string;
   defaultOpen?: boolean;
 }
@@ -47,6 +54,7 @@ export function ModuleHelp({
   etapes = [],
   faq = [],
   validateurs = [],
+  documentsRequis = [],
   className,
   defaultOpen = false,
 }: ModuleHelpProps) {
@@ -76,10 +84,14 @@ export function ModuleHelp({
             <p className="text-sm text-muted-foreground mb-4">{description}</p>
 
             <Tabs defaultValue="procedure" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="procedure" className="text-xs">
                   <Workflow className="h-3 w-3 mr-1" />
                   Procédure
+                </TabsTrigger>
+                <TabsTrigger value="documents" className="text-xs">
+                  <BookOpen className="h-3 w-3 mr-1" />
+                  Documents
                 </TabsTrigger>
                 <TabsTrigger value="faq" className="text-xs">
                   <MessageCircleQuestion className="h-3 w-3 mr-1" />
@@ -119,6 +131,33 @@ export function ModuleHelp({
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-4">
                     Procédure non documentée pour ce module
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="documents" className="mt-4">
+                {documentsRequis.length > 0 ? (
+                  <div className="space-y-2">
+                    {documentsRequis.map((doc, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <span className="font-medium text-sm">{doc.nom}</span>
+                            {doc.description && (
+                              <p className="text-xs text-muted-foreground">{doc.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Badge variant={doc.obligatoire ? "default" : "outline"}>
+                          {doc.obligatoire ? "Obligatoire" : "Optionnel"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aucun document requis spécifié
                   </p>
                 )}
               </TabsContent>
@@ -181,19 +220,26 @@ export const MODULE_HELP_CONFIG: Record<
     module: "NOTES SEF",
     titre: "Notes Sans Effet Financier",
     description:
-      "Les Notes SEF sont le point d'entrée de la chaîne de dépense. Elles permettent d'exprimer un besoin qui n'a pas encore d'impact budgétaire direct.",
+      "Les Notes SEF sont le point d'entrée de la chaîne de dépense. Elles permettent d'exprimer un besoin qui n'a pas encore d'impact budgétaire direct. À la validation par le DG, un dossier est automatiquement créé avec un code pivot unique.",
     etapes: [
       { numero: 1, titre: "Création de la note", description: "Saisir l'objet, la direction demandeuse et les informations du bénéficiaire", acteur: "Agent" },
       { numero: 2, titre: "Soumission", description: "Soumettre la note pour validation hiérarchique", acteur: "Agent" },
-      { numero: 3, titre: "Validation DG", description: "Le DG valide ou rejette la note", acteur: "DG" },
-      { numero: 4, titre: "Passage en Note AEF", description: "Une fois validée, la note peut donner lieu à une Note AEF", acteur: "Service financier" },
+      { numero: 3, titre: "Validation DG", description: "Le DG valide ou rejette la note. À la validation, un DOSSIER est créé automatiquement.", acteur: "DG (obligatoire)" },
+      { numero: 4, titre: "Création du dossier", description: "Un code pivot unique est généré au format ARTI/ANNÉE/DIR/SEQ", acteur: "Système" },
+      { numero: 5, titre: "Passage en Note AEF", description: "Une Note AEF peut être créée en référençant cette Note SEF validée", acteur: "Service financier" },
     ],
     faq: [
       { question: "Quelle est la différence entre Note SEF et Note AEF ?", reponse: "La Note SEF exprime un besoin sans impact financier immédiat, tandis que la Note AEF inclut une estimation financière et nécessite une imputation budgétaire." },
       { question: "Puis-je modifier une note soumise ?", reponse: "Non, une fois soumise, la note ne peut plus être modifiée. Elle peut être rejetée pour correction." },
+      { question: "Que se passe-t-il à la validation d'une Note SEF ?", reponse: "Un dossier est créé automatiquement avec un code pivot unique. Ce dossier suivra toute la chaîne de dépense." },
+      { question: "Qui peut valider une Note SEF ?", reponse: "Seul le DG (Directeur Général) peut valider une Note SEF. C'est une règle stricte du système." },
+    ],
+    documentsRequis: [
+      { nom: "Demande écrite", obligatoire: true, description: "Document justifiant le besoin" },
+      { nom: "Devis estimatif", obligatoire: false, description: "Si montant déjà estimé" },
     ],
     validateurs: [
-      { role: "DG", action: "Validation finale de la Note SEF" },
+      { role: "DG", action: "Validation finale de la Note SEF (obligatoire)" },
     ],
   },
   notes_aef: {
@@ -239,18 +285,28 @@ export const MODULE_HELP_CONFIG: Record<
     module: "ENGAGEMENTS",
     titre: "Engagements Budgétaires",
     description:
-      "L'engagement est l'acte par lequel l'ordonnateur crée ou constate une obligation qui entraînera une charge. C'est la première étape de consommation effective des crédits.",
+      "L'engagement est l'acte par lequel l'ordonnateur crée ou constate une obligation qui entraînera une charge. C'est la première étape de consommation effective des crédits. Le système vérifie automatiquement le disponible budgétaire avant toute création.",
     etapes: [
-      { numero: 1, titre: "Création de l'engagement", description: "À partir d'une imputation ou d'un marché validé", acteur: "DAAF" },
-      { numero: 2, titre: "Saisie des informations", description: "Montant définitif, fournisseur, pièces justificatives", acteur: "DAAF" },
-      { numero: 3, titre: "Soumission", description: "Soumettre pour validation CB", acteur: "DAAF" },
-      { numero: 4, titre: "Validation CB", description: "Le CB valide et réserve les crédits", acteur: "CB" },
+      { numero: 1, titre: "Vérification du disponible", description: "Le système vérifie que le disponible budgétaire est suffisant", acteur: "Système" },
+      { numero: 2, titre: "Création de l'engagement", description: "À partir d'une imputation ou d'un marché validé", acteur: "DAAF" },
+      { numero: 3, titre: "Saisie des informations", description: "Montant définitif, fournisseur, pièces justificatives", acteur: "DAAF" },
+      { numero: 4, titre: "Soumission", description: "Soumettre pour validation CB", acteur: "DAAF" },
+      { numero: 5, titre: "Validation CB", description: "Le CB (Contrôleur Budgétaire) valide et réserve les crédits", acteur: "CB (obligatoire)" },
+      { numero: 6, titre: "Mise à jour budget", description: "Le montant engagé est déduit du disponible de la ligne", acteur: "Système" },
     ],
     faq: [
       { question: "Le montant de l'engagement peut-il différer de l'estimation ?", reponse: "Oui, le montant définitif après marché peut différer. Le système vérifie toujours le disponible." },
+      { question: "Que se passe-t-il si le disponible est insuffisant ?", reponse: "L'engagement est bloqué. Un message indique le montant disponible vs demandé. Un virement peut être nécessaire." },
+      { question: "Qui peut valider un engagement ?", reponse: "Seul le CB (Contrôleur Budgétaire) peut valider un engagement. C'est une règle stricte du système." },
+    ],
+    documentsRequis: [
+      { nom: "Bon de commande signé", obligatoire: true },
+      { nom: "Contrat ou lettre de commande", obligatoire: true },
+      { nom: "Facture proforma", obligatoire: false },
+      { nom: "PV d'attribution (si marché)", obligatoire: false },
     ],
     validateurs: [
-      { role: "CB", action: "Validation de l'engagement et réservation des crédits" },
+      { role: "CB", action: "Validation de l'engagement et réservation des crédits (obligatoire)" },
     ],
   },
   liquidations: {

@@ -234,26 +234,118 @@ export default function GestionRoles() {
                 </div>
               </div>
 
-              {/* Rôles système prédéfinis */}
+              {/* Rôles système prédéfinis avec actions */}
               <div className="p-4 bg-background rounded-lg border space-y-3">
-                <h4 className="font-medium">Rôles système prédéfinis</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-blue-500 text-blue-500">ADMIN</Badge>
-                    <span className="text-muted-foreground">Administrateur</span>
+                <h4 className="font-medium">Rôles système et leurs responsabilités</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-blue-500 text-blue-500 shrink-0">ADMIN</Badge>
+                    <div>
+                      <span className="font-medium">Administrateur</span>
+                      <p className="text-xs text-muted-foreground">Accès complet à tous les modules</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-green-500 text-green-500">CB</Badge>
-                    <span className="text-muted-foreground">Contrôleur Budgétaire</span>
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-green-500 text-green-500 shrink-0">CB</Badge>
+                    <div>
+                      <span className="font-medium">Contrôleur Budgétaire</span>
+                      <p className="text-xs text-muted-foreground">Imputation, validation engagements, virements</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-purple-500 text-purple-500">DAAF</Badge>
-                    <span className="text-muted-foreground">Dir. Admin & Financier</span>
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-purple-500 text-purple-500 shrink-0">DAAF</Badge>
+                    <div>
+                      <span className="font-medium">Dir. Admin & Financier</span>
+                      <p className="text-xs text-muted-foreground">Création engagements, liquidations</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="border-orange-500 text-orange-500">DG</Badge>
-                    <span className="text-muted-foreground">Directeur Général</span>
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-orange-500 text-orange-500 shrink-0">DG</Badge>
+                    <div>
+                      <span className="font-medium">Directeur Général</span>
+                      <p className="text-xs text-muted-foreground">Validation Notes SEF, signature ordonnancements</p>
+                    </div>
                   </div>
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-cyan-500 text-cyan-500 shrink-0">TRESORERIE</Badge>
+                    <div>
+                      <span className="font-medium">Trésorerie / Agent Comptable</span>
+                      <p className="text-xs text-muted-foreground">Exécution des règlements</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="border-pink-500 text-pink-500 shrink-0">DIRECTEUR</Badge>
+                    <div>
+                      <span className="font-medium">Directeur de département</span>
+                      <p className="text-xs text-muted-foreground">Validation Notes AEF de sa direction</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tableau récapitulatif Qui valide quoi */}
+              <div className="p-4 bg-background rounded-lg border space-y-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  Tableau "Qui valide quoi"
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-3">Action</th>
+                        <th className="text-left py-2 px-3">Rôle requis</th>
+                        <th className="text-left py-2 px-3">Remarque</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Valider Note SEF</td>
+                        <td className="py-2 px-3"><Badge>DG</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Crée automatiquement le dossier</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Valider Note AEF</td>
+                        <td className="py-2 px-3"><Badge>Directeur</Badge> ou <Badge>DG</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Selon périmètre direction</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Imputation budgétaire</td>
+                        <td className="py-2 px-3"><Badge>CB</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Vérifie le disponible</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Valider Marché</td>
+                        <td className="py-2 px-3"><Badge>DG</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Après avis commission</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Valider Engagement</td>
+                        <td className="py-2 px-3"><Badge>CB</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Réserve les crédits</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Valider Liquidation</td>
+                        <td className="py-2 px-3"><Badge>DAAF</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Après service fait</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Signer Ordonnancement</td>
+                        <td className="py-2 px-3"><Badge>DG</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Ordre de payer</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Exécuter Règlement</td>
+                        <td className="py-2 px-3"><Badge>TRESORERIE</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Paiement effectif</td>
+                      </tr>
+                      <tr className="hover:bg-muted/50">
+                        <td className="py-2 px-3">Approuver Virement</td>
+                        <td className="py-2 px-3"><Badge>CB</Badge></td>
+                        <td className="py-2 px-3 text-muted-foreground">Modification budgétaire</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
