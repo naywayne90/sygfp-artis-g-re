@@ -11,10 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, Plus, Pencil, Trash2, RefreshCw, Info,
-  UserCheck, Shield, MessageSquare, Bell
+  UserCheck, Shield, MessageSquare, Bell, Settings
 } from "lucide-react";
+import { ValidationMatrix } from "@/components/admin/ValidationMatrix";
 
 const ROLE_COLORS = {
   R: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -116,12 +118,30 @@ export default function MatriceRACI() {
       <div className="page-header">
         <h1 className="page-title flex items-center gap-2">
           <Users className="h-6 w-6" />
-          Matrice RACI
+          Matrice RACI & Validations
         </h1>
         <p className="page-description">
-          Définition des responsabilités par processus (Responsible, Accountable, Consulted, Informed)
+          Définition des responsabilités et règles de validation par processus
         </p>
       </div>
+
+      <Tabs defaultValue="validation" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="validation" className="gap-2">
+            <UserCheck className="h-4 w-4" />
+            Matrice de Validation
+          </TabsTrigger>
+          <TabsTrigger value="raci" className="gap-2">
+            <Settings className="h-4 w-4" />
+            Configuration RACI
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="validation">
+          <ValidationMatrix />
+        </TabsContent>
+
+        <TabsContent value="raci" className="space-y-6">
 
       {/* Légende */}
       <Card>
@@ -377,7 +397,9 @@ export default function MatriceRACI() {
             </Table>
           </ScrollArea>
         </CardContent>
-      </Card>
+        </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

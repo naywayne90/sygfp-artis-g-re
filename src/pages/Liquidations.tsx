@@ -15,6 +15,7 @@ import { LiquidationDeferDialog } from "@/components/liquidation/LiquidationDefe
 import { LiquidationValidateDialog } from "@/components/liquidation/LiquidationValidateDialog";
 import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
@@ -126,6 +127,9 @@ export default function Liquidations() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={6} />
+
+      {/* Aide contextuelle */}
+      <ModuleHelp {...MODULE_HELP_CONFIG.liquidations} />
 
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
