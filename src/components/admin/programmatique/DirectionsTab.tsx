@@ -146,6 +146,7 @@ export default function DirectionsTab() {
             onExport={handleExport}
             onDownloadTemplate={handleDownloadTemplate}
             isImporting={isImporting}
+            entityName="directions"
           />
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>

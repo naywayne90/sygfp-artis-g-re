@@ -158,6 +158,7 @@ export default function ObjectifsStrategiquesTab() {
             onExport={handleExport}
             onDownloadTemplate={handleDownloadTemplate}
             isImporting={isImporting}
+            entityName="objectifs stratégiques"
           />
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>

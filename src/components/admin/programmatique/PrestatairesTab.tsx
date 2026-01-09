@@ -188,6 +188,7 @@ export default function PrestatairesTab() {
             onExport={handleExport}
             onDownloadTemplate={handleDownloadTemplate}
             isImporting={isImporting}
+            entityName="prestataires"
           />
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>

@@ -157,6 +157,7 @@ export default function ActivitesTab() {
             onExport={handleExport}
             onDownloadTemplate={handleDownloadTemplate}
             isImporting={isImporting}
+            entityName="activités"
           />
           <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
             <DialogTrigger asChild>
