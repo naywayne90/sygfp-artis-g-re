@@ -23,7 +23,7 @@ export interface ParsedRow {
   computed: {
     imputation: string | null;
     calculatedImputation: string | null;
-    imputationFormat: "17" | "19" | null;
+    imputationFormat: "17" | "18" | null;
     osCode: number | null;
     actionCode: number | null;
     activiteCode: number | null;
@@ -164,9 +164,18 @@ function padCode(value: number | null, width: number): string | null {
   return String(value).padStart(width, "0");
 }
 
-// Calculate imputation code based on the business rules
-// Format 17 digits (no Action): OS(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
-// Format 19 digits (with Action): OS(2) + Action(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
+/**
+ * RÈGLE CRITIQUE - SOURCE DE VÉRITÉ
+ * Reconstruire TOUJOURS l'imputation à partir des composants pour éviter la perte de précision Excel.
+ * 
+ * Format 18 chiffres (standard avec Action):
+ *   OS(2) + Action(2) + Activité(3) + SousActivité(2) + Direction(2) + NatureDépense(1) + NBE(6) = 18
+ * 
+ * Format 17 chiffres (sans Action):
+ *   OS(2) + Activité(3) + SousActivité(2) + Direction(2) + NatureDépense(1) + NBE(6) = 16 → Non, avec Activité(3)+SousAct(3) = 17
+ * 
+ * Attention: ne JAMAIS importer l'imputation comme nombre car Excel convertit 18 chiffres en 1.10E+17
+ */
 function calculateImputation(
   osCode: number | null,
   actionCode: number | null,
@@ -175,7 +184,7 @@ function calculateImputation(
   directionCode: number | null,
   natureDepenseCode: number | null,
   nbeCode: string | null
-): { imputation: string | null; format: "17" | "19" | null; errors: string[] } {
+): { imputation: string | null; format: "17" | "18" | null; errors: string[] } {
   const errors: string[] = [];
   
   // NBE is required and must be 6 digits
@@ -218,18 +227,18 @@ function calculateImputation(
   // Build the imputation code
   const osPadded = padCode(osCode, 2)!;
   const activitePadded = padCode(activiteCode, 3)!;
-  const sousActivitePadded = padCode(sousActiviteCode, 3)!;
+  const sousActivitePadded = padCode(sousActiviteCode, 2)!; // 2 digits as per ARTI format
   const directionPadded = padCode(directionCode, 2)!;
   const naturePadded = padCode(natureDepenseCode, 1)!;
   const nbePadded = nbeCode!;
   
   if (actionCode !== null) {
-    // Format 19 digits: OS(2) + Action(2) + Activité(3) + Sous(3) + Direction(2) + Nature(1) + NBE(6)
+    // Format 18 chiffres: OS(2) + Action(2) + Activité(3) + SousAct(2) + Direction(2) + Nature(1) + NBE(6) = 18
     const actionPadded = padCode(actionCode, 2)!;
     const imputation = `${osPadded}${actionPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
-    return { imputation, format: "19", errors: [] };
+    return { imputation, format: "18", errors: [] };
   } else {
-    // Format 17 digits: OS(2) + Activité(3) + SousActivité(3) + Direction(2) + NatureDépense(1) + NBE(6)
+    // Format 16 chiffres (sans Action): OS(2) + Activité(3) + SousAct(2) + Direction(2) + Nature(1) + NBE(6) = 16
     const imputation = `${osPadded}${activitePadded}${sousActivitePadded}${directionPadded}${naturePadded}${nbePadded}`;
     return { imputation, format: "17", errors: [] };
   }
