@@ -554,6 +554,76 @@ export function useImportJobs() {
     }
   }, []);
 
+  // Fetch all import jobs with optional filters
+  const fetchAllJobs = useCallback(async (options?: {
+    exercice?: number;
+    status?: string;
+    module?: string;
+    limit?: number;
+  }): Promise<ImportJob[]> => {
+    try {
+      let query = supabase
+        .from("import_jobs")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (options?.exercice) {
+        query = query.eq("exercice_id", options.exercice);
+      }
+      if (options?.status) {
+        query = query.eq("status", options.status);
+      }
+      if (options?.module) {
+        query = query.eq("module", options.module);
+      }
+      if (options?.limit) {
+        query = query.limit(options.limit);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return (data || []).map(job => ({
+        ...job,
+        stats: job.stats as unknown as ImportJobStats,
+        status: job.status as ImportJob["status"],
+      })) as ImportJob[];
+    } catch (error) {
+      console.error("Error fetching all jobs:", error);
+      return [];
+    }
+  }, []);
+
+  // Retry a failed import (reset status to draft)
+  const retryImport = useCallback(async (jobId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from("import_jobs")
+        .update({ 
+          status: "draft",
+          completed_at: null,
+          notes: null,
+        })
+        .eq("id", jobId);
+
+      if (error) throw error;
+
+      await supabase.from("audit_logs").insert({
+        action: "IMPORT_RETRY",
+        entity_type: "import_jobs",
+        entity_id: jobId,
+      });
+
+      toast.success("Import réinitialisé, vous pouvez le rejouer");
+      return true;
+    } catch (error) {
+      console.error("Error retrying import:", error);
+      toast.error("Erreur lors de la réinitialisation");
+      return false;
+    }
+  }, []);
+
   return {
     currentJob,
     importRows,
@@ -568,5 +638,7 @@ export function useImportJobs() {
     markJobFailed,
     fetchJob,
     exportErrors,
+    fetchAllJobs,
+    retryImport,
   };
 }
