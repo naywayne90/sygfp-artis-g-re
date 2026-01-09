@@ -14,6 +14,8 @@ import { MarcheDetails } from "@/components/marches/MarcheDetails";
 import { MarcheRejectDialog } from "@/components/marches/MarcheRejectDialog";
 import { MarcheDeferDialog } from "@/components/marches/MarcheDeferDialog";
 import { MarcheValidateDialog } from "@/components/marches/MarcheValidateDialog";
+import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 import { 
   Plus, 
   ShoppingCart, 
@@ -55,32 +57,40 @@ export default function Marches() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Indicateur de workflow */}
+      <WorkflowStepIndicator currentStep={4} />
+
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle 
-          title="Passation de Marchés (SDPM)" 
-          description="Gestion des marchés et workflow de validation" 
-        />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button 
-                  onClick={() => setShowForm(true)} 
-                  className="gap-2"
-                  disabled={!canWrite}
-                >
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouveau marché
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
-              <TooltipContent>
-                <p>{getDisabledMessage()}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex-1">
+          <ExerciceSubtitle 
+            title="Passation de Marchés (SDPM)" 
+            description="Gestion des marchés et workflow de validation" 
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <ModuleHelp {...MODULE_HELP_CONFIG.marches} />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button 
+                    onClick={() => setShowForm(true)} 
+                    className="gap-2"
+                    disabled={!canWrite}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Nouveau marché
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* KPIs */}

@@ -17,13 +17,11 @@ import {
   FileText,
   ArrowRight,
   Eye,
-  HelpCircle,
-  Info
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
+import { BudgetFormulas } from "@/components/budget/BudgetFormulas";
 
 export default function Imputation() {
   const { exercice } = useExercice();
@@ -36,7 +34,6 @@ export default function Imputation() {
   } = useImputation();
 
   const [activeTab, setActiveTab] = useState("a_imputer");
-  const [showHelp, setShowHelp] = useState(false);
 
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
@@ -54,36 +51,12 @@ export default function Imputation() {
               Affectation des notes AEF validées aux lignes budgétaires - Exercice {exercice}
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setShowHelp(!showHelp)}>
-            <HelpCircle className="h-4 w-4 mr-1" />
-            Aide
-          </Button>
+          <ModuleHelp {...MODULE_HELP_CONFIG.imputation} />
         </div>
       </div>
 
-      {/* Section d'aide */}
-      <Collapsible open={showHelp} onOpenChange={setShowHelp}>
-        <CollapsibleContent>
-          <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-200">Comment fonctionne l'imputation ?</AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300 space-y-2">
-              <p>L'imputation est l'étape 2 de la chaîne de dépense, juste après les Notes AEF.</p>
-              <ol className="list-decimal list-inside space-y-1 mt-2">
-                <li><strong>Notes à imputer :</strong> Les notes AEF validées apparaissent ici en attente d'imputation</li>
-                <li><strong>Affectation :</strong> Cliquez sur "Imputer" pour affecter la note à une ligne budgétaire</li>
-                <li><strong>Vérification :</strong> Le système vérifie la disponibilité budgétaire</li>
-                <li><strong>Création du dossier :</strong> Un dossier de dépense est créé automatiquement</li>
-              </ol>
-              <p className="mt-2">
-                <Button variant="link" className="p-0 h-auto text-blue-600" onClick={() => navigate("/notes-aef")}>
-                  → Gérer les Notes AEF
-                </Button>
-              </p>
-            </AlertDescription>
-          </Alert>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Formules de référence */}
+      <BudgetFormulas compact />
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
