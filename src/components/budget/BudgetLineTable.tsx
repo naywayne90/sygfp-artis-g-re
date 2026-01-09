@@ -80,6 +80,10 @@ export function BudgetLineTable({
     liquide: number;
     ordonnance: number;
     paye: number;
+    virements_recus: number;
+    virements_emis: number;
+    dotation_actuelle: number;
+    disponible: number;
   }>>({});
 
   useEffect(() => {
@@ -117,11 +121,36 @@ export function BudgetLineTable({
         .eq("exercice", exercice)
         .eq("statut", "paye");
 
-      const execMap: Record<string, { engage: number; liquide: number; ordonnance: number; paye: number }> = {};
+      // POINT 4: Fetch virements exécutés pour calculer dotation_actuelle
+      const { data: virements } = await supabase
+        .from("credit_transfers")
+        .select("from_budget_line_id, to_budget_line_id, amount")
+        .eq("exercice", exercice)
+        .eq("status", "execute");
 
-      // Initialize
-      lineIds.forEach(id => {
-        execMap[id] = { engage: 0, liquide: 0, ordonnance: 0, paye: 0 };
+      const execMap: Record<string, { 
+        engage: number; liquide: number; ordonnance: number; paye: number;
+        virements_recus: number; virements_emis: number; dotation_actuelle: number; disponible: number;
+      }> = {};
+
+      // Initialize with line data
+      lines.forEach(line => {
+        execMap[line.id] = { 
+          engage: 0, liquide: 0, ordonnance: 0, paye: 0,
+          virements_recus: 0, virements_emis: 0, 
+          dotation_actuelle: line.dotation_initiale,
+          disponible: line.dotation_initiale 
+        };
+      });
+
+      // Calculate virements per line
+      virements?.forEach(v => {
+        if (v.from_budget_line_id && execMap[v.from_budget_line_id]) {
+          execMap[v.from_budget_line_id].virements_emis += v.amount || 0;
+        }
+        if (v.to_budget_line_id && execMap[v.to_budget_line_id]) {
+          execMap[v.to_budget_line_id].virements_recus += v.amount || 0;
+        }
       });
 
       // Sum engagements
@@ -155,6 +184,15 @@ export function BudgetLineTable({
         }
       });
 
+      // POINT 4: Calculer dotation_actuelle et disponible pour chaque ligne
+      lines.forEach(line => {
+        if (execMap[line.id]) {
+          const { virements_recus, virements_emis, engage } = execMap[line.id];
+          execMap[line.id].dotation_actuelle = line.dotation_initiale + virements_recus - virements_emis;
+          execMap[line.id].disponible = execMap[line.id].dotation_actuelle - engage;
+        }
+      });
+
       setExecutionData(execMap);
     };
 
@@ -169,7 +207,8 @@ export function BudgetLineTable({
             <TableHead className="w-[100px]">Code</TableHead>
             <TableHead>Libellé</TableHead>
             <TableHead>Direction</TableHead>
-            <TableHead className="text-right">Dotation</TableHead>
+            <TableHead className="text-right">Dotation Init.</TableHead>
+            <TableHead className="text-right">Dotation Act.</TableHead>
             <TableHead className="text-right">Engagé</TableHead>
             <TableHead className="text-right">Liquidé</TableHead>
             <TableHead className="text-right">Payé</TableHead>
@@ -181,17 +220,21 @@ export function BudgetLineTable({
         <TableBody>
           {lines.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={12} className="text-center py-8 text-muted-foreground">
                 Aucune ligne budgétaire trouvée
               </TableCell>
             </TableRow>
           ) : (
             lines.map((line) => {
-              const exec = executionData[line.id] || { engage: 0, liquide: 0, ordonnance: 0, paye: 0 };
-              const available = line.dotation_initiale - exec.engage;
+              const exec = executionData[line.id] || { 
+                engage: 0, liquide: 0, ordonnance: 0, paye: 0,
+                virements_recus: 0, virements_emis: 0,
+                dotation_actuelle: line.dotation_initiale,
+                disponible: line.dotation_initiale
+              };
               const displayCode = getDisplayBudgetCode(line);
-              const tauxExec = line.dotation_initiale > 0 
-                ? Math.round((exec.paye / line.dotation_initiale) * 100) 
+              const tauxExec = exec.dotation_actuelle > 0 
+                ? Math.round((exec.paye / exec.dotation_actuelle) * 100) 
                 : 0;
 
               return (
@@ -221,8 +264,18 @@ export function BudgetLineTable({
                   <TableCell>
                     {line.direction?.code || "-"}
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right font-mono text-muted-foreground">
                     {formatCurrency(line.dotation_initiale)}
+                  </TableCell>
+                  {/* POINT 4: Colonne Dotation Actuelle */}
+                  <TableCell className="text-right font-mono font-medium">
+                    {formatCurrency(exec.dotation_actuelle)}
+                    {(exec.virements_recus > 0 || exec.virements_emis > 0) && (
+                      <div className="text-xs text-muted-foreground">
+                        {exec.virements_recus > 0 && <span className="text-green-600">+{formatCurrency(exec.virements_recus).replace(' FCFA', '')}</span>}
+                        {exec.virements_emis > 0 && <span className="text-red-600 ml-1">-{formatCurrency(exec.virements_emis).replace(' FCFA', '')}</span>}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-right font-mono text-orange-600">
                     {formatCurrency(exec.engage)}
@@ -233,8 +286,12 @@ export function BudgetLineTable({
                   <TableCell className="text-right font-mono text-green-600">
                     {formatCurrency(exec.paye)}
                   </TableCell>
-                  <TableCell className={`text-right font-mono ${available < 0 ? "text-red-600" : "text-green-600"}`}>
-                    {formatCurrency(available)}
+                  {/* POINT 4: Colonne Disponible avec alerte si négatif */}
+                  <TableCell className={`text-right font-mono font-bold ${exec.disponible < 0 ? "text-red-600 bg-red-50 dark:bg-red-950/30" : "text-green-600"}`}>
+                    {formatCurrency(exec.disponible)}
+                    {exec.disponible < 0 && (
+                      <div className="text-xs">⚠️ Dépassement</div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
