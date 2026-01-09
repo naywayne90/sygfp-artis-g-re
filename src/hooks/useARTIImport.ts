@@ -161,64 +161,163 @@ export function useARTIImport() {
     return mapping;
   }, []);
 
-  // Clean and preserve codes as strings (preserve leading zeros)
-  const cleanCode = useCallback((value: unknown): string | null => {
+  /**
+   * ============================================================================
+   * RÈGLES DE NETTOYAGE ET EXTRACTION DES CODES (ULTRA IMPORTANT)
+   * ============================================================================
+   * Ces fonctions appliquent les règles métier strictes pour l'import ARTI
+   */
+
+  /**
+   * Extrait un code numérique entier depuis une valeur brute
+   * Exemples:
+   *   - "2 Biens et services" → "2"
+   *   - "01" → "1" (puis sera paddé)
+   *   - 2.0 → "2"
+   *   - "01 Direction Générale" → "1"
+   */
+  const extractIntegerCode = useCallback((value: unknown): number | null => {
     if (value === null || value === undefined || value === "") return null;
+    
+    // Handle numbers directly
+    if (typeof value === "number") {
+      return Math.floor(value);
+    }
+    
+    const str = String(value).trim();
+    if (str === "") return null;
+    
+    // Extract leading digits from string (e.g., "2 Biens et services" → "2")
+    const match = str.match(/^(\d+)/);
+    if (match) {
+      return parseInt(match[1], 10);
+    }
+    
+    return null;
+  }, []);
+
+  /**
+   * Extrait le code Nature de Dépense (1 chiffre)
+   * Règle: Prendre le PREMIER chiffre uniquement
+   * Exemples:
+   *   - "4 Investissements" → "4"
+   *   - "2 Biens et services" → "2"
+   *   - 4 → "4"
+   */
+  const extractNatureDepenseCode = useCallback((value: unknown): string | null => {
+    if (value === null || value === undefined || value === "") return null;
+    
+    if (typeof value === "number") {
+      return String(Math.floor(value)).charAt(0);
+    }
     
     const str = String(value).trim();
     
-    // If it's a number like 1.0 or 2.0, convert to integer string
-    if (typeof value === "number") {
-      const intVal = Math.floor(value);
-      return String(intVal);
-    }
-    
-    // Extract leading digits if there's text after (e.g., "2 Biens et services" → "2")
-    const match = str.match(/^(\d+)/);
+    // Extract first digit
+    const match = str.match(/(\d)/);
     if (match) {
       return match[1];
     }
     
-    return str === "" ? null : str;
+    return null;
   }, []);
 
-  // Clean montant value
-  const cleanMontant = useCallback((value: unknown): number | null => {
-    if (value === null || value === undefined || value === "") return null;
-    
-    if (typeof value === "number") return value;
-    
-    const str = String(value)
-      .trim()
-      .replace(/\s/g, "") // Remove spaces
-      .replace(/\u00A0/g, "") // Remove non-breaking spaces
-      .replace(/,/g, "."); // Convert comma to dot
-    
-    const num = parseFloat(str);
-    return isNaN(num) ? null : num;
-  }, []);
-
-  // Extract NBE code (6 digits)
+  /**
+   * Extrait le code NBE (6 chiffres) depuis Nature éco
+   * Règle: Prendre les 6 premiers chiffres AVANT les espaces ou ":"
+   * Exemples:
+   *   - "221100 : Achats de matériel" → "221100"
+   *   - "671700: Services" → "671700"
+   *   - 221100 → "221100"
+   *   - "22110" → "022110" (padded)
+   */
   const extractNBECode = useCallback((value: unknown): string | null => {
     if (value === null || value === undefined || value === "") return null;
     
     const str = String(value).trim();
     
-    // If it's a number, format it
+    // If it's a number, format it directly
     if (typeof value === "number") {
       const numStr = String(Math.floor(value));
+      // Ensure 6 digits with leading zeros if needed
       return numStr.substring(0, 6).padStart(6, "0");
     }
     
-    // Extract digits from string
-    const digitsOnly = str.replace(/\D/g, "");
+    // Extract part before ":" or " " first, then get digits
+    const beforeSeparator = str.split(/[:\s]/)[0].trim();
+    const digitsOnly = beforeSeparator.replace(/\D/g, "");
+    
     if (digitsOnly.length >= 6) {
       return digitsOnly.substring(0, 6);
     } else if (digitsOnly.length > 0) {
       return digitsOnly.padStart(6, "0");
     }
     
+    // Fallback: try to extract any 6 consecutive digits
+    const allDigits = str.replace(/\D/g, "");
+    if (allDigits.length >= 6) {
+      return allDigits.substring(0, 6);
+    } else if (allDigits.length > 0) {
+      return allDigits.padStart(6, "0");
+    }
+    
     return null;
+  }, []);
+
+  /**
+   * Nettoie et valide un montant
+   * Retourne null si invalide ou <= 0
+   */
+  const cleanMontant = useCallback((value: unknown): number | null => {
+    if (value === null || value === undefined || value === "") return null;
+    
+    if (typeof value === "number") {
+      return value > 0 ? value : null;
+    }
+    
+    const str = String(value)
+      .trim()
+      .replace(/\s/g, "") // Remove spaces (thousand separators)
+      .replace(/\u00A0/g, "") // Remove non-breaking spaces
+      .replace(/,/g, "."); // Convert comma to dot
+    
+    const num = parseFloat(str);
+    return (!isNaN(num) && num > 0) ? num : null;
+  }, []);
+
+  /**
+   * Vérifie si une ligne est valide pour import (filtrage initial)
+   * Règle: Ignorer les lignes où OS, Direction, Montant sont TOUS vides
+   */
+  const isRowValidForImport = useCallback((
+    os: number | null,
+    direction: number | null,
+    montant: number | null
+  ): boolean => {
+    // Skip if ALL required fields are empty (pivot/summary rows)
+    if (os === null && direction === null && montant === null) {
+      return false;
+    }
+    // Also skip if OS is empty (critical identifier)
+    if (os === null) {
+      return false;
+    }
+    return true;
+  }, []);
+
+  /**
+   * Applique le padding selon les règles métier:
+   * - OS: 2 digits
+   * - Action: 2 digits
+   * - Activité: 3 digits
+   * - Sous-Activité: 2 digits
+   * - Direction: 2 digits
+   * - Nature Dépense: 1 digit
+   * - NBE: 6 digits
+   */
+  const padCode = useCallback((value: number | null, width: number): string => {
+    if (value === null) return "0".repeat(width);
+    return String(value).padStart(width, "0");
   }, []);
 
   /**
@@ -378,23 +477,57 @@ export function useARTIImport() {
         return idx >= 0 ? row[idx] : null;
       };
 
-      const rawImputation = cleanCode(getVal("imputation"));
-      const rawOs = cleanCode(getVal("os"));
-      const rawAction = cleanCode(getVal("action"));
-      const rawActivite = cleanCode(getVal("activite"));
-      const rawSousActivite = cleanCode(getVal("sousActivite"));
-      const rawDirection = cleanCode(getVal("direction"));
-      const rawNatureDepense = cleanCode(getVal("natureDepense"));
-      const rawNbe = extractNBECode(getVal("nbe"));
-      const rawMontant = cleanMontant(getVal("montant"));
+      // ============================================================================
+      // EXTRACTION DES CODES AVEC RÈGLES STRICTES
+      // ============================================================================
+      
+      // Extract raw imputation (for comparison only - will be recalculated)
+      const rawImputationValue = getVal("imputation");
+      const rawImputationStr = rawImputationValue ? String(rawImputationValue).trim() : null;
+      
+      // Extract codes as integers, then apply padding
+      const osInt = extractIntegerCode(getVal("os"));
+      const actionInt = extractIntegerCode(getVal("action"));
+      const activiteInt = extractIntegerCode(getVal("activite"));
+      const sousActiviteInt = extractIntegerCode(getVal("sousActivite"));
+      const directionInt = extractIntegerCode(getVal("direction"));
+      
+      // Nature dépense: extract FIRST digit only (e.g., "4 Investissements" → "4")
+      const natureDepenseCode = extractNatureDepenseCode(getVal("natureDepense"));
+      
+      // NBE: extract 6 digits before space/colon (e.g., "221100 : Achats" → "221100")
+      const nbeCode = extractNBECode(getVal("nbe"));
+      
+      // Montant: clean and validate
+      const montant = cleanMontant(getVal("montant"));
+      
+      // Libellé
       const rawLibelle = String(getVal("libelle") || "").trim();
+
+      // ============================================================================
+      // RÈGLE: IGNORER LES LIGNES VIDES/PIVOTS
+      // Skip rows where OS, Direction, Montant are ALL empty
+      // ============================================================================
+      if (!isRowValidForImport(osInt, directionInt, montant)) {
+        continue; // Skip this row entirely - it's likely a summary/pivot row
+      }
+
+      // Apply padding to codes
+      const rawOs = osInt !== null ? padCode(osInt, 2) : null;
+      const rawAction = actionInt !== null ? padCode(actionInt, 2) : null;
+      const rawActivite = activiteInt !== null ? padCode(activiteInt, 3) : null;
+      const rawSousActivite = sousActiviteInt !== null ? padCode(sousActiviteInt, 2) : null;
+      const rawDirection = directionInt !== null ? padCode(directionInt, 2) : null;
+      const rawNatureDepense = natureDepenseCode;
+      const rawNbe = nbeCode;
+      const rawMontant = montant;
 
       const errors: string[] = [];
       const warnings: string[] = [];
 
       // Validate required fields
-      if (rawMontant === null || rawMontant <= 0) {
-        errors.push("Montant invalide ou manquant");
+      if (rawMontant === null) {
+        errors.push("Montant invalide, manquant ou ≤ 0");
       }
 
       // Match references
@@ -417,6 +550,7 @@ export function useARTIImport() {
 
       /**
        * RÈGLE CRITIQUE: TOUJOURS reconstruire l'imputation à partir des composants
+       * Format 18 chiffres: OS(2) + Action(2) + Activité(3) + SousAct(2) + Dir(2) + Nat(1) + NBE(6) = 18
        * Ne jamais faire confiance à la colonne "imputation" du fichier Excel car:
        * - Excel peut convertir 18 chiffres en notation scientifique (1.10E+17)
        * - Les parseurs peuvent perdre des chiffres significatifs
@@ -439,11 +573,12 @@ export function useARTIImport() {
       }
 
       // Compare with raw imputation for validation (if available and looks valid)
-      if (rawImputation && rawImputation.length >= 17 && finalCode) {
-        const normalizedRaw = rawImputation.replace(/\D/g, "");
+      // This is WARNING only - we always use the recalculated code
+      if (rawImputationStr && rawImputationStr.length >= 17 && finalCode) {
+        const normalizedRaw = rawImputationStr.replace(/\D/g, "");
         const normalizedCalc = finalCode.replace(/\D/g, "");
         if (normalizedRaw !== normalizedCalc && normalizedRaw.length >= 17) {
-          warnings.push(`Imputation recalculée: "${finalCode}" (fichier: "${rawImputation}")`);
+          warnings.push(`Imputation recalculée: "${finalCode}" (fichier: "${rawImputationStr}")`);
         }
       }
 
@@ -482,7 +617,7 @@ export function useARTIImport() {
       const rawRow: ARTIRawRow = {
         rowIndex: i + 1,
         sheetName: selectedSheet,
-        imputation: rawImputation,
+        imputation: rawImputationStr,
         os: rawOs,
         action: rawAction,
         activite: rawActivite,
@@ -548,7 +683,7 @@ export function useARTIImport() {
       allSheets,
       stats,
     };
-  }, [detectBestSheet, fetchReferenceData, autoDetectARTIMapping, cleanCode, cleanMontant, extractNBECode, calculateImputation, findReference]);
+  }, [detectBestSheet, fetchReferenceData, autoDetectARTIMapping, extractIntegerCode, extractNatureDepenseCode, extractNBECode, cleanMontant, isRowValidForImport, padCode, calculateImputation, findReference]);
 
   // Execute import to budget_lines table
   const executeARTIImport = useCallback(async (
