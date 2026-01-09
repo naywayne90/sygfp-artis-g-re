@@ -778,8 +778,9 @@ export function useReferentielSync() {
     }
   }, [importOS, importActions, importActivites, importSousActivites, importDirections, importNBE, importNatureDepense]);
 
-  // Refresh all dropdown caches
+  // Refresh all dropdown caches AND dashboard stats after import
   const refreshDropdowns = useCallback(() => {
+    // Referential dropdowns
     queryClient.invalidateQueries({ queryKey: ["objectifs-strategiques"] });
     queryClient.invalidateQueries({ queryKey: ["actions"] });
     queryClient.invalidateQueries({ queryKey: ["activites"] });
@@ -789,6 +790,17 @@ export function useReferentielSync() {
     queryClient.invalidateQueries({ queryKey: ["ref-data"] });
     queryClient.invalidateQueries({ queryKey: ["ref-nve"] });
     queryClient.invalidateQueries({ queryKey: ["nature-depense"] });
+    
+    // Budget data
+    queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
+    queryClient.invalidateQueries({ queryKey: ["budget_lines"] });
+    
+    // Dashboard stats (post-import auto-refresh)
+    queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["os-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["disponibilite-budget"] });
+    queryClient.invalidateQueries({ queryKey: ["dossier-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["delais-stats"] });
   }, [queryClient]);
 
   // Auto-create missing reference

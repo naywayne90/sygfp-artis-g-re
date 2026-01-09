@@ -122,6 +122,37 @@ export function KPICards() {
     enabled: !!exercice,
   });
 
+  // Montants par Direction
+  const { data: directionStats } = useQuery({
+    queryKey: ["direction-stats", exercice],
+    queryFn: async () => {
+      const { data: budgetLines } = await supabase
+        .from("budget_lines")
+        .select(`
+          id, dotation_initiale, direction_id,
+          directions(id, code, label)
+        `)
+        .eq("exercice", exercice);
+
+      const dirMap = new Map<string, { code: string; label: string; dotation: number }>();
+      
+      budgetLines?.forEach(bl => {
+        if (bl.direction_id && bl.directions) {
+          const dir = bl.directions as any;
+          const existing = dirMap.get(bl.direction_id) || { code: dir.code, label: dir.label, dotation: 0 };
+          existing.dotation += bl.dotation_initiale || 0;
+          dirMap.set(bl.direction_id, existing);
+        }
+      });
+
+      return Array.from(dirMap.entries())
+        .map(([id, stats]) => ({ id, ...stats }))
+        .sort((a, b) => b.dotation - a.dotation)
+        .slice(0, 5);
+    },
+    enabled: !!exercice,
+  });
+
   // Disponibilité budgétaire - CORRIGÉ: utilise uniquement engagements validés
   const { data: disponibilite } = useQuery({
     queryKey: ["disponibilite-budget", exercice],
@@ -225,7 +256,7 @@ export function KPICards() {
       </div>
 
       {/* Délais moyens et disponibilité */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -308,17 +339,46 @@ export function KPICards() {
             {(!osStats || osStats.length === 0) ? (
               <div className="text-center py-2">
                 <Building2 className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-                <p className="text-xs text-muted-foreground">Structure de planification à charger</p>
+                <p className="text-xs text-muted-foreground">Aucun OS associé</p>
                 <Button variant="link" size="sm" className="text-xs p-0 h-auto mt-1" asChild>
-                  <a href="/planification/budget">→ Importer la structure</a>
+                  <a href="/planification/budget">→ Importer le budget</a>
                 </Button>
               </div>
             ) : (
               <div className="space-y-2">
-                {osStats?.map((os, index) => (
+                {osStats?.map((os) => (
                   <div key={os.id} className="flex items-center justify-between text-sm">
-                    <span className="truncate max-w-[150px]">{os.code}</span>
+                    <span className="truncate max-w-[120px]" title={os.label}>{os.code}</span>
                     <span className="font-medium">{formatMontant(os.dotation)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Top Directions par dotation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(!directionStats || directionStats.length === 0) ? (
+              <div className="text-center py-2">
+                <Building2 className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="text-xs text-muted-foreground">Aucune direction associée</p>
+                <Button variant="link" size="sm" className="text-xs p-0 h-auto mt-1" asChild>
+                  <a href="/planification/budget">→ Importer le budget</a>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {directionStats?.map((dir) => (
+                  <div key={dir.id} className="flex items-center justify-between text-sm">
+                    <span className="truncate max-w-[120px]" title={dir.label}>{dir.code}</span>
+                    <span className="font-medium">{formatMontant(dir.dotation)}</span>
                   </div>
                 ))}
               </div>
