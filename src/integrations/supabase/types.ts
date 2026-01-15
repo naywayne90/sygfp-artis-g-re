@@ -5435,6 +5435,7 @@ export type Database = {
       notes_sef_pieces: {
         Row: {
           fichier_url: string
+          file_hash: string | null
           id: string
           nom: string
           note_id: string
@@ -5445,6 +5446,7 @@ export type Database = {
         }
         Insert: {
           fichier_url: string
+          file_hash?: string | null
           id?: string
           nom: string
           note_id: string
@@ -5455,6 +5457,7 @@ export type Database = {
         }
         Update: {
           fichier_url?: string
+          file_hash?: string | null
           id?: string
           nom?: string
           note_id?: string
