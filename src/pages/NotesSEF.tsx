@@ -12,6 +12,7 @@ import { useNotesSEF, NoteSEF } from "@/hooks/useNotesSEF";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { useExport } from "@/hooks/useExport";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
@@ -25,6 +26,7 @@ import {
   XCircle,
   Clock,
   Loader2,
+  Download,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -32,6 +34,7 @@ export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
+  const { isExporting, exportToExcel } = useExport();
   const {
     notes,
     notesByStatus,
@@ -42,6 +45,53 @@ export default function NotesSEF() {
     deferNote,
     deleteNote,
   } = useNotesSEF();
+
+  const handleExportExcel = async () => {
+    const exportData = filteredNotes.map((note) => ({
+      "N° Note": note.numero || "",
+      "Objet": note.objet,
+      "Direction": note.direction?.label || note.direction?.sigle || "",
+      "Demandeur": note.demandeur
+        ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`
+        : "",
+      "Statut": getStatutLabel(note.statut),
+      "Urgence": getUrgenceLabel(note.urgence),
+      "Exercice": note.exercice,
+      "Date Création": note.created_at
+        ? new Date(note.created_at).toLocaleDateString("fr-FR")
+        : "",
+      "Description": note.description || "",
+      "Commentaire": note.commentaire || "",
+    }));
+
+    await exportToExcel(
+      exportData,
+      `notes_sef_${exercice}_${activeTab}`,
+      "Notes SEF"
+    );
+  };
+
+  const getStatutLabel = (statut: string | null) => {
+    const labels: Record<string, string> = {
+      brouillon: "Brouillon",
+      soumis: "Soumis",
+      a_valider: "À valider",
+      valide: "Validé",
+      rejete: "Rejeté",
+      differe: "Différé",
+    };
+    return labels[statut || "brouillon"] || statut || "";
+  };
+
+  const getUrgenceLabel = (urgence: string | null) => {
+    const labels: Record<string, string> = {
+      basse: "Basse",
+      normale: "Normale",
+      haute: "Haute",
+      urgente: "Urgente",
+    };
+    return labels[urgence || "normale"] || urgence || "";
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("toutes");
@@ -128,27 +178,42 @@ export default function NotesSEF() {
           title="Notes SEF" 
           description="Gestion des Notes Sans Effet Financier" 
         />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button 
-                  onClick={() => setFormOpen(true)} 
-                  className="gap-2"
-                  disabled={!canWrite}
-                >
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouvelle note SEF
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
-              <TooltipContent>
-                <p>{getDisabledMessage()}</p>
-              </TooltipContent>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExportExcel}
+            disabled={isExporting || filteredNotes.length === 0}
+            className="gap-2"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
             )}
-          </Tooltip>
-        </TooltipProvider>
+            Exporter Excel
+          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button 
+                    onClick={() => setFormOpen(true)} 
+                    className="gap-2"
+                    disabled={!canWrite}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Nouvelle note SEF
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* KPIs */}
