@@ -5031,6 +5031,7 @@ export type Database = {
           commentaire: string | null
           id: string
           ip_address: string | null
+          metadata: Json | null
           new_statut: string | null
           note_id: string
           old_statut: string | null
@@ -5042,6 +5043,7 @@ export type Database = {
           commentaire?: string | null
           id?: string
           ip_address?: string | null
+          metadata?: Json | null
           new_statut?: string | null
           note_id: string
           old_statut?: string | null
@@ -5053,6 +5055,7 @@ export type Database = {
           commentaire?: string | null
           id?: string
           ip_address?: string | null
+          metadata?: Json | null
           new_statut?: string | null
           note_id?: string
           old_statut?: string | null
@@ -5085,6 +5088,9 @@ export type Database = {
       }
       notes_dg: {
         Row: {
+          action_id: string | null
+          activite_id: string | null
+          beneficiaire_id: string | null
           budget_line_id: string | null
           contenu: string | null
           created_at: string
@@ -5101,22 +5107,31 @@ export type Database = {
           is_direct_aef: boolean | null
           justification: string | null
           legacy_import: boolean | null
+          ligne_budgetaire_id: string | null
           montant_estime: number | null
           motif_differe: string | null
           note_sef_id: string | null
           numero: string | null
           objet: string
+          origin: string | null
+          os_id: string | null
           priorite: string | null
           reference_pivot: string | null
+          rejected_at: string | null
+          rejected_by: string | null
           rejection_reason: string | null
           statut: string | null
           submitted_at: string | null
+          submitted_by: string | null
           type_depense: string | null
           updated_at: string
           validated_at: string | null
           validated_by: string | null
         }
         Insert: {
+          action_id?: string | null
+          activite_id?: string | null
+          beneficiaire_id?: string | null
           budget_line_id?: string | null
           contenu?: string | null
           created_at?: string
@@ -5133,22 +5148,31 @@ export type Database = {
           is_direct_aef?: boolean | null
           justification?: string | null
           legacy_import?: boolean | null
+          ligne_budgetaire_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
           note_sef_id?: string | null
           numero?: string | null
           objet: string
+          origin?: string | null
+          os_id?: string | null
           priorite?: string | null
           reference_pivot?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           statut?: string | null
           submitted_at?: string | null
+          submitted_by?: string | null
           type_depense?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
         }
         Update: {
+          action_id?: string | null
+          activite_id?: string | null
+          beneficiaire_id?: string | null
           budget_line_id?: string | null
           contenu?: string | null
           created_at?: string
@@ -5165,22 +5189,56 @@ export type Database = {
           is_direct_aef?: boolean | null
           justification?: string | null
           legacy_import?: boolean | null
+          ligne_budgetaire_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
           note_sef_id?: string | null
           numero?: string | null
           objet?: string
+          origin?: string | null
+          os_id?: string | null
           priorite?: string | null
           reference_pivot?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           rejection_reason?: string | null
           statut?: string | null
           submitted_at?: string | null
+          submitted_by?: string | null
           type_depense?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notes_dg_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notes_dg_budget_line_id_fkey"
             columns: ["budget_line_id"]
@@ -5224,6 +5282,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notes_dg_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notes_dg_note_sef_id_fkey"
             columns: ["note_sef_id"]
             isOneToOne: false
@@ -5231,8 +5296,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notes_dg_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notes_dg_validated_by_fkey"
             columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_dg_attachments: {
+        Row: {
+          created_at: string
+          fichier_url: string
+          id: string
+          nom: string
+          note_id: string
+          taille: number | null
+          type_fichier: string | null
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          fichier_url: string
+          id?: string
+          nom: string
+          note_id: string
+          taille?: number | null
+          type_fichier?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          fichier_url?: string
+          id?: string
+          nom?: string
+          note_id?: string
+          taille?: number | null
+          type_fichier?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_dg_attachments_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_attachments_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -9196,25 +9340,46 @@ export type Database = {
       }
       notes_imputees_disponibles: {
         Row: {
-          budget_line_id: string | null
+          beneficiaire_id: string | null
+          contenu: string | null
+          created_at: string | null
+          created_by: string | null
           direction_id: string | null
           direction_label: string | null
           direction_sigle: string | null
           exercice: number | null
           id: string | null
-          imputed_at: string | null
-          ligne_code: string | null
-          ligne_label: string | null
           montant_estime: number | null
+          note_sef_id: string | null
           numero: string | null
           objet: string | null
+          origin: string | null
+          priorite: string | null
+          reference_pivot: string | null
+          statut: string | null
+          validated_at: string | null
+          validated_by: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "notes_dg_budget_line_id_fkey"
-            columns: ["budget_line_id"]
+            foreignKeyName: "notes_dg_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
             isOneToOne: false
-            referencedRelation: "budget_lines"
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -9222,6 +9387,20 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_note_sef_id_fkey"
+            columns: ["note_sef_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

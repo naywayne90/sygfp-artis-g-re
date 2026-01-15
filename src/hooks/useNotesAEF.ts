@@ -367,16 +367,27 @@ export function useNotesAEF() {
     },
   });
 
-  // Validate note - devient automatiquement "validée à imputer"
+  // Validate note - devient automatiquement "à imputer" (validée par DG)
   const validateMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier le rôle DG/ADMIN
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent valider une note AEF");
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
-          statut: "valide",
+          statut: "a_imputer", // Nouveau statut: validée, en attente d'imputation
           validated_by: user.id,
           validated_at: new Date().toISOString(),
         })
@@ -390,17 +401,18 @@ export function useNotesAEF() {
         entityType: "note_aef",
         entityId: noteId,
         action: "validate",
-        newValues: { statut: "valide" },
+        newValues: { statut: "a_imputer" },
       });
 
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: `Note ${data.numero} validée - disponible pour imputation` });
+      queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
+      toast({ title: `Note ${data.numero} validée ✓`, description: "Disponible pour imputation" });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur de validation", description: error.message, variant: "destructive" });
     },
   });
 
@@ -602,13 +614,12 @@ export function useNotesAEF() {
     },
   });
 
-  // Filter notes by status
+  // Filter notes by status - aligné sur les nouveaux statuts
   const notesByStatus = {
     brouillon: notes.filter((n) => n.statut === "brouillon"),
     soumis: notes.filter((n) => n.statut === "soumis"),
     a_valider: notes.filter((n) => n.statut === "soumis" || n.statut === "a_valider"),
-    valide: notes.filter((n) => n.statut === "valide"),
-    valide_a_imputer: notes.filter((n) => n.statut === "valide" && !n.imputed_at),
+    a_imputer: notes.filter((n) => n.statut === "a_imputer"), // Validé par DG, en attente d'imputation
     impute: notes.filter((n) => n.statut === "impute"),
     rejete: notes.filter((n) => n.statut === "rejete"),
     differe: notes.filter((n) => n.statut === "differe"),
