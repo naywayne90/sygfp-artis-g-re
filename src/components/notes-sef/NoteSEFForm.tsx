@@ -338,9 +338,23 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
   const isLoading = isCreating || isUpdating || isUploading;
 
   // Filtrer les demandeurs par direction si une direction est sélectionnée
+  // et créer un affichage enrichi (Nom + fonction)
   const filteredProfiles = formData.direction_id 
-    ? profiles // Pour l'instant, on affiche tous les profils (le filtrage par direction nécessiterait d'enrichir la requête)
+    ? profiles.filter(p => p.direction_id === formData.direction_id || !p.direction_id)
     : profiles;
+
+  // Helper pour formater l'affichage d'un profil (Nom + fonction)
+  const formatProfileDisplay = (profile: typeof profiles[0]) => {
+    const name = profile.full_name || 
+      `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 
+      profile.email?.split('@')[0] || 
+      'Utilisateur';
+    
+    if (profile.poste) {
+      return `${name} — ${profile.poste}`;
+    }
+    return name;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -428,7 +442,7 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
                 <SelectContent>
                   {filteredProfiles.map((profile) => (
                     <SelectItem key={profile.id} value={profile.id}>
-                      {profile.first_name || ""} {profile.last_name || ""}
+                      {formatProfileDisplay(profile)}
                     </SelectItem>
                   ))}
                 </SelectContent>
