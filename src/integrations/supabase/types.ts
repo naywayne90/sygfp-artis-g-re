@@ -5123,8 +5123,12 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_souhaitee: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
           demandeur_id: string | null
           description: string | null
+          dg_validation_required: boolean | null
           differe_at: string | null
           differe_by: string | null
           differe_condition: string | null
@@ -5156,8 +5160,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_souhaitee?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
           demandeur_id?: string | null
           description?: string | null
+          dg_validation_required?: boolean | null
           differe_at?: string | null
           differe_by?: string | null
           differe_condition?: string | null
@@ -5189,8 +5197,12 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_souhaitee?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
           demandeur_id?: string | null
           description?: string | null
+          dg_validation_required?: boolean | null
           differe_at?: string | null
           differe_by?: string | null
           differe_condition?: string | null
@@ -5240,6 +5252,13 @@ export type Database = {
           {
             foreignKeyName: "notes_sef_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_decided_by_fkey"
+            columns: ["decided_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
