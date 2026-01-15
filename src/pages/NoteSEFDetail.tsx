@@ -22,8 +22,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useNotesSEF, NoteSEF, NoteSEFHistory } from "@/hooks/useNotesSEF";
+import { useNotesSEFAudit } from "@/hooks/useNotesSEFAudit";
 import { notesSefService } from "@/lib/notes-sef/notesSefService";
 import { supabase } from "@/integrations/supabase/client";
+import { useExercice } from "@/contexts/ExerciceContext";
 import { PrintButton } from "@/components/export/PrintButton";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
@@ -112,9 +114,47 @@ const formatFileSize = (bytes: number | null) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+// Génère une phrase lisible avec l'acteur
+const getActionDescription = (
+  action: string,
+  performer?: { first_name: string | null; last_name: string | null } | null,
+  commentaire?: string | null
+): { title: string; detail?: string } => {
+  const actorName = performer
+    ? `${performer.first_name || ""} ${performer.last_name || ""}`.trim() || "Utilisateur"
+    : "Système";
+
+  const descriptions: Record<string, { title: string; detail?: string }> = {
+    création: { title: `${actorName} a créé le brouillon` },
+    creation: { title: `${actorName} a créé le brouillon` },
+    soumission: { title: `${actorName} a soumis la note pour validation` },
+    resoumission: { title: `${actorName} a re-soumis la note` },
+    validation: { title: `${actorName} a validé la note`, detail: "Dossier créé automatiquement" },
+    rejet: { title: `${actorName} a rejeté la note`, detail: commentaire ? `Motif: ${commentaire}` : undefined },
+    report: { title: `${actorName} a différé la note`, detail: commentaire || undefined },
+    modification: { title: `${actorName} a modifié la note` },
+    ajout_piece: { 
+      title: `${actorName} a ajouté une pièce jointe`,
+      detail: commentaire?.replace(/^(Pièce jointe|Fichier ajouté):\s*/i, "") || undefined
+    },
+    suppression_piece: { 
+      title: `${actorName} a supprimé une pièce jointe`,
+      detail: commentaire?.replace(/^(Fichier supprimé|Suppression):\s*/i, "") || undefined
+    },
+    reference_generated: { title: "Référence générée", detail: commentaire?.replace("Référence générée: ", "") },
+    upload_echec: { title: "Échec de l'upload", detail: commentaire || undefined },
+    "passage à valider": { title: `${actorName} a transmis la note au DG` },
+    passage_a_valider: { title: `${actorName} a transmis la note au DG` },
+  };
+
+  return descriptions[action] || { title: action, detail: commentaire || undefined };
+};
+
+// Legacy label pour rétrocompatibilité
 const getActionLabel = (action: string) => {
   const labels: Record<string, string> = {
     création: "Création du brouillon",
+    creation: "Création du brouillon",
     soumission: "Soumis pour validation",
     validation: "Validé",
     rejet: "Rejeté",
@@ -129,15 +169,20 @@ const getActionLabel = (action: string) => {
 
 const getActionIcon = (action: string) => {
   const icons: Record<string, React.ReactNode> = {
-    création: <FileText className="h-4 w-4" />,
+    création: <FileText className="h-4 w-4 text-muted-foreground" />,
+    creation: <FileText className="h-4 w-4 text-muted-foreground" />,
     soumission: <Send className="h-4 w-4 text-blue-500" />,
+    resoumission: <Send className="h-4 w-4 text-blue-500" />,
     validation: <CheckCircle className="h-4 w-4 text-success" />,
     rejet: <XCircle className="h-4 w-4 text-destructive" />,
     report: <Clock className="h-4 w-4 text-warning" />,
-    modification: <Edit className="h-4 w-4" />,
+    modification: <Edit className="h-4 w-4 text-muted-foreground" />,
     ajout_piece: <Paperclip className="h-4 w-4 text-primary" />,
     suppression_piece: <Trash2 className="h-4 w-4 text-muted-foreground" />,
     upload_echec: <AlertTriangle className="h-4 w-4 text-destructive" />,
+    reference_generated: <FileText className="h-4 w-4 text-primary" />,
+    "passage à valider": <Send className="h-4 w-4 text-warning" />,
+    passage_a_valider: <Send className="h-4 w-4 text-warning" />,
   };
   return icons[action] || <History className="h-4 w-4" />;
 };
@@ -154,7 +199,8 @@ export default function NoteSEFDetail() {
   const queryClient = useQueryClient();
   const { hasAnyRole } = usePermissions();
   const { fetchHistory, submitNote, validateNote, rejectNote, deferNote, resubmitNote } = useNotesSEF();
-
+  const { logAjoutPiece, logSuppressionPiece, logModification } = useNotesSEFAudit();
+  const { exercice } = useExercice();
   // État local
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -338,12 +384,8 @@ export default function NoteSEFDetail() {
           uploaded_by: user.id,
         });
 
-        await supabase.from("notes_sef_history").insert({
-          note_id: note.id,
-          action: 'ajout_piece',
-          commentaire: `Pièce jointe: ${file.name}`,
-          performed_by: user.id,
-        });
+        // Log dans notes_sef_history ET audit_logs via hook
+        await logAjoutPiece(note.id, file.name);
       }
 
       toast({ title: "Fichier(s) ajouté(s)" });
@@ -375,12 +417,8 @@ export default function NoteSEFDetail() {
       await supabase.from("notes_sef_pieces").delete().eq("id", attachment.id);
 
       if (user && note) {
-        await supabase.from("notes_sef_history").insert({
-          note_id: note.id,
-          action: 'suppression_piece',
-          commentaire: `Suppression: ${attachment.nom}`,
-          performed_by: user.id,
-        });
+        // Log via hook (écrit dans history + audit_logs)
+        await logSuppressionPiece(note.id, attachment.nom);
       }
 
       toast({ title: "Fichier supprimé" });
@@ -436,13 +474,10 @@ export default function NoteSEFDetail() {
 
       if (error) throw error;
 
-      // Log history
-      await supabase.from("notes_sef_history").insert({
-        note_id: note.id,
-        action: 'modification',
-        commentaire: "Modification des champs",
-        performed_by: user.id,
-      });
+      // Log via hook (écrit dans history + audit_logs)
+      await logModification(note.id, note.statut, { 
+        fields: Object.keys(editedFields) 
+      } as any);
 
       toast({ title: "Modifications enregistrées" });
       setIsEditing(false);
@@ -1015,29 +1050,40 @@ export default function NoteSEFDetail() {
               ) : history.length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">Aucun événement</p>
               ) : (
-                <div className="space-y-4">
-                  {history.map((entry, index) => (
-                    <div key={entry.id} className="relative flex gap-3">
-                      {/* Timeline line */}
-                      {index < history.length - 1 && (
-                        <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-border" />
-                      )}
-                      {/* Icon */}
-                      <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background border">
-                        {getActionIcon(entry.action)}
-                      </div>
-                      {/* Content */}
-                      <div className="flex-1 min-w-0 pb-4">
-                        <p className="font-medium text-sm">{getActionLabel(entry.action)}</p>
-                        {entry.commentaire && (
-                          <p className="text-sm text-muted-foreground mt-0.5 truncate">{entry.commentaire}</p>
+                <div className="space-y-3">
+                  {history.map((entry, index) => {
+                    const { title, detail } = getActionDescription(
+                      entry.action, 
+                      entry.performer, 
+                      entry.commentaire
+                    );
+                    
+                    return (
+                      <div key={entry.id} className="relative flex gap-3">
+                        {/* Timeline line */}
+                        {index < history.length - 1 && (
+                          <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-border" />
                         )}
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(entry.performed_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
-                        </p>
+                        {/* Icon */}
+                        <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background border shadow-sm">
+                          {getActionIcon(entry.action)}
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 pb-3">
+                          <p className="font-medium text-sm leading-tight">{title}</p>
+                          {detail && (
+                            <p className="text-sm text-muted-foreground mt-1 leading-snug">
+                              {detail}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground/70 mt-1.5 flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {format(new Date(entry.performed_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
