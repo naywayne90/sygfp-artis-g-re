@@ -28,10 +28,12 @@ export interface NoteAEF {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  // POINT 2: Liaison Note SEF
-  note_sef_id?: string | null;
+  // Liaison Note SEF
+  note_sef_id: string | null;
   dossier_id?: string | null;
-  // New fields for AEF
+  // Champs AEF directe
+  origin: 'FROM_SEF' | 'DIRECT' | string | null;
+  is_direct_aef: boolean;
   type_depense?: string | null;
   justification?: string | null;
   beneficiaire_id?: string | null;
