@@ -161,7 +161,12 @@ export function useRecentActivitiesEnhanced(limit: number = 15) {
           contrat: "Contrat",
           user: "Utilisateur",
         };
-        const title = `${typeLabels[entityType] || "Élément"} ${log.entity_id?.slice(0, 8) || ""}`;
+        
+        // Amélioration: afficher "Note SEF" au lieu de "Note" pour les notes_sef
+        const typeLabel = log.entity_type === "note_sef" || log.entity_type === "notes_sef" 
+          ? "Note SEF" 
+          : typeLabels[entityType] || "Élément";
+        const title = `${typeLabel} ${log.entity_id?.slice(0, 8) || ""}`;
 
         return {
           id: log.id,
