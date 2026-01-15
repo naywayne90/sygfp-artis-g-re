@@ -190,6 +190,9 @@ function generatePDFHTML(data: any, entityType: string): string {
     case "ordonnancement":
       content = generateOrdonnancementPDF(data, logoUrl);
       break;
+    case "note_sef":
+      content = generateNoteSEFPDF(data, logoUrl);
+      break;
     default:
       content = generateGenericPDF(data, entityType, logoUrl);
   }
@@ -406,6 +409,137 @@ function generateOrdonnancementPDF(data: any, logoUrl: string): string {
   `;
 }
 
+function generateNoteSEFPDF(data: any, logoUrl: string): string {
+  const qrData = encodeURIComponent(data.numero || "");
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+  
+  const getUrgenceLabel = (urgence: string | null) => {
+    const labels: Record<string, string> = {
+      basse: "Basse",
+      normale: "Normale", 
+      haute: "Haute",
+      urgente: "Urgente",
+    };
+    return labels[urgence || "normale"] || "Normale";
+  };
+
+  const getStatutLabel = (statut: string | null) => {
+    const labels: Record<string, string> = {
+      brouillon: "Brouillon",
+      soumis: "Soumis",
+      a_valider: "À valider",
+      valide: "Validé",
+      rejete: "Rejeté",
+      differe: "Différé",
+    };
+    return labels[statut || "brouillon"] || "Brouillon";
+  };
+
+  const directionName = data.direction?.label || data.direction?.sigle || "Non spécifiée";
+  const demandeurName = data.demandeur 
+    ? `${data.demandeur.first_name || ""} ${data.demandeur.last_name || ""}`.trim() 
+    : "Non spécifié";
+  const beneficiaireName = data.beneficiaire?.raison_sociale 
+    || (data.beneficiaire_interne 
+      ? `${data.beneficiaire_interne.first_name || ""} ${data.beneficiaire_interne.last_name || ""}`.trim()
+      : "Non spécifié");
+
+  return `
+    <div class="header">
+      <img src="${logoUrl}" alt="ARTI" class="logo" onerror="this.style.display='none'"/>
+      <div class="title-section">
+        <h1 class="title">NOTE D'ACCORD DE PRINCIPE (SEF)</h1>
+        <p class="subtitle">Exercice ${data.exercice || new Date().getFullYear()}</p>
+      </div>
+    </div>
+    
+    <div class="doc-info">
+      <h3>Informations Générales</h3>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">N° Note :</span><span class="info-value">${data.numero || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Statut :</span><span class="info-value">${getStatutLabel(data.statut)}</span></div>
+        <div class="info-item"><span class="info-label">Direction :</span><span class="info-value">${directionName}</span></div>
+        <div class="info-item"><span class="info-label">Urgence :</span><span class="info-value">${getUrgenceLabel(data.urgence)}</span></div>
+        <div class="info-item"><span class="info-label">Demandeur :</span><span class="info-value">${demandeurName}</span></div>
+        <div class="info-item"><span class="info-label">Date création :</span><span class="info-value">${formatDate(data.created_at)}</span></div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Objet de la demande</div>
+      <p style="font-size: 12pt; font-weight: 500;">${data.objet || "N/A"}</p>
+    </div>
+
+    ${data.description ? `
+    <div class="section">
+      <div class="section-title">Description détaillée</div>
+      <p style="white-space: pre-wrap;">${data.description}</p>
+    </div>
+    ` : ""}
+    
+    <div class="section">
+      <div class="section-title">Bénéficiaire</div>
+      <p>${beneficiaireName}</p>
+    </div>
+
+    ${data.commentaire ? `
+    <div class="section">
+      <div class="section-title">Commentaire</div>
+      <p style="white-space: pre-wrap;">${data.commentaire}</p>
+    </div>
+    ` : ""}
+
+    ${data.statut === "valide" && data.validated_at ? `
+    <div class="section" style="background: #d1fae5; padding: 15px; border-radius: 8px; border: 1px solid #10b981;">
+      <div class="section-title" style="color: #059669; border: none;">✓ Validation</div>
+      <p>Validée le ${formatDate(data.validated_at)}</p>
+      ${data.dossier?.numero ? `<p>Dossier créé : <strong>${data.dossier.numero}</strong></p>` : ""}
+    </div>
+    ` : ""}
+
+    ${data.statut === "rejete" && data.rejection_reason ? `
+    <div class="section" style="background: #fee2e2; padding: 15px; border-radius: 8px; border: 1px solid #ef4444;">
+      <div class="section-title" style="color: #dc2626; border: none;">✗ Rejet</div>
+      <p><strong>Motif :</strong> ${data.rejection_reason}</p>
+      <p style="font-size: 10pt; color: #666;">Rejetée le ${formatDate(data.rejected_at)}</p>
+    </div>
+    ` : ""}
+
+    ${data.statut === "differe" ? `
+    <div class="section" style="background: #fef3c7; padding: 15px; border-radius: 8px; border: 1px solid #f59e0b;">
+      <div class="section-title" style="color: #d97706; border: none;">⏸ Report</div>
+      ${data.differe_motif ? `<p><strong>Motif :</strong> ${data.differe_motif}</p>` : ""}
+      ${data.differe_condition ? `<p><strong>Condition de reprise :</strong> ${data.differe_condition}</p>` : ""}
+      ${data.differe_date_reprise ? `<p><strong>Date de reprise prévue :</strong> ${formatDate(data.differe_date_reprise)}</p>` : ""}
+    </div>
+    ` : ""}
+    
+    <div class="qr-code">
+      <img src="${qrUrl}" alt="QR Code ${data.numero}" />
+      <p style="font-size: 9pt; color: #666;">${data.numero}</p>
+    </div>
+    
+    <div class="signatures">
+      <div class="signature-box">
+        <div class="signature-title">Le Demandeur</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le Chef SEF</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le DG</div>
+        <div>Date: _______________</div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      Document généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")} - ARTI SYGFP
+    </div>
+  `;
+}
+
 function generateGenericPDF(data: any, entityType: string, logoUrl: string): string {
   const title = entityType.toUpperCase().replace(/_/g, " ");
   return `
@@ -570,6 +704,23 @@ Deno.serve(async (req) => {
               .select(`
                 *,
                 liquidation:budget_liquidations(numero, montant)
+              `)
+              .eq("id", body.entity_id!)
+              .single();
+          if (error) throw error;
+            entityData = data;
+            break;
+          }
+          case "note_sef": {
+            const { data, error } = await supabase
+              .from("notes_sef")
+              .select(`
+                *,
+                direction:directions(id, label, sigle),
+                demandeur:profiles!notes_sef_demandeur_id_fkey(id, first_name, last_name),
+                beneficiaire:prestataires(id, raison_sociale),
+                beneficiaire_interne:profiles!notes_sef_beneficiaire_interne_id_fkey(id, first_name, last_name),
+                dossier:dossiers(id, numero)
               `)
               .eq("id", body.entity_id!)
               .single();
