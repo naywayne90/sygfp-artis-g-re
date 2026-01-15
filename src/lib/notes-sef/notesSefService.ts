@@ -134,13 +134,131 @@ export const notesSefService = {
   // ============================================
 
   /**
-   * Créer une nouvelle note SEF (brouillon)
-   * @placeholder Géré par useNotesSEF.createNote
+   * Créer une nouvelle note SEF (brouillon) avec pièces jointes
+   * @param dto Données de la note
+   * @param exercice Année d'exercice
+   * @param attachments Fichiers à uploader (optionnel)
+   * @returns La note créée avec sa référence pivot générée
+   */
+  async createDraftWithAttachments(
+    dto: CreateNoteSEFDTO, 
+    exercice: number,
+    attachments?: File[]
+  ): Promise<ServiceResult<NoteSEFEntity & { attachmentResults?: { success: number; failed: number } }>> {
+    try {
+      // 1. Récupérer l'utilisateur
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return { success: false, error: 'Non authentifié' };
+      }
+
+      // 2. Créer la note (le trigger génère reference_pivot automatiquement)
+      const { data: note, error: insertError } = await supabase
+        .from('notes_sef')
+        .insert({
+          objet: dto.objet,
+          description: dto.description || null,
+          justification: dto.justification,
+          direction_id: dto.direction_id,
+          demandeur_id: dto.demandeur_id || user.id,
+          beneficiaire_id: dto.beneficiaire_id || null,
+          beneficiaire_interne_id: dto.beneficiaire_interne_id || null,
+          urgence: dto.urgence || 'normale',
+          date_souhaitee: dto.date_souhaitee || null,
+          commentaire: dto.commentaire || null,
+          exercice: exercice,
+          created_by: user.id,
+          statut: 'brouillon',
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        return { success: false, error: `Erreur création note: ${insertError.message}` };
+      }
+
+      // 3. Log history
+      await supabase.from('notes_sef_history').insert({
+        note_id: note.id,
+        action: 'création',
+        new_statut: 'brouillon',
+        performed_by: user.id,
+      });
+
+      // 4. Upload des pièces jointes si présentes
+      let attachmentResults = { success: 0, failed: 0 };
+      
+      if (attachments && attachments.length > 0) {
+        for (const file of attachments) {
+          try {
+            // Chemin: {exercice}/{noteId}/{timestamp}_{filename}
+            const timestamp = Date.now();
+            const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filePath = `${exercice}/${note.id}/${timestamp}_${safeFileName}`;
+
+            // Upload vers Storage
+            const { error: uploadError } = await supabase.storage
+              .from('notes-sef')
+              .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              attachmentResults.failed++;
+              
+              // Log échec
+              await supabase.from('notes_sef_history').insert({
+                note_id: note.id,
+                action: 'upload_echec',
+                commentaire: `Échec upload: ${file.name} - ${uploadError.message}`,
+                performed_by: user.id,
+              });
+              continue;
+            }
+
+            // Enregistrer dans notes_sef_pieces
+            await supabase.from('notes_sef_pieces').insert({
+              note_id: note.id,
+              fichier_url: filePath,
+              nom: file.name,
+              type_fichier: file.type || 'application/octet-stream',
+              taille: file.size,
+              uploaded_by: user.id,
+            });
+
+            // Log succès
+            await supabase.from('notes_sef_history').insert({
+              note_id: note.id,
+              action: 'ajout_piece',
+              commentaire: `Pièce jointe: ${file.name}`,
+              performed_by: user.id,
+            });
+
+            attachmentResults.success++;
+          } catch (fileError) {
+            console.error(`Error processing ${file.name}:`, fileError);
+            attachmentResults.failed++;
+          }
+        }
+      }
+
+      return { 
+        success: true, 
+        data: { 
+          ...note as unknown as NoteSEFEntity, 
+          attachmentResults 
+        } 
+      };
+    } catch (error) {
+      return { success: false, error: (error as Error).message };
+    }
+  },
+
+  /**
+   * Créer une nouvelle note SEF (brouillon) - ALIAS pour compatibilité
+   * @deprecated Utiliser createDraftWithAttachments pour le support des PJ
    */
   async createDraft(dto: CreateNoteSEFDTO, exercice: number): Promise<ServiceResult<NoteSEFEntity>> {
-    // Placeholder - la logique réelle est dans useNotesSEF
-    console.log('[notesSefService] createDraft called', { dto, exercice });
-    return { success: false, error: 'Utiliser useNotesSEF().createNote à la place' };
+    return this.createDraftWithAttachments(dto, exercice);
   },
 
   /**

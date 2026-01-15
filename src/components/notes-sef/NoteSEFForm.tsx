@@ -181,40 +181,95 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const uploadFiles = async (noteId: string) => {
-    if (uploadedFiles.length === 0) return;
+  const uploadFiles = async (noteId: string): Promise<{ success: number; failed: number }> => {
+    if (uploadedFiles.length === 0) return { success: 0, failed: 0 };
 
     setIsUploading(true);
+    let successCount = 0;
+    let failedCount = 0;
+    const failedFiles: string[] = [];
+
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
       for (const { file } of uploadedFiles) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${noteId}/${Date.now()}_${file.name}`;
-        
-        // Upload to Supabase Storage (bucket notes_sef_pieces)
-        const { error: uploadError } = await supabase.storage
-          .from('notes_sef_pieces')
-          .upload(fileName, file);
+        try {
+          // Chemin stable: {exercice}/{noteId}/{timestamp}_{filename}
+          const timestamp = Date.now();
+          const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const filePath = `${exercice}/${noteId}/${timestamp}_${safeFileName}`;
+          
+          // Upload to Supabase Storage (bucket notes-sef)
+          const { error: uploadError } = await supabase.storage
+            .from('notes-sef')
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false,
+            });
 
-        if (uploadError) {
-          console.error("Upload error:", uploadError);
-          // Continuer même en cas d'erreur de storage (bucket peut ne pas exister)
+          if (uploadError) {
+            console.error("Upload error:", uploadError);
+            failedFiles.push(file.name);
+            failedCount++;
+            
+            // Log l'échec dans l'historique
+            await supabase.from('notes_sef_history').insert({
+              note_id: noteId,
+              action: 'upload_echec',
+              commentaire: `Échec upload: ${file.name} - ${uploadError.message}`,
+              performed_by: user.id,
+            });
+            continue;
+          }
+
+          // Créer l'entrée dans la table notes_sef_pieces
+          const { error: insertError } = await supabase.from('notes_sef_pieces').insert({
+            note_id: noteId,
+            fichier_url: filePath,
+            nom: file.name,
+            type_fichier: file.type || 'application/octet-stream',
+            taille: file.size,
+            uploaded_by: user.id,
+          });
+
+          if (insertError) {
+            console.error("Insert piece error:", insertError);
+            failedFiles.push(file.name);
+            failedCount++;
+            continue;
+          }
+
+          // Log succès dans l'historique
+          await supabase.from('notes_sef_history').insert({
+            note_id: noteId,
+            action: 'ajout_piece',
+            commentaire: `Pièce jointe: ${file.name}`,
+            performed_by: user.id,
+          });
+
+          successCount++;
+        } catch (fileError) {
+          console.error(`Error processing file ${file.name}:`, fileError);
+          failedFiles.push(file.name);
+          failedCount++;
         }
-
-        // Créer l'entrée dans la table notes_sef_pieces
-        const { data: { user } } = await supabase.auth.getUser();
-        await supabase.from('notes_sef_pieces').insert({
-          note_id: noteId,
-          fichier_url: fileName,
-          nom: file.name,
-          type_fichier: file.type || 'application/octet-stream',
-          taille: file.size,
-          uploaded_by: user?.id,
-        });
       }
-      toast.success(`${uploadedFiles.length} pièce(s) jointe(s) enregistrée(s)`);
+
+      // Messages de résultat
+      if (successCount > 0 && failedCount === 0) {
+        toast.success(`${successCount} pièce(s) jointe(s) enregistrée(s)`);
+      } else if (successCount > 0 && failedCount > 0) {
+        toast.warning(`${successCount} pièce(s) ajoutée(s), ${failedCount} échec(s): ${failedFiles.join(', ')}`);
+      } else if (failedCount > 0) {
+        toast.error(`Échec de l'upload: ${failedFiles.join(', ')}`);
+      }
+
+      return { success: successCount, failed: failedCount };
     } catch (error) {
       console.error("Error uploading files:", error);
       toast.error("Erreur lors de l'upload des pièces jointes");
+      return { success: successCount, failed: uploadedFiles.length - successCount };
     } finally {
       setIsUploading(false);
     }
@@ -244,21 +299,39 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
       };
 
       if (note) {
+        // Mode édition
         await updateNote({ id: note.id, ...dataToSend });
         // Upload des nouvelles pièces jointes si présentes
         if (uploadedFiles.length > 0) {
           await uploadFiles(note.id);
         }
+        toast.success(`Note ${note.reference_pivot || note.numero} mise à jour`);
       } else {
+        // Mode création
         const result = await createNote(dataToSend);
-        // Upload des pièces jointes après création
-        if (result && uploadedFiles.length > 0) {
-          await uploadFiles(result.id);
+        
+        if (result) {
+          // Upload des pièces jointes après création
+          if (uploadedFiles.length > 0) {
+            const uploadResult = await uploadFiles(result.id);
+            
+            // Message final avec la référence pivot générée
+            if (uploadResult.failed === 0) {
+              toast.success(
+                `Brouillon créé : ${result.reference_pivot || result.numero}`,
+                { description: uploadResult.success > 0 ? `${uploadResult.success} pièce(s) jointe(s)` : undefined }
+              );
+            }
+          } else {
+            // Pas de pièces jointes, le toast est déjà affiché par le hook
+          }
         }
       }
+      
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving note:", error);
+      toast.error("Erreur lors de l'enregistrement de la note");
     }
   };
 
