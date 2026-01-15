@@ -1,0 +1,242 @@
+/**
+ * Hook pour la liste paginée des Notes AEF
+ * Gère la recherche server-side avec debounce et les compteurs
+ */
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { notesAefService } from '@/lib/notes-aef/notesAefService';
+import type { NoteAEFEntity, NoteAEFCounts, PaginatedResult, ListNotesAEFOptions } from '@/lib/notes-aef/types';
+import { useExercice } from '@/contexts/ExerciceContext';
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+export interface UseNotesAEFListOptions {
+  pageSize?: number;
+  initialTab?: string;
+}
+
+export interface NotesAEFFiltersState {
+  directionId: string | null;
+  urgence: string | null;
+  dateFrom: string | null;
+  dateTo: string | null;
+}
+
+export interface UseNotesAEFListReturn {
+  // Data
+  notes: NoteAEFEntity[];
+  counts: NoteAEFCounts;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+
+  // State
+  isLoading: boolean;
+  isCountsLoading: boolean;
+  error: string | null;
+
+  // Filters
+  searchQuery: string;
+  activeTab: string;
+  filters: NotesAEFFiltersState;
+
+  // Actions
+  setSearchQuery: (query: string) => void;
+  setActiveTab: (tab: string) => void;
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
+  setFilters: (filters: Partial<NotesAEFFiltersState>) => void;
+  resetFilters: () => void;
+  refetch: () => void;
+}
+
+const defaultFilters: NotesAEFFiltersState = {
+  directionId: null,
+  urgence: null,
+  dateFrom: null,
+  dateTo: null,
+};
+
+/**
+ * Hook principal pour la liste paginée des Notes AEF
+ * avec recherche serveur-side et debounce 300ms
+ */
+export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesAEFListReturn {
+  const { pageSize: initialPageSize = 20, initialTab = 'toutes' } = options;
+  const { exercice } = useExercice();
+  const queryClient = useQueryClient();
+
+  // État local
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [filters, setFiltersState] = useState<NotesAEFFiltersState>(defaultFilters);
+
+  // Debounce de la recherche (300ms)
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Reset page quand les filtres changent
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, activeTab, filters]);
+
+  // Convertir l'onglet actif en filtre de statut
+  const statutFilter = useMemo(() => {
+    switch (activeTab) {
+      case 'a_valider':
+        return ['soumis', 'a_valider'];
+      case 'a_imputer':
+        return 'a_imputer';
+      case 'imputees':
+        return 'impute';
+      case 'differees':
+        return 'differe';
+      case 'rejetees':
+        return 'rejete';
+      default:
+        return undefined;
+    }
+  }, [activeTab]);
+
+  // Query pour les compteurs
+  const {
+    data: countsResult,
+    isLoading: isCountsLoading
+  } = useQuery({
+    queryKey: ['notes-aef-counts', exercice],
+    queryFn: async () => {
+      if (!exercice) return null;
+      return notesAefService.getCounts(exercice);
+    },
+    enabled: !!exercice,
+    staleTime: 30000,
+    refetchOnWindowFocus: true,
+  });
+
+  // Query pour les notes paginées
+  const {
+    data: listResult,
+    isLoading,
+    error: queryError,
+    refetch
+  } = useQuery({
+    queryKey: ['notes-aef-list', exercice, page, pageSize, debouncedSearch, statutFilter, filters],
+    queryFn: async () => {
+      if (!exercice) return null;
+
+      const options: ListNotesAEFOptions = {
+        exercice,
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
+        statut: statutFilter,
+        direction_id: filters.directionId || undefined,
+        urgence: filters.urgence || undefined,
+        dateFrom: filters.dateFrom || undefined,
+        dateTo: filters.dateTo || undefined,
+        sortBy: 'updated_at',
+        sortOrder: 'desc'
+      };
+
+      return notesAefService.listPaginated(options);
+    },
+    enabled: !!exercice,
+    staleTime: 10000,
+    refetchOnWindowFocus: true,
+  });
+
+  // Invalider les queries après mutation
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['notes-aef-counts'] });
+    queryClient.invalidateQueries({ queryKey: ['notes-aef-list'] });
+    queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+  }, [queryClient]);
+
+  // Mise à jour des filtres
+  const setFilters = useCallback((newFilters: Partial<NotesAEFFiltersState>) => {
+    setFiltersState(prev => ({ ...prev, ...newFilters }));
+  }, []);
+
+  const resetFilters = useCallback(() => {
+    setFiltersState(defaultFilters);
+    setSearchQuery('');
+  }, []);
+
+  // Données par défaut
+  const defaultCounts: NoteAEFCounts = {
+    total: 0,
+    brouillon: 0,
+    soumis: 0,
+    a_valider: 0,
+    a_imputer: 0,
+    impute: 0,
+    differe: 0,
+    rejete: 0,
+  };
+
+  const defaultPagination: PaginatedResult<NoteAEFEntity> = {
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize,
+    totalPages: 0
+  };
+
+  // Extraire les données
+  const counts = countsResult?.success ? countsResult.data! : defaultCounts;
+  const paginatedData = listResult?.success ? listResult.data! : defaultPagination;
+
+  return {
+    // Data
+    notes: paginatedData.data,
+    counts,
+    pagination: {
+      page: paginatedData.page,
+      pageSize: paginatedData.pageSize,
+      total: paginatedData.total,
+      totalPages: paginatedData.totalPages
+    },
+
+    // State
+    isLoading,
+    isCountsLoading,
+    error: queryError ? (queryError as Error).message : null,
+
+    // Filters
+    searchQuery,
+    activeTab,
+    filters,
+
+    // Actions
+    setSearchQuery,
+    setActiveTab,
+    setPage,
+    setPageSize,
+    setFilters,
+    resetFilters,
+    refetch: () => {
+      invalidateQueries();
+      refetch();
+    }
+  };
+}
