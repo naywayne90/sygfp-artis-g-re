@@ -709,22 +709,35 @@ export default function NoteSEFDetail() {
         </Card>
       )}
 
-      {/* CTA Créer Note AEF après validation */}
+      {/* CTA Créer/ouvrir Note AEF après validation */}
       {isApproved && (
         <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
           <CardContent className="py-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <CheckCircle className="h-5 w-5 text-success" />
                 <div>
                   <p className="font-medium text-success">Note validée</p>
-                  <p className="text-sm text-muted-foreground">Vous pouvez maintenant créer la Note AEF associée</p>
+                  <p className="text-sm text-muted-foreground">
+                    {note.dossier_id 
+                      ? `Dossier créé automatiquement. Vous pouvez créer la Note AEF associée.`
+                      : "Vous pouvez maintenant créer la Note AEF associée"
+                    }
+                  </p>
                 </div>
               </div>
-              <Button onClick={handleCreateNoteAEF} className="gap-2">
-                <FilePlus className="h-4 w-4" />
-                Créer Note AEF
-              </Button>
+              <div className="flex items-center gap-2">
+                {note.dossier_id && (
+                  <Button variant="outline" onClick={handleGoToDossier} className="gap-2">
+                    <FolderOpen className="h-4 w-4" />
+                    Voir le dossier
+                  </Button>
+                )}
+                <Button onClick={handleCreateNoteAEF} className="gap-2">
+                  <FilePlus className="h-4 w-4" />
+                  Créer Note AEF
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function NotesAEF() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
@@ -54,8 +56,23 @@ export default function NotesAEF() {
   const [rejectingNote, setRejectingNote] = useState<NoteAEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteAEF | null>(null);
   const [imputingNote, setImputingNote] = useState<NoteAEF | null>(null);
+  
+  // ID de la note SEF pour pré-remplissage (depuis URL ?prefill=...)
+  const [prefillNoteSEFId, setPrefillNoteSEFId] = useState<string | null>(null);
 
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+
+  // Gérer le prefill depuis l'URL
+  useEffect(() => {
+    const prefillId = searchParams.get("prefill");
+    if (prefillId) {
+      setPrefillNoteSEFId(prefillId);
+      setFormOpen(true);
+      // Nettoyer l'URL après utilisation
+      searchParams.delete("prefill");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Filter notes based on search
   const filteredNotes = useMemo(() => {
@@ -96,7 +113,10 @@ export default function NotesAEF() {
 
   const handleCloseForm = (open: boolean) => {
     setFormOpen(open);
-    if (!open) setEditingNote(null);
+    if (!open) {
+      setEditingNote(null);
+      setPrefillNoteSEFId(null);
+    }
   };
 
   const handleReject = async (noteId: string, motif: string) => {
@@ -362,6 +382,7 @@ export default function NotesAEF() {
         open={formOpen}
         onOpenChange={handleCloseForm}
         note={editingNote}
+        initialNoteSEFId={prefillNoteSEFId}
       />
 
       <NoteAEFDetails
