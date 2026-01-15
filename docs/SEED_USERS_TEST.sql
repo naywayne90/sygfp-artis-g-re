@@ -28,153 +28,199 @@
 -- }
 --
 -- =====================================================
--- LISTE DES 10 UTILISATEURS TEST SUGGÉRÉS
+-- UTILISATEURS TEST CONFIGURÉS (ÉTAT ACTUEL)
 -- =====================================================
--- Créez ces utilisateurs via le Dashboard Supabase Auth:
+-- Ces utilisateurs ont été créés et configurés dans la base:
 --
--- | #  | Email                | Prénom   | Nom      | Password  |
--- |----|----------------------|----------|----------|-----------|
--- | 1  | dg@arti.ci           | Mamadou  | DIALLO   | Test2026! |
--- | 2  | daaf@arti.ci         | Fatou    | KONE     | Test2026! |
--- | 3  | cb@arti.ci           | Kouassi  | AMAN     | Test2026! |
--- | 4  | dsi@arti.ci          | Ibrahim  | TRAORE   | Test2026! |
--- | 5  | dcp@arti.ci          | Jean     | KOUAME   | Test2026! |
--- | 6  | stats@arti.ci        | Paul     | BAMBA    | Test2026! |
--- | 7  | agent.daaf@arti.ci   | Aminata  | COULIBALY| Test2026! |
--- | 8  | agent.dsi@arti.ci    | Marcel   | KOUADIO  | Test2026! |
--- | 9  | agent.dcp@arti.ci    | Marie    | KONAN    | Test2026! |
--- | 10 | admin@arti.ci        | Admin    | SYSTEM   | Test2026! |
+-- | #  | Email                | Nom complet           | Poste                           | Direction | Rôle      | Password   |
+-- |----|----------------------|-----------------------|---------------------------------|-----------|-----------|------------|
+-- | 1  | ange.nimba@arti.ci   | Ange NIMBA            | Chief Technology Officer        | DG        | ADMIN,DG  | (existant) |
+-- | 2  | admin@arti.ci        | Admin SYSTEM          | Administrateur Système          | DAAF      | ADMIN     | Test1234!  |
+-- | 3  | dg@arti.ci           | Directeur GENERAL     | Directeur Général               | DG        | DG        | Test1234!  |
+-- | 4  | daaf@arti.ci         | Chef DAAF             | Dir. Administratif et Financier | DAAF      | DAAF      | Test1234!  |
+-- | 5  | cb@arti.ci           | Contrôleur BUDGETAIRE | Contrôleur Budgétaire           | CB        | CB        | Test1234!  |
+-- | 6  | dsi@arti.ci          | Chef DSI              | Dir. Systèmes d'Information     | DSI       | SDMG      | Test1234!  |
+-- | 7  | dcp@arti.ci          | Chef DCP              | Dir. Communication Partenariat  | DCP       | SDMG      | Test1234!  |
+-- | 8  | stats@arti.ci        | Chef STATS            | Dir. Statistiques et Études     | STATS     | SDMG      | Test1234!  |
+-- | 9  | agent.daaf@arti.ci   | Agent DAAF            | Agent Financier                 | DAAF      | OPERATEUR | Test1234!  |
+-- | 10 | agent.dsi@arti.ci    | Agent DSI             | Agent Informatique              | DSI       | OPERATEUR | Test1234!  |
+-- | 11 | agent.dcp@arti.ci    | Agent DCP             | Agent Communication             | DCP       | OPERATEUR | Test1234!  |
 --
 -- =====================================================
--- APRÈS CRÉATION: Mise à jour des profils
+-- SCÉNARIOS DE TEST - Workflow Notes SEF
 -- =====================================================
--- Exécutez ces scripts dans l'éditeur SQL Supabase après avoir créé les users:
--- https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf/sql/new
+--
+-- | Scénario                  | Se connecter avec    |
+-- |---------------------------|----------------------|
+-- | Créer une note SEF        | agent.daaf@arti.ci   |
+-- | Valider une note (DG)     | dg@arti.ci           |
+-- | Viser une note (DAAF)     | daaf@arti.ci         |
+-- | Contrôle budgétaire       | cb@arti.ci           |
+-- | Administration système    | admin@arti.ci        |
+--
+-- =====================================================
+-- SCRIPT DE CRÉATION (si recréation nécessaire)
+-- =====================================================
+-- Si vous devez recréer les utilisateurs, suivez ces étapes:
+--
+-- ÉTAPE 1: Créer les users dans Supabase Auth Dashboard
+-- (voir MÉTHODE 1 ci-dessus)
+--
+-- ÉTAPE 2: Exécuter ce script pour configurer les profils
+-- (nécessite privilèges admin ou désactivation temporaire du trigger)
 
--- 1. Mise à jour des noms complets et postes
-UPDATE public.profiles SET
-  first_name = 'Mamadou',
-  last_name = 'DIALLO',
-  full_name = 'Mamadou DIALLO',
-  poste = 'Directeur Général'
-WHERE email = 'dg@arti.ci';
+-- Désactiver le trigger de protection (si nécessaire)
+-- ALTER TABLE profiles DISABLE TRIGGER check_profile_update_trigger;
 
-UPDATE public.profiles SET
-  first_name = 'Fatou',
-  last_name = 'KONE',
-  full_name = 'Fatou KONE',
-  poste = 'Directrice Administrative et Financière'
-WHERE email = 'daaf@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Kouassi',
-  last_name = 'AMAN',
-  full_name = 'Kouassi AMAN',
-  poste = 'Contrôleur Budgétaire'
-WHERE email = 'cb@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Ibrahim',
-  last_name = 'TRAORE',
-  full_name = 'Ibrahim TRAORE',
-  poste = 'Directeur des Systèmes d''Information'
-WHERE email = 'dsi@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Jean',
-  last_name = 'KOUAME',
-  full_name = 'Jean KOUAME',
-  poste = 'Directeur Communication et Partenariat'
-WHERE email = 'dcp@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Paul',
-  last_name = 'BAMBA',
-  full_name = 'Paul BAMBA',
-  poste = 'Chef Service Statistiques'
-WHERE email = 'stats@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Aminata',
-  last_name = 'COULIBALY',
-  full_name = 'Aminata COULIBALY',
-  poste = 'Agent Comptable DAAF'
-WHERE email = 'agent.daaf@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Marcel',
-  last_name = 'KOUADIO',
-  full_name = 'Marcel KOUADIO',
-  poste = 'Développeur DSI'
-WHERE email = 'agent.dsi@arti.ci';
-
-UPDATE public.profiles SET
-  first_name = 'Marie',
-  last_name = 'KONAN',
-  full_name = 'Marie KONAN',
-  poste = 'Chargée de Communication'
-WHERE email = 'agent.dcp@arti.ci';
-
+-- Mise à jour des profils
 UPDATE public.profiles SET
   first_name = 'Admin',
   last_name = 'SYSTEM',
   full_name = 'Admin SYSTEM',
-  poste = 'Administrateur Système'
+  poste = 'Administrateur Système',
+  direction_id = (SELECT id FROM directions WHERE code = '02' LIMIT 1),
+  is_active = true
 WHERE email = 'admin@arti.ci';
 
--- =====================================================
--- 2. Attribution des directions (par un ADMIN)
--- =====================================================
--- Ces updates nécessitent d'être connecté en tant qu'ADMIN
--- ou via une migration avec privilèges élevés
-
--- DG -> Direction Générale
-UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '01' LIMIT 1)
+UPDATE public.profiles SET
+  first_name = 'Directeur',
+  last_name = 'GENERAL',
+  full_name = 'Directeur GENERAL',
+  poste = 'Directeur Général',
+  direction_id = (SELECT id FROM directions WHERE code = '01' LIMIT 1),
+  is_active = true
 WHERE email = 'dg@arti.ci';
 
--- DAAF, CB, Agent DAAF -> Direction Administrative et Financière
-UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '02' LIMIT 1)
-WHERE email IN ('daaf@arti.ci', 'cb@arti.ci', 'agent.daaf@arti.ci');
+UPDATE public.profiles SET
+  first_name = 'Chef',
+  last_name = 'DAAF',
+  full_name = 'Chef DAAF',
+  poste = 'Directeur Administratif et Financier',
+  direction_id = (SELECT id FROM directions WHERE code = '02' LIMIT 1),
+  is_active = true
+WHERE email = 'daaf@arti.ci';
 
--- DSI, Agent DSI -> Direction des Systèmes d'Information
-UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '09' LIMIT 1)
-WHERE email IN ('dsi@arti.ci', 'agent.dsi@arti.ci');
+UPDATE public.profiles SET
+  first_name = 'Contrôleur',
+  last_name = 'BUDGETAIRE',
+  full_name = 'Contrôleur BUDGETAIRE',
+  poste = 'Contrôleur Budgétaire',
+  direction_id = (SELECT id FROM directions WHERE code = '03' LIMIT 1),
+  is_active = true
+WHERE email = 'cb@arti.ci';
 
--- DCP, Agent DCP -> Direction Communication et Partenariat
-UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '08' LIMIT 1)
-WHERE email IN ('dcp@arti.ci', 'agent.dcp@arti.ci');
+UPDATE public.profiles SET
+  first_name = 'Chef',
+  last_name = 'DSI',
+  full_name = 'Chef DSI',
+  poste = 'Directeur des Systèmes d''Information',
+  direction_id = (SELECT id FROM directions WHERE code = '09' LIMIT 1),
+  is_active = true
+WHERE email = 'dsi@arti.ci';
 
--- Stats -> Direction Statistiques
-UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '04' LIMIT 1)
+UPDATE public.profiles SET
+  first_name = 'Chef',
+  last_name = 'DCP',
+  full_name = 'Chef DCP',
+  poste = 'Directeur Communication et Partenariat',
+  direction_id = (SELECT id FROM directions WHERE code = '08' LIMIT 1),
+  is_active = true
+WHERE email = 'dcp@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Chef',
+  last_name = 'STATS',
+  full_name = 'Chef STATS',
+  poste = 'Directeur Statistiques et Études',
+  direction_id = (SELECT id FROM directions WHERE code = '04' LIMIT 1),
+  is_active = true
 WHERE email = 'stats@arti.ci';
 
+UPDATE public.profiles SET
+  first_name = 'Agent',
+  last_name = 'DAAF',
+  full_name = 'Agent DAAF',
+  poste = 'Agent Financier',
+  direction_id = (SELECT id FROM directions WHERE code = '02' LIMIT 1),
+  is_active = true
+WHERE email = 'agent.daaf@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Agent',
+  last_name = 'DSI',
+  full_name = 'Agent DSI',
+  poste = 'Agent Informatique',
+  direction_id = (SELECT id FROM directions WHERE code = '09' LIMIT 1),
+  is_active = true
+WHERE email = 'agent.dsi@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Agent',
+  last_name = 'DCP',
+  full_name = 'Agent DCP',
+  poste = 'Agent Communication',
+  direction_id = (SELECT id FROM directions WHERE code = '08' LIMIT 1),
+  is_active = true
+WHERE email = 'agent.dcp@arti.ci';
+
+-- Réactiver le trigger
+-- ALTER TABLE profiles ENABLE TRIGGER check_profile_update_trigger;
+
 -- =====================================================
--- 3. Attribution des rôles
+-- ATTRIBUTION DES RÔLES
 -- =====================================================
 
--- Rôle DG
-INSERT INTO public.user_roles (user_id, role, is_active)
-SELECT id, 'DG', true FROM profiles WHERE email = 'dg@arti.ci'
+-- Supprimer les rôles INVITE existants
+DELETE FROM user_roles 
+WHERE role = 'INVITE' 
+AND user_id IN (
+  SELECT id FROM profiles 
+  WHERE email IN (
+    'admin@arti.ci', 'dg@arti.ci', 'daaf@arti.ci', 'cb@arti.ci',
+    'dsi@arti.ci', 'dcp@arti.ci', 'stats@arti.ci',
+    'agent.daaf@arti.ci', 'agent.dsi@arti.ci', 'agent.dcp@arti.ci'
+  )
+);
+
+-- Insérer les bons rôles
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'ADMIN', true, now() FROM profiles WHERE email = 'admin@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Rôle DAAF  
-INSERT INTO public.user_roles (user_id, role, is_active)
-SELECT id, 'DAAF', true FROM profiles WHERE email = 'daaf@arti.ci'
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'DG', true, now() FROM profiles WHERE email = 'dg@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Rôle CB (Contrôleur Budgétaire)
-INSERT INTO public.user_roles (user_id, role, is_active)
-SELECT id, 'CB', true FROM profiles WHERE email = 'cb@arti.ci'
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'DAAF', true, now() FROM profiles WHERE email = 'daaf@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Rôle ADMIN
-INSERT INTO public.user_roles (user_id, role, is_active)
-SELECT id, 'ADMIN', true FROM profiles WHERE email = 'admin@arti.ci'
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'CB', true, now() FROM profiles WHERE email = 'cb@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Rôles DIRECTEUR pour les directeurs de service
-INSERT INTO public.user_roles (user_id, role, is_active)
-SELECT id, 'DIRECTEUR', true FROM profiles WHERE email IN ('dsi@arti.ci', 'dcp@arti.ci')
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'SDMG', true, now() FROM profiles WHERE email = 'dsi@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'SDMG', true, now() FROM profiles WHERE email = 'dcp@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'SDMG', true, now() FROM profiles WHERE email = 'stats@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'OPERATEUR', true, now() FROM profiles WHERE email = 'agent.daaf@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'OPERATEUR', true, now() FROM profiles WHERE email = 'agent.dsi@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+INSERT INTO user_roles (user_id, role, is_active, granted_at)
+SELECT id, 'OPERATEUR', true, now() FROM profiles WHERE email = 'agent.dcp@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
 -- =====================================================
@@ -192,21 +238,6 @@ SELECT
 FROM profiles p
 LEFT JOIN directions d ON d.id = p.direction_id
 LEFT JOIN user_roles ur ON ur.user_id = p.id AND ur.is_active = true
+WHERE p.email LIKE '%@arti.ci'
 GROUP BY p.id, p.email, p.full_name, p.first_name, p.last_name, p.poste, d.sigle, p.is_active
 ORDER BY p.email;
-
--- =====================================================
--- RÉSULTAT ATTENDU:
--- =====================================================
--- | email              | nom_complet        | poste                    | direction | roles        |
--- |--------------------|--------------------|--------------------------|-----------|--------------|
--- | admin@arti.ci      | Admin SYSTEM       | Administrateur Système   | NULL      | {ADMIN}      |
--- | agent.daaf@arti.ci | Aminata COULIBALY  | Agent Comptable DAAF     | DAAF      | NULL         |
--- | agent.dcp@arti.ci  | Marie KONAN        | Chargée de Communication | DCP       | NULL         |
--- | agent.dsi@arti.ci  | Marcel KOUADIO     | Développeur DSI          | DSI       | NULL         |
--- | cb@arti.ci         | Kouassi AMAN       | Contrôleur Budgétaire    | DAAF      | {CB}         |
--- | daaf@arti.ci       | Fatou KONE         | Directrice Admin/Fin.    | DAAF      | {DAAF}       |
--- | dcp@arti.ci        | Jean KOUAME        | Directeur Communication  | DCP       | {DIRECTEUR}  |
--- | dg@arti.ci         | Mamadou DIALLO     | Directeur Général        | DG        | {DG}         |
--- | dsi@arti.ci        | Ibrahim TRAORE     | Directeur SI             | DSI       | {DIRECTEUR}  |
--- | stats@arti.ci      | Paul BAMBA         | Chef Service Statistiques| DSESP     | NULL         |
