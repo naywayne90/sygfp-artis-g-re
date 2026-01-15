@@ -95,16 +95,24 @@ export const notesAefService = {
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
           budget_line:budget_lines(id, code, label, dotation_initiale),
-          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, objet, dossier_id)
+          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, objet, dossier_id),
+          attachments:note_attachments(id)
         `)
         .in('id', noteIds);
 
       if (enrichError) throw enrichError;
 
-      // Préserver l'ordre du RPC
-      const orderedData = noteIds.map((id: string) =>
-        enrichedData?.find((n) => n.id === id)
-      ).filter(Boolean);
+      // Préserver l'ordre du RPC et ajouter le comptage des pièces jointes
+      const orderedData = noteIds.map((id: string) => {
+        const note = enrichedData?.find((n) => n.id === id);
+        if (note) {
+          return {
+            ...note,
+            attachments_count: Array.isArray(note.attachments) ? note.attachments.length : 0
+          };
+        }
+        return null;
+      }).filter(Boolean);
 
       return {
         success: true,

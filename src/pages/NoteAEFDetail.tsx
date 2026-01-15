@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
 import { useNoteAccessControl } from "@/hooks/useNoteAccessControl";
@@ -26,7 +26,9 @@ import {
   Shield,
   LinkIcon,
   Paperclip,
-  Loader2
+  Loader2,
+  Upload,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +51,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+// Constants for file upload validation
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp'
+];
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
 
 // Helper functions
 const getStatusBadge = (statut: string | null) => {
@@ -114,12 +131,16 @@ export default function NoteAEFDetail() {
   const { validateNote, rejectNote, deferNote, submitNote, deleteNote, imputeNote } = useNotesAEF();
   const { canValidateNoteAEF, canImpute } = usePermissions();
   
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   // Dialogs state
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showImputeDialog, setShowImputeDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch note details
   const { data: note, isLoading: noteLoading, refetch } = useQuery({
@@ -254,8 +275,152 @@ export default function NoteAEFDetail() {
     } catch (error: any) {
       toast.error(error.message || "Erreur lors de la suppression");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(true);
       setShowDeleteDialog(false);
+    }
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length || !note) return;
+
+    setIsUploading(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const file of Array.from(files)) {
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name} dépasse la limite de 10 MB`);
+        errorCount++;
+        continue;
+      }
+
+      // Validate file type
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+      if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(fileExtension)) {
+        toast.error(`${file.name}: type de fichier non autorisé`);
+        errorCount++;
+        continue;
+      }
+
+      try {
+        // Generate unique path: {exercice}/AEF/{note_id}/{timestamp}_{filename}
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = `${note.exercice}/AEF/${note.id}/${timestamp}_${safeName}`;
+
+        // Upload to storage
+        const { error: uploadError } = await supabase.storage
+          .from('note-attachments')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast.error(`Erreur upload: ${file.name}`);
+          errorCount++;
+          continue;
+        }
+
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // Insert metadata into note_attachments table
+        const { error: insertError } = await supabase
+          .from('note_attachments')
+          .insert({
+            note_id: note.id,
+            file_name: file.name,
+            file_path: filePath,
+            file_type: file.type || 'application/octet-stream',
+            file_size: file.size,
+            uploaded_by: user?.id
+          });
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          // Try to delete uploaded file on failure
+          await supabase.storage.from('note-attachments').remove([filePath]);
+          toast.error(`Erreur enregistrement: ${file.name}`);
+          errorCount++;
+          continue;
+        }
+
+        successCount++;
+      } catch (err) {
+        console.error('File upload error:', err);
+        toast.error(`Erreur: ${file.name}`);
+        errorCount++;
+      }
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    setIsUploading(false);
+
+    // Show summary
+    if (successCount > 0) {
+      toast.success(`${successCount} fichier(s) ajouté(s)`);
+      // Refresh attachments
+      queryClient.invalidateQueries({ queryKey: ['note-aef-attachments', id] });
+    }
+    if (errorCount > 0 && successCount === 0) {
+      toast.error(`Échec de l'upload de ${errorCount} fichier(s)`);
+    }
+  };
+
+  // Handle file delete
+  const handleDeleteFile = async (attachment: { id: string; file_path: string; file_name: string }) => {
+    if (!note || note.statut !== 'brouillon') {
+      toast.error("Suppression possible uniquement pour les brouillons");
+      return;
+    }
+
+    try {
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('note-attachments')
+        .remove([attachment.file_path]);
+
+      if (storageError) {
+        console.error('Storage delete error:', storageError);
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('note_attachments')
+        .delete()
+        .eq('id', attachment.id);
+
+      if (dbError) throw dbError;
+
+      toast.success(`${attachment.file_name} supprimé`);
+      queryClient.invalidateQueries({ queryKey: ['note-aef-attachments', id] });
+    } catch (err) {
+      console.error('Delete file error:', err);
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  // Handle file download
+  const handleDownloadFile = async (attachment: { file_path: string; file_name: string }) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('note-attachments')
+        .createSignedUrl(attachment.file_path, 60);
+
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank');
+    } catch (err) {
+      console.error('Download error:', err);
+      toast.error("Impossible de télécharger le fichier");
     }
   };
 
@@ -573,13 +738,53 @@ export default function NoteAEFDetail() {
 
           {/* Pièces jointes */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Paperclip className="h-4 w-4" />
                 Pièces jointes
+                <Badge variant="secondary" className="ml-1">{attachments.length}</Badge>
               </CardTitle>
+              {/* Upload button - only for brouillon and creator */}
+              {note.statut === 'brouillon' && accessControl.canEdit && (
+                <div className="relative">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={isUploading}
+                    className="gap-2"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Upload...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" />
+                        Ajouter
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
+              {/* Upload hint for brouillon */}
+              {note.statut === 'brouillon' && accessControl.canEdit && (
+                <p className="text-xs text-muted-foreground mb-3">
+                  Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF • Max 10 MB
+                </p>
+              )}
+              
               {attachmentsLoading ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -606,25 +811,28 @@ export default function NoteAEFDetail() {
                           )}
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={async () => {
-                          try {
-                            const { data, error } = await supabase.storage
-                              .from("note-attachments")
-                              .createSignedUrl(att.file_path, 60);
-                            
-                            if (error) throw error;
-                            window.open(data.signedUrl, "_blank");
-                          } catch (err) {
-                            console.error("Download error:", err);
-                            toast.error("Impossible de télécharger le fichier");
-                          }
-                        }}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDownloadFile(att)}
+                          title="Télécharger"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {/* Delete button - only for brouillon */}
+                        {note.statut === 'brouillon' && accessControl.canEdit && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteFile(att)}
+                            className="text-destructive hover:text-destructive"
+                            title="Supprimer"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
