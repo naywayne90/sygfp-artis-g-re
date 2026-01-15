@@ -236,7 +236,12 @@ export function useNotesAEF() {
 
   // Create note - numéro généré automatiquement par trigger
   const createMutation = useMutation({
-    mutationFn: async (noteData: Partial<NoteAEF>) => {
+    mutationFn: async (noteData: Partial<NoteAEF> & { 
+      note_sef_id?: string | null;
+      is_direct_aef?: boolean;
+      type_depense?: string;
+      justification?: string;
+    }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
@@ -250,6 +255,8 @@ export function useNotesAEF() {
           montant_estime: noteData.montant_estime || 0,
           type_depense: noteData.type_depense || "fonctionnement",
           justification: noteData.justification,
+          note_sef_id: noteData.note_sef_id || null,
+          is_direct_aef: noteData.is_direct_aef || false,
           beneficiaire_id: noteData.beneficiaire_id,
           ligne_budgetaire_id: noteData.ligne_budgetaire_id,
           os_id: noteData.os_id,
