@@ -31,6 +31,8 @@ import {
   Trash2,
   FileText,
   CreditCard,
+  Zap,
+  Link2,
 } from "lucide-react";
 
 interface NoteAEFListProps {
@@ -54,6 +56,7 @@ const getStatusBadge = (status: string | null) => {
     brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     soumis: { label: "Soumis", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
     a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
+    a_imputer: { label: "À imputer", className: "bg-success/10 text-success border-success/20" },
     valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
     impute: { label: "Imputé", className: "bg-primary/10 text-primary border-primary/20" },
     rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
@@ -61,6 +64,16 @@ const getStatusBadge = (status: string | null) => {
   };
   const variant = variants[status || "brouillon"] || variants.brouillon;
   return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+};
+
+const getOriginBadge = (isDirectAEF: boolean | undefined, noteSefId: string | null | undefined) => {
+  if (isDirectAEF || (!noteSefId && isDirectAEF !== false)) {
+    return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">AEF Directe</Badge>;
+  }
+  if (noteSefId) {
+    return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">Via SEF</Badge>;
+  }
+  return null;
 };
 
 const getUrgenceBadge = (urgence: string | null) => {
@@ -129,8 +142,11 @@ export function NoteAEFList({
             <TableBody>
               {notes.map((note) => (
                 <TableRow key={note.id}>
-                  <TableCell className="font-medium font-mono">
-                    {note.numero || "—"}
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col gap-1">
+                      <span className="font-mono">{note.numero || "—"}</span>
+                      {getOriginBadge((note as any).is_direct_aef, note.note_sef_id)}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                     {note.objet}
@@ -200,8 +216,8 @@ export function NoteAEFList({
                             </>
                           )}
 
-                          {/* Bouton Imputer pour notes validées non imputées */}
-                          {canImpute && note.statut === "valide" && !note.imputed_at && onImpute && (
+                          {/* Bouton Imputer pour notes à imputer (validées) */}
+                          {canImpute && (note.statut === "a_imputer" || note.statut === "valide") && !note.imputed_at && onImpute && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onImpute(note)}>
