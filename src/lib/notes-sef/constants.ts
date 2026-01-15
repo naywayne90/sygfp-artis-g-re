@@ -224,8 +224,57 @@ export const NOTES_SEF_CONFIG = {
   ],
   /** Nombre max de pièces jointes par note */
   MAX_ATTACHMENTS_PER_NOTE: 10,
-  /** Préfixe de référence pivot */
+  /** 
+   * Référence pivot - format ARTI01YYNNNN
+   * - ARTI : préfixe organisme
+   * - 01 : code module Note SEF
+   * - YY : 2 derniers chiffres de l'exercice (ex: 2026 → 26)
+   * - NNNN : compteur séquentiel par exercice (0001, 0002, ...)
+   * Exemple : ARTI01260001 pour la 1ère note de l'exercice 2026
+   * 
+   * La génération est faite côté DB via trigger BEFORE INSERT
+   */
   REFERENCE_PREFIX: 'ARTI',
+  /** Code module pour la séquence (table reference_sequences) */
+  MODULE_CODE: '01',
   /** Bucket Supabase Storage */
-  STORAGE_BUCKET: 'notes_sef_pieces',
+  STORAGE_BUCKET: 'notes-sef',
 } as const;
+
+// ============================================
+// FORMAT DE RÉFÉRENCE PIVOT
+// ============================================
+
+/**
+ * Parse une référence pivot ARTI01YYNNNN
+ * @param ref - La référence à parser (ex: "ARTI01260001")
+ * @returns Les composants de la référence ou null si format invalide
+ */
+export function parseReferencePivot(ref: string): {
+  prefix: string;
+  moduleCode: string;
+  year: number;
+  sequence: number;
+} | null {
+  // Format attendu : ARTI01YYNNNN (12 caractères)
+  const match = ref.match(/^(ARTI)(01)(\d{2})(\d{4})$/);
+  if (!match) return null;
+  
+  return {
+    prefix: match[1],
+    moduleCode: match[2],
+    year: 2000 + parseInt(match[3], 10),
+    sequence: parseInt(match[4], 10),
+  };
+}
+
+/**
+ * Formate une référence pivot pour affichage
+ * @param ref - La référence brute
+ * @returns Référence formatée ou la valeur originale
+ */
+export function formatReferencePivot(ref: string | null | undefined): string {
+  if (!ref) return '—';
+  // La référence est déjà au bon format, on peut juste la retourner
+  return ref;
+}
