@@ -103,7 +103,7 @@ export default function NotesSEF() {
 
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
 
-  // Filter notes based on search
+  // Filter notes based on search (includes reference_pivot)
   const filteredNotes = useMemo(() => {
     const getNotesForTab = () => {
       switch (activeTab) {
@@ -111,10 +111,10 @@ export default function NotesSEF() {
           return notesByStatus.a_valider;
         case "validees":
           return notesByStatus.valide;
-        case "rejetees":
-          return notesByStatus.rejete;
         case "differees":
           return notesByStatus.differe;
+        case "rejetees":
+          return notesByStatus.rejete;
         default:
           return notes;
       }
@@ -127,9 +127,13 @@ export default function NotesSEF() {
     const query = searchQuery.toLowerCase();
     return tabNotes.filter(
       (note) =>
+        note.reference_pivot?.toLowerCase().includes(query) ||
         note.numero?.toLowerCase().includes(query) ||
         note.objet.toLowerCase().includes(query) ||
-        note.direction?.label?.toLowerCase().includes(query)
+        note.direction?.label?.toLowerCase().includes(query) ||
+        note.direction?.sigle?.toLowerCase().includes(query) ||
+        note.demandeur?.first_name?.toLowerCase().includes(query) ||
+        note.demandeur?.last_name?.toLowerCase().includes(query)
     );
   }, [notes, notesByStatus, activeTab, searchQuery]);
 
@@ -289,7 +293,7 @@ export default function NotesSEF() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par numéro, objet ou direction..."
+              placeholder="Rechercher par référence (ARTI...), objet, direction ou demandeur..."
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

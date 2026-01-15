@@ -7,6 +7,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 export interface NoteSEF {
   id: string;
   numero: string | null;
+  reference_pivot: string | null;
   exercice: number;
   direction_id: string | null;
   demandeur_id: string | null;
@@ -14,6 +15,8 @@ export interface NoteSEF {
   beneficiaire_interne_id: string | null;
   objet: string;
   description: string | null;
+  justification: string | null;
+  date_souhaitee: string | null;
   urgence: string | null;
   commentaire: string | null;
   statut: string | null;
@@ -32,7 +35,7 @@ export interface NoteSEF {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  // Nouveau: lien vers le dossier créé
+  // Lien vers le dossier créé
   dossier_id?: string | null;
   // Relations
   direction?: { id: string; label: string; sigle: string | null };
