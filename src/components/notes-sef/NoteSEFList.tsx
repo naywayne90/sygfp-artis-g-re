@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,7 @@ import {
   Trash2,
   FileText,
   FolderOpen,
+  ExternalLink,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -88,8 +90,19 @@ export function NoteSEFList({
   showActions = true,
   emptyMessage = "Aucune note trouvée",
 }: NoteSEFListProps) {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { hasAnyRole } = usePermissions();
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+
+  // Navigation vers la page détail avec conservation du contexte
+  const handleNavigateToDetail = (note: NoteSEF) => {
+    const currentTab = searchParams.get('tab') || '';
+    const detailUrl = currentTab 
+      ? `/notes-sef/${note.id}?tab=${currentTab}`
+      : `/notes-sef/${note.id}`;
+    navigate(detailUrl);
+  };
 
   return (
     <Card>
@@ -124,7 +137,7 @@ export function NoteSEFList({
                 <TableRow 
                   key={note.id} 
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onView?.(note)}
+                  onClick={() => handleNavigateToDetail(note)}
                 >
                   <TableCell className="font-medium font-mono text-primary">
                     {note.reference_pivot || note.numero || "—"}
@@ -172,10 +185,14 @@ export function NoteSEFList({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleNavigateToDetail(note)}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Ouvrir la page
+                          </DropdownMenuItem>
                           {onView && (
                             <DropdownMenuItem onClick={() => onView(note)}>
                               <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
+                              Aperçu rapide
                             </DropdownMenuItem>
                           )}
 
