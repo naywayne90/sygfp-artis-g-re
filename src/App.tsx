@@ -20,6 +20,7 @@ import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
+import NoteSEFDetail from "./pages/NoteSEFDetail";
 import Notifications from "./pages/Notifications";
 import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 import Alertes from "./pages/Alertes";
@@ -141,6 +142,7 @@ const App = () => (
               {/* Exécution Budgétaire */}
               <Route path="/notes" element={<Notes />} />
               <Route path="/notes-sef" element={<NotesSEF />} />
+              <Route path="/notes-sef/:id" element={<NoteSEFDetail />} />
               <Route path="/notes-aef" element={<NotesAEF />} />
               <Route path="/execution/imputation" element={<Imputation />} />
               <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
