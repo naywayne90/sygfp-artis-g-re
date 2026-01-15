@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useNotesSEFAudit } from "@/hooks/useNotesSEFAudit";
 
 export interface NoteSEF {
   id: string;
@@ -64,6 +65,7 @@ export function useNotesSEF() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { logAction } = useAuditLog();
+  const { logSoumission, logValidation, logRejet, logReport, logAjoutPiece, logSuppressionPiece } = useNotesSEFAudit();
 
   // Fetch all notes SEF for current exercice
   const { data: notes = [], isLoading, refetch } = useQuery({
@@ -232,6 +234,17 @@ export function useNotesSEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Récupérer la note avant la soumission pour les notifications
+      const { data: oldNote } = await supabase
+        .from("notes_sef")
+        .select(`
+          *,
+          direction:directions(id, label, sigle),
+          demandeur:profiles!demandeur_id(id, first_name, last_name)
+        `)
+        .eq("id", noteId)
+        .single();
+
       const { data, error } = await supabase
         .from("notes_sef")
         .update({
@@ -245,20 +258,8 @@ export function useNotesSEF() {
 
       if (error) throw error;
 
-      await supabase.from("notes_sef_history").insert([{
-        note_id: noteId,
-        action: "soumission",
-        old_statut: "brouillon",
-        new_statut: "soumis",
-        performed_by: user.id,
-      }]);
-
-      await logAction({
-        entityType: "note_sef",
-        entityId: noteId,
-        action: "submit",
-        newValues: { statut: "soumis" },
-      });
+      // Log history + audit + notifications aux validateurs
+      await logSoumission({ ...oldNote, ...data } as any);
 
       return data;
     },
@@ -394,21 +395,8 @@ export function useNotesSEF() {
         });
       }
 
-      await supabase.from("notes_sef_history").insert([{
-        note_id: noteId,
-        action: "validation",
-        old_statut: oldNote?.statut,
-        new_statut: "valide",
-        commentaire: dossier ? `Dossier ${dossier.numero} créé automatiquement` : undefined,
-        performed_by: user.id,
-      }]);
-
-      await logAction({
-        entityType: "note_sef",
-        entityId: noteId,
-        action: "validate",
-        newValues: { statut: "valide", dossier_id: dossier?.id },
-      });
+      // Log history + audit + notifications au créateur/demandeur
+      await logValidation({ ...oldNote, ...data } as any, dossier?.id);
 
       return { ...data, dossier };
     },
@@ -438,7 +426,12 @@ export function useNotesSEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: oldNote } = await supabase.from("notes_sef").select("statut").eq("id", noteId).single();
+      // Récupérer la note avec les infos nécessaires pour les notifications
+      const { data: oldNote } = await supabase
+        .from("notes_sef")
+        .select("*, direction:directions(id, label)")
+        .eq("id", noteId)
+        .single();
 
       const { data, error } = await supabase
         .from("notes_sef")
@@ -454,21 +447,8 @@ export function useNotesSEF() {
 
       if (error) throw error;
 
-      await supabase.from("notes_sef_history").insert([{
-        note_id: noteId,
-        action: "rejet",
-        old_statut: oldNote?.statut,
-        new_statut: "rejete",
-        commentaire: motif,
-        performed_by: user.id,
-      }]);
-
-      await logAction({
-        entityType: "note_sef",
-        entityId: noteId,
-        action: "reject",
-        newValues: { statut: "rejete", motif },
-      });
+      // Log history + audit + notifications au créateur/demandeur
+      await logRejet({ ...oldNote, ...data } as any, motif);
 
       return data;
     },
@@ -499,7 +479,12 @@ export function useNotesSEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: oldNote } = await supabase.from("notes_sef").select("statut").eq("id", noteId).single();
+      // Récupérer la note avec les infos nécessaires pour les notifications
+      const { data: oldNote } = await supabase
+        .from("notes_sef")
+        .select("*, direction:directions(id, label)")
+        .eq("id", noteId)
+        .single();
 
       const { data, error } = await supabase
         .from("notes_sef")
@@ -517,21 +502,8 @@ export function useNotesSEF() {
 
       if (error) throw error;
 
-      await supabase.from("notes_sef_history").insert([{
-        note_id: noteId,
-        action: "report",
-        old_statut: oldNote?.statut,
-        new_statut: "differe",
-        commentaire: motif,
-        performed_by: user.id,
-      }]);
-
-      await logAction({
-        entityType: "note_sef",
-        entityId: noteId,
-        action: "archive",
-        newValues: { statut: "differe", motif },
-      });
+      // Log history + audit + notifications au créateur/demandeur
+      await logReport({ ...oldNote, ...data } as any, motif, dateReprise);
 
       return data;
     },
