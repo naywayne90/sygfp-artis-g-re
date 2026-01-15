@@ -515,4 +515,12 @@ FOR UPDATE USING (
 
 ---
 
+## 11. Documentation détaillée par module
+
+| Module | Documentation RLS |
+|--------|-------------------|
+| Notes SEF | [docs/RLS_NOTES_SEF.md](./RLS_NOTES_SEF.md) |
+
+---
+
 *Documentation générée le 2026-01-15*
