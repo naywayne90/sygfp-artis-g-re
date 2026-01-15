@@ -255,6 +255,33 @@ export type Database = {
           },
         ]
       }
+      arti_reference_counters: {
+        Row: {
+          annee: number
+          dernier_numero: number
+          etape: number
+          id: string
+          mois: number
+          updated_at: string | null
+        }
+        Insert: {
+          annee: number
+          dernier_numero?: number
+          etape: number
+          id?: string
+          mois: number
+          updated_at?: string | null
+        }
+        Update: {
+          annee?: number
+          dernier_numero?: number
+          etape?: number
+          id?: string
+          mois?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           categorie: string | null
@@ -9443,6 +9470,13 @@ export type Database = {
         Args: { p_alert_id: string }
         Returns: boolean
       }
+      backfill_arti_references: {
+        Args: never
+        Returns: {
+          records_updated: number
+          table_name: string
+        }[]
+      }
       bloquer_dossier: {
         Args: { p_dossier_id: string; p_motif: string; p_user_id: string }
         Returns: undefined
@@ -9543,6 +9577,10 @@ export type Database = {
         Returns: Json
       }
       finalize_import_run: { Args: { p_run_id: string }; Returns: Json }
+      generate_arti_reference: {
+        Args: { p_date?: string; p_etape: number }
+        Returns: string
+      }
       generate_budget_code_v2: {
         Args: {
           p_action_code: string
@@ -9762,6 +9800,16 @@ export type Database = {
         Args: { p_exercise_year: number }
         Returns: string
       }
+      parse_arti_reference: {
+        Args: { p_reference: string }
+        Returns: {
+          annee: number
+          etape: number
+          is_valid: boolean
+          mois: number
+          numero: number
+        }[]
+      }
       parse_sequence_code: {
         Args: { p_code: string }
         Returns: {
@@ -9841,6 +9889,15 @@ export type Database = {
           validated_at: string
           validated_by: string
         }[]
+      }
+      sync_arti_counter_from_import: {
+        Args: {
+          p_annee: number
+          p_etape: number
+          p_max_numero: number
+          p_mois: number
+        }
+        Returns: boolean
       }
       sync_lambda_link: { Args: { p_link_id: string }; Returns: boolean }
       sync_referentiels_from_import: {
