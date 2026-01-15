@@ -9319,6 +9319,10 @@ export type Database = {
         Args: { p_exercice: number }
         Returns: string
       }
+      generate_note_sef_reference_pivot: {
+        Args: { p_exercice?: number }
+        Returns: string
+      }
       generate_prestataire_code: { Args: never; Returns: string }
       generate_transfer_code: {
         Args: { p_exercice: number; p_type?: string }
