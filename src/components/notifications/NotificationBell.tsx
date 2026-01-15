@@ -57,6 +57,8 @@ export function NotificationBell() {
     if (!entityType || !entityId) return null;
     const routes: Record<string, string> = {
       note: "/notes",
+      note_sef: "/notes-sef",
+      notes_sef: "/notes-sef",
       engagement: "/engagements",
       liquidation: "/liquidations",
       ordonnancement: "/ordonnancements",
