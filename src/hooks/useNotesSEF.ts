@@ -32,12 +32,16 @@ export interface NoteSEF {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // Nouveau: lien vers le dossier créé
+  dossier_id?: string | null;
   // Relations
   direction?: { id: string; label: string; sigle: string | null };
   demandeur?: { id: string; first_name: string | null; last_name: string | null };
   beneficiaire?: { id: string; raison_sociale: string };
   beneficiaire_interne?: { id: string; first_name: string | null; last_name: string | null };
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
+  // Relation vers dossier
+  dossier?: { id: string; numero: string; statut_global: string | null };
 }
 
 export interface NoteSEFHistory {
@@ -67,8 +71,8 @@ export function useNotesSEF() {
         .select(`
           *,
           direction:directions(id, label, sigle),
-          demandeur:profiles!notes_sef_demandeur_id_fkey(id, first_name, last_name),
-          created_by_profile:profiles!notes_sef_created_by_fkey(id, first_name, last_name)
+          demandeur:profiles!demandeur_id(id, first_name, last_name),
+          created_by_profile:profiles!created_by(id, first_name, last_name)
         `)
         .order("created_at", { ascending: false });
 
@@ -402,8 +406,9 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ["dossiers"] });
       if (result.dossier) {
         toast({ 
-          title: `Note ${result.numero} validée`, 
-          description: `Dossier ${result.dossier.numero} créé automatiquement` 
+          title: `Note ${result.numero} validée ✓`, 
+          description: `Dossier ${result.dossier.numero} créé automatiquement. Cliquez sur la note pour voir le lien vers le dossier.`,
+          duration: 6000,
         });
       } else {
         toast({ title: `Note ${result.numero} validée avec succès` });
