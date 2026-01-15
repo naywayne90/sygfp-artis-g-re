@@ -80,10 +80,10 @@ export default function NotesAEF() {
       switch (activeTab) {
         case "a_valider":
           return notesByStatus.a_valider;
-        case "validees":
-          return notesByStatus.valide;
         case "a_imputer":
-          return notesByStatus.valide_a_imputer;
+          return notesByStatus.a_imputer; // Notes validées par DG, en attente d'imputation
+        case "imputees":
+          return notesByStatus.impute; // Notes déjà imputées
         case "rejetees":
           return notesByStatus.rejete;
         case "differees":
@@ -212,7 +212,7 @@ export default function NotesAEF() {
               <div>
                 <p className="text-sm text-muted-foreground">À imputer</p>
                 <p className="text-2xl font-bold text-primary">
-                  {notesByStatus.valide_a_imputer.length}
+                  {notesByStatus.a_imputer.length}
                 </p>
               </div>
               <CreditCard className="h-8 w-8 text-primary/50" />
@@ -223,9 +223,9 @@ export default function NotesAEF() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Validées</p>
+                <p className="text-sm text-muted-foreground">Imputées</p>
                 <p className="text-2xl font-bold text-success">
-                  {notesByStatus.valide.length}
+                  {notesByStatus.impute.length}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
@@ -283,10 +283,10 @@ export default function NotesAEF() {
             À valider ({notesByStatus.a_valider.length})
           </TabsTrigger>
           <TabsTrigger value="a_imputer" className="text-primary">
-            À imputer ({notesByStatus.valide_a_imputer.length})
+            À imputer ({notesByStatus.a_imputer.length})
           </TabsTrigger>
-          <TabsTrigger value="validees">
-            Validées ({notesByStatus.valide.length})
+          <TabsTrigger value="imputees">
+            Imputées ({notesByStatus.impute.length})
           </TabsTrigger>
           <TabsTrigger value="differees">
             Différées ({notesByStatus.differe.length})
