@@ -109,26 +109,36 @@ export function NoteSEFList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Numéro</TableHead>
+                <TableHead>Référence</TableHead>
                 <TableHead className="hidden md:table-cell">Objet</TableHead>
                 <TableHead>Direction</TableHead>
+                <TableHead className="hidden lg:table-cell">Demandeur</TableHead>
                 <TableHead>Urgence</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="hidden lg:table-cell">Date</TableHead>
+                <TableHead className="hidden xl:table-cell">Date</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {notes.map((note) => (
-                <TableRow key={note.id}>
-                  <TableCell className="font-medium font-mono">
-                    {note.numero || "—"}
+                <TableRow 
+                  key={note.id} 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onView?.(note)}
+                >
+                  <TableCell className="font-medium font-mono text-primary">
+                    {note.reference_pivot || note.numero || "—"}
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[250px] truncate">
                     {note.objet}
                   </TableCell>
                   <TableCell>
                     {note.direction?.sigle || note.direction?.label || "—"}
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {note.demandeur 
+                      ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim() || "—"
+                      : "—"}
                   </TableCell>
                   <TableCell>{getUrgenceBadge(note.urgence)}</TableCell>
                   <TableCell>
@@ -150,11 +160,11 @@ export function NoteSEFList({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">
+                  <TableCell className="hidden xl:table-cell text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   {showActions && (
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -183,7 +193,7 @@ export function NoteSEFList({
                             </DropdownMenuItem>
                           )}
 
-                          {canValidate && (note.statut === "soumis" || note.statut === "a_valider") && (
+                          {canValidate && (note.statut === "soumis" || note.statut === "a_valider" || note.statut === "differe") && (
                             <>
                               <DropdownMenuSeparator />
                               {onValidate && (
@@ -192,13 +202,13 @@ export function NoteSEFList({
                                   Valider
                                 </DropdownMenuItem>
                               )}
-                              {onReject && (
+                              {onReject && note.statut !== "differe" && (
                                 <DropdownMenuItem onClick={() => onReject(note)}>
                                   <XCircle className="mr-2 h-4 w-4 text-destructive" />
                                   Rejeter
                                 </DropdownMenuItem>
                               )}
-                              {onDefer && (
+                              {onDefer && note.statut !== "differe" && (
                                 <DropdownMenuItem onClick={() => onDefer(note)}>
                                   <Clock className="mr-2 h-4 w-4 text-warning" />
                                   Différer
