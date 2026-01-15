@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { NoteSEF, useNotesSEF } from "@/hooks/useNotesSEF";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -40,7 +41,11 @@ interface UploadedFile {
 export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
   const { exercice } = useExercice();
   const { createNote, updateNote, directions, profiles, beneficiaires, isCreating, isUpdating } = useNotesSEF();
+  const { isAdmin, hasAnyRole, userId } = usePermissions();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Le demandeur peut être changé par les gestionnaires (ADMIN, DG, DAAF) ou si création par un autre
+  const canChangeDemandeur = isAdmin || hasAnyRole(["DG", "DAAF", "CB"]);
 
   // Type de bénéficiaire: "externe" (prestataire) ou "interne" (profil)
   const [typeBeneficiaire, setTypeBeneficiaire] = useState<"externe" | "interne" | "">("");
@@ -61,23 +66,30 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
     commentaire: "",
   });
 
-  // Charger l'utilisateur connecté au montage
+  // Charger l'utilisateur connecté au montage et pré-remplir direction si possible
   useEffect(() => {
     const loadCurrentUser = async () => {
       if (!note && open) {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Pré-remplir le demandeur avec l'utilisateur connecté
+          // Récupérer le profil pour obtenir la direction
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("direction_id")
+            .eq("id", user.id)
+            .single();
+          
+          // Pré-remplir le demandeur avec l'utilisateur connecté + direction si disponible
           setFormData(prev => ({
             ...prev,
             demandeur_id: user.id,
+            direction_id: profile?.direction_id || prev.direction_id,
           }));
         }
       }
     };
     loadCurrentUser();
   }, [open, note]);
-
   useEffect(() => {
     if (note) {
       setFormData({
@@ -427,7 +439,7 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
             {/* Demandeur */}
             <div>
               <Label htmlFor="demandeur" className={errors.demandeur_id ? "text-destructive" : ""}>
-                Demandeur *
+                Demandeur * {!canChangeDemandeur && "(auto)"}
               </Label>
               <Select
                 value={formData.demandeur_id}
@@ -435,8 +447,12 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
                   setFormData({ ...formData, demandeur_id: value });
                   if (errors.demandeur_id) setErrors(prev => ({ ...prev, demandeur_id: "" }));
                 }}
+                disabled={!canChangeDemandeur && !note}
               >
-                <SelectTrigger className={errors.demandeur_id ? "border-destructive" : ""}>
+                <SelectTrigger className={cn(
+                  errors.demandeur_id ? "border-destructive" : "",
+                  !canChangeDemandeur && !note ? "opacity-70" : ""
+                )}>
                   <SelectValue placeholder="Sélectionner un demandeur" />
                 </SelectTrigger>
                 <SelectContent>
