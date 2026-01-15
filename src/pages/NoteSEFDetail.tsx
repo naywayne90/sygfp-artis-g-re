@@ -54,6 +54,7 @@ import {
   Paperclip,
   AlertTriangle,
   MessageSquare,
+  FilePlus,
 } from "lucide-react";
 
 // ============================================
@@ -166,11 +167,12 @@ export default function NoteSEFDetail() {
   const [savingChanges, setSavingChanges] = useState(false);
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
+  const [validating, setValidating] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Permissions
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+  // Permissions - DG uniquement pour validation
+  const isDG = hasAnyRole(["ADMIN", "DG"]);
   const isAdmin = hasAnyRole(["ADMIN"]);
 
   // Récupérer l'utilisateur courant
@@ -211,7 +213,13 @@ export default function NoteSEFDetail() {
   const isCreator = currentUserId && note?.created_by === currentUserId;
   const canModify = (isCreator || isAdmin) && note?.statut === "brouillon";
   const canSubmit = canModify;
-  const canValidateNote = canValidate && (note?.statut === "soumis" || note?.statut === "a_valider" || note?.statut === "differe");
+  
+  // DG peut valider/rejeter/différer si statut = soumis (ou a_valider pour rétrocompatibilité)
+  // Si differe, seul "Valider" est disponible (pas rejeter/différer à nouveau)
+  const canValidateNote = isDG && note?.statut === "soumis";
+  const canValidateDeferredNote = isDG && note?.statut === "differe";
+  const isApproved = note?.statut === "valide";
+  const isRejected = note?.statut === "rejete";
 
   // Navigation retour
   const handleBack = () => {
@@ -451,33 +459,54 @@ export default function NoteSEFDetail() {
   // Soumettre
   const handleSubmit = async () => {
     if (!note) return;
-    await submitNote(note.id);
-    queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    toast({ title: "Note soumise pour validation" });
+    try {
+      await submitNote(note.id);
+      queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
+    } catch (error) {
+      // Toast déjà géré dans le hook
+    }
   };
 
-  // Valider
+  // Valider (DG seulement)
   const handleValidate = async () => {
     if (!note) return;
-    await validateNote(note.id);
-    queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    toast({ title: "Note validée" });
+    setValidating(true);
+    try {
+      await validateNote(note.id);
+      queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
+      toast({ title: "Note validée avec succès ✓" });
+    } catch (error) {
+      // Toast déjà géré dans le hook
+    } finally {
+      setValidating(false);
+    }
   };
 
-  // Rejeter (via dialog)
+  // Rejeter (via dialog) - DG seulement
   const handleReject = async (noteId: string, motif: string) => {
-    await rejectNote({ noteId, motif });
-    setRejectingNote(null);
-    queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    toast({ title: "Note rejetée" });
+    try {
+      await rejectNote({ noteId, motif });
+      setRejectingNote(null);
+      queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
+    } catch (error) {
+      // Toast déjà géré dans le hook
+    }
   };
 
-  // Différer (via dialog)
+  // Différer (via dialog) - DG seulement
   const handleDefer = async (data: { noteId: string; motif: string; condition?: string; dateReprise?: string }) => {
-    await deferNote(data);
-    setDeferringNote(null);
-    queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    toast({ title: "Note différée" });
+    try {
+      await deferNote(data);
+      setDeferringNote(null);
+      queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
+    } catch (error) {
+      // Toast déjà géré dans le hook
+    }
+  };
+
+  // Créer Note AEF (stub)
+  const handleCreateNoteAEF = () => {
+    navigate(`/notes-aef?prefill=${note?.id}`);
   };
 
   // Aller au dossier
@@ -555,8 +584,8 @@ export default function NoteSEFDetail() {
         </div>
       </div>
 
-      {/* Actions bar */}
-      {(canModify || canSubmit || canValidateNote) && !isEditing && (
+      {/* Actions bar pour brouillon */}
+      {(canModify || canSubmit) && !isEditing && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -575,43 +604,115 @@ export default function NoteSEFDetail() {
                   Soumettre pour validation
                 </Button>
               )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Actions bar DG - Validation */}
+      {(canValidateNote || canValidateDeferredNote) && !isEditing && (
+        <Card className="border-success/30 bg-success/5">
+          <CardContent className="py-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-success">Décision DG :</span>
+
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleValidate}
+                disabled={validating}
+                className="gap-2 bg-success hover:bg-success/90"
+              >
+                {validating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                Valider
+              </Button>
+
+              {/* Rejeter/Différer uniquement si pas déjà différé */}
               {canValidateNote && (
                 <>
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    onClick={handleValidate}
-                    className="gap-2 bg-success hover:bg-success/90"
+                    onClick={() => setRejectingNote(note)}
+                    className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
                   >
-                    <CheckCircle className="h-4 w-4" />
-                    Valider
+                    <XCircle className="h-4 w-4" />
+                    Rejeter
                   </Button>
-
-                  {note.statut !== "differe" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setRejectingNote(note)}
-                        className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Rejeter
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeferringNote(note)}
-                        className="gap-2 border-warning/50 text-warning hover:bg-warning/10"
-                      >
-                        <Clock className="h-4 w-4" />
-                        Différer
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeferringNote(note)}
+                    className="gap-2 border-warning/50 text-warning hover:bg-warning/10"
+                  >
+                    <Clock className="h-4 w-4" />
+                    Différer
+                  </Button>
                 </>
               )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CTA Créer Note AEF après validation */}
+      {isApproved && (
+        <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-success" />
+                <div>
+                  <p className="font-medium text-success">Note validée</p>
+                  <p className="text-sm text-muted-foreground">Vous pouvez maintenant créer la Note AEF associée</p>
+                </div>
+              </div>
+              <Button onClick={handleCreateNoteAEF} className="gap-2">
+                <FilePlus className="h-4 w-4" />
+                Créer Note AEF
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Info si note rejetée */}
+      {isRejected && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <XCircle className="h-5 w-5 text-destructive mt-0.5" />
+              <div>
+                <p className="font-medium text-destructive">Note rejetée</p>
+                {note.rejection_reason && (
+                  <p className="text-sm text-muted-foreground mt-1">Motif : {note.rejection_reason}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Info si note différée */}
+      {note?.statut === "differe" && (
+        <Card className="border-warning/30 bg-warning/5">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-warning mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <p className="font-medium text-warning">Note différée</p>
+                {note.differe_motif && (
+                  <p className="text-sm text-muted-foreground">Motif : {note.differe_motif}</p>
+                )}
+                {note.differe_condition && (
+                  <p className="text-sm text-muted-foreground">Condition de reprise : {note.differe_condition}</p>
+                )}
+                {note.differe_date_reprise && (
+                  <p className="text-sm text-muted-foreground">
+                    Date de reprise prévue : {format(new Date(note.differe_date_reprise), "dd MMM yyyy", { locale: fr })}
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
