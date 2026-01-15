@@ -28,16 +28,7 @@ import {
   Clock,
   Download,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function NotesSEF() {
@@ -46,7 +37,7 @@ export default function NotesSEF() {
   const { hasAnyRole } = usePermissions();
   const { exportNotesSEF, isExporting, exportProgress } = useNotesSEFExport();
   
-  // Nouveau hook pour la liste paginée
+  // Nouveau hook pour la liste paginée avec filtres avancés
   const {
     notes: filteredNotes,
     counts,
@@ -55,10 +46,13 @@ export default function NotesSEF() {
     error: listError,
     searchQuery,
     activeTab,
+    filters,
     setSearchQuery,
     setActiveTab,
     setPage,
     setPageSize,
+    setFilters,
+    resetFilters,
     refetch,
   } = useNotesSEFList({ pageSize: 20 });
 
@@ -292,9 +286,9 @@ export default function NotesSEF() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             searchPlaceholder="Rechercher par référence, objet, direction, demandeur..."
-            filters={{ directionId: null, urgence: null, dateFrom: null, dateTo: null }}
-            onFiltersChange={() => {}}
-            onResetFilters={() => setSearchQuery('')}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onResetFilters={resetFilters}
             showUrgence={true}
           />
         </CardContent>
@@ -399,55 +393,15 @@ export default function NotesSEF() {
       </Tabs>
 
       {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Afficher</span>
-                <Select 
-                  value={String(pagination.pageSize)} 
-                  onValueChange={(v) => setPageSize(Number(v))}
-                >
-                  <SelectTrigger className="w-[70px] h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span>par page</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  Page {pagination.page} sur {pagination.totalPages}
-                </span>
-                <div className="flex gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    disabled={pagination.page <= 1}
-                    onClick={() => setPage(pagination.page - 1)}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8"
-                    disabled={pagination.page >= pagination.totalPages}
-                    onClick={() => setPage(pagination.page + 1)}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {pagination.total > 0 && (
+        <NotesPagination
+          page={pagination.page}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+        />
       )}
 
       {/* Dialogs */}
