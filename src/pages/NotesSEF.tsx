@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NoteSEFForm } from "@/components/notes-sef/NoteSEFForm";
 import { NoteSEFList } from "@/components/notes-sef/NoteSEFList";
@@ -17,22 +16,20 @@ import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
+import { NotesFiltersBar, type FiltersState } from "@/components/shared/NotesFiltersBar";
+import { NotesPagination } from "@/components/shared/NotesPagination";
 import {
   Plus,
   Lock,
-  Search,
   FileText,
   Send,
   CheckCircle,
   XCircle,
   Clock,
   Download,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function NotesSEF() {
   const { exercice } = useExercice();
@@ -279,18 +276,18 @@ export default function NotesSEF() {
         </Card>
       </div>
 
-      {/* Search - avec debounce 300ms via le hook */}
+      {/* Recherche et filtres avancés */}
       <Card>
         <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par référence, objet, direction, demandeur..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <NotesFiltersBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Rechercher par référence, objet, direction, demandeur..."
+            filters={{ directionId: null, urgence: null, dateFrom: null, dateTo: null }}
+            onFiltersChange={() => {}}
+            onResetFilters={() => setSearchQuery('')}
+            showUrgence={true}
+          />
         </CardContent>
       </Card>
 

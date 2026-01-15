@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NoteAEFForm } from "@/components/notes-aef/NoteAEFForm";
 import { NoteAEFList } from "@/components/notes-aef/NoteAEFList";
@@ -11,16 +10,18 @@ import { NoteAEFRejectDialog } from "@/components/notes-aef/NoteAEFRejectDialog"
 import { NoteAEFDeferDialog } from "@/components/notes-aef/NoteAEFDeferDialog";
 import { NoteAEFImputeDialog } from "@/components/notes-aef/NoteAEFImputeDialog";
 import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
+import { useNotesAEFList } from "@/hooks/useNotesAEFList";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
+import { NotesFiltersBar } from "@/components/shared/NotesFiltersBar";
+import { NotesPagination } from "@/components/shared/NotesPagination";
 import {
   Plus,
   Lock,
-  Search,
   FileText,
   Send,
   CheckCircle,
@@ -36,10 +37,28 @@ export default function NotesAEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
+
+  // Nouveau hook pour liste paginée avec filtres
   const {
-    notes,
-    notesByStatus,
+    notes: filteredNotes,
+    counts,
+    pagination,
     isLoading,
+    error: listError,
+    searchQuery,
+    activeTab,
+    filters,
+    setSearchQuery,
+    setActiveTab,
+    setPage,
+    setPageSize,
+    setFilters,
+    resetFilters,
+    refetch,
+  } = useNotesAEFList({ pageSize: 20 });
+
+  // Hook existant pour les mutations
+  const {
     submitNote,
     validateNote,
     rejectNote,
@@ -48,15 +67,14 @@ export default function NotesAEF() {
     deleteNote,
   } = useNotesAEF();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("toutes");
+  // État local pour les dialogs
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<NoteAEF | null>(null);
   const [viewingNote, setViewingNote] = useState<NoteAEF | null>(null);
   const [rejectingNote, setRejectingNote] = useState<NoteAEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteAEF | null>(null);
   const [imputingNote, setImputingNote] = useState<NoteAEF | null>(null);
-  
+
   // ID de la note SEF pour pré-remplissage (depuis URL ?prefill=...)
   const [prefillNoteSEFId, setPrefillNoteSEFId] = useState<string | null>(null);
 
@@ -68,43 +86,13 @@ export default function NotesAEF() {
     if (prefillId) {
       setPrefillNoteSEFId(prefillId);
       setFormOpen(true);
-      // Nettoyer l'URL après utilisation
       searchParams.delete("prefill");
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
-  // Filter notes based on search
-  const filteredNotes = useMemo(() => {
-    const getNotesForTab = () => {
-      switch (activeTab) {
-        case "a_valider":
-          return notesByStatus.a_valider;
-        case "a_imputer":
-          return notesByStatus.a_imputer; // Notes validées par DG, en attente d'imputation
-        case "imputees":
-          return notesByStatus.impute; // Notes déjà imputées
-        case "rejetees":
-          return notesByStatus.rejete;
-        case "differees":
-          return notesByStatus.differe;
-        default:
-          return notes;
-      }
-    };
-
-    const tabNotes = getNotesForTab();
-
-    if (!searchQuery.trim()) return tabNotes;
-
-    const query = searchQuery.toLowerCase();
-    return tabNotes.filter(
-      (note) =>
-        note.numero?.toLowerCase().includes(query) ||
-        note.objet.toLowerCase().includes(query) ||
-        note.direction?.label?.toLowerCase().includes(query)
-    );
-  }, [notes, notesByStatus, activeTab, searchQuery]);
+  // Compteur "À valider" = soumis + a_valider
+  const aValiderCount = counts.soumis + counts.a_valider;
 
   const handleEdit = (note: NoteAEF) => {
     setEditingNote(note);
@@ -116,11 +104,13 @@ export default function NotesAEF() {
     if (!open) {
       setEditingNote(null);
       setPrefillNoteSEFId(null);
+      refetch();
     }
   };
 
   const handleReject = async (noteId: string, motif: string) => {
     await rejectNote({ noteId, motif });
+    refetch();
   };
 
   const handleDefer = async (data: {
@@ -129,10 +119,27 @@ export default function NotesAEF() {
     deadlineCorrection?: string;
   }) => {
     await deferNote(data);
+    refetch();
   };
 
   const handleImpute = async (noteId: string, budgetLineId: string) => {
     await imputeNote({ noteId, budgetLineId });
+    refetch();
+  };
+
+  const handleSubmit = async (noteId: string) => {
+    await submitNote(noteId);
+    refetch();
+  };
+
+  const handleValidate = async (noteId: string) => {
+    await validateNote(noteId);
+    refetch();
+  };
+
+  const handleDelete = async (noteId: string) => {
+    await deleteNote(noteId);
+    refetch();
   };
 
   if (!exercice) {
@@ -147,22 +154,22 @@ export default function NotesAEF() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={2} />
-      
+
       {/* Aide contextuelle */}
       <ModuleHelp {...MODULE_HELP_CONFIG.notes_aef} />
 
       {/* Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle 
-          title="Notes AEF" 
-          description="Gestion des Notes Avec Effet Financier" 
+        <ExerciceSubtitle
+          title="Notes AEF"
+          description="Gestion des Notes Avec Effet Financier"
         />
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
-                <Button 
-                  onClick={() => setFormOpen(true)} 
+                <Button
+                  onClick={() => setFormOpen(true)}
                   className="gap-2"
                   disabled={!canWrite}
                 >
@@ -187,7 +194,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{notes.length}</p>
+                <p className="text-2xl font-bold">{counts.total}</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -198,9 +205,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">À valider</p>
-                <p className="text-2xl font-bold text-warning">
-                  {notesByStatus.a_valider.length}
-                </p>
+                <p className="text-2xl font-bold text-warning">{aValiderCount}</p>
               </div>
               <Send className="h-8 w-8 text-warning/50" />
             </div>
@@ -211,9 +216,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">À imputer</p>
-                <p className="text-2xl font-bold text-primary">
-                  {notesByStatus.a_imputer.length}
-                </p>
+                <p className="text-2xl font-bold text-primary">{counts.a_imputer}</p>
               </div>
               <CreditCard className="h-8 w-8 text-primary/50" />
             </div>
@@ -224,9 +227,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Imputées</p>
-                <p className="text-2xl font-bold text-success">
-                  {notesByStatus.impute.length}
-                </p>
+                <p className="text-2xl font-bold text-success">{counts.impute}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
             </div>
@@ -237,9 +238,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Différées</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {notesByStatus.differe.length}
-                </p>
+                <p className="text-2xl font-bold text-orange-600">{counts.differe}</p>
               </div>
               <Clock className="h-8 w-8 text-orange-500/50" />
             </div>
@@ -250,9 +249,7 @@ export default function NotesAEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Rejetées</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {notesByStatus.rejete.length}
-                </p>
+                <p className="text-2xl font-bold text-destructive">{counts.rejete}</p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
@@ -260,71 +257,74 @@ export default function NotesAEF() {
         </Card>
       </div>
 
-      {/* Search */}
+      {/* Recherche et filtres */}
       <Card>
         <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par numéro, objet ou direction..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <NotesFiltersBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Rechercher par référence, objet, direction, montant..."
+            filters={filters}
+            onFiltersChange={setFilters}
+            onResetFilters={resetFilters}
+            showUrgence={true}
+          />
         </CardContent>
       </Card>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="toutes">Toutes ({notes.length})</TabsTrigger>
-          <TabsTrigger value="a_valider">
-            À valider ({notesByStatus.a_valider.length})
-          </TabsTrigger>
+          <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
+          <TabsTrigger value="a_valider">À valider ({aValiderCount})</TabsTrigger>
           <TabsTrigger value="a_imputer" className="text-primary">
-            À imputer ({notesByStatus.a_imputer.length})
+            À imputer ({counts.a_imputer})
           </TabsTrigger>
-          <TabsTrigger value="imputees">
-            Imputées ({notesByStatus.impute.length})
-          </TabsTrigger>
-          <TabsTrigger value="differees">
-            Différées ({notesByStatus.differe.length})
-          </TabsTrigger>
-          <TabsTrigger value="rejetees">
-            Rejetées ({notesByStatus.rejete.length})
-          </TabsTrigger>
+          <TabsTrigger value="imputees">Imputées ({counts.impute})</TabsTrigger>
+          <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
+          <TabsTrigger value="rejetees">Rejetées ({counts.rejete})</TabsTrigger>
         </TabsList>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
+        ) : listError ? (
+          <Card className="mt-4">
+            <CardContent className="pt-6">
+              <div className="text-center py-8 text-destructive">
+                <p>Erreur de chargement: {listError}</p>
+                <Button variant="outline" onClick={refetch} className="mt-4">
+                  Réessayer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : (
           <>
             <TabsContent value="toutes">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Toutes les notes AEF"
-                description={`${filteredNotes.length} note(s) trouvée(s)`}
+                description={`${pagination.total} note(s) trouvée(s)`}
                 onView={setViewingNote}
                 onEdit={handleEdit}
-                onSubmit={submitNote}
-                onValidate={validateNote}
+                onSubmit={handleSubmit}
+                onValidate={handleValidate}
                 onReject={setRejectingNote}
                 onDefer={setDeferringNote}
                 onImpute={setImputingNote}
-                onDelete={deleteNote}
+                onDelete={handleDelete}
               />
             </TabsContent>
 
             <TabsContent value="a_valider">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Notes à valider"
                 description="Notes en attente de validation"
                 onView={setViewingNote}
-                onValidate={canValidate ? validateNote : undefined}
+                onValidate={canValidate ? handleValidate : undefined}
                 onReject={canValidate ? setRejectingNote : undefined}
                 onDefer={canValidate ? setDeferringNote : undefined}
                 emptyMessage="Aucune note en attente de validation"
@@ -333,7 +333,7 @@ export default function NotesAEF() {
 
             <TabsContent value="a_imputer">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Notes validées à imputer"
                 description="Notes validées en attente d'imputation sur une ligne budgétaire"
                 onView={setViewingNote}
@@ -344,7 +344,7 @@ export default function NotesAEF() {
 
             <TabsContent value="imputees">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Notes imputées"
                 description="Notes ayant été imputées sur une ligne budgétaire"
                 onView={setViewingNote}
@@ -354,18 +354,18 @@ export default function NotesAEF() {
 
             <TabsContent value="differees">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Notes différées"
                 description="Notes en attente de conditions de reprise"
                 onView={setViewingNote}
-                onValidate={canValidate ? validateNote : undefined}
+                onValidate={canValidate ? handleValidate : undefined}
                 emptyMessage="Aucune note différée"
               />
             </TabsContent>
 
             <TabsContent value="rejetees">
               <NoteAEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteAEF[]}
                 title="Notes rejetées"
                 description="Notes ayant été rejetées"
                 onView={setViewingNote}
@@ -375,6 +375,16 @@ export default function NotesAEF() {
           </>
         )}
       </Tabs>
+
+      {/* Pagination */}
+      <NotesPagination
+        page={pagination.page}
+        pageSize={pagination.pageSize}
+        total={pagination.total}
+        totalPages={pagination.totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
       {/* Dialogs */}
       <NoteAEFForm

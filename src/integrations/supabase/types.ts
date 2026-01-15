@@ -9716,8 +9716,32 @@ export type Database = {
         }
         Returns: Json
       }
+      count_search_notes_aef: {
+        Args: {
+          p_date_from?: string
+          p_date_to?: string
+          p_direction_id?: string
+          p_exercice: number
+          p_search?: string
+          p_statut?: string[]
+          p_urgence?: string
+        }
+        Returns: number
+      }
       count_search_notes_sef: {
         Args: { p_exercice: number; p_search?: string; p_statut?: string[] }
+        Returns: number
+      }
+      count_search_notes_sef_v2: {
+        Args: {
+          p_date_from?: string
+          p_date_to?: string
+          p_direction_id?: string
+          p_exercice: number
+          p_search?: string
+          p_statut?: string[]
+          p_urgence?: string
+        }
         Returns: number
       }
       create_engagement_from_eb: {
@@ -10028,6 +10052,24 @@ export type Database = {
         Args: { p_alert_id: string; p_comment?: string }
         Returns: boolean
       }
+      search_notes_aef: {
+        Args: {
+          p_date_from?: string
+          p_date_to?: string
+          p_direction_id?: string
+          p_exercice: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_sort_by?: string
+          p_sort_order?: string
+          p_statut?: string[]
+          p_urgence?: string
+        }
+        Returns: {
+          id: string
+        }[]
+      }
       search_notes_sef: {
         Args: {
           p_exercice: number
@@ -10070,6 +10112,24 @@ export type Database = {
           urgence: string
           validated_at: string
           validated_by: string
+        }[]
+      }
+      search_notes_sef_v2: {
+        Args: {
+          p_date_from?: string
+          p_date_to?: string
+          p_direction_id?: string
+          p_exercice: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_sort_by?: string
+          p_sort_order?: string
+          p_statut?: string[]
+          p_urgence?: string
+        }
+        Returns: {
+          id: string
         }[]
       }
       sync_arti_counter_from_import: {
