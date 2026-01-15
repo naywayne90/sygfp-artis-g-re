@@ -313,7 +313,7 @@ export function AppSidebar() {
                       </div>
                       {!collapsed && (
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                          <Badge className="text-[10px] px-1.5 py-0 h-5 bg-sidebar-primary/20 text-sidebar-primary-foreground border-sidebar-primary/40">
                             9 étapes
                           </Badge>
                           <ChevronRight className={cn(
