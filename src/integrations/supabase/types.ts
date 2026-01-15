@@ -7531,6 +7531,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reference_counters: {
+        Row: {
+          etape: string
+          id: string
+          last_value: number
+          mm: string
+          updated_at: string
+          yy: string
+        }
+        Insert: {
+          etape: string
+          id?: string
+          last_value?: number
+          mm: string
+          updated_at?: string
+          yy: string
+        }
+        Update: {
+          etape?: string
+          id?: string
+          last_value?: number
+          mm?: string
+          updated_at?: string
+          yy?: string
+        }
+        Relationships: []
+      }
       reference_sequences: {
         Row: {
           created_at: string | null
@@ -9436,6 +9463,11 @@ export type Database = {
         Returns: string
       }
       generate_prestataire_code: { Args: never; Returns: string }
+      generate_reference: {
+        Args: { p_date_ref?: string; p_etape: string }
+        Returns: string
+      }
+      generate_sef_reference: { Args: { p_date_ref?: string }; Returns: string }
       generate_transfer_code: {
         Args: { p_exercice: number; p_type?: string }
         Returns: string
