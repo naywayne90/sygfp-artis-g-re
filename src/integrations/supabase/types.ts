@@ -5511,6 +5511,7 @@ export type Database = {
           commentaire: string | null
           id: string
           ip_address: string | null
+          metadata: Json | null
           new_statut: string | null
           note_id: string
           old_statut: string | null
@@ -5522,6 +5523,7 @@ export type Database = {
           commentaire?: string | null
           id?: string
           ip_address?: string | null
+          metadata?: Json | null
           new_statut?: string | null
           note_id: string
           old_statut?: string | null
@@ -5533,6 +5535,7 @@ export type Database = {
           commentaire?: string | null
           id?: string
           ip_address?: string | null
+          metadata?: Json | null
           new_statut?: string | null
           note_id?: string
           old_statut?: string | null
