@@ -342,14 +342,13 @@ export default function NotesAEF() {
               />
             </TabsContent>
 
-            <TabsContent value="validees">
+            <TabsContent value="imputees">
               <NoteAEFList
                 notes={filteredNotes}
-                title="Notes validées"
-                description="Notes ayant été validées"
+                title="Notes imputées"
+                description="Notes ayant été imputées sur une ligne budgétaire"
                 onView={setViewingNote}
-                onImpute={setImputingNote}
-                emptyMessage="Aucune note validée"
+                emptyMessage="Aucune note imputée"
               />
             </TabsContent>
 

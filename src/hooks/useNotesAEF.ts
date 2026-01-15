@@ -328,15 +328,37 @@ export function useNotesAEF() {
     },
   });
 
-  // Submit note
+  // Submit note - avec validations des champs requis
   const submitMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Vérifier si le budget est validé
-      if (budgetValidationStatus && !budgetValidationStatus.isValidated) {
-        throw new Error("Le budget n'est pas encore validé. Veuillez attendre la validation du budget.");
+      // Récupérer la note pour validation
+      const { data: note, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("*")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw new Error("Note introuvable");
+
+      // Validations des champs requis
+      const errors: string[] = [];
+      if (!note.objet?.trim()) errors.push("Objet");
+      if (!note.direction_id) errors.push("Direction");
+      if (!note.priorite) errors.push("Urgence");
+      if (!note.montant_estime || note.montant_estime <= 0) errors.push("Montant estimé");
+      if (!note.contenu?.trim()) errors.push("Description/Justification");
+
+      // Règle origin: si FROM_SEF, note_sef_id requis
+      const origin = note.origin || (note.is_direct_aef ? 'DIRECT' : 'FROM_SEF');
+      if (origin === 'FROM_SEF' && !note.note_sef_id) {
+        errors.push("Note SEF validée (origine FROM_SEF)");
+      }
+
+      if (errors.length > 0) {
+        throw new Error(`Champs obligatoires manquants: ${errors.join(", ")}`);
       }
 
       const { data, error } = await supabase
@@ -344,6 +366,7 @@ export function useNotesAEF() {
         .update({
           statut: "soumis",
           submitted_at: new Date().toISOString(),
+          submitted_by: user.id,
         })
         .eq("id", noteId)
         .select()
@@ -418,7 +441,7 @@ export function useNotesAEF() {
     },
   });
 
-  // Reject note
+  // Reject note - DG/ADMIN only
   const rejectMutation = useMutation({
     mutationFn: async ({ noteId, motif }: { noteId: string; motif: string }) => {
       if (!motif?.trim()) throw new Error("Le motif de rejet est obligatoire");
@@ -426,11 +449,24 @@ export function useNotesAEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier le rôle DG/ADMIN
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note AEF");
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
           statut: "rejete",
           rejection_reason: motif,
+          rejected_by: user.id,
+          rejected_at: new Date().toISOString(),
         })
         .eq("id", noteId)
         .select()
@@ -456,7 +492,7 @@ export function useNotesAEF() {
     },
   });
 
-  // Defer note
+  // Defer note - DG/ADMIN only
   const deferMutation = useMutation({
     mutationFn: async ({
       noteId,
@@ -471,6 +507,17 @@ export function useNotesAEF() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
+
+      // Vérifier le rôle DG/ADMIN
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent différer une note AEF");
+      }
 
       const { data, error } = await supabase
         .from("notes_dg")
@@ -490,7 +537,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "archive",
+        action: "defer",
         newValues: { statut: "differe", motif },
       });
 

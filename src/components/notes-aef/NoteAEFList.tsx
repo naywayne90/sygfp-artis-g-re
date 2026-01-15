@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ import {
   CreditCard,
   Zap,
   Link2,
+  ArrowRight,
 } from "lucide-react";
 
 interface NoteAEFListProps {
@@ -54,7 +56,7 @@ interface NoteAEFListProps {
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
     brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    soumis: { label: "Soumis", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+    soumis: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
     a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
     a_imputer: { label: "À imputer", className: "bg-success/10 text-success border-success/20" },
     valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
@@ -66,14 +68,15 @@ const getStatusBadge = (status: string | null) => {
   return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
 };
 
-const getOriginBadge = (isDirectAEF: boolean | undefined, noteSefId: string | null | undefined) => {
-  if (isDirectAEF || (!noteSefId && isDirectAEF !== false)) {
-    return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">AEF Directe</Badge>;
+const getOriginBadge = (note: NoteAEF) => {
+  const isDirectAEF = note.is_direct_aef || note.origin === 'DIRECT';
+  if (isDirectAEF) {
+    return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">Direct DG</Badge>;
   }
-  if (noteSefId) {
+  if (note.note_sef_id) {
     return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">Via SEF</Badge>;
   }
-  return null;
+  return <Badge variant="outline" className="bg-muted text-muted-foreground text-xs">—</Badge>;
 };
 
 const getUrgenceBadge = (urgence: string | null) => {
@@ -107,9 +110,15 @@ export function NoteAEFList({
   showActions = true,
   emptyMessage = "Aucune note trouvée",
 }: NoteAEFListProps) {
+  const navigate = useNavigate();
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+  const canValidate = hasAnyRole(["ADMIN", "DG"]);
   const canImpute = hasAnyRole(["ADMIN", "DAAF", "CB"]);
+
+  const handleGoToImputation = (note: NoteAEF) => {
+    // Naviguer vers la page d'imputation avec l'ID de la note
+    navigate(`/execution/imputation?note_aef_id=${note.id}`);
+  };
 
   return (
     <Card>
@@ -129,11 +138,11 @@ export function NoteAEFList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Numéro</TableHead>
+                <TableHead>Référence</TableHead>
                 <TableHead className="hidden md:table-cell">Objet</TableHead>
                 <TableHead>Direction</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
-                <TableHead>Urgence</TableHead>
+                <TableHead>Origine</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden lg:table-cell">Date</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
@@ -143,10 +152,7 @@ export function NoteAEFList({
               {notes.map((note) => (
                 <TableRow key={note.id}>
                   <TableCell className="font-medium">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-mono">{note.numero || "—"}</span>
-                      {getOriginBadge((note as any).is_direct_aef, note.note_sef_id)}
-                    </div>
+                    <span className="font-mono">{note.numero || "—"}</span>
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                     {note.objet}
@@ -157,7 +163,7 @@ export function NoteAEFList({
                   <TableCell className="text-right">
                     {formatMontant(note.montant_estime)}
                   </TableCell>
-                  <TableCell>{getUrgenceBadge(note.priorite)}</TableCell>
+                  <TableCell>{getOriginBadge(note)}</TableCell>
                   <TableCell>{getStatusBadge(note.statut)}</TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
@@ -170,7 +176,7 @@ export function NoteAEFList({
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="bg-popover">
                           {onView && (
                             <DropdownMenuItem onClick={() => onView(note)}>
                               <Eye className="mr-2 h-4 w-4" />
@@ -178,6 +184,7 @@ export function NoteAEFList({
                             </DropdownMenuItem>
                           )}
 
+                          {/* Actions pour BROUILLON */}
                           {note.statut === "brouillon" && onEdit && (
                             <DropdownMenuItem onClick={() => onEdit(note)}>
                               <Edit className="mr-2 h-4 w-4" />
@@ -192,6 +199,7 @@ export function NoteAEFList({
                             </DropdownMenuItem>
                           )}
 
+                          {/* Actions pour A_VALIDER / SOUMIS - DG only */}
                           {canValidate && (note.statut === "soumis" || note.statut === "a_valider") && (
                             <>
                               <DropdownMenuSeparator />
@@ -216,17 +224,24 @@ export function NoteAEFList({
                             </>
                           )}
 
-                          {/* Bouton Imputer pour notes à imputer (validées) */}
-                          {canImpute && (note.statut === "a_imputer" || note.statut === "valide") && !note.imputed_at && onImpute && (
+                          {/* Actions pour A_IMPUTER - Bouton Aller à Imputation */}
+                          {note.statut === "a_imputer" && !note.imputed_at && (
                             <>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => onImpute(note)}>
-                                <CreditCard className="mr-2 h-4 w-4 text-primary" />
-                                Imputer
+                              <DropdownMenuItem onClick={() => handleGoToImputation(note)}>
+                                <ArrowRight className="mr-2 h-4 w-4 text-primary" />
+                                Aller à Imputation
                               </DropdownMenuItem>
+                              {canImpute && onImpute && (
+                                <DropdownMenuItem onClick={() => onImpute(note)}>
+                                  <CreditCard className="mr-2 h-4 w-4 text-primary" />
+                                  Imputer (rapide)
+                                </DropdownMenuItem>
+                              )}
                             </>
                           )}
 
+                          {/* Suppression pour brouillons */}
                           {note.statut === "brouillon" && onDelete && (
                             <>
                               <DropdownMenuSeparator />
