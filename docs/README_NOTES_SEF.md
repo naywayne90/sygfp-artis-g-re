@@ -97,13 +97,31 @@ Les **Notes Sans Effet Financier (SEF)** représentent le point d'entrée de la 
 
 ### Transitions autorisées
 
-| De | Vers | Qui | Action |
-|----|------|-----|--------|
-| brouillon | soumis | Créateur | Soumettre (génère référence pivot) |
-| soumis | valide | DG/ADMIN | Valider |
-| soumis | rejete | DG/ADMIN | Rejeter (motif requis) |
-| soumis | differe | DG/ADMIN | Différer (motif + date reprise) |
-| differe | valide | DG/ADMIN | Valider après reprise |
+| De | Vers | Qui | Action | Validation backend |
+|----|------|-----|--------|-------------------|
+| brouillon | soumis | Créateur | Soumettre | Champs obligatoires, génère référence pivot |
+| soumis | valide | DG/ADMIN/DAAF | Valider | Vérif rôle |
+| soumis | rejete | DG/ADMIN/DAAF | Rejeter | Motif obligatoire |
+| soumis | differe | DG/ADMIN/DAAF | Différer | Motif obligatoire |
+| differe | soumis | Créateur | Re-soumettre | Vérif créateur |
+| differe | valide | DG/ADMIN/DAAF | Valider après reprise | Vérif rôle |
+
+### Règles de modification
+
+| Statut | Qui peut modifier | Restrictions |
+|--------|------------------|--------------|
+| brouillon | Créateur, Admin | Toutes modifications |
+| soumis | DG/Admin (actions) | Lecture seule pour créateur, sauf commentaire |
+| valide | Admin uniquement | Lecture seule |
+| rejete | Admin uniquement | Lecture seule |
+| differe | Créateur (re-soumission) | Actions limitées |
+
+### Trigger de validation
+
+`trigger_validate_notes_sef_transition` valide toutes les transitions et bloque :
+- Modifications de fond sur notes soumises (sauf par validateurs)
+- Toute modification sur notes validées/rejetées (sauf admin)
+- Transitions non autorisées
 
 ## Génération de Référence Pivot
 

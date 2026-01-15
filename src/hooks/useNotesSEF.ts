@@ -606,6 +606,85 @@ export function useNotesSEF() {
     },
   });
 
+  // Re-submit note (DIFFERE -> A_VALIDER)
+  const resubmitMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      // Récupérer la note
+      const { data: oldNote } = await supabase
+        .from("notes_sef")
+        .select("*")
+        .eq("id", noteId)
+        .single();
+
+      if (!oldNote || oldNote.statut !== "differe") {
+        throw new Error("Seules les notes différées peuvent être re-soumises");
+      }
+
+      // Vérifier que l'utilisateur est autorisé (créateur ou admin)
+      const isCreator = oldNote.created_by === user.id;
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const isAdmin = userRoles?.some(r => r.role === "ADMIN");
+      
+      if (!isCreator && !isAdmin) {
+        throw new Error("Seul le créateur peut re-soumettre cette note");
+      }
+
+      // Mise à jour du statut
+      const { data, error } = await supabase
+        .from("notes_sef")
+        .update({
+          statut: "soumis",
+          submitted_by: user.id,
+          submitted_at: new Date().toISOString(),
+          // Réinitialiser les champs de report
+          differe_motif: null,
+          differe_condition: null,
+          differe_date_reprise: null,
+          differe_by: null,
+          differe_at: null,
+        })
+        .eq("id", noteId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log history
+      await supabase.from("notes_sef_history").insert([{
+        note_id: noteId,
+        action: "resoumission",
+        old_statut: "differe",
+        new_statut: "soumis",
+        commentaire: "Re-soumission après report",
+        performed_by: user.id,
+      }]);
+
+      // Notifier les validateurs
+      await logSoumission({ ...oldNote, ...data } as any);
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
+      toast({ 
+        title: `Note ${(data as any).reference_pivot || (data as any).numero} re-soumise`,
+        description: "Les validateurs ont été notifiés",
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur de re-soumission", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Duplicate note
   const duplicateMutation = useMutation({
     mutationFn: async (noteId: string) => {
@@ -710,11 +789,13 @@ export function useNotesSEF() {
     validateNote: validateMutation.mutateAsync,
     rejectNote: rejectMutation.mutateAsync,
     deferNote: deferMutation.mutateAsync,
+    resubmitNote: resubmitMutation.mutateAsync,
     duplicateNote: duplicateMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,
     fetchHistory,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
+    isResubmitting: resubmitMutation.isPending,
   };
 }
