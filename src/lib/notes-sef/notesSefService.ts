@@ -36,6 +36,10 @@ export interface ListNotesOptions {
   pageSize?: number;
   search?: string;
   statut?: string | string[];
+  direction_id?: string;
+  urgence?: string;
+  dateFrom?: string;
+  dateTo?: string;
   sortBy?: 'updated_at' | 'created_at' | 'date_souhaitee';
   sortOrder?: 'asc' | 'desc';
 }
@@ -110,6 +114,10 @@ export const notesSefService = {
         pageSize = 20,
         search,
         statut,
+        direction_id,
+        urgence,
+        dateFrom,
+        dateTo,
         sortBy = 'updated_at',
         sortOrder = 'desc'
       } = options;
@@ -117,13 +125,17 @@ export const notesSefService = {
       const offset = (page - 1) * pageSize;
       const statutArray = statut ? (Array.isArray(statut) ? statut : [statut]) : null;
 
-      // 1. Compter le total avec recherche étendue via RPC
+      // 1. Compter le total avec recherche étendue via RPC v2
       const { data: totalCount, error: countError } = await supabase.rpc(
-        'count_search_notes_sef',
+        'count_search_notes_sef_v2',
         {
           p_exercice: exercice,
           p_search: search?.trim() || null,
-          p_statut: statutArray
+          p_statut: statutArray,
+          p_direction_id: direction_id || null,
+          p_urgence: urgence || null,
+          p_date_from: dateFrom || null,
+          p_date_to: dateTo || null
         }
       );
       if (countError) throw countError;
@@ -131,13 +143,17 @@ export const notesSefService = {
       const total = totalCount || 0;
       const totalPages = Math.ceil(total / pageSize);
 
-      // 2. Récupérer les données via RPC pour recherche étendue
+      // 2. Récupérer les données via RPC v2 pour recherche étendue
       const { data: rpcData, error: rpcError } = await supabase.rpc(
-        'search_notes_sef',
+        'search_notes_sef_v2',
         {
           p_exercice: exercice,
           p_search: search?.trim() || null,
           p_statut: statutArray,
+          p_direction_id: direction_id || null,
+          p_urgence: urgence || null,
+          p_date_from: dateFrom || null,
+          p_date_to: dateTo || null,
           p_limit: pageSize,
           p_offset: offset,
           p_sort_by: sortBy,

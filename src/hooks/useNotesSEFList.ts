@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notesSefService, type ListNotesOptions } from '@/lib/notes-sef/notesSefService';
 import type { NoteSEFEntity, NoteSEFCounts, PaginatedResult } from '@/lib/notes-sef/types';
 import { useExercice } from '@/contexts/ExerciceContext';
+import type { FiltersState } from '@/components/shared/NotesFiltersBar';
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -50,14 +51,24 @@ export interface UseNotesSEFListReturn {
   // Filters
   searchQuery: string;
   activeTab: string;
+  filters: FiltersState;
   
   // Actions
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: string) => void;
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
+  setFilters: (filters: FiltersState) => void;
+  resetFilters: () => void;
   refetch: () => void;
 }
+
+const defaultFilters: FiltersState = {
+  directionId: null,
+  urgence: null,
+  dateFrom: null,
+  dateTo: null
+};
 
 /**
  * Hook principal pour la liste paginée des Notes SEF
@@ -73,6 +84,7 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
   const [activeTab, setActiveTab] = useState(initialTab);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
+  const [filters, setFilters] = useState<FiltersState>(defaultFilters);
 
   // Debounce de la recherche (300ms)
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -80,7 +92,13 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
   // Reset page quand les filtres changent
   useEffect(() => {
     setPage(1);
-  }, [debouncedSearch, activeTab]);
+  }, [debouncedSearch, activeTab, filters]);
+
+  // Reset filters
+  const resetFilters = useCallback(() => {
+    setFilters(defaultFilters);
+    setSearchQuery('');
+  }, []);
 
   // Convertir l'onglet actif en filtre de statut
   const statutFilter = useMemo(() => {
@@ -120,7 +138,7 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
     error: queryError,
     refetch
   } = useQuery({
-    queryKey: ['notes-sef-list', exercice, page, pageSize, debouncedSearch, statutFilter],
+    queryKey: ['notes-sef-list', exercice, page, pageSize, debouncedSearch, statutFilter, filters],
     queryFn: async () => {
       if (!exercice) return null;
       
@@ -130,6 +148,10 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
         pageSize,
         search: debouncedSearch || undefined,
         statut: statutFilter,
+        direction_id: filters.directionId || undefined,
+        urgence: filters.urgence || undefined,
+        dateFrom: filters.dateFrom || undefined,
+        dateTo: filters.dateTo || undefined,
         sortBy: 'updated_at',
         sortOrder: 'desc'
       };
@@ -190,12 +212,15 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
     // Filters
     searchQuery,
     activeTab,
+    filters,
     
     // Actions
     setSearchQuery,
     setActiveTab,
     setPage,
     setPageSize,
+    setFilters,
+    resetFilters,
     refetch: () => {
       invalidateQueries();
       refetch();
