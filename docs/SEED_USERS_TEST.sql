@@ -5,104 +5,208 @@
 -- Il est impossible d'insérer directement dans profiles sans créer
 -- d'abord l'utilisateur dans Supabase Auth.
 --
--- MÉTHODES DE CRÉATION:
+-- =====================================================
+-- MÉTHODE 1: Dashboard Supabase (RECOMMANDÉ)
+-- =====================================================
 -- 
--- 1. Dashboard Supabase (recommandé pour les tests):
---    - Supabase Dashboard > Authentication > Users > Add user
---    - Renseigner email et password
---    - Le profil sera créé automatiquement par le trigger handle_new_user
---
--- 2. Edge Function create-user (pour création par API):
---    - POST /functions/v1/create-user
---    - Body: { email, password, first_name, last_name, role }
---
--- 3. Signup dans l'application (utilisateurs réels)
+-- 1. Aller sur: https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf/auth/users
+-- 2. Cliquer "Add user" > "Create new user"
+-- 3. Renseigner email + password
+-- 4. ✅ Cocher "Auto-confirm user"
+-- 5. Le profil sera créé automatiquement par le trigger handle_new_user
 --
 -- =====================================================
--- APRÈS CRÉATION - Mise à jour des profils (champs autorisés)
+-- MÉTHODE 2: Edge Function create-user (API)
 -- =====================================================
--- Le trigger check_profile_update autorise: first_name, last_name, full_name, avatar_url
--- Les champs direction_id, poste, is_active nécessitent le rôle ADMIN
+-- POST /functions/v1/create-user
+-- Body: { 
+--   "email": "user@arti.ci", 
+--   "password": "Test2026!", 
+--   "first_name": "Prénom", 
+--   "last_name": "NOM",
+--   "role": "OPERATIONNEL"
+-- }
+--
+-- =====================================================
+-- LISTE DES 10 UTILISATEURS TEST SUGGÉRÉS
+-- =====================================================
+-- Créez ces utilisateurs via le Dashboard Supabase Auth:
+--
+-- | #  | Email                | Prénom   | Nom      | Password  |
+-- |----|----------------------|----------|----------|-----------|
+-- | 1  | dg@arti.ci           | Mamadou  | DIALLO   | Test2026! |
+-- | 2  | daaf@arti.ci         | Fatou    | KONE     | Test2026! |
+-- | 3  | cb@arti.ci           | Kouassi  | AMAN     | Test2026! |
+-- | 4  | dsi@arti.ci          | Ibrahim  | TRAORE   | Test2026! |
+-- | 5  | dcp@arti.ci          | Jean     | KOUAME   | Test2026! |
+-- | 6  | stats@arti.ci        | Paul     | BAMBA    | Test2026! |
+-- | 7  | agent.daaf@arti.ci   | Aminata  | COULIBALY| Test2026! |
+-- | 8  | agent.dsi@arti.ci    | Marcel   | KOUADIO  | Test2026! |
+-- | 9  | agent.dcp@arti.ci    | Marie    | KONAN    | Test2026! |
+-- | 10 | admin@arti.ci        | Admin    | SYSTEM   | Test2026! |
+--
+-- =====================================================
+-- APRÈS CRÉATION: Mise à jour des profils
+-- =====================================================
+-- Exécutez ces scripts dans l'éditeur SQL Supabase après avoir créé les users:
+-- https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf/sql/new
 
--- Exemple de mise à jour pour un utilisateur existant:
-/*
-UPDATE public.profiles 
-SET 
-  first_name = 'Prénom',
-  last_name = 'NOM',
-  full_name = 'Prénom NOM',
-  updated_at = now()
-WHERE email = 'user@arti.ci';
-*/
+-- 1. Mise à jour des noms complets et postes
+UPDATE public.profiles SET
+  first_name = 'Mamadou',
+  last_name = 'DIALLO',
+  full_name = 'Mamadou DIALLO',
+  poste = 'Directeur Général'
+WHERE email = 'dg@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Fatou',
+  last_name = 'KONE',
+  full_name = 'Fatou KONE',
+  poste = 'Directrice Administrative et Financière'
+WHERE email = 'daaf@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Kouassi',
+  last_name = 'AMAN',
+  full_name = 'Kouassi AMAN',
+  poste = 'Contrôleur Budgétaire'
+WHERE email = 'cb@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Ibrahim',
+  last_name = 'TRAORE',
+  full_name = 'Ibrahim TRAORE',
+  poste = 'Directeur des Systèmes d''Information'
+WHERE email = 'dsi@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Jean',
+  last_name = 'KOUAME',
+  full_name = 'Jean KOUAME',
+  poste = 'Directeur Communication et Partenariat'
+WHERE email = 'dcp@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Paul',
+  last_name = 'BAMBA',
+  full_name = 'Paul BAMBA',
+  poste = 'Chef Service Statistiques'
+WHERE email = 'stats@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Aminata',
+  last_name = 'COULIBALY',
+  full_name = 'Aminata COULIBALY',
+  poste = 'Agent Comptable DAAF'
+WHERE email = 'agent.daaf@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Marcel',
+  last_name = 'KOUADIO',
+  full_name = 'Marcel KOUADIO',
+  poste = 'Développeur DSI'
+WHERE email = 'agent.dsi@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Marie',
+  last_name = 'KONAN',
+  full_name = 'Marie KONAN',
+  poste = 'Chargée de Communication'
+WHERE email = 'agent.dcp@arti.ci';
+
+UPDATE public.profiles SET
+  first_name = 'Admin',
+  last_name = 'SYSTEM',
+  full_name = 'Admin SYSTEM',
+  poste = 'Administrateur Système'
+WHERE email = 'admin@arti.ci';
 
 -- =====================================================
--- ATTRIBUTION DES RÔLES (après création users)
+-- 2. Attribution des directions (par un ADMIN)
 -- =====================================================
--- Exemples de rôles à attribuer:
+-- Ces updates nécessitent d'être connecté en tant qu'ADMIN
+-- ou via une migration avec privilèges élevés
 
-/*
--- Attribuer le rôle DG à un utilisateur
+-- DG -> Direction Générale
+UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '01' LIMIT 1)
+WHERE email = 'dg@arti.ci';
+
+-- DAAF, CB, Agent DAAF -> Direction Administrative et Financière
+UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '02' LIMIT 1)
+WHERE email IN ('daaf@arti.ci', 'cb@arti.ci', 'agent.daaf@arti.ci');
+
+-- DSI, Agent DSI -> Direction des Systèmes d'Information
+UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '09' LIMIT 1)
+WHERE email IN ('dsi@arti.ci', 'agent.dsi@arti.ci');
+
+-- DCP, Agent DCP -> Direction Communication et Partenariat
+UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '08' LIMIT 1)
+WHERE email IN ('dcp@arti.ci', 'agent.dcp@arti.ci');
+
+-- Stats -> Direction Statistiques
+UPDATE public.profiles SET direction_id = (SELECT id FROM directions WHERE code = '04' LIMIT 1)
+WHERE email = 'stats@arti.ci';
+
+-- =====================================================
+-- 3. Attribution des rôles
+-- =====================================================
+
+-- Rôle DG
 INSERT INTO public.user_roles (user_id, role, is_active)
 SELECT id, 'DG', true FROM profiles WHERE email = 'dg@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Attribuer le rôle DAAF  
+-- Rôle DAAF  
 INSERT INTO public.user_roles (user_id, role, is_active)
 SELECT id, 'DAAF', true FROM profiles WHERE email = 'daaf@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
 
--- Attribuer le rôle ADMIN
+-- Rôle CB (Contrôleur Budgétaire)
+INSERT INTO public.user_roles (user_id, role, is_active)
+SELECT id, 'CB', true FROM profiles WHERE email = 'cb@arti.ci'
+ON CONFLICT (user_id, role) DO NOTHING;
+
+-- Rôle ADMIN
 INSERT INTO public.user_roles (user_id, role, is_active)
 SELECT id, 'ADMIN', true FROM profiles WHERE email = 'admin@arti.ci'
 ON CONFLICT (user_id, role) DO NOTHING;
-*/
+
+-- Rôles DIRECTEUR pour les directeurs de service
+INSERT INTO public.user_roles (user_id, role, is_active)
+SELECT id, 'DIRECTEUR', true FROM profiles WHERE email IN ('dsi@arti.ci', 'dcp@arti.ci')
+ON CONFLICT (user_id, role) DO NOTHING;
 
 -- =====================================================
--- MISE À JOUR DIRECTION/POSTE (requiert ADMIN connecté)
+-- VÉRIFICATION FINALE
 -- =====================================================
--- Ces updates doivent être exécutés par un utilisateur ADMIN connecté
--- via l'interface ou une requête authentifiée:
+-- Exécutez cette requête pour vérifier la configuration:
 
-/*
-UPDATE public.profiles 
-SET 
-  direction_id = (SELECT id FROM directions WHERE sigle = 'DAAF' LIMIT 1),
-  poste = 'Directeur Administratif et Financier'
-WHERE email = 'daaf@arti.ci';
-*/
-
--- =====================================================
--- LISTE DES UTILISATEURS TEST SUGGÉRÉS
--- =====================================================
--- À créer via Dashboard Supabase Auth:
---
--- | Email             | Nom            | Direction | Poste                    | Rôle  |
--- |-------------------|----------------|-----------|--------------------------|-------|
--- | dg@arti.ci        | Mamadou DIALLO | DG        | Directeur Général        | DG    |
--- | daaf@arti.ci      | Fatou KONE     | DAAF      | Directeur Admin/Financier| DAAF  |
--- | agent.daaf@arti.ci| Kouassi AMAN   | DAAF      | Agent Comptable          | -     |
--- | dsi@arti.ci       | Ibrahim TRAORE | DSI       | Directeur SI             | -     |
--- | dev@arti.ci       | Aminata COULIBALY| DSI     | Développeur              | -     |
--- | dcp@arti.ci       | Jean KOUAME    | DCP       | Directeur Communication  | -     |
--- | stats@arti.ci     | Paul BAMBA     | DSESP     | Statisticien             | -     |
--- | admin@arti.ci     | Admin SYSTEM   | -         | Administrateur           | ADMIN |
---
--- Password suggéré pour les tests: Test2026!
-
--- =====================================================
--- VÉRIFICATION
--- =====================================================
--- Afficher les profils existants avec leurs rôles
 SELECT 
-  p.id,
   p.email,
   COALESCE(p.full_name, p.first_name || ' ' || p.last_name) as nom_complet,
   p.poste,
   d.sigle as direction,
   p.is_active,
-  array_agg(ur.role) FILTER (WHERE ur.role IS NOT NULL) as roles
+  array_agg(ur.role ORDER BY ur.role) FILTER (WHERE ur.role IS NOT NULL) as roles
 FROM profiles p
 LEFT JOIN directions d ON d.id = p.direction_id
 LEFT JOIN user_roles ur ON ur.user_id = p.id AND ur.is_active = true
 GROUP BY p.id, p.email, p.full_name, p.first_name, p.last_name, p.poste, d.sigle, p.is_active
 ORDER BY p.email;
+
+-- =====================================================
+-- RÉSULTAT ATTENDU:
+-- =====================================================
+-- | email              | nom_complet        | poste                    | direction | roles        |
+-- |--------------------|--------------------|--------------------------|-----------|--------------|
+-- | admin@arti.ci      | Admin SYSTEM       | Administrateur Système   | NULL      | {ADMIN}      |
+-- | agent.daaf@arti.ci | Aminata COULIBALY  | Agent Comptable DAAF     | DAAF      | NULL         |
+-- | agent.dcp@arti.ci  | Marie KONAN        | Chargée de Communication | DCP       | NULL         |
+-- | agent.dsi@arti.ci  | Marcel KOUADIO     | Développeur DSI          | DSI       | NULL         |
+-- | cb@arti.ci         | Kouassi AMAN       | Contrôleur Budgétaire    | DAAF      | {CB}         |
+-- | daaf@arti.ci       | Fatou KONE         | Directrice Admin/Fin.    | DAAF      | {DAAF}       |
+-- | dcp@arti.ci        | Jean KOUAME        | Directeur Communication  | DCP       | {DIRECTEUR}  |
+-- | dg@arti.ci         | Mamadou DIALLO     | Directeur Général        | DG        | {DG}         |
+-- | dsi@arti.ci        | Ibrahim TRAORE     | Directeur SI             | DSI       | {DIRECTEUR}  |
+-- | stats@arti.ci      | Paul BAMBA         | Chef Service Statistiques| DSESP     | NULL         |
