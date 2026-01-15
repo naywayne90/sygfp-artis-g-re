@@ -1,7 +1,7 @@
 /**
- * Hook pour l'export Excel des Notes SEF
+ * Hook pour l'export Excel des Notes AEF
  * Gère les filtres, permissions et pagination pour export complet
- * Format fichier: SYGFP_SEF_{exercice}_{statut}_{YYYYMMDD}.xlsx
+ * Format fichier: SYGFP_AEF_{exercice}_{statut}_{YYYYMMDD}.xlsx
  */
 
 import { useState, useCallback } from "react";
@@ -11,7 +11,6 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 const MAX_EXPORT_ROWS = 10000;
 
@@ -26,11 +25,13 @@ const STATUT_LABELS: Record<string, string> = {
   soumis: "Soumis",
   a_valider: "À valider",
   valide: "Validé",
+  a_imputer: "À imputer",
+  impute: "Imputé",
   rejete: "Rejeté",
   differe: "Différé",
 };
 
-const URGENCE_LABELS: Record<string, string> = {
+const PRIORITE_LABELS: Record<string, string> = {
   basse: "Basse",
   normale: "Normale",
   haute: "Haute",
@@ -41,12 +42,35 @@ const URGENCE_LABELS: Record<string, string> = {
 const TAB_FILE_LABELS: Record<string, string> = {
   toutes: "toutes",
   a_valider: "a_valider",
-  validees: "validees",
+  a_imputer: "a_imputer",
+  imputees: "imputees",
   differees: "differees",
   rejetees: "rejetees",
 };
 
-export function useNotesSEFExport() {
+// Mapping des onglets vers filtres de statut
+const TAB_STATUT_FILTERS: Record<string, string | string[] | undefined> = {
+  toutes: undefined,
+  a_valider: ["soumis", "a_valider"],
+  a_imputer: "valide",
+  imputees: "impute",
+  differees: "differe",
+  rejetees: "rejete",
+};
+
+/**
+ * Formate un montant en FCFA avec séparateurs de milliers
+ */
+function formatMontantFCFA(montant: number | null | undefined): string {
+  if (montant == null) return "";
+  return new Intl.NumberFormat("fr-FR", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(montant);
+}
+
+export function useNotesAEFExport() {
   const { exercice } = useExercice();
   const { hasAnyRole } = usePermissions();
   const [isExporting, setIsExporting] = useState(false);
@@ -55,9 +79,9 @@ export function useNotesSEFExport() {
   const isDG = hasAnyRole(["ADMIN", "DG"]);
 
   /**
-   * Exporte les notes SEF en Excel selon les filtres actuels
+   * Exporte les notes AEF en Excel selon les filtres actuels
    */
-  const exportNotesSEF = useCallback(
+  const exportNotesAEF = useCallback(
     async (filters: ExportFilters = {}, tabLabel: string = "toutes") => {
       if (!exercice) {
         toast.error("Exercice non sélectionné");
@@ -85,36 +109,34 @@ export function useNotesSEFExport() {
 
         // 2. Construire la requête avec les filtres
         let query = supabase
-          .from("notes_sef")
+          .from("notes_dg")
           .select(`
             id,
-            reference_pivot,
             numero,
+            reference_pivot,
             exercice,
             statut,
             objet,
-            description,
             justification,
-            commentaire,
-            urgence,
-            date_souhaitee,
-            beneficiaire_id,
-            beneficiaire_interne_id,
+            priorite,
+            montant_estime,
+            type_depense,
+            is_direct_aef,
             rejection_reason,
-            differe_motif,
-            differe_condition,
-            differe_date_reprise,
+            motif_differe,
+            deadline_correction,
+            date_differe,
             created_at,
             submitted_at,
             validated_at,
+            imputed_at,
             rejected_at,
-            differe_at,
             direction:directions(id, label, sigle),
-            demandeur:profiles!demandeur_id(id, first_name, last_name),
-            beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
-            beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
+            note_sef:notes_sef(id, numero, reference_pivot),
+            budget_line:budget_lines(id, code, label),
             created_by_profile:profiles!created_by(id, first_name, last_name),
             validated_by_profile:profiles!validated_by(id, first_name, last_name),
+            imputed_by_profile:profiles!imputed_by(id, first_name, last_name),
             rejected_by_profile:profiles!rejected_by(id, first_name, last_name),
             differe_by_profile:profiles!differe_by(id, first_name, last_name)
           `)
@@ -122,12 +144,13 @@ export function useNotesSEFExport() {
           .order("created_at", { ascending: false })
           .limit(MAX_EXPORT_ROWS);
 
-        // Filtre par statut
-        if (filters.statut) {
-          if (Array.isArray(filters.statut)) {
-            query = query.in("statut", filters.statut);
+        // Déterminer le filtre de statut selon l'onglet
+        const statutFilter = filters.statut ?? TAB_STATUT_FILTERS[tabLabel];
+        if (statutFilter) {
+          if (Array.isArray(statutFilter)) {
+            query = query.in("statut", statutFilter);
           } else {
-            query = query.eq("statut", filters.statut);
+            query = query.eq("statut", statutFilter);
           }
         }
 
@@ -141,7 +164,7 @@ export function useNotesSEFExport() {
         // Filtre par recherche
         if (filters.search?.trim()) {
           const searchTerm = `%${filters.search.trim()}%`;
-          query = query.or(`reference_pivot.ilike.${searchTerm},objet.ilike.${searchTerm}`);
+          query = query.or(`reference_pivot.ilike.${searchTerm},numero.ilike.${searchTerm},objet.ilike.${searchTerm}`);
         }
 
         setExportProgress("Chargement des notes...");
@@ -152,21 +175,22 @@ export function useNotesSEFExport() {
         // Générer le nom de fichier avec format standardisé
         const fileStatutLabel = TAB_FILE_LABELS[tabLabel] || "toutes";
         const dateStr = format(new Date(), "yyyyMMdd");
-        const fileName = `SYGFP_SEF_${exercice}_${fileStatutLabel}_${dateStr}.xlsx`;
+        const fileName = `SYGFP_AEF_${exercice}_${fileStatutLabel}_${dateStr}.xlsx`;
+
+        // Colonnes de l'export
+        const headers = [
+          "Référence", "Exercice", "Statut", "Objet", "Direction", "Urgence",
+          "Montant (FCFA)", "Type dépense", "Origine", "Réf. SEF liée",
+          "Justification", "Motif décision", "Créée le", "Créée par",
+          "Soumise le", "Validée le", "Imputée le", "Imputée par",
+          "Ligne budgétaire", "Nb PJ"
+        ];
 
         // 3. Si aucune note, créer fichier avec en-têtes uniquement
         if (!notes || notes.length === 0) {
-          const emptyData = [{}];
-          const headers = [
-            "Référence", "Exercice", "Statut", "Objet", "Direction", "Demandeur",
-            "Urgence", "Date souhaitée", "Justification", "Description", "Commentaire",
-            "Type bénéficiaire", "Bénéficiaire", "Motif décision", "Créée le",
-            "Créée par", "Soumise le", "Décidée le", "Décidée par", "Nb PJ", "Pièces jointes"
-          ];
-          
           const worksheet = XLSX.utils.aoa_to_sheet([headers]);
           const workbook = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(workbook, worksheet, "Notes SEF");
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Notes AEF");
           
           const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
           const blob = new Blob([excelBuffer], {
@@ -195,68 +219,42 @@ export function useNotesSEFExport() {
         const noteIds = notes.map((n) => n.id);
         
         const { data: attachmentCounts } = await supabase
-          .from("notes_sef_pieces")
-          .select("note_id, nom")
+          .from("note_attachments")
+          .select("note_id")
           .in("note_id", noteIds);
 
-        // Grouper les pièces jointes par note
-        const attachmentsByNote: Record<string, string[]> = {};
-        (attachmentCounts || []).forEach((att: { note_id: string; nom: string }) => {
-          if (!attachmentsByNote[att.note_id]) {
-            attachmentsByNote[att.note_id] = [];
-          }
-          attachmentsByNote[att.note_id].push(att.nom);
+        // Compter les pièces jointes par note
+        const attachmentCountByNote: Record<string, number> = {};
+        (attachmentCounts || []).forEach((att: { note_id: string }) => {
+          attachmentCountByNote[att.note_id] = (attachmentCountByNote[att.note_id] || 0) + 1;
         });
 
         // 5. Transformer les données pour l'export
         setExportProgress("Préparation du fichier Excel...");
         const exportData = notes.map((note: any): Record<string, string | number> => {
-          // Déterminer le type de bénéficiaire
-          let beneficiaireType = "Non renseigné";
-          let beneficiaireName = "";
-          if (note.beneficiaire?.raison_sociale) {
-            beneficiaireType = "Prestataire externe";
-            beneficiaireName = note.beneficiaire.raison_sociale;
-          } else if (note.beneficiaire_interne) {
-            beneficiaireType = "Agent interne";
-            beneficiaireName = `${note.beneficiaire_interne.first_name || ""} ${note.beneficiaire_interne.last_name || ""}`.trim();
-          }
-
+          // Origine: Via SEF ou AEF Directe
+          const origine = note.is_direct_aef ? "AEF Directe" : "Via SEF";
+          
+          // Référence SEF liée
+          const refSEFLiee = note.note_sef?.reference_pivot || note.note_sef?.numero || "";
+          
           // Motif de décision (rejet ou report)
           let motifDecision = "";
           if (note.statut === "rejete" && note.rejection_reason) {
             motifDecision = note.rejection_reason;
           } else if (note.statut === "differe") {
             const parts: string[] = [];
-            if (note.differe_motif) parts.push(note.differe_motif);
-            if (note.differe_condition) parts.push(`Condition: ${note.differe_condition}`);
-            if (note.differe_date_reprise) {
-              parts.push(`Reprise: ${format(new Date(note.differe_date_reprise), "dd/MM/yyyy")}`);
+            if (note.motif_differe) parts.push(note.motif_differe);
+            if (note.deadline_correction) {
+              parts.push(`Reprise: ${format(new Date(note.deadline_correction), "dd/MM/yyyy")}`);
             }
             motifDecision = parts.join(" | ");
           }
 
-          // Décidé le / par
-          let decidedAt = "";
-          let decidedBy = "";
-          if (note.statut === "valide") {
-            decidedAt = note.validated_at ? format(new Date(note.validated_at), "dd/MM/yyyy HH:mm") : "";
-            decidedBy = note.validated_by_profile
-              ? `${note.validated_by_profile.first_name || ""} ${note.validated_by_profile.last_name || ""}`.trim()
-              : "";
-          } else if (note.statut === "rejete") {
-            decidedAt = note.rejected_at ? format(new Date(note.rejected_at), "dd/MM/yyyy HH:mm") : "";
-            decidedBy = note.rejected_by_profile
-              ? `${note.rejected_by_profile.first_name || ""} ${note.rejected_by_profile.last_name || ""}`.trim()
-              : "";
-          } else if (note.statut === "differe") {
-            decidedAt = note.differe_at ? format(new Date(note.differe_at), "dd/MM/yyyy HH:mm") : "";
-            decidedBy = note.differe_by_profile
-              ? `${note.differe_by_profile.first_name || ""} ${note.differe_by_profile.last_name || ""}`.trim()
-              : "";
-          }
-
-          const pjs = attachmentsByNote[note.id] || [];
+          // Ligne budgétaire
+          const ligneBudgetaire = note.budget_line
+            ? `${note.budget_line.code} - ${note.budget_line.label}`
+            : "";
 
           return {
             "Référence": note.reference_pivot || note.numero || "",
@@ -264,18 +262,12 @@ export function useNotesSEFExport() {
             "Statut": STATUT_LABELS[note.statut] || note.statut || "",
             "Objet": note.objet || "",
             "Direction": note.direction?.label || note.direction?.sigle || "",
-            "Demandeur": note.demandeur
-              ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim()
-              : "",
-            "Urgence": URGENCE_LABELS[note.urgence] || note.urgence || "",
-            "Date souhaitée": note.date_souhaitee
-              ? format(new Date(note.date_souhaitee), "dd/MM/yyyy")
-              : "",
+            "Urgence": PRIORITE_LABELS[note.priorite] || note.priorite || "",
+            "Montant (FCFA)": formatMontantFCFA(note.montant_estime),
+            "Type dépense": note.type_depense || "",
+            "Origine": origine,
+            "Réf. SEF liée": refSEFLiee,
             "Justification": note.justification || "",
-            "Description": note.description || "",
-            "Commentaire": note.commentaire || "",
-            "Type bénéficiaire": beneficiaireType,
-            "Bénéficiaire": beneficiaireName,
             "Motif décision": motifDecision,
             "Créée le": note.created_at
               ? format(new Date(note.created_at), "dd/MM/yyyy HH:mm")
@@ -286,43 +278,49 @@ export function useNotesSEFExport() {
             "Soumise le": note.submitted_at
               ? format(new Date(note.submitted_at), "dd/MM/yyyy HH:mm")
               : "",
-            "Décidée le": decidedAt,
-            "Décidée par": decidedBy,
-            "Nb PJ": pjs.length,
-            "Pièces jointes": pjs.join("; "),
+            "Validée le": note.validated_at
+              ? format(new Date(note.validated_at), "dd/MM/yyyy HH:mm")
+              : "",
+            "Imputée le": note.imputed_at
+              ? format(new Date(note.imputed_at), "dd/MM/yyyy HH:mm")
+              : "",
+            "Imputée par": note.imputed_by_profile
+              ? `${note.imputed_by_profile.first_name || ""} ${note.imputed_by_profile.last_name || ""}`.trim()
+              : "",
+            "Ligne budgétaire": ligneBudgetaire,
+            "Nb PJ": attachmentCountByNote[note.id] || 0,
           };
         });
 
         // 6. Créer le fichier Excel
         const worksheet = XLSX.utils.json_to_sheet(exportData);
 
-        // Largeurs de colonnes (avec Exercice ajouté)
+        // Largeurs de colonnes
         worksheet["!cols"] = [
           { wch: 18 },  // Référence
           { wch: 10 },  // Exercice
           { wch: 12 },  // Statut
           { wch: 40 },  // Objet
           { wch: 20 },  // Direction
-          { wch: 25 },  // Demandeur
           { wch: 10 },  // Urgence
-          { wch: 12 },  // Date souhaitée
+          { wch: 15 },  // Montant (FCFA)
+          { wch: 15 },  // Type dépense
+          { wch: 12 },  // Origine
+          { wch: 18 },  // Réf. SEF liée
           { wch: 40 },  // Justification
-          { wch: 40 },  // Description
-          { wch: 30 },  // Commentaire
-          { wch: 18 },  // Type bénéficiaire
-          { wch: 25 },  // Bénéficiaire
           { wch: 40 },  // Motif décision
           { wch: 16 },  // Créée le
           { wch: 20 },  // Créée par
           { wch: 16 },  // Soumise le
-          { wch: 16 },  // Décidée le
-          { wch: 20 },  // Décidée par
+          { wch: 16 },  // Validée le
+          { wch: 16 },  // Imputée le
+          { wch: 20 },  // Imputée par
+          { wch: 40 },  // Ligne budgétaire
           { wch: 6 },   // Nb PJ
-          { wch: 50 },  // Pièces jointes
         ];
 
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Notes SEF");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Notes AEF");
 
         // 7. Télécharger le fichier
         const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
@@ -341,7 +339,7 @@ export function useNotesSEFExport() {
 
         toast.success(`${exportData.length} note(s) exportée(s)`);
       } catch (error: any) {
-        console.error("Export error:", error);
+        console.error("Export AEF error:", error);
         toast.error("Erreur lors de l'export: " + error.message);
       } finally {
         setIsExporting(false);
@@ -352,7 +350,7 @@ export function useNotesSEFExport() {
   );
 
   return {
-    exportNotesSEF,
+    exportNotesAEF,
     isExporting,
     exportProgress,
   };
