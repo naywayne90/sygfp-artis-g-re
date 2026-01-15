@@ -153,7 +153,7 @@ export default function NoteSEFDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { hasAnyRole } = usePermissions();
-  const { fetchHistory, submitNote, validateNote, rejectNote, deferNote } = useNotesSEF();
+  const { fetchHistory, submitNote, validateNote, rejectNote, deferNote, resubmitNote } = useNotesSEF();
 
   // État local
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -168,6 +168,7 @@ export default function NoteSEFDetail() {
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
   const [validating, setValidating] = useState(false);
+  const [resubmitting, setResubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -218,6 +219,9 @@ export default function NoteSEFDetail() {
   // Si differe, seul "Valider" est disponible (pas rejeter/différer à nouveau)
   const canValidateNote = isDG && note?.statut === "soumis";
   const canValidateDeferredNote = isDG && note?.statut === "differe";
+  
+  // Créateur peut re-soumettre une note différée
+  const canResubmit = (isCreator || isAdmin) && note?.statut === "differe";
   const isApproved = note?.statut === "valide";
   const isRejected = note?.statut === "rejete";
 
@@ -504,6 +508,21 @@ export default function NoteSEFDetail() {
     }
   };
 
+  // Re-soumettre (créateur note différée)
+  const handleResubmit = async () => {
+    if (!note) return;
+    setResubmitting(true);
+    try {
+      await resubmitNote(note.id);
+      queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
+      toast({ title: "Note re-soumise pour validation ✓" });
+    } catch (error) {
+      // Toast déjà géré dans le hook
+    } finally {
+      setResubmitting(false);
+    }
+  };
+
   // Créer Note AEF (stub)
   const handleCreateNoteAEF = () => {
     navigate(`/notes-aef?prefill=${note?.id}`);
@@ -627,18 +646,9 @@ export default function NoteSEFDetail() {
                 Valider
               </Button>
 
-              {/* Rejeter/Différer uniquement si pas déjà différé */}
+              {/* Différer/Rejeter uniquement si pas déjà différé */}
               {canValidateNote && (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRejectingNote(note)}
-                    className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    Rejeter
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -647,6 +657,15 @@ export default function NoteSEFDetail() {
                   >
                     <Clock className="h-4 w-4" />
                     Différer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRejectingNote(note)}
+                    className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Rejeter
                   </Button>
                 </>
               )}
@@ -693,7 +712,7 @@ export default function NoteSEFDetail() {
         </Card>
       )}
 
-      {/* Info si note différée */}
+      {/* Info si note différée + bouton re-soumettre pour créateur */}
       {note?.statut === "differe" && (
         <Card className="border-warning/30 bg-warning/5">
           <CardContent className="py-4">
@@ -711,6 +730,22 @@ export default function NoteSEFDetail() {
                   <p className="text-sm text-muted-foreground">
                     Date de reprise prévue : {format(new Date(note.differe_date_reprise), "dd MMM yyyy", { locale: fr })}
                   </p>
+                )}
+                
+                {/* Bouton Re-soumettre pour le créateur */}
+                {canResubmit && !isEditing && (
+                  <div className="pt-3 border-t border-warning/20 mt-3">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleResubmit}
+                      disabled={resubmitting}
+                      className="gap-2"
+                    >
+                      {resubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      Re-soumettre pour validation
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
