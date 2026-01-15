@@ -7521,25 +7521,31 @@ export type Database = {
       }
       reference_sequences: {
         Row: {
+          created_at: string | null
           current_value: number
-          exercise_year: number
           id: string
-          module_code: string
+          month_mm: number
+          step_code: string
           updated_at: string | null
+          year_yy: number
         }
         Insert: {
+          created_at?: string | null
           current_value?: number
-          exercise_year: number
           id?: string
-          module_code: string
+          month_mm: number
+          step_code: string
           updated_at?: string | null
+          year_yy: number
         }
         Update: {
+          created_at?: string | null
           current_value?: number
-          exercise_year?: number
           id?: string
-          module_code?: string
+          month_mm?: number
+          step_code?: string
           updated_at?: string | null
+          year_yy?: number
         }
         Relationships: []
       }
@@ -9529,6 +9535,10 @@ export type Database = {
           p_run_id: string
           p_step?: string
         }
+        Returns: string
+      }
+      next_reference: {
+        Args: { p_input_date?: string; p_step_code: string }
         Returns: string
       }
       next_reference_note_sef: {
