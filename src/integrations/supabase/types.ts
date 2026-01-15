@@ -5119,6 +5119,8 @@ export type Database = {
         Row: {
           beneficiaire_id: string | null
           beneficiaire_interne_id: string | null
+          beneficiaire_nom: string | null
+          beneficiaire_type: string | null
           commentaire: string | null
           created_at: string
           created_by: string | null
@@ -5126,6 +5128,7 @@ export type Database = {
           decided_at: string | null
           decided_by: string | null
           decision_reason: string | null
+          demandeur_display: string | null
           demandeur_id: string | null
           description: string | null
           dg_validation_required: boolean | null
@@ -5138,6 +5141,7 @@ export type Database = {
           dossier_id: string | null
           exercice: number
           id: string
+          is_deleted: boolean | null
           justification: string | null
           numero: string | null
           objet: string
@@ -5156,6 +5160,8 @@ export type Database = {
         Insert: {
           beneficiaire_id?: string | null
           beneficiaire_interne_id?: string | null
+          beneficiaire_nom?: string | null
+          beneficiaire_type?: string | null
           commentaire?: string | null
           created_at?: string
           created_by?: string | null
@@ -5163,6 +5169,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_reason?: string | null
+          demandeur_display?: string | null
           demandeur_id?: string | null
           description?: string | null
           dg_validation_required?: boolean | null
@@ -5175,6 +5182,7 @@ export type Database = {
           dossier_id?: string | null
           exercice?: number
           id?: string
+          is_deleted?: boolean | null
           justification?: string | null
           numero?: string | null
           objet: string
@@ -5193,6 +5201,8 @@ export type Database = {
         Update: {
           beneficiaire_id?: string | null
           beneficiaire_interne_id?: string | null
+          beneficiaire_nom?: string | null
+          beneficiaire_type?: string | null
           commentaire?: string | null
           created_at?: string
           created_by?: string | null
@@ -5200,6 +5210,7 @@ export type Database = {
           decided_at?: string | null
           decided_by?: string | null
           decision_reason?: string | null
+          demandeur_display?: string | null
           demandeur_id?: string | null
           description?: string | null
           dg_validation_required?: boolean | null
@@ -5212,6 +5223,7 @@ export type Database = {
           dossier_id?: string | null
           exercice?: number
           id?: string
+          is_deleted?: boolean | null
           justification?: string | null
           numero?: string | null
           objet?: string
@@ -9050,6 +9062,57 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_sef_audit_log: {
+        Row: {
+          action: string | null
+          actor_id: string | null
+          created_at: string | null
+          from_status: string | null
+          id: string | null
+          ip_address: string | null
+          message: string | null
+          note_id: string | null
+          to_status: string | null
+        }
+        Insert: {
+          action?: string | null
+          actor_id?: string | null
+          created_at?: string | null
+          from_status?: string | null
+          id?: string | null
+          ip_address?: string | null
+          message?: string | null
+          note_id?: string | null
+          to_status?: string | null
+        }
+        Update: {
+          action?: string | null
+          actor_id?: string | null
+          created_at?: string | null
+          from_status?: string | null
+          id?: string | null
+          ip_address?: string | null
+          message?: string | null
+          note_id?: string | null
+          to_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_sef_history_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_history_performed_by_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
