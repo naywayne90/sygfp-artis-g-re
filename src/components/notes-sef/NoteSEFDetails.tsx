@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NoteSEF, NoteSEFHistory, useNotesSEF } from "@/hooks/useNotesSEF";
+import { PrintButton } from "@/components/export/PrintButton";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -82,10 +83,21 @@ export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Note SEF - {note.numero || "Nouveau"}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Note SEF - {note.numero || "Nouveau"}
+            </DialogTitle>
+            {note.id && (
+              <PrintButton
+                entityType="note_sef"
+                entityId={note.id}
+                label="Imprimer"
+                size="sm"
+                variant="outline"
+              />
+            )}
+          </div>
         </DialogHeader>
 
         <ScrollArea className="max-h-[70vh]">
