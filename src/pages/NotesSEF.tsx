@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { NoteSEFDetails } from "@/components/notes-sef/NoteSEFDetails";
 import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
 import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
 import { useNotesSEF, NoteSEF } from "@/hooks/useNotesSEF";
+import { useNotesSEFList } from "@/hooks/useNotesSEFList";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
@@ -27,18 +28,35 @@ import {
   Clock,
   Loader2,
   Download,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
   const { isExporting, exportToExcel } = useExport();
+  
+  // Nouveau hook pour la liste paginée
   const {
-    notes,
-    notesByStatus,
+    notes: filteredNotes,
+    counts,
+    pagination,
     isLoading,
+    searchQuery,
+    activeTab,
+    setSearchQuery,
+    setActiveTab,
+    setPage,
+    setPageSize,
+    refetch,
+  } = useNotesSEFList({ pageSize: 20 });
+
+  // Hook existant pour les mutations
+  const {
     submitNote,
     validateNote,
     rejectNote,
@@ -46,30 +64,17 @@ export default function NotesSEF() {
     deleteNote,
   } = useNotesSEF();
 
-  const handleExportExcel = async () => {
-    const exportData = filteredNotes.map((note) => ({
-      "N° Note": note.numero || "",
-      "Objet": note.objet,
-      "Direction": note.direction?.label || note.direction?.sigle || "",
-      "Demandeur": note.demandeur
-        ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`
-        : "",
-      "Statut": getStatutLabel(note.statut),
-      "Urgence": getUrgenceLabel(note.urgence),
-      "Exercice": note.exercice,
-      "Date Création": note.created_at
-        ? new Date(note.created_at).toLocaleDateString("fr-FR")
-        : "",
-      "Description": note.description || "",
-      "Commentaire": note.commentaire || "",
-    }));
+  // État local pour les dialogs
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<NoteSEF | null>(null);
+  const [viewingNote, setViewingNote] = useState<NoteSEF | null>(null);
+  const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
+  const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
 
-    await exportToExcel(
-      exportData,
-      `notes_sef_${exercice}_${activeTab}`,
-      "Notes SEF"
-    );
-  };
+  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+
+  // Compteur "À valider" = soumis + a_valider
+  const aValiderCount = counts.soumis + counts.a_valider;
 
   const getStatutLabel = (statut: string | null) => {
     const labels: Record<string, string> = {
@@ -93,49 +98,30 @@ export default function NotesSEF() {
     return labels[urgence || "normale"] || urgence || "";
   };
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("toutes");
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState<NoteSEF | null>(null);
-  const [viewingNote, setViewingNote] = useState<NoteSEF | null>(null);
-  const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
-  const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
+  const handleExportExcel = async () => {
+    const exportData = filteredNotes.map((note) => ({
+      "N° Note": note.reference_pivot || note.numero || "",
+      "Objet": note.objet,
+      "Direction": note.direction?.label || note.direction?.sigle || "",
+      "Demandeur": note.demandeur
+        ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`
+        : "",
+      "Statut": getStatutLabel(note.statut),
+      "Urgence": getUrgenceLabel(note.urgence),
+      "Exercice": note.exercice,
+      "Date Création": note.created_at
+        ? new Date(note.created_at).toLocaleDateString("fr-FR")
+        : "",
+      "Description": note.description || "",
+      "Commentaire": note.commentaire || "",
+    }));
 
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
-
-  // Filter notes based on search (includes reference_pivot)
-  const filteredNotes = useMemo(() => {
-    const getNotesForTab = () => {
-      switch (activeTab) {
-        case "a_valider":
-          return notesByStatus.a_valider;
-        case "validees":
-          return notesByStatus.valide;
-        case "differees":
-          return notesByStatus.differe;
-        case "rejetees":
-          return notesByStatus.rejete;
-        default:
-          return notes;
-      }
-    };
-
-    const tabNotes = getNotesForTab();
-
-    if (!searchQuery.trim()) return tabNotes;
-
-    const query = searchQuery.toLowerCase();
-    return tabNotes.filter(
-      (note) =>
-        note.reference_pivot?.toLowerCase().includes(query) ||
-        note.numero?.toLowerCase().includes(query) ||
-        note.objet.toLowerCase().includes(query) ||
-        note.direction?.label?.toLowerCase().includes(query) ||
-        note.direction?.sigle?.toLowerCase().includes(query) ||
-        note.demandeur?.first_name?.toLowerCase().includes(query) ||
-        note.demandeur?.last_name?.toLowerCase().includes(query)
+    await exportToExcel(
+      exportData,
+      `notes_sef_${exercice}_${activeTab}`,
+      "Notes SEF"
     );
-  }, [notes, notesByStatus, activeTab, searchQuery]);
+  };
 
   const handleEdit = (note: NoteSEF) => {
     setEditingNote(note);
@@ -144,11 +130,15 @@ export default function NotesSEF() {
 
   const handleCloseForm = (open: boolean) => {
     setFormOpen(open);
-    if (!open) setEditingNote(null);
+    if (!open) {
+      setEditingNote(null);
+      refetch(); // Rafraîchir après fermeture
+    }
   };
 
   const handleReject = async (noteId: string, motif: string) => {
     await rejectNote({ noteId, motif });
+    refetch();
   };
 
   const handleDefer = async (data: {
@@ -158,6 +148,22 @@ export default function NotesSEF() {
     dateReprise?: string;
   }) => {
     await deferNote(data);
+    refetch();
+  };
+
+  const handleSubmit = async (noteId: string) => {
+    await submitNote(noteId);
+    refetch();
+  };
+
+  const handleValidate = async (noteId: string) => {
+    await validateNote(noteId);
+    refetch();
+  };
+
+  const handleDelete = async (noteId: string) => {
+    await deleteNote(noteId);
+    refetch();
   };
 
   if (!exercice) {
@@ -220,14 +226,14 @@ export default function NotesSEF() {
         </div>
       </div>
 
-      {/* KPIs */}
+      {/* KPIs - Compteurs serveur-side */}
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{notes.length}</p>
+                <p className="text-2xl font-bold">{counts.total}</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -239,7 +245,7 @@ export default function NotesSEF() {
               <div>
                 <p className="text-sm text-muted-foreground">À valider</p>
                 <p className="text-2xl font-bold text-warning">
-                  {notesByStatus.a_valider.length}
+                  {aValiderCount}
                 </p>
               </div>
               <Send className="h-8 w-8 text-warning/50" />
@@ -252,7 +258,7 @@ export default function NotesSEF() {
               <div>
                 <p className="text-sm text-muted-foreground">Validées</p>
                 <p className="text-2xl font-bold text-success">
-                  {notesByStatus.valide.length}
+                  {counts.valide}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
@@ -265,7 +271,7 @@ export default function NotesSEF() {
               <div>
                 <p className="text-sm text-muted-foreground">Différées</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {notesByStatus.differe.length}
+                  {counts.differe}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-orange-500/50" />
@@ -278,7 +284,7 @@ export default function NotesSEF() {
               <div>
                 <p className="text-sm text-muted-foreground">Rejetées</p>
                 <p className="text-2xl font-bold text-destructive">
-                  {notesByStatus.rejete.length}
+                  {counts.rejete}
                 </p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
@@ -287,13 +293,13 @@ export default function NotesSEF() {
         </Card>
       </div>
 
-      {/* Search */}
+      {/* Search - avec debounce 300ms via le hook */}
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par référence (ARTI...), objet, direction ou demandeur..."
+              placeholder="Rechercher par référence (ARTI...), objet..."
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -302,21 +308,21 @@ export default function NotesSEF() {
         </CardContent>
       </Card>
 
-      {/* Tabs */}
+      {/* Tabs - Filtre serveur-side */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="toutes">Toutes ({notes.length})</TabsTrigger>
+          <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
           <TabsTrigger value="a_valider">
-            À valider ({notesByStatus.a_valider.length})
+            À valider ({aValiderCount})
           </TabsTrigger>
           <TabsTrigger value="validees">
-            Validées ({notesByStatus.valide.length})
+            Validées ({counts.valide})
           </TabsTrigger>
           <TabsTrigger value="differees">
-            Différées ({notesByStatus.differe.length})
+            Différées ({counts.differe})
           </TabsTrigger>
           <TabsTrigger value="rejetees">
-            Rejetées ({notesByStatus.rejete.length})
+            Rejetées ({counts.rejete})
           </TabsTrigger>
         </TabsList>
 
@@ -328,26 +334,26 @@ export default function NotesSEF() {
           <>
             <TabsContent value="toutes">
               <NoteSEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteSEF[]}
                 title="Toutes les notes SEF"
-                description={`${filteredNotes.length} note(s) trouvée(s)`}
-                onView={setViewingNote}
+                description={`${pagination.total} note(s) trouvée(s)`}
+                onView={(note) => setViewingNote(note)}
                 onEdit={handleEdit}
-                onSubmit={submitNote}
-                onValidate={validateNote}
+                onSubmit={handleSubmit}
+                onValidate={handleValidate}
                 onReject={setRejectingNote}
                 onDefer={setDeferringNote}
-                onDelete={deleteNote}
+                onDelete={handleDelete}
               />
             </TabsContent>
 
             <TabsContent value="a_valider">
               <NoteSEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteSEF[]}
                 title="Notes à valider"
                 description="Notes en attente de validation"
-                onView={setViewingNote}
-                onValidate={canValidate ? validateNote : undefined}
+                onView={(note) => setViewingNote(note)}
+                onValidate={canValidate ? handleValidate : undefined}
                 onReject={canValidate ? setRejectingNote : undefined}
                 onDefer={canValidate ? setDeferringNote : undefined}
                 emptyMessage="Aucune note en attente de validation"
@@ -356,10 +362,10 @@ export default function NotesSEF() {
 
             <TabsContent value="validees">
               <NoteSEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteSEF[]}
                 title="Notes validées"
                 description="Notes ayant été validées"
-                onView={setViewingNote}
+                onView={(note) => setViewingNote(note)}
                 showActions={true}
                 emptyMessage="Aucune note validée"
               />
@@ -367,11 +373,11 @@ export default function NotesSEF() {
 
             <TabsContent value="differees">
               <NoteSEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteSEF[]}
                 title="Notes différées"
                 description="Notes en attente de conditions de reprise"
-                onView={setViewingNote}
-                onValidate={canValidate ? validateNote : undefined}
+                onView={(note) => setViewingNote(note)}
+                onValidate={canValidate ? handleValidate : undefined}
                 showActions={true}
                 emptyMessage="Aucune note différée"
               />
@@ -379,10 +385,10 @@ export default function NotesSEF() {
 
             <TabsContent value="rejetees">
               <NoteSEFList
-                notes={filteredNotes}
+                notes={filteredNotes as NoteSEF[]}
                 title="Notes rejetées"
                 description="Notes ayant été rejetées"
-                onView={setViewingNote}
+                onView={(note) => setViewingNote(note)}
                 showActions={true}
                 emptyMessage="Aucune note rejetée"
               />
@@ -390,6 +396,58 @@ export default function NotesSEF() {
           </>
         )}
       </Tabs>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Afficher</span>
+                <Select 
+                  value={String(pagination.pageSize)} 
+                  onValueChange={(v) => setPageSize(Number(v))}
+                >
+                  <SelectTrigger className="w-[70px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>par page</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Page {pagination.page} sur {pagination.totalPages}
+                </span>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={pagination.page <= 1}
+                    onClick={() => setPage(pagination.page - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() => setPage(pagination.page + 1)}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dialogs */}
       <NoteSEFForm
@@ -403,8 +461,8 @@ export default function NotesSEF() {
         onOpenChange={() => setViewingNote(null)}
         note={viewingNote}
         onEdit={handleEdit}
-        onSubmit={submitNote}
-        onValidate={canValidate ? validateNote : undefined}
+        onSubmit={handleSubmit}
+        onValidate={canValidate ? handleValidate : undefined}
         onReject={canValidate ? setRejectingNote : undefined}
         onDefer={canValidate ? setDeferringNote : undefined}
       />
