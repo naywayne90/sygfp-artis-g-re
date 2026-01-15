@@ -6651,6 +6651,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          direction_code: string | null
           direction_id: string | null
           email: string
           exercice_actif: number | null
@@ -6673,6 +6674,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          direction_code?: string | null
           direction_id?: string | null
           email: string
           exercice_actif?: number | null
@@ -6695,6 +6697,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          direction_code?: string | null
           direction_id?: string | null
           email?: string
           exercice_actif?: number | null
@@ -9351,7 +9354,17 @@ export type Database = {
         Args: { p_budget_line_id: string }
         Returns: boolean
       }
+      can_export_notes_sef: { Args: { p_user_id: string }; Returns: boolean }
       can_qualify_supplier: { Args: { p_supplier_id: string }; Returns: Json }
+      can_view_note_sef: {
+        Args: {
+          p_note_created_by: string
+          p_note_direction_id: string
+          p_note_statut: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       check_budget_alerts: {
         Args: { p_exercice: number }
         Returns: {
@@ -9537,6 +9550,7 @@ export type Database = {
         Returns: Json
       }
       get_user_direction: { Args: { _user_id: string }; Returns: string }
+      get_user_direction_id: { Args: { p_user_id: string }; Returns: string }
       get_user_exercice_actif: { Args: { _user_id: string }; Returns: number }
       get_user_permissions: {
         Args: { p_user_id: string }
