@@ -9390,6 +9390,10 @@ export type Database = {
         }
         Returns: Json
       }
+      count_search_notes_sef: {
+        Args: { p_exercice: number; p_search?: string; p_statut?: string[] }
+        Returns: number
+      }
       create_engagement_from_eb: {
         Args: {
           p_budget_line_id: string
@@ -9678,6 +9682,50 @@ export type Database = {
       resolve_budget_alert: {
         Args: { p_alert_id: string; p_comment?: string }
         Returns: boolean
+      }
+      search_notes_sef: {
+        Args: {
+          p_exercice: number
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_sort_by?: string
+          p_sort_order?: string
+          p_statut?: string[]
+        }
+        Returns: {
+          beneficiaire_id: string
+          beneficiaire_interne_id: string
+          commentaire: string
+          created_at: string
+          created_by: string
+          date_souhaitee: string
+          demandeur_id: string
+          description: string
+          differe_at: string
+          differe_by: string
+          differe_condition: string
+          differe_date_reprise: string
+          differe_motif: string
+          direction_id: string
+          dossier_id: string
+          exercice: number
+          id: string
+          justification: string
+          numero: string
+          objet: string
+          reference_pivot: string
+          rejected_at: string
+          rejected_by: string
+          rejection_reason: string
+          statut: string
+          submitted_at: string
+          submitted_by: string
+          updated_at: string
+          urgence: string
+          validated_at: string
+          validated_by: string
+        }[]
       }
       sync_lambda_link: { Args: { p_link_id: string }; Returns: boolean }
       sync_referentiels_from_import: {

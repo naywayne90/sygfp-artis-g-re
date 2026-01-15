@@ -26,10 +26,10 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Loader2,
   Download,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,6 +46,7 @@ export default function NotesSEF() {
     counts,
     pagination,
     isLoading,
+    error: listError,
     searchQuery,
     activeTab,
     setSearchQuery,
@@ -284,7 +285,7 @@ export default function NotesSEF() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par référence (ARTI...), objet..."
+              placeholder="Rechercher par référence, objet, direction, demandeur..."
               className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -311,75 +312,84 @@ export default function NotesSEF() {
           </TabsTrigger>
         </TabsList>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <>
-            <TabsContent value="toutes">
-              <NoteSEFList
-                notes={filteredNotes as NoteSEF[]}
-                title="Toutes les notes SEF"
-                description={`${pagination.total} note(s) trouvée(s)`}
-                onView={(note) => setViewingNote(note)}
-                onEdit={handleEdit}
-                onSubmit={handleSubmit}
-                onValidate={handleValidate}
-                onReject={setRejectingNote}
-                onDefer={setDeferringNote}
-                onDelete={handleDelete}
-              />
-            </TabsContent>
+        <TabsContent value="toutes">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Toutes les notes SEF"
+            description={`${pagination.total} note(s) trouvée(s)`}
+            onView={(note) => setViewingNote(note)}
+            onEdit={handleEdit}
+            onSubmit={handleSubmit}
+            onValidate={handleValidate}
+            onReject={setRejectingNote}
+            onDefer={setDeferringNote}
+            onDelete={handleDelete}
+            onCreate={() => setFormOpen(true)}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+          />
+        </TabsContent>
 
-            <TabsContent value="a_valider">
-              <NoteSEFList
-                notes={filteredNotes as NoteSEF[]}
-                title="Notes à valider"
-                description="Notes en attente de validation"
-                onView={(note) => setViewingNote(note)}
-                onValidate={canValidate ? handleValidate : undefined}
-                onReject={canValidate ? setRejectingNote : undefined}
-                onDefer={canValidate ? setDeferringNote : undefined}
-                emptyMessage="Aucune note en attente de validation"
-              />
-            </TabsContent>
+        <TabsContent value="a_valider">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Notes à valider"
+            description="Notes en attente de validation"
+            onView={(note) => setViewingNote(note)}
+            onValidate={canValidate ? handleValidate : undefined}
+            onReject={canValidate ? setRejectingNote : undefined}
+            onDefer={canValidate ? setDeferringNote : undefined}
+            onCreate={() => setFormOpen(true)}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+            emptyMessage="Aucune note en attente de validation"
+          />
+        </TabsContent>
 
-            <TabsContent value="validees">
-              <NoteSEFList
-                notes={filteredNotes as NoteSEF[]}
-                title="Notes validées"
-                description="Notes ayant été validées"
-                onView={(note) => setViewingNote(note)}
-                showActions={true}
-                emptyMessage="Aucune note validée"
-              />
-            </TabsContent>
+        <TabsContent value="validees">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Notes validées"
+            description="Notes ayant été validées"
+            onView={(note) => setViewingNote(note)}
+            showActions={true}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+            emptyMessage="Aucune note validée"
+          />
+        </TabsContent>
 
-            <TabsContent value="differees">
-              <NoteSEFList
-                notes={filteredNotes as NoteSEF[]}
-                title="Notes différées"
-                description="Notes en attente de conditions de reprise"
-                onView={(note) => setViewingNote(note)}
-                onValidate={canValidate ? handleValidate : undefined}
-                showActions={true}
-                emptyMessage="Aucune note différée"
-              />
-            </TabsContent>
+        <TabsContent value="differees">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Notes différées"
+            description="Notes en attente de conditions de reprise"
+            onView={(note) => setViewingNote(note)}
+            onValidate={canValidate ? handleValidate : undefined}
+            showActions={true}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+            emptyMessage="Aucune note différée"
+          />
+        </TabsContent>
 
-            <TabsContent value="rejetees">
-              <NoteSEFList
-                notes={filteredNotes as NoteSEF[]}
-                title="Notes rejetées"
-                description="Notes ayant été rejetées"
-                onView={(note) => setViewingNote(note)}
-                showActions={true}
-                emptyMessage="Aucune note rejetée"
-              />
-            </TabsContent>
-          </>
-        )}
+        <TabsContent value="rejetees">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Notes rejetées"
+            description="Notes ayant été rejetées"
+            onView={(note) => setViewingNote(note)}
+            showActions={true}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+            emptyMessage="Aucune note rejetée"
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Pagination */}

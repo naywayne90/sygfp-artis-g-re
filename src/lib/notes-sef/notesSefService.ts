@@ -98,7 +98,8 @@ export const notesSefService = {
   },
 
   /**
-   * Récupérer les notes SEF paginées avec recherche serveur-side
+   * Récupérer les notes SEF paginées avec recherche serveur-side étendue
+   * Utilise la fonction RPC pour rechercher sur direction et demandeur
    * @param options Options de recherche et pagination
    */
   async listPaginated(options: ListNotesOptions): Promise<ServiceResult<PaginatedResult<NoteSEFEntity>>> {
@@ -113,38 +114,55 @@ export const notesSefService = {
         sortOrder = 'desc'
       } = options;
 
-      // 1. D'abord compter le total (avec les mêmes filtres)
-      let countQuery = supabase
-        .from('notes_sef')
-        .select('id', { count: 'exact', head: true })
-        .eq('exercice', exercice);
+      const offset = (page - 1) * pageSize;
+      const statutArray = statut ? (Array.isArray(statut) ? statut : [statut]) : null;
 
-      // Filtre par statut
-      if (statut) {
-        if (Array.isArray(statut)) {
-          countQuery = countQuery.in('statut', statut);
-        } else {
-          countQuery = countQuery.eq('statut', statut);
+      // 1. Compter le total avec recherche étendue via RPC
+      const { data: totalCount, error: countError } = await supabase.rpc(
+        'count_search_notes_sef',
+        {
+          p_exercice: exercice,
+          p_search: search?.trim() || null,
+          p_statut: statutArray
         }
-      }
-
-      // Filtre par recherche (full-text sur plusieurs champs via ilike)
-      if (search && search.trim()) {
-        const searchTerm = `%${search.trim()}%`;
-        countQuery = countQuery.or(
-          `reference_pivot.ilike.${searchTerm},numero.ilike.${searchTerm},objet.ilike.${searchTerm}`
-        );
-      }
-
-      const { count, error: countError } = await countQuery;
+      );
       if (countError) throw countError;
 
-      const total = count || 0;
+      const total = totalCount || 0;
       const totalPages = Math.ceil(total / pageSize);
-      const offset = (page - 1) * pageSize;
 
-      // 2. Récupérer les données paginées
-      let dataQuery = supabase
+      // 2. Récupérer les données via RPC pour recherche étendue
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        'search_notes_sef',
+        {
+          p_exercice: exercice,
+          p_search: search?.trim() || null,
+          p_statut: statutArray,
+          p_limit: pageSize,
+          p_offset: offset,
+          p_sort_by: sortBy,
+          p_sort_order: sortOrder
+        }
+      );
+      if (rpcError) throw rpcError;
+
+      // 3. Enrichir avec les relations (direction, demandeur, etc.)
+      const noteIds = (rpcData || []).map((n: { id: string }) => n.id);
+      
+      if (noteIds.length === 0) {
+        return {
+          success: true,
+          data: {
+            data: [],
+            total,
+            page,
+            pageSize,
+            totalPages
+          }
+        };
+      }
+
+      const { data: enrichedData, error: enrichError } = await supabase
         .from('notes_sef')
         .select(`
           *,
@@ -155,34 +173,19 @@ export const notesSefService = {
           created_by_profile:profiles!created_by(id, first_name, last_name),
           dossier:dossiers!dossier_id(id, numero, statut_global)
         `)
-        .eq('exercice', exercice)
-        .order(sortBy, { ascending: sortOrder === 'asc' })
-        .range(offset, offset + pageSize - 1);
+        .in('id', noteIds);
 
-      // Filtre par statut
-      if (statut) {
-        if (Array.isArray(statut)) {
-          dataQuery = dataQuery.in('statut', statut);
-        } else {
-          dataQuery = dataQuery.eq('statut', statut);
-        }
-      }
+      if (enrichError) throw enrichError;
 
-      // Filtre par recherche
-      if (search && search.trim()) {
-        const searchTerm = `%${search.trim()}%`;
-        dataQuery = dataQuery.or(
-          `reference_pivot.ilike.${searchTerm},numero.ilike.${searchTerm},objet.ilike.${searchTerm}`
-        );
-      }
-
-      const { data, error } = await dataQuery;
-      if (error) throw error;
+      // Préserver l'ordre du RPC
+      const orderedData = noteIds.map((id: string) => 
+        enrichedData?.find((n) => n.id === id)
+      ).filter(Boolean);
 
       return {
         success: true,
         data: {
-          data: data as unknown as NoteSEFEntity[],
+          data: orderedData as unknown as NoteSEFEntity[],
           total,
           page,
           pageSize,

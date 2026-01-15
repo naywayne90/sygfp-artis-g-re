@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -34,6 +34,9 @@ import {
   FileText,
   FolderOpen,
   ExternalLink,
+  AlertCircle,
+  Plus,
+  RefreshCw,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -48,8 +51,12 @@ interface NoteSEFListProps {
   onReject?: (note: NoteSEF) => void;
   onDefer?: (note: NoteSEF) => void;
   onDelete?: (noteId: string) => void;
+  onCreate?: () => void;
+  onRetry?: () => void;
   showActions?: boolean;
   emptyMessage?: string;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const getStatusBadge = (status: string | null) => {
@@ -76,6 +83,23 @@ const getUrgenceBadge = (urgence: string | null) => {
   return <Badge className={variant.className}>{variant.label}</Badge>;
 };
 
+// Composant skeleton pour le chargement
+function TableRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+      <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-40" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+      <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-28" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
+    </TableRow>
+  );
+}
+
 export function NoteSEFList({
   notes,
   title,
@@ -87,8 +111,12 @@ export function NoteSEFList({
   onReject,
   onDefer,
   onDelete,
+  onCreate,
+  onRetry,
   showActions = true,
   emptyMessage = "Aucune note trouvée",
+  isLoading = false,
+  error = null,
 }: NoteSEFListProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -104,6 +132,38 @@ export function NoteSEFList({
     navigate(detailUrl);
   };
 
+  // État d'erreur
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            {title}
+          </CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
+            <div className="rounded-full bg-destructive/10 p-3">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <div>
+              <p className="font-medium text-destructive">Erreur de chargement</p>
+              <p className="text-sm text-muted-foreground mt-1">{error}</p>
+            </div>
+            {onRetry && (
+              <Button variant="outline" onClick={onRetry} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Réessayer
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -114,11 +174,8 @@ export function NoteSEFList({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        {notes.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {emptyMessage}
-          </div>
-        ) : (
+        {isLoading ? (
+          // État de chargement avec skeleton
           <Table>
             <TableHeader>
               <TableRow>
@@ -127,8 +184,50 @@ export function NoteSEFList({
                 <TableHead>Direction</TableHead>
                 <TableHead className="hidden lg:table-cell">Demandeur</TableHead>
                 <TableHead>Urgence</TableHead>
+                <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="hidden xl:table-cell">Date</TableHead>
+                <TableHead className="hidden xl:table-cell">Mise à jour</TableHead>
+                {showActions && <TableHead className="w-[50px]"></TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRowSkeleton key={i} />
+              ))}
+            </TableBody>
+          </Table>
+        ) : notes.length === 0 ? (
+          // État vide amélioré
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
+            <div className="rounded-full bg-muted p-3">
+              <FileText className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="font-medium text-muted-foreground">{emptyMessage}</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                Les notes apparaîtront ici une fois créées
+              </p>
+            </div>
+            {onCreate && (
+              <Button onClick={onCreate} className="gap-2 mt-2">
+                <Plus className="h-4 w-4" />
+                Créer une note SEF
+              </Button>
+            )}
+          </div>
+        ) : (
+          // Table avec données
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Référence</TableHead>
+                <TableHead className="hidden md:table-cell">Objet</TableHead>
+                <TableHead>Direction</TableHead>
+                <TableHead className="hidden lg:table-cell">Demandeur</TableHead>
+                <TableHead>Urgence</TableHead>
+                <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead className="hidden xl:table-cell">Mise à jour</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -154,6 +253,11 @@ export function NoteSEFList({
                       : "—"}
                   </TableCell>
                   <TableCell>{getUrgenceBadge(note.urgence)}</TableCell>
+                  <TableCell className="hidden xl:table-cell text-muted-foreground">
+                    {note.date_souhaitee 
+                      ? format(new Date(note.date_souhaitee), "dd MMM yyyy", { locale: fr })
+                      : "—"}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(note.statut)}
@@ -174,7 +278,7 @@ export function NoteSEFList({
                     </div>
                   </TableCell>
                   <TableCell className="hidden xl:table-cell text-muted-foreground">
-                    {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
+                    {format(new Date(note.updated_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   {showActions && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
