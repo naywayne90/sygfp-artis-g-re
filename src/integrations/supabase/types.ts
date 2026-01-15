@@ -5117,9 +5117,12 @@ export type Database = {
       }
       notes_sef: {
         Row: {
+          beneficiaire_id: string | null
+          beneficiaire_interne_id: string | null
           commentaire: string | null
           created_at: string
           created_by: string | null
+          date_souhaitee: string | null
           demandeur_id: string | null
           description: string | null
           differe_at: string | null
@@ -5128,10 +5131,13 @@ export type Database = {
           differe_date_reprise: string | null
           differe_motif: string | null
           direction_id: string | null
+          dossier_id: string | null
           exercice: number
           id: string
+          justification: string | null
           numero: string | null
           objet: string
+          reference_pivot: string | null
           rejected_at: string | null
           rejected_by: string | null
           rejection_reason: string | null
@@ -5144,9 +5150,12 @@ export type Database = {
           validated_by: string | null
         }
         Insert: {
+          beneficiaire_id?: string | null
+          beneficiaire_interne_id?: string | null
           commentaire?: string | null
           created_at?: string
           created_by?: string | null
+          date_souhaitee?: string | null
           demandeur_id?: string | null
           description?: string | null
           differe_at?: string | null
@@ -5155,10 +5164,13 @@ export type Database = {
           differe_date_reprise?: string | null
           differe_motif?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
           exercice?: number
           id?: string
+          justification?: string | null
           numero?: string | null
           objet: string
+          reference_pivot?: string | null
           rejected_at?: string | null
           rejected_by?: string | null
           rejection_reason?: string | null
@@ -5171,9 +5183,12 @@ export type Database = {
           validated_by?: string | null
         }
         Update: {
+          beneficiaire_id?: string | null
+          beneficiaire_interne_id?: string | null
           commentaire?: string | null
           created_at?: string
           created_by?: string | null
+          date_souhaitee?: string | null
           demandeur_id?: string | null
           description?: string | null
           differe_at?: string | null
@@ -5182,10 +5197,13 @@ export type Database = {
           differe_date_reprise?: string | null
           differe_motif?: string | null
           direction_id?: string | null
+          dossier_id?: string | null
           exercice?: number
           id?: string
+          justification?: string | null
           numero?: string | null
           objet?: string
+          reference_pivot?: string | null
           rejected_at?: string | null
           rejected_by?: string | null
           rejection_reason?: string | null
@@ -5198,6 +5216,27 @@ export type Database = {
           validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notes_sef_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_beneficiaire_id_fkey"
+            columns: ["beneficiaire_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_beneficiaire_interne_id_fkey"
+            columns: ["beneficiaire_interne_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notes_sef_created_by_fkey"
             columns: ["created_by"]
@@ -5225,6 +5264,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
           },
           {
             foreignKeyName: "notes_sef_rejected_by_fkey"
@@ -5342,6 +5395,54 @@ export type Database = {
           {
             foreignKeyName: "notes_sef_history_performed_by_fkey"
             columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes_sef_pieces: {
+        Row: {
+          fichier_url: string
+          id: string
+          nom: string
+          note_id: string
+          taille: number | null
+          type_fichier: string | null
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          fichier_url: string
+          id?: string
+          nom: string
+          note_id: string
+          taille?: number | null
+          type_fichier?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          fichier_url?: string
+          id?: string
+          nom?: string
+          note_id?: string
+          taille?: number | null
+          type_fichier?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_sef_pieces_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_pieces_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
