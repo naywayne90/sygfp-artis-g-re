@@ -72,7 +72,10 @@ export function useNotesSEF() {
           *,
           direction:directions(id, label, sigle),
           demandeur:profiles!demandeur_id(id, first_name, last_name),
-          created_by_profile:profiles!created_by(id, first_name, last_name)
+          beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
+          beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
+          created_by_profile:profiles!created_by(id, first_name, last_name),
+          dossier:dossiers!dossier_id(id, numero, statut_global)
         `)
         .order("created_at", { ascending: false });
 
@@ -82,7 +85,7 @@ export function useNotesSEF() {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as NoteSEF[];
+      return (data as unknown) as NoteSEF[];
     },
     enabled: !!exercice,
   });

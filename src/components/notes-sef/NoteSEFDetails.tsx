@@ -22,6 +22,8 @@ import {
   History,
   FolderOpen,
   ExternalLink,
+  UserCheck,
+  Briefcase,
 } from "lucide-react";
 
 interface NoteSEFDetailsProps {
@@ -159,6 +161,31 @@ export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps
                     </div>
                   </div>
                 </div>
+
+                {/* Bénéficiaire */}
+                {(note.beneficiaire || note.beneficiaire_interne) && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                    {note.beneficiaire ? (
+                      <>
+                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Bénéficiaire (Prestataire)</p>
+                          <p className="font-medium">{note.beneficiaire.raison_sociale}</p>
+                        </div>
+                      </>
+                    ) : note.beneficiaire_interne ? (
+                      <>
+                        <UserCheck className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Bénéficiaire (Agent interne)</p>
+                          <p className="font-medium">
+                            {`${note.beneficiaire_interne.first_name || ""} ${note.beneficiaire_interne.last_name || ""}`.trim()}
+                          </p>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                )}
 
                 {note.commentaire && (
                   <div>
