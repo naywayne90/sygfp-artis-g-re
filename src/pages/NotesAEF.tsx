@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { NoteAEFDeferDialog } from "@/components/notes-aef/NoteAEFDeferDialog";
 import { NoteAEFImputeDialog } from "@/components/notes-aef/NoteAEFImputeDialog";
 import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
 import { useNotesAEFList } from "@/hooks/useNotesAEFList";
+import { useNotesAEFExport } from "@/hooks/useNotesAEFExport";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
@@ -29,6 +30,7 @@ import {
   Clock,
   CreditCard,
   Loader2,
+  Download,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -37,6 +39,9 @@ export default function NotesAEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
+
+  // Hook pour l'export Excel
+  const { exportNotesAEF, isExporting, exportProgress } = useNotesAEFExport();
 
   // Nouveau hook pour liste paginée avec filtres
   const {
@@ -79,6 +84,14 @@ export default function NotesAEF() {
   const [prefillNoteSEFId, setPrefillNoteSEFId] = useState<string | null>(null);
 
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+
+  // Handler pour l'export Excel
+  const handleExportExcel = async () => {
+    await exportNotesAEF(
+      { search: searchQuery || undefined },
+      activeTab
+    );
+  };
 
   // Gérer le prefill depuis l'URL
   useEffect(() => {
@@ -164,27 +177,51 @@ export default function NotesAEF() {
           title="Notes AEF"
           description="Gestion des Notes Avec Effet Financier"
         />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button
-                  onClick={() => setFormOpen(true)}
+                  variant="outline"
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
                   className="gap-2"
-                  disabled={!canWrite}
                 >
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouvelle note AEF
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {isExporting ? (exportProgress || "Export...") : "Exporter Excel"}
                 </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
+              </TooltipTrigger>
               <TooltipContent>
-                <p>{getDisabledMessage()}</p>
+                <p>Exporter les notes de l'onglet actuel en Excel</p>
               </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    onClick={() => setFormOpen(true)}
+                    className="gap-2"
+                    disabled={!canWrite}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Nouvelle note AEF
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* KPIs */}
