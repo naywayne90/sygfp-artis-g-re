@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,17 +17,16 @@ import {
   FileText,
   DollarSign,
   Building2,
-  User,
   Calendar,
-  Tag,
   AlertTriangle,
   ExternalLink,
   Download,
   Trash2,
-  Upload,
   History,
   Shield,
-  LinkIcon
+  LinkIcon,
+  Paperclip,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,12 +148,12 @@ export default function NoteAEFDetail() {
     enabled: !!id,
   });
 
-  // Fetch history
+  // Fetch history (cast to any to handle table not in generated types)
   const { data: history = [] } = useQuery({
     queryKey: ["note-aef-history", id],
     queryFn: async () => {
       if (!id) return [];
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("notes_aef_history")
         .select(`
           *,
@@ -167,7 +166,7 @@ export default function NoteAEFDetail() {
         console.error("Error fetching history:", error);
         return [];
       }
-      return data as unknown as HistoryEvent[];
+      return data as HistoryEvent[];
     },
     enabled: !!id,
   });
@@ -191,6 +190,26 @@ export default function NoteAEFDetail() {
       return data;
     },
     enabled: !!note?.note_sef_id,
+  });
+
+  // Fetch attachments
+  const { data: attachments = [], isLoading: attachmentsLoading } = useQuery({
+    queryKey: ["note-aef-attachments", id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data, error } = await supabase
+        .from("note_attachments")
+        .select("*")
+        .eq("note_id", id)
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching attachments:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!id,
   });
 
   // Access control
@@ -551,6 +570,67 @@ export default function NoteAEFDetail() {
               ligneBudgetaire={note.budget_line}
             />
           )}
+
+          {/* Pièces jointes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Paperclip className="h-4 w-4" />
+                Pièces jointes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {attachmentsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : attachments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Aucune pièce jointe
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {attachments.map((att) => (
+                    <div 
+                      key={att.id} 
+                      className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{att.file_name}</p>
+                          {att.file_size && (
+                            <p className="text-xs text-muted-foreground">
+                              {(att.file_size / 1024).toFixed(1)} KB
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.storage
+                              .from("note-attachments")
+                              .createSignedUrl(att.file_path, 60);
+                            
+                            if (error) throw error;
+                            window.open(data.signedUrl, "_blank");
+                          } catch (err) {
+                            console.error("Download error:", err);
+                            toast.error("Impossible de télécharger le fichier");
+                          }
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sidebar */}
