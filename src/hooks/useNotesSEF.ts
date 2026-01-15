@@ -144,6 +144,8 @@ export function useNotesSEF() {
         .insert([{
           objet: noteData.objet!,
           description: noteData.description,
+          justification: noteData.justification,
+          date_souhaitee: noteData.date_souhaitee,
           direction_id: noteData.direction_id,
           demandeur_id: noteData.demandeur_id || user.id,
           beneficiaire_id: noteData.beneficiaire_id,
@@ -152,7 +154,7 @@ export function useNotesSEF() {
           commentaire: noteData.commentaire,
           exercice: exercice || new Date().getFullYear(),
           created_by: user.id,
-          // numero sera généré par trigger
+          // reference_pivot sera généré par trigger
         }])
         .select()
         .single();
@@ -178,7 +180,10 @@ export function useNotesSEF() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: `Note ${data.numero} créée avec succès` });
+      toast({ 
+        title: `Note ${data.reference_pivot || data.numero} créée`, 
+        description: "La note a été enregistrée en brouillon",
+      });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
