@@ -259,12 +259,12 @@ export default function NotesSEF() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Rejetées</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {notesByStatus.rejete.length}
+                <p className="text-sm text-muted-foreground">Différées</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {notesByStatus.differe.length}
                 </p>
               </div>
-              <XCircle className="h-8 w-8 text-destructive/50" />
+              <Clock className="h-8 w-8 text-orange-500/50" />
             </div>
           </CardContent>
         </Card>
@@ -272,12 +272,12 @@ export default function NotesSEF() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Différées</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {notesByStatus.differe.length}
+                <p className="text-sm text-muted-foreground">Rejetées</p>
+                <p className="text-2xl font-bold text-destructive">
+                  {notesByStatus.rejete.length}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-orange-500/50" />
+              <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
           </CardContent>
         </Card>
@@ -308,11 +308,11 @@ export default function NotesSEF() {
           <TabsTrigger value="validees">
             Validées ({notesByStatus.valide.length})
           </TabsTrigger>
-          <TabsTrigger value="rejetees">
-            Rejetées ({notesByStatus.rejete.length})
-          </TabsTrigger>
           <TabsTrigger value="differees">
             Différées ({notesByStatus.differe.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejetees">
+            Rejetées ({notesByStatus.rejete.length})
           </TabsTrigger>
         </TabsList>
 
@@ -361,17 +361,6 @@ export default function NotesSEF() {
               />
             </TabsContent>
 
-            <TabsContent value="rejetees">
-              <NoteSEFList
-                notes={filteredNotes}
-                title="Notes rejetées"
-                description="Notes ayant été rejetées"
-                onView={setViewingNote}
-                showActions={true}
-                emptyMessage="Aucune note rejetée"
-              />
-            </TabsContent>
-
             <TabsContent value="differees">
               <NoteSEFList
                 notes={filteredNotes}
@@ -381,6 +370,17 @@ export default function NotesSEF() {
                 onValidate={canValidate ? validateNote : undefined}
                 showActions={true}
                 emptyMessage="Aucune note différée"
+              />
+            </TabsContent>
+
+            <TabsContent value="rejetees">
+              <NoteSEFList
+                notes={filteredNotes}
+                title="Notes rejetées"
+                description="Notes ayant été rejetées"
+                onView={setViewingNote}
+                showActions={true}
+                emptyMessage="Aucune note rejetée"
               />
             </TabsContent>
           </>
