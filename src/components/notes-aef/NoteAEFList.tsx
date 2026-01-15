@@ -36,7 +36,9 @@ import {
   Link2,
   ArrowRight,
   ExternalLink,
+  Paperclip,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NoteAEFListProps {
   notes: NoteAEF[];
@@ -149,6 +151,7 @@ export function NoteAEFList({
                 <TableHead className="text-right">Montant</TableHead>
                 <TableHead>Origine</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="hidden xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden lg:table-cell">Date</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
@@ -174,6 +177,25 @@ export function NoteAEFList({
                   </TableCell>
                   <TableCell>{getOriginBadge(note)}</TableCell>
                   <TableCell>{getStatusBadge(note.statut)}</TableCell>
+                  <TableCell className="hidden xl:table-cell text-center">
+                    {(note as any).attachments_count > 0 ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="secondary" className="gap-1">
+                              <Paperclip className="h-3 w-3" />
+                              {(note as any).attachments_count}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{(note as any).attachments_count} pièce(s) jointe(s)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                  </TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>

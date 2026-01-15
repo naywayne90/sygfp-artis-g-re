@@ -37,6 +37,7 @@ import {
   AlertCircle,
   Plus,
   RefreshCw,
+  Paperclip,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -186,6 +187,7 @@ export function NoteSEFList({
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
@@ -227,6 +229,7 @@ export function NoteSEFList({
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
                 <TableHead>Statut</TableHead>
+                <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
@@ -276,6 +279,25 @@ export function NoteSEFList({
                         </TooltipProvider>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell className="hidden 2xl:table-cell text-center">
+                    {(note as any).pieces_count > 0 ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge variant="secondary" className="gap-1">
+                              <Paperclip className="h-3 w-3" />
+                              {(note as any).pieces_count}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{(note as any).pieces_count} pièce(s) jointe(s)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="hidden xl:table-cell text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}

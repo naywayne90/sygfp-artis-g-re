@@ -187,16 +187,24 @@ export const notesSefService = {
           beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
           beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
           created_by_profile:profiles!created_by(id, first_name, last_name),
-          dossier:dossiers!dossier_id(id, numero, statut_global)
+          dossier:dossiers!dossier_id(id, numero, statut_global),
+          pieces:notes_sef_pieces(id)
         `)
         .in('id', noteIds);
 
       if (enrichError) throw enrichError;
 
-      // Préserver l'ordre du RPC
-      const orderedData = noteIds.map((id: string) => 
-        enrichedData?.find((n) => n.id === id)
-      ).filter(Boolean);
+      // Préserver l'ordre du RPC et ajouter le comptage des pièces
+      const orderedData = noteIds.map((id: string) => {
+        const note = enrichedData?.find((n) => n.id === id);
+        if (note) {
+          return {
+            ...note,
+            pieces_count: Array.isArray(note.pieces) ? note.pieces.length : 0
+          };
+        }
+        return null;
+      }).filter(Boolean);
 
       return {
         success: true,
