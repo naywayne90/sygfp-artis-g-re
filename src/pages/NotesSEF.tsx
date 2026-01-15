@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,10 @@ import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog"
 import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
 import { useNotesSEF, NoteSEF } from "@/hooks/useNotesSEF";
 import { useNotesSEFList } from "@/hooks/useNotesSEFList";
+import { useNotesSEFExport } from "@/hooks/useNotesSEFExport";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { useExport } from "@/hooks/useExport";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
@@ -38,7 +38,7 @@ export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
-  const { isExporting, exportToExcel } = useExport();
+  const { exportNotesSEF, isExporting, exportProgress } = useNotesSEFExport();
   
   // Nouveau hook pour la liste paginée
   const {
@@ -76,50 +76,26 @@ export default function NotesSEF() {
   // Compteur "À valider" = soumis + a_valider
   const aValiderCount = counts.soumis + counts.a_valider;
 
-  const getStatutLabel = (statut: string | null) => {
-    const labels: Record<string, string> = {
-      brouillon: "Brouillon",
-      soumis: "Soumis",
-      a_valider: "À valider",
-      valide: "Validé",
-      rejete: "Rejeté",
-      differe: "Différé",
-    };
-    return labels[statut || "brouillon"] || statut || "";
-  };
-
-  const getUrgenceLabel = (urgence: string | null) => {
-    const labels: Record<string, string> = {
-      basse: "Basse",
-      normale: "Normale",
-      haute: "Haute",
-      urgente: "Urgente",
-    };
-    return labels[urgence || "normale"] || urgence || "";
-  };
+  // Convertir l'onglet actif en filtre de statut pour l'export
+  const statutFilterForExport = useMemo(() => {
+    switch (activeTab) {
+      case 'a_valider':
+        return ['soumis', 'a_valider'];
+      case 'validees':
+        return 'valide';
+      case 'differees':
+        return 'differe';
+      case 'rejetees':
+        return 'rejete';
+      default:
+        return undefined;
+    }
+  }, [activeTab]);
 
   const handleExportExcel = async () => {
-    const exportData = filteredNotes.map((note) => ({
-      "N° Note": note.reference_pivot || note.numero || "",
-      "Objet": note.objet,
-      "Direction": note.direction?.label || note.direction?.sigle || "",
-      "Demandeur": note.demandeur
-        ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`
-        : "",
-      "Statut": getStatutLabel(note.statut),
-      "Urgence": getUrgenceLabel(note.urgence),
-      "Exercice": note.exercice,
-      "Date Création": note.created_at
-        ? new Date(note.created_at).toLocaleDateString("fr-FR")
-        : "",
-      "Description": note.description || "",
-      "Commentaire": note.commentaire || "",
-    }));
-
-    await exportToExcel(
-      exportData,
-      `notes_sef_${exercice}_${activeTab}`,
-      "Notes SEF"
+    await exportNotesSEF(
+      { statut: statutFilterForExport, search: searchQuery || undefined },
+      activeTab
     );
   };
 
@@ -189,19 +165,28 @@ export default function NotesSEF() {
           description="Gestion des Notes Sans Effet Financier" 
         />
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={handleExportExcel}
-            disabled={isExporting || filteredNotes.length === 0}
-            className="gap-2"
-          >
-            {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            Exporter Excel
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  className="gap-2"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  {isExporting ? (exportProgress || "Export...") : "Exporter Excel"}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exporter les notes de l'onglet actuel en Excel</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
