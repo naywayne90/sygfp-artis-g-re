@@ -119,12 +119,13 @@ const budgetItems = [
 const chaineDepenseItems = [
   { title: "1. Notes SEF", url: "/notes-sef", icon: FileText, step: 1, description: "Sans Engagement Financier" },
   { title: "2. Notes AEF", url: "/notes-aef", icon: FileEdit, step: 2, description: "Avec Engagement Financier" },
-  { title: "3. Expression Besoin", url: "/execution/expression-besoin", icon: Briefcase, step: 3, description: "Formalisation du besoin" },
-  { title: "4. Passation Marché", url: "/marches", icon: ShoppingCart, step: 4, description: "Si montant > seuil" },
-  { title: "5. Engagement", url: "/engagements", icon: CreditCard, step: 5, description: "Réservation crédits" },
-  { title: "6. Liquidation", url: "/liquidations", icon: Receipt, step: 6, description: "Constatation service fait" },
-  { title: "7. Ordonnancement", url: "/ordonnancements", icon: FileCheck, step: 7, description: "Ordre de paiement" },
-  { title: "8. Règlement", url: "/reglements", icon: Banknote, step: 8, description: "Paiement effectif" },
+  { title: "3. Imputation", url: "/execution/imputation", icon: Tag, step: 3, description: "Imputation budgétaire" },
+  { title: "4. Expression Besoin", url: "/execution/expression-besoin", icon: Briefcase, step: 4, description: "Formalisation du besoin" },
+  { title: "5. Passation Marché", url: "/marches", icon: ShoppingCart, step: 5, description: "Si montant > seuil" },
+  { title: "6. Engagement", url: "/engagements", icon: CreditCard, step: 6, description: "Réservation crédits" },
+  { title: "7. Liquidation", url: "/liquidations", icon: Receipt, step: 7, description: "Constatation service fait" },
+  { title: "8. Ordonnancement", url: "/ordonnancements", icon: FileCheck, step: 8, description: "Ordre de paiement" },
+  { title: "9. Règlement", url: "/reglements", icon: Banknote, step: 9, description: "Paiement effectif" },
 ];
 
 // PARTENAIRES
@@ -313,7 +314,7 @@ export function AppSidebar() {
                       {!collapsed && (
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
-                            8 étapes
+                            9 étapes
                           </Badge>
                           <ChevronRight className={cn(
                             "h-4 w-4 transition-transform",
@@ -352,28 +353,6 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-              
-              {/* Imputation (lié à la chaîne) */}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/execution/imputation")}
-                  tooltip="Imputation budgétaire"
-                >
-                  <NavLink
-                    to="/execution/imputation"
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
-                      isActive("/execution/imputation")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
-                    )}
-                  >
-                    <Tag className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span>Imputation</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
