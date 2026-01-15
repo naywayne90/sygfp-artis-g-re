@@ -10,6 +10,7 @@ export type NoteSEFAction =
   | "suppression_piece"
   | "reference_generated"
   | "soumission"
+  | "resoumission"
   | "passage_a_valider"
   | "validation"
   | "rejet"
