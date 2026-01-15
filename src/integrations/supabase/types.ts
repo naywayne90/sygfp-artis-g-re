@@ -4998,6 +4998,64 @@ export type Database = {
           },
         ]
       }
+      notes_aef_history: {
+        Row: {
+          action: string
+          commentaire: string | null
+          id: string
+          ip_address: string | null
+          new_statut: string | null
+          note_id: string
+          old_statut: string | null
+          performed_at: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          commentaire?: string | null
+          id?: string
+          ip_address?: string | null
+          new_statut?: string | null
+          note_id: string
+          old_statut?: string | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          commentaire?: string | null
+          id?: string
+          ip_address?: string | null
+          new_statut?: string | null
+          note_id?: string
+          old_statut?: string | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_aef_history_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_aef_history_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_aef_history_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes_dg: {
         Row: {
           budget_line_id: string | null
@@ -5013,15 +5071,20 @@ export type Database = {
           id: string
           imputed_at: string | null
           imputed_by: string | null
+          is_direct_aef: boolean | null
+          justification: string | null
           legacy_import: boolean | null
           montant_estime: number | null
           motif_differe: string | null
+          note_sef_id: string | null
           numero: string | null
           objet: string
           priorite: string | null
+          reference_pivot: string | null
           rejection_reason: string | null
           statut: string | null
           submitted_at: string | null
+          type_depense: string | null
           updated_at: string
           validated_at: string | null
           validated_by: string | null
@@ -5040,15 +5103,20 @@ export type Database = {
           id?: string
           imputed_at?: string | null
           imputed_by?: string | null
+          is_direct_aef?: boolean | null
+          justification?: string | null
           legacy_import?: boolean | null
           montant_estime?: number | null
           motif_differe?: string | null
+          note_sef_id?: string | null
           numero?: string | null
           objet: string
           priorite?: string | null
+          reference_pivot?: string | null
           rejection_reason?: string | null
           statut?: string | null
           submitted_at?: string | null
+          type_depense?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
@@ -5067,15 +5135,20 @@ export type Database = {
           id?: string
           imputed_at?: string | null
           imputed_by?: string | null
+          is_direct_aef?: boolean | null
+          justification?: string | null
           legacy_import?: boolean | null
           montant_estime?: number | null
           motif_differe?: string | null
+          note_sef_id?: string | null
           numero?: string | null
           objet?: string
           priorite?: string | null
+          reference_pivot?: string | null
           rejection_reason?: string | null
           statut?: string | null
           submitted_at?: string | null
+          type_depense?: string | null
           updated_at?: string
           validated_at?: string | null
           validated_by?: string | null
@@ -5121,6 +5194,13 @@ export type Database = {
             columns: ["imputed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_note_sef_id_fkey"
+            columns: ["note_sef_id"]
+            isOneToOne: false
+            referencedRelation: "notes_sef"
             referencedColumns: ["id"]
           },
           {
@@ -9488,6 +9568,10 @@ export type Database = {
         Returns: string
       }
       generate_note_aef_numero: {
+        Args: { p_exercice: number }
+        Returns: string
+      }
+      generate_note_aef_reference: {
         Args: { p_exercice: number }
         Returns: string
       }

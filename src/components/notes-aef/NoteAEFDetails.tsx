@@ -1,9 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { NoteAEF } from "@/hooks/useNotesAEF";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Link } from "react-router-dom";
 import {
   Building2,
   Calendar,
@@ -11,6 +16,10 @@ import {
   FileText,
   CreditCard,
   AlertTriangle,
+  Link2,
+  Zap,
+  History,
+  ExternalLink,
 } from "lucide-react";
 
 interface NoteAEFDetailsProps {
@@ -39,22 +48,142 @@ const formatMontant = (montant: number | null) => {
 };
 
 export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps) {
+  // Récupérer l'historique de la note
+  const { data: history = [] } = useQuery({
+    queryKey: ["note-aef-history", note?.id],
+    queryFn: async () => {
+      if (!note?.id) return [];
+      const { data, error } = await supabase
+        .from("notes_aef_history")
+        .select(`
+          *,
+          performer:profiles!notes_aef_history_performed_by_fkey(id, first_name, last_name)
+        `)
+        .eq("note_id", note.id)
+        .order("performed_at", { ascending: false });
+      if (error) {
+        console.error("Error fetching history:", error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!note?.id && open,
+  });
+
+  // Récupérer la Note SEF liée si existe
+  const { data: linkedNoteSEF } = useQuery({
+    queryKey: ["linked-note-sef", (note as any)?.note_sef_id],
+    queryFn: async () => {
+      const noteWithSef = note as any;
+      if (!noteWithSef?.note_sef_id) return null;
+      const { data, error } = await supabase
+        .from("notes_sef")
+        .select("id, numero, objet, statut, created_at")
+        .eq("id", noteWithSef.note_sef_id)
+        .single();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!(note as any)?.note_sef_id && open,
+  });
+
   if (!note) return null;
+
+  const noteWithExtras = note as any;
+  const isDirectAEF = noteWithExtras.is_direct_aef === true;
+
+  const getActionLabel = (action: string) => {
+    const labels: Record<string, string> = {
+      "status_change": "Changement de statut",
+      "create": "Création",
+      "update": "Modification",
+      "submit": "Soumission",
+      "validate": "Validation",
+      "reject": "Rejet",
+      "defer": "Report",
+      "impute": "Imputation",
+    };
+    return labels[action] || action;
+  };
+
+  const getStatusLabel = (status: string | null) => {
+    const labels: Record<string, string> = {
+      brouillon: "Brouillon",
+      soumis: "Soumis",
+      a_valider: "À valider",
+      valide: "Validé",
+      impute: "Imputé",
+      rejete: "Rejeté",
+      differe: "Différé",
+    };
+    return labels[status || ""] || status || "-";
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Note AEF {note.numero || ""}
             </DialogTitle>
-            {getStatusBadge(note.statut)}
+            <div className="flex items-center gap-2">
+              {isDirectAEF && (
+                <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">
+                  <Zap className="h-3 w-3 mr-1" />
+                  AEF Directe
+                </Badge>
+              )}
+              {getStatusBadge(note.statut)}
+            </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Note SEF liée */}
+          {linkedNoteSEF && !isDirectAEF && (
+            <Card className="border-primary/20">
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Link2 className="h-4 w-4 text-primary" />
+                  Note SEF liée
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-mono text-sm font-medium">{linkedNoteSEF.numero}</p>
+                    <p className="text-sm text-muted-foreground truncate max-w-[300px]">
+                      {linkedNoteSEF.objet}
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/notes-sef/${linkedNoteSEF.id}`}>
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Voir
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Justification AEF directe */}
+          {isDirectAEF && noteWithExtras.justification && (
+            <Card className="border-warning/20 bg-warning/5">
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm flex items-center gap-2 text-warning">
+                  <Zap className="h-4 w-4" />
+                  Justification AEF directe
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm">{noteWithExtras.justification}</p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Informations principales */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">{note.objet}</h3>
@@ -83,6 +212,14 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
               <span className="text-muted-foreground">Montant estimé:</span>
               <span className="font-medium">{formatMontant(note.montant_estime)}</span>
             </div>
+
+            {noteWithExtras.type_depense && (
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Type:</span>
+                <span className="font-medium capitalize">{noteWithExtras.type_depense}</span>
+              </div>
+            )}
 
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -171,6 +308,50 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
               <div className="text-sm text-muted-foreground">
                 <span className="text-success">✓</span> Validée le{" "}
                 {format(new Date(note.validated_at), "dd MMMM yyyy à HH:mm", { locale: fr })}
+              </div>
+            </>
+          )}
+
+          {/* Historique */}
+          {history.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Historique des actions
+                </h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {history.map((entry: any) => (
+                    <div 
+                      key={entry.id} 
+                      className="flex items-start gap-3 text-sm p-2 rounded-lg bg-muted/30"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">{getActionLabel(entry.action)}</span>
+                          {entry.old_statut && entry.new_statut && (
+                            <span className="text-muted-foreground">
+                              {getStatusLabel(entry.old_statut)} → {getStatusLabel(entry.new_statut)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {format(new Date(entry.performed_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
+                          {entry.performer && (
+                            <> • {entry.performer.first_name} {entry.performer.last_name}</>
+                          )}
+                        </div>
+                        {entry.commentaire && (
+                          <p className="text-xs mt-1 text-muted-foreground italic">
+                            {entry.commentaire}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}

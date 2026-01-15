@@ -6,16 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NoteAEF, useNotesAEF } from "@/hooks/useNotesAEF";
-import { Loader2, Link2, FileText, AlertTriangle } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Loader2, Link2, FileText, AlertTriangle, Zap } from "lucide-react";
 
 interface NoteAEFFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   note?: NoteAEF | null;
-  initialNoteSEFId?: string | null; // Pré-sélection depuis Notes SEF
+  initialNoteSEFId?: string | null;
 }
 
 const formatNumber = (value: string) => {
@@ -27,8 +28,18 @@ const parseNumber = (value: string) => {
   return parseInt(value.replace(/\s/g, "").replace(/,/g, ""), 10) || 0;
 };
 
+const TYPES_DEPENSE = [
+  { value: "fonctionnement", label: "Fonctionnement" },
+  { value: "investissement", label: "Investissement" },
+  { value: "transfert", label: "Transfert" },
+];
+
 export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: NoteAEFFormProps) {
   const { createNote, updateNote, directions, notesSEFValidees, isCreating, isUpdating } = useNotesAEF();
+  const { hasAnyRole, isAdmin } = usePermissions();
+  
+  // Le DG peut créer des AEF directes (sans Note SEF)
+  const canCreateDirectAEF = isAdmin || hasAnyRole(["DG"]);
 
   const [formData, setFormData] = useState({
     objet: "",
@@ -36,7 +47,10 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     direction_id: "",
     priorite: "normale",
     montant_estime: "",
-    note_sef_id: "", // POINT 2: Liaison obligatoire avec Note SEF validée
+    note_sef_id: "",
+    is_direct_aef: false,
+    type_depense: "fonctionnement",
+    justification: "",
   });
 
   const selectedNoteSEF = notesSEFValidees.find(n => n.id === formData.note_sef_id);
@@ -50,12 +64,15 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         priorite: note.priorite || "normale",
         montant_estime: note.montant_estime ? formatNumber(note.montant_estime.toString()) : "",
         note_sef_id: (note as any).note_sef_id || "",
+        is_direct_aef: (note as any).is_direct_aef || false,
+        type_depense: (note as any).type_depense || "fonctionnement",
+        justification: (note as any).justification || "",
       });
     } else if (initialNoteSEFId) {
-      // Pré-remplir avec la note SEF depuis l'URL
       setFormData(prev => ({
         ...prev,
         note_sef_id: initialNoteSEFId,
+        is_direct_aef: false,
       }));
     } else {
       setFormData({
@@ -65,26 +82,42 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         priorite: "normale",
         montant_estime: "",
         note_sef_id: "",
+        is_direct_aef: false,
+        type_depense: "fonctionnement",
+        justification: "",
       });
     }
   }, [note, open, initialNoteSEFId]);
 
   // Pré-remplir depuis la note SEF sélectionnée
   useEffect(() => {
-    if (selectedNoteSEF && !note) {
+    if (selectedNoteSEF && !note && !formData.is_direct_aef) {
       setFormData(prev => ({
         ...prev,
         objet: prev.objet || selectedNoteSEF.objet,
         direction_id: prev.direction_id || selectedNoteSEF.direction_id || "",
       }));
     }
-  }, [selectedNoteSEF, note]);
+  }, [selectedNoteSEF, note, formData.is_direct_aef]);
+
+  const handleDirectAEFChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      is_direct_aef: checked,
+      note_sef_id: checked ? "" : prev.note_sef_id,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // POINT 2: Vérification obligatoire de la liaison
-    if (!formData.note_sef_id) {
+    // Vérification: soit AEF directe, soit liée à une Note SEF
+    if (!formData.is_direct_aef && !formData.note_sef_id) {
+      return;
+    }
+
+    // AEF directe requiert une justification
+    if (formData.is_direct_aef && !formData.justification?.trim()) {
       return;
     }
 
@@ -95,7 +128,10 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         direction_id: formData.direction_id || null,
         priorite: formData.priorite,
         montant_estime: parseNumber(formData.montant_estime),
-        note_sef_id: formData.note_sef_id, // Liaison vers Note SEF
+        note_sef_id: formData.is_direct_aef ? null : formData.note_sef_id,
+        is_direct_aef: formData.is_direct_aef,
+        type_depense: formData.type_depense,
+        justification: formData.justification || null,
       };
 
       if (note) {
@@ -110,6 +146,8 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
   };
 
   const isLoading = isCreating || isUpdating;
+  const needsNoteSEF = !formData.is_direct_aef && !formData.note_sef_id;
+  const needsJustification = formData.is_direct_aef && !formData.justification?.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,65 +159,116 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* POINT 2: Sélection obligatoire de la Note SEF */}
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Link2 className="h-4 w-4 text-primary" />
-                <Label className="font-medium">Note SEF validée (obligatoire) *</Label>
-              </div>
-              
-              <Select
-                value={formData.note_sef_id}
-                onValueChange={(value) => setFormData({ ...formData, note_sef_id: value })}
-              >
-                <SelectTrigger className={!formData.note_sef_id ? "border-destructive" : ""}>
-                  <SelectValue placeholder="Sélectionner une Note SEF validée..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {notesSEFValidees.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      Aucune Note SEF validée disponible
-                    </div>
-                  ) : (
-                    notesSEFValidees.map((noteSEF) => (
-                      <SelectItem key={noteSEF.id} value={noteSEF.id}>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-mono text-xs">{noteSEF.numero}</span>
-                          <span className="truncate max-w-[200px]">{noteSEF.objet}</span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-
-              {selectedNoteSEF && (
-                <div className="mt-3 p-3 bg-background rounded-lg border">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">N° Note SEF:</span>
-                      <p className="font-mono font-medium">{selectedNoteSEF.numero}</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Objet:</span>
-                      <p className="truncate">{selectedNoteSEF.objet}</p>
-                    </div>
+          {/* Option AEF directe pour DG */}
+          {canCreateDirectAEF && (
+            <Card className="border-warning/30 bg-warning/5">
+              <CardContent className="pt-4">
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="is_direct_aef"
+                    checked={formData.is_direct_aef}
+                    onCheckedChange={handleDirectAEFChange}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-warning" />
+                    <Label htmlFor="is_direct_aef" className="font-medium cursor-pointer">
+                      AEF directe (sans Note SEF)
+                    </Label>
                   </div>
                 </div>
-              )}
+                {formData.is_direct_aef && (
+                  <p className="text-xs text-muted-foreground mt-2 ml-7">
+                    En tant que DG, vous pouvez créer une Note AEF directement sans passer par une Note SEF.
+                    Une justification est requise.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-              {!formData.note_sef_id && (
-                <Alert variant="destructive" className="mt-3">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    Une Note AEF doit obligatoirement être liée à une Note SEF validée.
-                  </AlertDescription>
-                </Alert>
+          {/* Sélection de la Note SEF (masqué si AEF directe) */}
+          {!formData.is_direct_aef && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Link2 className="h-4 w-4 text-primary" />
+                  <Label className="font-medium">Note SEF validée (obligatoire) *</Label>
+                </div>
+                
+                <Select
+                  value={formData.note_sef_id}
+                  onValueChange={(value) => setFormData({ ...formData, note_sef_id: value })}
+                >
+                  <SelectTrigger className={needsNoteSEF ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Sélectionner une Note SEF validée..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {notesSEFValidees.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground text-center">
+                        Aucune Note SEF validée disponible
+                      </div>
+                    ) : (
+                      notesSEFValidees.map((noteSEF) => (
+                        <SelectItem key={noteSEF.id} value={noteSEF.id}>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-mono text-xs">{noteSEF.numero}</span>
+                            <span className="truncate max-w-[200px]">{noteSEF.objet}</span>
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+
+                {selectedNoteSEF && (
+                  <div className="mt-3 p-3 bg-background rounded-lg border">
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">N° Note SEF:</span>
+                        <p className="font-mono font-medium">{selectedNoteSEF.numero}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Objet:</span>
+                        <p className="truncate">{selectedNoteSEF.objet}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {needsNoteSEF && (
+                  <Alert variant="destructive" className="mt-3">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      Une Note AEF doit obligatoirement être liée à une Note SEF validée.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Justification obligatoire pour AEF directe */}
+          {formData.is_direct_aef && (
+            <div>
+              <Label htmlFor="justification" className="flex items-center gap-1">
+                Justification (obligatoire pour AEF directe) *
+              </Label>
+              <Textarea
+                id="justification"
+                value={formData.justification}
+                onChange={(e) => setFormData({ ...formData, justification: e.target.value })}
+                placeholder="Expliquez pourquoi cette dépense ne nécessite pas de Note SEF préalable..."
+                rows={3}
+                className={needsJustification ? "border-destructive" : ""}
+              />
+              {needsJustification && (
+                <p className="text-xs text-destructive mt-1">
+                  La justification est obligatoire pour une AEF directe.
+                </p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
@@ -230,7 +319,26 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
               </Select>
             </div>
 
-            <div className="col-span-2">
+            <div>
+              <Label htmlFor="type_depense">Type de dépense</Label>
+              <Select
+                value={formData.type_depense}
+                onValueChange={(value) => setFormData({ ...formData, type_depense: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TYPES_DEPENSE.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label htmlFor="montant">Montant estimé (FCFA)</Label>
               <Input
                 id="montant"
@@ -250,7 +358,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                 value={formData.contenu}
                 onChange={(e) => setFormData({ ...formData, contenu: e.target.value })}
                 placeholder="Description détaillée de la demande et justificatifs"
-                rows={5}
+                rows={4}
               />
             </div>
           </div>
@@ -261,7 +369,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading || !formData.objet || !formData.note_sef_id}
+              disabled={isLoading || !formData.objet || needsNoteSEF || needsJustification}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {note ? "Modifier" : "Créer"}
