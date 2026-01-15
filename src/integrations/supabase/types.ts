@@ -9385,6 +9385,8 @@ export type Database = {
         Args: { p_processus_code: string }
         Returns: Json
       }
+      get_user_direction: { Args: { _user_id: string }; Returns: string }
+      get_user_exercice_actif: { Args: { _user_id: string }; Returns: number }
       get_user_permissions: {
         Args: { p_user_id: string }
         Returns: {
@@ -9407,9 +9409,23 @@ export type Database = {
         Args: { _action_code: string; _user_id: string }
         Returns: boolean
       }
+      has_profil_fonctionnel: {
+        Args: {
+          _profil: Database["public"]["Enums"]["profil_fonctionnel"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role_hierarchique: {
+        Args: {
+          _role: Database["public"]["Enums"]["role_hierarchique"]
           _user_id: string
         }
         Returns: boolean
@@ -9426,6 +9442,8 @@ export type Database = {
         Args: { eb_id: string }
         Returns: boolean
       }
+      is_notes_sef_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_notes_sef_validator: { Args: { _user_id: string }; Returns: boolean }
       is_prefix_reserved: {
         Args: { p_code: string }
         Returns: {
