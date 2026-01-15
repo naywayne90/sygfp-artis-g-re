@@ -186,7 +186,7 @@ export function NoteSEFList({
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="hidden xl:table-cell">Mise à jour</TableHead>
+                <TableHead className="hidden xl:table-cell">Créée le</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -227,7 +227,7 @@ export function NoteSEFList({
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead className="hidden xl:table-cell">Mise à jour</TableHead>
+                <TableHead className="hidden xl:table-cell">Créée le</TableHead>
                 {showActions && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -278,7 +278,7 @@ export function NoteSEFList({
                     </div>
                   </TableCell>
                   <TableCell className="hidden xl:table-cell text-muted-foreground">
-                    {format(new Date(note.updated_at), "dd MMM yyyy", { locale: fr })}
+                    {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   {showActions && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
