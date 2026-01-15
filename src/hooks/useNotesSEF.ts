@@ -342,12 +342,29 @@ export function useNotesSEF() {
   });
 
   // Validate note - CREATION AUTOMATIQUE DU DOSSIER
+  // Sécurisé: seuls DG/ADMIN peuvent valider (vérifié par trigger backend)
   const validateMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier le rôle DG/ADMIN côté frontend (le backend vérifie aussi)
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent valider une note");
+      }
+
       const { data: oldNote } = await supabase.from("notes_sef").select("*, direction:directions(sigle)").eq("id", noteId).single();
+
+      // Vérifier que la note est dans un état validable
+      if (!oldNote || !["soumis", "a_valider", "differe"].includes(oldNote.statut)) {
+        throw new Error("Cette note n'est pas dans un état permettant la validation");
+      }
 
       // Mise à jour de la Note SEF
       const { data, error } = await supabase
@@ -437,23 +454,25 @@ export function useNotesSEF() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
       queryClient.invalidateQueries({ queryKey: ["dossiers"] });
       if (result.dossier) {
         toast({ 
-          title: `Note ${result.numero} validée ✓`, 
-          description: `Dossier ${result.dossier.numero} créé automatiquement. Cliquez sur la note pour voir le lien vers le dossier.`,
+          title: `Note ${result.numero || result.reference_pivot} validée ✓`, 
+          description: `Dossier ${result.dossier.numero} créé automatiquement.`,
           duration: 6000,
         });
       } else {
-        toast({ title: `Note ${result.numero} validée avec succès` });
+        toast({ title: `Note ${result.numero || result.reference_pivot} validée avec succès` });
       }
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur de validation", description: error.message, variant: "destructive" });
     },
   });
 
-  // Reject note
+  // Reject note - Sécurisé: seuls DG/ADMIN peuvent rejeter (vérifié par trigger backend)
   const rejectMutation = useMutation({
     mutationFn: async ({ noteId, motif }: { noteId: string; motif: string }) => {
       if (!motif?.trim()) throw new Error("Le motif de rejet est obligatoire");
@@ -461,12 +480,28 @@ export function useNotesSEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier le rôle DG/ADMIN côté frontend (le backend vérifie aussi)
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note");
+      }
+
       // Récupérer la note avec les infos nécessaires pour les notifications
       const { data: oldNote } = await supabase
         .from("notes_sef")
         .select("*, direction:directions(id, label)")
         .eq("id", noteId)
         .single();
+
+      // Vérifier que la note est dans un état rejectable
+      if (!oldNote || !["soumis", "a_valider"].includes(oldNote.statut)) {
+        throw new Error("Cette note n'est pas dans un état permettant le rejet");
+      }
 
       const { data, error } = await supabase
         .from("notes_sef")
@@ -487,16 +522,18 @@ export function useNotesSEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: "Note rejetée" });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
+      toast({ title: `Note ${data.reference_pivot || data.numero} rejetée` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur de rejet", description: error.message, variant: "destructive" });
     },
   });
 
-  // Defer note
+  // Defer note - Sécurisé: seuls DG/ADMIN peuvent différer (vérifié par trigger backend)
   const deferMutation = useMutation({
     mutationFn: async ({
       noteId,
@@ -514,12 +551,28 @@ export function useNotesSEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Vérifier le rôle DG/ADMIN côté frontend (le backend vérifie aussi)
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent différer une note");
+      }
+
       // Récupérer la note avec les infos nécessaires pour les notifications
       const { data: oldNote } = await supabase
         .from("notes_sef")
         .select("*, direction:directions(id, label)")
         .eq("id", noteId)
         .single();
+
+      // Vérifier que la note est dans un état différable
+      if (!oldNote || !["soumis", "a_valider"].includes(oldNote.statut)) {
+        throw new Error("Cette note n'est pas dans un état permettant le report");
+      }
 
       const { data, error } = await supabase
         .from("notes_sef")
@@ -542,12 +595,14 @@ export function useNotesSEF() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: "Note différée" });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
+      toast({ title: `Note ${(data as any).reference_pivot || (data as any).numero} différée` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur de report", description: error.message, variant: "destructive" });
     },
   });
 
