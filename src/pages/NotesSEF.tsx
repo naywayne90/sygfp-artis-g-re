@@ -402,6 +402,11 @@ export default function NotesSEF() {
         open={!!viewingNote}
         onOpenChange={() => setViewingNote(null)}
         note={viewingNote}
+        onEdit={handleEdit}
+        onSubmit={submitNote}
+        onValidate={canValidate ? validateNote : undefined}
+        onReject={canValidate ? setRejectingNote : undefined}
+        onDefer={canValidate ? setDeferringNote : undefined}
       />
 
       <NoteSEFRejectDialog
