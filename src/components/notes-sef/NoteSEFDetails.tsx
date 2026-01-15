@@ -176,6 +176,11 @@ export function NoteSEFDetails({
     }
   };
 
+  // Types de fichiers autorisés
+  const ALLOWED_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|jpg|jpeg|png|gif|webp|bmp)$/i;
+  const DANGEROUS_EXTENSIONS = /\.(exe|bat|cmd|sh|ps1|vbs|js|msi|dll|scr|pif|com|jar|hta|reg)$/i;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0 || !note) return;
@@ -186,30 +191,64 @@ export function NoteSEFDetails({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      let successCount = 0;
+      let errorCount = 0;
+
       for (const file of Array.from(files)) {
-        // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        // Validation taille (max 10MB)
+        if (file.size > MAX_FILE_SIZE) {
           toast({
             title: "Fichier trop volumineux",
             description: `${file.name} dépasse 10MB`,
             variant: "destructive",
           });
+          errorCount++;
           continue;
         }
 
-        // Upload to storage
-        const filePath = `${note.exercice}/${note.id}/${Date.now()}_${file.name}`;
+        // Validation extensions dangereuses
+        if (DANGEROUS_EXTENSIONS.test(file.name)) {
+          toast({
+            title: "Type de fichier non autorisé",
+            description: `${file.name} - Extensions exécutables interdites`,
+            variant: "destructive",
+          });
+          errorCount++;
+          continue;
+        }
+
+        // Validation extensions autorisées
+        if (!ALLOWED_EXTENSIONS.test(file.name)) {
+          toast({
+            title: "Type de fichier non supporté",
+            description: `${file.name} - Formats acceptés: PDF, Word, Excel, Images`,
+            variant: "destructive",
+          });
+          errorCount++;
+          continue;
+        }
+
+        // Nettoyer le nom de fichier
+        const timestamp = Date.now();
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = `${note.exercice}/${note.id}/${timestamp}_${safeFileName}`;
+
+        // Upload to storage (bucket notes-sef)
         const { error: uploadError } = await supabase.storage
-          .from("notes_sef_pieces")
-          .upload(filePath, file);
+          .from("notes-sef")
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
 
         if (uploadError) {
           console.error("Upload error:", uploadError);
           toast({
             title: "Erreur upload",
-            description: `Impossible d'uploader ${file.name}`,
+            description: `Impossible d'uploader ${file.name}: ${uploadError.message}`,
             variant: "destructive",
           });
+          errorCount++;
           continue;
         }
 
@@ -220,17 +259,34 @@ export function NoteSEFDetails({
             note_id: note.id,
             nom: file.name,
             fichier_url: filePath,
-            type_fichier: file.type,
+            type_fichier: file.type || 'application/octet-stream',
             taille: file.size,
             uploaded_by: user.id,
           });
 
         if (dbError) {
           console.error("DB error:", dbError);
+          errorCount++;
+        } else {
+          successCount++;
+          
+          // Log dans l'historique
+          await supabase.from('notes_sef_history').insert({
+            note_id: note.id,
+            action: 'ajout_piece',
+            commentaire: `Pièce jointe: ${file.name}`,
+            performed_by: user.id,
+          });
         }
       }
 
-      toast({ title: "Fichier(s) ajouté(s)" });
+      if (successCount > 0) {
+        toast({ title: `${successCount} fichier(s) ajouté(s)` });
+      }
+      if (errorCount > 0 && successCount === 0) {
+        toast({ title: "Aucun fichier ajouté", variant: "destructive" });
+      }
+      
       fetchAttachments();
     } catch (error) {
       console.error("Upload error:", error);
@@ -250,7 +306,7 @@ export function NoteSEFDetails({
   const handleDownloadFile = async (attachment: Attachment) => {
     try {
       const { data, error } = await supabase.storage
-        .from("notes_sef_pieces")
+        .from("notes-sef")
         .download(attachment.fichier_url);
       
       if (error) throw error;
@@ -278,9 +334,11 @@ export function NoteSEFDetails({
     if (!confirm("Supprimer ce fichier ?")) return;
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Delete from storage
       await supabase.storage
-        .from("notes_sef_pieces")
+        .from("notes-sef")
         .remove([attachment.fichier_url]);
       
       // Delete from database
@@ -288,6 +346,16 @@ export function NoteSEFDetails({
         .from("notes_sef_pieces")
         .delete()
         .eq("id", attachment.id);
+      
+      // Log dans l'historique
+      if (user && note) {
+        await supabase.from('notes_sef_history').insert({
+          note_id: note.id,
+          action: 'suppression_piece',
+          commentaire: `Pièce supprimée: ${attachment.nom}`,
+          performed_by: user.id,
+        });
+      }
       
       toast({ title: "Fichier supprimé" });
       fetchAttachments();

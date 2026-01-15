@@ -163,11 +163,33 @@ ARTI + ÉTAPE(1) + MM(2) + YY(2) + NNNN(4)
 | `notes_sef_update_authorized` | UPDATE | Créateur ou ADMIN/DG |
 | `notes_sef_delete_policy` | DELETE | Créateur (brouillon) ou ADMIN |
 
-### Policies `notes_sef_attachments`
+### Policies `notes_sef_pieces` (Pièces jointes)
 
-- INSERT : Créateur de la note ou ADMIN
-- SELECT : Direction de la note ou ADMIN/DG/DAAF
-- DELETE : Créateur si note brouillon
+| Policy | Opération | Règle |
+|--------|-----------|-------|
+| `sef_pieces_select` | SELECT | Admin/DG/DAAF voient tout; Créateur voit ses PJ |
+| `sef_pieces_insert` | INSERT | Admin (toujours) ou Créateur (brouillon uniquement) + validation MIME |
+| `sef_pieces_update` | UPDATE | ADMIN uniquement |
+| `sef_pieces_delete` | DELETE | Admin ou Uploader (brouillon uniquement) |
+
+### Policies Storage `notes-sef` (bucket privé)
+
+| Policy | Opération | Règle |
+|--------|-----------|-------|
+| `sef_storage_select_policy` | SELECT | Admin/DG/DAAF ou Créateur/Demandeur de la note |
+| `sef_storage_insert_policy` | INSERT | Admin ou Créateur (brouillon) + extensions dangereuses bloquées |
+| `sef_storage_update_policy` | UPDATE | ADMIN uniquement |
+| `sef_storage_delete_policy` | DELETE | Admin ou Créateur (brouillon uniquement) |
+
+### Règles fichiers pièces jointes
+
+| Règle | Valeur |
+|-------|--------|
+| **Bucket** | `notes-sef` (privé) |
+| **Chemin** | `{exercice}/{noteId}/{timestamp}_{filename}` |
+| **Taille max** | 10 MB par fichier |
+| **Extensions autorisées** | `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp` |
+| **Extensions bloquées** | `.exe`, `.bat`, `.cmd`, `.sh`, `.ps1`, `.vbs`, `.js`, `.msi`, `.dll`, `.scr`, `.pif`, `.com`, `.jar`, `.hta`, `.reg` |
 
 ### Trigger de protection
 
