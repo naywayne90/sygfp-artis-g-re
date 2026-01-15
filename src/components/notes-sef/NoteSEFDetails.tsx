@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NoteSEF, NoteSEFHistory, useNotesSEF } from "@/hooks/useNotesSEF";
@@ -17,6 +19,8 @@ import {
   CheckCircle,
   XCircle,
   History,
+  FolderOpen,
+  ExternalLink,
 } from "lucide-react";
 
 interface NoteSEFDetailsProps {
@@ -50,6 +54,7 @@ const getUrgenceBadge = (urgence: string | null) => {
 };
 
 export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps) {
+  const navigate = useNavigate();
   const { fetchHistory } = useNotesSEF();
   const [history, setHistory] = useState<NoteSEFHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -63,6 +68,13 @@ export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps
         .finally(() => setLoadingHistory(false));
     }
   }, [note, open]);
+
+  const handleGoToDossier = () => {
+    if (note?.dossier_id) {
+      onOpenChange(false);
+      navigate(`/recherche?dossier=${note.dossier_id}`);
+    }
+  };
 
   if (!note) return null;
 
@@ -202,7 +214,7 @@ export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps
               </Card>
             )}
 
-            {/* Validation */}
+            {/* Validation + Lien Dossier */}
             {note.statut === "valide" && note.validated_at && (
               <Card className="border-success/50">
                 <CardHeader className="pb-3">
@@ -211,10 +223,32 @@ export function NoteSEFDetails({ open, onOpenChange, note }: NoteSEFDetailsProps
                     Validation
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">
                     Validée le {format(new Date(note.validated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
                   </p>
+                  
+                  {/* Lien vers le dossier créé */}
+                  {note.dossier_id && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10 border border-success/20">
+                      <FolderOpen className="h-5 w-5 text-success" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Dossier créé automatiquement</p>
+                        <p className="text-xs text-muted-foreground">
+                          {note.dossier?.numero || "Dossier lié"}
+                        </p>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="gap-2 border-success/30 text-success hover:bg-success/10"
+                        onClick={handleGoToDossier}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Voir le dossier
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
