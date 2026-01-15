@@ -15,6 +15,7 @@ interface NoteAEFFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   note?: NoteAEF | null;
+  initialNoteSEFId?: string | null; // Pré-sélection depuis Notes SEF
 }
 
 const formatNumber = (value: string) => {
@@ -26,7 +27,7 @@ const parseNumber = (value: string) => {
   return parseInt(value.replace(/\s/g, "").replace(/,/g, ""), 10) || 0;
 };
 
-export function NoteAEFForm({ open, onOpenChange, note }: NoteAEFFormProps) {
+export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: NoteAEFFormProps) {
   const { createNote, updateNote, directions, notesSEFValidees, isCreating, isUpdating } = useNotesAEF();
 
   const [formData, setFormData] = useState({
@@ -50,6 +51,12 @@ export function NoteAEFForm({ open, onOpenChange, note }: NoteAEFFormProps) {
         montant_estime: note.montant_estime ? formatNumber(note.montant_estime.toString()) : "",
         note_sef_id: (note as any).note_sef_id || "",
       });
+    } else if (initialNoteSEFId) {
+      // Pré-remplir avec la note SEF depuis l'URL
+      setFormData(prev => ({
+        ...prev,
+        note_sef_id: initialNoteSEFId,
+      }));
     } else {
       setFormData({
         objet: "",
@@ -60,7 +67,7 @@ export function NoteAEFForm({ open, onOpenChange, note }: NoteAEFFormProps) {
         note_sef_id: "",
       });
     }
-  }, [note, open]);
+  }, [note, open, initialNoteSEFId]);
 
   // Pré-remplir depuis la note SEF sélectionnée
   useEffect(() => {

@@ -2592,6 +2592,7 @@ export type Database = {
           montant_ordonnance: number | null
           montant_paye: number | null
           motif_blocage: string | null
+          note_sef_id: string | null
           numero: string
           objet: string
           piece_principale_path: string | null
@@ -2630,6 +2631,7 @@ export type Database = {
           montant_ordonnance?: number | null
           montant_paye?: number | null
           motif_blocage?: string | null
+          note_sef_id?: string | null
           numero: string
           objet: string
           piece_principale_path?: string | null
@@ -2668,6 +2670,7 @@ export type Database = {
           montant_ordonnance?: number | null
           montant_paye?: number | null
           motif_blocage?: string | null
+          note_sef_id?: string | null
           numero?: string
           objet?: string
           piece_principale_path?: string | null
@@ -2755,6 +2758,20 @@ export type Database = {
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_note_sef_id_fkey"
+            columns: ["note_sef_id"]
+            isOneToOne: false
+            referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_note_sef_id_fkey"
+            columns: ["note_sef_id"]
+            isOneToOne: false
+            referencedRelation: "notes_imputees_disponibles"
             referencedColumns: ["id"]
           },
           {
