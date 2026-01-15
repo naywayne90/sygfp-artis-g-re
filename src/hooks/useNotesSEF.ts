@@ -228,14 +228,14 @@ export function useNotesSEF() {
     },
   });
 
-  // Submit note
+  // Submit note - avec validation des champs obligatoires
   const submitMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      // Récupérer la note avant la soumission pour les notifications
-      const { data: oldNote } = await supabase
+      // Récupérer la note avant la soumission pour validation + notifications
+      const { data: oldNote, error: fetchError } = await supabase
         .from("notes_sef")
         .select(`
           *,
@@ -245,6 +245,36 @@ export function useNotesSEF() {
         .eq("id", noteId)
         .single();
 
+      if (fetchError) throw new Error("Note introuvable");
+      if (!oldNote) throw new Error("Note introuvable");
+
+      // Validation front des champs obligatoires (le backend valide aussi)
+      const errors: string[] = [];
+      if (!oldNote.objet?.trim()) errors.push("Objet");
+      if (!oldNote.direction_id) errors.push("Direction");
+      if (!oldNote.demandeur_id) errors.push("Demandeur");
+      if (!oldNote.urgence) errors.push("Urgence");
+      if (!oldNote.justification?.trim()) errors.push("Justification");
+      if (!oldNote.date_souhaitee) errors.push("Date souhaitée");
+
+      if (errors.length > 0) {
+        throw new Error(`Champs obligatoires manquants: ${errors.join(", ")}`);
+      }
+
+      // Vérifier que l'utilisateur est autorisé (créateur ou admin)
+      const isCreator = oldNote.created_by === user.id;
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const isAdmin = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      
+      if (!isCreator && !isAdmin) {
+        throw new Error("Vous n'êtes pas autorisé à soumettre cette note");
+      }
+
+      // Mise à jour du statut
       const { data, error } = await supabase
         .from("notes_sef")
         .update({
@@ -265,10 +295,15 @@ export function useNotesSEF() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: `Note ${data.numero} soumise pour validation` });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
+      toast({ 
+        title: `Note ${data.reference_pivot || data.numero} soumise`,
+        description: "Les validateurs ont été notifiés",
+      });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur de soumission", description: error.message, variant: "destructive" });
     },
   });
 
