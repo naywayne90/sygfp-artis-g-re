@@ -99,11 +99,40 @@ Les **Notes Sans Effet Financier (SEF)** représentent le point d'entrée de la 
 
 | De | Vers | Qui | Action |
 |----|------|-----|--------|
-| brouillon | soumis | Créateur | Soumettre |
+| brouillon | soumis | Créateur | Soumettre (génère référence pivot) |
 | soumis | valide | DG/ADMIN | Valider |
 | soumis | rejete | DG/ADMIN | Rejeter (motif requis) |
 | soumis | differe | DG/ADMIN | Différer (motif + date reprise) |
 | differe | valide | DG/ADMIN | Valider après reprise |
+
+## Génération de Référence Pivot
+
+### Format
+
+```
+ARTI + ÉTAPE(1) + MM(2) + YY(2) + NNNN(4)
+```
+
+- **ARTI** : Préfixe fixe
+- **ÉTAPE** : 1 chiffre (0 pour SEF, 1 pour AEF, etc.)
+- **MM** : Mois sur 2 chiffres (01-12)
+- **YY** : Année sur 2 chiffres (ex: 26 pour 2026)
+- **NNNN** : Compteur séquentiel sur 4 chiffres (0001-9999)
+
+### Exemples
+
+| Date | Séquence | Référence |
+|------|----------|-----------|
+| Janvier 2026, 1ère | 1 | `ARTI001260001` |
+| Janvier 2026, 2ème | 2 | `ARTI001260002` |
+| Février 2026, 1ère | 1 | `ARTI002260001` |
+
+### Implémentation
+
+- **Table** : `reference_counters` avec contrainte unique sur (etape, mm, yy)
+- **Fonction** : `generate_sef_reference(date_ref)` - UPSERT atomique
+- **Trigger** : `trigger_auto_generate_sef_reference` - génère automatiquement à la soumission
+- **Anti-doublon** : `INSERT ... ON CONFLICT ... DO UPDATE ... RETURNING` garantit unicité sous concurrence
 
 ## Sécurité (RLS)
 

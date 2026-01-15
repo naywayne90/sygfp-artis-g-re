@@ -8,6 +8,7 @@ export type NoteSEFAction =
   | "modification"
   | "ajout_piece"
   | "suppression_piece"
+  | "reference_generated"
   | "soumission"
   | "passage_a_valider"
   | "validation"
@@ -232,18 +233,38 @@ export function useNotesSEFAudit() {
   }, [logAuditEvent]);
 
   /**
+   * Log génération de référence pivot
+   * Format: ARTI + ETAPE(1) + MM(2) + YY(2) + NNNN(4)
+   */
+  const logReferenceGenerated = useCallback(async (noteId: string, reference: string) => {
+    await logAuditEvent({
+      noteId,
+      action: "reference_generated",
+      commentaire: `Référence générée: ${reference}`,
+      details: { reference } as unknown as Json,
+    });
+  }, [logAuditEvent]);
+
+  /**
    * Log soumission + notification aux validateurs
+   * La référence pivot est générée automatiquement par le trigger backend
    */
   const logSoumission = useCallback(async (note: NoteSEF) => {
+    // Log la génération de référence si présente
+    if (note.reference_pivot) {
+      await logReferenceGenerated(note.id, note.reference_pivot);
+    }
+
     await logAuditEvent({
       noteId: note.id,
       action: "soumission",
       oldStatut: "brouillon",
       newStatut: "soumis",
+      commentaire: note.reference_pivot ? `Référence: ${note.reference_pivot}` : undefined,
     });
     
     await sendNotifications({ note, action: "soumission" });
-  }, [logAuditEvent, sendNotifications]);
+  }, [logAuditEvent, logReferenceGenerated, sendNotifications]);
 
   /**
    * Log validation + notification au créateur/demandeur
@@ -296,6 +317,7 @@ export function useNotesSEFAudit() {
     logModification,
     logAjoutPiece,
     logSuppressionPiece,
+    logReferenceGenerated,
     logSoumission,
     logValidation,
     logRejet,
