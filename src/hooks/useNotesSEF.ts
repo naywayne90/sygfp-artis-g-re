@@ -109,13 +109,14 @@ export function useNotesSEF() {
     },
   });
 
-  // Fetch profiles for demandeur
+  // Fetch profiles for demandeur (actifs uniquement, avec poste et direction)
   const { data: profiles = [] } = useQuery({
     queryKey: ["profiles-list-sef"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, email")
+        .select("id, first_name, last_name, full_name, email, poste, direction_id, is_active")
+        .eq("is_active", true)
         .order("last_name");
       if (error) throw error;
       return data;
