@@ -31,7 +31,9 @@ import {
   Clock,
   Trash2,
   FileText,
+  FolderOpen,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NoteSEFListProps {
   notes: NoteSEF[];
@@ -129,7 +131,25 @@ export function NoteSEFList({
                     {note.direction?.sigle || note.direction?.label || "—"}
                   </TableCell>
                   <TableCell>{getUrgenceBadge(note.urgence)}</TableCell>
-                  <TableCell>{getStatusBadge(note.statut)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(note.statut)}
+                      {note.dossier_id && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-success/10 text-success">
+                                <FolderOpen className="h-3 w-3" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Dossier créé</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="hidden lg:table-cell text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
