@@ -7519,6 +7519,30 @@ export type Database = {
         }
         Relationships: []
       }
+      reference_sequences: {
+        Row: {
+          current_value: number
+          exercise_year: number
+          id: string
+          module_code: string
+          updated_at: string | null
+        }
+        Insert: {
+          current_value?: number
+          exercise_year: number
+          id?: string
+          module_code: string
+          updated_at?: string | null
+        }
+        Update: {
+          current_value?: number
+          exercise_year?: number
+          id?: string
+          module_code?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reglement_attachments: {
         Row: {
           created_at: string | null
@@ -9505,6 +9529,10 @@ export type Database = {
           p_run_id: string
           p_step?: string
         }
+        Returns: string
+      }
+      next_reference_note_sef: {
+        Args: { p_exercise_year: number }
         Returns: string
       }
       parse_sequence_code: {
