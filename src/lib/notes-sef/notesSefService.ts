@@ -262,8 +262,11 @@ export const notesSefService = {
           demandeur:profiles!demandeur_id(id, first_name, last_name, email),
           beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
           beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
-          created_by_profile:profiles!created_by(id, first_name, last_name),
-          dossier:dossiers!dossier_id(id, numero, statut_global)
+          created_by_profile:profiles!notes_sef_created_by_fkey(id, first_name, last_name),
+          dossier:dossiers!dossier_id(id, numero, statut_global),
+          validated_by_profile:profiles!notes_sef_validated_by_fkey(id, first_name, last_name),
+          rejected_by_profile:profiles!notes_sef_rejected_by_fkey(id, first_name, last_name),
+          differe_by_profile:profiles!notes_sef_differe_by_fkey(id, first_name, last_name)
         `)
         .eq('id', id)
         .single();

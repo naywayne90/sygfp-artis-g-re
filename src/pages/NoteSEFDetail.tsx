@@ -58,6 +58,8 @@ import {
   MessageSquare,
   FilePlus,
 } from "lucide-react";
+import { DecisionBlock } from "@/components/workflow/DecisionBlock";
+import { useNoteAccessControl } from "@/hooks/useNoteAccessControl";
 
 // ============================================
 // TYPES
@@ -72,6 +74,13 @@ interface Attachment {
   taille: number | null;
   uploaded_by: string | null;
   uploaded_at: string;
+}
+
+// Extended type for detail page with profile relations
+interface NoteSEFExtended extends NoteSEF {
+  validated_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
+  rejected_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
+  differe_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
 }
 
 // ============================================
@@ -236,7 +245,7 @@ export default function NoteSEFDetail() {
       if (!id) return null;
       const result = await notesSefService.getById(id);
       if (!result.success) throw new Error(result.error);
-      return result.data as unknown as NoteSEF;
+      return result.data as unknown as NoteSEFExtended;
     },
     enabled: !!id,
   });
@@ -743,62 +752,51 @@ export default function NoteSEFDetail() {
         </Card>
       )}
 
-      {/* Info si note rejetée */}
-      {isRejected && (
-        <Card className="border-destructive/30 bg-destructive/5">
-          <CardContent className="py-4">
-            <div className="flex items-start gap-3">
-              <XCircle className="h-5 w-5 text-destructive mt-0.5" />
-              <div>
-                <p className="font-medium text-destructive">Note rejetée</p>
-                {note.rejection_reason && (
-                  <p className="text-sm text-muted-foreground mt-1">Motif : {note.rejection_reason}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Bloc Décision DG - Rejet */}
+      {isRejected && note.rejection_reason && (
+        <DecisionBlock
+          type="rejet"
+          acteur={note.rejected_by_profile || { first_name: "DG", last_name: "" }}
+          date={note.rejected_at || note.updated_at}
+          commentaire={note.rejection_reason}
+        />
       )}
 
-      {/* Info si note différée + bouton re-soumettre pour créateur */}
+      {/* Bloc Décision DG - Différé + bouton re-soumettre */}
       {note?.statut === "differe" && (
-        <Card className="border-warning/30 bg-warning/5">
-          <CardContent className="py-4">
-            <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-warning mt-0.5" />
-              <div className="flex-1 space-y-2">
-                <p className="font-medium text-warning">Note différée</p>
-                {note.differe_motif && (
-                  <p className="text-sm text-muted-foreground">Motif : {note.differe_motif}</p>
-                )}
-                {note.differe_condition && (
-                  <p className="text-sm text-muted-foreground">Condition de reprise : {note.differe_condition}</p>
-                )}
-                {note.differe_date_reprise && (
+        <>
+          <DecisionBlock
+            type="differe"
+            acteur={note.differe_by_profile || { first_name: "DG", last_name: "" }}
+            date={note.differe_at || note.updated_at}
+            commentaire={note.differe_motif}
+            condition={note.differe_condition}
+            dateReprise={note.differe_date_reprise}
+          />
+          
+          {/* Bouton Re-soumettre pour le créateur */}
+          {canResubmit && !isEditing && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="py-4">
+                <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Date de reprise prévue : {format(new Date(note.differe_date_reprise), "dd MMM yyyy", { locale: fr })}
+                    Vous pouvez modifier et re-soumettre cette note après avoir rempli les conditions.
                   </p>
-                )}
-                
-                {/* Bouton Re-soumettre pour le créateur */}
-                {canResubmit && !isEditing && (
-                  <div className="pt-3 border-t border-warning/20 mt-3">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={handleResubmit}
-                      disabled={resubmitting}
-                      className="gap-2"
-                    >
-                      {resubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      Re-soumettre pour validation
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleResubmit}
+                    disabled={resubmitting}
+                    className="gap-2"
+                  >
+                    {resubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    Re-soumettre
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {/* Mode édition bar */}

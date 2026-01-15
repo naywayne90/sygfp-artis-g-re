@@ -35,6 +35,7 @@ import {
   Zap,
   Link2,
   ArrowRight,
+  ExternalLink,
 } from "lucide-react";
 
 interface NoteAEFListProps {
@@ -120,6 +121,10 @@ export function NoteAEFList({
     navigate(`/execution/imputation?note_aef_id=${note.id}`);
   };
 
+  const handleNavigateToDetail = (noteId: string) => {
+    navigate(`/notes-aef/${noteId}`);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -150,7 +155,11 @@ export function NoteAEFList({
             </TableHeader>
             <TableBody>
               {notes.map((note) => (
-                <TableRow key={note.id}>
+                <TableRow 
+                  key={note.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleNavigateToDetail(note.id)}
+                >
                   <TableCell className="font-medium">
                     <span className="font-mono">{note.numero || "—"}</span>
                   </TableCell>
@@ -169,7 +178,7 @@ export function NoteAEFList({
                     {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
                   </TableCell>
                   {showActions && (
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -177,10 +186,14 @@ export function NoteAEFList({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem onClick={() => handleNavigateToDetail(note.id)}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Ouvrir la page
+                          </DropdownMenuItem>
                           {onView && (
                             <DropdownMenuItem onClick={() => onView(note)}>
                               <Eye className="mr-2 h-4 w-4" />
-                              Voir détails
+                              Aperçu rapide
                             </DropdownMenuItem>
                           )}
 
