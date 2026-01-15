@@ -27,6 +27,20 @@ import { NoteSEFStatut, NOTES_SEF_CONFIG } from './constants';
 import { calculateCounts } from './helpers';
 
 // ============================================
+// TYPES POUR LA PAGINATION
+// ============================================
+
+export interface ListNotesOptions {
+  exercice: number;
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  statut?: string | string[];
+  sortBy?: 'updated_at' | 'created_at' | 'date_souhaitee';
+  sortOrder?: 'asc' | 'desc';
+}
+
+// ============================================
 // SERVICE SINGLETON
 // ============================================
 
@@ -41,7 +55,6 @@ export const notesSefService = {
 
   /**
    * Récupérer toutes les notes SEF pour un exercice
-   * @placeholder Implémentation complète dans useNotesSEF
    */
   async list(filters: NoteSEFFilters = {}): Promise<ServiceResult<NoteSEFEntity[]>> {
     try {
@@ -85,7 +98,104 @@ export const notesSefService = {
   },
 
   /**
-   * Récupérer les compteurs par statut
+   * Récupérer les notes SEF paginées avec recherche serveur-side
+   * @param options Options de recherche et pagination
+   */
+  async listPaginated(options: ListNotesOptions): Promise<ServiceResult<PaginatedResult<NoteSEFEntity>>> {
+    try {
+      const {
+        exercice,
+        page = 1,
+        pageSize = 20,
+        search,
+        statut,
+        sortBy = 'updated_at',
+        sortOrder = 'desc'
+      } = options;
+
+      // 1. D'abord compter le total (avec les mêmes filtres)
+      let countQuery = supabase
+        .from('notes_sef')
+        .select('id', { count: 'exact', head: true })
+        .eq('exercice', exercice);
+
+      // Filtre par statut
+      if (statut) {
+        if (Array.isArray(statut)) {
+          countQuery = countQuery.in('statut', statut);
+        } else {
+          countQuery = countQuery.eq('statut', statut);
+        }
+      }
+
+      // Filtre par recherche (full-text sur plusieurs champs via ilike)
+      if (search && search.trim()) {
+        const searchTerm = `%${search.trim()}%`;
+        countQuery = countQuery.or(
+          `reference_pivot.ilike.${searchTerm},numero.ilike.${searchTerm},objet.ilike.${searchTerm}`
+        );
+      }
+
+      const { count, error: countError } = await countQuery;
+      if (countError) throw countError;
+
+      const total = count || 0;
+      const totalPages = Math.ceil(total / pageSize);
+      const offset = (page - 1) * pageSize;
+
+      // 2. Récupérer les données paginées
+      let dataQuery = supabase
+        .from('notes_sef')
+        .select(`
+          *,
+          direction:directions(id, label, sigle),
+          demandeur:profiles!demandeur_id(id, first_name, last_name),
+          beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
+          beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
+          created_by_profile:profiles!created_by(id, first_name, last_name),
+          dossier:dossiers!dossier_id(id, numero, statut_global)
+        `)
+        .eq('exercice', exercice)
+        .order(sortBy, { ascending: sortOrder === 'asc' })
+        .range(offset, offset + pageSize - 1);
+
+      // Filtre par statut
+      if (statut) {
+        if (Array.isArray(statut)) {
+          dataQuery = dataQuery.in('statut', statut);
+        } else {
+          dataQuery = dataQuery.eq('statut', statut);
+        }
+      }
+
+      // Filtre par recherche
+      if (search && search.trim()) {
+        const searchTerm = `%${search.trim()}%`;
+        dataQuery = dataQuery.or(
+          `reference_pivot.ilike.${searchTerm},numero.ilike.${searchTerm},objet.ilike.${searchTerm}`
+        );
+      }
+
+      const { data, error } = await dataQuery;
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: {
+          data: data as unknown as NoteSEFEntity[],
+          total,
+          page,
+          pageSize,
+          totalPages
+        }
+      };
+    } catch (error) {
+      return { success: false, error: (error as Error).message };
+    }
+  },
+
+  /**
+   * Récupérer les compteurs par statut pour un exercice
    */
   async getCounts(exercice: number): Promise<ServiceResult<NoteSEFCounts>> {
     try {
@@ -96,7 +206,24 @@ export const notesSefService = {
 
       if (error) throw error;
 
-      const counts = calculateCounts(data as unknown as NoteSEFEntity[]);
+      const counts: NoteSEFCounts = {
+        total: 0,
+        brouillon: 0,
+        soumis: 0,
+        a_valider: 0,
+        valide: 0,
+        differe: 0,
+        rejete: 0,
+      };
+
+      for (const note of data || []) {
+        counts.total++;
+        const statut = note.statut || 'brouillon';
+        if (statut in counts) {
+          (counts as any)[statut]++;
+        }
+      }
+
       return { success: true, data: counts };
     } catch (error) {
       return { success: false, error: (error as Error).message };
