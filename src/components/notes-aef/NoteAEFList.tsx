@@ -146,7 +146,7 @@ export function NoteAEFList({
   const canImpute = hasAnyRole(["ADMIN", "DAAF", "CB"]);
 
   const handleGoToImputation = (note: NoteAEF) => {
-    navigate(`/execution/imputation?note_aef_id=${note.id}`);
+    navigate(`/execution/imputation?sourceAef=${note.id}`);
   };
 
   const handleNavigateToDetail = (noteId: string) => {
@@ -354,18 +354,21 @@ export function NoteAEFList({
                             </>
                           )}
 
-                          {/* Actions pour A_IMPUTER - Bouton Aller à Imputation */}
+                          {/* Actions pour A_IMPUTER - Bouton Imputer principal */}
                           {note.statut === "a_imputer" && !note.imputed_at && (
                             <>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleGoToImputation(note)}>
-                                <ArrowRight className="mr-2 h-4 w-4 text-primary" />
-                                Aller à Imputation
+                              <DropdownMenuItem 
+                                onClick={() => handleGoToImputation(note)}
+                                className="text-primary font-medium"
+                              >
+                                <CreditCard className="mr-2 h-4 w-4" />
+                                Imputer
                               </DropdownMenuItem>
                               {canImpute && onImpute && (
                                 <DropdownMenuItem onClick={() => onImpute(note)}>
-                                  <CreditCard className="mr-2 h-4 w-4 text-primary" />
-                                  Imputer (rapide)
+                                  <ArrowRight className="mr-2 h-4 w-4" />
+                                  Imputation rapide
                                 </DropdownMenuItem>
                               )}
                             </>
