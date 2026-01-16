@@ -20,47 +20,23 @@ import {
   User,
   Calendar,
   Banknote,
-  ArrowRight,
-  Wallet,
-  FileSignature,
-  Receipt,
-  ShoppingCart,
-  FileCheck,
   PartyPopper
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+// Import du stepper unifié et des constantes
+import { ChaineDepenseStepper } from "@/components/workflow/ChaineDepenseStepper";
+import { ETAPES_CONFIG, formatMontant as formatMontantUtil, getStatutBadge } from "@/lib/config/sygfp-constants";
+import { StatutBadge } from "@/components/shared/StatutBadge";
+import { EmptyState } from "@/components/shared/EmptyState";
+
 interface DossierDetailsProps {
   dossier: Dossier | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const ETAPE_LABELS: Record<string, string> = {
-  note_sef: "Note SEF",
-  note_aef: "Note AEF",
-  imputation: "Imputation",
-  expression_besoin: "Expression de besoin",
-  passation_marche: "Passation marché",
-  engagement: "Engagement",
-  liquidation: "Liquidation",
-  ordonnancement: "Ordonnancement",
-  reglement: "Règlement",
-};
-
-const ETAPE_ICONS: Record<string, React.ReactNode> = {
-  note_sef: <FileText className="h-4 w-4" />,
-  note_aef: <FileCheck className="h-4 w-4" />,
-  imputation: <Receipt className="h-4 w-4" />,
-  expression_besoin: <ShoppingCart className="h-4 w-4" />,
-  passation_marche: <Building2 className="h-4 w-4" />,
-  engagement: <FileSignature className="h-4 w-4" />,
-  liquidation: <Receipt className="h-4 w-4" />,
-  ordonnancement: <FileCheck className="h-4 w-4" />,
-  reglement: <Wallet className="h-4 w-4" />,
-};
 
 const CATEGORIE_LABELS: Record<string, string> = {
   proforma: "Facture proforma",
@@ -73,23 +49,17 @@ const CATEGORIE_LABELS: Record<string, string> = {
 };
 
 const STATUT_ICONS: Record<string, React.ReactNode> = {
-  en_attente: <Clock className="h-4 w-4 text-yellow-500" />,
-  valide: <CheckCircle className="h-4 w-4 text-green-500" />,
-  rejete: <XCircle className="h-4 w-4 text-red-500" />,
-  en_cours: <AlertCircle className="h-4 w-4 text-blue-500" />,
+  en_attente: <Clock className="h-4 w-4 text-warning" />,
+  valide: <CheckCircle className="h-4 w-4 text-success" />,
+  rejete: <XCircle className="h-4 w-4 text-destructive" />,
+  en_cours: <AlertCircle className="h-4 w-4 text-secondary" />,
 };
 
-const WORKFLOW_STEPS = [
-  { key: "note_sef", label: "SEF" },
-  { key: "note_aef", label: "AEF" },
-  { key: "imputation", label: "Imputation" },
-  { key: "expression_besoin", label: "EB" },
-  { key: "passation_marche", label: "PM" },
-  { key: "engagement", label: "Engagement" },
-  { key: "liquidation", label: "Liquidation" },
-  { key: "ordonnancement", label: "Ordo." },
-  { key: "reglement", label: "Règlement" },
-];
+// Helper pour obtenir le label d'une étape
+const getEtapeLabel = (etapeCode: string): string => {
+  const etapeConfig = Object.values(ETAPES_CONFIG).find(e => e.code === etapeCode);
+  return etapeConfig?.label || etapeCode;
+};
 
 export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsProps) {
   const [etapes, setEtapes] = useState<DossierEtape[]>([]);
@@ -118,10 +88,6 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
     }
   };
 
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-  };
-
   const handleDeleteDocument = async (docId: string) => {
     const success = await deleteDocument(docId);
     if (success) {
@@ -136,9 +102,9 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
   const montantPaye = dossier.montant_paye || 0;
   const montantEngage = dossier.montant_engage || 0;
   const progressPaiement = montantEngage > 0 ? (montantPaye / montantEngage) * 100 : 0;
-  
-  // Trouver l'index de l'étape courante
-  const currentStepIndex = WORKFLOW_STEPS.findIndex(s => s.key === dossier.etape_courante);
+
+  // Helper local pour le formatage
+  const formatMontant = (montant: number) => formatMontantUtil(montant, false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -217,7 +183,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                       <div>
                         <p className="text-sm text-muted-foreground">Étape actuelle</p>
                         <p className="font-medium">
-                          {ETAPE_LABELS[dossier.etape_courante] || dossier.etape_courante}
+                          {getEtapeLabel(dossier.etape_courante)}
                         </p>
                       </div>
                     </div>
@@ -302,41 +268,12 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                   <CardTitle className="text-lg">Progression dans la chaîne de dépense</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* Workflow visuel */}
-                  <div className="flex items-center justify-between overflow-x-auto pb-4">
-                    {WORKFLOW_STEPS.map((step, index) => {
-                      const isPast = index < currentStepIndex;
-                      const isCurrent = index === currentStepIndex;
-                      const isFuture = index > currentStepIndex;
-                      const isComplete = isCloture && index <= currentStepIndex;
-                      
-                      return (
-                        <div key={step.key} className="flex items-center">
-                          <div className={`flex flex-col items-center min-w-[70px] ${isFuture ? 'opacity-40' : ''}`}>
-                            <div className={`
-                              w-10 h-10 rounded-full flex items-center justify-center mb-2
-                              ${isComplete ? 'bg-success text-success-foreground' : 
-                                isCurrent ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 
-                                isPast ? 'bg-primary/80 text-primary-foreground' : 
-                                'bg-muted text-muted-foreground'}
-                            `}>
-                              {isComplete ? (
-                                <CheckCircle className="h-5 w-5" />
-                              ) : (
-                                ETAPE_ICONS[step.key] || <FileText className="h-4 w-4" />
-                              )}
-                            </div>
-                            <span className={`text-xs text-center font-medium ${isCurrent ? 'text-primary' : ''}`}>
-                              {step.label}
-                            </span>
-                          </div>
-                          {index < WORKFLOW_STEPS.length - 1 && (
-                            <ArrowRight className={`h-4 w-4 mx-1 flex-shrink-0 ${isPast || isCurrent ? 'text-primary' : 'text-muted-foreground/30'}`} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  {/* Workflow visuel - Utilisation du stepper unifié */}
+                  <ChaineDepenseStepper 
+                    etapeCourante={dossier.etape_courante}
+                    isCloture={isCloture}
+                    className="mb-4"
+                  />
 
                   <Separator className="my-4" />
 
@@ -385,7 +322,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                         <CardContent className="pt-4">
                           <div className="flex items-center justify-between mb-2">
                             <Badge variant="outline">
-                              {ETAPE_LABELS[etape.type_etape] || etape.type_etape}
+                              {getEtapeLabel(etape.type_etape)}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
                               {format(new Date(etape.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
