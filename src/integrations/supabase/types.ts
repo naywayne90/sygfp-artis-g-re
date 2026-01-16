@@ -5108,6 +5108,112 @@ export type Database = {
           },
         ]
       }
+      marche_documents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          libelle: string
+          marche_id: string
+          metadata: Json | null
+          type_document: string
+          updated_at: string | null
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          libelle: string
+          marche_id: string
+          metadata?: Json | null
+          type_document: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          libelle?: string
+          marche_id?: string
+          metadata?: Json | null
+          type_document?: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_documents_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marche_historique: {
+        Row: {
+          ancien_statut: string | null
+          commentaire: string | null
+          created_at: string | null
+          description: string
+          id: string
+          marche_id: string
+          metadata: Json | null
+          nouveau_statut: string | null
+          type_action: string
+          user_id: string | null
+        }
+        Insert: {
+          ancien_statut?: string | null
+          commentaire?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          marche_id: string
+          metadata?: Json | null
+          nouveau_statut?: string | null
+          type_action: string
+          user_id?: string | null
+        }
+        Update: {
+          ancien_statut?: string | null
+          commentaire?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          marche_id?: string
+          metadata?: Json | null
+          nouveau_statut?: string | null
+          type_action?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marche_historique_marche_id_fkey"
+            columns: ["marche_id"]
+            isOneToOne: false
+            referencedRelation: "marches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marche_lots: {
         Row: {
           attributaire_id: string | null
@@ -5345,25 +5451,43 @@ export type Database = {
           commission_membres: string[] | null
           created_at: string
           created_by: string | null
+          current_validation_step: number | null
           date_attribution: string | null
           date_lancement: string | null
           date_signature: string | null
+          differe_at: string | null
+          differe_by: string | null
+          differe_date_reprise: string | null
+          differe_motif: string | null
           dossier_id: string | null
+          duree_execution: number | null
           exercice: number | null
           expression_besoin_id: string | null
           id: string
+          intitule_lot: string | null
           justification_derogation: string | null
           legacy_import: boolean | null
           mode_force: boolean | null
           mode_passation: string
           montant: number
+          nombre_lots: number | null
           note_id: string | null
           numero: string | null
+          numero_lot: number | null
           objet: string
+          observations: string | null
           prestataire_id: string | null
           pv_attribution_path: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           statut: string | null
+          type_marche: string | null
+          type_procedure: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          validation_status: string | null
         }
         Insert: {
           annee?: number | null
@@ -5376,25 +5500,43 @@ export type Database = {
           commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
+          current_validation_step?: number | null
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          differe_at?: string | null
+          differe_by?: string | null
+          differe_date_reprise?: string | null
+          differe_motif?: string | null
           dossier_id?: string | null
+          duree_execution?: number | null
           exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
+          intitule_lot?: string | null
           justification_derogation?: string | null
           legacy_import?: boolean | null
           mode_force?: boolean | null
           mode_passation: string
           montant: number
+          nombre_lots?: number | null
           note_id?: string | null
           numero?: string | null
+          numero_lot?: number | null
           objet: string
+          observations?: string | null
           prestataire_id?: string | null
           pv_attribution_path?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           statut?: string | null
+          type_marche?: string | null
+          type_procedure?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
         }
         Update: {
           annee?: number | null
@@ -5407,25 +5549,43 @@ export type Database = {
           commission_membres?: string[] | null
           created_at?: string
           created_by?: string | null
+          current_validation_step?: number | null
           date_attribution?: string | null
           date_lancement?: string | null
           date_signature?: string | null
+          differe_at?: string | null
+          differe_by?: string | null
+          differe_date_reprise?: string | null
+          differe_motif?: string | null
           dossier_id?: string | null
+          duree_execution?: number | null
           exercice?: number | null
           expression_besoin_id?: string | null
           id?: string
+          intitule_lot?: string | null
           justification_derogation?: string | null
           legacy_import?: boolean | null
           mode_force?: boolean | null
           mode_passation?: string
           montant?: number
+          nombre_lots?: number | null
           note_id?: string | null
           numero?: string | null
+          numero_lot?: number | null
           objet?: string
+          observations?: string | null
           prestataire_id?: string | null
           pv_attribution_path?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           statut?: string | null
+          type_marche?: string | null
+          type_procedure?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
         }
         Relationships: [
           {
@@ -11613,6 +11773,20 @@ export type Database = {
         }
         Relationships: []
       }
+      v_marches_stats: {
+        Row: {
+          en_attente: number | null
+          exercice: number | null
+          montant_total: number | null
+          montant_valide: number | null
+          rejetes: number | null
+          total: number | null
+          type_marche: string | null
+          type_procedure: string | null
+          valides: number | null
+        }
+        Relationships: []
+      }
       v_top_directions_imputations: {
         Row: {
           direction_code: string | null
@@ -11697,6 +11871,10 @@ export type Database = {
       check_exercice_writable: {
         Args: { p_exercice: number }
         Returns: boolean
+      }
+      check_marche_prerequisites: {
+        Args: { p_expression_besoin_id: string }
+        Returns: Json
       }
       check_permission_with_conditions: {
         Args: {

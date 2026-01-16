@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -14,9 +15,14 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-  User
+  User,
+  Users,
+  History
 } from "lucide-react";
 import { Marche, VALIDATION_STEPS, useMarches } from "@/hooks/useMarches";
+import { MarcheDocumentsTab } from "./MarcheDocumentsTab";
+import { MarcheHistoriqueTab } from "./MarcheHistoriqueTab";
+import { MarcheOffresTab } from "./MarcheOffresTab";
 
 interface MarcheDetailsProps {
   marche: Marche;
@@ -103,139 +109,124 @@ export function MarcheDetails({ marche }: MarcheDetailsProps) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Prestataire */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Building2 className="h-5 w-5" />
-              Prestataire
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {marche.prestataire ? (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Raison sociale:</span>
-                  <span className="font-medium">{marche.prestataire.raison_sociale}</span>
-                </div>
-                {marche.prestataire.sigle && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Sigle:</span>
-                    <span>{marche.prestataire.sigle}</span>
-                  </div>
-                )}
-                <Separator />
-                {marche.prestataire.banque && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Banque:</span>
-                    <span>{marche.prestataire.banque}</span>
-                  </div>
-                )}
-                {marche.prestataire.mode_paiement && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Mode paiement:</span>
-                    <Badge variant="outline">{marche.prestataire.mode_paiement}</Badge>
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">Aucun prestataire assigné</p>
-            )}
-          </CardContent>
-        </Card>
+      {/* Tabs pour les sections */}
+      <Tabs defaultValue="workflow" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="workflow" className="gap-1">
+            <CheckCircle2 className="h-4 w-4" />
+            Workflow
+          </TabsTrigger>
+          <TabsTrigger value="offres" className="gap-1">
+            <Users className="h-4 w-4" />
+            Offres
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1">
+            <FileText className="h-4 w-4" />
+            Documents
+          </TabsTrigger>
+          <TabsTrigger value="historique" className="gap-1">
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Références passation */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CreditCard className="h-5 w-5" />
-              Références passation
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type procédure:</span>
-              <span>{marche.type_procedure || "-"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Nombre de lots:</span>
-              <span>{marche.nombre_lots || 1}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Numéro/Intitulé lot:</span>
-              <span>Lot {marche.numero_lot || 1} {marche.intitule_lot ? `- ${marche.intitule_lot}` : ""}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Durée exécution:</span>
-              <span>{marche.duree_execution ? `${marche.duree_execution} jours` : "-"}</span>
-            </div>
-            {marche.observations && (
-              <>
-                <Separator />
-                <div>
-                  <span className="text-muted-foreground">Observations:</span>
-                  <p className="mt-1">{marche.observations}</p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Workflow de validation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <CheckCircle2 className="h-5 w-5" />
-            Workflow de validation
-          </CardTitle>
-          <CardDescription>
-            Suivi des étapes de validation du marché
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="relative">
-            {validations.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">Chargement...</p>
-            ) : (
-              <div className="space-y-4">
-                {validations.map((validation, index) => {
-                  const step = VALIDATION_STEPS.find(s => s.order === validation.step_order);
-                  return (
-                    <div key={validation.id} className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                        {getStepIcon(validation.status)}
-                      </div>
-                      <div className="flex-1 pb-4 border-b last:border-0">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{step?.label || validation.role}</p>
-                            <p className="text-sm text-muted-foreground">{step?.description}</p>
-                          </div>
-                          {getStatusBadge(validation.status)}
-                        </div>
-                        {validation.validated_at && (
-                          <div className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
-                            <User className="h-3 w-3" />
-                            <span>
-                              {validation.validator?.first_name} {validation.validator?.last_name} -
-                              {format(new Date(validation.validated_at), " dd MMM yyyy à HH:mm", { locale: fr })}
-                            </span>
-                          </div>
-                        )}
-                        {validation.comments && (
-                          <p className="mt-2 text-sm bg-muted p-2 rounded">{validation.comments}</p>
-                        )}
-                      </div>
+        <TabsContent value="workflow" className="mt-4 space-y-4">
+          {/* Prestataire & Références */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Building2 className="h-5 w-5" />
+                  Prestataire
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {marche.prestataire ? (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Raison sociale:</span>
+                      <span className="font-medium">{marche.prestataire.raison_sociale}</span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    {marche.prestataire.banque && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Banque:</span>
+                        <span>{marche.prestataire.banque}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">Aucun prestataire assigné</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CreditCard className="h-5 w-5" />
+                  Références passation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Type procédure:</span>
+                  <span>{marche.type_procedure || "-"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Durée exécution:</span>
+                  <span>{marche.duree_execution ? `${marche.duree_execution} jours` : "-"}</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Workflow de validation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CheckCircle2 className="h-5 w-5" />
+                Workflow de validation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {validations.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">Chargement...</p>
+              ) : (
+                <div className="space-y-4">
+                  {validations.map((validation) => {
+                    const step = VALIDATION_STEPS.find(s => s.order === validation.step_order);
+                    return (
+                      <div key={validation.id} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                          {getStepIcon(validation.status)}
+                        </div>
+                        <div className="flex-1 pb-4 border-b last:border-0">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium">{step?.label || validation.role}</p>
+                            {getStatusBadge(validation.status)}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="offres" className="mt-4">
+          <MarcheOffresTab marcheId={marche.id} canEdit={marche.validation_status !== "valide"} />
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <MarcheDocumentsTab marcheId={marche.id} canEdit={marche.validation_status !== "valide"} />
+        </TabsContent>
+
+        <TabsContent value="historique" className="mt-4">
+          <MarcheHistoriqueTab marcheId={marche.id} />
+        </TabsContent>
+      </Tabs>
 
       {/* Motifs rejet/différé */}
       {(marche.rejection_reason || marche.differe_motif) && (
