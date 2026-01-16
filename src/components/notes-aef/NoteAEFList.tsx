@@ -298,7 +298,20 @@ export function NoteAEFList({
                   </TableCell>
                   {showActions && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
+                      <div className="flex items-center gap-2 justify-end">
+                        {/* Bouton Imputer visible directement pour les notes a_imputer */}
+                        {note.statut === "a_imputer" && !note.imputed_at && (
+                          <Button 
+                            size="sm" 
+                            variant="default"
+                            onClick={(e) => { e.stopPropagation(); handleGoToImputation(note); }}
+                            className="gap-1"
+                          >
+                            <CreditCard className="h-3 w-3" />
+                            Imputer
+                          </Button>
+                        )}
+                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
                             <MoreHorizontal className="h-4 w-4" />
@@ -390,7 +403,8 @@ export function NoteAEFList({
                             </>
                           )}
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>
