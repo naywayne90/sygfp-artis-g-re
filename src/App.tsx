@@ -26,6 +26,7 @@ import Notifications from "./pages/Notifications";
 import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 import Alertes from "./pages/Alertes";
 import MonProfil from "./pages/MonProfil";
+import WorkflowTasks from "./pages/WorkflowTasks";
 
 // Pages Admin
 import ParametresProgrammatiques from "./pages/admin/ParametresProgrammatiques";
@@ -115,6 +116,7 @@ const App = () => (
               <Route path="/alertes-budgetaires" element={<AlertesBudgetaires />} />
               <Route path="/alertes" element={<Alertes />} />
               <Route path="/mon-profil" element={<MonProfil />} />
+              <Route path="/taches" element={<WorkflowTasks />} />
               
               {/* Administration */}
               <Route path="/admin/exercices" element={<GestionExercices />} />

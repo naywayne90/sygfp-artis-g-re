@@ -10686,6 +10686,151 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_tasks: {
+        Row: {
+          action_taken: string | null
+          assignee_role: string
+          assignee_user_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          completion_comment: string | null
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          dossier_id: string | null
+          due_date: string | null
+          entity_code: string
+          entity_id: string
+          entity_title: string | null
+          entity_type: string
+          exercice: number
+          id: string
+          metadata: Json | null
+          montant: number | null
+          priority: string
+          sla_hours: number | null
+          status: string
+          task_type: string
+          updated_at: string
+        }
+        Insert: {
+          action_taken?: string | null
+          assignee_role: string
+          assignee_user_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          dossier_id?: string | null
+          due_date?: string | null
+          entity_code: string
+          entity_id: string
+          entity_title?: string | null
+          entity_type: string
+          exercice?: number
+          id?: string
+          metadata?: Json | null
+          montant?: number | null
+          priority?: string
+          sla_hours?: number | null
+          status?: string
+          task_type: string
+          updated_at?: string
+        }
+        Update: {
+          action_taken?: string | null
+          assignee_role?: string
+          assignee_user_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          dossier_id?: string | null
+          due_date?: string | null
+          entity_code?: string
+          entity_id?: string
+          entity_title?: string | null
+          entity_type?: string
+          exercice?: number
+          id?: string
+          metadata?: Json | null
+          montant?: number | null
+          priority?: string
+          sla_hours?: number | null
+          status?: string
+          task_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_tasks_assignee_user_id_fkey"
+            columns: ["assignee_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_assignee_user_id_fkey"
+            columns: ["assignee_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+        ]
+      }
     }
     Views: {
       documents_index: {
@@ -11130,6 +11275,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      cancel_workflow_tasks: {
+        Args: { p_entity_id: string; p_entity_type: string }
+        Returns: undefined
+      }
       check_budget_alerts: {
         Args: { p_exercice: number }
         Returns: {
@@ -11158,6 +11307,16 @@ export type Database = {
           p_user_id?: string
         }
         Returns: Json
+      }
+      close_workflow_task: {
+        Args: {
+          p_action: string
+          p_comment?: string
+          p_entity_id: string
+          p_entity_type: string
+          p_user_id?: string
+        }
+        Returns: undefined
       }
       copy_budget_structure: {
         Args: {
@@ -11223,6 +11382,24 @@ export type Database = {
           p_source_id: string
           p_source_table: string
           p_type_lien?: string
+        }
+        Returns: string
+      }
+      create_workflow_task: {
+        Args: {
+          p_assignee_role: string
+          p_created_by?: string
+          p_direction_id: string
+          p_dossier_id: string
+          p_entity_code: string
+          p_entity_id: string
+          p_entity_title: string
+          p_entity_type: string
+          p_exercice?: number
+          p_montant?: number
+          p_priority?: string
+          p_sla_hours?: number
+          p_task_type: string
         }
         Returns: string
       }
