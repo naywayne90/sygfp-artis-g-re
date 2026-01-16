@@ -27,6 +27,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useOrdonnancements, VALIDATION_STEPS, MODES_PAIEMENT } from "@/hooks/useOrdonnancements";
 import { OrdonnancementSignatures } from "./OrdonnancementSignatures";
+import { ParapheurIntern } from "./ParapheurIntern";
 import { ChaineDepenseTimeline } from "@/components/workflow/ChaineDepenseTimeline";
 
 interface OrdonnancementDetailsProps {
@@ -96,14 +97,18 @@ export function OrdonnancementDetails({
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="details" className="gap-2">
               <FileText className="h-4 w-4" />
               Détails
             </TabsTrigger>
-            <TabsTrigger value="signatures" className="gap-2">
+            <TabsTrigger value="parapheur" className="gap-2">
               <FileSignature className="h-4 w-4" />
-              Signatures
+              Parapheur
+            </TabsTrigger>
+            <TabsTrigger value="signatures" className="gap-2">
+              <User className="h-4 w-4" />
+              Validations
             </TabsTrigger>
             <TabsTrigger value="timeline" className="gap-2">
               <History className="h-4 w-4" />
@@ -315,6 +320,16 @@ export function OrdonnancementDetails({
                 </div>
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="parapheur">
+            <div className="pt-4">
+              <ParapheurIntern
+                ordonnancementId={ordonnancement?.id}
+                ordonnancementNumero={ordonnancement?.numero || ""}
+                canSign={ordonnancement?.statut === "en_signature"}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="signatures">

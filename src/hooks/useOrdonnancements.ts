@@ -11,6 +11,14 @@ export const VALIDATION_STEPS = [
   { order: 4, role: "DG", label: "Directeur Général" },
 ];
 
+// Étapes de signature
+export const SIGNATURE_STEPS = [
+  { order: 1, role: "CB", label: "Contrôleur Budgétaire" },
+  { order: 2, role: "DAF", label: "Directeur Administratif et Financier" },
+  { order: 3, role: "DG", label: "Directeur Général (Ordonnateur)" },
+  { order: 4, role: "AC", label: "Agent Comptable" },
+];
+
 export const MODES_PAIEMENT = [
   { value: "virement", label: "Virement bancaire" },
   { value: "cheque", label: "Chèque" },
@@ -403,6 +411,44 @@ export function useOrdonnancements() {
     },
   });
 
+  // Soumettre à la signature (après validation complète)
+  const submitToSignature = useMutation({
+    mutationFn: async (id: string) => {
+      // Create signature steps
+      const signatureSteps = SIGNATURE_STEPS.map((step) => ({
+        ordonnancement_id: id,
+        signataire_role: step.role,
+        signataire_label: step.label,
+        signature_order: step.order,
+        status: "pending",
+      }));
+
+      const { error: sigError } = await (supabase
+        .from("ordonnancement_signatures" as any)
+        .insert(signatureSteps) as any);
+
+      if (sigError) throw sigError;
+
+      const { error } = await supabase
+        .from("ordonnancements")
+        .update({
+          statut: "en_signature",
+          workflow_status: "en_signature",
+          signature_status: "in_progress",
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
+      toast.success("Ordonnancement soumis à la signature");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Erreur lors de la soumission");
+    },
+  });
+
   // Supprimer un ordonnancement (brouillon uniquement)
   const deleteOrdonnancement = useMutation({
     mutationFn: async (id: string) => {
@@ -454,6 +500,7 @@ export function useOrdonnancements() {
     rejectOrdonnancement,
     deferOrdonnancement,
     resumeOrdonnancement,
+    submitToSignature,
     deleteOrdonnancement,
     calculateOrdonnancementAvailability,
     getValidations,
