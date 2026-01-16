@@ -45,6 +45,8 @@ import MatriceRACI from "./pages/admin/MatriceRACI";
 import ChecklistProduction from "./pages/admin/ChecklistProduction";
 import LiensLambda from "./pages/admin/LiensLambda";
 import ParametresExercice from "./pages/admin/ParametresExercice";
+import GestionDoublons from "./pages/admin/GestionDoublons";
+import CompteursReferences from "./pages/admin/CompteursReferences";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -58,6 +60,7 @@ import AideImportBudget from "./pages/planification/AideImportBudget";
 // Pages Exécution
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
 import Imputation from "./pages/execution/Imputation";
+import DashboardExecution from "./pages/execution/DashboardExecution";
 
 // Pages Approvisionnement
 import Approvisionnement from "./pages/approvisionnement/Approvisionnement";
@@ -130,6 +133,8 @@ const App = () => (
               <Route path="/admin/checklist-production" element={<ChecklistProduction />} />
               <Route path="/admin/liens-lambda" element={<LiensLambda />} />
               <Route path="/admin/parametres-exercice" element={<ParametresExercice />} />
+              <Route path="/admin/doublons" element={<GestionDoublons />} />
+              <Route path="/admin/compteurs-references" element={<CompteursReferences />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
@@ -141,6 +146,7 @@ const App = () => (
               <Route path="/planification/aide-import" element={<AideImportBudget />} />
               
               {/* Exécution Budgétaire */}
+              <Route path="/execution/dashboard" element={<DashboardExecution />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/notes-sef" element={<NotesSEF />} />
               <Route path="/notes-sef/:id" element={<NoteSEFDetail />} />
