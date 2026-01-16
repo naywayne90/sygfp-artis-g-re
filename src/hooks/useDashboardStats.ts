@@ -13,6 +13,10 @@ export interface DashboardStats {
   notesAEFEnAttente: number;
   notesAEFAValider: number;
   notesAEFImputees: number;
+  // Expressions de Besoin
+  ebTotal: number;
+  ebAValider: number;
+  ebValidees: number;
   // Legacy (pour compatibilité)
   notesEnAttente: number;
   notesTotal: number;
@@ -94,6 +98,18 @@ export function useDashboardStats() {
       const notesTotal = notesSEFTotal + notesAEFTotal;
       const notesEnAttente = notesSEFEnAttente + notesAEFEnAttente;
       const notesAValider = notesSEFAValider + notesAEFAValider;
+
+      // Fetch expressions de besoin stats
+      const { data: expressionsBesoin, error: ebError } = await supabase
+        .from("expressions_besoin")
+        .select("id, statut")
+        .eq("exercice", exercice);
+
+      if (ebError) throw ebError;
+
+      const ebTotal = expressionsBesoin?.length || 0;
+      const ebAValider = expressionsBesoin?.filter(e => e.statut === "soumis").length || 0;
+      const ebValidees = expressionsBesoin?.filter(e => e.statut === "validé").length || 0;
 
       // Fetch engagements stats
       const { data: engagements, error: engagementsError } = await supabase
@@ -230,6 +246,10 @@ export function useDashboardStats() {
         notesAEFEnAttente,
         notesAEFAValider,
         notesAEFImputees,
+        // Expressions de besoin
+        ebTotal,
+        ebAValider,
+        ebValidees,
         // Legacy
         notesEnAttente,
         notesTotal,

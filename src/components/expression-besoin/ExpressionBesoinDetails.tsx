@@ -6,13 +6,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ExpressionBesoin } from "@/hooks/useExpressionsBesoin";
+import { ExpressionBesoin, VALIDATION_STEPS } from "@/hooks/useExpressionsBesoin";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   FileText,
-  Building2,
   Briefcase,
   Calendar,
   User,
@@ -20,6 +18,9 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  MapPin,
+  Package,
+  Users,
 } from "lucide-react";
 
 interface ExpressionBesoinDetailsProps {
@@ -42,6 +43,7 @@ export function ExpressionBesoinDetails({
   onOpenChange,
 }: ExpressionBesoinDetailsProps) {
   const status = STATUS_CONFIG[expression.statut || "brouillon"];
+  const currentStep = expression.current_validation_step || 1;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -60,6 +62,57 @@ export function ExpressionBesoinDetails({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Workflow de validation */}
+          {expression.statut === "soumis" && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Circuit de validation
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between gap-2">
+                  {VALIDATION_STEPS.map((step, index) => {
+                    const validation = expression.validations?.find(v => v.step_order === step.order);
+                    const isCompleted = validation?.status === "approved";
+                    const isCurrent = step.order === currentStep;
+                    const isPending = step.order > currentStep;
+
+                    return (
+                      <div key={step.order} className="flex items-center gap-2 flex-1">
+                        <div className={`
+                          flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium
+                          ${isCompleted ? 'bg-success text-white' : ''}
+                          ${isCurrent ? 'bg-primary text-primary-foreground' : ''}
+                          ${isPending ? 'bg-muted text-muted-foreground' : ''}
+                        `}>
+                          {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : step.order}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${isPending ? 'text-muted-foreground' : ''}`}>
+                            {step.label}
+                          </p>
+                          {isCompleted && validation?.validated_at && (
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(validation.validated_at), "dd/MM HH:mm")}
+                            </p>
+                          )}
+                          {isCurrent && (
+                            <p className="text-xs text-primary">En attente</p>
+                          )}
+                        </div>
+                        {index < VALIDATION_STEPS.length - 1 && (
+                          <div className={`h-0.5 w-4 ${isCompleted ? 'bg-success' : 'bg-muted'}`} />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Informations principales */}
           <Card>
             <CardHeader className="pb-2">
@@ -119,6 +172,64 @@ export function ExpressionBesoinDetails({
               )}
             </CardContent>
           </Card>
+
+          {/* Livraison */}
+          {(expression.lieu_livraison || expression.delai_livraison || expression.contact_livraison) && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Lieu et délais de livraison
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {expression.lieu_livraison && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Lieu de livraison</span>
+                    <p className="font-medium">{expression.lieu_livraison}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  {expression.delai_livraison && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Délai souhaité</span>
+                      <p className="font-medium">{expression.delai_livraison}</p>
+                    </div>
+                  )}
+                  {expression.contact_livraison && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Contact sur site</span>
+                      <p className="font-medium">{expression.contact_livraison}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Articles */}
+          {expression.liste_articles && Array.isArray(expression.liste_articles) && expression.liste_articles.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Articles ({expression.liste_articles.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {expression.liste_articles.map((item: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center p-2 bg-muted/50 rounded">
+                      <span className="font-medium">{item.article}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {item.quantite} {item.unite}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Marché lié */}
           {expression.marche && (

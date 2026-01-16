@@ -97,6 +97,9 @@ export function ExpressionBesoinFromImputationForm({
     calendrier_fin: "",
     montant_estime: "",
     urgence: "normal",
+    lieu_livraison: "",
+    delai_livraison: "",
+    contact_livraison: "",
   });
 
   const [articles, setArticles] = useState<ArticleLigne[]>([
@@ -176,6 +179,9 @@ export function ExpressionBesoinFromImputationForm({
           calendrier_fin: formData.calendrier_fin || null,
           montant_estime: formData.montant_estime ? parseFloat(formData.montant_estime) : null,
           urgence: formData.urgence,
+          lieu_livraison: formData.lieu_livraison || null,
+          delai_livraison: formData.delai_livraison || null,
+          contact_livraison: formData.contact_livraison || null,
           liste_articles: listeArticles,
           exercice: exercice || new Date().getFullYear(),
           statut: "brouillon",
@@ -212,6 +218,9 @@ export function ExpressionBesoinFromImputationForm({
       calendrier_fin: "",
       montant_estime: "",
       urgence: "normal",
+      lieu_livraison: "",
+      delai_livraison: "",
+      contact_livraison: "",
     });
     setArticles([{ id: crypto.randomUUID(), article: "", quantite: 1, unite: "piece" }]);
   };
@@ -531,6 +540,50 @@ export function ExpressionBesoinFromImputationForm({
                     />
                   </div>
                 </div>
+
+                {/* Lieu et délai de livraison */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Lieu et délais de livraison</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="lieu_livraison">Lieu de livraison</Label>
+                      <Input
+                        id="lieu_livraison"
+                        value={formData.lieu_livraison}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, lieu_livraison: e.target.value }))
+                        }
+                        placeholder="Adresse ou site de livraison..."
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="delai_livraison">Délai de livraison souhaité</Label>
+                        <Input
+                          id="delai_livraison"
+                          value={formData.delai_livraison}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, delai_livraison: e.target.value }))
+                          }
+                          placeholder="Ex: 15 jours, 1 mois..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contact_livraison">Contact sur site</Label>
+                        <Input
+                          id="contact_livraison"
+                          value={formData.contact_livraison}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, contact_livraison: e.target.value }))
+                          }
+                          placeholder="Nom et téléphone..."
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </>
           )}
