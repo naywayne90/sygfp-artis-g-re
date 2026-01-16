@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 
 export interface ImputationData {
   noteId: string;
@@ -26,11 +27,16 @@ export interface ImputationData {
 
 export interface BudgetAvailability {
   dotation_initiale: number;
+  dotation_actuelle: number;
   engagements_anterieurs: number;
+  montant_reserve: number;
   engagement_actuel: number;
   cumul: number;
   disponible: number;
+  disponible_net: number; // Après réservations
   is_sufficient: boolean;
+  budget_line_id?: string;
+  budget_line_code?: string;
 }
 
 export function useImputation() {
@@ -38,6 +44,7 @@ export function useImputation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { logAction } = useAuditLog();
+  const { isReadOnly, checkCanWrite, getDisabledMessage } = useExerciceWriteGuard();
 
   // Fetch notes validées à imputer
   const { data: notesAImputer = [], isLoading: loadingNotes } = useQuery({
@@ -197,7 +204,7 @@ export function useImputation() {
     },
   });
 
-  // Calculer le disponible budgétaire
+  // Calculer le disponible budgétaire avec réservations
   const calculateAvailability = async (params: {
     direction_id?: string | null;
     os_id?: string | null;
@@ -212,7 +219,7 @@ export function useImputation() {
     // Trouver la ligne budgétaire correspondante
     let query = supabase
       .from("budget_lines")
-      .select("id, dotation_initiale")
+      .select("id, code, dotation_initiale, dotation_modifiee, total_engage, montant_reserve")
       .eq("exercice", exercice || new Date().getFullYear())
       .eq("is_active", true);
 
@@ -232,40 +239,59 @@ export function useImputation() {
     if (!lines || lines.length === 0) {
       return {
         dotation_initiale: 0,
+        dotation_actuelle: 0,
         engagements_anterieurs: 0,
+        montant_reserve: 0,
         engagement_actuel: params.montant_actuel,
         cumul: params.montant_actuel,
         disponible: -params.montant_actuel,
+        disponible_net: -params.montant_actuel,
         is_sufficient: false,
       };
     }
 
+    // Prendre la première ligne correspondante (ou sommer si plusieurs)
+    const lineIds = lines.map(l => l.id);
+    const primaryLine = lines[0];
+
+    // Calculer les virements pour dotation actuelle
+    const { data: virementsRecus } = await supabase
+      .from("credit_transfers")
+      .select("amount")
+      .in("to_budget_line_id", lineIds)
+      .eq("status", "execute");
+
+    const { data: virementsEmis } = await supabase
+      .from("credit_transfers")
+      .select("amount")
+      .in("from_budget_line_id", lineIds)
+      .eq("status", "execute");
+
+    const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
+    const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
+
     // Sommer les dotations de toutes les lignes correspondantes
     const dotation_initiale = lines.reduce((sum, l) => sum + (l.dotation_initiale || 0), 0);
-
-    // Récupérer les engagements antérieurs
-    const lineIds = lines.map(l => l.id);
-    const { data: engagements, error: engError } = await supabase
-      .from("budget_engagements")
-      .select("montant")
-      .in("budget_line_id", lineIds)
-      .eq("exercice", exercice || new Date().getFullYear())
-      .neq("statut", "annule");
-
-    if (engError) throw engError;
-
-    const engagements_anterieurs = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+    const dotation_actuelle = dotation_initiale + totalRecus - totalEmis;
+    const engagements_anterieurs = lines.reduce((sum, l) => sum + (l.total_engage || 0), 0);
+    const montant_reserve = lines.reduce((sum, l) => sum + ((l as any).montant_reserve || 0), 0);
     const engagement_actuel = params.montant_actuel;
     const cumul = engagements_anterieurs + engagement_actuel;
-    const disponible = dotation_initiale - cumul;
+    const disponible = dotation_actuelle - engagements_anterieurs;
+    const disponible_net = disponible - montant_reserve - engagement_actuel;
 
     return {
       dotation_initiale,
+      dotation_actuelle,
       engagements_anterieurs,
+      montant_reserve,
       engagement_actuel,
       cumul,
       disponible,
-      is_sufficient: disponible >= 0,
+      disponible_net,
+      is_sufficient: disponible_net >= 0,
+      budget_line_id: primaryLine.id,
+      budget_line_code: primaryLine.code,
     };
   };
 
@@ -339,6 +365,11 @@ export function useImputation() {
   // Mutation pour imputer une note
   const imputeMutation = useMutation({
     mutationFn: async (data: ImputationData) => {
+      // Vérifier que l'exercice est ouvert
+      if (isReadOnly) {
+        throw new Error("L'exercice est clôturé. Aucune imputation n'est possible.");
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
@@ -363,7 +394,8 @@ export function useImputation() {
 
       if (!availability.is_sufficient && !data.forcer_imputation) {
         throw new Error(
-          `Disponible insuffisant (${availability.disponible.toLocaleString("fr-FR")} FCFA). ` +
+          `Disponible net insuffisant (${availability.disponible_net.toLocaleString("fr-FR")} FCFA). ` +
+          `Montant demandé: ${data.montant.toLocaleString("fr-FR")} FCFA. ` +
           `Justification requise pour forcer l'imputation.`
         );
       }
@@ -536,6 +568,10 @@ export function useImputation() {
     buildImputationCode,
     // Vérification
     checkAlreadyImputed,
+    // Protection exercice
+    isReadOnly,
+    checkCanWrite,
+    getDisabledMessage,
     // Actions
     imputeNote: imputeMutation.mutateAsync,
     isImputing: imputeMutation.isPending,

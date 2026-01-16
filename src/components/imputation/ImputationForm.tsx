@@ -63,6 +63,8 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
     buildImputationCode,
     imputeNote,
     isImputing,
+    isReadOnly,
+    getDisabledMessage,
   } = useImputation();
 
   // État du formulaire
@@ -507,33 +509,44 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
             </div>
           </div>
 
-          {/* Tableau de disponibilité */}
+          {/* Tableau de disponibilité amélioré */}
           {availability && (
             <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-              <div className="grid grid-cols-5 gap-4 text-center">
+              <div className="grid grid-cols-6 gap-3 text-center">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">(A) Dotation</p>
-                  <p className="font-bold text-lg">{formatMontant(availability.dotation_initiale)}</p>
+                  <p className="text-xs text-muted-foreground mb-1">(A) Dotation actuelle</p>
+                  <p className="font-bold text-lg">{formatMontant(availability.dotation_actuelle)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">(B) Eng. antérieurs</p>
+                  <p className="text-xs text-muted-foreground mb-1">(B) Eng. validés</p>
                   <p className="font-bold text-lg text-orange-600">{formatMontant(availability.engagements_anterieurs)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">(C) Eng. actuel</p>
+                  <p className="text-xs text-muted-foreground mb-1">(C) Réservé</p>
+                  <p className="font-bold text-lg text-amber-600">{formatMontant(availability.montant_reserve)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">(D) Eng. actuel</p>
                   <p className="font-bold text-lg text-blue-600">{formatMontant(availability.engagement_actuel)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">(D) Cumul (B+C)</p>
-                  <p className="font-bold text-lg">{formatMontant(availability.cumul)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(E) Disponible (A-D)</p>
-                  <p className={`font-bold text-lg ${availability.is_sufficient ? "text-green-600" : "text-red-600"}`}>
+                  <p className="text-xs text-muted-foreground mb-1">(E) Disponible (A-B)</p>
+                  <p className={`font-bold text-lg ${availability.disponible >= 0 ? "text-green-600" : "text-red-600"}`}>
                     {formatMontant(availability.disponible)}
                   </p>
                 </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">(F) Dispo. net (E-C-D)</p>
+                  <p className={`font-bold text-lg ${availability.is_sufficient ? "text-green-600" : "text-red-600"}`}>
+                    {formatMontant(availability.disponible_net)}
+                  </p>
+                </div>
               </div>
+              {availability.budget_line_code && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Ligne budgétaire: <span className="font-mono">{availability.budget_line_code}</span>
+                </p>
+              )}
             </div>
           )}
 
@@ -541,11 +554,11 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
           {availability && !availability.is_sufficient && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Disponible insuffisant</AlertTitle>
+              <AlertTitle>Disponible net insuffisant</AlertTitle>
               <AlertDescription className="space-y-3">
                 <p>
-                  Le montant demandé dépasse le disponible de{" "}
-                  <strong>{formatMontant(Math.abs(availability.disponible))}</strong>.
+                  Le montant demandé dépasse le disponible net de{" "}
+                  <strong>{formatMontant(Math.abs(availability.disponible_net))}</strong>.
                 </p>
                 <div>
                   <Label htmlFor="justification">Justification obligatoire *</Label>
@@ -578,6 +591,17 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
         </CardContent>
       </Card>
 
+      {/* Alerte exercice clos */}
+      {isReadOnly && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Exercice clôturé</AlertTitle>
+          <AlertDescription>
+            {getDisabledMessage()} - Aucune imputation n'est possible sur cet exercice.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Actions */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" onClick={onCancel}>
@@ -587,9 +611,11 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
           onClick={handleSubmit}
           disabled={
             isImputing ||
+            isReadOnly ||
             !formData.montant ||
             (availability && !availability.is_sufficient && !formData.forcer_imputation)
           }
+          title={isReadOnly ? getDisabledMessage() : undefined}
         >
           {isImputing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
