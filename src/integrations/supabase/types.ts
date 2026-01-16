@@ -7594,6 +7594,53 @@ export type Database = {
           },
         ]
       }
+      ordonnancement_pieces: {
+        Row: {
+          created_at: string | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          included_in_parapheur: boolean | null
+          ordonnancement_id: string
+          piece_label: string
+          piece_type: string
+          source_entity_id: string | null
+          source_entity_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          included_in_parapheur?: boolean | null
+          ordonnancement_id: string
+          piece_label: string
+          piece_type: string
+          source_entity_id?: string | null
+          source_entity_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          included_in_parapheur?: boolean | null
+          ordonnancement_id?: string
+          piece_label?: string
+          piece_type?: string
+          source_entity_id?: string | null
+          source_entity_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordonnancement_pieces_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "ordonnancements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordonnancement_sequences: {
         Row: {
           annee: number
