@@ -7,6 +7,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 export interface NoteAEF {
   id: string;
   numero: string | null;
+  reference_pivot: string | null; // Référence ARTI héritée de la SEF
   exercice: number | null;
   direction_id: string | null;
   objet: string;
@@ -46,7 +47,7 @@ export interface NoteAEF {
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
-  note_sef?: { id: string; numero: string | null; objet: string; dossier_id?: string | null };
+  note_sef?: { id: string; numero: string | null; reference_pivot: string | null; objet: string; dossier_id?: string | null };
 }
 
 export interface BudgetValidationStatus {
@@ -81,7 +82,8 @@ export function useNotesAEF() {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines(id, code, label, dotation_initiale)
+          budget_line:budget_lines(id, code, label, dotation_initiale),
+          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
         `)
         .order("created_at", { ascending: false });
 
@@ -110,18 +112,25 @@ export function useNotesAEF() {
     },
   });
 
-  // POINT 2: Fetch validated Notes SEF for linking
+  // POINT 2: Fetch validated Notes SEF for linking (includes reference_pivot)
   const { data: notesSEFValidees = [] } = useQuery({
     queryKey: ["notes-sef-validees-for-aef", exercice],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notes_sef")
-        .select("id, numero, objet, direction_id, validated_at")
+        .select("id, numero, reference_pivot, objet, direction_id, validated_at")
         .eq("statut", "valide")
         .eq("exercice", exercice || new Date().getFullYear())
         .order("validated_at", { ascending: false });
       if (error) throw error;
-      return data as { id: string; numero: string | null; objet: string; direction_id: string | null; validated_at: string | null }[];
+      return data as { 
+        id: string; 
+        numero: string | null; 
+        reference_pivot: string | null;
+        objet: string; 
+        direction_id: string | null; 
+        validated_at: string | null 
+      }[];
     },
     enabled: !!exercice,
   });
@@ -236,7 +245,7 @@ export function useNotesAEF() {
     };
   };
 
-  // Create note - numéro généré automatiquement par trigger
+  // Create note - La référence AEF = référence SEF liée (règle métier)
   const createMutation = useMutation({
     mutationFn: async (noteData: Partial<NoteAEF> & { 
       note_sef_id?: string | null;
@@ -246,6 +255,30 @@ export function useNotesAEF() {
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
+
+      let referencePivot: string | null = null;
+      let origin: 'FROM_SEF' | 'DIRECT' = 'DIRECT';
+
+      // RÈGLE MÉTIER: Si liée à une Note SEF, copier sa référence
+      if (noteData.note_sef_id && !noteData.is_direct_aef) {
+        const { data: noteSef, error: sefError } = await supabase
+          .from("notes_sef")
+          .select("id, numero, reference_pivot, statut")
+          .eq("id", noteData.note_sef_id)
+          .single();
+
+        if (sefError || !noteSef) {
+          throw new Error("Note SEF introuvable");
+        }
+
+        if (noteSef.statut !== "valide") {
+          throw new Error("La Note SEF doit être validée pour créer une AEF");
+        }
+
+        // La référence AEF = référence SEF (même code)
+        referencePivot = noteSef.reference_pivot || noteSef.numero;
+        origin = 'FROM_SEF';
+      }
 
       const { data, error } = await supabase
         .from("notes_dg")
@@ -259,6 +292,8 @@ export function useNotesAEF() {
           justification: noteData.justification,
           note_sef_id: noteData.note_sef_id || null,
           is_direct_aef: noteData.is_direct_aef || false,
+          origin: origin,
+          reference_pivot: referencePivot, // Copie de la référence SEF
           beneficiaire_id: noteData.beneficiaire_id,
           ligne_budgetaire_id: noteData.ligne_budgetaire_id,
           os_id: noteData.os_id,
@@ -267,7 +302,6 @@ export function useNotesAEF() {
           exercice: exercice || new Date().getFullYear(),
           created_by: user.id,
           statut: "brouillon",
-          // numero sera généré par trigger
         }])
         .select()
         .single();
@@ -285,7 +319,8 @@ export function useNotesAEF() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: `Note ${data.numero} créée avec succès` });
+      const refDisplay = data.reference_pivot || data.numero || data.id.substring(0, 8);
+      toast({ title: `Note AEF ${refDisplay} créée avec succès` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });

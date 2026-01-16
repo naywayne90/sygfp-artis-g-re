@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { NoteAEF, useNotesAEF } from "@/hooks/useNotesAEF";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Loader2, Link2, FileText, AlertTriangle, Zap } from "lucide-react";
+import { Loader2, Link2, FileText, AlertTriangle, Zap, Hash } from "lucide-react";
 
 interface NoteAEFFormProps {
   open: boolean;
@@ -223,14 +224,27 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
 
                 {selectedNoteSEF && (
                   <div className="mt-3 p-3 bg-background rounded-lg border">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">N° Note SEF:</span>
-                        <p className="font-mono font-medium">{selectedNoteSEF.numero}</p>
+                    <div className="grid grid-cols-1 gap-3 text-sm">
+                      {/* Référence héritée de la SEF - FIGÉE */}
+                      <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-md border border-primary/20">
+                        <Hash className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">Référence AEF :</span>
+                        <Badge variant="secondary" className="font-mono font-bold text-primary">
+                          {selectedNoteSEF.reference_pivot || selectedNoteSEF.numero || "—"}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground ml-auto">
+                          (héritée de la Note SEF)
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Objet:</span>
-                        <p className="truncate">{selectedNoteSEF.objet}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <span className="text-muted-foreground">N° Note SEF :</span>
+                          <p className="font-mono font-medium">{selectedNoteSEF.numero}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Objet :</span>
+                          <p className="truncate">{selectedNoteSEF.objet}</p>
+                        </div>
                       </div>
                     </div>
                   </div>

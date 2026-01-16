@@ -86,7 +86,7 @@ export const notesAefService = {
         };
       }
 
-      // 3. Enrichir avec les relations
+      // 3. Enrichir avec les relations (inclut reference_pivot de la note_sef)
       const { data: enrichedData, error: enrichError } = await supabase
         .from('notes_dg')
         .select(`
@@ -95,7 +95,7 @@ export const notesAefService = {
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
           budget_line:budget_lines(id, code, label, dotation_initiale),
-          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, objet, dossier_id),
+          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id),
           attachments:note_attachments(id)
         `)
         .in('id', noteIds);
@@ -179,7 +179,7 @@ export const notesAefService = {
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
           budget_line:budget_lines(id, code, label, dotation_initiale),
-          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, objet, dossier_id)
+          note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
         `)
         .eq('id', id)
         .single();
