@@ -68,6 +68,7 @@ const getStatusBadge = (status: string | null) => {
     soumis: { label: "Soumis", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
     a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
     valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
+    valide_auto: { label: "Validé (auto)", className: "bg-success/10 text-success border-success/20 border-dashed" },
     rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
     differe: { label: "Différé", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
   };

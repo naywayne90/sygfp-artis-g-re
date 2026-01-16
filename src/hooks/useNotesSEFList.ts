@@ -108,7 +108,7 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
       case 'a_valider':
         return ['soumis', 'a_valider']; // Soumis + À valider
       case 'validees':
-        return 'valide';
+        return ['valide', 'valide_auto']; // Valide + Valide auto (SEF shadow)
       case 'differees':
         return 'differe';
       case 'rejetees':
