@@ -1,5 +1,8 @@
 project_id = "tjagvgqthlibdpvztvaf"
 
+[functions.r2-storage]
+verify_jwt = false
+
 [functions.send-notification-email]
 verify_jwt = false
 
