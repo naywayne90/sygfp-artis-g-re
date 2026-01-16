@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useARTIReference } from "@/hooks/useARTIReference";
 
 export interface NoteAEF {
   id: string;
@@ -258,8 +259,9 @@ export function useNotesAEF() {
 
       let referencePivot: string | null = null;
       let origin: 'FROM_SEF' | 'DIRECT' = 'DIRECT';
+      let noteSefId: string | null = noteData.note_sef_id || null;
 
-      // RÈGLE MÉTIER: Si liée à une Note SEF, copier sa référence
+      // RÈGLE MÉTIER: Si liée à une Note SEF existante, copier sa référence
       if (noteData.note_sef_id && !noteData.is_direct_aef) {
         const { data: noteSef, error: sefError } = await supabase
           .from("notes_sef")
@@ -290,7 +292,7 @@ export function useNotesAEF() {
           montant_estime: noteData.montant_estime || 0,
           type_depense: noteData.type_depense || "fonctionnement",
           justification: noteData.justification,
-          note_sef_id: noteData.note_sef_id || null,
+          note_sef_id: noteSefId,
           is_direct_aef: noteData.is_direct_aef || false,
           origin: origin,
           reference_pivot: referencePivot, // Copie de la référence SEF
@@ -324,6 +326,142 @@ export function useNotesAEF() {
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Créer une AEF directe DG avec SEF shadow automatique
+  const createDirectDGMutation = useMutation({
+    mutationFn: async (noteData: {
+      objet: string;
+      contenu?: string | null;
+      direction_id?: string | null;
+      priorite?: string;
+      montant_estime?: number;
+      type_depense?: string;
+      justification: string; // Obligatoire pour AEF directe
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Non authentifié");
+
+      // Vérifier que l'utilisateur est DG ou ADMIN
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      
+      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+      if (!hasDGRole) {
+        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent créer une AEF directe");
+      }
+
+      // Validation
+      if (!noteData.justification?.trim()) {
+        throw new Error("La justification est obligatoire pour une AEF directe DG");
+      }
+
+      // 1. Générer la référence ARTI (étape 0 = SEF)
+      const { data: referencePivot, error: refError } = await supabase.rpc(
+        "generate_arti_reference",
+        { p_etape: 0, p_date: new Date().toISOString() }
+      );
+
+      if (refError || !referencePivot) {
+        throw new Error("Erreur lors de la génération de la référence");
+      }
+
+      // 2. Créer la SEF shadow (auto-validée)
+      const { data: shadowSef, error: sefError } = await supabase
+        .from("notes_sef")
+        .insert([{
+          objet: `[AEF DIRECTE] ${noteData.objet}`,
+          description: noteData.contenu || null,
+          justification: `AEF directe DG: ${noteData.justification}`,
+          direction_id: noteData.direction_id,
+          demandeur_id: user.id,
+          urgence: noteData.priorite || "normale",
+          exercice: exercice || new Date().getFullYear(),
+          created_by: user.id,
+          numero: referencePivot,
+          reference_pivot: referencePivot,
+          statut: "valide_auto", // Statut spécial: validée automatiquement
+          validated_by: user.id,
+          validated_at: new Date().toISOString(),
+          submitted_by: user.id,
+          submitted_at: new Date().toISOString(),
+          dg_validation_required: false, // Pas besoin de validation DG
+        }])
+        .select()
+        .single();
+
+      if (sefError || !shadowSef) {
+        console.error("Erreur création SEF shadow:", sefError);
+        throw new Error("Erreur lors de la création de la Note SEF associée");
+      }
+
+      // Log création SEF shadow (utilise "create" avec métadonnées)
+      await logAction({
+        entityType: "note_sef",
+        entityId: shadowSef.id,
+        action: "create",
+        newValues: { ...shadowSef, is_shadow: true, created_via: "AEF_DIRECT_DG" },
+      });
+
+      // 3. Créer l'AEF liée à la SEF shadow
+      const { data: aefData, error: aefError } = await supabase
+        .from("notes_dg")
+        .insert([{
+          objet: noteData.objet,
+          contenu: noteData.contenu || null,
+          direction_id: noteData.direction_id,
+          priorite: noteData.priorite || "normale",
+          montant_estime: noteData.montant_estime || 0,
+          type_depense: noteData.type_depense || "fonctionnement",
+          justification: noteData.justification,
+          note_sef_id: shadowSef.id, // Lien vers la SEF shadow
+          is_direct_aef: true,
+          origin: 'DIRECT',
+          reference_pivot: referencePivot, // Même référence que la SEF
+          exercice: exercice || new Date().getFullYear(),
+          created_by: user.id,
+          statut: "brouillon",
+        }])
+        .select()
+        .single();
+
+      if (aefError) {
+        console.error("Erreur création AEF:", aefError);
+        throw new Error("Erreur lors de la création de la Note AEF");
+      }
+
+      // Log création AEF directe DG (utilise "create" avec métadonnées)
+      await logAction({
+        entityType: "note_aef",
+        entityId: aefData.id,
+        action: "create",
+        newValues: { 
+          ...aefData, 
+          is_direct_dg: true,
+          shadow_sef_id: shadowSef.id,
+          shadow_sef_numero: shadowSef.numero,
+        },
+      });
+
+      return {
+        aef: aefData,
+        shadowSef: shadowSef,
+        reference: referencePivot,
+      };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      toast({ 
+        title: `AEF directe ${result.reference} créée`,
+        description: "Une Note SEF a été générée automatiquement",
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erreur AEF directe", description: error.message, variant: "destructive" });
     },
   });
 
@@ -721,6 +859,7 @@ export function useNotesAEF() {
     notesSEFValidees, // POINT 2: Notes SEF validées pour liaison
     checkBudgetAvailability,
     createNote: createMutation.mutateAsync,
+    createDirectDG: createDirectDGMutation.mutateAsync, // Nouvelle: AEF directe DG
     updateNote: updateMutation.mutateAsync,
     submitNote: submitMutation.mutateAsync,
     validateNote: validateMutation.mutateAsync,
@@ -730,6 +869,7 @@ export function useNotesAEF() {
     duplicateNote: duplicateMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,
     isCreating: createMutation.isPending,
+    isCreatingDirectDG: createDirectDGMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
     isImputing: imputeMutation.isPending,

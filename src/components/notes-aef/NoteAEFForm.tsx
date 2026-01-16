@@ -36,7 +36,7 @@ const TYPES_DEPENSE = [
 ];
 
 export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: NoteAEFFormProps) {
-  const { createNote, updateNote, directions, notesSEFValidees, isCreating, isUpdating } = useNotesAEF();
+  const { createNote, createDirectDG, updateNote, directions, notesSEFValidees, isCreating, isCreatingDirectDG, isUpdating } = useNotesAEF();
   const { hasAnyRole, isAdmin } = usePermissions();
   
   // Le DG peut créer des AEF directes (sans Note SEF)
@@ -123,21 +123,44 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     }
 
     try {
-      const payload = {
-        objet: formData.objet,
-        contenu: formData.contenu || null,
-        direction_id: formData.direction_id || null,
-        priorite: formData.priorite,
-        montant_estime: parseNumber(formData.montant_estime),
-        note_sef_id: formData.is_direct_aef ? null : formData.note_sef_id,
-        is_direct_aef: formData.is_direct_aef,
-        type_depense: formData.type_depense,
-        justification: formData.justification || null,
-      };
-
       if (note) {
+        // Mode édition
+        const payload = {
+          objet: formData.objet,
+          contenu: formData.contenu || null,
+          direction_id: formData.direction_id || null,
+          priorite: formData.priorite,
+          montant_estime: parseNumber(formData.montant_estime),
+          note_sef_id: formData.is_direct_aef ? null : formData.note_sef_id,
+          is_direct_aef: formData.is_direct_aef,
+          type_depense: formData.type_depense,
+          justification: formData.justification || null,
+        };
         await updateNote({ id: note.id, ...payload } as any);
+      } else if (formData.is_direct_aef) {
+        // Mode AEF directe DG: crée SEF shadow automatiquement
+        await createDirectDG({
+          objet: formData.objet,
+          contenu: formData.contenu || null,
+          direction_id: formData.direction_id || null,
+          priorite: formData.priorite,
+          montant_estime: parseNumber(formData.montant_estime),
+          type_depense: formData.type_depense,
+          justification: formData.justification,
+        });
       } else {
+        // Mode normal: lié à une SEF existante
+        const payload = {
+          objet: formData.objet,
+          contenu: formData.contenu || null,
+          direction_id: formData.direction_id || null,
+          priorite: formData.priorite,
+          montant_estime: parseNumber(formData.montant_estime),
+          note_sef_id: formData.note_sef_id,
+          is_direct_aef: false,
+          type_depense: formData.type_depense,
+          justification: formData.justification || null,
+        };
         await createNote(payload as any);
       }
       onOpenChange(false);
@@ -146,7 +169,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     }
   };
 
-  const isLoading = isCreating || isUpdating;
+  const isLoading = isCreating || isCreatingDirectDG || isUpdating;
   const needsNoteSEF = !formData.is_direct_aef && !formData.note_sef_id;
   const needsJustification = formData.is_direct_aef && !formData.justification?.trim();
 
@@ -179,8 +202,8 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                 </div>
                 {formData.is_direct_aef && (
                   <p className="text-xs text-muted-foreground mt-2 ml-7">
-                    En tant que DG, vous pouvez créer une Note AEF directement sans passer par une Note SEF.
-                    Une justification est requise.
+                    En tant que DG, vous pouvez créer une Note AEF directement.
+                    <strong className="text-primary"> Une Note SEF sera générée automatiquement</strong> avec la même référence ARTI.
                   </p>
                 )}
               </CardContent>
