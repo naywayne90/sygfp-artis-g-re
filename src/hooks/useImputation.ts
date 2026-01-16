@@ -50,7 +50,7 @@ export function useImputation() {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name)
         `)
-        .eq("statut", "valide")
+        .eq("statut", "a_imputer")
         .is("imputed_at", null)
         .eq("exercice", exercice || new Date().getFullYear())
         .order("validated_at", { ascending: true });

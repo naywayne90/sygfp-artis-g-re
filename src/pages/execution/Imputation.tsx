@@ -96,12 +96,32 @@ export default function Imputation() {
     setSearchParams(searchParams, { replace: true });
   };
 
-  const handleImputationSuccess = () => {
+  const handleImputationSuccess = (result?: { dossier?: { id: string; numero?: string } }) => {
     handleCloseImputationDialog();
-    toast({
-      title: "Imputation réussie",
-      description: "La note AEF a été imputée avec succès",
-    });
+    setActiveTab("imputees");
+    
+    if (result?.dossier) {
+      toast({
+        title: "Imputation réussie",
+        description: `Dossier ${result.dossier.numero || ""} créé avec succès.`,
+        action: (
+          <div className="flex gap-2 mt-2">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => navigate(`/marches`)}
+            >
+              Passer le marché
+            </Button>
+          </div>
+        ),
+      });
+    } else {
+      toast({
+        title: "Imputation réussie",
+        description: "La note AEF a été imputée avec succès",
+      });
+    }
   };
 
   const formatMontant = (montant: number | null) =>
