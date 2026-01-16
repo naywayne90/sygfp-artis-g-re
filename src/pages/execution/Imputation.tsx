@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useImputation } from "@/hooks/useImputation";
 import { ImputationList } from "@/components/imputation/ImputationList";
+import { ImputationForm } from "@/components/imputation/ImputationForm";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -17,15 +19,20 @@ import {
   FileText,
   ArrowRight,
   Eye,
+  CreditCard,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
 import { BudgetFormulas } from "@/components/budget/BudgetFormulas";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Imputation() {
   const { exercice } = useExercice();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
   const { 
     notesAImputer, 
     notesImputees, 
@@ -34,6 +41,68 @@ export default function Imputation() {
   } = useImputation();
 
   const [activeTab, setActiveTab] = useState("a_imputer");
+  const [sourceAefNote, setSourceAefNote] = useState<any>(null);
+  const [isLoadingSource, setIsLoadingSource] = useState(false);
+
+  // Gérer le paramètre sourceAef depuis l'URL
+  useEffect(() => {
+    const sourceAefId = searchParams.get("sourceAef");
+    if (sourceAefId) {
+      setIsLoadingSource(true);
+      // Charger les détails de la note AEF source
+      supabase
+        .from("notes_dg")
+        .select(`
+          *,
+          direction:directions(id, label, sigle),
+          created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name)
+        `)
+        .eq("id", sourceAefId)
+        .single()
+        .then(({ data, error }) => {
+          setIsLoadingSource(false);
+          if (error) {
+            console.error("Erreur chargement AEF source:", error);
+            toast({
+              title: "Erreur",
+              description: "Impossible de charger la note AEF source",
+              variant: "destructive",
+            });
+            // Nettoyer l'URL
+            searchParams.delete("sourceAef");
+            setSearchParams(searchParams, { replace: true });
+          } else if (data) {
+            // Vérifier que la note est bien "a_imputer"
+            if (data.statut !== "a_imputer") {
+              toast({
+                title: "Note non imputable",
+                description: `Cette note est en statut "${data.statut}" et ne peut pas être imputée.`,
+                variant: "destructive",
+              });
+              searchParams.delete("sourceAef");
+              setSearchParams(searchParams, { replace: true });
+            } else {
+              setSourceAefNote(data);
+            }
+          }
+        });
+    }
+  }, [searchParams, setSearchParams, toast]);
+
+  const handleCloseImputationDialog = () => {
+    setSourceAefNote(null);
+    // Nettoyer l'URL
+    searchParams.delete("sourceAef");
+    setSearchParams(searchParams, { replace: true });
+  };
+
+  const handleImputationSuccess = () => {
+    handleCloseImputationDialog();
+    toast({
+      title: "Imputation réussie",
+      description: "La note AEF a été imputée avec succès",
+    });
+  };
 
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
@@ -236,6 +305,32 @@ export default function Imputation() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog d'imputation depuis AEF source */}
+      <Dialog open={!!sourceAefNote} onOpenChange={(open) => !open && handleCloseImputationDialog()}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              Imputer la note AEF
+            </DialogTitle>
+          </DialogHeader>
+          {sourceAefNote && (
+            <ImputationForm
+              note={{
+                id: sourceAefNote.id,
+                numero: sourceAefNote.numero,
+                objet: sourceAefNote.objet,
+                montant_estime: sourceAefNote.montant_estime,
+                direction: sourceAefNote.direction,
+                created_by_profile: sourceAefNote.created_by_profile,
+              }}
+              onSuccess={handleImputationSuccess}
+              onCancel={handleCloseImputationDialog}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

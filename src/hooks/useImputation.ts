@@ -320,11 +320,33 @@ export function useImputation() {
     return newLine.id;
   };
 
+  // Vérifier si une AEF est déjà imputée
+  const checkAlreadyImputed = async (noteAefId: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from("imputations")
+      .select("id")
+      .eq("note_aef_id", noteAefId)
+      .eq("statut", "active")
+      .maybeSingle();
+    
+    if (error) {
+      console.error("Erreur vérification imputation:", error);
+      return false;
+    }
+    return !!data;
+  };
+
   // Mutation pour imputer une note
   const imputeMutation = useMutation({
     mutationFn: async (data: ImputationData) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
+
+      // Vérifier que l'AEF n'est pas déjà imputée
+      const alreadyImputed = await checkAlreadyImputed(data.noteId);
+      if (alreadyImputed) {
+        throw new Error("Cette note AEF a déjà été imputée. Une seule imputation par note est autorisée.");
+      }
 
       // Vérifier la disponibilité budgétaire
       const availability = await calculateAvailability({
@@ -388,6 +410,36 @@ export function useImputation() {
         created_by: user.id,
       } as any);
 
+      // Créer l'enregistrement dans la table imputations
+      const imputationCode = buildImputationCode(data);
+      const { data: imputation, error: imputationError } = await supabase
+        .from("imputations")
+        .insert({
+          note_aef_id: data.noteId,
+          budget_line_id: budgetLineId,
+          dossier_id: dossier.id,
+          objet: note.objet,
+          montant: data.montant,
+          direction_id: data.direction_id || note.direction_id,
+          os_id: data.os_id,
+          mission_id: data.mission_id,
+          action_id: data.action_id,
+          activite_id: data.activite_id,
+          sous_activite_id: data.sous_activite_id,
+          nbe_id: data.nbe_id,
+          sysco_id: data.sysco_id,
+          source_financement: data.source_financement,
+          code_imputation: imputationCode,
+          justification_depassement: data.justification_depassement || null,
+          forcer_imputation: data.forcer_imputation || false,
+          exercice: exercice || new Date().getFullYear(),
+          created_by: user.id,
+        })
+        .select()
+        .single();
+
+      if (imputationError) throw imputationError;
+
       // Mettre à jour la note avec l'imputation
       const { data: updatedNote, error: updateError } = await supabase
         .from("notes_dg")
@@ -406,19 +458,19 @@ export function useImputation() {
       // Logger l'action
       await logAction({
         entityType: "imputation",
-        entityId: data.noteId,
+        entityId: imputation.id,
         action: "create",
         newValues: {
-          note_id: data.noteId,
+          note_aef_id: data.noteId,
           budget_line_id: budgetLineId,
           dossier_id: dossier.id,
           montant: data.montant,
-          imputation_code: buildImputationCode(data),
+          imputation_code: imputationCode,
           forcer: data.forcer_imputation || false,
         },
       });
 
-      return { note: updatedNote, dossier, budgetLineId, availability };
+      return { note: updatedNote, dossier, imputation, budgetLineId, availability };
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
@@ -482,6 +534,8 @@ export function useImputation() {
     // Calculs
     calculateAvailability,
     buildImputationCode,
+    // Vérification
+    checkAlreadyImputed,
     // Actions
     imputeNote: imputeMutation.mutateAsync,
     isImputing: imputeMutation.isPending,

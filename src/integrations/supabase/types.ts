@@ -3816,6 +3816,183 @@ export type Database = {
           },
         ]
       }
+      imputations: {
+        Row: {
+          action_id: string | null
+          activite_id: string | null
+          budget_line_id: string | null
+          code_imputation: string | null
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          dossier_id: string | null
+          exercice: number
+          forcer_imputation: boolean | null
+          id: string
+          justification_depassement: string | null
+          mission_id: string | null
+          montant: number
+          nbe_id: string | null
+          note_aef_id: string
+          objet: string
+          os_id: string | null
+          source_financement: string | null
+          sous_activite_id: string | null
+          statut: string
+          sysco_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_id?: string | null
+          activite_id?: string | null
+          budget_line_id?: string | null
+          code_imputation?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          dossier_id?: string | null
+          exercice: number
+          forcer_imputation?: boolean | null
+          id?: string
+          justification_depassement?: string | null
+          mission_id?: string | null
+          montant: number
+          nbe_id?: string | null
+          note_aef_id: string
+          objet: string
+          os_id?: string | null
+          source_financement?: string | null
+          sous_activite_id?: string | null
+          statut?: string
+          sysco_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string | null
+          activite_id?: string | null
+          budget_line_id?: string | null
+          code_imputation?: string | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          dossier_id?: string | null
+          exercice?: number
+          forcer_imputation?: boolean | null
+          id?: string
+          justification_depassement?: string | null
+          mission_id?: string | null
+          montant?: number
+          nbe_id?: string | null
+          note_aef_id?: string
+          objet?: string
+          os_id?: string | null
+          source_financement?: string | null
+          sous_activite_id?: string | null
+          statut?: string
+          sysco_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imputations_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "imputations_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_nbe_id_fkey"
+            columns: ["nbe_id"]
+            isOneToOne: false
+            referencedRelation: "nomenclature_nbe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_note_aef_id_fkey"
+            columns: ["note_aef_id"]
+            isOneToOne: true
+            referencedRelation: "notes_dg"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_note_aef_id_fkey"
+            columns: ["note_aef_id"]
+            isOneToOne: true
+            referencedRelation: "notes_imputees_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_sous_activite_id_fkey"
+            columns: ["sous_activite_id"]
+            isOneToOne: false
+            referencedRelation: "sous_activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_sysco_id_fkey"
+            columns: ["sysco_id"]
+            isOneToOne: false
+            referencedRelation: "plan_comptable_sysco"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventaire_lignes: {
         Row: {
           ajustement_effectue: boolean | null
