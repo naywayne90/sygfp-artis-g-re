@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notesAefService } from '@/lib/notes-aef/notesAefService';
 import type { NoteAEFEntity, NoteAEFCounts, PaginatedResult, ListNotesAEFOptions } from '@/lib/notes-aef/types';
 import { useExercice } from '@/contexts/ExerciceContext';
+import type { FiltersState } from '@/components/shared/NotesFiltersBar';
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -31,12 +32,8 @@ export interface UseNotesAEFListOptions {
   initialTab?: string;
 }
 
-export interface NotesAEFFiltersState {
-  directionId: string | null;
-  urgence: string | null;
-  dateFrom: string | null;
-  dateTo: string | null;
-}
+// Réutiliser le type FiltersState de NotesFiltersBar pour cohérence
+export type NotesAEFFiltersState = FiltersState;
 
 export interface UseNotesAEFListReturn {
   // Data
