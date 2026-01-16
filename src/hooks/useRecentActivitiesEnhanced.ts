@@ -6,7 +6,7 @@ import { fr } from "date-fns/locale";
 
 export interface EnhancedActivity {
   id: string;
-  type: "note" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "virement" | "prestataire" | "contrat" | "user" | "other";
+  type: "note" | "note_sef" | "note_aef" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "virement" | "prestataire" | "contrat" | "user" | "dossier" | "expression_besoin" | "imputation" | "reglement" | "other";
   action: string;
   actionLabel: string;
   title: string;
@@ -18,7 +18,9 @@ export interface EnhancedActivity {
   entityTable: string;
   entityId: string | null;
   userName: string | null;
+  userEmail: string | null;
   link: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -34,11 +36,16 @@ const ACTION_LABELS: Record<string, string> = {
   submit: "Soumis",
   soumission: "Soumis",
   defer: "Différé",
+  differe: "Différé",
   report: "Différé",
   execute: "Exécuté",
   pay: "Payé",
   import: "Importé",
   cancel: "Annulé",
+  archive: "Archivé",
+  impute: "Imputé",
+  sign: "Signé",
+  transfer: "Transféré",
   ajout_piece: "Pièce ajoutée",
   suppression_piece: "Pièce supprimée",
   passage_a_valider: "Passage à valider",
@@ -49,13 +56,18 @@ const ACTION_LABELS: Record<string, string> = {
   supplier_suspended: "Prestataire suspendu",
   supplier_activated: "Prestataire activé",
   alert_resolved: "Alerte résolue",
-  ROLE_ADDED: "Rôle ajouté",
-  ROLE_REMOVED: "Rôle retiré",
+  role_added: "Rôle ajouté",
+  role_removed: "Rôle retiré",
+  role_changed: "Rôle modifié",
+  budget_modified: "Budget modifié",
+  login: "Connexion",
+  logout: "Déconnexion",
 };
 
 const ENTITY_ROUTES: Record<string, string> = {
   notes_dg: "/notes-aef",
   note: "/notes-aef",
+  note_aef: "/notes-aef",
   notes_sef: "/notes-sef",
   note_sef: "/notes-sef",
   budget_engagements: "/engagements",
@@ -64,6 +76,8 @@ const ENTITY_ROUTES: Record<string, string> = {
   liquidation: "/liquidations",
   ordonnancements: "/ordonnancements",
   ordonnancement: "/ordonnancements",
+  reglements: "/reglements",
+  reglement: "/reglements",
   marches: "/marches",
   marche: "/marches",
   credit_transfers: "/planification/virements",
@@ -72,6 +86,51 @@ const ENTITY_ROUTES: Record<string, string> = {
   prestataire: "/contractualisation/prestataires",
   contrats: "/contractualisation/contrats",
   contrat: "/contractualisation/contrats",
+  dossiers: "/recherche",
+  dossier: "/recherche",
+  expressions_besoin: "/execution/expression-besoin",
+  expression_besoin: "/execution/expression-besoin",
+  imputations: "/execution/imputation",
+  imputation: "/execution/imputation",
+  budget_lines: "/planification/budget",
+  budget_line: "/planification/budget",
+  budget: "/planification/budget",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  note: "Note",
+  note_aef: "Note AEF",
+  notes_dg: "Note AEF",
+  note_sef: "Note SEF",
+  notes_sef: "Note SEF",
+  engagement: "Engagement",
+  budget_engagements: "Engagement",
+  liquidation: "Liquidation",
+  budget_liquidations: "Liquidation",
+  ordonnancement: "Ordonnancement",
+  ordonnancements: "Ordonnancement",
+  reglement: "Règlement",
+  reglements: "Règlement",
+  marche: "Marché",
+  marches: "Marché",
+  virement: "Virement",
+  credit_transfers: "Virement",
+  prestataire: "Prestataire",
+  prestataires: "Prestataire",
+  contrat: "Contrat",
+  contrats: "Contrat",
+  dossier: "Dossier",
+  dossiers: "Dossier",
+  user: "Utilisateur",
+  user_role: "Rôle utilisateur",
+  profiles: "Profil",
+  expression_besoin: "Expression de besoin",
+  expressions_besoin: "Expression de besoin",
+  imputation: "Imputation",
+  imputations: "Imputation",
+  budget_line: "Ligne budgétaire",
+  budget_lines: "Ligne budgétaire",
+  budget: "Budget",
 };
 
 function getTimeGroup(date: Date): EnhancedActivity["timeGroup"] {
@@ -83,16 +142,19 @@ function getTimeGroup(date: Date): EnhancedActivity["timeGroup"] {
 
 function mapEntityType(entityType: string): EnhancedActivity["type"] {
   const mapping: Record<string, EnhancedActivity["type"]> = {
-    notes_dg: "note",
-    note: "note",
-    notes_sef: "note",
-    note_sef: "note",
+    notes_dg: "note_aef",
+    note: "note_aef",
+    note_aef: "note_aef",
+    notes_sef: "note_sef",
+    note_sef: "note_sef",
     budget_engagements: "engagement",
     engagement: "engagement",
     budget_liquidations: "liquidation",
     liquidation: "liquidation",
     ordonnancements: "ordonnancement",
     ordonnancement: "ordonnancement",
+    reglements: "reglement",
+    reglement: "reglement",
     marches: "marche",
     marche: "marche",
     credit_transfers: "virement",
@@ -101,8 +163,14 @@ function mapEntityType(entityType: string): EnhancedActivity["type"] {
     prestataire: "prestataire",
     contrats: "contrat",
     contrat: "contrat",
+    dossiers: "dossier",
+    dossier: "dossier",
     user_role: "user",
     profiles: "user",
+    expressions_besoin: "expression_besoin",
+    expression_besoin: "expression_besoin",
+    imputations: "imputation",
+    imputation: "imputation",
   };
   return mapping[entityType] || "other";
 }
@@ -114,12 +182,13 @@ export interface GroupedActivities {
   "Plus ancien": EnhancedActivity[];
 }
 
-export function useRecentActivitiesEnhanced(limit: number = 15) {
+export function useRecentActivitiesEnhanced(limit: number = 30) {
   const { exercice } = useExercice();
 
   return useQuery({
     queryKey: ["recent-activities-enhanced", exercice, limit],
     queryFn: async (): Promise<GroupedActivities> => {
+      // Récupérer les logs avec les infos utilisateur
       const { data: logs, error } = await supabase
         .from("audit_logs")
         .select(`
@@ -129,7 +198,10 @@ export function useRecentActivitiesEnhanced(limit: number = 15) {
           action, 
           created_at, 
           user_id,
-          exercice
+          exercice,
+          new_values,
+          old_values,
+          user:profiles!audit_logs_user_id_fkey(full_name, email)
         `)
         .eq("exercice", exercice)
         .order("created_at", { ascending: false })
@@ -148,25 +220,28 @@ export function useRecentActivitiesEnhanced(limit: number = 15) {
         const date = new Date(log.created_at);
         const entityType = mapEntityType(log.entity_type);
         const baseRoute = ENTITY_ROUTES[log.entity_type] || "/";
+        const typeLabel = TYPE_LABELS[log.entity_type] || "Élément";
         
-        // Build display title
-        const typeLabels: Record<string, string> = {
-          note: "Note",
-          engagement: "Engagement",
-          liquidation: "Liquidation",
-          ordonnancement: "Ordonnancement",
-          marche: "Marché",
-          virement: "Virement",
-          prestataire: "Prestataire",
-          contrat: "Contrat",
-          user: "Utilisateur",
-        };
+        // Extraire le code/numéro de l'entité depuis new_values si disponible
+        const newValues = log.new_values as Record<string, unknown> | null;
+        const code = newValues?.numero || newValues?.reference || newValues?.code || log.entity_id?.slice(0, 8);
         
-        // Amélioration: afficher "Note SEF" au lieu de "Note" pour les notes_sef
-        const typeLabel = log.entity_type === "note_sef" || log.entity_type === "notes_sef" 
-          ? "Note SEF" 
-          : typeLabels[entityType] || "Élément";
-        const title = `${typeLabel} ${log.entity_id?.slice(0, 8) || ""}`;
+        // Construire un résumé pertinent
+        let resume: string | null = null;
+        if (newValues?.objet) {
+          resume = String(newValues.objet).substring(0, 100);
+        } else if (newValues?.motif) {
+          resume = `Motif: ${String(newValues.motif).substring(0, 80)}`;
+        } else if (newValues?.commentaire) {
+          resume = String(newValues.commentaire).substring(0, 100);
+        }
+
+        const title = `${typeLabel} ${code || ""}`.trim();
+
+        // Infos utilisateur
+        const user = log.user as { full_name?: string; email?: string } | null;
+        const userName = user?.full_name || null;
+        const userEmail = user?.email || null;
 
         return {
           id: log.id,
@@ -174,15 +249,17 @@ export function useRecentActivitiesEnhanced(limit: number = 15) {
           action: log.action.toLowerCase(),
           actionLabel: ACTION_LABELS[log.action.toLowerCase()] || log.action.replace(/_/g, " "),
           title,
-          resume: null,
-          code: null,
+          resume,
+          code: code ? String(code) : null,
           timeAgo: formatDistanceToNow(date, { addSuffix: true, locale: fr }),
           timeGroup: getTimeGroup(date),
           date,
           entityTable: log.entity_type,
           entityId: log.entity_id,
-          userName: null,
+          userName,
+          userEmail,
           link: log.entity_id ? `${baseRoute}?id=${log.entity_id}` : baseRoute,
+          metadata: newValues,
         };
       }).slice(0, limit);
 
@@ -201,5 +278,7 @@ export function useRecentActivitiesEnhanced(limit: number = 15) {
       return grouped;
     },
     enabled: !!exercice,
+    staleTime: 30000, // 30 secondes
+    refetchInterval: 60000, // Rafraîchir toutes les minutes
   });
 }
