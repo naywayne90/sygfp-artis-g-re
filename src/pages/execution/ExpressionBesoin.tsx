@@ -26,7 +26,15 @@ import {
   Tag,
   Eye,
   ShoppingCart,
+  FileSignature,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 export default function ExpressionBesoin() {
   const { exercice } = useExercice();
@@ -321,8 +329,65 @@ export default function ExpressionBesoin() {
               )}
             </TabsContent>
 
+            {/* Onglet validées avec action passation */}
+            <TabsContent value="validees">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Référence</TableHead>
+                      <TableHead>Objet</TableHead>
+                      <TableHead>Direction</TableHead>
+                      <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {expressionsValidees.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                          Aucune expression de besoin validée
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      expressionsValidees.map((eb: any) => (
+                        <TableRow key={eb.id}>
+                          <TableCell className="font-mono text-sm">{eb.numero || "-"}</TableCell>
+                          <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
+                          <TableCell>{eb.direction?.sigle || eb.direction?.label || "-"}</TableCell>
+                          <TableCell className="text-right font-medium">{formatMontant(eb.montant_estime)}</TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => navigate(`/execution/expression-besoin?view=${eb.id}`)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Voir détails
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => navigate(`/execution/passation-marche?sourceEB=${eb.id}`)}
+                                  className="text-primary"
+                                >
+                                  <FileSignature className="mr-2 h-4 w-4" />
+                                  Créer passation marché
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
             {/* Autres onglets */}
-            {["toutes", "a_valider", "validees", "rejetees", "differees"].map((tab) => (
+            {["toutes", "a_valider", "rejetees", "differees"].map((tab) => (
               <TabsContent key={tab} value={tab}>
                 <ExpressionBesoinList expressions={getFilteredByTab()} />
               </TabsContent>
