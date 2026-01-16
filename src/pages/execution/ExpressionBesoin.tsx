@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useExpressionsBesoin } from "@/hooks/useExpressionsBesoin";
 import { ExpressionBesoinForm } from "@/components/expression-besoin/ExpressionBesoinForm";
+import { ExpressionBesoinFromImputationForm, ImputationValidee } from "@/components/expression-besoin/ExpressionBesoinFromImputationForm";
 import { ExpressionBesoinList } from "@/components/expression-besoin/ExpressionBesoinList";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   FileText,
   Clock,
@@ -16,22 +22,67 @@ import {
   Plus,
   Search,
   Loader2,
+  CreditCard,
+  Tag,
+  Eye,
+  ShoppingCart,
 } from "lucide-react";
 
 export default function ExpressionBesoin() {
   const { exercice } = useExercice();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
     expressions,
     expressionsAValider,
     expressionsValidees,
     expressionsRejetees,
     expressionsDifferees,
+    imputationsValidees,
     isLoading,
   } = useExpressionsBesoin();
 
   const [showForm, setShowForm] = useState(false);
+  const [showImputationForm, setShowImputationForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("toutes");
+  const [activeTab, setActiveTab] = useState("a_traiter");
+  const [sourceImputation, setSourceImputation] = useState<ImputationValidee | null>(null);
+  const [isLoadingSource, setIsLoadingSource] = useState(false);
+
+  // Gérer le paramètre sourceImputation depuis l'URL
+  useEffect(() => {
+    const sourceImputationId = searchParams.get("sourceImputation");
+    if (sourceImputationId) {
+      setIsLoadingSource(true);
+      supabase
+        .from("imputations")
+        .select(`
+          id, reference, objet, montant, code_imputation, direction_id, dossier_id,
+          direction:directions(id, label, sigle),
+          budget_line:budget_lines(id, code, label)
+        `)
+        .eq("id", sourceImputationId)
+        .single()
+        .then(({ data, error }) => {
+          setIsLoadingSource(false);
+          if (error) {
+            toast.error("Impossible de charger l'imputation source");
+            searchParams.delete("sourceImputation");
+            setSearchParams(searchParams, { replace: true });
+          } else if (data) {
+            setSourceImputation(data as unknown as ImputationValidee);
+            setShowImputationForm(true);
+          }
+        });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleCloseImputationForm = () => {
+    setShowImputationForm(false);
+    setSourceImputation(null);
+    searchParams.delete("sourceImputation");
+    setSearchParams(searchParams, { replace: true });
+  };
 
   const filteredExpressions = expressions.filter(
     (e) =>
@@ -55,7 +106,10 @@ export default function ExpressionBesoin() {
     }
   };
 
-  if (isLoading) {
+  const formatMontant = (montant: number | null) =>
+    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+
+  if (isLoading || isLoadingSource) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -69,23 +123,42 @@ export default function ExpressionBesoin() {
         <div>
           <h1 className="page-title">Expressions de Besoin</h1>
           <p className="page-description">
-            Gestion des demandes d'acquisition - Exercice {exercice}
+            Gestion des demandes d'acquisition depuis les imputations validées - Exercice {exercice}
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle expression
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowForm(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Depuis marché
+          </Button>
+          <Button onClick={() => setShowImputationForm(true)}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Nouvelle EB
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total
+              À traiter
             </CardTitle>
-            <FileText className="h-4 w-4 text-primary" />
+            <Tag className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{imputationsValidees.length}</div>
+            <p className="text-xs text-muted-foreground">Imputations validées</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total EB
+            </CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expressions.length}</div>
@@ -115,7 +188,7 @@ export default function ExpressionBesoin() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expressionsValidees.length}</div>
-            <p className="text-xs text-muted-foreground">Prêtes pour engagement</p>
+            <p className="text-xs text-muted-foreground">Prêtes</p>
           </CardContent>
         </Card>
 
@@ -151,9 +224,9 @@ export default function ExpressionBesoin() {
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle>Liste des expressions de besoin</CardTitle>
+              <CardTitle>Expressions de besoin</CardTitle>
               <CardDescription>
-                Créer et suivre les demandes d'acquisition à partir des marchés validés
+                Créer des EB depuis les imputations validées
               </CardDescription>
             </div>
             <div className="relative w-full md:w-72">
@@ -169,7 +242,12 @@ export default function ExpressionBesoin() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
+            <TabsList className="mb-4 grid w-full grid-cols-6">
+              <TabsTrigger value="a_traiter" className="gap-1">
+                <Tag className="h-3 w-3" />
+                À traiter
+                <Badge variant="secondary" className="ml-1 text-xs">{imputationsValidees.length}</Badge>
+              </TabsTrigger>
               <TabsTrigger value="toutes">
                 Toutes ({filteredExpressions.length})
               </TabsTrigger>
@@ -187,15 +265,83 @@ export default function ExpressionBesoin() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value={activeTab}>
-              <ExpressionBesoinList expressions={getFilteredByTab()} />
+            {/* Onglet Imputations à traiter */}
+            <TabsContent value="a_traiter">
+              {imputationsValidees.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucune imputation validée à traiter</p>
+                  <p className="text-sm mt-1">Les imputations validées apparaîtront ici</p>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Référence</TableHead>
+                        <TableHead>Objet</TableHead>
+                        <TableHead>Direction</TableHead>
+                        <TableHead className="text-right">Montant</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {imputationsValidees.map((imp: any) => (
+                        <TableRow key={imp.id}>
+                          <TableCell className="font-mono text-sm">{imp.reference || "-"}</TableCell>
+                          <TableCell className="max-w-[250px] truncate">{imp.objet}</TableCell>
+                          <TableCell>{imp.direction?.sigle || imp.direction?.label || "-"}</TableCell>
+                          <TableCell className="text-right font-medium">{formatMontant(imp.montant)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => navigate(`/execution/imputation?view=${imp.id}`)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => {
+                                  setSourceImputation(imp);
+                                  setShowImputationForm(true);
+                                }}
+                              >
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                                Créer EB
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </TabsContent>
+
+            {/* Autres onglets */}
+            {["toutes", "a_valider", "validees", "rejetees", "differees"].map((tab) => (
+              <TabsContent key={tab} value={tab}>
+                <ExpressionBesoinList expressions={getFilteredByTab()} />
+              </TabsContent>
+            ))}
           </Tabs>
         </CardContent>
       </Card>
 
-      {/* Form dialog */}
+      {/* Form dialog depuis marché */}
       <ExpressionBesoinForm open={showForm} onOpenChange={setShowForm} />
+
+      {/* Form dialog depuis imputation */}
+      <ExpressionBesoinFromImputationForm
+        open={showImputationForm}
+        onOpenChange={handleCloseImputationForm}
+        sourceImputation={sourceImputation}
+        imputationsValidees={imputationsValidees}
+        onSuccess={() => setActiveTab("toutes")}
+      />
     </div>
   );
 }
