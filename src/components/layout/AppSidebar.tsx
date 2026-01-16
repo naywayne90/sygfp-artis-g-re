@@ -469,8 +469,8 @@ export function AppSidebar() {
                                   <span>{item.title}</span>
                                 </div>
                                 {badgeCount > 0 && (
-                                  <span className="inline-flex items-center text-[10px] px-1.5 py-0 h-4 bg-amber-100 text-amber-700 border border-amber-200 rounded-md font-medium">
-                                    {badgeCount}
+                                  <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-bold bg-warning/20 text-warning-foreground dark:text-warning">
+                                    {badgeCount > 99 ? "99+" : badgeCount}
                                   </span>
                                 )}
                               </NavLink>
