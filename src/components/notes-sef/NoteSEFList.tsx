@@ -38,6 +38,7 @@ import {
   Plus,
   RefreshCw,
   Paperclip,
+  RotateCcw,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -51,6 +52,7 @@ interface NoteSEFListProps {
   onValidate?: (noteId: string) => void;
   onReject?: (note: NoteSEF) => void;
   onDefer?: (note: NoteSEF) => void;
+  onResume?: (noteId: string) => void;
   onDelete?: (noteId: string) => void;
   onCreate?: () => void;
   onRetry?: () => void;
@@ -111,6 +113,7 @@ export function NoteSEFList({
   onValidate,
   onReject,
   onDefer,
+  onResume,
   onDelete,
   onCreate,
   onRetry,
@@ -357,6 +360,17 @@ export function NoteSEFList({
                                   Différer
                                 </DropdownMenuItem>
                               )}
+                            </>
+                          )}
+
+                          {/* Bouton Reprendre pour les notes différées (créateur/admin) */}
+                          {note.statut === "differe" && onResume && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => onResume(note.id)}>
+                                <RotateCcw className="mr-2 h-4 w-4 text-primary" />
+                                Reprendre / Re-soumettre
+                              </DropdownMenuItem>
                             </>
                           )}
 
