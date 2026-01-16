@@ -337,9 +337,9 @@ export function AppSidebar() {
                       </div>
                       {!collapsed && (
                         <div className="flex items-center gap-2">
-                          <Badge className="text-[10px] px-1.5 py-0 h-5 bg-sidebar-primary/20 text-sidebar-primary-foreground border-sidebar-primary/40">
+                          <span className="inline-flex items-center text-[10px] px-1.5 py-0 h-5 bg-sidebar-primary/20 text-sidebar-primary-foreground border border-sidebar-primary/40 rounded-md font-medium">
                             9 étapes
-                          </Badge>
+                          </span>
                           <ChevronRight className={cn(
                             "h-4 w-4 transition-transform",
                             chaineOpen && "rotate-90"
@@ -438,9 +438,9 @@ export function AppSidebar() {
                       {!collapsed && (
                         <div className="flex items-center gap-2">
                           {stats && (stats.engagementsAValider + stats.liquidationsAValider + stats.ordonnancementsAValider) > 0 && (
-                            <Badge className="text-[10px] px-1.5 py-0 h-5 bg-destructive/80 text-destructive-foreground">
+                            <span className="inline-flex items-center text-[10px] px-1.5 py-0 h-5 bg-destructive/80 text-destructive-foreground rounded-md font-medium">
                               {stats.engagementsAValider + stats.liquidationsAValider + stats.ordonnancementsAValider}
-                            </Badge>
+                            </span>
                           )}
                           <ChevronRight className={cn(
                             "h-4 w-4 transition-transform",
@@ -469,9 +469,9 @@ export function AppSidebar() {
                                   <span>{item.title}</span>
                                 </div>
                                 {badgeCount > 0 && (
-                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-amber-100 text-amber-700 border-amber-200">
+                                  <span className="inline-flex items-center text-[10px] px-1.5 py-0 h-4 bg-amber-100 text-amber-700 border border-amber-200 rounded-md font-medium">
                                     {badgeCount}
-                                  </Badge>
+                                  </span>
                                 )}
                               </NavLink>
                             </SidebarMenuSubButton>
