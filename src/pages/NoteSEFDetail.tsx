@@ -363,9 +363,33 @@ export default function NoteSEFDetail() {
           continue;
         }
 
+        // Validate file extension
+        const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+        const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
+        const BLOCKED_EXTENSIONS = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'vbs', 'js', 'msi', 'dll', 'scr'];
+        
+        if (BLOCKED_EXTENSIONS.includes(fileExtension)) {
+          toast({
+            title: "Type de fichier interdit",
+            description: `${file.name} n'est pas autorisé (fichier exécutable)`,
+            variant: "destructive",
+          });
+          continue;
+        }
+        
+        if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+          toast({
+            title: "Type de fichier non supporté",
+            description: `${file.name}: utilisez PDF, DOCX, XLSX ou images`,
+            variant: "destructive",
+          });
+          continue;
+        }
+
         const timestamp = Date.now();
         const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filePath = `${note.exercice}/${note.id}/${timestamp}_${safeFileName}`;
+        // Arborescence: /<exercice>/SEF/<noteId>/<filename>
+        const filePath = `${note.exercice}/SEF/${note.id}/${timestamp}_${safeFileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from("notes-sef")
