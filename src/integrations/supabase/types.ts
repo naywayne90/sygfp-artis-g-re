@@ -66,6 +66,13 @@ export type Database = {
             referencedRelation: "objectifs_strategiques"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "actions_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
+          },
         ]
       }
       activites: {
@@ -622,6 +629,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budg_alerts_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budg_alerts_resolved_by_fkey"
             columns: ["resolved_by"]
             isOneToOne: false
@@ -696,6 +710,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_activities_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_activities_responsible_id_fkey"
             columns: ["responsible_id"]
             isOneToOne: false
@@ -740,6 +761,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_code_sequences_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
         ]
       }
@@ -843,6 +871,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
           {
@@ -976,6 +1011,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
           {
@@ -1123,6 +1165,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_line_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_line_history_changed_by_fkey"
             columns: ["changed_by"]
             isOneToOne: false
@@ -1166,6 +1215,7 @@ export type Database = {
           locked_at: string | null
           locked_by: string | null
           mission_id: string | null
+          montant_reserve: number | null
           nbe_id: string | null
           numero_ligne: string | null
           nve_id: string | null
@@ -1218,6 +1268,7 @@ export type Database = {
           locked_at?: string | null
           locked_by?: string | null
           mission_id?: string | null
+          montant_reserve?: number | null
           nbe_id?: string | null
           numero_ligne?: string | null
           nve_id?: string | null
@@ -1270,6 +1321,7 @@ export type Database = {
           locked_at?: string | null
           locked_by?: string | null
           mission_id?: string | null
+          montant_reserve?: number | null
           nbe_id?: string | null
           numero_ligne?: string | null
           nve_id?: string | null
@@ -1332,6 +1384,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "budget_lines_import_run_id_fkey"
             columns: ["import_run_id"]
             isOneToOne: false
@@ -1367,10 +1426,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
+          },
+          {
             foreignKeyName: "budget_lines_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
           {
@@ -2155,6 +2228,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "credit_transfers_from_budget_line_id_fkey"
+            columns: ["from_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "credit_transfers_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
@@ -2173,6 +2253,13 @@ export type Database = {
             columns: ["to_budget_line_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_to_budget_line_id_fkey"
+            columns: ["to_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
         ]
@@ -2502,6 +2589,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "demandes_achat_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "demandes_achat_dossier_id_fkey"
             columns: ["dossier_id"]
             isOneToOne: false
@@ -2594,6 +2688,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "directions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "directions_responsible_user_id_fkey"
@@ -3001,6 +3102,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "dossiers_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "dossiers_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -3048,6 +3156,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "dossiers_mission_id_fkey"
@@ -3653,6 +3768,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "expressions_besoin_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "expressions_besoin_dossier_id_fkey"
             columns: ["dossier_id"]
             isOneToOne: false
@@ -3678,6 +3800,13 @@ export type Database = {
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
           {
@@ -3829,6 +3958,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_budget_staging_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
             referencedColumns: ["id"]
           },
           {
@@ -4337,6 +4473,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "imputations_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "imputations_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -4370,6 +4513,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "imputations_dossier_id_fkey"
@@ -4419,6 +4569,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "objectifs_strategiques"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
           },
           {
             foreignKeyName: "imputations_rejected_by_fkey"
@@ -6002,6 +6159,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notes_dg_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notes_dg_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -6021,6 +6185,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "notes_dg_dossier_id_fkey"
@@ -6058,6 +6229,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notes_dg_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notes_dg_note_sef_id_fkey"
             columns: ["note_sef_id"]
             isOneToOne: false
@@ -6070,6 +6248,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "objectifs_strategiques"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
           },
           {
             foreignKeyName: "notes_dg_rejected_by_fkey"
@@ -6409,6 +6594,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "notes_sef_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "notes_sef_dossier_id_fkey"
             columns: ["dossier_id"]
             isOneToOne: false
@@ -6435,6 +6627,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "objectifs_strategiques"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
           },
           {
             foreignKeyName: "notes_sef_rejected_by_fkey"
@@ -7765,6 +7964,13 @@ export type Database = {
             referencedRelation: "directions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "positions_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
         ]
       }
       prestataire_requests: {
@@ -8232,6 +8438,13 @@ export type Database = {
             referencedRelation: "directions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
         ]
       }
       project_progress_updates: {
@@ -8352,6 +8565,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "projects_owner_id_fkey"
@@ -10141,6 +10361,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "taches_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "taches_raci_accountable_fkey"
             columns: ["raci_accountable"]
             isOneToOne: false
@@ -10851,6 +11078,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "workflow_tasks_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "workflow_tasks_dossier_id_fkey"
             columns: ["dossier_id"]
             isOneToOne: false
@@ -10944,6 +11178,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "directions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
           },
           {
             foreignKeyName: "notes_dg_note_sef_id_fkey"
@@ -11209,6 +11450,13 @@ export type Database = {
             referencedRelation: "directions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
         ]
       }
       projects_with_financial: {
@@ -11240,6 +11488,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "projects_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
             foreignKeyName: "projects_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -11252,6 +11507,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles_display"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_budget_disponibilite: {
+        Row: {
+          code: string | null
+          direction_code: string | null
+          direction_id: string | null
+          direction_label: string | null
+          disponible_net: number | null
+          dotation_actuelle: number | null
+          dotation_initiale: number | null
+          dotation_modifiee: number | null
+          exercice: number | null
+          id: string | null
+          label: string | null
+          mission_id: string | null
+          montant_reserve: number | null
+          os_code: string | null
+          os_id: string | null
+          os_libelle: string | null
+          total_engage: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
           },
         ]
       }
@@ -11275,6 +11588,31 @@ export type Database = {
           nb_reglements: number | null
           objet: string | null
           statut_global: string | null
+        }
+        Relationships: []
+      }
+      v_top_directions_imputations: {
+        Row: {
+          direction_code: string | null
+          direction_id: string | null
+          direction_label: string | null
+          direction_sigle: string | null
+          exercice: number | null
+          montant_force: number | null
+          montant_total: number | null
+          nb_imputations: number | null
+        }
+        Relationships: []
+      }
+      v_top_os_imputations: {
+        Row: {
+          exercice: number | null
+          montant_force: number | null
+          montant_total: number | null
+          nb_imputations: number | null
+          os_code: string | null
+          os_id: string | null
+          os_libelle: string | null
         }
         Relationships: []
       }
@@ -11333,6 +11671,10 @@ export type Database = {
           is_available: boolean
           message: string
         }[]
+      }
+      check_exercice_writable: {
+        Args: { p_exercice: number }
+        Returns: boolean
       }
       check_permission_with_conditions: {
         Args: {
