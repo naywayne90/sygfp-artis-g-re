@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause, Lock, AlertTriangle, HelpCircle, ChevronDown, ChevronUp, Search, Filter, Eye, Edit, Paperclip, UserPlus } from "lucide-react";
@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Recherche() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { 
     dossiers, 
     loading, 
@@ -34,6 +35,7 @@ export default function Recherche() {
     addDocument,
     bloquerDossier,
     debloquerDossier,
+    getDossierById,
     DEFAULT_FILTERS 
   } = useDossiers();
   const { exercice } = useExercice();
@@ -61,6 +63,28 @@ export default function Recherche() {
   useEffect(() => {
     fetchDossiers(filters, pagination.page, pagination.pageSize);
   }, [filters]);
+
+  // Gérer le paramètre URL ?dossier=xxx pour ouvrir directement les détails
+  useEffect(() => {
+    const dossierId = searchParams.get("dossier");
+    if (dossierId) {
+      // Récupérer le dossier et ouvrir les détails
+      getDossierById(dossierId).then((dossier) => {
+        if (dossier) {
+          setSelectedDossier(dossier);
+          setShowDetails(true);
+        } else {
+          toast({
+            title: "Dossier introuvable",
+            description: "Le dossier demandé n'existe pas ou a été supprimé.",
+            variant: "destructive",
+          });
+        }
+        // Nettoyer l'URL après chargement
+        setSearchParams({}, { replace: true });
+      });
+    }
+  }, [searchParams]);
 
   const handleFiltersChange = useCallback((newFilters: Partial<DossierFilters>) => {
     setFilters(newFilters);
