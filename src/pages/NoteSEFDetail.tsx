@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,15 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { usePermissions } from "@/hooks/usePermissions";
 import { useNotesSEF, NoteSEF, NoteSEFHistory } from "@/hooks/useNotesSEF";
 import { useNotesSEFAudit } from "@/hooks/useNotesSEFAudit";
 import { notesSefService } from "@/lib/notes-sef/notesSefService";
 import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { PrintButton } from "@/components/export/PrintButton";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
 import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
@@ -57,6 +56,7 @@ import {
   AlertTriangle,
   MessageSquare,
   FilePlus,
+  Shield,
 } from "lucide-react";
 import { DecisionBlock } from "@/components/workflow/DecisionBlock";
 import { useNoteAccessControl } from "@/hooks/useNoteAccessControl";
@@ -206,12 +206,11 @@ export default function NoteSEFDetail() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { hasAnyRole } = usePermissions();
   const { fetchHistory, submitNote, validateNote, rejectNote, deferNote, resubmitNote } = useNotesSEF();
   const { logAjoutPiece, logSuppressionPiece, logModification } = useNotesSEFAudit();
   const { exercice } = useExercice();
+  
   // État local
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedFields, setEditedFields] = useState<Partial<NoteSEF>>({});
   const [history, setHistory] = useState<NoteSEFHistory[]>([]);
@@ -227,17 +226,6 @@ export default function NoteSEFDetail() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Permissions - DG uniquement pour validation
-  const isDG = hasAnyRole(["ADMIN", "DG"]);
-  const isAdmin = hasAnyRole(["ADMIN"]);
-
-  // Récupérer l'utilisateur courant
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setCurrentUserId(user?.id || null);
-    });
-  }, []);
-
   // Query pour la note
   const { data: note, isLoading: loadingNote, error } = useQuery({
     queryKey: ['note-sef-detail', id],
@@ -249,6 +237,28 @@ export default function NoteSEFDetail() {
     },
     enabled: !!id,
   });
+
+  // Contrôle d'accès centralisé
+  const accessControl = useNoteAccessControl(note, 'SEF');
+  const { 
+    canView, 
+    canEdit: canModify, 
+    canSubmit, 
+    canValidate, 
+    canReject, 
+    canDefer, 
+    canResubmit,
+    isCreator,
+    isDG,
+    isAdmin,
+    isLoading: accessLoading,
+    denyReason
+  } = accessControl;
+
+  // Raccourcis pour validation DG
+  const canValidateNote = canValidate && note?.statut === "soumis";
+  const canValidateDeferredNote = isDG && note?.statut === "differe";
+  const isApproved = note?.statut === "valide";
 
   // Charger historique et pièces jointes
   useEffect(() => {
@@ -264,20 +274,6 @@ export default function NoteSEFDetail() {
       fetchAttachments();
     }
   }, [note?.id]);
-
-  // Vérifier les permissions
-  const isCreator = currentUserId && note?.created_by === currentUserId;
-  const canModify = (isCreator || isAdmin) && note?.statut === "brouillon";
-  const canSubmit = canModify;
-  
-  // DG peut valider/rejeter/différer si statut = soumis (ou a_valider pour rétrocompatibilité)
-  // Si differe, seul "Valider" est disponible (pas rejeter/différer à nouveau)
-  const canValidateNote = isDG && note?.statut === "soumis";
-  const canValidateDeferredNote = isDG && note?.statut === "differe";
-  
-  // Créateur peut re-soumettre une note différée
-  const canResubmit = (isCreator || isAdmin) && note?.statut === "differe";
-  const isApproved = note?.statut === "valide";
   const isRejected = note?.statut === "rejete";
 
   // Navigation retour
@@ -613,6 +609,36 @@ export default function NoteSEFDetail() {
           <CardContent className="pt-6 text-center text-muted-foreground">
             <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-warning" />
             <p>Note introuvable ou erreur de chargement</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Écran d'accès refusé
+  if (!accessLoading && !canView) {
+    return (
+      <div className="space-y-6">
+        <Button variant="ghost" onClick={handleBack} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Retour à la liste
+        </Button>
+        <Card className="border-destructive/30">
+          <CardContent className="pt-12 pb-12 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="rounded-full bg-destructive/10 p-4">
+                <Shield className="h-12 w-12 text-destructive" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold text-destructive">Accès refusé</h2>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {denyReason || "Vous n'avez pas les autorisations nécessaires pour consulter cette note."}
+                </p>
+              </div>
+              <Button variant="outline" onClick={handleBack} className="mt-4">
+                Retour à la liste des notes
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -1061,41 +1087,43 @@ export default function NoteSEFDetail() {
               ) : history.length === 0 ? (
                 <p className="text-center py-8 text-muted-foreground">Aucun événement</p>
               ) : (
-                <div className="space-y-3">
-                  {history.map((entry, index) => {
-                    const { title, detail } = getActionDescription(
-                      entry.action, 
-                      entry.performer, 
-                      entry.commentaire
-                    );
-                    
-                    return (
-                      <div key={entry.id} className="relative flex gap-3">
-                        {/* Timeline line */}
-                        {index < history.length - 1 && (
-                          <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-border" />
-                        )}
-                        {/* Icon */}
-                        <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background border shadow-sm">
-                          {getActionIcon(entry.action)}
-                        </div>
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 pb-3">
-                          <p className="font-medium text-sm leading-tight">{title}</p>
-                          {detail && (
-                            <p className="text-sm text-muted-foreground mt-1 leading-snug">
-                              {detail}
-                            </p>
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-3">
+                    {history.map((entry, index) => {
+                      const { title, detail } = getActionDescription(
+                        entry.action, 
+                        entry.performer, 
+                        entry.commentaire
+                      );
+                      
+                      return (
+                        <div key={entry.id} className="relative flex gap-3">
+                          {/* Timeline line */}
+                          {index < history.length - 1 && (
+                            <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-border" />
                           )}
-                          <p className="text-xs text-muted-foreground/70 mt-1.5 flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {format(new Date(entry.performed_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
-                          </p>
+                          {/* Icon */}
+                          <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background border shadow-sm">
+                            {getActionIcon(entry.action)}
+                          </div>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0 pb-3">
+                            <p className="font-medium text-sm leading-tight">{title}</p>
+                            {detail && (
+                              <p className="text-sm text-muted-foreground mt-1 leading-snug">
+                                {detail}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground/70 mt-1.5 flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(entry.performed_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
               )}
             </CardContent>
           </Card>
