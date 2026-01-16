@@ -501,7 +501,7 @@ export function useNotesAEF() {
     },
   });
 
-  // Submit note - avec validations des champs requis
+  // Submit note - avec validations des champs requis et verrouillage cohérence SEF
   const submitMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -524,41 +524,129 @@ export function useNotesAEF() {
       if (!note.montant_estime || note.montant_estime <= 0) errors.push("Montant estimé");
       if (!note.contenu?.trim()) errors.push("Description/Justification");
 
-      // Règle origin: si FROM_SEF, note_sef_id requis
-      const origin = note.origin || (note.is_direct_aef ? 'DIRECT' : 'FROM_SEF');
-      if (origin === 'FROM_SEF' && !note.note_sef_id) {
-        errors.push("Note SEF validée (origine FROM_SEF)");
-      }
-
       if (errors.length > 0) {
         throw new Error(`Champs obligatoires manquants: ${errors.join(", ")}`);
       }
 
+      // ═══════════════════════════════════════════════════════════════════════
+      // RÈGLE ABSOLUE: Toute AEF soumise DOIT avoir note_sef_id + reference_pivot
+      // ═══════════════════════════════════════════════════════════════════════
+      let updatedSefId = note.note_sef_id;
+      let updatedReferencePivot = note.reference_pivot;
+      let autoLinkedSef = false;
+
+      if (!note.note_sef_id || !note.reference_pivot) {
+        // Vérifier si l'utilisateur est DG/ADMIN
+        const { data: userRoles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        
+        const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+
+        if (hasDGRole) {
+          // CAS DG: Auto-créer une SEF shadow pour corriger les données legacy/incohérentes
+          console.log("[SUBMIT] DG detected with missing SEF link - creating shadow SEF");
+
+          // Générer la référence ARTI (étape 0 = SEF)
+          const { data: referencePivot, error: refError } = await supabase.rpc(
+            "generate_arti_reference",
+            { p_etape: 0, p_date: new Date().toISOString() }
+          );
+
+          if (refError || !referencePivot) {
+            throw new Error("Erreur lors de la génération de la référence SEF");
+          }
+
+          // Créer la SEF shadow (auto-validée)
+          const { data: shadowSef, error: sefError } = await supabase
+            .from("notes_sef")
+            .insert([{
+              objet: `[AUTO-LINK] ${note.objet}`,
+              description: note.contenu || null,
+              justification: `Auto-générée lors de la soumission (cohérence AEF legacy)`,
+              direction_id: note.direction_id,
+              demandeur_id: user.id,
+              urgence: note.priorite || "normale",
+              exercice: note.exercice || new Date().getFullYear(),
+              created_by: user.id,
+              numero: referencePivot,
+              reference_pivot: referencePivot,
+              statut: "valide_auto",
+              validated_by: user.id,
+              validated_at: new Date().toISOString(),
+              submitted_by: user.id,
+              submitted_at: new Date().toISOString(),
+              dg_validation_required: false,
+            }])
+            .select()
+            .single();
+
+          if (sefError || !shadowSef) {
+            console.error("Erreur création SEF shadow lors de submit:", sefError);
+            throw new Error("Erreur lors de la création automatique de la Note SEF");
+          }
+
+          // Log création SEF shadow
+          await logAction({
+            entityType: "note_sef",
+            entityId: shadowSef.id,
+            action: "create",
+            newValues: { ...shadowSef, is_shadow: true, created_via: "SUBMIT_AUTO_LINK" },
+          });
+
+          updatedSefId = shadowSef.id;
+          updatedReferencePivot = referencePivot;
+          autoLinkedSef = true;
+        } else {
+          // CAS NON-DG: Erreur explicite
+          throw new Error(
+            "Impossible de soumettre : cette Note AEF n'est pas liée à une Note SEF validée. " +
+            "Veuillez sélectionner une Note SEF avant de soumettre."
+          );
+        }
+      }
+
+      // Préparer les données de mise à jour
+      const updateData: Record<string, unknown> = {
+        statut: "soumis",
+        submitted_at: new Date().toISOString(),
+        submitted_by: user.id,
+      };
+
+      // Si auto-link effectué, mettre à jour les champs SEF
+      if (autoLinkedSef) {
+        updateData.note_sef_id = updatedSefId;
+        updateData.reference_pivot = updatedReferencePivot;
+        updateData.origin = 'DIRECT';
+        updateData.is_direct_aef = true;
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
-        .update({
-          statut: "soumis",
-          submitted_at: new Date().toISOString(),
-          submitted_by: user.id,
-        })
+        .update(updateData)
         .eq("id", noteId)
         .select()
         .single();
 
       if (error) throw error;
 
+      // Log action submit (avec info auto-link si applicable)
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
         action: "submit",
-        newValues: { statut: "soumis" },
+        newValues: autoLinkedSef 
+          ? { statut: "soumis", auto_linked_sef_id: updatedSefId, reference_pivot: updatedReferencePivot, via_auto_link: true }
+          : { statut: "soumis" },
       });
 
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: `Note ${data.numero} soumise pour validation` });
+      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      toast({ title: `Note ${data.reference_pivot || data.numero} soumise pour validation` });
     },
     onError: (error: Error) => {
       toast({ title: "Soumission impossible", description: error.message, variant: "destructive" });
@@ -566,6 +654,7 @@ export function useNotesAEF() {
   });
 
   // Validate note - devient automatiquement "à imputer" (validée par DG)
+  // GUARD: Double vérification de la cohérence SEF avant validation
   const validateMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -580,6 +669,26 @@ export function useNotesAEF() {
       const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
       if (!hasDGRole) {
         throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent valider une note AEF");
+      }
+
+      // Récupérer la note pour vérification de cohérence
+      const { data: note, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("id, note_sef_id, reference_pivot, objet")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw new Error("Note introuvable");
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // GUARD FINAL: Impossible de valider une AEF sans référence SEF valide
+      // ═══════════════════════════════════════════════════════════════════════
+      if (!note.note_sef_id || !note.reference_pivot) {
+        console.error("[VALIDATE] Incohérence détectée - AEF sans SEF:", { noteId, note });
+        throw new Error(
+          "Incohérence détectée : cette Note AEF n'a pas de référence SEF valide. " +
+          "Veuillez d'abord soumettre la note pour corriger cette incohérence."
+        );
       }
 
       const { data, error } = await supabase
@@ -607,7 +716,7 @@ export function useNotesAEF() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
       queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
-      toast({ title: `Note ${data.numero} validée ✓`, description: "Disponible pour imputation" });
+      toast({ title: `Note ${data.reference_pivot || data.numero} validée ✓`, description: "Disponible pour imputation" });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur de validation", description: error.message, variant: "destructive" });
