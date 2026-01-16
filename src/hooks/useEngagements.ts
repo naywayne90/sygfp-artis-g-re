@@ -124,7 +124,40 @@ export function useEngagements() {
     enabled: !!exercice,
   });
 
-  // Fetch validated expressions de besoin for creating engagements
+  // Fetch validated passations de marché for creating engagements
+  const { data: passationsValidees = [] } = useQuery({
+    queryKey: ["passations-validees-pour-engagement", exercice],
+    queryFn: async () => {
+      const { data: pms, error } = await supabase
+        .from("passation_marche")
+        .select(`
+          id, reference, mode_passation, montant_retenu, prestataire_retenu_id, dossier_id,
+          expression_besoin:expressions_besoin(
+            id, numero, objet, montant_estime, direction_id,
+            direction:directions(id, label, sigle)
+          ),
+          prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(id, raison_sociale, adresse)
+        `)
+        .eq("statut", "valide")
+        .eq("exercice", exercice)
+        .order("validated_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Exclure celles déjà utilisées
+      const { data: usedPMs } = await supabase
+        .from("budget_engagements")
+        .select("passation_marche_id")
+        .not("passation_marche_id", "is", null)
+        .eq("exercice", exercice);
+
+      const usedIds = new Set(usedPMs?.map((e) => e.passation_marche_id) || []);
+      return pms?.filter((pm) => !usedIds.has(pm.id)) || [];
+    },
+    enabled: !!exercice,
+  });
+
+  // Fetch validated expressions de besoin for creating engagements (legacy)
   const { data: expressionsValidees = [] } = useQuery({
     queryKey: ["expressions-validees-pour-engagement", exercice],
     queryFn: async () => {
@@ -627,6 +660,7 @@ export function useEngagements() {
     engagementsRejetes,
     engagementsDifferes,
     expressionsValidees,
+    passationsValidees,
     isLoading,
     error,
     calculateAvailability,

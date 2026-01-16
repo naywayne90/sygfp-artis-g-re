@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2, Lock } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2, Lock, Tag, MoreHorizontal, Eye, Send, FolderOpen, Receipt } from "lucide-react";
 import { useEngagements, Engagement } from "@/hooks/useEngagements";
 import { EngagementForm } from "@/components/engagement/EngagementForm";
+import { EngagementFromPMForm } from "@/components/engagement/EngagementFromPMForm";
 import { EngagementList } from "@/components/engagement/EngagementList";
 import { EngagementDetails } from "@/components/engagement/EngagementDetails";
 import { EngagementRejectDialog } from "@/components/engagement/EngagementRejectDialog";
@@ -17,18 +28,24 @@ import { PermissionGuard, usePermissionCheck } from "@/components/auth/Permissio
 import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 export default function Engagements() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
   const {
     engagements,
     engagementsAValider,
     engagementsValides,
     engagementsRejetes,
     engagementsDifferes,
+    passationsValidees,
     isLoading,
     submitEngagement,
     validateEngagement,
@@ -43,12 +60,37 @@ export default function Engagements() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateFromPM, setShowCreateFromPM] = useState(false);
+  const [selectedPM, setSelectedPM] = useState<any>(null);
   const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
+
+  // Handle sourcePM URL parameter
+  useEffect(() => {
+    const sourcePMId = searchParams.get("sourcePM");
+    if (sourcePMId && passationsValidees.length > 0) {
+      const pm = passationsValidees.find((p: any) => p.id === sourcePMId);
+      if (pm) {
+        setSelectedPM(pm);
+        setShowCreateFromPM(true);
+        searchParams.delete("sourcePM");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [searchParams, passationsValidees, setSearchParams]);
+
+  const handleCreateFromPM = (pm: any) => {
+    setSelectedPM(pm);
+    setShowCreateFromPM(true);
+  };
+
+  const handleCreateLiquidation = (engagementId: string) => {
+    navigate(`/liquidations?sourceEngagement=${engagementId}`);
+  };
 
   const filterEngagements = (list: Engagement[]) => {
     return list.filter(eng =>
@@ -211,8 +253,12 @@ export default function Engagements() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="tous" className="space-y-4">
+      <Tabs defaultValue="a_traiter" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="a_traiter" className="gap-1">
+            <Tag className="h-3 w-3" />
+            À traiter ({passationsValidees.length})
+          </TabsTrigger>
           <TabsTrigger value="tous">Tous ({engagements.length})</TabsTrigger>
           <TabsTrigger value="a_valider">À valider ({engagementsAValider.length})</TabsTrigger>
           <TabsTrigger value="valides">Validés ({engagementsValides.length})</TabsTrigger>
@@ -249,6 +295,68 @@ export default function Engagements() {
           </Card>
         </TabsContent>
 
+        {/* Onglet À traiter - PM validées */}
+        <TabsContent value="a_traiter">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-primary" />
+                Passations de Marché à engager
+              </CardTitle>
+              <CardDescription>
+                {passationsValidees.length} passation(s) validée(s) en attente d'engagement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {passationsValidees.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucune passation de marché à traiter</p>
+                  <p className="text-sm">Les PM validées apparaîtront ici</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Réf. PM</TableHead>
+                      <TableHead>Objet (EB)</TableHead>
+                      <TableHead>Mode</TableHead>
+                      <TableHead>Prestataire</TableHead>
+                      <TableHead className="text-right">Montant retenu</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {passationsValidees.map((pm: any) => (
+                      <TableRow key={pm.id}>
+                        <TableCell className="font-mono text-sm">{pm.reference || "-"}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {pm.expression_besoin?.objet || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{pm.mode_passation}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {pm.prestataire_retenu?.raison_sociale || "-"}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatMontant(pm.montant_retenu || 0)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" onClick={() => handleCreateFromPM(pm)}>
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Engager
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="a_valider">
           <Card>
             <CardHeader>
@@ -270,20 +378,70 @@ export default function Engagements() {
           </Card>
         </TabsContent>
 
+        {/* Onglet Validés avec action Liquidation */}
         <TabsContent value="valides">
           <Card>
             <CardHeader>
               <CardTitle>Engagements validés</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsValides).length} engagement(s) validé(s)
+                {filterEngagements(engagementsValides).length} engagement(s) validé(s) - prêts pour liquidation
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <EngagementList
-                engagements={filterEngagements(engagementsValides)}
-                onView={handleView}
-                onPrint={handlePrint}
-              />
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Numéro</TableHead>
+                    <TableHead>Objet</TableHead>
+                    <TableHead>Fournisseur</TableHead>
+                    <TableHead className="text-right">Montant</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filterEngagements(engagementsValides).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        Aucun engagement validé
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filterEngagements(engagementsValides).map((eng) => (
+                      <TableRow key={eng.id}>
+                        <TableCell className="font-mono text-sm">{eng.numero}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{eng.objet}</TableCell>
+                        <TableCell>{eng.fournisseur || "-"}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatMontant(eng.montant)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover">
+                              <DropdownMenuItem onClick={() => handleView(eng)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleCreateLiquidation(eng.id)}
+                                className="text-primary"
+                              >
+                                <Receipt className="mr-2 h-4 w-4" />
+                                Créer liquidation
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
@@ -328,6 +486,13 @@ export default function Engagements() {
 
       {/* Dialogs */}
       <EngagementForm open={showCreateForm} onOpenChange={setShowCreateForm} />
+      
+      <EngagementFromPMForm
+        open={showCreateFromPM}
+        onOpenChange={setShowCreateFromPM}
+        passation={selectedPM}
+        onSuccess={() => setSelectedPM(null)}
+      />
       
       <EngagementDetails
         engagement={selectedEngagement}
