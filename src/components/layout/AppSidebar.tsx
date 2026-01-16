@@ -42,6 +42,9 @@ import {
   HandCoins,
   FileOutput,
   Banknote,
+  TrendingUp,
+  Copy,
+  Activity,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -79,6 +82,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 // ============================================
 // NOUVELLE ORGANISATION DU MENU
@@ -142,10 +146,25 @@ const gestionItems = [
   { title: "Comptabilité Matière", url: "/contractualisation/comptabilite-matiere", icon: Archive },
 ];
 
+// EXÉCUTION BUDGÉTAIRE (nouveau groupe avec badges)
+const executionItems = [
+  { title: "Tableau de bord", url: "/execution/dashboard", icon: TrendingUp, badgeKey: null },
+  { title: "Engagements", url: "/engagements", icon: CreditCard, badgeKey: "engagementsAValider" },
+  { title: "Liquidations", url: "/liquidations", icon: Receipt, badgeKey: "liquidationsAValider" },
+  { title: "Ordonnancements", url: "/ordonnancements", icon: FileCheck, badgeKey: "ordonnancementsAValider" },
+  { title: "Règlements", url: "/reglements", icon: Banknote, badgeKey: null },
+];
+
 // RAPPORTS
 const rapportsItems = [
   { title: "États d'exécution", url: "/etats-execution", icon: BarChart3 },
   { title: "Alertes Budgétaires", url: "/alertes-budgetaires", icon: Target },
+];
+
+// OUTILS ADMIN
+const outilsAdminItems = [
+  { title: "Gestion Doublons", url: "/admin/doublons", icon: Copy },
+  { title: "Compteurs Références", url: "/admin/compteurs-references", icon: Hash },
 ];
 
 interface MenuSectionProps {
@@ -199,7 +218,11 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [chaineOpen, setChaineOpen] = useState(true);
+  const [executionOpen, setExecutionOpen] = useState(true);
   const [parametrageOpen, setParametrageOpen] = useState(false);
+  
+  // Fetch stats for badges
+  const { data: stats } = useDashboardStats();
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -210,7 +233,8 @@ export function AppSidebar() {
   };
 
   const isChaineActive = chaineDepenseItems.some(item => isActive(item.url));
-  const isParametrageActive = [...parametrageItems, ...utilisateursItems, ...systemeItems].some(item => isActive(item.url));
+  const isExecutionActive = executionItems.some(item => isActive(item.url));
+  const isParametrageActive = [...parametrageItems, ...utilisateursItems, ...systemeItems, ...outilsAdminItems].some(item => isActive(item.url));
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -381,6 +405,87 @@ export function AppSidebar() {
           isActive={isActive} 
         />
 
+        {/* ========== EXÉCUTION BUDGÉTAIRE (Nouveau groupe extensible) ========== */}
+        <SidebarGroup className="mt-4">
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-primary uppercase text-[10px] font-bold tracking-wider mb-1 px-3 flex items-center gap-2">
+              <Activity className="h-3.5 w-3.5" />
+              Exécution Budgétaire
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <Collapsible
+                open={executionOpen}
+                onOpenChange={setExecutionOpen}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      tooltip="Suivi de l'exécution"
+                      className={cn(
+                        "w-full justify-between",
+                        isExecutionActive && "bg-sidebar-accent"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <TrendingUp className="h-4 w-4 shrink-0" />
+                        {!collapsed && (
+                          <span className="text-sm font-medium">Suivi Exécution</span>
+                        )}
+                      </div>
+                      {!collapsed && (
+                        <div className="flex items-center gap-2">
+                          {stats && (stats.engagementsAValider + stats.liquidationsAValider + stats.ordonnancementsAValider) > 0 && (
+                            <Badge className="text-[10px] px-1.5 py-0 h-5 bg-destructive/80 text-destructive-foreground">
+                              {stats.engagementsAValider + stats.liquidationsAValider + stats.ordonnancementsAValider}
+                            </Badge>
+                          )}
+                          <ChevronRight className={cn(
+                            "h-4 w-4 transition-transform",
+                            executionOpen && "rotate-90"
+                          )} />
+                        </div>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {executionItems.map((item) => {
+                        const badgeCount = item.badgeKey && stats ? (stats as any)[item.badgeKey] : 0;
+                        return (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                              <NavLink
+                                to={item.url}
+                                className={cn(
+                                  "flex items-center justify-between gap-2 text-sm py-1.5",
+                                  isActive(item.url) && "text-sidebar-primary font-medium"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <item.icon className="h-3.5 w-3.5" />
+                                  <span>{item.title}</span>
+                                </div>
+                                {badgeCount > 0 && (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-amber-100 text-amber-700 border-amber-200">
+                                    {badgeCount}
+                                  </Badge>
+                                )}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* ========== RAPPORTS ========== */}
         <MenuSection 
           title="Rapports" 
@@ -474,6 +579,27 @@ export function AppSidebar() {
                         Système
                       </div>
                       {systemeItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                            <NavLink
+                              to={item.url}
+                              className={cn(
+                                "flex items-center gap-2 text-sm py-1.5",
+                                isActive(item.url) && "text-sidebar-primary font-medium"
+                              )}
+                            >
+                              <item.icon className="h-3.5 w-3.5" />
+                              <span>{item.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                      
+                      {/* Outils */}
+                      <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                        Outils
+                      </div>
+                      {outilsAdminItems.map((item) => (
                         <SidebarMenuSubItem key={item.title}>
                           <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
                             <NavLink
