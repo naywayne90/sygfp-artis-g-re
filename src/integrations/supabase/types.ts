@@ -7392,6 +7392,223 @@ export type Database = {
           },
         ]
       }
+      passation_marche: {
+        Row: {
+          analyse_offres: Json | null
+          created_at: string | null
+          created_by: string | null
+          criteres_evaluation: Json | null
+          date_reprise: string | null
+          decision: string | null
+          differed_at: string | null
+          differed_by: string | null
+          dossier_id: string | null
+          exercice: number | null
+          expression_besoin_id: string | null
+          id: string
+          mode_passation: string
+          montant_retenu: number | null
+          motif_differe: string | null
+          motif_selection: string | null
+          pieces_jointes: Json | null
+          prestataire_retenu_id: string | null
+          prestataires_sollicites: Json | null
+          pv_evaluation: string | null
+          pv_ouverture: string | null
+          rapport_analyse: string | null
+          reference: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          seuil_montant: string | null
+          statut: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          type_procedure: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          analyse_offres?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          criteres_evaluation?: Json | null
+          date_reprise?: string | null
+          decision?: string | null
+          differed_at?: string | null
+          differed_by?: string | null
+          dossier_id?: string | null
+          exercice?: number | null
+          expression_besoin_id?: string | null
+          id?: string
+          mode_passation?: string
+          montant_retenu?: number | null
+          motif_differe?: string | null
+          motif_selection?: string | null
+          pieces_jointes?: Json | null
+          prestataire_retenu_id?: string | null
+          prestataires_sollicites?: Json | null
+          pv_evaluation?: string | null
+          pv_ouverture?: string | null
+          rapport_analyse?: string | null
+          reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          seuil_montant?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          type_procedure?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          analyse_offres?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          criteres_evaluation?: Json | null
+          date_reprise?: string | null
+          decision?: string | null
+          differed_at?: string | null
+          differed_by?: string | null
+          dossier_id?: string | null
+          exercice?: number | null
+          expression_besoin_id?: string | null
+          id?: string
+          mode_passation?: string
+          montant_retenu?: number | null
+          motif_differe?: string | null
+          motif_selection?: string | null
+          pieces_jointes?: Json | null
+          prestataire_retenu_id?: string | null
+          prestataires_sollicites?: Json | null
+          pv_evaluation?: string | null
+          pv_ouverture?: string | null
+          rapport_analyse?: string | null
+          reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          seuil_montant?: string | null
+          statut?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          type_procedure?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passation_marche_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_differed_by_fkey"
+            columns: ["differed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_differed_by_fkey"
+            columns: ["differed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "passation_marche_expression_besoin_id_fkey"
+            columns: ["expression_besoin_id"]
+            isOneToOne: false
+            referencedRelation: "expressions_besoin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_prestataire_retenu_id_fkey"
+            columns: ["prestataire_retenu_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_prestataire_retenu_id_fkey"
+            columns: ["prestataire_retenu_id"]
+            isOneToOne: false
+            referencedRelation: "prestataires_actifs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "passation_marche_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permission_actions: {
         Row: {
           category: string
