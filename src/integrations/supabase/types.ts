@@ -3612,12 +3612,14 @@ export type Database = {
           calendrier_debut: string | null
           calendrier_fin: string | null
           code_locked: boolean | null
+          contact_livraison: string | null
           created_at: string
           created_by: string | null
           criteres_evaluation: string | null
           current_validation_step: number | null
           date_differe: string | null
           deadline_correction: string | null
+          delai_livraison: string | null
           description: string | null
           differe_by: string | null
           direction_id: string | null
@@ -3627,6 +3629,7 @@ export type Database = {
           imputation_id: string | null
           intitule_lot: string | null
           justification: string | null
+          lieu_livraison: string | null
           ligne_budgetaire_id: string | null
           liste_articles: Json | null
           marche_id: string | null
@@ -3653,12 +3656,14 @@ export type Database = {
           calendrier_debut?: string | null
           calendrier_fin?: string | null
           code_locked?: boolean | null
+          contact_livraison?: string | null
           created_at?: string
           created_by?: string | null
           criteres_evaluation?: string | null
           current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
+          delai_livraison?: string | null
           description?: string | null
           differe_by?: string | null
           direction_id?: string | null
@@ -3668,6 +3673,7 @@ export type Database = {
           imputation_id?: string | null
           intitule_lot?: string | null
           justification?: string | null
+          lieu_livraison?: string | null
           ligne_budgetaire_id?: string | null
           liste_articles?: Json | null
           marche_id?: string | null
@@ -3694,12 +3700,14 @@ export type Database = {
           calendrier_debut?: string | null
           calendrier_fin?: string | null
           code_locked?: boolean | null
+          contact_livraison?: string | null
           created_at?: string
           created_by?: string | null
           criteres_evaluation?: string | null
           current_validation_step?: number | null
           date_differe?: string | null
           deadline_correction?: string | null
+          delai_livraison?: string | null
           description?: string | null
           differe_by?: string | null
           direction_id?: string | null
@@ -3709,6 +3717,7 @@ export type Database = {
           imputation_id?: string | null
           intitule_lot?: string | null
           justification?: string | null
+          lieu_livraison?: string | null
           ligne_budgetaire_id?: string | null
           liste_articles?: Json | null
           marche_id?: string | null
@@ -11588,6 +11597,19 @@ export type Database = {
           nb_reglements: number | null
           objet: string | null
           statut_global: string | null
+        }
+        Relationships: []
+      }
+      v_expressions_besoin_stats: {
+        Row: {
+          brouillon: number | null
+          differe: number | null
+          exercice: number | null
+          montant_valide_total: number | null
+          rejete: number | null
+          soumis: number | null
+          total: number | null
+          valide: number | null
         }
         Relationships: []
       }

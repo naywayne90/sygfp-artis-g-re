@@ -38,6 +38,10 @@ export interface ExpressionBesoin {
   deadline_correction: string | null;
   current_validation_step: number | null;
   validation_status: string | null;
+  // Nouveaux champs
+  lieu_livraison: string | null;
+  delai_livraison: string | null;
+  contact_livraison: string | null;
   // Joined data
   direction?: { id: string; code: string; label: string; sigle: string | null } | null;
   marche?: {
@@ -64,6 +68,19 @@ export interface ExpressionBesoin {
   } | null;
   creator?: { id: string; full_name: string | null } | null;
   validator?: { id: string; full_name: string | null } | null;
+  validations?: ExpressionBesoinValidation[];
+}
+
+export interface ExpressionBesoinValidation {
+  id: string;
+  expression_besoin_id: string;
+  step_order: number;
+  role: string;
+  status: string | null;
+  validated_by: string | null;
+  validated_at: string | null;
+  comments: string | null;
+  validator?: { id: string; full_name: string | null } | null;
 }
 
 export interface MarcheValide {
@@ -79,10 +96,9 @@ export interface MarcheValide {
 }
 
 export const VALIDATION_STEPS = [
-  { order: 1, role: "DEMANDEUR", label: "Demandeur" },
-  { order: 2, role: "CHEF_SERVICE", label: "Chef de Service" },
+  { order: 1, role: "CHEF_SERVICE", label: "Chef de Service" },
+  { order: 2, role: "SOUS_DIRECTEUR", label: "Sous-Directeur" },
   { order: 3, role: "DIRECTEUR", label: "Directeur" },
-  { order: 4, role: "CB", label: "Contrôleur Budgétaire" },
 ];
 
 export const URGENCE_OPTIONS = [
@@ -113,7 +129,11 @@ export function useExpressionsBesoin() {
           ),
           dossier:dossiers(id, numero, objet),
           creator:profiles!expressions_besoin_created_by_fkey(id, full_name),
-          validator:profiles!expressions_besoin_validated_by_fkey(id, full_name)
+          validator:profiles!expressions_besoin_validated_by_fkey(id, full_name),
+          validations:expression_besoin_validations(
+            id, expression_besoin_id, step_order, role, status, validated_by, validated_at, comments,
+            validator:profiles!expression_besoin_validations_validated_by_fkey(id, full_name)
+          )
         `)
         .eq("exercice", exercice)
         .order("created_at", { ascending: false });
@@ -288,25 +308,61 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Validate expression
+  // Validate expression (avance dans le workflow ou valide définitivement)
   const validateMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
+      // Récupérer l'expression actuelle
+      const { data: expression, error: fetchError } = await supabase
+        .from("expressions_besoin")
+        .select("current_validation_step")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const currentStep = expression.current_validation_step || 1;
+      const nextStep = currentStep + 1;
+      const isLastStep = nextStep > VALIDATION_STEPS.length;
+
+      // Enregistrer la validation de l'étape actuelle
+      await supabase.from("expression_besoin_validations").insert({
+        expression_besoin_id: id,
+        step_order: currentStep,
+        role: VALIDATION_STEPS.find(s => s.order === currentStep)?.role || "UNKNOWN",
+        status: "approved",
+        validated_at: new Date().toISOString(),
+        comments: comments || null,
+      });
+
+      // Mettre à jour l'expression
+      const updateData: any = {
+        current_validation_step: isLastStep ? currentStep : nextStep,
+        rejection_reason: null,
+        date_differe: null,
+        motif_differe: null,
+      };
+
+      if (isLastStep) {
+        updateData.statut = "validé";
+        updateData.validated_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from("expressions_besoin")
-        .update({
-          statut: "validé",
-          validated_at: new Date().toISOString(),
-          rejection_reason: null,
-          date_differe: null,
-          motif_differe: null,
-        })
+        .update(updateData)
         .eq("id", id);
 
       if (error) throw error;
+
+      return { isLastStep };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin validée");
+      if (result.isLastStep) {
+        toast.success("Expression de besoin validée définitivement !");
+      } else {
+        toast.success("Validation effectuée, transmis à l'étape suivante");
+      }
     },
     onError: (error) => {
       toast.error("Erreur lors de la validation: " + error.message);
