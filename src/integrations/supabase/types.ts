@@ -4179,8 +4179,12 @@ export type Database = {
           activite_id: string | null
           budget_line_id: string | null
           code_imputation: string | null
+          commentaire: string | null
           created_at: string
           created_by: string | null
+          date_differe: string | null
+          differed_at: string | null
+          differed_by: string | null
           direction_id: string | null
           dossier_id: string | null
           exercice: number
@@ -4189,23 +4193,37 @@ export type Database = {
           justification_depassement: string | null
           mission_id: string | null
           montant: number
+          motif_differe: string | null
+          motif_rejet: string | null
           nbe_id: string | null
           note_aef_id: string
           objet: string
           os_id: string | null
+          pieces_jointes: string[] | null
+          reference: string | null
+          rejected_at: string | null
+          rejected_by: string | null
           source_financement: string | null
           sous_activite_id: string | null
           statut: string
+          submitted_at: string | null
+          submitted_by: string | null
           sysco_id: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           action_id?: string | null
           activite_id?: string | null
           budget_line_id?: string | null
           code_imputation?: string | null
+          commentaire?: string | null
           created_at?: string
           created_by?: string | null
+          date_differe?: string | null
+          differed_at?: string | null
+          differed_by?: string | null
           direction_id?: string | null
           dossier_id?: string | null
           exercice: number
@@ -4214,23 +4232,37 @@ export type Database = {
           justification_depassement?: string | null
           mission_id?: string | null
           montant: number
+          motif_differe?: string | null
+          motif_rejet?: string | null
           nbe_id?: string | null
           note_aef_id: string
           objet: string
           os_id?: string | null
+          pieces_jointes?: string[] | null
+          reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           sysco_id?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           action_id?: string | null
           activite_id?: string | null
           budget_line_id?: string | null
           code_imputation?: string | null
+          commentaire?: string | null
           created_at?: string
           created_by?: string | null
+          date_differe?: string | null
+          differed_at?: string | null
+          differed_by?: string | null
           direction_id?: string | null
           dossier_id?: string | null
           exercice?: number
@@ -4239,15 +4271,25 @@ export type Database = {
           justification_depassement?: string | null
           mission_id?: string | null
           montant?: number
+          motif_differe?: string | null
+          motif_rejet?: string | null
           nbe_id?: string | null
           note_aef_id?: string
           objet?: string
           os_id?: string | null
+          pieces_jointes?: string[] | null
+          reference?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
           source_financement?: string | null
           sous_activite_id?: string | null
           statut?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
           sysco_id?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
           {
@@ -4281,6 +4323,20 @@ export type Database = {
           {
             foreignKeyName: "imputations_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_differed_by_fkey"
+            columns: ["differed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_differed_by_fkey"
+            columns: ["differed_by"]
             isOneToOne: false
             referencedRelation: "profiles_display"
             referencedColumns: ["id"]
@@ -4342,6 +4398,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "imputations_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "imputations_sous_activite_id_fkey"
             columns: ["sous_activite_id"]
             isOneToOne: false
@@ -4349,10 +4419,38 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "imputations_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "imputations_sysco_id_fkey"
             columns: ["sysco_id"]
             isOneToOne: false
             referencedRelation: "plan_comptable_sysco"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
             referencedColumns: ["id"]
           },
         ]
