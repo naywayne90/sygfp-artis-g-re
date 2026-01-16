@@ -17,9 +17,11 @@ export interface Dossier {
   montant_engage: number;
   montant_liquide: number;
   montant_ordonnance: number;
+  montant_paye: number;
   statut_global: string;
   statut_paiement: string | null;
   etape_courante: string;
+  date_cloture: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

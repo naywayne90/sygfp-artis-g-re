@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import { 
   FileText, 
   Clock, 
@@ -18,7 +19,14 @@ import {
   Building2,
   User,
   Calendar,
-  Banknote
+  Banknote,
+  ArrowRight,
+  Wallet,
+  FileSignature,
+  Receipt,
+  ShoppingCart,
+  FileCheck,
+  PartyPopper
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { format } from "date-fns";
@@ -31,13 +39,27 @@ interface DossierDetailsProps {
 }
 
 const ETAPE_LABELS: Record<string, string> = {
-  note: "Note",
+  note_sef: "Note SEF",
+  note_aef: "Note AEF",
+  imputation: "Imputation",
   expression_besoin: "Expression de besoin",
-  marche: "Marché",
+  passation_marche: "Passation marché",
   engagement: "Engagement",
   liquidation: "Liquidation",
   ordonnancement: "Ordonnancement",
   reglement: "Règlement",
+};
+
+const ETAPE_ICONS: Record<string, React.ReactNode> = {
+  note_sef: <FileText className="h-4 w-4" />,
+  note_aef: <FileCheck className="h-4 w-4" />,
+  imputation: <Receipt className="h-4 w-4" />,
+  expression_besoin: <ShoppingCart className="h-4 w-4" />,
+  passation_marche: <Building2 className="h-4 w-4" />,
+  engagement: <FileSignature className="h-4 w-4" />,
+  liquidation: <Receipt className="h-4 w-4" />,
+  ordonnancement: <FileCheck className="h-4 w-4" />,
+  reglement: <Wallet className="h-4 w-4" />,
 };
 
 const CATEGORIE_LABELS: Record<string, string> = {
@@ -56,6 +78,18 @@ const STATUT_ICONS: Record<string, React.ReactNode> = {
   rejete: <XCircle className="h-4 w-4 text-red-500" />,
   en_cours: <AlertCircle className="h-4 w-4 text-blue-500" />,
 };
+
+const WORKFLOW_STEPS = [
+  { key: "note_sef", label: "SEF" },
+  { key: "note_aef", label: "AEF" },
+  { key: "imputation", label: "Imputation" },
+  { key: "expression_besoin", label: "EB" },
+  { key: "passation_marche", label: "PM" },
+  { key: "engagement", label: "Engagement" },
+  { key: "liquidation", label: "Liquidation" },
+  { key: "ordonnancement", label: "Ordo." },
+  { key: "reglement", label: "Règlement" },
+];
 
 export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsProps) {
   const [etapes, setEtapes] = useState<DossierEtape[]>([]);
@@ -85,11 +119,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
   };
 
   const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-    }).format(montant);
+    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
   };
 
   const handleDeleteDocument = async (docId: string) => {
@@ -101,28 +131,45 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
 
   if (!dossier) return null;
 
+  // Déterminer le statut de clôture
+  const isCloture = dossier.statut_global === "cloture" || dossier.statut_paiement === "solde";
+  const montantPaye = dossier.montant_paye || 0;
+  const montantEngage = dossier.montant_engage || 0;
+  const progressPaiement = montantEngage > 0 ? (montantPaye / montantEngage) * 100 : 0;
+  
+  // Trouver l'index de l'étape courante
+  const currentStepIndex = WORKFLOW_STEPS.findIndex(s => s.key === dossier.etape_courante);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <span className="font-mono text-primary">{dossier.numero}</span>
-            <Badge variant={dossier.statut_global === "en_cours" ? "default" : "secondary"}>
-              {dossier.statut_global === "en_cours" ? "En cours" :
-               dossier.statut_global === "termine" ? "Terminé" :
-               dossier.statut_global === "annule" ? "Annulé" : "Suspendu"}
-            </Badge>
+            <span className="font-mono text-primary text-xl">{dossier.numero}</span>
+            {isCloture ? (
+              <Badge className="bg-success text-success-foreground gap-1">
+                <PartyPopper className="h-3 w-3" />
+                Clôturé
+              </Badge>
+            ) : (
+              <Badge variant={dossier.statut_global === "en_cours" ? "default" : "secondary"}>
+                {dossier.statut_global === "en_cours" ? "En cours" :
+                 dossier.statut_global === "termine" ? "Terminé" :
+                 dossier.statut_global === "annule" ? "Annulé" : "Suspendu"}
+              </Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="resume" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="resume">Résumé</TabsTrigger>
+            <TabsTrigger value="chaine">Chaîne dépense</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="documents">Documents ({documents.length})</TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[500px] mt-4">
+          <ScrollArea className="h-[550px] mt-4">
             <TabsContent value="resume" className="space-y-4">
               <Card>
                 <CardHeader>
@@ -131,7 +178,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-medium text-muted-foreground mb-1">Objet</h4>
-                    <p>{dossier.objet}</p>
+                    <p className="text-lg">{dossier.objet}</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -174,6 +221,18 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                         </p>
                       </div>
                     </div>
+
+                    {dossier.date_cloture && (
+                      <div className="flex items-center gap-2 col-span-2">
+                        <CheckCircle className="h-4 w-4 text-success" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Date de clôture</p>
+                          <p className="font-medium text-success">
+                            {format(new Date(dossier.date_cloture), "dd MMMM yyyy à HH:mm", { locale: fr })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -185,23 +244,120 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
                     Suivi financier
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Estimé</p>
-                      <p className="text-lg font-bold">{formatMontant(dossier.montant_estime)}</p>
+                      <p className="text-xs text-muted-foreground">Estimé</p>
+                      <p className="text-sm font-bold">{formatMontant(dossier.montant_estime)}</p>
                     </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Engagé</p>
-                      <p className="text-lg font-bold text-blue-600">{formatMontant(dossier.montant_engage)}</p>
+                    <div className="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                      <p className="text-xs text-blue-600">Engagé</p>
+                      <p className="text-sm font-bold text-blue-600">{formatMontant(dossier.montant_engage)}</p>
                     </div>
-                    <div className="text-center p-3 bg-orange-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Liquidé</p>
-                      <p className="text-lg font-bold text-orange-600">{formatMontant(dossier.montant_liquide)}</p>
+                    <div className="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                      <p className="text-xs text-orange-600">Liquidé</p>
+                      <p className="text-sm font-bold text-orange-600">{formatMontant(dossier.montant_liquide)}</p>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Ordonnancé</p>
-                      <p className="text-lg font-bold text-green-600">{formatMontant(dossier.montant_ordonnance)}</p>
+                    <div className="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                      <p className="text-xs text-purple-600">Ordonnancé</p>
+                      <p className="text-sm font-bold text-purple-600">{formatMontant(dossier.montant_ordonnance || 0)}</p>
+                    </div>
+                    <div className={`text-center p-3 rounded-lg border ${isCloture ? 'bg-success/10 border-success/20' : 'bg-emerald-500/10 border-emerald-500/20'}`}>
+                      <p className={`text-xs ${isCloture ? 'text-success' : 'text-emerald-600'}`}>Payé</p>
+                      <p className={`text-sm font-bold ${isCloture ? 'text-success' : 'text-emerald-600'}`}>{formatMontant(montantPaye)}</p>
+                    </div>
+                  </div>
+
+                  {/* Barre de progression du paiement */}
+                  <div className="pt-2">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm text-muted-foreground">Progression du paiement</span>
+                      <span className="text-sm font-medium">{progressPaiement.toFixed(0)}%</span>
+                    </div>
+                    <Progress value={progressPaiement} className="h-3" />
+                    <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                      <span>Payé: {formatMontant(montantPaye)}</span>
+                      <span>Engagé: {formatMontant(montantEngage)}</span>
+                    </div>
+                  </div>
+
+                  {isCloture && (
+                    <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg">
+                      <PartyPopper className="h-5 w-5 text-success" />
+                      <div>
+                        <p className="font-medium text-success">Dossier soldé et clôturé</p>
+                        <p className="text-xs text-success/80">
+                          Paiement intégral effectué - chaîne de dépense terminée
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="chaine" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Progression dans la chaîne de dépense</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Workflow visuel */}
+                  <div className="flex items-center justify-between overflow-x-auto pb-4">
+                    {WORKFLOW_STEPS.map((step, index) => {
+                      const isPast = index < currentStepIndex;
+                      const isCurrent = index === currentStepIndex;
+                      const isFuture = index > currentStepIndex;
+                      const isComplete = isCloture && index <= currentStepIndex;
+                      
+                      return (
+                        <div key={step.key} className="flex items-center">
+                          <div className={`flex flex-col items-center min-w-[70px] ${isFuture ? 'opacity-40' : ''}`}>
+                            <div className={`
+                              w-10 h-10 rounded-full flex items-center justify-center mb-2
+                              ${isComplete ? 'bg-success text-success-foreground' : 
+                                isCurrent ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 
+                                isPast ? 'bg-primary/80 text-primary-foreground' : 
+                                'bg-muted text-muted-foreground'}
+                            `}>
+                              {isComplete ? (
+                                <CheckCircle className="h-5 w-5" />
+                              ) : (
+                                ETAPE_ICONS[step.key] || <FileText className="h-4 w-4" />
+                              )}
+                            </div>
+                            <span className={`text-xs text-center font-medium ${isCurrent ? 'text-primary' : ''}`}>
+                              {step.label}
+                            </span>
+                          </div>
+                          {index < WORKFLOW_STEPS.length - 1 && (
+                            <ArrowRight className={`h-4 w-4 mx-1 flex-shrink-0 ${isPast || isCurrent ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <Separator className="my-4" />
+
+                  {/* Détails par étape */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm text-muted-foreground">Détails des montants par étape</h4>
+                    <div className="grid gap-2">
+                      {[
+                        { label: "Montant estimé (EB/PM)", value: dossier.montant_estime, color: "text-muted-foreground" },
+                        { label: "Montant engagé", value: dossier.montant_engage, color: "text-blue-600" },
+                        { label: "Montant liquidé", value: dossier.montant_liquide, color: "text-orange-600" },
+                        { label: "Montant ordonnancé", value: dossier.montant_ordonnance || 0, color: "text-purple-600" },
+                        { label: "Montant payé", value: montantPaye, color: isCloture ? "text-success" : "text-emerald-600" },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center py-2 px-3 bg-muted/30 rounded">
+                          <span className="text-sm">{item.label}</span>
+                          <span className={`font-mono font-medium ${item.color}`}>
+                            {formatMontant(item.value)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
