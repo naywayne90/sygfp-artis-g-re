@@ -3,20 +3,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 
 export interface DashboardStats {
+  // Notes SEF
+  notesSEFTotal: number;
+  notesSEFEnAttente: number;
+  notesSEFAValider: number;
+  notesSEFValidees: number;
+  // Notes AEF
+  notesAEFTotal: number;
+  notesAEFEnAttente: number;
+  notesAEFAValider: number;
+  notesAEFImputees: number;
+  // Legacy (pour compatibilité)
   notesEnAttente: number;
   notesTotal: number;
   notesAValider: number;
+  // Engagements
   engagementsEnCours: number;
   engagementsTotal: number;
   engagementsAValider: number;
+  // Liquidations
   liquidationsATraiter: number;
   liquidationsTotal: number;
   liquidationsAValider: number;
+  // Ordonnancements
   ordonnancements: number;
   ordonnancementsEnSignature: number;
   ordonnancementsAValider: number;
+  // Marchés
   marchesEnCours: number;
   marchesTotal: number;
+  // Budget
   budgetTotal: number;
   budgetEngage: number;
   budgetLiquide: number;
@@ -48,17 +64,36 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ["dashboard-stats", exercice],
     queryFn: async (): Promise<DashboardStats> => {
-      // Fetch notes stats
-      const { data: notes, error: notesError } = await supabase
+      // Fetch Notes SEF stats
+      const { data: notesSEF, error: notesSEFError } = await supabase
+        .from("notes_sef")
+        .select("id, statut")
+        .eq("exercice", exercice);
+
+      if (notesSEFError) throw notesSEFError;
+
+      const notesSEFTotal = notesSEF?.length || 0;
+      const notesSEFEnAttente = notesSEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente").length || 0;
+      const notesSEFAValider = notesSEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente" || n.statut === "a_valider_dg").length || 0;
+      const notesSEFValidees = notesSEF?.filter(n => n.statut === "valide" || n.statut === "valide_auto").length || 0;
+
+      // Fetch Notes AEF stats
+      const { data: notesAEF, error: notesAEFError } = await supabase
         .from("notes_dg")
         .select("id, statut")
         .eq("exercice", exercice);
 
-      if (notesError) throw notesError;
+      if (notesAEFError) throw notesAEFError;
 
-      const notesEnAttente = notes?.filter(n => n.statut === "en_attente" || n.statut === "soumis").length || 0;
-      const notesAValider = notes?.filter(n => n.statut === "soumis" || n.statut === "en_attente").length || 0;
-      const notesTotal = notes?.length || 0;
+      const notesAEFTotal = notesAEF?.length || 0;
+      const notesAEFEnAttente = notesAEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente").length || 0;
+      const notesAEFAValider = notesAEF?.filter(n => n.statut === "soumis" || n.statut === "a_valider").length || 0;
+      const notesAEFImputees = notesAEF?.filter(n => n.statut === "impute").length || 0;
+
+      // Legacy totaux combinés
+      const notesTotal = notesSEFTotal + notesAEFTotal;
+      const notesEnAttente = notesSEFEnAttente + notesAEFEnAttente;
+      const notesAValider = notesSEFAValider + notesAEFAValider;
 
       // Fetch engagements stats
       const { data: engagements, error: engagementsError } = await supabase
@@ -185,9 +220,21 @@ export function useDashboardStats() {
         .slice(0, 5);
 
       return {
+        // Notes SEF
+        notesSEFTotal,
+        notesSEFEnAttente,
+        notesSEFAValider,
+        notesSEFValidees,
+        // Notes AEF
+        notesAEFTotal,
+        notesAEFEnAttente,
+        notesAEFAValider,
+        notesAEFImputees,
+        // Legacy
         notesEnAttente,
         notesTotal,
         notesAValider,
+        // Autres
         engagementsEnCours,
         engagementsTotal,
         engagementsAValider,

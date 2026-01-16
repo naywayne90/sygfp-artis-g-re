@@ -5837,6 +5837,8 @@ export type Database = {
           action_id: string | null
           activite_id: string | null
           beneficiaire_id: string | null
+          budget_bloque: boolean | null
+          budget_bloque_raison: string | null
           budget_line_id: string | null
           contenu: string | null
           created_at: string
@@ -5854,6 +5856,7 @@ export type Database = {
           justification: string | null
           legacy_import: boolean | null
           ligne_budgetaire_id: string | null
+          montant_autorise: number | null
           montant_estime: number | null
           motif_differe: string | null
           note_sef_id: string | null
@@ -5878,6 +5881,8 @@ export type Database = {
           action_id?: string | null
           activite_id?: string | null
           beneficiaire_id?: string | null
+          budget_bloque?: boolean | null
+          budget_bloque_raison?: string | null
           budget_line_id?: string | null
           contenu?: string | null
           created_at?: string
@@ -5895,6 +5900,7 @@ export type Database = {
           justification?: string | null
           legacy_import?: boolean | null
           ligne_budgetaire_id?: string | null
+          montant_autorise?: number | null
           montant_estime?: number | null
           motif_differe?: string | null
           note_sef_id?: string | null
@@ -5919,6 +5925,8 @@ export type Database = {
           action_id?: string | null
           activite_id?: string | null
           beneficiaire_id?: string | null
+          budget_bloque?: boolean | null
+          budget_bloque_raison?: string | null
           budget_line_id?: string | null
           contenu?: string | null
           created_at?: string
@@ -5936,6 +5944,7 @@ export type Database = {
           justification?: string | null
           legacy_import?: boolean | null
           ligne_budgetaire_id?: string | null
+          montant_autorise?: number | null
           montant_estime?: number | null
           motif_differe?: string | null
           note_sef_id?: string | null
@@ -11313,6 +11322,16 @@ export type Database = {
           niveau: string
           seuil: number
           taux: number
+        }[]
+      }
+      check_budget_availability: {
+        Args: { p_budget_line_id: string; p_montant: number }
+        Returns: {
+          disponible: number
+          dotation: number
+          engaged: number
+          is_available: boolean
+          message: string
         }[]
       }
       check_permission_with_conditions: {
