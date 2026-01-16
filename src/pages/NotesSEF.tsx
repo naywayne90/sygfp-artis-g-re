@@ -26,6 +26,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Edit,
   Download,
   Loader2,
 } from "lucide-react";
@@ -62,6 +63,7 @@ export default function NotesSEF() {
     validateNote,
     rejectNote,
     deferNote,
+    resubmitNote,
     deleteNote,
   } = useNotesSEF();
 
@@ -74,6 +76,8 @@ export default function NotesSEF() {
 
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
 
+  // Compteurs dérivés
+  const brouillonsCount = counts.brouillon;
   // Compteur "À valider" = soumis + a_valider
   const aValiderCount = counts.soumis + counts.a_valider;
 
@@ -140,6 +144,11 @@ export default function NotesSEF() {
 
   const handleDelete = async (noteId: string) => {
     await deleteNote(noteId);
+    refetch();
+  };
+
+  const handleResume = async (noteId: string) => {
+    await resubmitNote(noteId);
     refetch();
   };
 
@@ -213,7 +222,7 @@ export default function NotesSEF() {
       </div>
 
       {/* KPIs - Compteurs serveur-side */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-6">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -222,6 +231,19 @@ export default function NotesSEF() {
                 <p className="text-2xl font-bold">{counts.total}</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-muted">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Brouillons</p>
+                <p className="text-2xl font-bold text-muted-foreground">
+                  {brouillonsCount}
+                </p>
+              </div>
+              <Edit className="h-8 w-8 text-muted-foreground/50" />
             </div>
           </CardContent>
         </Card>
@@ -296,8 +318,11 @@ export default function NotesSEF() {
 
       {/* Tabs - Filtre serveur-side */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
+          <TabsTrigger value="brouillons">
+            Brouillons ({brouillonsCount})
+          </TabsTrigger>
           <TabsTrigger value="a_valider">
             À valider ({aValiderCount})
           </TabsTrigger>
@@ -328,6 +353,23 @@ export default function NotesSEF() {
             onRetry={refetch}
             isLoading={isLoading}
             error={listError}
+          />
+        </TabsContent>
+
+        <TabsContent value="brouillons">
+          <NoteSEFList
+            notes={filteredNotes as NoteSEF[]}
+            title="Brouillons"
+            description="Notes en cours de rédaction"
+            onView={(note) => setViewingNote(note)}
+            onEdit={handleEdit}
+            onSubmit={handleSubmit}
+            onDelete={handleDelete}
+            onCreate={() => setFormOpen(true)}
+            onRetry={refetch}
+            isLoading={isLoading}
+            error={listError}
+            emptyMessage="Aucun brouillon"
           />
         </TabsContent>
 
@@ -369,6 +411,7 @@ export default function NotesSEF() {
             description="Notes en attente de conditions de reprise"
             onView={(note) => setViewingNote(note)}
             onValidate={canValidate ? handleValidate : undefined}
+            onResume={handleResume}
             showActions={true}
             onRetry={refetch}
             isLoading={isLoading}

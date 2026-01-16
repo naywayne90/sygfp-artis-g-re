@@ -381,6 +381,16 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Affichage de la référence en lecture seule (mode édition uniquement) */}
+          {note && (note.reference_pivot || note.numero) && (
+            <div className="bg-muted/50 rounded-lg p-3 border">
+              <Label className="text-xs text-muted-foreground">Référence (lecture seule)</Label>
+              <p className="font-mono text-lg font-semibold text-primary mt-1">
+                {note.reference_pivot || note.numero}
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             {/* Objet */}
             <div className="col-span-2">

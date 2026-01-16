@@ -103,6 +103,8 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
   // Convertir l'onglet actif en filtre de statut
   const statutFilter = useMemo(() => {
     switch (activeTab) {
+      case 'brouillons':
+        return 'brouillon';
       case 'a_valider':
         return ['soumis', 'a_valider']; // Soumis + À valider
       case 'validees':
