@@ -767,6 +767,7 @@ export type Database = {
           note_id: string | null
           numero: string
           objet: string
+          passation_marche_id: string | null
           project_id: string | null
           required_documents: string[] | null
           statut: string | null
@@ -797,6 +798,7 @@ export type Database = {
           note_id?: string | null
           numero: string
           objet: string
+          passation_marche_id?: string | null
           project_id?: string | null
           required_documents?: string[] | null
           statut?: string | null
@@ -827,6 +829,7 @@ export type Database = {
           note_id?: string | null
           numero?: string
           objet?: string
+          passation_marche_id?: string | null
           project_id?: string | null
           required_documents?: string[] | null
           statut?: string | null
@@ -896,6 +899,13 @@ export type Database = {
             columns: ["note_id"]
             isOneToOne: false
             referencedRelation: "notes_imputees_disponibles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_passation_marche_id_fkey"
+            columns: ["passation_marche_id"]
+            isOneToOne: false
+            referencedRelation: "passation_marche"
             referencedColumns: ["id"]
           },
           {
