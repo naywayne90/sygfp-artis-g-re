@@ -751,7 +751,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: NoteAEFAuditAction.VALIDATE,
+        action: "validate",
         oldValues: { statut: oldStatut },
         newValues: { 
           statut: newStatut,
@@ -830,7 +830,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: NoteAEFAuditAction.REJECT,
+        action: "reject",
         oldValues: { statut: oldStatut },
         newValues: { 
           statut: newStatut,
@@ -918,7 +918,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: NoteAEFAuditAction.DEFER,
+        action: "defer",
         oldValues: { statut: oldStatut },
         newValues: { 
           statut: newStatut,
@@ -991,7 +991,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: NoteAEFAuditAction.IMPUTE,
+        action: "update",  // Imputation is an update action
         oldValues: { statut: oldStatut },
         newValues: { 
           statut: newStatut,
