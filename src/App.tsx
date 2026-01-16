@@ -61,6 +61,7 @@ import AideImportBudget from "./pages/planification/AideImportBudget";
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
 import ImputationPage from "./pages/execution/ImputationPage";
 import DashboardExecution from "./pages/execution/DashboardExecution";
+import PassationMarche from "./pages/execution/PassationMarche";
 
 // Pages Approvisionnement
 import Approvisionnement from "./pages/approvisionnement/Approvisionnement";
@@ -154,6 +155,7 @@ const App = () => (
               <Route path="/notes-aef/:id" element={<NoteAEFDetail />} />
               <Route path="/execution/imputation" element={<ImputationPage />} />
               <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
+              <Route path="/execution/passation-marche" element={<PassationMarche />} />
               <Route path="/marches" element={<Marches />} />
               <Route path="/engagements" element={<Engagements />} />
               <Route path="/liquidations" element={<Liquidations />} />
