@@ -20,6 +20,12 @@ export interface NoteSEF {
   date_souhaitee: string | null;
   urgence: string | null;
   commentaire: string | null;
+  // Nouveaux champs
+  montant_estime: number | null;
+  type_depense: string | null;
+  os_id: string | null;
+  mission_id: string | null;
+  // Statuts
   statut: string | null;
   rejection_reason: string | null;
   rejected_by: string | null;
@@ -44,6 +50,8 @@ export interface NoteSEF {
   beneficiaire?: { id: string; raison_sociale: string };
   beneficiaire_interne?: { id: string; first_name: string | null; last_name: string | null };
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
+  objectif_strategique?: { id: string; code: string; libelle: string } | null;
+  mission?: { id: string; code: string; libelle: string } | null;
   // Relation vers dossier
   dossier?: { id: string; numero: string; statut_global: string | null };
 }
@@ -80,6 +88,8 @@ export function useNotesSEF() {
           beneficiaire:prestataires!beneficiaire_id(id, raison_sociale),
           beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
           created_by_profile:profiles!created_by(id, first_name, last_name),
+          objectif_strategique:objectifs_strategiques!os_id(id, code, libelle),
+          mission:missions!mission_id(id, code, libelle),
           dossier:dossiers!dossier_id(id, numero, statut_global)
         `)
         .order("created_at", { ascending: false });
@@ -155,6 +165,11 @@ export function useNotesSEF() {
           beneficiaire_interne_id: noteData.beneficiaire_interne_id,
           urgence: noteData.urgence,
           commentaire: noteData.commentaire,
+          // Nouveaux champs
+          montant_estime: noteData.montant_estime || 0,
+          type_depense: noteData.type_depense,
+          os_id: noteData.os_id,
+          mission_id: noteData.mission_id,
           exercice: exercice || new Date().getFullYear(),
           created_by: user.id,
           // reference_pivot sera généré par trigger

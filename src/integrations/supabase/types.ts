@@ -6199,8 +6199,11 @@ export type Database = {
           id: string
           is_deleted: boolean | null
           justification: string | null
+          mission_id: string | null
+          montant_estime: number | null
           numero: string | null
           objet: string
+          os_id: string | null
           reference_pivot: string | null
           rejected_at: string | null
           rejected_by: string | null
@@ -6208,6 +6211,7 @@ export type Database = {
           statut: string | null
           submitted_at: string | null
           submitted_by: string | null
+          type_depense: string | null
           updated_at: string
           urgence: string | null
           validated_at: string | null
@@ -6240,8 +6244,11 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           justification?: string | null
+          mission_id?: string | null
+          montant_estime?: number | null
           numero?: string | null
           objet: string
+          os_id?: string | null
           reference_pivot?: string | null
           rejected_at?: string | null
           rejected_by?: string | null
@@ -6249,6 +6256,7 @@ export type Database = {
           statut?: string | null
           submitted_at?: string | null
           submitted_by?: string | null
+          type_depense?: string | null
           updated_at?: string
           urgence?: string | null
           validated_at?: string | null
@@ -6281,8 +6289,11 @@ export type Database = {
           id?: string
           is_deleted?: boolean | null
           justification?: string | null
+          mission_id?: string | null
+          montant_estime?: number | null
           numero?: string | null
           objet?: string
+          os_id?: string | null
           reference_pivot?: string | null
           rejected_at?: string | null
           rejected_by?: string | null
@@ -6290,6 +6301,7 @@ export type Database = {
           statut?: string | null
           submitted_at?: string | null
           submitted_by?: string | null
+          type_depense?: string | null
           updated_at?: string
           urgence?: string | null
           validated_at?: string | null
@@ -6400,6 +6412,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
             referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "notes_sef_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_sef_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "notes_sef_rejected_by_fkey"
