@@ -339,6 +339,11 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         urgence: formData.urgence,
         date_souhaitee: formData.date_souhaitee ? format(formData.date_souhaitee, 'yyyy-MM-dd') : null,
         commentaire: formData.commentaire,
+        // Nouveaux champs
+        montant_estime: formData.montant_estime || null,
+        type_depense: formData.type_depense || null,
+        os_id: formData.os_id || null,
+        mission_id: formData.mission_id || null,
       };
 
       if (note) {
@@ -608,6 +613,85 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
                   {errors.justification}
                 </p>
               )}
+            </div>
+
+            {/* Section Budget et Programmation */}
+            <div className="col-span-2 space-y-4 p-4 rounded-lg border bg-primary/5">
+              <Label className="text-base font-medium">Informations budgétaires</Label>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {/* Montant estimé */}
+                <div>
+                  <Label htmlFor="montant_estime">Montant estimé (FCFA)</Label>
+                  <Input
+                    id="montant_estime"
+                    type="number"
+                    min={0}
+                    value={formData.montant_estime || ""}
+                    onChange={(e) => setFormData({ ...formData, montant_estime: parseFloat(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                </div>
+
+                {/* Type de dépense */}
+                <div>
+                  <Label htmlFor="type_depense">Type de dépense</Label>
+                  <Select
+                    value={formData.type_depense}
+                    onValueChange={(value) => setFormData({ ...formData, type_depense: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fonctionnement">Fonctionnement</SelectItem>
+                      <SelectItem value="investissement">Investissement</SelectItem>
+                      <SelectItem value="personnel">Personnel</SelectItem>
+                      <SelectItem value="transfert">Transfert</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Objectif Stratégique */}
+                <div>
+                  <Label htmlFor="os_id">Objectif Stratégique</Label>
+                  <Select
+                    value={formData.os_id}
+                    onValueChange={(value) => setFormData({ ...formData, os_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un OS" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {objectifsStrategiques.map((os) => (
+                        <SelectItem key={os.id} value={os.id}>
+                          {os.code} - {os.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Mission */}
+                <div>
+                  <Label htmlFor="mission_id">Mission</Label>
+                  <Select
+                    value={formData.mission_id}
+                    onValueChange={(value) => setFormData({ ...formData, mission_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une mission" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {missionsList.map((mission) => (
+                        <SelectItem key={mission.id} value={mission.id}>
+                          {mission.code} - {mission.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
             {/* Section Bénéficiaire */}
