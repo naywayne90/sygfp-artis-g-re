@@ -246,7 +246,10 @@ export const notesSefService = {
       for (const note of data || []) {
         counts.total++;
         const statut = note.statut || 'brouillon';
-        if (statut in counts) {
+        // Grouper valide_auto avec valide dans le compteur
+        if (statut === 'valide_auto') {
+          counts.valide++;
+        } else if (statut in counts) {
           (counts as any)[statut]++;
         }
       }
