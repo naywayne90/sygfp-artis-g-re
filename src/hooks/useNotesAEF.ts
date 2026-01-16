@@ -4,6 +4,12 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useARTIReference } from "@/hooks/useARTIReference";
+import { 
+  NoteAEFStatut, 
+  isValidTransitionAEF, 
+  NoteAEFAuditAction,
+  getAvailableTransitionsAEF 
+} from "@/lib/notes-aef/constants";
 
 export interface NoteAEF {
   id: string;
@@ -516,6 +522,20 @@ export function useNotesAEF() {
 
       if (fetchError) throw new Error("Note introuvable");
 
+      const oldStatut = note.statut || NoteAEFStatut.DRAFT;
+      const newStatut = NoteAEFStatut.SUBMITTED;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // MACHINE À ÉTATS: Valider la transition
+      // ═══════════════════════════════════════════════════════════════════════
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
+
       // Validations des champs requis
       const errors: string[] = [];
       if (!note.objet?.trim()) errors.push("Objet");
@@ -587,12 +607,18 @@ export function useNotesAEF() {
             throw new Error("Erreur lors de la création automatique de la Note SEF");
           }
 
-          // Log création SEF shadow
+          // Log création SEF shadow avec audit enrichi
           await logAction({
             entityType: "note_sef",
             entityId: shadowSef.id,
             action: "create",
-            newValues: { ...shadowSef, is_shadow: true, created_via: "SUBMIT_AUTO_LINK" },
+            oldValues: { statut: null },
+            newValues: { 
+              statut: "valide_auto",
+              is_shadow: true, 
+              created_via: "SUBMIT_AUTO_LINK",
+              linked_aef_id: noteId,
+            },
           });
 
           updatedSefId = shadowSef.id;
@@ -609,7 +635,7 @@ export function useNotesAEF() {
 
       // Préparer les données de mise à jour
       const updateData: Record<string, unknown> = {
-        statut: "soumis",
+        statut: newStatut,
         submitted_at: new Date().toISOString(),
         submitted_by: user.id,
       };
@@ -631,14 +657,17 @@ export function useNotesAEF() {
 
       if (error) throw error;
 
-      // Log action submit (avec info auto-link si applicable)
+      // Log action submit avec audit enrichi (old_statut, new_statut)
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
         action: "submit",
-        newValues: autoLinkedSef 
-          ? { statut: "soumis", auto_linked_sef_id: updatedSefId, reference_pivot: updatedReferencePivot, via_auto_link: true }
-          : { statut: "soumis" },
+        oldValues: { statut: oldStatut },
+        newValues: { 
+          statut: newStatut,
+          reference_pivot: updatedReferencePivot,
+          ...(autoLinkedSef && { auto_linked_sef_id: updatedSefId, via_auto_link: true }),
+        },
       });
 
       return data;
@@ -674,11 +703,25 @@ export function useNotesAEF() {
       // Récupérer la note pour vérification de cohérence
       const { data: note, error: fetchError } = await supabase
         .from("notes_dg")
-        .select("id, note_sef_id, reference_pivot, objet")
+        .select("id, note_sef_id, reference_pivot, objet, statut")
         .eq("id", noteId)
         .single();
 
       if (fetchError) throw new Error("Note introuvable");
+
+      const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
+      const newStatut = NoteAEFStatut.TO_IMPUTE;
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // MACHINE À ÉTATS: Valider la transition
+      // ═══════════════════════════════════════════════════════════════════════
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
 
       // ═══════════════════════════════════════════════════════════════════════
       // GUARD FINAL: Impossible de valider une AEF sans référence SEF valide
@@ -694,7 +737,7 @@ export function useNotesAEF() {
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
-          statut: "a_imputer", // Nouveau statut: validée, en attente d'imputation
+          statut: newStatut,
           validated_by: user.id,
           validated_at: new Date().toISOString(),
         })
@@ -704,11 +747,17 @@ export function useNotesAEF() {
 
       if (error) throw error;
 
+      // Log action validate avec audit enrichi (old_statut, new_statut)
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "validate",
-        newValues: { statut: "a_imputer" },
+        action: NoteAEFAuditAction.VALIDATE,
+        oldValues: { statut: oldStatut },
+        newValues: { 
+          statut: newStatut,
+          validated_by: user.id,
+          validated_at: data.validated_at,
+        },
       });
 
       return data;
@@ -742,10 +791,31 @@ export function useNotesAEF() {
         throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note AEF");
       }
 
+      // Récupérer le statut actuel pour l'audit
+      const { data: note, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("statut")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw new Error("Note introuvable");
+
+      const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
+      const newStatut = NoteAEFStatut.REJECTED;
+
+      // MACHINE À ÉTATS: Valider la transition
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
-          statut: "rejete",
+          statut: newStatut,
           rejection_reason: motif,
           rejected_by: user.id,
           rejected_at: new Date().toISOString(),
@@ -756,11 +826,18 @@ export function useNotesAEF() {
 
       if (error) throw error;
 
+      // Log action reject avec audit enrichi
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "reject",
-        newValues: { statut: "rejete", motif },
+        action: NoteAEFAuditAction.REJECT,
+        oldValues: { statut: oldStatut },
+        newValues: { 
+          statut: newStatut,
+          rejection_reason: motif,
+          rejected_by: user.id,
+          rejected_at: data.rejected_at,
+        },
       });
 
       return data;
@@ -801,10 +878,31 @@ export function useNotesAEF() {
         throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent différer une note AEF");
       }
 
+      // Récupérer le statut actuel pour l'audit
+      const { data: note, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("statut")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw new Error("Note introuvable");
+
+      const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
+      const newStatut = NoteAEFStatut.DEFERRED;
+
+      // MACHINE À ÉTATS: Valider la transition
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
-          statut: "differe",
+          statut: newStatut,
           motif_differe: motif,
           date_differe: new Date().toISOString(),
           deadline_correction: deadlineCorrection || null,
@@ -816,11 +914,19 @@ export function useNotesAEF() {
 
       if (error) throw error;
 
+      // Log action defer avec audit enrichi
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "defer",
-        newValues: { statut: "differe", motif },
+        action: NoteAEFAuditAction.DEFER,
+        oldValues: { statut: oldStatut },
+        newValues: { 
+          statut: newStatut,
+          motif_differe: motif,
+          date_differe: data.date_differe,
+          deadline_correction: deadlineCorrection || null,
+          differe_by: user.id,
+        },
       });
 
       return data;
@@ -846,10 +952,31 @@ export function useNotesAEF() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Récupérer le statut actuel pour l'audit
+      const { data: note, error: fetchError } = await supabase
+        .from("notes_dg")
+        .select("statut")
+        .eq("id", noteId)
+        .single();
+
+      if (fetchError) throw new Error("Note introuvable");
+
+      const oldStatut = note.statut || NoteAEFStatut.TO_IMPUTE;
+      const newStatut = NoteAEFStatut.IMPUTED;
+
+      // MACHINE À ÉTATS: Valider la transition
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
+
       const { data, error } = await supabase
         .from("notes_dg")
         .update({
-          statut: "impute",
+          statut: newStatut,
           budget_line_id: budgetLineId,
           imputed_by: user.id,
           imputed_at: new Date().toISOString(),
@@ -860,11 +987,18 @@ export function useNotesAEF() {
 
       if (error) throw error;
 
+      // Log action impute avec audit enrichi
       await logAction({
         entityType: "note_aef",
         entityId: noteId,
-        action: "validate",
-        newValues: { statut: "impute", budget_line_id: budgetLineId },
+        action: NoteAEFAuditAction.IMPUTE,
+        oldValues: { statut: oldStatut },
+        newValues: { 
+          statut: newStatut,
+          budget_line_id: budgetLineId,
+          imputed_by: user.id,
+          imputed_at: data.imputed_at,
+        },
       });
 
       return data;
@@ -872,7 +1006,7 @@ export function useNotesAEF() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
       queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
-      toast({ title: `Note ${data.numero} imputée avec succès` });
+      toast({ title: `Note ${data.reference_pivot || data.numero} imputée avec succès` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
