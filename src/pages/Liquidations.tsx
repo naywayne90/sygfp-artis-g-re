@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Plus, Search, Receipt, CheckCircle, XCircle, Clock, FileText } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, Receipt, CheckCircle, XCircle, Clock, FileText, Tag, CreditCard, MoreHorizontal, Eye, FileSignature } from "lucide-react";
 import { useLiquidations, Liquidation, VALIDATION_STEPS } from "@/hooks/useLiquidations";
 import { LiquidationForm } from "@/components/liquidation/LiquidationForm";
 import { LiquidationList } from "@/components/liquidation/LiquidationList";
@@ -22,6 +32,8 @@ const formatMontant = (montant: number) => {
 };
 
 export default function Liquidations() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showDetailsSheet, setShowDetailsSheet] = useState(false);
@@ -30,9 +42,11 @@ export default function Liquidations() {
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
   const [actionLiquidationId, setActionLiquidationId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("a_traiter");
 
   const {
     liquidations,
+    engagementsValides,
     isLoading,
     submitLiquidation,
     validateLiquidation,
@@ -47,6 +61,16 @@ export default function Liquidations() {
 
   const { canPerform } = usePermissionCheck();
 
+  // Handle sourceEngagement URL parameter
+  useEffect(() => {
+    const sourceEngId = searchParams.get("sourceEngagement");
+    if (sourceEngId) {
+      setShowCreateDialog(true);
+      searchParams.delete("sourceEngagement");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   // Filter liquidations
   const filteredLiquidations = liquidations.filter(liq => 
     liq.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,6 +82,10 @@ export default function Liquidations() {
   const validees = filteredLiquidations.filter(l => l.statut === "valide");
   const rejetees = filteredLiquidations.filter(l => l.statut === "rejete");
   const differees = filteredLiquidations.filter(l => l.statut === "differe");
+
+  const handleCreateOrdonnancement = (liquidationId: string) => {
+    navigate(`/ordonnancements?sourceLiquidation=${liquidationId}`);
+  };
 
   // Stats
   const totalMontant = liquidations.reduce((acc, l) => acc + l.montant, 0);
@@ -220,8 +248,12 @@ export default function Liquidations() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="toutes">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
+              <TabsTrigger value="a_traiter" className="gap-1">
+                <Tag className="h-3 w-3" />
+                À traiter ({engagementsValides.length})
+              </TabsTrigger>
               <TabsTrigger value="toutes">
                 Toutes ({filteredLiquidations.length})
               </TabsTrigger>
@@ -238,6 +270,47 @@ export default function Liquidations() {
                 Différées ({differees.length})
               </TabsTrigger>
             </TabsList>
+
+            {/* Onglet À traiter - Engagements validés */}
+            <TabsContent value="a_traiter">
+              {engagementsValides.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun engagement à liquider</p>
+                  <p className="text-sm">Les engagements validés apparaîtront ici</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Réf. Engagement</TableHead>
+                      <TableHead>Objet</TableHead>
+                      <TableHead>Fournisseur</TableHead>
+                      <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {engagementsValides.map((eng: any) => (
+                      <TableRow key={eng.id}>
+                        <TableCell className="font-mono text-sm">{eng.numero || "-"}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{eng.objet || "-"}</TableCell>
+                        <TableCell>{eng.fournisseur || "-"}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatMontant(eng.montant || 0)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                            <Receipt className="mr-2 h-4 w-4" />
+                            Liquider
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
 
             <TabsContent value="toutes">
               <LiquidationList
@@ -261,11 +334,66 @@ export default function Liquidations() {
               />
             </TabsContent>
 
+            {/* Onglet Validées avec action Ordonnancement */}
             <TabsContent value="validees">
-              <LiquidationList
-                liquidations={validees}
-                onView={handleView}
-              />
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Numéro</TableHead>
+                    <TableHead>Engagement</TableHead>
+                    <TableHead className="text-right">Montant</TableHead>
+                    <TableHead className="text-right">Net à payer</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {validees.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        Aucune liquidation validée
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    validees.map((liq) => (
+                      <TableRow key={liq.id}>
+                        <TableCell className="font-mono text-sm">{liq.numero}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {liq.engagement?.objet || "-"}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatMontant(liq.montant)}
+                        </TableCell>
+                        <TableCell className="text-right text-success font-medium">
+                          {formatMontant(liq.net_a_payer || liq.montant)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-popover">
+                              <DropdownMenuItem onClick={() => handleView(liq)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={() => handleCreateOrdonnancement(liq.id)}
+                                className="text-primary"
+                              >
+                                <FileSignature className="mr-2 h-4 w-4" />
+                                Créer ordonnancement
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </TabsContent>
 
             <TabsContent value="rejetees">

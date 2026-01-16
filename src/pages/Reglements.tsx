@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +28,10 @@ import {
   Clock, 
   TrendingUp,
   CreditCard,
-  Lock
+  Lock,
+  Tag,
+  FileSignature,
+  FolderCheck
 } from "lucide-react";
 import { useReglements } from "@/hooks/useReglements";
 import { useExercice } from "@/contexts/ExerciceContext";
@@ -45,13 +50,27 @@ const formatMontant = (montant: number) => {
 
 export default function Reglements() {
   const { exercice } = useExercice();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { reglements, isLoading, stats, ordonnancementsValides } = useReglements();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedReglement, setSelectedReglement] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState("tous");
+  const [activeTab, setActiveTab] = useState("a_traiter");
+  const [preselectedOrdId, setPreselectedOrdId] = useState<string | null>(null);
+
+  // Handle sourceOrdonnancement URL parameter
+  useEffect(() => {
+    const sourceOrdId = searchParams.get("sourceOrdonnancement");
+    if (sourceOrdId) {
+      setPreselectedOrdId(sourceOrdId);
+      setShowCreateDialog(true);
+      searchParams.delete("sourceOrdonnancement");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Filtrer les règlements
   const filteredReglements = reglements.filter((reg) => {
@@ -205,6 +224,10 @@ export default function Reglements() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
+              <TabsTrigger value="a_traiter" className="gap-1">
+                <Tag className="h-3 w-3" />
+                À payer ({ordonnancementsValides.length})
+              </TabsTrigger>
               <TabsTrigger value="tous" className="gap-2">
                 <CreditCard className="h-4 w-4" />
                 Tous
@@ -217,10 +240,66 @@ export default function Reglements() {
               </TabsTrigger>
               <TabsTrigger value="partiels" className="gap-2">
                 <Clock className="h-4 w-4" />
-                Partiels en attente
+                Partiels
                 <Badge variant="secondary" className="ml-1">{reglementsPartiels.length}</Badge>
               </TabsTrigger>
             </TabsList>
+
+            {/* Onglet À traiter - Ordonnancements à payer */}
+            <TabsContent value="a_traiter">
+              {ordonnancementsValides.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <FolderCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun ordonnancement en attente de paiement</p>
+                  <p className="text-sm">Les ordonnancements validés apparaîtront ici</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Réf. Ordonnancement</TableHead>
+                      <TableHead>Bénéficiaire</TableHead>
+                      <TableHead>Mode paiement</TableHead>
+                      <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="text-right">Restant</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {ordonnancementsValides.map((ord: any) => {
+                      const restant = (ord.montant || 0) - (ord.montant_paye || 0);
+                      return (
+                        <TableRow key={ord.id}>
+                          <TableCell className="font-mono text-sm">{ord.numero || "-"}</TableCell>
+                          <TableCell>{ord.beneficiaire || "-"}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{ord.mode_paiement || "-"}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(ord.montant || 0)}
+                          </TableCell>
+                          <TableCell className="text-right text-warning font-medium">
+                            {formatMontant(restant)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                setPreselectedOrdId(ord.id);
+                                setShowCreateDialog(true);
+                              }}
+                            >
+                              <Wallet className="mr-2 h-4 w-4" />
+                              Payer
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
 
             <TabsContent value="tous">
               <ReglementList reglements={filteredReglements} onViewDetails={handleViewDetails} />
