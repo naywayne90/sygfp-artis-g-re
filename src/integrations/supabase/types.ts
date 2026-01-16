@@ -797,7 +797,9 @@ export type Database = {
           current_step: number | null
           date_differe: string | null
           date_engagement: string
+          date_entree_etape: string | null
           deadline_correction: string | null
+          delai_validation_jours: number | null
           differe_by: string | null
           dossier_id: string | null
           exercice: number | null
@@ -831,7 +833,9 @@ export type Database = {
           current_step?: number | null
           date_differe?: string | null
           date_engagement?: string
+          date_entree_etape?: string | null
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           exercice?: number | null
@@ -865,7 +869,9 @@ export type Database = {
           current_step?: number | null
           date_differe?: string | null
           date_engagement?: string
+          date_entree_etape?: string | null
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           exercice?: number | null
@@ -1550,8 +1556,10 @@ export type Database = {
           created_by: string | null
           current_step: number | null
           date_differe: string | null
+          date_entree_etape: string | null
           date_liquidation: string
           deadline_correction: string | null
+          delai_validation_jours: number | null
           differe_by: string | null
           dossier_id: string | null
           engagement_id: string
@@ -1590,8 +1598,10 @@ export type Database = {
           created_by?: string | null
           current_step?: number | null
           date_differe?: string | null
+          date_entree_etape?: string | null
           date_liquidation?: string
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           engagement_id: string
@@ -1630,8 +1640,10 @@ export type Database = {
           created_by?: string | null
           current_step?: number | null
           date_differe?: string | null
+          date_entree_etape?: string | null
           date_liquidation?: string
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           engagement_id?: string
@@ -7731,8 +7743,10 @@ export type Database = {
           created_by: string | null
           current_step: number | null
           date_differe: string | null
+          date_entree_etape: string | null
           date_prevue_paiement: string | null
           deadline_correction: string | null
+          delai_validation_jours: number | null
           differe_by: string | null
           dossier_id: string | null
           exercice: number | null
@@ -7775,8 +7789,10 @@ export type Database = {
           created_by?: string | null
           current_step?: number | null
           date_differe?: string | null
+          date_entree_etape?: string | null
           date_prevue_paiement?: string | null
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           exercice?: number | null
@@ -7819,8 +7835,10 @@ export type Database = {
           created_by?: string | null
           current_step?: number | null
           date_differe?: string | null
+          date_entree_etape?: string | null
           date_prevue_paiement?: string | null
           deadline_correction?: string | null
+          delai_validation_jours?: number | null
           differe_by?: string | null
           dossier_id?: string | null
           exercice?: number | null
@@ -9812,7 +9830,9 @@ export type Database = {
           compte_id: string | null
           created_at: string | null
           created_by: string | null
+          date_entree_etape: string | null
           date_paiement: string
+          delai_validation_jours: number | null
           dossier_id: string | null
           exercice: number | null
           id: string
@@ -9832,7 +9852,9 @@ export type Database = {
           compte_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          date_entree_etape?: string | null
           date_paiement?: string
+          delai_validation_jours?: number | null
           dossier_id?: string | null
           exercice?: number | null
           id?: string
@@ -9852,7 +9874,9 @@ export type Database = {
           compte_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          date_entree_etape?: string | null
           date_paiement?: string
+          delai_validation_jours?: number | null
           dossier_id?: string | null
           exercice?: number | null
           id?: string
@@ -11953,6 +11977,17 @@ export type Database = {
           os_code: string | null
           taux_engagement: number | null
           total_engage: number | null
+        }
+        Relationships: []
+      }
+      v_etape_delais: {
+        Row: {
+          count_valides: number | null
+          delai_max: number | null
+          delai_min: number | null
+          delai_moyen_validation: number | null
+          exercice: number | null
+          module: string | null
         }
         Relationships: []
       }

@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Liquidation, VALIDATION_STEPS, DOCUMENTS_REQUIS } from "@/hooks/useLiquidations";
+import { LiquidationChecklist } from "./LiquidationChecklist";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -13,7 +15,8 @@ import {
   XCircle, 
   Clock,
   AlertCircle,
-  Download
+  Download,
+  FileCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
