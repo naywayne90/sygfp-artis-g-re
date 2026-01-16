@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
@@ -12,22 +11,16 @@ import {
   FileCheck, 
   ShoppingCart,
   TrendingUp,
-  Clock,
-  AlertCircle,
-  Wallet,
   Plus,
   CheckCircle,
   ArrowRight,
   User,
   Building2,
   Banknote,
-  Settings,
   CalendarDays,
   AlertTriangle,
   HelpCircle,
   BarChart3,
-  Search,
-  FileSearch,
   FolderOpen,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -47,48 +40,24 @@ import { RecentActivitiesPanel } from "@/components/dashboard/RecentActivitiesPa
 import { PendingTasksPanel } from "@/components/dashboard/PendingTasksPanel";
 import { KPICards } from "@/components/dashboard/KPICards";
 
-const formatMontant = (montant: number): string => {
-  if (montant >= 1_000_000_000) {
-    return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
-  }
-  if (montant >= 1_000_000) {
-    return `${(montant / 1_000_000).toFixed(1)} M`;
-  }
-  if (montant >= 1_000) {
-    return `${(montant / 1_000).toFixed(0)} K`;
-  }
-  return montant.toFixed(0);
-};
+// Import des constantes centralisées
+import { formatMontantCompact, formatMontant, ETAPES_CONFIG, ETAPES_CHAINE_DEPENSE } from "@/lib/config/sygfp-constants";
+import { StatutBadge } from "@/components/shared/StatutBadge";
 
-const getStatusBadge = (status: string) => {
-  const variants: Record<string, { label: string; className: string }> = {
-    en_attente: { label: "En attente", className: "bg-warning/10 text-warning border-warning/20" },
-    soumis: { label: "Soumis", className: "bg-secondary/10 text-secondary border-secondary/20" },
-    valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
-    en_cours: { label: "En cours", className: "bg-secondary/10 text-secondary border-secondary/20" },
-    differe: { label: "Différé", className: "bg-muted text-muted-foreground" },
-    rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    impute: { label: "Imputé", className: "bg-primary/10 text-primary border-primary/20" },
-    en_signature: { label: "En signature", className: "bg-warning/10 text-warning border-warning/20" },
-    signe: { label: "Signé", className: "bg-success/10 text-success border-success/20" },
-    transmis: { label: "Transmis", className: "bg-primary/10 text-primary border-primary/20" },
-    paye: { label: "Payé", className: "bg-success/10 text-success border-success/20" },
-  };
-  const variant = variants[status] || variants.en_attente;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
-};
-
+// Helper pour les icônes par type
 const getTypeIcon = (type: string) => {
-  switch (type) {
-    case "note": return <FileText className="h-4 w-4" />;
-    case "engagement": return <CreditCard className="h-4 w-4" />;
-    case "liquidation": return <Receipt className="h-4 w-4" />;
-    case "ordonnancement": return <FileCheck className="h-4 w-4" />;
-    case "marche": return <ShoppingCart className="h-4 w-4" />;
-    case "user_role": return <User className="h-4 w-4" />;
-    default: return <FileText className="h-4 w-4" />;
-  }
+  const iconMap: Record<string, React.ReactNode> = {
+    note: <FileText className="h-4 w-4" />,
+    note_sef: <FileText className="h-4 w-4" />,
+    note_aef: <FileText className="h-4 w-4" />,
+    engagement: <CreditCard className="h-4 w-4" />,
+    liquidation: <Receipt className="h-4 w-4" />,
+    ordonnancement: <FileCheck className="h-4 w-4" />,
+    reglement: <Banknote className="h-4 w-4" />,
+    marche: <ShoppingCart className="h-4 w-4" />,
+    user_role: <User className="h-4 w-4" />,
+  };
+  return iconMap[type] || <FileText className="h-4 w-4" />;
 };
 
 // Tabs de dashboard par rôle
