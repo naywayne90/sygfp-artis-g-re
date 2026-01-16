@@ -59,13 +59,14 @@ interface ReglementFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   dossierId?: string;
+  preselectedOrdonnancementId?: string | null;
 }
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
 };
 
-export function ReglementForm({ onSuccess, onCancel, dossierId }: ReglementFormProps) {
+export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdonnancementId }: ReglementFormProps) {
   const { 
     ordonnancementsValides, 
     comptesBancaires,
@@ -108,6 +109,16 @@ export function ReglementForm({ onSuccess, onCancel, dossierId }: ReglementFormP
   const watchedOrdonnancementId = form.watch("ordonnancement_id");
   const watchedMontant = form.watch("montant");
   const watchedCompte = form.watch("compte_bancaire_arti");
+
+  // Pré-sélectionner l'ordonnancement si fourni
+  useEffect(() => {
+    if (preselectedOrdonnancementId && ordonnancementsValides.length > 0) {
+      const ord = ordonnancementsValides.find(o => o.id === preselectedOrdonnancementId);
+      if (ord) {
+        form.setValue("ordonnancement_id", preselectedOrdonnancementId);
+      }
+    }
+  }, [preselectedOrdonnancementId, ordonnancementsValides, form]);
 
   // Charger l'ordonnancement sélectionné et calculer la disponibilité
   useEffect(() => {

@@ -326,6 +326,7 @@ export default function Reglements() {
           <ReglementForm
             onSuccess={handleCreateSuccess}
             onCancel={() => setShowCreateDialog(false)}
+            preselectedOrdonnancementId={preselectedOrdId}
           />
         </DialogContent>
       </Dialog>
