@@ -39,6 +39,7 @@ import {
   AlertCircle,
   RefreshCw,
   Plus,
+  FolderOpen,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -151,6 +152,10 @@ export function NoteAEFList({
 
   const handleNavigateToDetail = (noteId: string) => {
     navigate(`/notes-aef/${noteId}`);
+  };
+
+  const handleGoToDossier = (dossierId: string) => {
+    navigate(`/recherche?dossier=${dossierId}`);
   };
 
   // État d'erreur
@@ -326,6 +331,14 @@ export function NoteAEFList({
                             <DropdownMenuItem onClick={() => onView(note)}>
                               <Eye className="mr-2 h-4 w-4" />
                               Aperçu rapide
+                            </DropdownMenuItem>
+                          )}
+                          
+                          {/* Lien vers le dossier si disponible */}
+                          {(note.dossier_id || note.note_sef?.dossier_id) && (
+                            <DropdownMenuItem onClick={() => handleGoToDossier((note.dossier_id || note.note_sef?.dossier_id)!)}>
+                              <FolderOpen className="mr-2 h-4 w-4" />
+                              Voir le dossier
                             </DropdownMenuItem>
                           )}
 

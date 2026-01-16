@@ -28,7 +28,8 @@ import {
   Paperclip,
   Loader2,
   Upload,
-  X
+  X,
+  FolderOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -583,6 +584,17 @@ export default function NoteAEFDetail() {
             <Button variant="outline" onClick={handleSubmit} disabled={isSubmitting}>
               <Send className="h-4 w-4 mr-2" />
               Re-soumettre
+            </Button>
+          )}
+          {/* Bouton Voir Dossier - récupère dossier_id depuis note ou SEF liée */}
+          {(note.dossier_id || note.note_sef?.dossier_id) && (
+            <Button 
+              variant="outline" 
+              onClick={() => navigate(`/recherche?dossier=${note.dossier_id || note.note_sef?.dossier_id}`)}
+              className="gap-2"
+            >
+              <FolderOpen className="h-4 w-4" />
+              Voir le dossier
             </Button>
           )}
           {accessControl.canDelete && (
