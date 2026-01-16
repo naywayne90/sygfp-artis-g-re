@@ -3499,9 +3499,11 @@ export type Database = {
           dossier_id: string | null
           exercice: number | null
           id: string
+          imputation_id: string | null
           intitule_lot: string | null
           justification: string | null
           ligne_budgetaire_id: string | null
+          liste_articles: Json | null
           marche_id: string | null
           montant_estime: number | null
           motif_differe: string | null
@@ -3538,9 +3540,11 @@ export type Database = {
           dossier_id?: string | null
           exercice?: number | null
           id?: string
+          imputation_id?: string | null
           intitule_lot?: string | null
           justification?: string | null
           ligne_budgetaire_id?: string | null
+          liste_articles?: Json | null
           marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
@@ -3577,9 +3581,11 @@ export type Database = {
           dossier_id?: string | null
           exercice?: number | null
           id?: string
+          imputation_id?: string | null
           intitule_lot?: string | null
           justification?: string | null
           ligne_budgetaire_id?: string | null
+          liste_articles?: Json | null
           marche_id?: string | null
           montant_estime?: number | null
           motif_differe?: string | null
@@ -3649,6 +3655,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
             referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_imputation_id_fkey"
+            columns: ["imputation_id"]
+            isOneToOne: false
+            referencedRelation: "imputations"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"

@@ -21,8 +21,10 @@ export interface ExpressionBesoin {
   intitule_lot: string | null;
   exercice: number | null;
   marche_id: string | null;
+  imputation_id: string | null;
   dossier_id: string | null;
   direction_id: string | null;
+  liste_articles: any;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -48,6 +50,12 @@ export interface ExpressionBesoin {
       id: string; 
       raison_sociale: string;
     } | null;
+  } | null;
+  imputation?: {
+    id: string;
+    reference: string | null;
+    objet: string;
+    montant: number | null;
   } | null;
   dossier?: {
     id: string;
@@ -100,6 +108,9 @@ export function useExpressionsBesoin() {
             id, numero, objet, montant, mode_passation,
             prestataire:prestataires(id, raison_sociale)
           ),
+          imputation:imputations!expressions_besoin_imputation_id_fkey(
+            id, reference, objet, montant
+          ),
           dossier:dossiers(id, numero, objet),
           creator:profiles!expressions_besoin_created_by_fkey(id, full_name),
           validator:profiles!expressions_besoin_validated_by_fkey(id, full_name)
@@ -110,6 +121,38 @@ export function useExpressionsBesoin() {
       if (error) throw error;
       return data as ExpressionBesoin[];
     },
+  });
+
+  // Fetch imputations validées disponibles pour créer une EB
+  const { data: imputationsValidees = [] } = useQuery({
+    queryKey: ["imputations-validees-pour-eb", exercice],
+    queryFn: async () => {
+      // Récupérer les imputations validées qui n'ont pas encore d'EB
+      const { data: imputations, error } = await supabase
+        .from("imputations")
+        .select(`
+          id, reference, objet, montant, code_imputation, 
+          direction_id, dossier_id,
+          direction:directions(id, label, sigle),
+          budget_line:budget_lines(id, code, label)
+        `)
+        .eq("statut", "valide")
+        .eq("exercice", exercice || new Date().getFullYear())
+        .order("validated_at", { ascending: false });
+
+      if (error) throw error;
+      
+      // Filtrer pour exclure celles qui ont déjà une EB
+      const { data: existingEBs } = await supabase
+        .from("expressions_besoin")
+        .select("imputation_id")
+        .not("imputation_id", "is", null);
+      
+      const usedImputationIds = new Set(existingEBs?.map(eb => eb.imputation_id) || []);
+      
+      return imputations?.filter(imp => !usedImputationIds.has(imp.id)) || [];
+    },
+    enabled: !!exercice,
   });
 
   // Fetch notes imputées disponibles pour créer une EB
@@ -381,6 +424,7 @@ export function useExpressionsBesoin() {
     expressionsDifferees,
     marchesValides,
     notesImputees,
+    imputationsValidees,
     isLoading,
     error,
     createExpression: createMutation.mutateAsync,

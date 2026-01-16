@@ -40,6 +40,7 @@ import {
   Loader2,
   Plus,
   Tag,
+  ShoppingCart,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
@@ -492,9 +493,9 @@ export default function ImputationPage() {
                                   {imp.statut === "valide" && (
                                     <>
                                       <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => navigate("/marches")}>
-                                        <ArrowRight className="mr-2 h-4 w-4" />
-                                        Passer le marché
+                                      <DropdownMenuItem onClick={() => navigate(`/execution/expression-besoin?sourceImputation=${imp.id}`)}>
+                                        <ShoppingCart className="mr-2 h-4 w-4" />
+                                        Créer expression de besoin
                                       </DropdownMenuItem>
                                     </>
                                   )}
