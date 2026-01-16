@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,7 +65,29 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
     urgence: "normale",
     date_souhaitee: null as Date | null,
     commentaire: "",
+    // Nouveaux champs
+    montant_estime: 0,
+    type_depense: "",
+    os_id: "",
+    mission_id: "",
   });
+
+  // Type pour les référentiels
+  type RefItem = { id: string; code: string; libelle: string };
+
+  // Fetch objectifs stratégiques et missions
+  const [objectifsStrategiques, setObjectifsStrategiques] = useState<RefItem[]>([]);
+  const [missionsList, setMissionsList] = useState<RefItem[]>([]);
+
+  useEffect(() => {
+    const loadReferentiels = async () => {
+      const { data: osData } = await (supabase as any).from("objectifs_strategiques").select("id, code, libelle").eq("est_active", true).order("code");
+      const { data: missionsData } = await (supabase as any).from("missions").select("id, code, libelle").eq("est_active", true).order("code");
+      if (osData) setObjectifsStrategiques(osData);
+      if (missionsData) setMissionsList(missionsData);
+    };
+    loadReferentiels();
+  }, []);
 
   // Charger l'utilisateur connecté au montage et pré-remplir direction si possible
   useEffect(() => {
@@ -103,6 +126,10 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         urgence: note.urgence || "normale",
         date_souhaitee: note.date_souhaitee ? new Date(note.date_souhaitee) : null,
         commentaire: note.commentaire || "",
+        montant_estime: note.montant_estime || 0,
+        type_depense: note.type_depense || "",
+        os_id: note.os_id || "",
+        mission_id: note.mission_id || "",
       });
       // Déterminer le type de bénéficiaire selon les données existantes
       if (note.beneficiaire_id) {
@@ -124,6 +151,10 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         urgence: "normale",
         date_souhaitee: null,
         commentaire: "",
+        montant_estime: 0,
+        type_depense: "",
+        os_id: "",
+        mission_id: "",
       });
       setTypeBeneficiaire("");
       setUploadedFiles([]);
