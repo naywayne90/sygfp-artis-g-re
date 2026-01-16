@@ -126,7 +126,10 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Note AEF {note.numero || ""}
+              <span>Note AEF</span>
+              <Badge variant="outline" className="font-mono ml-2">
+                {(note as any).reference_pivot || note.numero || note.id.substring(0, 8)}
+              </Badge>
             </DialogTitle>
             <div className="flex items-center gap-2">
               {isDirectAEF && (
@@ -143,25 +146,33 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
         <div className="space-y-6">
           {/* Note SEF liée */}
           {linkedNoteSEF && !isDirectAEF && (
-            <Card className="border-primary/20">
+            <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="py-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Link2 className="h-4 w-4 text-primary" />
-                  Note SEF liée
+                  Note SEF liée (source de la référence)
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-mono text-sm font-medium">{linkedNoteSEF.numero}</p>
-                    <p className="text-sm text-muted-foreground truncate max-w-[300px]">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Référence commune :</span>
+                      <Badge variant="secondary" className="font-mono font-bold text-primary">
+                        {noteWithExtras.reference_pivot || linkedNoteSEF.numero || "—"}
+                      </Badge>
+                    </div>
+                    <p className="font-mono text-sm text-muted-foreground">
+                      N° SEF : {linkedNoteSEF.numero}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate max-w-[350px]">
                       {linkedNoteSEF.objet}
                     </p>
                   </div>
                   <Button variant="outline" size="sm" asChild>
                     <Link to={`/notes-sef/${linkedNoteSEF.id}`}>
                       <ExternalLink className="h-4 w-4 mr-1" />
-                      Voir
+                      Voir SEF
                     </Link>
                   </Button>
                 </div>

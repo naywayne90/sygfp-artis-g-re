@@ -48,7 +48,7 @@ export interface NoteAEFEntity {
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
-  note_sef?: { id: string; numero: string | null; objet: string; dossier_id?: string | null };
+  note_sef?: { id: string; numero: string | null; reference_pivot: string | null; objet: string; dossier_id?: string | null };
 }
 
 export interface NoteAEFCounts {
