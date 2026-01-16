@@ -348,8 +348,8 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {/* Stats Grid - 6 colonnes pour SEF/AEF + autres */}
+          <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
             {statsLoading ? (
               Array(5).fill(0).map((_, i) => (
                 <Card key={i}>
@@ -364,10 +364,32 @@ export default function Dashboard() {
               ))
             ) : (
               <>
+                {/* Notes SEF */}
                 <Card className="relative overflow-hidden">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Notes
+                      Notes SEF
+                    </CardTitle>
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <FileText className="h-4 w-4 text-blue-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl font-bold text-blue-600">{stats?.notesSEFAValider || 0}</span>
+                      <span className="text-sm text-muted-foreground">à valider</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stats?.notesSEFValidees || 0} validées / {stats?.notesSEFTotal || 0} total
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Notes AEF */}
+                <Card className="relative overflow-hidden">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Notes AEF
                     </CardTitle>
                     <div className="p-2 rounded-lg bg-secondary/10">
                       <FileText className="h-4 w-4 text-secondary" />
@@ -375,34 +397,15 @@ export default function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold">{stats?.notesEnAttente || 0}</span>
-                      <span className="text-sm text-muted-foreground">en attente</span>
+                      <span className="text-3xl font-bold">{stats?.notesAEFAValider || 0}</span>
+                      <span className="text-sm text-muted-foreground">à valider</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {stats?.notesTotal || 0} notes au total
+                      {stats?.notesAEFImputees || 0} imputées / {stats?.notesAEFTotal || 0} total
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card className="relative overflow-hidden">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Marchés
-                    </CardTitle>
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <ShoppingCart className="h-4 w-4 text-primary" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold">{stats?.marchesEnCours || 0}</span>
-                      <span className="text-sm text-muted-foreground">en cours</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {stats?.marchesTotal || 0} marchés au total
-                    </p>
-                  </CardContent>
-                </Card>
 
                 <Card className="relative overflow-hidden">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
