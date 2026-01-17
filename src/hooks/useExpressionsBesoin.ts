@@ -466,11 +466,34 @@ export function useExpressionsBesoin() {
     },
   });
 
+  // Mark expression as satisfied (passation marché créée)
+  const satisfyMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("expressions_besoin")
+        .update({
+          statut: "satisfaite",
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
+      toast.success("Expression de besoin marquée comme satisfaite");
+    },
+    onError: (error) => {
+      toast.error("Erreur: " + error.message);
+    },
+  });
+
   // Filter helpers
   const expressionsAValider = expressions.filter((e) => e.statut === "soumis");
   const expressionsValidees = expressions.filter((e) => e.statut === "validé");
   const expressionsRejetees = expressions.filter((e) => e.statut === "rejeté");
   const expressionsDifferees = expressions.filter((e) => e.statut === "différé");
+  const expressionsSatisfaites = expressions.filter((e) => e.statut === "satisfaite");
+  const expressionsBrouillon = expressions.filter((e) => e.statut === "brouillon");
 
   return {
     expressions,
@@ -478,6 +501,8 @@ export function useExpressionsBesoin() {
     expressionsValidees,
     expressionsRejetees,
     expressionsDifferees,
+    expressionsSatisfaites,
+    expressionsBrouillon,
     marchesValides,
     notesImputees,
     imputationsValidees,
@@ -491,6 +516,7 @@ export function useExpressionsBesoin() {
     deferExpression: deferMutation.mutateAsync,
     resumeExpression: resumeMutation.mutateAsync,
     deleteExpression: deleteMutation.mutateAsync,
+    satisfyExpression: satisfyMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
