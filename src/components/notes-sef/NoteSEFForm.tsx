@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { NoteSEF, useNotesSEF } from "@/hooks/useNotesSEF";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -25,23 +27,25 @@ import {
   Upload, 
   X, 
   FileText,
-  AlertCircle
+  AlertCircle,
+  Save,
+  Send,
+  Info
 } from "lucide-react";
+import { FileList, validateFile, type UploadedFile } from "./FilePreview";
+import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
 
 interface NoteSEFFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   note?: NoteSEF | null;
+  /** Mode: si true, proposer de soumettre directement après création */
+  allowSubmitOnCreate?: boolean;
 }
 
-interface UploadedFile {
-  file: File;
-  preview?: string;
-}
-
-export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
+export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = true }: NoteSEFFormProps) {
   const { exercice } = useExercice();
-  const { createNote, updateNote, directions, profiles, beneficiaires, isCreating, isUpdating } = useNotesSEF();
+  const { createNote, updateNote, submitNote, directions, profiles, beneficiaires, isCreating, isUpdating, isSubmitting } = useNotesSEF();
   const { isAdmin, hasAnyRole, userId } = usePermissions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,6 +57,8 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAfterSave, setSubmitAfterSave] = useState(false);
 
   const [formData, setFormData] = useState({
     objet: "",
@@ -179,12 +185,11 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
     const newFiles: UploadedFile[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      // Limiter à 10MB par fichier
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`Le fichier ${file.name} dépasse 10MB`);
-        continue;
-      }
-      newFiles.push({ file });
+      const validation = validateFile(file);
+      newFiles.push({ 
+        file, 
+        error: validation.valid ? undefined : validation.error 
+      });
     }
     setUploadedFiles(prev => [...prev, ...newFiles]);
     
@@ -197,6 +202,50 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
+
+  // Validation temps réel d'un champ
+  const validateField = useCallback((field: string, value: any): string | null => {
+    switch (field) {
+      case "objet":
+        return !value?.trim() ? "L'objet est obligatoire" : null;
+      case "direction_id":
+        return !value ? "La direction est obligatoire" : null;
+      case "demandeur_id":
+        return !value ? "Le demandeur est obligatoire" : null;
+      case "urgence":
+        return !value ? "L'urgence est obligatoire" : null;
+      case "justification":
+        return !value?.trim() ? "La justification est obligatoire" : null;
+      case "date_souhaitee":
+        return !value ? "La date souhaitée est obligatoire" : null;
+      default:
+        return null;
+    }
+  }, []);
+
+  // Mettre à jour un champ avec validation temps réel
+  const updateField = useCallback((field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Valider si le champ a été touché
+    if (touched[field]) {
+      const error = validateField(field, value);
+      setErrors(prev => ({
+        ...prev,
+        [field]: error || ""
+      }));
+    }
+  }, [touched, validateField]);
+
+  // Marquer un champ comme touché (on blur)
+  const handleBlur = useCallback((field: string) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const value = formData[field as keyof typeof formData];
+    const error = validateField(field, value);
+    if (error) {
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }
+  }, [formData, validateField]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -354,6 +403,7 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
           await uploadFiles(note.id);
         }
         toast.success(`Note ${note.reference_pivot || note.numero} mise à jour`);
+        onOpenChange(false);
       } else {
         // Mode création
         const result = await createNote(dataToSend);
@@ -361,29 +411,48 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         if (result) {
           // Upload des pièces jointes après création
           if (uploadedFiles.length > 0) {
-            const uploadResult = await uploadFiles(result.id);
-            
-            // Message final avec la référence pivot générée
-            if (uploadResult.failed === 0) {
+            await uploadFiles(result.id);
+          }
+
+          // Si l'utilisateur veut soumettre directement
+          if (submitAfterSave) {
+            try {
+              await submitNote(result.id);
               toast.success(
-                `Brouillon créé : ${result.reference_pivot || result.numero}`,
-                { description: uploadResult.success > 0 ? `${uploadResult.success} pièce(s) jointe(s)` : undefined }
+                `Note ${result.reference_pivot || result.numero} créée et soumise`,
+                { description: "Les validateurs ont été notifiés" }
               );
+            } catch (submitError) {
+              toast.error("Erreur lors de la soumission", {
+                description: "La note a été créée en brouillon"
+              });
             }
           } else {
-            // Pas de pièces jointes, le toast est déjà affiché par le hook
+            toast.success(
+              `Brouillon créé : ${result.reference_pivot || result.numero}`,
+              { description: uploadedFiles.length > 0 ? `${uploadedFiles.length} pièce(s) jointe(s)` : undefined }
+            );
           }
+          
+          onOpenChange(false);
         }
       }
-      
-      onOpenChange(false);
     } catch (error) {
       console.error("Error saving note:", error);
       toast.error("Erreur lors de l'enregistrement de la note");
+    } finally {
+      setSubmitAfterSave(false);
     }
   };
 
-  const isLoading = isCreating || isUpdating || isUploading;
+  // Soumettre directement (créer + soumettre)
+  const handleSaveAndSubmit = () => {
+    setSubmitAfterSave(true);
+  };
+
+  const isLoading = isCreating || isUpdating || isUploading || isSubmitting;
+  const hasErrors = Object.values(errors).some(e => !!e);
+  const validFilesCount = uploadedFiles.filter(f => !f.error).length;
 
   // Filtrer les demandeurs par direction si une direction est sélectionnée
   // et créer un affichage enrichi (Nom + fonction)
@@ -417,13 +486,26 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Affichage de la référence en lecture seule (mode édition uniquement) */}
+          {/* Affichage de la référence ARTI en lecture seule (mode édition uniquement) */}
           {note && (note.reference_pivot || note.numero) && (
-            <div className="bg-muted/50 rounded-lg p-3 border">
-              <Label className="text-xs text-muted-foreground">Référence (lecture seule)</Label>
-              <p className="font-mono text-lg font-semibold text-primary mt-1">
-                {note.reference_pivot || note.numero}
-              </p>
+            <div className="bg-muted/50 rounded-lg p-3 border flex items-center justify-between">
+              <div>
+                <Label className="text-xs text-muted-foreground">Référence (lecture seule)</Label>
+                <div className="mt-1">
+                  <ARTIReferenceBadge 
+                    reference={note.reference_pivot || note.numero} 
+                    size="lg"
+                    showIcon
+                  />
+                </div>
+              </div>
+              {note.statut && (
+                <Badge variant={note.statut === "brouillon" ? "secondary" : "default"}>
+                  {note.statut === "brouillon" ? "Brouillon" : 
+                   note.statut === "soumis" ? "Soumis" : 
+                   note.statut === "valide" ? "Validé" : note.statut}
+                </Badge>
+              )}
             </div>
           )}
 
@@ -774,59 +856,47 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
               />
             </div>
 
-            {/* Pièces jointes */}
+            {/* Pièces jointes - Utilisation du composant FileList amélioré */}
             <div className="col-span-2 space-y-3">
-              <Label>Pièces jointes (TDR, devis, etc.)</Label>
+              <div className="flex items-center justify-between">
+                <Label>Pièces jointes (TDR, devis, etc.)</Label>
+                {uploadedFiles.length > 0 && (
+                  <Badge variant="secondary">
+                    {uploadedFiles.filter(f => !f.error).length} fichier(s)
+                  </Badge>
+                )}
+              </div>
               
-              <div className="border-2 border-dashed rounded-lg p-4 text-center">
+              <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary/50 transition-colors">
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
                   onChange={handleFileSelect}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
                   className="gap-2"
+                  disabled={isLoading}
                 >
                   <Upload className="h-4 w-4" />
                   Ajouter des fichiers
                 </Button>
                 <p className="text-sm text-muted-foreground mt-2">
-                  PDF, Word, Excel, Images • Max 10MB par fichier
+                  PDF, Word, Excel, Images • Max 10 Mo par fichier • Illimité
                 </p>
               </div>
 
-              {uploadedFiles.length > 0 && (
-                <div className="space-y-2">
-                  {uploadedFiles.map((item, index) => (
-                    <div 
-                      key={index} 
-                      className="flex items-center justify-between p-2 bg-muted rounded-lg"
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm truncate max-w-[300px]">{item.file.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({(item.file.size / 1024).toFixed(0)} KB)
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeFile(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* Liste des fichiers avec preview */}
+              <FileList 
+                files={uploadedFiles} 
+                onRemove={removeFile}
+                disabled={isLoading}
+              />
             </div>
 
             {/* Commentaire */}
@@ -842,14 +912,64 @@ export function NoteSEFForm({ open, onOpenChange, note }: NoteSEFFormProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Annuler
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {note ? "Modifier" : "Créer en brouillon"}
-            </Button>
+          {/* Indicateur d'erreurs */}
+          {hasErrors && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Veuillez corriger les erreurs avant de continuer
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Boutons d'action */}
+          <div className="flex items-center justify-between pt-4 border-t mt-4">
+            <div className="text-sm text-muted-foreground">
+              {validFilesCount > 0 && (
+                <span className="flex items-center gap-1">
+                  <FileText className="h-4 w-4" />
+                  {validFilesCount} pièce(s) jointe(s)
+                </span>
+              )}
+            </div>
+            
+            <div className="flex gap-2">
+              {/* Annuler */}
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Annuler
+              </Button>
+              
+              {/* Enregistrer brouillon */}
+              <Button 
+                type="submit" 
+                variant="outline"
+                disabled={isLoading || hasErrors}
+                className="gap-2"
+              >
+                {isLoading && !submitAfterSave && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Save className="h-4 w-4" />
+                {note ? "Enregistrer" : "Brouillon"}
+              </Button>
+              
+              {/* Soumettre directement (création seulement ou brouillon existant) */}
+              {(!note || note.statut === "brouillon") && allowSubmitOnCreate && (
+                <Button 
+                  type="submit"
+                  disabled={isLoading || hasErrors}
+                  className="gap-2"
+                  onClick={handleSaveAndSubmit}
+                >
+                  {isLoading && submitAfterSave && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <Send className="h-4 w-4" />
+                  {note ? "Soumettre" : "Créer et soumettre"}
+                </Button>
+              )}
+            </div>
           </div>
         </form>
       </DialogContent>
