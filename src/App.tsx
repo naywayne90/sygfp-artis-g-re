@@ -50,6 +50,7 @@ import LiensLambda from "./pages/admin/LiensLambda";
 import ParametresExercice from "./pages/admin/ParametresExercice";
 import GestionDoublons from "./pages/admin/GestionDoublons";
 import CompteursReferences from "./pages/admin/CompteursReferences";
+import ImportBudgetAdmin from "./pages/admin/ImportBudgetAdmin";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -142,6 +143,7 @@ const App = () => (
               <Route path="/admin/parametres-exercice" element={<ParametresExercice />} />
               <Route path="/admin/doublons" element={<GestionDoublons />} />
               <Route path="/admin/compteurs-references" element={<CompteursReferences />} />
+              <Route path="/admin/import-budget" element={<ImportBudgetAdmin />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

@@ -117,6 +117,7 @@ const budgetItems = [
   { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
   { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
+  { title: "Import Budget (Admin)", url: "/admin/import-budget", icon: Database },
 ];
 
 // CHAÎNE DE LA DÉPENSE (ordre logique strict avec numéros)
