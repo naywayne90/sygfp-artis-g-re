@@ -8,3 +8,11 @@ export {
   RoleBadge, 
   AccessDenied 
 } from './RoleGuard';
+export { 
+  StepActionGuard, 
+  StepViewGuard, 
+  StepUploadGuard, 
+  StepEditGuard, 
+  StepRequiredRoleBadge, 
+  StepAccessDenied 
+} from './StepGuard';
