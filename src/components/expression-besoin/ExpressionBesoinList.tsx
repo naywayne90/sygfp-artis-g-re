@@ -44,10 +44,11 @@ interface ExpressionBesoinListProps {
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   brouillon: { label: "Brouillon", variant: "secondary" },
-  soumis: { label: "Soumis", variant: "outline" },
+  soumis: { label: "À valider", variant: "outline" },
   validé: { label: "Validé", variant: "default" },
   rejeté: { label: "Rejeté", variant: "destructive" },
   différé: { label: "Différé", variant: "outline" },
+  satisfaite: { label: "Satisfaite", variant: "default" },
 };
 
 const URGENCE_CONFIG: Record<string, { label: string; className: string }> = {

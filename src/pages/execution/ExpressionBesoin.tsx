@@ -46,6 +46,8 @@ export default function ExpressionBesoin() {
     expressionsValidees,
     expressionsRejetees,
     expressionsDifferees,
+    expressionsSatisfaites,
+    expressionsBrouillon,
     imputationsValidees,
     isLoading,
   } = useExpressionsBesoin();
@@ -101,6 +103,8 @@ export default function ExpressionBesoin() {
 
   const getFilteredByTab = () => {
     switch (activeTab) {
+      case "brouillons":
+        return filteredExpressions.filter((e) => e.statut === "brouillon");
       case "a_valider":
         return filteredExpressions.filter((e) => e.statut === "soumis");
       case "validees":
@@ -109,6 +113,8 @@ export default function ExpressionBesoin() {
         return filteredExpressions.filter((e) => e.statut === "rejeté");
       case "differees":
         return filteredExpressions.filter((e) => e.statut === "différé");
+      case "satisfaites":
+        return filteredExpressions.filter((e) => e.statut === "satisfaite");
       default:
         return filteredExpressions;
     }
@@ -147,7 +153,7 @@ export default function ExpressionBesoin() {
       </div>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -164,13 +170,13 @@ export default function ExpressionBesoin() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total EB
+              Brouillons
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressions.length}</div>
-            <p className="text-xs text-muted-foreground">Expressions</p>
+            <div className="text-2xl font-bold">{expressionsBrouillon?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">En cours</p>
           </CardContent>
         </Card>
 
@@ -183,7 +189,7 @@ export default function ExpressionBesoin() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expressionsAValider.length}</div>
-            <p className="text-xs text-muted-foreground">En attente</p>
+            <p className="text-xs text-muted-foreground">Chef de service</p>
           </CardContent>
         </Card>
 
@@ -196,7 +202,20 @@ export default function ExpressionBesoin() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expressionsValidees.length}</div>
-            <p className="text-xs text-muted-foreground">Prêtes</p>
+            <p className="text-xs text-muted-foreground">Prêtes passation</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Satisfaites
+            </CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{expressionsSatisfaites?.length || 0}</div>
+            <p className="text-xs text-muted-foreground">Passation créée</p>
           </CardContent>
         </Card>
 
@@ -250,14 +269,14 @@ export default function ExpressionBesoin() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4 grid w-full grid-cols-6">
+            <TabsList className="mb-4 flex flex-wrap gap-1">
               <TabsTrigger value="a_traiter" className="gap-1">
                 <Tag className="h-3 w-3" />
                 À traiter
                 <Badge variant="secondary" className="ml-1 text-xs">{imputationsValidees.length}</Badge>
               </TabsTrigger>
-              <TabsTrigger value="toutes">
-                Toutes ({filteredExpressions.length})
+              <TabsTrigger value="brouillons">
+                Brouillons ({expressionsBrouillon?.length || 0})
               </TabsTrigger>
               <TabsTrigger value="a_valider">
                 À valider ({expressionsAValider.length})
@@ -265,11 +284,17 @@ export default function ExpressionBesoin() {
               <TabsTrigger value="validees">
                 Validées ({expressionsValidees.length})
               </TabsTrigger>
+              <TabsTrigger value="satisfaites">
+                Satisfaites ({expressionsSatisfaites?.length || 0})
+              </TabsTrigger>
               <TabsTrigger value="rejetees">
                 Rejetées ({expressionsRejetees.length})
               </TabsTrigger>
               <TabsTrigger value="differees">
                 Différées ({expressionsDifferees.length})
+              </TabsTrigger>
+              <TabsTrigger value="toutes">
+                Toutes ({expressions.length})
               </TabsTrigger>
             </TabsList>
 
@@ -387,7 +412,7 @@ export default function ExpressionBesoin() {
             </TabsContent>
 
             {/* Autres onglets */}
-            {["toutes", "a_valider", "rejetees", "differees"].map((tab) => (
+            {["toutes", "brouillons", "a_valider", "satisfaites", "rejetees", "differees"].map((tab) => (
               <TabsContent key={tab} value={tab}>
                 <ExpressionBesoinList expressions={getFilteredByTab()} />
               </TabsContent>

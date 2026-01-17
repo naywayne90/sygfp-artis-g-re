@@ -31,10 +31,11 @@ interface ExpressionBesoinDetailsProps {
 
 const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
   brouillon: { label: "Brouillon", variant: "secondary", icon: <FileText className="h-4 w-4" /> },
-  soumis: { label: "Soumis", variant: "outline", icon: <Clock className="h-4 w-4" /> },
+  soumis: { label: "À valider", variant: "outline", icon: <Clock className="h-4 w-4" /> },
   validé: { label: "Validé", variant: "default", icon: <CheckCircle2 className="h-4 w-4" /> },
   rejeté: { label: "Rejeté", variant: "destructive", icon: <XCircle className="h-4 w-4" /> },
   différé: { label: "Différé", variant: "outline", icon: <Clock className="h-4 w-4" /> },
+  satisfaite: { label: "Satisfaite", variant: "default", icon: <CheckCircle2 className="h-4 w-4" /> },
 };
 
 export function ExpressionBesoinDetails({
