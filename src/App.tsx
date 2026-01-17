@@ -22,6 +22,7 @@ import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
 import NoteSEFDetail from "./pages/NoteSEFDetail";
+import ValidationNotesSEF from "./pages/ValidationNotesSEF";
 import Notifications from "./pages/Notifications";
 import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 import Alertes from "./pages/Alertes";
@@ -156,6 +157,7 @@ const App = () => (
               <Route path="/execution/dashboard" element={<DashboardExecution />} />
               <Route path="/notes" element={<Notes />} />
               <Route path="/notes-sef" element={<NotesSEF />} />
+              <Route path="/notes-sef/validation" element={<ValidationNotesSEF />} />
               <Route path="/notes-sef/:id" element={<NoteSEFDetail />} />
               <Route path="/notes-aef" element={<NotesAEF />} />
               <Route path="/notes-aef/:id" element={<NoteAEFDetail />} />
