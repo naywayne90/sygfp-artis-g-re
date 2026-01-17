@@ -420,7 +420,7 @@ export default function PassationMarchePage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="bg-popover">
-                                  <DropdownMenuItem onClick={() => {}}>
+                                  <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
                                     <Eye className="mr-2 h-4 w-4" />
                                     Voir détails
                                   </DropdownMenuItem>
@@ -452,18 +452,16 @@ export default function PassationMarchePage() {
                                   {pm.statut === "soumis" && (
                                     <>
                                       <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => validatePassation(pm.id)}>
+                                      <DropdownMenuItem onClick={() => handleValidateClick(pm)}>
                                         <CheckCircle2 className="mr-2 h-4 w-4" />
                                         Valider
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => setDeferDialog({ open: true, id: pm.id })}
-                                      >
+                                      <DropdownMenuItem onClick={() => handleDeferClick(pm)}>
                                         <Clock className="mr-2 h-4 w-4" />
                                         Différer
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
-                                        onClick={() => setRejectDialog({ open: true, id: pm.id })}
+                                        onClick={() => handleRejectClick(pm)}
                                         className="text-destructive"
                                       >
                                         <XCircle className="mr-2 h-4 w-4" />
@@ -506,69 +504,56 @@ export default function PassationMarchePage() {
         onSuccess={() => setActiveTab("brouillon")}
       />
 
+      {/* Details dialog */}
+      {selectedPassation && (
+        <PassationDetails
+          passation={selectedPassation}
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          onSubmit={() => {
+            submitPassation(selectedPassation.id);
+            setDetailsOpen(false);
+            refetch();
+          }}
+          onValidate={() => {
+            setDetailsOpen(false);
+            setValidateOpen(true);
+          }}
+          onReject={() => {
+            setDetailsOpen(false);
+            setRejectOpen(true);
+          }}
+          onDefer={() => {
+            setDetailsOpen(false);
+            setDeferOpen(true);
+          }}
+          canValidate={true}
+        />
+      )}
+
+      {/* Validate dialog */}
+      <PassationValidateDialog
+        passation={selectedPassation}
+        open={validateOpen}
+        onOpenChange={setValidateOpen}
+        onConfirm={handleConfirmValidate}
+      />
+
       {/* Reject dialog */}
-      <Dialog open={rejectDialog.open} onOpenChange={(open) => setRejectDialog({ open, id: null })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rejeter la passation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Motif du rejet *</Label>
-              <Textarea
-                value={rejectMotif}
-                onChange={(e) => setRejectMotif(e.target.value)}
-                placeholder="Indiquez le motif du rejet..."
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectDialog({ open: false, id: null })}>
-              Annuler
-            </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={!rejectMotif}>
-              Rejeter
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PassationRejectDialog
+        open={rejectOpen}
+        onOpenChange={setRejectOpen}
+        onConfirm={handleConfirmReject}
+        reference={selectedPassation?.reference || undefined}
+      />
 
       {/* Defer dialog */}
-      <Dialog open={deferDialog.open} onOpenChange={(open) => setDeferDialog({ open, id: null })}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Différer la passation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Motif du report *</Label>
-              <Textarea
-                value={deferMotif}
-                onChange={(e) => setDeferMotif(e.target.value)}
-                placeholder="Indiquez le motif du report..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label>Date de reprise prévue</Label>
-              <Input
-                type="date"
-                value={deferDate}
-                onChange={(e) => setDeferDate(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeferDialog({ open: false, id: null })}>
-              Annuler
-            </Button>
-            <Button onClick={handleDefer} disabled={!deferMotif}>
-              Différer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <PassationDeferDialog
+        open={deferOpen}
+        onOpenChange={setDeferOpen}
+        onConfirm={handleConfirmDefer}
+        reference={selectedPassation?.reference || undefined}
+      />
     </div>
   );
 }
