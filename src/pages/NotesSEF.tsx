@@ -175,6 +175,16 @@ export default function NotesSEF() {
           description="Gestion des Notes Sans Effet Financier" 
         />
         <div className="flex items-center gap-2">
+          {canValidate && (
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = "/notes-sef/validation"}
+              className="gap-2"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Espace validation ({aValiderCount})
+            </Button>
+          )}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
