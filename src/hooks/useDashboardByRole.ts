@@ -23,6 +23,10 @@ export interface DGStats {
   dossiersValides: number;
   dossiersSoldes: number;
   alertesDepassement: number;
+  // Dossiers en attente de signature
+  engagementsASigner: number;
+  liquidationsASigner: number;
+  ordonnancementsASigner: number;
 }
 
 // Stats pour DAF/SDCT
@@ -189,6 +193,21 @@ export function useDGDashboard() {
         }
       });
 
+      // Engagements à signer (statut soumis ou en_validation pour signature DG)
+      const engagementsASigner = engagements?.filter(e =>
+        e.statut === "soumis" || e.statut === "en_validation"
+      ).length || 0;
+
+      // Liquidations à signer
+      const liquidationsASigner = liquidations?.filter(l =>
+        l.statut === "soumis" || l.statut === "en_validation"
+      ).length || 0;
+
+      // Ordonnancements à signer
+      const ordonnancementsASigner = ordonnancements?.filter(o =>
+        o.statut === "soumis" || o.statut === "en_signature"
+      ).length || 0;
+
       return {
         budgetGlobal,
         budgetEngage,
@@ -202,6 +221,9 @@ export function useDGDashboard() {
         dossiersValides,
         dossiersSoldes,
         alertesDepassement,
+        engagementsASigner,
+        liquidationsASigner,
+        ordonnancementsASigner,
       };
     },
     enabled: !!exercice,
@@ -385,6 +407,212 @@ export function useSDPMDashboard() {
         delaiMoyenMarche,
         topFournisseurs,
         marchesMontantTotal,
+      };
+    },
+    enabled: !!exercice,
+  });
+}
+
+// Stats pour Contrôleur Budgétaire (CB)
+export interface ControleurStats {
+  lignesCritiques: number;           // >90% consommées
+  lignesAlertes: number;             // >80% consommées
+  lignesSaines: number;              // <80%
+  totalLignes: number;
+  engagementsAViser: number;
+  engagementsEnCours: number;
+  delaiMoyenEngagement: number | null;  // en jours
+  delaiMoyenLiquidation: number | null;
+  anomaliesDetectees: number;
+  montantEngage: number;
+  montantDisponible: number;
+  tauxConsommationGlobal: number;
+  lignesCritiquesDetails: Array<{
+    id: string;
+    code: string;
+    label: string;
+    dotation: number;
+    engage: number;
+    tauxConsommation: number;
+  }>;
+  anomaliesDetails: Array<{
+    type: string;
+    description: string;
+    entityId?: string;
+    severity: 'info' | 'warning' | 'critical';
+  }>;
+  trackingEnabled: {
+    delais: boolean;
+    anomalies: boolean;
+    alertes: boolean;
+  };
+}
+
+function formatAmountInternal(amount: number): string {
+  return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
+}
+
+export function useControleurDashboard() {
+  const { exercice } = useExercice();
+
+  return useQuery({
+    queryKey: ["dashboard-controleur", exercice],
+    queryFn: async (): Promise<ControleurStats> => {
+      // Budget lines avec leur consommation
+      const { data: budgetLines } = await supabase
+        .from("budget_lines")
+        .select(`
+          id, code, label, dotation_initiale,
+          total_engage, total_liquide
+        `)
+        .eq("exercice", exercice)
+        .eq("is_active", true);
+
+      const totalLignes = budgetLines?.length || 0;
+      let lignesCritiques = 0;
+      let lignesAlertes = 0;
+      let lignesSaines = 0;
+      const lignesCritiquesDetails: ControleurStats['lignesCritiquesDetails'] = [];
+
+      budgetLines?.forEach(bl => {
+        const dotation = bl.dotation_initiale || 0;
+        const engage = bl.total_engage || 0;
+        const tauxConsommation = dotation > 0 ? (engage / dotation) * 100 : 0;
+
+        if (tauxConsommation >= 90) {
+          lignesCritiques++;
+          lignesCritiquesDetails.push({
+            id: bl.id,
+            code: bl.code,
+            label: bl.label,
+            dotation,
+            engage,
+            tauxConsommation: Math.round(tauxConsommation),
+          });
+        } else if (tauxConsommation >= 80) {
+          lignesAlertes++;
+        } else {
+          lignesSaines++;
+        }
+      });
+
+      // Trier les lignes critiques par taux décroissant
+      lignesCritiquesDetails.sort((a, b) => b.tauxConsommation - a.tauxConsommation);
+
+      // Engagements à viser
+      const { data: engagements } = await supabase
+        .from("budget_engagements")
+        .select("id, statut, montant, created_at, validated_at")
+        .eq("exercice", exercice);
+
+      const engagementsAViser = engagements?.filter(e =>
+        e.statut === "soumis" || e.statut === "en_validation"
+      ).length || 0;
+
+      const engagementsEnCours = engagements?.filter(e =>
+        e.statut === "en_cours" || e.statut === "brouillon"
+      ).length || 0;
+
+      const engagementsValides = engagements?.filter(e => e.statut === "valide") || [];
+      const montantEngage = engagementsValides.reduce((sum, e) => sum + (e.montant || 0), 0);
+
+      // Calcul délai moyen engagement (création -> validation)
+      let totalDelaiEng = 0;
+      let countDelaiEng = 0;
+      engagementsValides.forEach(e => {
+        if (e.validated_at) {
+          const creation = new Date(e.created_at);
+          const validation = new Date(e.validated_at);
+          const delaiJours = Math.floor((validation.getTime() - creation.getTime()) / (1000 * 60 * 60 * 24));
+          if (delaiJours >= 0) {
+            totalDelaiEng += delaiJours;
+            countDelaiEng++;
+          }
+        }
+      });
+      const delaiMoyenEngagement = countDelaiEng > 0 ? Math.round(totalDelaiEng / countDelaiEng) : null;
+
+      // Liquidations pour délai moyen
+      const { data: liquidations } = await supabase
+        .from("budget_liquidations")
+        .select("id, statut, created_at, validated_at")
+        .eq("exercice", exercice)
+        .eq("statut", "valide");
+
+      let totalDelaiLiq = 0;
+      let countDelaiLiq = 0;
+      liquidations?.forEach(l => {
+        if (l.validated_at) {
+          const creation = new Date(l.created_at);
+          const validation = new Date(l.validated_at);
+          const delaiJours = Math.floor((validation.getTime() - creation.getTime()) / (1000 * 60 * 60 * 24));
+          if (delaiJours >= 0) {
+            totalDelaiLiq += delaiJours;
+            countDelaiLiq++;
+          }
+        }
+      });
+      const delaiMoyenLiquidation = countDelaiLiq > 0 ? Math.round(totalDelaiLiq / countDelaiLiq) : null;
+
+      // Budget global
+      const budgetTotal = budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
+      const montantDisponible = budgetTotal - montantEngage;
+      const tauxConsommationGlobal = budgetTotal > 0 ? Math.round((montantEngage / budgetTotal) * 100) : 0;
+
+      // Anomalies détectées (règles simplifiées)
+      const anomaliesDetails: ControleurStats['anomaliesDetails'] = [];
+
+      // Anomalie: Lignes avec engagement > dotation
+      budgetLines?.forEach(bl => {
+        const dotation = bl.dotation_initiale || 0;
+        const engage = bl.total_engage || 0;
+        if (engage > dotation) {
+          anomaliesDetails.push({
+            type: 'DEPASSEMENT',
+            description: `Ligne ${bl.code}: engagement (${formatAmountInternal(engage)}) dépasse la dotation (${formatAmountInternal(dotation)})`,
+            entityId: bl.id,
+            severity: 'critical',
+          });
+        }
+      });
+
+      // Anomalie: Engagements en attente depuis plus de 15 jours
+      const il15Jours = new Date();
+      il15Jours.setDate(il15Jours.getDate() - 15);
+      engagements?.filter(e =>
+        (e.statut === "soumis" || e.statut === "en_validation") &&
+        new Date(e.created_at) < il15Jours
+      ).forEach(() => {
+        anomaliesDetails.push({
+          type: 'RETARD_VALIDATION',
+          description: `Engagement en attente de validation depuis plus de 15 jours`,
+          severity: 'warning',
+        });
+      });
+
+      // Check tracking enabled (based on data availability)
+      const trackingEnabled = {
+        delais: countDelaiEng > 0 || countDelaiLiq > 0,
+        anomalies: true, // Always check for anomalies
+        alertes: lignesCritiques > 0 || lignesAlertes > 0,
+      };
+
+      return {
+        lignesCritiques,
+        lignesAlertes,
+        lignesSaines,
+        totalLignes,
+        engagementsAViser,
+        engagementsEnCours,
+        delaiMoyenEngagement,
+        delaiMoyenLiquidation,
+        anomaliesDetectees: anomaliesDetails.length,
+        montantEngage,
+        montantDisponible,
+        tauxConsommationGlobal,
+        lignesCritiquesDetails: lignesCritiquesDetails.slice(0, 10), // Top 10
+        anomaliesDetails,
+        trackingEnabled,
       };
     },
     enabled: !!exercice,

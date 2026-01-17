@@ -10,6 +10,7 @@ import { ValidationDgForm } from "./ValidationDgForm";
 import { DossierGED } from "@/components/ged";
 import { DossierTimeline } from "@/components/dossier/DossierTimeline";
 import { DossierAuditLog } from "@/components/dossier/DossierAuditLog";
+import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -79,6 +80,16 @@ export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetail
         </div>
         {getStatusBadge(liquidation.statut)}
       </div>
+
+      {/* Timeline de la chaîne de dépense */}
+      {(liquidation as any).dossier_id && (
+        <DossierStepTimeline
+          dossierId={(liquidation as any).dossier_id}
+          highlightStep="liquidation"
+          compact
+          showNavigation
+        />
+      )}
 
       {/* Rejection/Defer reason */}
       {liquidation.statut === "rejete" && liquidation.rejection_reason && (

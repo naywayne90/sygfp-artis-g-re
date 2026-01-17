@@ -2,11 +2,12 @@
  * TopBar V2 - Barre supérieure unifiée
  * Logo ARTI + Sélecteur exercice + Notifications + Menu utilisateur
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Lock, RefreshCw, Bell, User, Settings, LogOut, Menu } from "lucide-react";
+import { Calendar, Lock, RefreshCw, Bell, User, Settings, LogOut, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DossierSearchDialog } from "@/components/search";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +30,19 @@ export function TopBar() {
   const { data: badges } = useSidebarBadges();
   const navigate = useNavigate();
   const [showExerciceModal, setShowExerciceModal] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+
+  // Keyboard shortcut: Ctrl+K to open search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearchDialog(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -62,6 +76,30 @@ export function TopBar() {
             </span>
           </div>
         </div>
+
+        {/* Search button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden sm:flex items-center gap-2 mr-2"
+          onClick={() => setShowSearchDialog(true)}
+        >
+          <Search className="h-4 w-4" />
+          <span className="text-sm">Rechercher...</span>
+          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+            <span className="text-xs">Ctrl</span>K
+          </kbd>
+        </Button>
+
+        {/* Mobile search button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="sm:hidden"
+          onClick={() => setShowSearchDialog(true)}
+        >
+          <Search className="h-5 w-5" />
+        </Button>
 
         {/* Spacer */}
         <div className="flex-1" />
@@ -169,6 +207,12 @@ export function TopBar() {
       <ExerciceChangeModal
         open={showExerciceModal}
         onOpenChange={setShowExerciceModal}
+      />
+
+      {/* Dialog recherche de dossiers */}
+      <DossierSearchDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
       />
     </>
   );

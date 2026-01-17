@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export interface EngagementDocument {
   id: string;
@@ -22,16 +23,30 @@ export interface EngagementDocument {
 }
 
 export const TYPES_DOCUMENTS_ENGAGEMENT = [
-  { value: "marche", label: "Contrat/Marché signé" },
-  { value: "bon_commande", label: "Bon de commande" },
-  { value: "devis", label: "Devis/Proforma" },
-  { value: "justificatif", label: "Justificatif de la dépense" },
-  { value: "pv_attribution", label: "PV d'attribution" },
-  { value: "autre", label: "Autre document" },
+  { value: "marche", label: "Contrat/Marché signé", obligatoire: false },
+  { value: "bon_commande", label: "Bon de commande", obligatoire: true },
+  { value: "devis", label: "Devis/Proforma", obligatoire: true },
+  { value: "justificatif", label: "Justificatif de la dépense", obligatoire: false },
+  { value: "pv_attribution", label: "PV d'attribution", obligatoire: false },
+  { value: "pv_reception", label: "PV de réception", obligatoire: false },
+  { value: "facture_proforma", label: "Facture proforma", obligatoire: false },
+  { value: "autre", label: "Autre document", obligatoire: false },
 ];
+
+// File type validation
+export const ACCEPTED_FILE_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+
+export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
 
 export function useEngagementDocuments(engagementId?: string) {
   const queryClient = useQueryClient();
+  const { logAction } = useAuditLog();
 
   // Fetch documents
   const { data: documents = [], isLoading } = useQuery({
@@ -53,31 +68,80 @@ export function useEngagementDocuments(engagementId?: string) {
   });
 
   // Calculate checklist status
+  const obligatoires = documents.filter(d => d.est_obligatoire);
+  const fournis = documents.filter(d => d.est_fourni);
+  const fourniObligatoires = documents.filter(d => d.est_obligatoire && d.est_fourni);
+  const verifies = documents.filter(d => d.verified_at);
+  const manquants = documents.filter(d => d.est_obligatoire && !d.est_fourni);
+
   const checklistStatus = {
-    total: documents.filter(d => d.est_obligatoire).length,
-    provided: documents.filter(d => d.est_obligatoire && d.est_fourni).length,
-    isComplete: documents.filter(d => d.est_obligatoire).every(d => d.est_fourni),
-    percentage: documents.filter(d => d.est_obligatoire).length > 0
-      ? Math.round((documents.filter(d => d.est_obligatoire && d.est_fourni).length / 
-          documents.filter(d => d.est_obligatoire).length) * 100)
+    total: obligatoires.length,
+    totalAll: documents.length,
+    provided: fourniObligatoires.length,
+    providedAll: fournis.length,
+    verified: verifies.length,
+    isComplete: obligatoires.every(d => d.est_fourni),
+    isFullyVerified: fournis.every(d => d.verified_at),
+    percentage: obligatoires.length > 0
+      ? Math.round((fourniObligatoires.length / obligatoires.length) * 100)
       : 100,
+    missingLabels: manquants.map(d => d.libelle),
   };
 
-  // Mark document as provided
+  // Mark document as provided (with optional file info)
   const markProvidedMutation = useMutation({
-    mutationFn: async ({ documentId, provided }: { documentId: string; provided: boolean }) => {
+    mutationFn: async ({
+      documentId,
+      provided,
+      filePath,
+      fileName,
+      fileSize,
+      fileType,
+    }: {
+      documentId: string;
+      provided: boolean;
+      filePath?: string;
+      fileName?: string;
+      fileSize?: number;
+      fileType?: string;
+    }) => {
       const { data: user } = await supabase.auth.getUser();
-      
+
+      // Get old values for audit
+      const { data: oldDoc } = await supabase
+        .from("engagement_documents")
+        .select("est_fourni, file_path, file_name")
+        .eq("id", documentId)
+        .single();
+
       const { error } = await supabase
         .from("engagement_documents")
         .update({
           est_fourni: provided,
+          file_path: provided ? (filePath || null) : null,
+          file_name: provided ? (fileName || null) : null,
+          file_size: provided ? (fileSize || null) : null,
+          file_type: provided ? (fileType || null) : null,
           uploaded_by: provided ? user.user?.id : null,
           uploaded_at: provided ? new Date().toISOString() : null,
+          // Clear verification if re-uploading
+          verified_by: null,
+          verified_at: null,
         })
         .eq("id", documentId);
 
       if (error) throw error;
+
+      // Audit log
+      if (engagementId) {
+        await logAction({
+          entityType: "engagement",
+          entityId: engagementId,
+          action: provided ? "UPLOAD" : "DELETE",
+          oldValues: { est_fourni: oldDoc?.est_fourni, file_name: oldDoc?.file_name },
+          newValues: { est_fourni: provided, file_name: fileName, document_id: documentId },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["engagement-documents", engagementId] });
@@ -90,23 +154,40 @@ export function useEngagementDocuments(engagementId?: string) {
 
   // Add custom document
   const addDocumentMutation = useMutation({
-    mutationFn: async (data: { type_document: string; libelle: string; description?: string }) => {
-      const { data: user } = await supabase.auth.getUser();
-      
-      const { error } = await supabase
+    mutationFn: async (data: {
+      type_document: string;
+      libelle: string;
+      description?: string;
+      est_obligatoire?: boolean;
+    }) => {
+      const { error, data: newDoc } = await supabase
         .from("engagement_documents")
         .insert({
           engagement_id: engagementId,
           ...data,
-          est_obligatoire: false,
+          est_obligatoire: data.est_obligatoire ?? false,
           est_fourni: false,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Audit log
+      if (engagementId) {
+        await logAction({
+          entityType: "engagement",
+          entityId: engagementId,
+          action: "CREATE",
+          newValues: { document_id: newDoc.id, type: data.type_document, libelle: data.libelle },
+        });
+      }
+
+      return newDoc;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["engagement-documents", engagementId] });
-      toast.success("Document ajouté");
+      toast.success("Document ajouté à la checklist");
     },
     onError: (error) => {
       toast.error("Erreur: " + error.message);
@@ -117,7 +198,14 @@ export function useEngagementDocuments(engagementId?: string) {
   const verifyDocumentMutation = useMutation({
     mutationFn: async (documentId: string) => {
       const { data: user } = await supabase.auth.getUser();
-      
+
+      // Get document info for audit
+      const { data: doc } = await supabase
+        .from("engagement_documents")
+        .select("libelle, file_name")
+        .eq("id", documentId)
+        .single();
+
       const { error } = await supabase
         .from("engagement_documents")
         .update({
@@ -127,6 +215,21 @@ export function useEngagementDocuments(engagementId?: string) {
         .eq("id", documentId);
 
       if (error) throw error;
+
+      // Audit log
+      if (engagementId) {
+        await logAction({
+          entityType: "engagement",
+          entityId: engagementId,
+          action: "VALIDATE",
+          newValues: {
+            document_id: documentId,
+            document_libelle: doc?.libelle,
+            file_name: doc?.file_name,
+            verified: true
+          },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["engagement-documents", engagementId] });
@@ -146,5 +249,6 @@ export function useEngagementDocuments(engagementId?: string) {
     verifyDocument: verifyDocumentMutation.mutateAsync,
     isMarking: markProvidedMutation.isPending,
     isAdding: addDocumentMutation.isPending,
+    isVerifying: verifyDocumentMutation.isPending,
   };
 }

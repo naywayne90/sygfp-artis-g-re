@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Clock, XCircle, User, Building2, FileText, Calculator, Lock, FileCheck, FolderOpen } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, User, Building2, FileText, Calculator, Lock, FileCheck, FolderOpen, History } from "lucide-react";
 import { Engagement, VALIDATION_STEPS, useEngagements } from "@/hooks/useEngagements";
 import { EngagementChecklist } from "./EngagementChecklist";
 import { DossierGED } from "@/components/ged";
+import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
+import { DossierTimeline } from "@/components/dossier/DossierTimeline";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -73,8 +75,19 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
         </DialogHeader>
 
         <ScrollArea className="max-h-[70vh] pr-4">
+          {/* Timeline de la chaîne de dépense */}
+          {(engagement as any).dossier_id && (
+            <DossierStepTimeline
+              dossierId={(engagement as any).dossier_id}
+              highlightStep="engagement"
+              compact
+              showNavigation
+              className="mb-4"
+            />
+          )}
+
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger value="details" className="gap-1">
                 <FileText className="h-4 w-4" />
                 Détails
@@ -86,6 +99,10 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
               <TabsTrigger value="checklist" className="gap-1">
                 <FileCheck className="h-4 w-4" />
                 Checklist
+              </TabsTrigger>
+              <TabsTrigger value="journal" className="gap-1">
+                <History className="h-4 w-4" />
+                Journal
               </TabsTrigger>
             </TabsList>
 
@@ -285,10 +302,30 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
             </TabsContent>
 
             <TabsContent value="checklist">
-              <EngagementChecklist 
-                engagementId={engagement.id} 
-                canEdit={engagement.statut !== "valide"} 
+              <EngagementChecklist
+                engagementId={engagement.id}
+                canEdit={engagement.statut !== "valide"}
               />
+            </TabsContent>
+
+            <TabsContent value="journal">
+              {(engagement as any).dossier_id ? (
+                <DossierTimeline
+                  dossierId={(engagement as any).dossier_id}
+                  entityType="engagement"
+                  entityId={engagement.id}
+                  maxItems={50}
+                  showFilters={true}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="py-8 text-center text-muted-foreground">
+                    <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Journal non disponible</p>
+                    <p className="text-sm">Cet engagement n'est pas lié à un dossier.</p>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </ScrollArea>

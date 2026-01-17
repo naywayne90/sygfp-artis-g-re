@@ -346,9 +346,18 @@ export function useLiquidations() {
     },
   });
 
-  // Submit liquidation for validation
+  // Submit liquidation for validation with before/after audit trail
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Capturer l'état AVANT pour l'audit trail
+      const { data: liquidationBefore, error: fetchError } = await supabase
+        .from("budget_liquidations")
+        .select("id, numero, montant, statut, workflow_status, current_step, submitted_at")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       // Check attachments
       const { data: attachments } = await supabase
         .from("liquidation_attachments")
@@ -367,22 +376,37 @@ export function useLiquidations() {
         throw new Error(`Documents obligatoires manquants: ${missingLabels}`);
       }
 
+      const newValues = {
+        statut: "soumis",
+        workflow_status: "en_validation",
+        current_step: 1,
+        submitted_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from("budget_liquidations")
-        .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
-          current_step: 1,
-          submitted_at: new Date().toISOString(),
-        })
+        .update(newValues)
         .eq("id", id);
 
       if (error) throw error;
 
+      // Audit trail avec before/after
       await logAction({
         entityType: "liquidation",
         entityId: id,
         action: "submit",
+        entityCode: liquidationBefore?.numero,
+        oldValues: {
+          statut: liquidationBefore?.statut,
+          workflow_status: liquidationBefore?.workflow_status,
+          current_step: liquidationBefore?.current_step,
+          submitted_at: liquidationBefore?.submitted_at,
+        },
+        newValues: {
+          ...newValues,
+          documents_count: attachments?.length || 0,
+        },
+        resume: `Soumission pour validation - ${liquidationBefore?.numero}`,
       });
     },
     onSuccess: () => {
@@ -394,22 +418,24 @@ export function useLiquidations() {
     },
   });
 
-  // Validate liquidation step
+  // Validate liquidation step with before/after audit trail
   const validateMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: liquidation, error: fetchError } = await supabase
+      // Capturer l'état AVANT pour l'audit trail
+      const { data: liquidationBefore, error: fetchError } = await supabase
         .from("budget_liquidations")
-        .select("current_step")
+        .select("id, numero, montant, statut, workflow_status, current_step, validated_at, validated_by")
         .eq("id", id)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStep = liquidation?.current_step || 1;
+      const currentStep = liquidationBefore?.current_step || 1;
       const isLastStep = currentStep >= VALIDATION_STEPS.length;
+      const stepInfo = VALIDATION_STEPS.find(s => s.order === currentStep);
 
       await supabase
         .from("liquidation_validations")
@@ -422,24 +448,44 @@ export function useLiquidations() {
         .eq("liquidation_id", id)
         .eq("step_order", currentStep);
 
+      const newValues = {
+        current_step: isLastStep ? currentStep : currentStep + 1,
+        statut: isLastStep ? "valide" : "soumis",
+        workflow_status: isLastStep ? "termine" : "en_validation",
+        validated_at: isLastStep ? new Date().toISOString() : null,
+        validated_by: isLastStep ? user.id : null,
+      };
+
       const { error } = await supabase
         .from("budget_liquidations")
-        .update({
-          current_step: isLastStep ? currentStep : currentStep + 1,
-          statut: isLastStep ? "valide" : "soumis",
-          workflow_status: isLastStep ? "termine" : "en_validation",
-          validated_at: isLastStep ? new Date().toISOString() : null,
-          validated_by: isLastStep ? user.id : null,
-        })
+        .update(newValues)
         .eq("id", id);
 
       if (error) throw error;
 
+      // Audit trail avec before/after
       await logAction({
         entityType: "liquidation",
         entityId: id,
         action: "validate",
-        newValues: { step: currentStep, comments },
+        entityCode: liquidationBefore?.numero,
+        oldValues: {
+          statut: liquidationBefore?.statut,
+          workflow_status: liquidationBefore?.workflow_status,
+          current_step: liquidationBefore?.current_step,
+          validated_at: liquidationBefore?.validated_at,
+          validated_by: liquidationBefore?.validated_by,
+        },
+        newValues: {
+          ...newValues,
+          step_validated: currentStep,
+          step_label: stepInfo?.label,
+          step_role: stepInfo?.role,
+          is_final_validation: isLastStep,
+        },
+        resume: isLastStep
+          ? `Validation finale de la liquidation ${liquidationBefore?.numero}`
+          : `Validation étape ${currentStep} (${stepInfo?.label}) - ${liquidationBefore?.numero}`,
       });
     },
     onSuccess: () => {
@@ -451,19 +497,22 @@ export function useLiquidations() {
     },
   });
 
-  // Reject liquidation
+  // Reject liquidation with before/after audit trail
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
-      const { data: liquidation } = await supabase
+      // Capturer l'état AVANT pour l'audit trail
+      const { data: liquidationBefore, error: fetchError } = await supabase
         .from("budget_liquidations")
-        .select("current_step")
+        .select("id, numero, montant, statut, workflow_status, current_step, rejection_reason, rejected_by, rejected_at")
         .eq("id", id)
         .single();
 
-      const currentStep = liquidation?.current_step || 1;
+      if (fetchError) throw fetchError;
+
+      const currentStep = liquidationBefore?.current_step || 1;
 
       await supabase
         .from("liquidation_validations")
@@ -476,24 +525,40 @@ export function useLiquidations() {
         .eq("liquidation_id", id)
         .eq("step_order", currentStep);
 
+      const newValues = {
+        statut: "rejete",
+        workflow_status: "rejete",
+        rejected_at: new Date().toISOString(),
+        rejected_by: user.id,
+        rejection_reason: reason,
+      };
+
       const { error } = await supabase
         .from("budget_liquidations")
-        .update({
-          statut: "rejete",
-          workflow_status: "rejete",
-          rejected_at: new Date().toISOString(),
-          rejected_by: user.id,
-          rejection_reason: reason,
-        })
+        .update(newValues)
         .eq("id", id);
 
       if (error) throw error;
 
+      // Audit trail avec before/after
       await logAction({
         entityType: "liquidation",
         entityId: id,
         action: "reject",
-        newValues: { reason },
+        entityCode: liquidationBefore?.numero,
+        oldValues: {
+          statut: liquidationBefore?.statut,
+          workflow_status: liquidationBefore?.workflow_status,
+          current_step: liquidationBefore?.current_step,
+          rejection_reason: liquidationBefore?.rejection_reason,
+          rejected_by: liquidationBefore?.rejected_by,
+          rejected_at: liquidationBefore?.rejected_at,
+        },
+        newValues: {
+          ...newValues,
+          step_rejected: currentStep,
+        },
+        justification: reason,
       });
     },
     onSuccess: () => {
@@ -505,7 +570,7 @@ export function useLiquidations() {
     },
   });
 
-  // Defer liquidation
+  // Defer liquidation with before/after audit trail
   const deferMutation = useMutation({
     mutationFn: async ({
       id,
@@ -519,25 +584,51 @@ export function useLiquidations() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
 
+      // Capturer l'état AVANT pour l'audit trail
+      const { data: liquidationBefore, error: fetchError } = await supabase
+        .from("budget_liquidations")
+        .select("id, numero, montant, statut, workflow_status, current_step, motif_differe, date_differe, deadline_correction, differe_by")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newValues = {
+        statut: "differe",
+        workflow_status: "differe",
+        motif_differe: motif,
+        date_differe: new Date().toISOString(),
+        deadline_correction: dateReprise || null,
+        differe_by: user.id,
+      };
+
       const { error } = await supabase
         .from("budget_liquidations")
-        .update({
-          statut: "differe",
-          workflow_status: "differe",
-          motif_differe: motif,
-          date_differe: new Date().toISOString(),
-          deadline_correction: dateReprise || null,
-          differe_by: user.id,
-        })
+        .update(newValues)
         .eq("id", id);
 
       if (error) throw error;
 
+      // Audit trail avec before/after
       await logAction({
         entityType: "liquidation",
         entityId: id,
         action: "defer",
-        newValues: { motif, dateReprise },
+        entityCode: liquidationBefore?.numero,
+        oldValues: {
+          statut: liquidationBefore?.statut,
+          workflow_status: liquidationBefore?.workflow_status,
+          current_step: liquidationBefore?.current_step,
+          motif_differe: liquidationBefore?.motif_differe,
+          date_differe: liquidationBefore?.date_differe,
+          deadline_correction: liquidationBefore?.deadline_correction,
+        },
+        newValues: {
+          ...newValues,
+          step_deferred: liquidationBefore?.current_step,
+        },
+        justification: motif,
+        resume: `Report de la liquidation ${liquidationBefore?.numero}`,
       });
     },
     onSuccess: () => {
@@ -549,27 +640,53 @@ export function useLiquidations() {
     },
   });
 
-  // Resume deferred liquidation
+  // Resume deferred liquidation with before/after audit trail
   const resumeMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Capturer l'état AVANT pour l'audit trail
+      const { data: liquidationBefore, error: fetchError } = await supabase
+        .from("budget_liquidations")
+        .select("id, numero, montant, statut, workflow_status, current_step, motif_differe, date_differe, deadline_correction, differe_by")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newValues = {
+        statut: "soumis",
+        workflow_status: "en_validation",
+        date_differe: null,
+        motif_differe: null,
+        deadline_correction: null,
+        differe_by: null,
+      };
+
       const { error } = await supabase
         .from("budget_liquidations")
-        .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
-          date_differe: null,
-          motif_differe: null,
-          deadline_correction: null,
-          differe_by: null,
-        })
+        .update(newValues)
         .eq("id", id);
 
       if (error) throw error;
 
+      // Audit trail avec before/after
       await logAction({
         entityType: "liquidation",
         entityId: id,
         action: "resume",
+        entityCode: liquidationBefore?.numero,
+        oldValues: {
+          statut: liquidationBefore?.statut,
+          workflow_status: liquidationBefore?.workflow_status,
+          motif_differe: liquidationBefore?.motif_differe,
+          date_differe: liquidationBefore?.date_differe,
+          deadline_correction: liquidationBefore?.deadline_correction,
+          differe_by: liquidationBefore?.differe_by,
+        },
+        newValues: {
+          ...newValues,
+          resumed_from_step: liquidationBefore?.current_step,
+        },
+        resume: `Reprise de la liquidation ${liquidationBefore?.numero} après report`,
       });
     },
     onSuccess: () => {

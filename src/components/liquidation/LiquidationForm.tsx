@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,13 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLiquidations, DOCUMENTS_REQUIS, LiquidationAvailability } from "@/hooks/useLiquidations";
-import { Upload, AlertCircle, CheckCircle, X, FileText } from "lucide-react";
+import { Upload, AlertCircle, CheckCircle, X, FileText, Eye, FileImage, Lock, AlertTriangle, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   engagement_id: z.string().min(1, "Engagement requis"),
@@ -40,10 +48,29 @@ interface FileUpload {
   file_size?: number;
   file_type?: string;
   file?: File;
+  previewUrl?: string; // URL de preview pour les images
 }
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
+};
+
+// Types MIME acceptés pour le scan
+const ACCEPTED_FILE_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
+
+// Formater la taille de fichier
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return bytes + " o";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " Ko";
+  return (bytes / (1024 * 1024)).toFixed(1) + " Mo";
 };
 
 export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationFormProps) {
@@ -52,6 +79,8 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
   const [availability, setAvailability] = useState<LiquidationAvailability | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<FileUpload | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -103,14 +132,36 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
     }
   };
 
-  const handleFileUpload = (documentType: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback((documentType: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setFileError(null);
 
-    // Remove existing file of same type
+    // Vérifier le type MIME
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+      setFileError(`Type de fichier "${file.type}" non accepté. Utilisez PDF, JPG, PNG, GIF ou WEBP.`);
+      return;
+    }
+
+    // Vérifier la taille
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError(`Fichier trop volumineux (${formatFileSize(file.size)}). Maximum autorisé : 10 Mo.`);
+      return;
+    }
+
+    // Remove existing file of same type (clean up preview URL)
+    const oldFile = uploadedFiles.find(f => f.document_type === documentType);
+    if (oldFile?.previewUrl) {
+      URL.revokeObjectURL(oldFile.previewUrl);
+    }
     const filtered = uploadedFiles.filter(f => f.document_type !== documentType);
+
+    // Create preview URL for images
+    let previewUrl: string | undefined;
+    if (file.type.startsWith("image/")) {
+      previewUrl = URL.createObjectURL(file);
+    }
 
     const newUpload: FileUpload = {
       document_type: documentType,
@@ -119,12 +170,29 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
       file_size: file.size,
       file_type: file.type,
       file: file,
+      previewUrl,
     };
 
     setUploadedFiles([...filtered, newUpload]);
+  }, [uploadedFiles]);
+
+  // Ouvrir la preview d'un fichier
+  const openPreview = (file: FileUpload) => {
+    setPreviewFile(file);
+    setPreviewDialogOpen(true);
+  };
+
+  // Fermer la preview
+  const closePreview = () => {
+    setPreviewDialogOpen(false);
+    setPreviewFile(null);
   };
 
   const removeFile = (documentType: string) => {
+    const fileToRemove = uploadedFiles.find(f => f.document_type === documentType);
+    if (fileToRemove?.previewUrl) {
+      URL.revokeObjectURL(fileToRemove.previewUrl);
+    }
     setUploadedFiles(uploadedFiles.filter(f => f.document_type !== documentType));
   };
 
@@ -415,7 +483,13 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
                 return (
                   <div
                     key={doc.code}
-                    className={`p-4 border rounded-lg ${doc.obligatoire ? "border-primary/50" : "border-muted"}`}
+                    className={`p-4 border rounded-lg transition-colors ${
+                      uploadedFile
+                        ? "bg-success/5 border-success/30"
+                        : doc.obligatoire
+                          ? "border-primary/50 bg-muted/30"
+                          : "border-muted"
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <Label className="flex items-center gap-2">
@@ -428,34 +502,88 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
                         )}
                       </Label>
                       {uploadedFile && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(doc.code)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          {uploadedFile.previewUrl && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openPreview(uploadedFile)}
+                              title="Voir l'aperçu"
+                            >
+                              <Eye className="h-4 w-4 text-primary" />
+                            </Button>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(doc.code)}
+                            title="Supprimer"
+                          >
+                            <X className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       )}
                     </div>
-                    
+
                     {uploadedFile ? (
-                      <div className="flex items-center gap-2 text-sm text-success">
-                        <CheckCircle className="h-4 w-4" />
-                        {uploadedFile.file_name}
+                      <div className="space-y-2">
+                        {/* Thumbnail preview for images */}
+                        {uploadedFile.previewUrl && (
+                          <div
+                            className="relative h-20 w-full bg-muted rounded overflow-hidden cursor-pointer"
+                            onClick={() => openPreview(uploadedFile)}
+                          >
+                            <img
+                              src={uploadedFile.previewUrl}
+                              alt={uploadedFile.file_name}
+                              className="h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center">
+                              <Eye className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm text-success">
+                          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                          <span className="truncate">{uploadedFile.file_name}</span>
+                        </div>
+                        {uploadedFile.file_size && (
+                          <p className="text-xs text-muted-foreground">
+                            {formatFileSize(uploadedFile.file_size)}
+                          </p>
+                        )}
                       </div>
                     ) : (
-                      <Input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileUpload(doc.code, e)}
-                        className="text-sm"
-                      />
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
+                          onChange={(e) => handleFileUpload(doc.code, e)}
+                          className="text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          PDF, JPG, PNG, GIF, WEBP (max 10 Mo)
+                        </p>
+                      </div>
                     )}
                   </div>
                 );
               })}
             </div>
+
+            {/* Completeness blocking notice */}
+            {!checkRequiredDocuments() && (
+              <Alert variant="destructive" className="mt-4">
+                <Lock className="h-4 w-4" />
+                <AlertTitle>Documents obligatoires manquants</AlertTitle>
+                <AlertDescription>
+                  Vous devez téléverser tous les documents obligatoires (Facture, PV de réception, Bon de livraison)
+                  avant de pouvoir créer la liquidation.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
 
@@ -464,14 +592,57 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isCreating || !checkRequiredDocuments() || (availability && !availability.is_valid)}
           >
-            {isCreating ? "Création..." : "Créer la liquidation"}
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Création...
+              </>
+            ) : (
+              "Créer la liquidation"
+            )}
           </Button>
         </div>
       </form>
+
+      {/* Dialog de preview d'image */}
+      <Dialog open={previewDialogOpen} onOpenChange={closePreview}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileImage className="h-5 w-5" />
+              Aperçu du document
+            </DialogTitle>
+            {previewFile && (
+              <DialogDescription>
+                {previewFile.file_name}
+                {previewFile.file_size && ` - ${formatFileSize(previewFile.file_size)}`}
+              </DialogDescription>
+            )}
+          </DialogHeader>
+
+          <div className="py-4">
+            {previewFile?.previewUrl && (
+              <div className="border rounded-lg overflow-hidden bg-muted/50 p-2">
+                <img
+                  src={previewFile.previewUrl}
+                  alt={previewFile.file_name}
+                  className="max-h-[60vh] mx-auto object-contain rounded"
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closePreview}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }

@@ -260,7 +260,8 @@ export function useReglements() {
         })
         .eq("id", data.ordonnancement_id);
 
-      // Si complètement payé, marquer le dossier comme soldé (si lié)
+      // Si complètement payé, marquer le dossier comme soldé (CLOTURE)
+      let dossierId: string | undefined;
       if (isFullyPaid) {
         // Récupérer l'ordonnancement avec sa chaîne
         const { data: ordData } = await supabase
@@ -277,17 +278,47 @@ export function useReglements() {
           .eq("id", data.ordonnancement_id)
           .single();
 
-        const dossierId = ordData?.liquidation?.engagement?.expression_besoin?.dossier_id;
-        
+        dossierId = ordData?.liquidation?.engagement?.expression_besoin?.dossier_id;
+
         if (dossierId) {
           await supabase
             .from("dossiers")
             .update({
               statut_global: "solde",
               statut_paiement: "solde",
+              date_cloture: new Date().toISOString(),
             })
             .eq("id", dossierId);
         }
+      }
+
+      // Audit log for reglement creation
+      await logAction({
+        entityType: "reglement",
+        entityId: reglement.id,
+        action: "CREATE",
+        newValues: {
+          numero: reglement.numero,
+          montant: data.montant,
+          mode_paiement: data.mode_paiement,
+          reference_paiement: data.reference_paiement,
+          ordonnancement_id: data.ordonnancement_id,
+          is_fully_paid: isFullyPaid,
+        },
+      });
+
+      // If dossier was closed, log it
+      if (isFullyPaid && dossierId) {
+        await logAction({
+          entityType: "dossier",
+          entityId: dossierId,
+          action: "CLOSE",
+          newValues: {
+            statut_global: "solde",
+            reason: "Règlement complet effectué",
+            reglement_id: reglement.id,
+          },
+        });
       }
 
       return reglement;
@@ -310,7 +341,7 @@ export function useReglements() {
       // Récupérer le règlement pour mettre à jour l'ordonnancement
       const { data: reglement, error: fetchError } = await supabase
         .from("reglements")
-        .select("ordonnancement_id, montant")
+        .select("ordonnancement_id, montant, numero")
         .eq("id", id)
         .single();
 
@@ -342,6 +373,18 @@ export function useReglements() {
           is_locked: newMontantPaye > 0,
         })
         .eq("id", reglement.ordonnancement_id);
+
+      // Audit log
+      await logAction({
+        entityType: "reglement",
+        entityId: id,
+        action: "DELETE",
+        oldValues: {
+          numero: reglement.numero,
+          montant: reglement.montant,
+          ordonnancement_id: reglement.ordonnancement_id,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reglements"] });
@@ -418,6 +461,30 @@ export function useReglements() {
     }).length,
   };
 
+  // Helper to generate treasury link for a reglement
+  const getTreasuryLink = (reglementId: string, compteId?: string) => {
+    // Link format: /tresorerie/operations?reglement={id}&compte={compteId}
+    const baseUrl = "/tresorerie/operations";
+    const params = new URLSearchParams();
+    params.set("reglement", reglementId);
+    if (compteId) {
+      params.set("compte", compteId);
+    }
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  // Check if dossier is in CLOTURE state (read-only)
+  const isDossierClosed = async (dossierId: string) => {
+    const { data, error } = await supabase
+      .from("dossiers")
+      .select("statut_global, date_cloture")
+      .eq("id", dossierId)
+      .single();
+
+    if (error) return false;
+    return data?.statut_global === "solde";
+  };
+
   return {
     reglements,
     isLoading,
@@ -430,5 +497,7 @@ export function useReglements() {
     getAttachments,
     addAttachment,
     stats,
+    getTreasuryLink,
+    isDossierClosed,
   };
 }

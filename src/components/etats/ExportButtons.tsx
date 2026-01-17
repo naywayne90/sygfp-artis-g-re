@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
 interface ExportButtonsProps {
   data: any[];
@@ -20,33 +21,62 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
     return new Intl.NumberFormat("fr-FR").format(value);
   };
 
-  const exportToCSV = () => {
+  const exportToExcel = () => {
     try {
-      const headers = columns.map((c) => c.label).join(";");
-      const rows = data.map((row) =>
-        columns
-          .map((col) => {
-            const value = col.key.split(".").reduce((obj, key) => obj?.[key], row);
-            if (typeof value === "number") {
-              return formatMontant(value);
-            }
-            return value || "";
-          })
-          .join(";")
-      );
+      // Prepare data for Excel
+      const excelData = data.map((row) => {
+        const rowData: Record<string, any> = {};
+        columns.forEach((col) => {
+          const value = col.key.split(".").reduce((obj, key) => obj?.[key], row);
+          rowData[col.label] = value ?? "";
+        });
+        return rowData;
+      });
 
-      const csv = [headers, ...rows].join("\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // Auto-size columns
+      const colWidths = columns.map((col) => ({
+        wch: Math.max(
+          col.label.length,
+          ...data.map((row) => {
+            const value = col.key.split(".").reduce((obj, key) => obj?.[key], row);
+            return String(value ?? "").length;
+          })
+        ) + 2,
+      }));
+      worksheet["!cols"] = colWidths;
+
+      // Add title row at the top
+      XLSX.utils.sheet_add_aoa(worksheet, [[title]], { origin: "A1" });
+      XLSX.utils.sheet_add_aoa(worksheet, [[`Généré le ${new Date().toLocaleDateString("fr-FR")}`]], { origin: "A2" });
+      XLSX.utils.sheet_add_aoa(worksheet, [[""]], { origin: "A3" });
+
+      // Shift existing data down
+      const sheetData = excelData.map((row) => Object.values(row));
+      XLSX.utils.sheet_add_aoa(worksheet, [columns.map(c => c.label)], { origin: "A4" });
+      XLSX.utils.sheet_add_aoa(worksheet, sheetData, { origin: "A5" });
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Données");
+
+      // Generate file and download
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${filename}_${new Date().toISOString().split("T")[0]}.csv`;
+      link.download = `${filename}_${new Date().toISOString().split("T")[0]}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
 
-      toast.success("Export CSV réussi");
+      toast.success("Export Excel réussi");
     } catch (error) {
-      toast.error("Erreur lors de l'export CSV");
+      console.error("Excel export error:", error);
+      toast.error("Erreur lors de l'export Excel");
     }
   };
 
@@ -145,9 +175,9 @@ export function ExportButtons({ data, columns, filename, title }: ExportButtonsP
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={exportToCSV}>
+        <DropdownMenuItem onClick={exportToExcel}>
           <FileSpreadsheet className="h-4 w-4 mr-2" />
-          Exporter en Excel (CSV)
+          Exporter en Excel
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportToPDF}>
           <FileText className="h-4 w-4 mr-2" />

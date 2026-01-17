@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 // Étapes de validation workflow
 export const VALIDATION_STEPS = [
@@ -41,6 +42,7 @@ export interface OrdonnancementFormData {
 export function useOrdonnancements() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
+  const { logAction } = useAuditLog();
 
   // Récupérer les ordonnancements
   const {
@@ -208,6 +210,21 @@ export function useOrdonnancements() {
         .single();
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: ordonnancement.id,
+        action: "CREATE",
+        newValues: {
+          numero,
+          montant: data.montant,
+          beneficiaire: data.beneficiaire,
+          mode_paiement: data.mode_paiement,
+          liquidation_id: data.liquidation_id,
+        },
+      });
+
       return ordonnancement;
     },
     onSuccess: () => {
@@ -247,6 +264,15 @@ export function useOrdonnancements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: id,
+        action: "SUBMIT",
+        oldValues: { statut: "brouillon" },
+        newValues: { statut: "soumis", workflow_status: "en_validation" },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
@@ -268,6 +294,8 @@ export function useOrdonnancements() {
       stepOrder: number;
       comments?: string;
     }) => {
+      const currentStep = VALIDATION_STEPS.find(s => s.order === stepOrder);
+
       // Mettre à jour l'étape de validation
       const { error: validationError } = await supabase
         .from("ordonnancement_validations")
@@ -313,6 +341,21 @@ export function useOrdonnancements() {
 
         if (error) throw error;
       }
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: ordonnancementId,
+        action: "VALIDATE",
+        newValues: {
+          step: stepOrder,
+          step_role: currentStep?.role,
+          step_label: currentStep?.label,
+          comments,
+          is_final_validation: isLastStep,
+          new_status: isLastStep ? "valide" : "en_validation",
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
@@ -332,6 +375,13 @@ export function useOrdonnancements() {
       id: string;
       reason: string;
     }) => {
+      // Get old values for audit
+      const { data: oldData } = await supabase
+        .from("ordonnancements")
+        .select("statut, workflow_status, numero")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("ordonnancements")
         .update({
@@ -343,6 +393,19 @@ export function useOrdonnancements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: id,
+        action: "REJECT",
+        oldValues: { statut: oldData?.statut, workflow_status: oldData?.workflow_status },
+        newValues: {
+          statut: "rejete",
+          rejection_reason: reason,
+          numero: oldData?.numero,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
@@ -364,6 +427,13 @@ export function useOrdonnancements() {
       motif: string;
       dateReprise?: string;
     }) => {
+      // Get old values for audit
+      const { data: oldData } = await supabase
+        .from("ordonnancements")
+        .select("statut, workflow_status, numero")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase
         .from("ordonnancements")
         .update({
@@ -376,6 +446,20 @@ export function useOrdonnancements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: id,
+        action: "DEFER",
+        oldValues: { statut: oldData?.statut },
+        newValues: {
+          statut: "differe",
+          motif_differe: motif,
+          deadline_correction: dateReprise,
+          numero: oldData?.numero,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
@@ -401,6 +485,15 @@ export function useOrdonnancements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: id,
+        action: "RESUME",
+        oldValues: { statut: "differe" },
+        newValues: { statut: "soumis", workflow_status: "en_validation" },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
@@ -439,6 +532,15 @@ export function useOrdonnancements() {
         .eq("id", id);
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: "ordonnancement",
+        entityId: id,
+        action: "SUBMIT_TO_SIGNATURE",
+        oldValues: { statut: "valide" },
+        newValues: { statut: "en_signature", signature_status: "in_progress" },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });

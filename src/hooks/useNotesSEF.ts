@@ -146,11 +146,45 @@ export function useNotesSEF() {
     },
   });
 
-  // Create note - numéro généré automatiquement par trigger
+  // Fonction utilitaire pour générer la référence pivot côté client
+  // Format: ARTI + étape(0 pour SEF) + MM + YY + NNNN
+  const generateReferencePivot = async (currentExercice: number): Promise<string> => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // MM
+    const year = String(currentExercice % 100).padStart(2, '0'); // YY (2 derniers chiffres)
+    const stepCode = '0'; // 0 pour Notes SEF
+
+    // Compter les notes existantes pour ce mois/année pour générer le séquentiel
+    const startOfMonth = new Date(currentExercice, now.getMonth(), 1).toISOString();
+    const endOfMonth = new Date(currentExercice, now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+    const { count, error } = await supabase
+      .from("notes_sef")
+      .select("id", { count: "exact", head: true })
+      .eq("exercice", currentExercice)
+      .gte("created_at", startOfMonth)
+      .lte("created_at", endOfMonth);
+
+    if (error) {
+      console.error("Erreur comptage notes:", error);
+    }
+
+    const sequence = ((count || 0) + 1).toString().padStart(4, '0'); // NNNN
+
+    // Format: ARTI0MMYYNNNN
+    return `ARTI${stepCode}${month}${year}${sequence}`;
+  };
+
+  // Create note - référence générée côté client (plus de dépendance SQL)
   const createMutation = useMutation({
     mutationFn: async (noteData: Partial<NoteSEF>) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
+
+      const currentExercice = exercice || new Date().getFullYear();
+
+      // Générer la référence pivot côté client
+      const referencePivot = await generateReferencePivot(currentExercice);
 
       const { data, error } = await supabase
         .from("notes_sef")
@@ -170,9 +204,11 @@ export function useNotesSEF() {
           type_depense: noteData.type_depense,
           os_id: noteData.os_id,
           mission_id: noteData.mission_id,
-          exercice: exercice || new Date().getFullYear(),
+          exercice: currentExercice,
           created_by: user.id,
-          // reference_pivot sera généré par trigger
+          // Référence générée côté client
+          reference_pivot: referencePivot,
+          numero: referencePivot, // Aussi utilisé comme numéro
         }])
         .select()
         .single();
@@ -715,6 +751,11 @@ export function useNotesSEF() {
 
       if (fetchError) throw fetchError;
 
+      const currentExercice = exercice || new Date().getFullYear();
+
+      // Générer la référence pivot côté client
+      const referencePivot = await generateReferencePivot(currentExercice);
+
       const { data, error } = await supabase
         .from("notes_sef")
         .insert([{
@@ -724,8 +765,11 @@ export function useNotesSEF() {
           demandeur_id: original.demandeur_id,
           urgence: original.urgence,
           commentaire: original.commentaire,
-          exercice: exercice || new Date().getFullYear(),
+          exercice: currentExercice,
           created_by: user.id,
+          // Référence générée côté client
+          reference_pivot: referencePivot,
+          numero: referencePivot,
         }])
         .select()
         .single();
@@ -743,7 +787,7 @@ export function useNotesSEF() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: `Note ${data.numero} créée (copie)` });
+      toast({ title: `Note ${data.reference_pivot || data.numero} créée (copie)` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });

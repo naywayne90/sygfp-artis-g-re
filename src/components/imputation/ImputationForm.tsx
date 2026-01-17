@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,21 +8,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  CreditCard, 
-  Loader2, 
-  Search, 
-  AlertTriangle, 
-  CheckCircle2, 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CreditCard,
+  Loader2,
+  Search,
+  AlertTriangle,
+  CheckCircle2,
   ArrowRight,
   Calculator,
   Building,
   Target,
   FileText,
-  Banknote
+  Banknote,
+  XCircle,
+  Info,
+  Shield,
+  History
 } from "lucide-react";
 import { useImputation, BudgetAvailability, ImputationData } from "@/hooks/useImputation";
 import { useNavigate } from "react-router-dom";
+import { ImputationSummaryCard } from "./ImputationSummaryCard";
+import { BudgetLineSelector, SelectedBudgetLine } from "./BudgetLineSelector";
 
 interface Note {
   id: string;
@@ -492,8 +500,13 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                   className="pl-9"
                 />
               </div>
+              {note.montant_estime && formData.montant !== note.montant_estime && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Montant estimé initial: {formatMontant(note.montant_estime)}
+                </p>
+              )}
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-2">
               <Button
                 variant="outline"
                 onClick={handleCalculateAvailability}
@@ -509,82 +522,104 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
             </div>
           </div>
 
-          {/* Tableau de disponibilité amélioré */}
+          {/* Utiliser le composant ImputationSummaryCard amélioré */}
           {availability && (
-            <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-              <div className="grid grid-cols-6 gap-3 text-center">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(A) Dotation actuelle</p>
-                  <p className="font-bold text-lg">{formatMontant(availability.dotation_actuelle)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(B) Eng. validés</p>
-                  <p className="font-bold text-lg text-orange-600">{formatMontant(availability.engagements_anterieurs)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(C) Réservé</p>
-                  <p className="font-bold text-lg text-amber-600">{formatMontant(availability.montant_reserve)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(D) Eng. actuel</p>
-                  <p className="font-bold text-lg text-blue-600">{formatMontant(availability.engagement_actuel)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(E) Disponible (A-B)</p>
-                  <p className={`font-bold text-lg ${availability.disponible >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {formatMontant(availability.disponible)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">(F) Dispo. net (E-C-D)</p>
-                  <p className={`font-bold text-lg ${availability.is_sufficient ? "text-green-600" : "text-red-600"}`}>
-                    {formatMontant(availability.disponible_net)}
-                  </p>
-                </div>
-              </div>
-              {availability.budget_line_code && (
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  Ligne budgétaire: <span className="font-mono">{availability.budget_line_code}</span>
-                </p>
-              )}
-            </div>
+            <ImputationSummaryCard
+              montantTotal={formData.montant || 0}
+              montantImpute={formData.montant || 0}
+              disponibleAvant={availability.disponible}
+              disponibleApres={availability.disponible_net}
+              dotationActuelle={availability.dotation_actuelle}
+              dotationInitiale={availability.dotation_initiale}
+              virementsRecus={availability.virements_recus}
+              virementsEmis={availability.virements_emis}
+              cumulEngage={availability.engagements_anterieurs}
+              montantReserve={availability.montant_reserve}
+              isValid={availability.is_sufficient || !!formData.forcer_imputation}
+              isForced={formData.forcer_imputation}
+              validationErrors={[]}
+              budgetLineCode={availability.budget_line_code}
+              budgetLineLabel={availability.budget_line_label}
+              showDetailedCalculation={true}
+            />
           )}
 
-          {/* Alerte si dépassement */}
+          {/* Section de forçage avec alerte visuelle améliorée */}
           {availability && !availability.is_sufficient && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Disponible net insuffisant</AlertTitle>
-              <AlertDescription className="space-y-3">
-                <p>
-                  Le montant demandé dépasse le disponible net de{" "}
-                  <strong>{formatMontant(Math.abs(availability.disponible_net))}</strong>.
-                </p>
-                <div>
-                  <Label htmlFor="justification">Justification obligatoire *</Label>
-                  <Textarea
-                    id="justification"
-                    value={formData.justification_depassement}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      justification_depassement: e.target.value,
-                      forcer_imputation: !!e.target.value.trim()
-                    }))}
-                    placeholder="Expliquez pourquoi vous souhaitez forcer cette imputation..."
-                    className="mt-1.5"
-                    rows={3}
-                  />
+            <Alert variant="destructive" className="border-2 border-destructive">
+              <Shield className="h-5 w-5" />
+              <AlertTitle className="text-lg">Contrôle budgétaire - Action requise</AlertTitle>
+              <AlertDescription className="space-y-4 mt-2">
+                <div className="bg-destructive/10 p-3 rounded-lg">
+                  <p className="font-medium">
+                    Le montant demandé ({formatMontant(formData.montant || 0)}) dépasse le disponible net.
+                  </p>
+                  <p className="text-sm mt-1">
+                    Déficit: <strong className="text-destructive">{formatMontant(availability.deficit || 0)}</strong>
+                  </p>
                 </div>
+
+                <div className="flex items-start gap-3 p-3 border border-destructive/30 rounded-lg bg-background">
+                  <Checkbox
+                    id="forcer"
+                    checked={formData.forcer_imputation}
+                    onCheckedChange={(checked) => setFormData(prev => ({
+                      ...prev,
+                      forcer_imputation: !!checked,
+                    }))}
+                    className="mt-0.5"
+                  />
+                  <div className="space-y-1 flex-1">
+                    <Label htmlFor="forcer" className="text-sm font-medium cursor-pointer">
+                      Forcer l'imputation malgré le dépassement budgétaire
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Cette action sera tracée dans l'historique d'audit et nécessite une justification.
+                    </p>
+                  </div>
+                </div>
+
+                {formData.forcer_imputation && (
+                  <div className="space-y-2">
+                    <Label htmlFor="justification" className="font-medium flex items-center gap-2">
+                      <History className="h-4 w-4" />
+                      Justification obligatoire *
+                    </Label>
+                    <Textarea
+                      id="justification"
+                      value={formData.justification_depassement}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        justification_depassement: e.target.value,
+                      }))}
+                      placeholder="Expliquez de manière détaillée pourquoi vous souhaitez forcer cette imputation malgré le dépassement budgétaire... (minimum 10 caractères)"
+                      className="min-h-[100px]"
+                    />
+                    {formData.justification_depassement && formData.justification_depassement.length < 10 && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <XCircle className="h-3 w-3" />
+                        La justification doit contenir au moins 10 caractères ({formData.justification_depassement.length}/10)
+                      </p>
+                    )}
+                    {formData.justification_depassement && formData.justification_depassement.length >= 10 && (
+                      <p className="text-xs text-green-600 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Justification valide ({formData.justification_depassement.length} caractères)
+                      </p>
+                    )}
+                  </div>
+                )}
               </AlertDescription>
             </Alert>
           )}
 
           {availability?.is_sufficient && (
-            <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
+            <Alert className="border-green-500 bg-green-50 dark:bg-green-950/20">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertTitle className="text-green-700">Disponible suffisant</AlertTitle>
+              <AlertTitle className="text-green-700">Budget disponible suffisant</AlertTitle>
               <AlertDescription className="text-green-600">
-                L'imputation peut être effectuée. Après validation, vous pourrez passer le marché.
+                L'imputation peut être effectuée. Le montant de {formatMontant(formData.montant || 0)} sera réservé
+                sur la ligne budgétaire {availability.budget_line_code}.
               </AlertDescription>
             </Alert>
           )}
@@ -613,16 +648,31 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
             isImputing ||
             isReadOnly ||
             !formData.montant ||
-            (availability && !availability.is_sufficient && !formData.forcer_imputation)
+            (availability && !availability.is_sufficient && !formData.forcer_imputation) ||
+            (availability && !availability.is_sufficient && formData.forcer_imputation && (!formData.justification_depassement || formData.justification_depassement.length < 10))
           }
-          title={isReadOnly ? getDisabledMessage() : undefined}
+          title={
+            isReadOnly
+              ? getDisabledMessage()
+              : availability && !availability.is_sufficient && !formData.forcer_imputation
+                ? "Activez 'Forcer l'imputation' et fournissez une justification"
+                : availability && !availability.is_sufficient && formData.forcer_imputation && (!formData.justification_depassement || formData.justification_depassement.length < 10)
+                  ? "Fournissez une justification d'au moins 10 caractères"
+                  : undefined
+          }
+          className={availability && !availability.is_sufficient && formData.forcer_imputation && formData.justification_depassement && formData.justification_depassement.length >= 10 ? "bg-orange-600 hover:bg-orange-700" : ""}
         >
           {isImputing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : availability && !availability.is_sufficient && formData.forcer_imputation ? (
+            <Shield className="mr-2 h-4 w-4" />
           ) : (
             <CreditCard className="mr-2 h-4 w-4" />
           )}
-          Imputer et créer le dossier
+          {availability && !availability.is_sufficient && formData.forcer_imputation
+            ? "Forcer l'imputation et créer le dossier"
+            : "Imputer et créer le dossier"
+          }
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>

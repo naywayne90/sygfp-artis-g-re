@@ -28,15 +28,30 @@ export interface ImputationData {
 export interface BudgetAvailability {
   dotation_initiale: number;
   dotation_actuelle: number;
+  virements_recus: number;
+  virements_emis: number;
   engagements_anterieurs: number;
   montant_reserve: number;
   engagement_actuel: number;
   cumul: number;
   disponible: number;
+  disponible_brut: number;
   disponible_net: number; // Après réservations
   is_sufficient: boolean;
+  deficit?: number; // Montant du dépassement si insuffisant
   budget_line_id?: string;
   budget_line_code?: string;
+  budget_line_label?: string;
+}
+
+export interface ImputationAuditEntry {
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  old_values?: Record<string, unknown>;
+  new_values: Record<string, unknown>;
+  justification?: string;
+  timestamp: string;
 }
 
 export function useImputation() {
@@ -219,7 +234,7 @@ export function useImputation() {
     // Trouver la ligne budgétaire correspondante
     let query = supabase
       .from("budget_lines")
-      .select("id, code, dotation_initiale, dotation_modifiee, total_engage, montant_reserve")
+      .select("id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve")
       .eq("exercice", exercice || new Date().getFullYear())
       .eq("is_active", true);
 
@@ -240,13 +255,17 @@ export function useImputation() {
       return {
         dotation_initiale: 0,
         dotation_actuelle: 0,
+        virements_recus: 0,
+        virements_emis: 0,
         engagements_anterieurs: 0,
         montant_reserve: 0,
         engagement_actuel: params.montant_actuel,
         cumul: params.montant_actuel,
         disponible: -params.montant_actuel,
+        disponible_brut: -params.montant_actuel,
         disponible_net: -params.montant_actuel,
         is_sufficient: false,
+        deficit: params.montant_actuel,
       };
     }
 
@@ -255,20 +274,20 @@ export function useImputation() {
     const primaryLine = lines[0];
 
     // Calculer les virements pour dotation actuelle
-    const { data: virementsRecus } = await supabase
+    const { data: virementsRecusData } = await supabase
       .from("credit_transfers")
       .select("amount")
       .in("to_budget_line_id", lineIds)
       .eq("status", "execute");
 
-    const { data: virementsEmis } = await supabase
+    const { data: virementsEmisData } = await supabase
       .from("credit_transfers")
       .select("amount")
       .in("from_budget_line_id", lineIds)
       .eq("status", "execute");
 
-    const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
-    const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
+    const totalRecus = virementsRecusData?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
+    const totalEmis = virementsEmisData?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
 
     // Sommer les dotations de toutes les lignes correspondantes
     const dotation_initiale = lines.reduce((sum, l) => sum + (l.dotation_initiale || 0), 0);
@@ -278,20 +297,28 @@ export function useImputation() {
     const engagement_actuel = params.montant_actuel;
     const cumul = engagements_anterieurs + engagement_actuel;
     const disponible = dotation_actuelle - engagements_anterieurs;
+    const disponible_brut = disponible;
     const disponible_net = disponible - montant_reserve - engagement_actuel;
+    const is_sufficient = disponible_net >= 0;
+    const deficit = is_sufficient ? 0 : Math.abs(disponible_net);
 
     return {
       dotation_initiale,
       dotation_actuelle,
+      virements_recus: totalRecus,
+      virements_emis: totalEmis,
       engagements_anterieurs,
       montant_reserve,
       engagement_actuel,
       cumul,
       disponible,
+      disponible_brut,
       disponible_net,
-      is_sufficient: disponible_net >= 0,
+      is_sufficient,
+      deficit,
       budget_line_id: primaryLine.id,
       budget_line_code: primaryLine.code,
+      budget_line_label: primaryLine.label,
     };
   };
 
@@ -394,9 +421,18 @@ export function useImputation() {
 
       if (!availability.is_sufficient && !data.forcer_imputation) {
         throw new Error(
-          `Disponible net insuffisant (${availability.disponible_net.toLocaleString("fr-FR")} FCFA). ` +
+          `BLOCAGE: Disponible net insuffisant (${availability.disponible_net.toLocaleString("fr-FR")} FCFA). ` +
           `Montant demandé: ${data.montant.toLocaleString("fr-FR")} FCFA. ` +
-          `Justification requise pour forcer l'imputation.`
+          `Déficit: ${availability.deficit?.toLocaleString("fr-FR")} FCFA. ` +
+          `Pour continuer, activez "Forcer l'imputation" et fournissez une justification obligatoire.`
+        );
+      }
+
+      // Vérifier que la justification est fournie si forçage
+      if (!availability.is_sufficient && data.forcer_imputation && (!data.justification_depassement || data.justification_depassement.trim().length < 10)) {
+        throw new Error(
+          `Une justification détaillée (minimum 10 caractères) est obligatoire pour forcer une imputation ` +
+          `avec dépassement budgétaire de ${availability.deficit?.toLocaleString("fr-FR")} FCFA.`
         );
       }
 
@@ -514,20 +550,79 @@ export function useImputation() {
 
       if (updateError) throw updateError;
 
-      // Logger l'action
+      // Logger l'action avec détails complets pour l'audit
       await logAction({
         entityType: "imputation",
         entityId: imputation.id,
-        action: "create",
+        action: data.forcer_imputation ? "impute_forced" : "create",
+        module: "imputation",
+        entityCode: imputationCode,
+        resume: `Imputation ${imputationCode} - ${data.montant.toLocaleString("fr-FR")} FCFA`,
         newValues: {
           note_aef_id: data.noteId,
+          note_numero: note.numero,
           budget_line_id: budgetLineId,
+          budget_line_code: availability.budget_line_code,
           dossier_id: dossier.id,
+          dossier_numero: dossier.numero,
           montant: data.montant,
           imputation_code: imputationCode,
           forcer: data.forcer_imputation || false,
+          // Détails budgétaires au moment de l'imputation
+          budget_snapshot: {
+            dotation_initiale: availability.dotation_initiale,
+            dotation_actuelle: availability.dotation_actuelle,
+            virements_recus: availability.virements_recus,
+            virements_emis: availability.virements_emis,
+            cumul_engage: availability.engagements_anterieurs,
+            montant_reserve_avant: availability.montant_reserve,
+            montant_reserve_apres: availability.montant_reserve + data.montant,
+            disponible_avant: availability.disponible,
+            disponible_apres: availability.disponible_net,
+            is_sufficient: availability.is_sufficient,
+            deficit: availability.deficit,
+          },
+          // Rattachement programmatique
+          rattachement: {
+            os_id: data.os_id,
+            mission_id: data.mission_id,
+            action_id: data.action_id,
+            activite_id: data.activite_id,
+            sous_activite_id: data.sous_activite_id,
+            direction_id: data.direction_id,
+          },
+          // Nomenclatures
+          nomenclatures: {
+            nbe_id: data.nbe_id,
+            sysco_id: data.sysco_id,
+            source_financement: data.source_financement,
+          },
         },
+        justification: data.forcer_imputation ? data.justification_depassement : undefined,
       });
+
+      // Logger également l'action sur le budget si dépassement forcé
+      if (data.forcer_imputation) {
+        await logAction({
+          entityType: "budget_line",
+          entityId: budgetLineId,
+          action: "override_request",
+          module: "imputation",
+          entityCode: availability.budget_line_code,
+          resume: `Dépassement forcé de ${availability.deficit?.toLocaleString("fr-FR")} FCFA`,
+          oldValues: {
+            disponible_net: availability.disponible,
+            montant_reserve: availability.montant_reserve,
+          },
+          newValues: {
+            disponible_net: availability.disponible_net,
+            montant_reserve: availability.montant_reserve + data.montant,
+            deficit: availability.deficit,
+            imputation_id: imputation.id,
+          },
+          justification: data.justification_depassement,
+        });
+      }
 
       return { note: updatedNote, dossier, imputation, budgetLineId, availability };
     },

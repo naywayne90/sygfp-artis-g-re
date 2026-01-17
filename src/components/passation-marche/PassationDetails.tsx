@@ -1,13 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PassationChecklist } from "./PassationChecklist";
-import { PassationMarche, MODES_PASSATION, STATUTS } from "@/hooks/usePassationsMarche";
+import { PassationMarche, MODES_PASSATION, STATUTS, DECISIONS_SORTIE, LotMarche } from "@/hooks/usePassationsMarche";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -23,6 +25,11 @@ import {
   Building2,
   AlertTriangle,
   ClipboardList,
+  Package,
+  ArrowRight,
+  CreditCard,
+  FileCheck,
+  ExternalLink,
 } from "lucide-react";
 
 interface PassationDetailsProps {
@@ -46,8 +53,13 @@ export function PassationDetails({
   onDefer,
   canValidate = false,
 }: PassationDetailsProps) {
+  const navigate = useNavigate();
   const [checklistComplete, setChecklistComplete] = useState(false);
   const [missingDocs, setMissingDocs] = useState<string[]>([]);
+
+  // Trouver la config de décision
+  const decisionConfig = DECISIONS_SORTIE.find((d) => d.value === passation.decision);
+  const lots = (passation.lots || []) as LotMarche[];
 
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
@@ -88,11 +100,17 @@ export function PassationDetails({
         </DialogHeader>
 
         <Tabs defaultValue="infos" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="infos" className="gap-1">
               <ClipboardList className="h-3 w-3" />
               Informations
             </TabsTrigger>
+            {passation.allotissement && lots.length > 0 && (
+              <TabsTrigger value="lots" className="gap-1">
+                <Package className="h-3 w-3" />
+                Lots ({lots.length})
+              </TabsTrigger>
+            )}
             <TabsTrigger value="prestataires" className="gap-1">
               <Users className="h-3 w-3" />
               Prestataires ({prestataires.length})
@@ -196,7 +214,125 @@ export function PassationDetails({
                 )}
               </CardContent>
             </Card>
+
+            {/* Décision de sortie */}
+            {decisionConfig && (
+              <Card className={`border-2 ${passation.decision === "engagement_possible" ? "border-green-200" : "border-blue-200"}`}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <ArrowRight className="h-4 w-4" />
+                    Décision de sortie
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${passation.decision === "engagement_possible" ? "bg-green-100" : "bg-blue-100"}`}>
+                      {passation.decision === "engagement_possible" ? (
+                        <CreditCard className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <FileCheck className="h-5 w-5 text-blue-600" />
+                      )}
+                    </div>
+                    <div>
+                      <Badge className={decisionConfig.color}>{decisionConfig.label}</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">{decisionConfig.description}</p>
+                    </div>
+                  </div>
+
+                  {passation.justification_decision && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Justification:</span>{" "}
+                      <span>{passation.justification_decision}</span>
+                    </div>
+                  )}
+
+                  {passation.motif_selection && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Motif de sélection:</span>{" "}
+                      <span>{passation.motif_selection}</span>
+                    </div>
+                  )}
+
+                  {/* Bouton d'action pour les passations validées */}
+                  {passation.statut === "valide" && (
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => {
+                          onOpenChange(false);
+                          if (passation.decision === "engagement_possible") {
+                            navigate(`/engagements?sourcePM=${passation.id}`);
+                          } else {
+                            navigate(`/contractualisation?sourcePM=${passation.id}`);
+                          }
+                        }}
+                        className={passation.decision === "engagement_possible" ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}
+                      >
+                        {passation.decision === "engagement_possible" ? (
+                          <>
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Créer l'engagement
+                          </>
+                        ) : (
+                          <>
+                            <FileCheck className="h-4 w-4 mr-2" />
+                            Créer le contrat
+                          </>
+                        )}
+                        <ExternalLink className="h-4 w-4 ml-2" />
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
+
+          {/* Lots (si allotissement) */}
+          {passation.allotissement && lots.length > 0 && (
+            <TabsContent value="lots" className="mt-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Lots du marché
+                  </CardTitle>
+                  <CardDescription>
+                    {lots.length} lot{lots.length > 1 ? "s" : ""} défini{lots.length > 1 ? "s" : ""}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-20">N° Lot</TableHead>
+                        <TableHead>Désignation</TableHead>
+                        <TableHead className="text-right">Montant estimé</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {lots.map((lot) => (
+                        <TableRow key={lot.id}>
+                          <TableCell className="font-mono font-medium">
+                            Lot {lot.numero}
+                          </TableCell>
+                          <TableCell>{lot.designation || "-"}</TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatMontant(lot.montant_estime)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  <div className="mt-4 text-sm text-right">
+                    <span className="text-muted-foreground">Total estimé:</span>{" "}
+                    <span className="font-bold">
+                      {formatMontant(lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0))}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           {/* Prestataires sollicités */}
           <TabsContent value="prestataires" className="mt-4">

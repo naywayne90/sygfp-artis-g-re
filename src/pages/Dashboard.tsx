@@ -35,6 +35,7 @@ import { DashboardDG } from "@/components/dashboard/DashboardDG";
 import { DashboardDAF } from "@/components/dashboard/DashboardDAF";
 import { DashboardSDPM } from "@/components/dashboard/DashboardSDPM";
 import { DashboardTresorerie } from "@/components/dashboard/DashboardTresorerie";
+import { DashboardKPI } from "@/components/dashboard/DashboardKPI";
 import { AlertsPanelEnhanced } from "@/components/dashboard/AlertsPanelEnhanced";
 import { RecentActivitiesPanel } from "@/components/dashboard/RecentActivitiesPanel";
 import { PendingTasksPanel } from "@/components/dashboard/PendingTasksPanel";
@@ -63,6 +64,7 @@ const getTypeIcon = (type: string) => {
 // Tabs de dashboard par rôle
 const DASHBOARD_TABS = [
   { id: "general", label: "Vue générale", icon: TrendingUp, roles: [] }, // Accessible à tous
+  { id: "kpi", label: "KPIs", icon: BarChart3, roles: [] }, // Accessible à tous avec rendu conditionnel
   { id: "dg", label: "DG", icon: User, roles: ["DG", "ADMIN"] },
   { id: "daf", label: "DAF/SDCT", icon: Building2, roles: ["DAF", "SDCT", "CB", "SAF", "ADMIN"] },
   { id: "sdpm", label: "SDPM", icon: ShoppingCart, roles: ["SDPM", "ADMIN"] },
@@ -572,6 +574,11 @@ export default function Dashboard() {
 
           {/* KPIs */}
           <KPICards />
+        </TabsContent>
+
+        {/* Dashboard KPI - Rendu conditionnel par profil */}
+        <TabsContent value="kpi">
+          <DashboardKPI />
         </TabsContent>
 
         {/* Dashboard DG */}

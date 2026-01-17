@@ -3,6 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
 
+export interface LotMarche {
+  id: string;
+  numero: number;
+  designation: string;
+  montant_estime: number | null;
+  prestataire_retenu_id?: string | null;
+  montant_retenu?: number | null;
+}
+
 export interface PassationMarche {
   id: string;
   reference: string | null;
@@ -11,16 +20,22 @@ export interface PassationMarche {
   mode_passation: string;
   type_procedure: string | null;
   seuil_montant: string | null;
+  // Lots optionnels
+  lots: LotMarche[];
+  allotissement: boolean;
   prestataires_sollicites: any[];
   analyse_offres: any;
   criteres_evaluation: any[];
   pv_ouverture: string | null;
   pv_evaluation: string | null;
   rapport_analyse: string | null;
-  decision: string | null;
+  // Décision
+  decision: 'contrat_a_creer' | 'engagement_possible' | null;
+  justification_decision: string | null;
   prestataire_retenu_id: string | null;
   montant_retenu: number | null;
   motif_selection: string | null;
+  // Workflow
   statut: string;
   exercice: number | null;
   created_by: string | null;
@@ -68,6 +83,26 @@ export const MODES_PASSATION = [
   { value: "appel_offres_restreint", label: "Appel d'offres restreint" },
   { value: "entente_directe", label: "Entente directe" },
 ];
+
+// Types de décision de sortie de la passation
+export const DECISIONS_SORTIE = [
+  {
+    value: "engagement_possible",
+    label: "Engagement possible",
+    description: "Le montant est sous le seuil - passage direct à l'engagement",
+    color: "bg-green-100 text-green-700",
+    nextStep: "/engagements"
+  },
+  {
+    value: "contrat_a_creer",
+    label: "Contrat à créer",
+    description: "Montant au-dessus du seuil - nécessite un contrat formel",
+    color: "bg-blue-100 text-blue-700",
+    nextStep: "/contractualisation"
+  },
+] as const;
+
+export type DecisionSortie = typeof DECISIONS_SORTIE[number]['value'];
 
 export const STATUTS = {
   brouillon: { label: "Brouillon", color: "bg-muted text-muted-foreground" },
@@ -150,6 +185,14 @@ export function usePassationsMarche() {
       type_procedure?: string;
       prestataires_sollicites?: any[];
       criteres_evaluation?: any[];
+      // Nouveaux champs
+      allotissement?: boolean;
+      lots?: LotMarche[];
+      decision?: DecisionSortie;
+      justification_decision?: string;
+      prestataire_retenu_id?: string;
+      montant_retenu?: number;
+      motif_selection?: string;
     }) => {
       // Récupérer le dossier_id depuis l'EB
       const { data: eb } = await supabase
@@ -165,6 +208,8 @@ export function usePassationsMarche() {
           dossier_id: eb?.dossier_id || null,
           exercice: exercice || new Date().getFullYear(),
           statut: "brouillon",
+          lots: data.lots || [],
+          allotissement: data.allotissement || false,
         })
         .select()
         .single();

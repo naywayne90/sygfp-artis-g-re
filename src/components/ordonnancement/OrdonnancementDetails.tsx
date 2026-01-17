@@ -31,6 +31,7 @@ import { OrdonnancementSignatures } from "./OrdonnancementSignatures";
 import { ParapheurIntern } from "./ParapheurIntern";
 import { ChaineDepenseTimeline } from "@/components/workflow/ChaineDepenseTimeline";
 import { DossierGED } from "@/components/ged";
+import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 
 interface OrdonnancementDetailsProps {
   ordonnancement: any;
@@ -97,6 +98,19 @@ export function OrdonnancementDetails({
             Détails du mandat
           </DialogTitle>
         </DialogHeader>
+
+        {/* Dossier step timeline for expense chain visualization */}
+        <DossierStepTimeline
+          currentStep="ordonnancement"
+          engagementId={engagement?.id}
+          liquidationId={liquidation?.id}
+          ordonnancementId={ordonnancement?.id}
+          engagementStatus={engagement ? "valide" : undefined}
+          liquidationStatus={liquidation ? "valide" : undefined}
+          ordonnancementStatus={ordonnancement?.statut}
+          reglementStatus={ordonnancement?.montant_paye > 0 ? "en_cours" : undefined}
+          compact
+        />
 
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-5">

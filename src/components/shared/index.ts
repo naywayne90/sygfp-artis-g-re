@@ -7,8 +7,9 @@ export { StatutBadge, StatutCounter } from './StatutBadge';
 export { EmptyState, EmptyStateNoResults, EmptyStateNoData, EmptyStateImport } from './EmptyState';
 export { PageHeader } from './PageHeader';
 export { ListFilters } from './ListFilters';
-export { 
-  ARTIReferenceBadge, 
+export {
+  ARTIReferenceBadge,
   ARTIReferenceInline,
-  DossierHeaderWithARTI 
+  DossierHeaderWithARTI
 } from './ARTIReferenceBadge';
+export { DossierStepTimeline, ETAPES_CHAINE_DEPENSE } from './DossierStepTimeline';

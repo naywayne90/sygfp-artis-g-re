@@ -1,19 +1,29 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { 
-  CreditCard, 
-  Building2, 
-  Calendar, 
-  FileText, 
+import {
+  CreditCard,
+  Building2,
+  Calendar,
+  FileText,
   User,
   CheckCircle,
-  Clock
+  Clock,
+  Lock,
+  ExternalLink,
+  History,
+  Wallet
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { MODES_PAIEMENT, COMPTES_BANCAIRES_ARTI } from "@/hooks/useReglements";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { MODES_PAIEMENT, COMPTES_BANCAIRES_ARTI, useReglements } from "@/hooks/useReglements";
+import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
+import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
 
 interface ReglementDetailsProps {
   reglement: any;
@@ -32,8 +42,10 @@ const getCompteLabel = (compte: string) => {
 };
 
 export function ReglementDetails({ reglement }: ReglementDetailsProps) {
+  const { getTreasuryLink } = useReglements();
   const ordonnancement = reglement.ordonnancement;
   const engagement = ordonnancement?.liquidation?.engagement;
+  const liquidation = ordonnancement?.liquidation;
   const budgetLine = engagement?.budget_line;
 
   const montantOrdonnance = ordonnancement?.montant || 0;
@@ -41,6 +53,9 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
   const restantAPayer = montantOrdonnance - montantPaye;
   const progressPaiement = montantOrdonnance > 0 ? (montantPaye / montantOrdonnance) * 100 : 0;
   const isFullyPaid = restantAPayer <= 0;
+
+  // Treasury link
+  const treasuryLink = getTreasuryLink(reglement.id, reglement.compte_bancaire_arti);
 
   return (
     <div className="space-y-6">
@@ -52,7 +67,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
             Enregistré le {format(new Date(reglement.created_at), "dd MMMM yyyy à HH:mm", { locale: fr })}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {isFullyPaid ? (
             <Badge className="bg-success text-success-foreground">
               <CheckCircle className="mr-1 h-3 w-3" />
@@ -64,12 +79,60 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
               Partiel
             </Badge>
           )}
+          {/* Treasury link button */}
+          <Button variant="outline" size="sm" asChild>
+            <Link to={treasuryLink}>
+              <Wallet className="mr-2 h-4 w-4" />
+              Ouvrir dans Trésorerie
+              <ExternalLink className="ml-2 h-3 w-3" />
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Informations du règlement */}
-        <Card>
+      {/* Closure alert if fully paid */}
+      {isFullyPaid && (
+        <Alert className="bg-success/10 border-success/30">
+          <Lock className="h-4 w-4 text-success" />
+          <AlertTitle className="text-success">Dossier clôturé</AlertTitle>
+          <AlertDescription>
+            Le dossier est maintenant en lecture seule. Tous les paiements ont été effectués.
+            La chaîne de dépense est complète.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Dossier step timeline */}
+      <DossierStepTimeline
+        currentStep="reglement"
+        engagementId={engagement?.id}
+        liquidationId={liquidation?.id}
+        ordonnancementId={ordonnancement?.id}
+        reglementId={reglement.id}
+        engagementStatus="valide"
+        liquidationStatus="valide"
+        ordonnancementStatus="valide"
+        reglementStatus={isFullyPaid ? "solde" : "en_cours"}
+        compact
+      />
+
+      {/* Tabs for details and journal */}
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="details" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Détails
+          </TabsTrigger>
+          <TabsTrigger value="journal" className="gap-2">
+            <History className="h-4 w-4" />
+            Journal d'audit
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="details" className="space-y-6 pt-4">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Informations du règlement */}
+            <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CreditCard className="h-5 w-5" />
@@ -171,62 +234,68 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Chaîne de traçabilité */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Chaîne de traçabilité</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 overflow-x-auto pb-2">
-            <div className="flex-shrink-0 text-center">
-              <Badge variant="outline" className="mb-1">Ligne budgétaire</Badge>
-              <p className="text-sm font-mono">{budgetLine?.code || "-"}</p>
-              <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                {budgetLine?.label || "-"}
-              </p>
-            </div>
-            <div className="text-muted-foreground">→</div>
-            <div className="flex-shrink-0 text-center">
-              <Badge variant="outline" className="mb-1">Engagement</Badge>
-              <p className="text-sm font-mono">{engagement?.numero || "-"}</p>
-            </div>
-            <div className="text-muted-foreground">→</div>
-            <div className="flex-shrink-0 text-center">
-              <Badge variant="outline" className="mb-1">Liquidation</Badge>
-              <p className="text-sm font-mono">{ordonnancement?.liquidation?.numero || "-"}</p>
-            </div>
-            <div className="text-muted-foreground">→</div>
-            <div className="flex-shrink-0 text-center">
-              <Badge variant="outline" className="mb-1">Ordonnancement</Badge>
-              <p className="text-sm font-mono">{ordonnancement?.numero || "-"}</p>
-            </div>
-            <div className="text-muted-foreground">→</div>
-            <div className="flex-shrink-0 text-center">
-              <Badge className="mb-1 bg-success">Règlement</Badge>
-              <p className="text-sm font-mono">{reglement.numero}</p>
-            </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Créé par */}
-      {reglement.created_by_profile && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <User className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Enregistré par</p>
-                <p className="font-medium">
-                  {reglement.created_by_profile.prenom} {reglement.created_by_profile.nom}
-                </p>
+          {/* Chaîne de traçabilité */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Chaîne de traçabilité</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4 overflow-x-auto pb-2">
+                <div className="flex-shrink-0 text-center">
+                  <Badge variant="outline" className="mb-1">Ligne budgétaire</Badge>
+                  <p className="text-sm font-mono">{budgetLine?.code || "-"}</p>
+                  <p className="text-xs text-muted-foreground truncate max-w-[150px]">
+                    {budgetLine?.label || "-"}
+                  </p>
+                </div>
+                <div className="text-muted-foreground">→</div>
+                <div className="flex-shrink-0 text-center">
+                  <Badge variant="outline" className="mb-1">Engagement</Badge>
+                  <p className="text-sm font-mono">{engagement?.numero || "-"}</p>
+                </div>
+                <div className="text-muted-foreground">→</div>
+                <div className="flex-shrink-0 text-center">
+                  <Badge variant="outline" className="mb-1">Liquidation</Badge>
+                  <p className="text-sm font-mono">{ordonnancement?.liquidation?.numero || "-"}</p>
+                </div>
+                <div className="text-muted-foreground">→</div>
+                <div className="flex-shrink-0 text-center">
+                  <Badge variant="outline" className="mb-1">Ordonnancement</Badge>
+                  <p className="text-sm font-mono">{ordonnancement?.numero || "-"}</p>
+                </div>
+                <div className="text-muted-foreground">→</div>
+                <div className="flex-shrink-0 text-center">
+                  <Badge className="mb-1 bg-success">Règlement</Badge>
+                  <p className="text-sm font-mono">{reglement.numero}</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+
+          {/* Créé par */}
+          {reglement.created_by_profile && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Enregistré par</p>
+                    <p className="font-medium">
+                      {reglement.created_by_profile.prenom} {reglement.created_by_profile.nom}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="journal" className="pt-4">
+          <AuditLogViewer entityType="reglement" entityId={reglement.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

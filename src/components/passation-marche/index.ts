@@ -5,3 +5,7 @@ export { PassationDetails } from "./PassationDetails";
 export { PassationValidateDialog } from "./PassationValidateDialog";
 export { PassationRejectDialog } from "./PassationRejectDialog";
 export { PassationDeferDialog } from "./PassationDeferDialog";
+
+// Re-export types from hook for convenience
+export type { LotMarche, PassationMarche, EBValidee, DecisionSortie } from "@/hooks/usePassationsMarche";
+export { MODES_PASSATION, DECISIONS_SORTIE, STATUTS } from "@/hooks/usePassationsMarche";

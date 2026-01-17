@@ -7,11 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Upload,
   Download,
@@ -29,11 +35,14 @@ import {
   ArrowRight,
   TrendingUp,
   ClipboardList,
-  Hash
+  Hash,
+  FileSpreadsheet,
+  Loader2
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { DossierTimeline } from "./DossierTimeline";
 import { DossierAuditLog } from "./DossierAuditLog";
+import { useExportDossierComplet } from "@/hooks/useExportDossierComplet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -105,6 +114,7 @@ export function DossierDetailsEnhanced({
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { getDossierEtapes, getDossierDocuments, deleteDocument } = useDossiers();
+  const { exportDossierComplet, isExporting } = useExportDossierComplet();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -204,6 +214,30 @@ export function DossierDetailsEnhanced({
               )}
             </div>
             <div className="flex gap-2">
+              {/* Export dossier complet dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={isExporting}>
+                    {isExporting ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-1" />
+                    )}
+                    Exporter
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, "pdf")}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export PDF (Récapitulatif)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportDossierComplet(dossier.id, "excel")}>
+                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    Export Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               {isBlocked && onUnblock && (
                 <Button variant="outline" size="sm" onClick={() => onUnblock(dossier.id)}>
                   <Unlock className="h-4 w-4 mr-1" />

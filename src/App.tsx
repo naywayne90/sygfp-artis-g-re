@@ -19,6 +19,7 @@ import Marches from "./pages/Marches";
 import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
+import LoginPage from "./pages/auth/LoginPage";
 import NotFound from "./pages/NotFound";
 import NoteSEFDetail from "./pages/NoteSEFDetail";
 import ValidationNotesSEF from "./pages/ValidationNotesSEF";
@@ -50,6 +51,7 @@ import ParametresExercice from "./pages/admin/ParametresExercice";
 import GestionDoublons from "./pages/admin/GestionDoublons";
 import CompteursReferences from "./pages/admin/CompteursReferences";
 import ImportBudgetAdmin from "./pages/admin/ImportBudgetAdmin";
+import TestNonRegression from "./pages/TestNonRegression";
 
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
@@ -108,7 +110,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Route indépendante pour sélection exercice */}
+            {/* Routes indépendantes (sans layout) */}
+            <Route path="/auth" element={<LoginPage />} />
             <Route path="/select-exercice" element={<SelectExercice />} />
             
             {/* Routes avec layout */}
@@ -143,6 +146,7 @@ const App = () => (
               <Route path="/admin/doublons" element={<GestionDoublons />} />
               <Route path="/admin/compteurs-references" element={<CompteursReferences />} />
               <Route path="/admin/import-budget" element={<ImportBudgetAdmin />} />
+              <Route path="/admin/test-non-regression" element={<TestNonRegression />} />
               
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

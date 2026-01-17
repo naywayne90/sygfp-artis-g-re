@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export interface LiquidationDocument {
   id: string;
@@ -30,6 +31,7 @@ export interface LiquidationDocumentsChecklistStatus {
 
 export function useLiquidationDocuments(liquidationId: string | undefined) {
   const queryClient = useQueryClient();
+  const { logAction } = useAuditLog();
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["liquidation-documents", liquidationId],
@@ -61,15 +63,26 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
 
   // Mark document as provided
   const markAsProvidedMutation = useMutation({
-    mutationFn: async ({ 
-      documentId, 
-      filePath, 
-      fileName 
-    }: { 
-      documentId: string; 
-      filePath?: string; 
+    mutationFn: async ({
+      documentId,
+      filePath,
+      fileName,
+      fileSize,
+      fileType,
+    }: {
+      documentId: string;
+      filePath?: string;
       fileName?: string;
+      fileSize?: number;
+      fileType?: string;
     }) => {
+      // Get old values for audit
+      const { data: oldDoc } = await (supabase
+        .from("liquidation_documents" as any)
+        .select("is_provided, file_path, file_name, document_label")
+        .eq("id", documentId)
+        .single() as any);
+
       const { error } = await (supabase
         .from("liquidation_documents" as any)
         .update({
@@ -80,6 +93,24 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
         })
         .eq("id", documentId) as any);
       if (error) throw error;
+
+      // Audit log
+      if (liquidationId) {
+        await logAction({
+          entityType: "liquidation",
+          entityId: liquidationId,
+          action: "UPLOAD",
+          oldValues: { is_provided: oldDoc?.is_provided, file_name: oldDoc?.file_name },
+          newValues: {
+            is_provided: true,
+            file_name: fileName,
+            document_id: documentId,
+            document_label: oldDoc?.document_label,
+            file_size: fileSize,
+            file_type: fileType,
+          },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
@@ -92,15 +123,22 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
 
   // Verify document
   const verifyDocumentMutation = useMutation({
-    mutationFn: async ({ 
-      documentId, 
-      observation 
-    }: { 
-      documentId: string; 
+    mutationFn: async ({
+      documentId,
+      observation,
+    }: {
+      documentId: string;
       observation?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Non authentifié");
+
+      // Get document info for audit
+      const { data: doc } = await (supabase
+        .from("liquidation_documents" as any)
+        .select("document_label, file_name")
+        .eq("id", documentId)
+        .single() as any);
 
       const { error } = await (supabase
         .from("liquidation_documents" as any)
@@ -113,6 +151,22 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
         .eq("id", documentId) as any);
 
       if (error) throw error;
+
+      // Audit log
+      if (liquidationId) {
+        await logAction({
+          entityType: "liquidation",
+          entityId: liquidationId,
+          action: "VALIDATE",
+          newValues: {
+            document_id: documentId,
+            document_label: doc?.document_label,
+            file_name: doc?.file_name,
+            verified: true,
+            observation: observation || null,
+          },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
@@ -126,6 +180,13 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
   // Unmark document
   const unmarkDocumentMutation = useMutation({
     mutationFn: async (documentId: string) => {
+      // Get old values for audit
+      const { data: oldDoc } = await (supabase
+        .from("liquidation_documents" as any)
+        .select("document_label, file_name, is_provided, is_verified")
+        .eq("id", documentId)
+        .single() as any);
+
       const { error } = await (supabase
         .from("liquidation_documents" as any)
         .update({
@@ -140,6 +201,23 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
         .eq("id", documentId) as any);
 
       if (error) throw error;
+
+      // Audit log
+      if (liquidationId) {
+        await logAction({
+          entityType: "liquidation",
+          entityId: liquidationId,
+          action: "DELETE",
+          oldValues: {
+            document_id: documentId,
+            document_label: oldDoc?.document_label,
+            file_name: oldDoc?.file_name,
+            is_provided: oldDoc?.is_provided,
+            is_verified: oldDoc?.is_verified,
+          },
+          newValues: { is_provided: false, is_verified: false },
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
