@@ -27,6 +27,24 @@ export {
   type RolePaniers,
 } from './paniers';
 
+// Service de transitions
+export {
+  getAllStatuses,
+  getAvailableTransitions,
+  canTransition,
+  executeTransition,
+  transitionEntity,
+  getTransitionHistory,
+  workflowActions,
+  WORKFLOW_ACTIONS,
+  type WorkflowStatus,
+  type WorkflowTransition,
+  type TransitionResult,
+  type TransitionPayload,
+  type TransitionHistoryEntry,
+  type WorkflowModule,
+} from './transitionService';
+
 // ===== Étapes de la chaîne =====
 
 export const ETAPES_CHAINE = [
