@@ -23,6 +23,7 @@ import SelectExercice from "./pages/SelectExercice";
 import NotFound from "./pages/NotFound";
 import NoteSEFDetail from "./pages/NoteSEFDetail";
 import ValidationNotesSEF from "./pages/ValidationNotesSEF";
+import ValidationNotesAEF from "./pages/ValidationNotesAEF";
 import Notifications from "./pages/Notifications";
 import AlertesBudgetaires from "./pages/AlertesBudgetaires";
 import Alertes from "./pages/Alertes";
@@ -160,6 +161,7 @@ const App = () => (
               <Route path="/notes-sef/validation" element={<ValidationNotesSEF />} />
               <Route path="/notes-sef/:id" element={<NoteSEFDetail />} />
               <Route path="/notes-aef" element={<NotesAEF />} />
+              <Route path="/notes-aef/validation" element={<ValidationNotesAEF />} />
               <Route path="/notes-aef/:id" element={<NoteAEFDetail />} />
               <Route path="/execution/imputation" element={<ImputationPage />} />
               <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />

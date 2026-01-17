@@ -31,7 +31,9 @@ import {
   CreditCard,
   Loader2,
   Download,
+  ShieldCheck,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function NotesAEF() {
@@ -178,6 +180,31 @@ export default function NotesAEF() {
           description="Gestion des Notes Avec Effet Financier"
         />
         <div className="flex items-center gap-2">
+          {/* Lien vers espace validation */}
+          {hasAnyRole(["ADMIN", "DG", "DAAF"]) && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.location.href = "/notes-aef/validation"}
+                    className="gap-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Validation
+                    {(counts.soumis + counts.a_valider) > 0 && (
+                      <Badge variant="destructive" className="ml-1">
+                        {counts.soumis + counts.a_valider}
+                      </Badge>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Espace de validation DAAF/DG</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
