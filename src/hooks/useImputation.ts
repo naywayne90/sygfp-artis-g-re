@@ -412,7 +412,7 @@ export function useImputation() {
 
       if (noteError) throw noteError;
 
-      // Créer le dossier
+      // Créer le dossier avec statut IMPUTE/READY_FOR_PASSATION
       const dossierInsert = {
         objet: note.objet,
         direction_id: data.direction_id || note.direction_id,
@@ -420,7 +420,7 @@ export function useImputation() {
         exercice: exercice || new Date().getFullYear(),
         created_by: user.id,
         etape_courante: "imputation",
-        statut_global: "en_cours",
+        statut_global: "impute", // Statut IMPUTE = prêt pour passation
       };
       
       const { data: dossier, error: dossierError } = await supabase
@@ -430,6 +430,33 @@ export function useImputation() {
         .single();
 
       if (dossierError) throw dossierError;
+
+      // Créer le mouvement de réservation budgétaire (bloquant)
+      await supabase.from("budget_movements").insert({
+        budget_line_id: budgetLineId,
+        type_mouvement: "reservation",
+        montant: data.montant,
+        sens: "debit",
+        disponible_avant: availability.disponible,
+        disponible_apres: availability.disponible_net,
+        reserve_avant: availability.montant_reserve,
+        reserve_apres: availability.montant_reserve + data.montant,
+        entity_type: "imputation",
+        entity_id: data.noteId,
+        dossier_id: dossier.id,
+        exercice: exercice || new Date().getFullYear(),
+        motif: "Réservation budgétaire - Imputation AEF",
+        created_by: user.id,
+        statut: "valide",
+      });
+
+      // Mettre à jour montant_reserve sur la ligne budgétaire
+      await supabase
+        .from("budget_lines")
+        .update({
+          montant_reserve: (availability.montant_reserve || 0) + data.montant,
+        })
+        .eq("id", budgetLineId);
 
       // Créer l'étape d'imputation dans le dossier
       await supabase.from("dossier_etapes").insert({
