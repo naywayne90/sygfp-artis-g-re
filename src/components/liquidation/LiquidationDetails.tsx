@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Liquidation, VALIDATION_STEPS, DOCUMENTS_REQUIS } from "@/hooks/useLiquidations";
 import { LiquidationChecklist } from "./LiquidationChecklist";
+import { DossierGED } from "@/components/ged";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -16,7 +17,8 @@ import {
   Clock,
   AlertCircle,
   Download,
-  FileCheck
+  FileCheck,
+  FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -242,35 +244,27 @@ export function LiquidationDetails({ liquidation }: LiquidationDetailsProps) {
         </CardContent>
       </Card>
 
-      {/* Documents */}
-      {liquidation.attachments && liquidation.attachments.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="h-5 w-5" />
-              Pièces justificatives ({liquidation.attachments.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {liquidation.attachments.map((att) => (
-                <div key={att.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="font-medium text-sm">{att.file_name}</div>
-                      <div className="text-xs text-muted-foreground">{getDocLabel(att.document_type)}</div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* GED Documents */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FolderOpen className="h-5 w-5" />
+            Gestion documentaire
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DossierGED
+            entityType="liquidation"
+            entityId={liquidation.id}
+            dossierId={(liquidation as any).dossier_id || undefined}
+            reference={liquidation.numero}
+            exercice={liquidation.exercice || undefined}
+            etape="liquidation"
+            showChecklist={true}
+            readOnly={liquidation.statut === "valide"}
+          />
+        </CardContent>
+      </Card>
 
       {/* Workflow */}
       <Card>
