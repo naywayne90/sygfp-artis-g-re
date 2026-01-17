@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,7 +15,6 @@ import {
   MoreHorizontal, 
   Eye, 
   Edit, 
-  FolderOpen, 
   History, 
   Paperclip, 
   RefreshCw,
@@ -22,12 +23,16 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  ExternalLink,
+  AlertTriangle
 } from "lucide-react";
 import { Dossier } from "@/hooks/useDossiers";
+import { DossierEmptyState } from "./DossierEmptyState";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface DossierListProps {
   dossiers: Dossier[];
@@ -48,6 +53,10 @@ interface DossierListProps {
   onSort: (field: string) => void;
   sortField?: string;
   sortDirection?: "asc" | "desc";
+  hasFilters?: boolean;
+  searchTerm?: string;
+  onReset?: () => void;
+  onCreate?: () => void;
 }
 
 const STATUT_COLORS: Record<string, string> = {
@@ -94,7 +103,11 @@ export function DossierList({
   onPageSizeChange,
   onSort,
   sortField,
-  sortDirection
+  sortDirection,
+  hasFilters = false,
+  searchTerm = "",
+  onReset,
+  onCreate
 }: DossierListProps) {
   const formatMontant = (montant: number) => {
     return new Intl.NumberFormat("fr-FR", {
@@ -120,19 +133,51 @@ export function DossierList({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-4">
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="w-[130px]">Numéro</TableHead>
+                <TableHead>Objet</TableHead>
+                <TableHead className="w-[80px]">Type</TableHead>
+                <TableHead>Bénéficiaire</TableHead>
+                <TableHead className="w-[120px]">Montant</TableHead>
+                <TableHead className="w-[120px]">Étape</TableHead>
+                <TableHead className="w-[100px]">Statut</TableHead>
+                <TableHead className="w-[100px]">Modifié</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     );
   }
 
   if (dossiers.length === 0) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        <FolderOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p className="text-lg font-medium">Aucun dossier trouvé</p>
-        <p className="text-sm">Modifiez vos critères de recherche ou créez un nouveau dossier.</p>
-      </div>
+      <DossierEmptyState 
+        hasFilters={hasFilters}
+        searchTerm={searchTerm}
+        onReset={onReset}
+        onCreate={onCreate}
+      />
     );
   }
 

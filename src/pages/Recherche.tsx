@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
 import { DossierSearch } from "@/components/dossier/DossierSearch";
 import { DossierList } from "@/components/dossier/DossierList";
+import { DossierQuickFilters } from "@/components/dossier/DossierQuickFilters";
 import { DossierForm } from "@/components/dossier/DossierForm";
 import { DossierDetailsEnhanced } from "@/components/dossier/DossierDetailsEnhanced";
 import { DossierStatusDialog } from "@/components/dossier/DossierStatusDialog";
@@ -104,6 +105,11 @@ export default function Recherche() {
     setSortDirection(newDirection);
     // In a real implementation, we would pass sort params to fetchDossiers
   }, [sortField, sortDirection]);
+
+  const handleReset = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+    fetchDossiers(DEFAULT_FILTERS, 1, pagination.pageSize);
+  }, [fetchDossiers, pagination.pageSize]);
 
   const handleCreateDossier = async (data: any) => {
     const result = await createDossier(data);
@@ -424,6 +430,17 @@ export default function Recherche() {
         </CardContent>
       </Card>
 
+      {/* Filtres rapides par statut */}
+      <DossierQuickFilters
+        currentStatut={filters.statut || ""}
+        onStatutChange={(statut) => handleFiltersChange({ ...filters, statut })}
+        counts={{
+          en_cours: stats.en_cours,
+          termine: stats.termines,
+          suspendu: stats.suspendus,
+        }}
+      />
+
       {/* Liste des dossiers */}
       <Card>
         <CardContent className="pt-6">
@@ -442,6 +459,10 @@ export default function Recherche() {
             onSort={handleSort}
             sortField={sortField}
             sortDirection={sortDirection}
+            hasFilters={!!filters.statut || !!filters.direction_id || !!filters.etape || !!filters.type_dossier}
+            searchTerm={filters.search || ""}
+            onReset={handleReset}
+            onCreate={() => setShowForm(true)}
           />
         </CardContent>
       </Card>
