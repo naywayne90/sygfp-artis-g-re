@@ -7,6 +7,7 @@ import { useAuditLog } from "@/hooks/useAuditLog";
 export interface Dossier {
   id: string;
   numero: string;
+  reference_pivot: string | null; // Référence ARTI pivot héritée de la Note SEF
   exercice: number;
   direction_id: string | null;
   objet: string;

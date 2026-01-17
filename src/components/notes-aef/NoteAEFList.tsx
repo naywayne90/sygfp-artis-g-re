@@ -42,6 +42,7 @@ import {
   FolderOpen,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ARTIReferenceInline } from "@/components/shared/ARTIReferenceBadge";
 
 interface NoteAEFListProps {
   notes: NoteAEF[];
@@ -264,9 +265,10 @@ export function NoteAEFList({
                   onClick={() => handleNavigateToDetail(note.id)}
                 >
                   <TableCell className="font-medium">
-                    <span className="font-mono text-sm">
-                      {note.reference_pivot || note.numero || "—"}
-                    </span>
+                    <ARTIReferenceInline 
+                      reference={note.reference_pivot || note.numero} 
+                      className="text-primary"
+                    />
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                     {note.objet}

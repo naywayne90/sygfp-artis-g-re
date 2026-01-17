@@ -29,6 +29,7 @@ import {
   ArrowRight,
   TrendingUp,
   ClipboardList,
+  Hash
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { DossierTimeline } from "./DossierTimeline";
@@ -36,6 +37,7 @@ import { DossierAuditLog } from "./DossierAuditLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
 
 interface DossierDetailsEnhancedProps {
   dossier: Dossier | null;
@@ -171,8 +173,25 @@ export function DossierDetailsEnhanced({
       <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xl text-primary font-bold">{dossier.numero}</span>
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Référence ARTI pivot en premier si disponible */}
+              {dossier.reference_pivot ? (
+                <ARTIReferenceBadge 
+                  reference={dossier.reference_pivot} 
+                  size="lg" 
+                  showIcon 
+                />
+              ) : (
+                <span className="font-mono text-xl text-primary font-bold">{dossier.numero}</span>
+              )}
+              
+              {/* Numéro dossier si différent de la référence */}
+              {dossier.reference_pivot && (
+                <span className="text-sm text-muted-foreground font-mono">
+                  ({dossier.numero})
+                </span>
+              )}
+              
               <Badge className={STATUT_COLORS[dossier.statut_global] || ""}>
                 {isBlocked && <Lock className="h-3 w-3 mr-1" />}
                 {dossier.statut_global === "en_cours" ? "En cours" :

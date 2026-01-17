@@ -3326,6 +3326,7 @@ export type Database = {
           objet: string
           piece_principale_path: string | null
           priorite: number | null
+          reference_pivot: string | null
           responsable_suivi_id: string | null
           statut_global: string | null
           statut_paiement: string | null
@@ -3365,6 +3366,7 @@ export type Database = {
           objet: string
           piece_principale_path?: string | null
           priorite?: number | null
+          reference_pivot?: string | null
           responsable_suivi_id?: string | null
           statut_global?: string | null
           statut_paiement?: string | null
@@ -3404,6 +3406,7 @@ export type Database = {
           objet?: string
           piece_principale_path?: string | null
           priorite?: number | null
+          reference_pivot?: string | null
           responsable_suivi_id?: string | null
           statut_global?: string | null
           statut_paiement?: string | null

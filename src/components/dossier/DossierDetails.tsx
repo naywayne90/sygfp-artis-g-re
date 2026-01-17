@@ -20,7 +20,8 @@ import {
   User,
   Calendar,
   Banknote,
-  PartyPopper
+  PartyPopper,
+  Hash
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { format } from "date-fns";
@@ -31,6 +32,7 @@ import { ChaineDepenseStepper } from "@/components/workflow/ChaineDepenseStepper
 import { ETAPES_CONFIG, formatMontant as formatMontantUtil, getStatutBadge } from "@/lib/config/sygfp-constants";
 import { StatutBadge } from "@/components/shared/StatutBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
 
 interface DossierDetailsProps {
   dossier: Dossier | null;
@@ -110,8 +112,25 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <span className="font-mono text-primary text-xl">{dossier.numero}</span>
+          <DialogTitle className="flex items-center gap-3 flex-wrap">
+            {/* Référence ARTI pivot en premier si disponible */}
+            {dossier.reference_pivot ? (
+              <ARTIReferenceBadge 
+                reference={dossier.reference_pivot} 
+                size="lg" 
+                showIcon 
+              />
+            ) : (
+              <span className="font-mono text-primary text-xl">{dossier.numero}</span>
+            )}
+            
+            {/* Numéro dossier si différent de la référence */}
+            {dossier.reference_pivot && (
+              <span className="text-sm text-muted-foreground font-mono">
+                ({dossier.numero})
+              </span>
+            )}
+            
             {isCloture ? (
               <Badge className="bg-success text-success-foreground gap-1">
                 <PartyPopper className="h-3 w-3" />

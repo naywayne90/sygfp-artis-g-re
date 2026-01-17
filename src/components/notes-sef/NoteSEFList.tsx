@@ -41,6 +41,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ARTIReferenceInline } from "@/components/shared/ARTIReferenceBadge";
 
 interface NoteSEFListProps {
   notes: NoteSEF[];
@@ -245,8 +246,11 @@ export function NoteSEFList({
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => handleNavigateToDetail(note)}
                 >
-                  <TableCell className="font-medium font-mono text-primary">
-                    {note.reference_pivot || note.numero || "—"}
+                  <TableCell className="font-medium">
+                    <ARTIReferenceInline 
+                      reference={note.reference_pivot || note.numero} 
+                      className="text-primary"
+                    />
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[250px] truncate">
                     {note.objet}
