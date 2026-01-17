@@ -643,6 +643,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "budg_alerts_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "budg_alerts_resolved_by_fkey"
             columns: ["resolved_by"]
             isOneToOne: false
@@ -728,6 +735,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "budget_activities_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -917,6 +931,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "budget_engagements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "budget_engagements_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -942,6 +963,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -1061,6 +1089,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "budget_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -1219,6 +1254,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "budget_line_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -1504,6 +1546,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "budget_lines_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "budget_lines_sous_activite_id_fkey"
             columns: ["sous_activite_id"]
             isOneToOne: false
@@ -1701,6 +1750,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "budget_liquidations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -2110,6 +2166,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "contrats_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "contrats_engagement_id_fkey"
             columns: ["engagement_id"]
             isOneToOne: false
@@ -2305,6 +2368,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "credit_transfers_from_budget_line_id_fkey"
+            columns: ["from_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "credit_transfers_requested_by_fkey"
             columns: ["requested_by"]
             isOneToOne: false
@@ -2337,6 +2407,13 @@ export type Database = {
             columns: ["to_budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_to_budget_line_id_fkey"
+            columns: ["to_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
         ]
@@ -2687,6 +2764,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "demandes_achat_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "demandes_achat_engagement_id_fkey"
             columns: ["engagement_id"]
             isOneToOne: false
@@ -2899,6 +2983,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "dossier_documents_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "dossier_documents_etape_id_fkey"
             columns: ["etape_id"]
             isOneToOne: false
@@ -2982,6 +3073,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "dossier_etapes_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
         ]
@@ -3190,6 +3288,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "dossiers_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -3947,6 +4052,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "expressions_besoin_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "expressions_besoin_imputation_id_fkey"
             columns: ["imputation_id"]
             isOneToOne: false
@@ -3972,6 +4084,13 @@ export type Database = {
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -4137,6 +4256,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "import_budget_staging_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -4659,6 +4785,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "imputations_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "imputations_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -4712,6 +4845,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "imputations_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -5787,6 +5927,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "marches_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "marches_expression_besoin_id_fkey"
             columns: ["expression_besoin_id"]
             isOneToOne: false
@@ -6512,6 +6659,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "notes_dg_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "notes_dg_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -6554,6 +6708,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "notes_dg_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "notes_dg_imputed_by_fkey"
             columns: ["imputed_by"]
             isOneToOne: false
@@ -6586,6 +6747,13 @@ export type Database = {
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "notes_dg_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
             referencedColumns: ["budget_line_id"]
           },
           {
@@ -6965,6 +7133,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "notes_sef_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -7507,11 +7682,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "operations_tresorerie_compte_destination_id_fkey"
+            columns: ["compte_destination_id"]
+            isOneToOne: false
+            referencedRelation: "v_etat_caisse"
+            referencedColumns: ["compte_id"]
+          },
+          {
             foreignKeyName: "operations_tresorerie_compte_id_fkey"
             columns: ["compte_id"]
             isOneToOne: false
             referencedRelation: "comptes_bancaires"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_tresorerie_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "v_etat_caisse"
+            referencedColumns: ["compte_id"]
           },
           {
             foreignKeyName: "operations_tresorerie_created_by_fkey"
@@ -7579,6 +7768,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordonnancement_attachments_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
+          },
+          {
             foreignKeyName: "ordonnancement_attachments_uploaded_by_fkey"
             columns: ["uploaded_by"]
             isOneToOne: false
@@ -7638,6 +7834,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ordonnancements"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancement_pieces_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
           },
         ]
       }
@@ -7705,6 +7908,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordonnancement_signatures_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
+          },
+          {
             foreignKeyName: "ordonnancement_signatures_signed_by_fkey"
             columns: ["signed_by"]
             isOneToOne: false
@@ -7764,6 +7974,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ordonnancements"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordonnancement_validations_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
           },
           {
             foreignKeyName: "ordonnancement_validations_validated_by_fkey"
@@ -7961,6 +8178,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "ordonnancements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -8192,6 +8416,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "passation_marche_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
           {
@@ -9415,6 +9646,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "recettes_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "v_etat_caisse"
+            referencedColumns: ["compte_id"]
+          },
+          {
             foreignKeyName: "recettes_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -9945,6 +10183,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reglements_compte_id_fkey"
+            columns: ["compte_id"]
+            isOneToOne: false
+            referencedRelation: "v_etat_caisse"
+            referencedColumns: ["compte_id"]
+          },
+          {
             foreignKeyName: "reglements_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -9973,11 +10218,25 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "reglements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "reglements_ordonnancement_id_fkey"
             columns: ["ordonnancement_id"]
             isOneToOne: false
             referencedRelation: "ordonnancements"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reglements_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
           },
         ]
       }
@@ -10787,6 +11046,13 @@ export type Database = {
             referencedColumns: ["budget_line_id"]
           },
           {
+            foreignKeyName: "taches_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
             foreignKeyName: "taches_raci_accountable_fkey"
             columns: ["raci_accountable"]
             isOneToOne: false
@@ -10971,6 +11237,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ordonnancements"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_movements_ordonnancement_id_fkey"
+            columns: ["ordonnancement_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["ordonnancement_id"]
           },
         ]
       }
@@ -11329,6 +11602,13 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
           {
+            foreignKeyName: "workflow_instances_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
+          },
+          {
             foreignKeyName: "workflow_instances_etape_code_fkey"
             columns: ["etape_code"]
             isOneToOne: false
@@ -11515,6 +11795,13 @@ export type Database = {
             columns: ["dossier_id"]
             isOneToOne: false
             referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "workflow_tasks_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
             referencedColumns: ["dossier_id"]
           },
         ]
@@ -12038,6 +12325,54 @@ export type Database = {
         }
         Relationships: []
       }
+      v_etat_caisse: {
+        Row: {
+          banque: string | null
+          code: string | null
+          compte_id: string | null
+          derniere_operation_date: string | null
+          devise: string | null
+          entrees_mois: number | null
+          est_actif: boolean | null
+          libelle: string | null
+          solde_actuel: number | null
+          solde_initial: number | null
+          sorties_mois: number | null
+          type_compte: string | null
+          variation: number | null
+        }
+        Insert: {
+          banque?: string | null
+          code?: string | null
+          compte_id?: string | null
+          derniere_operation_date?: never
+          devise?: string | null
+          entrees_mois?: never
+          est_actif?: boolean | null
+          libelle?: string | null
+          solde_actuel?: number | null
+          solde_initial?: number | null
+          sorties_mois?: never
+          type_compte?: string | null
+          variation?: never
+        }
+        Update: {
+          banque?: string | null
+          code?: string | null
+          compte_id?: string | null
+          derniere_operation_date?: never
+          devise?: string | null
+          entrees_mois?: never
+          est_actif?: boolean | null
+          libelle?: string | null
+          solde_actuel?: number | null
+          solde_initial?: number | null
+          sorties_mois?: never
+          type_compte?: string | null
+          variation?: never
+        }
+        Relationships: []
+      }
       v_expressions_besoin_stats: {
         Row: {
           brouillon: number | null
@@ -12048,6 +12383,23 @@ export type Database = {
           soumis: number | null
           total: number | null
           valide: number | null
+        }
+        Relationships: []
+      }
+      v_kpi_paiement: {
+        Row: {
+          dotation_totale: number | null
+          exercice: number | null
+          nb_lignes_budget: number | null
+          taux_engagement: number | null
+          taux_execution_global: number | null
+          taux_liquidation: number | null
+          taux_ordonnancement: number | null
+          taux_paiement: number | null
+          total_engage: number | null
+          total_liquide: number | null
+          total_ordonnance: number | null
+          total_paye: number | null
         }
         Relationships: []
       }
@@ -12062,6 +12414,86 @@ export type Database = {
           type_marche: string | null
           type_procedure: string | null
           valides: number | null
+        }
+        Relationships: []
+      }
+      v_paiements_a_venir: {
+        Row: {
+          banque_beneficiaire: string | null
+          beneficiaire: string | null
+          code_ligne_budgetaire: string | null
+          date_ordonnancement: string | null
+          dossier_id: string | null
+          exercice: number | null
+          fournisseur: string | null
+          libelle_ligne_budgetaire: string | null
+          mode_paiement: string | null
+          montant_paye: number | null
+          montant_total: number | null
+          numero_dossier: string | null
+          numero_engagement: string | null
+          numero_liquidation: string | null
+          numero_ordonnancement: string | null
+          objet: string | null
+          ordonnancement_id: string | null
+          priorite: number | null
+          reste_a_payer: number | null
+          rib_beneficiaire: string | null
+        }
+        Relationships: []
+      }
+      v_position_tresorerie: {
+        Row: {
+          exercice: number | null
+          montant_a_payer: number | null
+          nb_ordres_a_payer: number | null
+          nb_partiels: number | null
+          solde_disponible: number | null
+        }
+        Relationships: []
+      }
+      v_reglement_stats: {
+        Row: {
+          budget_line_id: string | null
+          code: string | null
+          dotation_courante: number | null
+          dotation_initiale: number | null
+          exercice: number | null
+          label: string | null
+          taux_execution: number | null
+          taux_paiement: number | null
+          total_engage: number | null
+          total_liquide: number | null
+          total_ordonnance: number | null
+          total_paye: number | null
+        }
+        Insert: {
+          budget_line_id?: string | null
+          code?: string | null
+          dotation_courante?: never
+          dotation_initiale?: number | null
+          exercice?: number | null
+          label?: string | null
+          taux_execution?: never
+          taux_paiement?: never
+          total_engage?: never
+          total_liquide?: never
+          total_ordonnance?: never
+          total_paye?: never
+        }
+        Update: {
+          budget_line_id?: string | null
+          code?: string | null
+          dotation_courante?: never
+          dotation_initiale?: number | null
+          exercice?: number | null
+          label?: string | null
+          taux_execution?: never
+          taux_paiement?: never
+          total_engage?: never
+          total_liquide?: never
+          total_ordonnance?: never
+          total_paye?: never
         }
         Relationships: []
       }

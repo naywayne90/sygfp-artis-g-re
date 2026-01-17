@@ -2,14 +2,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useTresorerie } from "@/hooks/useTresorerie";
-import { Landmark, ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
+import { usePaymentKPIs } from "@/hooks/usePaymentKPIs";
+import { Landmark, ArrowUpRight, ArrowDownRight, Wallet, Clock, TrendingUp } from "lucide-react";
 import { CompteBancaireList } from "@/components/tresorerie/CompteBancaireList";
 import { OperationTresorerieList } from "@/components/tresorerie/OperationTresorerieList";
 import { PlanTresorerie } from "@/components/tresorerie/PlanTresorerie";
+import { PaiementsAVenir } from "@/components/tresorerie/PaiementsAVenir";
 
 export default function GestionTresorerie() {
   const { exercice } = useExercice();
   const { stats } = useTresorerie();
+  const { positionTresorerie, kpis } = usePaymentKPIs();
 
   const formatMontant = (montant: number) => {
     return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
@@ -78,12 +81,39 @@ export default function GestionTresorerie() {
         </Card>
       </div>
 
-      <Tabs defaultValue="comptes" className="space-y-4">
+      {/* KPI Taux de paiement */}
+      {kpis.data && (
+        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Taux de paiement (Payé / Ordonnancé)</p>
+                <p className="text-3xl font-bold">{kpis.data.taux_paiement?.toFixed(1) || 0}%</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-muted-foreground">Taux d'exécution global</p>
+                <p className="text-xl font-medium text-primary">{kpis.data.taux_execution_global?.toFixed(1) || 0}%</p>
+              </div>
+              <TrendingUp className="h-10 w-10 text-primary/50" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="paiements" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="paiements" className="gap-2">
+            <Clock className="h-4 w-4" />
+            Paiements à venir ({positionTresorerie.data?.nb_ordres_a_payer || 0})
+          </TabsTrigger>
           <TabsTrigger value="comptes">Comptes bancaires</TabsTrigger>
           <TabsTrigger value="operations">Opérations</TabsTrigger>
           <TabsTrigger value="plan">Plan de trésorerie</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="paiements">
+          <PaiementsAVenir />
+        </TabsContent>
 
         <TabsContent value="comptes">
           <CompteBancaireList />
