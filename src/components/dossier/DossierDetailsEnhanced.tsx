@@ -27,9 +27,12 @@ import {
   Unlock,
   AlertTriangle,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  ClipboardList,
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
+import { DossierTimeline } from "./DossierTimeline";
+import { DossierAuditLog } from "./DossierAuditLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -573,59 +576,22 @@ export function DossierDetailsEnhanced({
               )}
             </TabsContent>
 
-            {/* ONGLET JOURNAL */}
+            {/* ONGLET JOURNAL - Utiliser les nouveaux composants */}
             <TabsContent value="journal" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <History className="h-4 w-4" />
-                    Journal d'audit
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {etapes.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">Aucune entrée dans le journal</p>
-                  ) : (
-                    <div className="relative">
-                      <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-border" />
-                      {etapes.map((etape) => (
-                        <div key={etape.id} className="relative pl-8 pb-4">
-                          <div className="absolute left-0 w-5 h-5 rounded-full bg-background border-2 border-primary flex items-center justify-center">
-                            {etape.statut === 'valide' ? (
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                            ) : etape.statut === 'rejete' ? (
-                              <XCircle className="h-3 w-3 text-red-500" />
-                            ) : (
-                              <Clock className="h-3 w-3 text-yellow-500" />
-                            )}
-                          </div>
-                          <div className="bg-muted/30 rounded-lg p-3">
-                            <div className="flex items-center justify-between mb-1">
-                              <Badge variant="outline" className="text-xs">
-                                {ETAPE_LABELS[etape.type_etape]}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(etape.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
-                              </span>
-                            </div>
-                            {etape.montant > 0 && (
-                              <p className="text-sm font-medium">{formatMontant(etape.montant)}</p>
-                            )}
-                            {etape.commentaire && (
-                              <p className="text-sm text-muted-foreground mt-1">{etape.commentaire}</p>
-                            )}
-                            {etape.creator?.full_name && (
-                              <p className="text-xs text-muted-foreground mt-2">
-                                Par {etape.creator.full_name}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* Timeline visuelle */}
+              <DossierTimeline
+                dossierId={dossier.id}
+                maxItems={30}
+                showFilters={true}
+                compact={false}
+              />
+
+              {/* Journal d'audit détaillé */}
+              <DossierAuditLog
+                dossierId={dossier.id}
+                title="Journal d'audit complet"
+                maxItems={100}
+              />
             </TabsContent>
           </ScrollArea>
         </Tabs>
