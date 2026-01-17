@@ -52,6 +52,8 @@ import CompteursReferences from "./pages/admin/CompteursReferences";
 // Pages Planification
 import PlanificationBudgetaire from "./pages/planification/PlanificationBudgetaire";
 import PlanificationPhysique from "./pages/planification/PlanificationPhysique";
+import StructureBudgetaire from "./pages/planification/StructureBudgetaire";
+import PlanTravail from "./pages/planification/PlanTravail";
 import Virements from "./pages/planification/Virements";
 import ImportExport from "./pages/planification/ImportExport";
 import DocumentationImport from "./pages/planification/DocumentationImport";
@@ -142,6 +144,8 @@ const App = () => (
               {/* Planification */}
               <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
               <Route path="/planification/physique" element={<PlanificationPhysique />} />
+              <Route path="/planification/structure" element={<StructureBudgetaire />} />
+              <Route path="/planification/plan-travail" element={<PlanTravail />} />
               <Route path="/planification/virements" element={<Virements />} />
               <Route path="/planification/import-export" element={<ImportExport />} />
               <Route path="/planification/documentation-import" element={<DocumentationImport />} />
