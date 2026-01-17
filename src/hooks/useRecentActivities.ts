@@ -1,235 +1,300 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export interface Activity {
   id: string;
-  type: "note" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "user_role" | "other";
-  title: string;
+  type: "note" | "note_sef" | "note_aef" | "engagement" | "liquidation" | "ordonnancement" | "marche" | "virement" | "prestataire" | "contrat" | "user" | "dossier" | "expression_besoin" | "imputation" | "reglement" | "other";
   action: string;
+  actionLabel: string;
+  title: string;
+  resume: string | null;
+  code: string | null;
   time: string;
+  timeAgo: string;
+  timeGroup: "Aujourd'hui" | "Hier" | "Cette semaine" | "Plus ancien";
   status: string;
   date: Date;
+  entityTable: string;
+  entityId: string | null;
+  userName: string | null;
+  userEmail: string | null;
+  link: string | null;
+  metadata: Record<string, unknown> | null;
 }
 
-export function useRecentActivities() {
-  const { exercice } = useExercice();
+// Alias for backward compatibility
+export type EnhancedActivity = Activity;
 
-  return useQuery({
-    queryKey: ["recent-activities", exercice],
-    queryFn: async (): Promise<Activity[]> => {
-      // CORRECTION: Basculer vers audit_logs pour les activités récentes
-      const { data: logs, error } = await supabase
-        .from("audit_logs")
-        .select("id, entity_type, entity_id, action, created_at, user_id, exercice")
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false })
-        .limit(15);
+const ACTION_LABELS: Record<string, string> = {
+  create: "Créé",
+  creation: "Créé",
+  update: "Modifié",
+  modification: "Modifié",
+  delete: "Supprimé",
+  validate: "Validé",
+  validation: "Validé",
+  reject: "Rejeté",
+  rejet: "Rejeté",
+  submit: "Soumis",
+  soumission: "Soumis",
+  defer: "Différé",
+  differe: "Différé",
+  report: "Différé",
+  execute: "Exécuté",
+  pay: "Payé",
+  import: "Importé",
+  cancel: "Annulé",
+  archive: "Archivé",
+  impute: "Imputé",
+  sign: "Signé",
+  transfer: "Transféré",
+  ajout_piece: "Pièce ajoutée",
+  suppression_piece: "Pièce supprimée",
+  passage_a_valider: "Passage à valider",
+  transfer_submitted: "Virement soumis",
+  transfer_validated: "Virement validé",
+  transfer_executed: "Virement exécuté",
+  transfer_cancelled: "Virement annulé",
+  supplier_suspended: "Prestataire suspendu",
+  supplier_activated: "Prestataire activé",
+  alert_resolved: "Alerte résolue",
+  role_added: "Rôle ajouté",
+  role_removed: "Rôle retiré",
+  role_changed: "Rôle modifié",
+  budget_modified: "Budget modifié",
+  login: "Connexion",
+  logout: "Déconnexion",
+};
 
-      if (error) {
-        console.error("Error fetching audit logs:", error);
-        // Fallback vers l'ancienne méthode si audit_logs échoue
-        return fetchActivitiesLegacy(exercice);
-      }
+const ENTITY_ROUTES: Record<string, string> = {
+  notes_dg: "/notes-aef",
+  note: "/notes-aef",
+  note_aef: "/notes-aef",
+  notes_sef: "/notes-sef",
+  note_sef: "/notes-sef",
+  budget_engagements: "/engagements",
+  engagement: "/engagements",
+  budget_liquidations: "/liquidations",
+  liquidation: "/liquidations",
+  ordonnancements: "/ordonnancements",
+  ordonnancement: "/ordonnancements",
+  reglements: "/reglements",
+  reglement: "/reglements",
+  marches: "/marches",
+  marche: "/marches",
+  credit_transfers: "/planification/virements",
+  virement: "/planification/virements",
+  prestataires: "/contractualisation/prestataires",
+  prestataire: "/contractualisation/prestataires",
+  contrats: "/contractualisation/contrats",
+  contrat: "/contractualisation/contrats",
+  dossiers: "/recherche",
+  dossier: "/recherche",
+  expressions_besoin: "/execution/expression-besoin",
+  expression_besoin: "/execution/expression-besoin",
+  imputations: "/execution/imputation",
+  imputation: "/execution/imputation",
+  budget_lines: "/planification/budget",
+  budget_line: "/planification/budget",
+  budget: "/planification/budget",
+};
 
-      if (!logs || logs.length === 0) {
-        // Si pas de logs, fallback vers l'ancienne méthode
-        return fetchActivitiesLegacy(exercice);
-      }
+const TYPE_LABELS: Record<string, string> = {
+  note: "Note",
+  note_aef: "Note AEF",
+  notes_dg: "Note AEF",
+  note_sef: "Note SEF",
+  notes_sef: "Note SEF",
+  engagement: "Engagement",
+  budget_engagements: "Engagement",
+  liquidation: "Liquidation",
+  budget_liquidations: "Liquidation",
+  ordonnancement: "Ordonnancement",
+  ordonnancements: "Ordonnancement",
+  reglement: "Règlement",
+  reglements: "Règlement",
+  marche: "Marché",
+  marches: "Marché",
+  virement: "Virement",
+  credit_transfers: "Virement",
+  prestataire: "Prestataire",
+  prestataires: "Prestataire",
+  contrat: "Contrat",
+  contrats: "Contrat",
+  dossier: "Dossier",
+  dossiers: "Dossier",
+  user: "Utilisateur",
+  user_role: "Rôle utilisateur",
+  profiles: "Profil",
+  expression_besoin: "Expression de besoin",
+  expressions_besoin: "Expression de besoin",
+  imputation: "Imputation",
+  imputations: "Imputation",
+  budget_line: "Ligne budgétaire",
+  budget_lines: "Ligne budgétaire",
+  budget: "Budget",
+};
 
-      const activities: Activity[] = logs.map(log => ({
-        id: log.id,
-        type: mapEntityType(log.entity_type),
-        title: formatTitle(log.entity_type, log.entity_id),
-        action: formatAction(log.action),
-        time: formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: fr }),
-        status: log.action.toLowerCase(),
-        date: new Date(log.created_at),
-      }));
-
-      return activities.slice(0, 8);
-    },
-    enabled: !!exercice,
-  });
-}
-
-// Fallback function en cas d'échec de l'audit_logs
-async function fetchActivitiesLegacy(exercice: number): Promise<Activity[]> {
-  const activities: Activity[] = [];
-
-  // Fetch recent notes
-  const { data: notes } = await supabase
-    .from("notes_dg")
-    .select("id, numero, statut, created_at, updated_at")
-    .eq("exercice", exercice)
-    .order("updated_at", { ascending: false })
-    .limit(5);
-
-  notes?.forEach(note => {
-    activities.push({
-      id: note.id,
-      type: "note",
-      title: `Note ${note.numero || "N/A"}`,
-      action: getStatusAction(note.statut),
-      time: formatDistanceToNow(new Date(note.updated_at), { addSuffix: true, locale: fr }),
-      status: note.statut || "en_attente",
-      date: new Date(note.updated_at),
-    });
-  });
-
-  // Fetch recent engagements
-  const { data: engagements } = await supabase
-    .from("budget_engagements")
-    .select("id, numero, statut, created_at, updated_at")
-    .eq("exercice", exercice)
-    .order("updated_at", { ascending: false })
-    .limit(5);
-
-  engagements?.forEach(eng => {
-    activities.push({
-      id: eng.id,
-      type: "engagement",
-      title: `Engagement ${eng.numero}`,
-      action: getStatusAction(eng.statut),
-      time: formatDistanceToNow(new Date(eng.updated_at), { addSuffix: true, locale: fr }),
-      status: eng.statut || "en_attente",
-      date: new Date(eng.updated_at),
-    });
-  });
-
-  // Fetch recent liquidations
-  const { data: liquidations } = await supabase
-    .from("budget_liquidations")
-    .select("id, numero, statut, created_at")
-    .eq("exercice", exercice)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  liquidations?.forEach(liq => {
-    activities.push({
-      id: liq.id,
-      type: "liquidation",
-      title: `Liquidation ${liq.numero}`,
-      action: getStatusAction(liq.statut),
-      time: formatDistanceToNow(new Date(liq.created_at), { addSuffix: true, locale: fr }),
-      status: liq.statut || "en_attente",
-      date: new Date(liq.created_at),
-    });
-  });
-
-  // Fetch recent ordonnancements
-  const { data: ordonnancements } = await supabase
-    .from("ordonnancements")
-    .select("id, numero, statut, created_at, updated_at")
-    .eq("exercice", exercice)
-    .order("updated_at", { ascending: false })
-    .limit(5);
-
-  ordonnancements?.forEach(ord => {
-    activities.push({
-      id: ord.id,
-      type: "ordonnancement",
-      title: `Ordonnancement ${ord.numero || "N/A"}`,
-      action: getStatusAction(ord.statut),
-      time: formatDistanceToNow(new Date(ord.updated_at), { addSuffix: true, locale: fr }),
-      status: ord.statut || "en_attente",
-      date: new Date(ord.updated_at),
-    });
-  });
-
-  // Sort by date and return top 8
-  return activities
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 8);
+function getTimeGroup(date: Date): Activity["timeGroup"] {
+  if (isToday(date)) return "Aujourd'hui";
+  if (isYesterday(date)) return "Hier";
+  if (isThisWeek(date)) return "Cette semaine";
+  return "Plus ancien";
 }
 
 function mapEntityType(entityType: string): Activity["type"] {
-  switch (entityType) {
-    case "note":
-    case "notes_dg":
-      return "note";
-    case "engagement":
-    case "budget_engagements":
-      return "engagement";
-    case "liquidation":
-    case "budget_liquidations":
-      return "liquidation";
-    case "ordonnancement":
-    case "ordonnancements":
-      return "ordonnancement";
-    case "marche":
-    case "marches":
-      return "marche";
-    case "user_role":
-      return "user_role";
-    default:
-      return "other";
-  }
-}
-
-function formatTitle(entityType: string, entityId: string | null): string {
-  const type = mapEntityType(entityType);
-  const shortId = entityId?.slice(0, 8) || "N/A";
-  
-  switch (type) {
-    case "note": return `Note ${shortId}`;
-    case "engagement": return `Engagement ${shortId}`;
-    case "liquidation": return `Liquidation ${shortId}`;
-    case "ordonnancement": return `Ordonnancement ${shortId}`;
-    case "marche": return `Marché ${shortId}`;
-    case "user_role": return `Modification rôle`;
-    default: return `Activité ${shortId}`;
-  }
-}
-
-function formatAction(action: string): string {
-  const actionMap: Record<string, string> = {
-    "CREATE": "créé",
-    "UPDATE": "modifié",
-    "DELETE": "supprimé",
-    "VALIDATE": "validé",
-    "REJECT": "rejeté",
-    "DIFFERE": "différé",
-    "SUBMIT": "soumis",
-    "ROLE_ADDED": "rôle ajouté",
-    "ROLE_REMOVED": "rôle retiré",
-    "ROLE_CHANGED": "rôle modifié",
-    "NOTIFICATION_TRIGGERED": "notification envoyée",
-    "RESOUMIS_APRES_DIFFERE": "resoumis après report",
+  const mapping: Record<string, Activity["type"]> = {
+    notes_dg: "note_aef",
+    note: "note_aef",
+    note_aef: "note_aef",
+    notes_sef: "note_sef",
+    note_sef: "note_sef",
+    budget_engagements: "engagement",
+    engagement: "engagement",
+    budget_liquidations: "liquidation",
+    liquidation: "liquidation",
+    ordonnancements: "ordonnancement",
+    ordonnancement: "ordonnancement",
+    reglements: "reglement",
+    reglement: "reglement",
+    marches: "marche",
+    marche: "marche",
+    credit_transfers: "virement",
+    virement: "virement",
+    prestataires: "prestataire",
+    prestataire: "prestataire",
+    contrats: "contrat",
+    contrat: "contrat",
+    dossiers: "dossier",
+    dossier: "dossier",
+    user_role: "user",
+    profiles: "user",
+    expressions_besoin: "expression_besoin",
+    expression_besoin: "expression_besoin",
+    imputations: "imputation",
+    imputation: "imputation",
   };
-  
-  return actionMap[action] || action.toLowerCase().replace(/_/g, " ");
+  return mapping[entityType] || "other";
 }
 
-function getStatusAction(status: string | null): string {
-  switch (status) {
-    case "brouillon":
-      return "créé en brouillon";
-    case "soumis":
-      return "soumis pour validation";
-    case "en_attente":
-      return "en attente de traitement";
-    case "en_cours":
-      return "en cours de traitement";
-    case "valide":
-      return "validé";
-    case "rejete":
-      return "rejeté";
-    case "differe":
-      return "différé";
-    case "impute":
-      return "imputé";
-    case "en_signature":
-      return "en attente de signature";
-    case "signe":
-      return "signé";
-    case "transmis":
-      return "transmis au Trésor";
-    case "paye":
-      return "payé";
-    default:
-      return "mis à jour";
-  }
+export interface GroupedActivities {
+  "Aujourd'hui": Activity[];
+  "Hier": Activity[];
+  "Cette semaine": Activity[];
+  "Plus ancien": Activity[];
 }
+
+/**
+ * Hook unifié pour récupérer les activités récentes
+ * Fusionne useRecentActivities + useRecentActivitiesEnhanced
+ */
+export function useRecentActivities(limit: number = 30) {
+  const { exercice } = useExercice();
+
+  return useQuery({
+    queryKey: ["recent-activities", exercice, limit],
+    queryFn: async (): Promise<GroupedActivities> => {
+      // Récupérer les logs avec les infos utilisateur
+      const { data: logs, error } = await supabase
+        .from("audit_logs")
+        .select(`
+          id, 
+          entity_type, 
+          entity_id, 
+          action, 
+          created_at, 
+          user_id,
+          exercice,
+          new_values,
+          old_values,
+          user:profiles!audit_logs_user_id_fkey(full_name, email)
+        `)
+        .eq("exercice", exercice)
+        .order("created_at", { ascending: false })
+        .limit(limit * 2);
+
+      if (error) {
+        console.error("Error fetching audit logs:", error);
+        return { "Aujourd'hui": [], "Hier": [], "Cette semaine": [], "Plus ancien": [] };
+      }
+
+      if (!logs || logs.length === 0) {
+        return { "Aujourd'hui": [], "Hier": [], "Cette semaine": [], "Plus ancien": [] };
+      }
+
+      const activities: Activity[] = logs.map((log) => {
+        const date = new Date(log.created_at);
+        const entityType = mapEntityType(log.entity_type);
+        const baseRoute = ENTITY_ROUTES[log.entity_type] || "/";
+        const typeLabel = TYPE_LABELS[log.entity_type] || "Élément";
+        
+        // Extraire le code/numéro de l'entité depuis new_values si disponible
+        const newValues = log.new_values as Record<string, unknown> | null;
+        const code = newValues?.numero || newValues?.reference || newValues?.code || log.entity_id?.slice(0, 8);
+        
+        // Construire un résumé pertinent
+        let resume: string | null = null;
+        if (newValues?.objet) {
+          resume = String(newValues.objet).substring(0, 100);
+        } else if (newValues?.motif) {
+          resume = `Motif: ${String(newValues.motif).substring(0, 80)}`;
+        } else if (newValues?.commentaire) {
+          resume = String(newValues.commentaire).substring(0, 100);
+        }
+
+        const title = `${typeLabel} ${code || ""}`.trim();
+
+        // Infos utilisateur
+        const user = log.user as { full_name?: string; email?: string } | null;
+        const userName = user?.full_name || null;
+        const userEmail = user?.email || null;
+
+        const actionLower = log.action.toLowerCase();
+
+        return {
+          id: log.id,
+          type: entityType,
+          action: actionLower,
+          actionLabel: ACTION_LABELS[actionLower] || log.action.replace(/_/g, " "),
+          title,
+          resume,
+          code: code ? String(code) : null,
+          time: formatDistanceToNow(date, { addSuffix: true, locale: fr }),
+          timeAgo: formatDistanceToNow(date, { addSuffix: true, locale: fr }),
+          timeGroup: getTimeGroup(date),
+          status: actionLower,
+          date,
+          entityTable: log.entity_type,
+          entityId: log.entity_id,
+          userName,
+          userEmail,
+          link: log.entity_id ? `${baseRoute}?id=${log.entity_id}` : baseRoute,
+          metadata: newValues,
+        };
+      }).slice(0, limit);
+
+      // Group by time
+      const grouped: GroupedActivities = {
+        "Aujourd'hui": [],
+        "Hier": [],
+        "Cette semaine": [],
+        "Plus ancien": [],
+      };
+
+      for (const activity of activities) {
+        grouped[activity.timeGroup].push(activity);
+      }
+
+      return grouped;
+    },
+    enabled: !!exercice,
+    staleTime: 30000, // 30 secondes
+    refetchInterval: 60000, // Rafraîchir toutes les minutes
+  });
+}
+
+// Alias for backward compatibility
+export const useRecentActivitiesEnhanced = useRecentActivities;

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useRecentActivitiesEnhanced, type EnhancedActivity, type GroupedActivities } from "@/hooks/useRecentActivitiesEnhanced";
+import { useRecentActivities, type Activity as EnhancedActivity, type GroupedActivities } from "@/hooks/useRecentActivities";
 import { 
   Clock, 
   FileText, 
@@ -131,7 +131,7 @@ export function RecentActivitiesPanel({
   showHeader = true,
   showViewAll = true,
 }: RecentActivitiesPanelProps) {
-  const { data: groupedActivities, isLoading } = useRecentActivitiesEnhanced();
+  const { data: groupedActivities, isLoading } = useRecentActivities();
 
   if (isLoading) {
     return (
