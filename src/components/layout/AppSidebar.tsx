@@ -112,8 +112,8 @@ const systemeItems = [
 
 // BUDGET (fusion Planification Budget + Physique)
 const budgetItems = [
-  { title: "Structure Budgétaire", url: "/planification/budget", icon: Wallet },
-  { title: "Plan de Travail", url: "/planification/physique", icon: ClipboardList },
+  { title: "Structure Budgétaire", url: "/planification/structure", icon: Wallet },
+  { title: "Plan de Travail", url: "/planification/plan-travail", icon: ClipboardList },
   { title: "Virements & Ajustements", url: "/planification/virements", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
   { title: "Historique Imports", url: "/planification/historique-imports", icon: History },

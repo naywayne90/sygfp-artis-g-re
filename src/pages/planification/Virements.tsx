@@ -60,11 +60,14 @@ import {
   XCircle,
   Loader2,
   Lock,
+  History,
+  FileText,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { BudgetMovementJournal } from "@/components/budget/BudgetMovementJournal";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
@@ -84,6 +87,7 @@ const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secon
 export default function Virements() {
   const { exercice, isReadOnly } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
+  const [activeTab, setActiveTab] = useState("demandes");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -242,8 +246,22 @@ export default function Virements() {
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card>
+        {/* Tabs: Demandes + Journal */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="demandes" className="gap-2">
+              <FileText className="h-4 w-4" />
+              Demandes ({transfers?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="journal" className="gap-2">
+              <History className="h-4 w-4" />
+              Journal des mouvements
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="demandes" className="space-y-4">
+            {/* Filters */}
+            <Card>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
@@ -517,6 +535,12 @@ export default function Virements() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+          </TabsContent>
+
+          <TabsContent value="journal">
+            <BudgetMovementJournal />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
