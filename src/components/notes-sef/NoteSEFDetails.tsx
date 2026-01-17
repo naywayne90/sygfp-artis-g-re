@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { NoteSEF, NoteSEFHistory, useNotesSEF } from "@/hooks/useNotesSEF";
 import { PrintButton } from "@/components/export/PrintButton";
+import { NoteSEFCreateAEFButton } from "@/components/notes-sef/NoteSEFCreateAEFButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -37,6 +38,7 @@ import {
   Paperclip,
   FileIcon,
   MessageSquare,
+  CreditCard,
 } from "lucide-react";
 
 interface NoteSEFDetailsProps {
@@ -775,8 +777,8 @@ export function NoteSEFDetails({
               </Card>
             )}
 
-            {/* Validation + Lien Dossier */}
-            {note.statut === "valide" && note.validated_at && (
+            {/* Validation + Lien Dossier + Création AEF */}
+            {(note.statut === "valide" || note.statut === "valide_auto") && (
               <Card className="border-success/50">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2 text-success">
@@ -785,9 +787,11 @@ export function NoteSEFDetails({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Validée le {format(new Date(note.validated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
-                  </p>
+                  {note.validated_at && (
+                    <p className="text-sm text-muted-foreground">
+                      Validée le {format(new Date(note.validated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
+                    </p>
+                  )}
                   
                   {/* Lien vers le dossier créé */}
                   {note.dossier_id && (
@@ -810,6 +814,18 @@ export function NoteSEFDetails({
                       </Button>
                     </div>
                   )}
+
+                  {/* Bouton création AEF */}
+                  <NoteSEFCreateAEFButton
+                    noteSEF={{
+                      id: note.id,
+                      numero: note.numero,
+                      reference_pivot: note.reference_pivot,
+                      statut: note.statut,
+                      objet: note.objet,
+                    }}
+                    variant="card"
+                  />
                 </CardContent>
               </Card>
             )}
