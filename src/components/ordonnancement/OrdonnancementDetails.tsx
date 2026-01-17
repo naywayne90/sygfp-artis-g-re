@@ -22,6 +22,7 @@ import {
   AlertCircle,
   FileSignature,
   History,
+  FolderOpen,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -29,6 +30,7 @@ import { useOrdonnancements, VALIDATION_STEPS, MODES_PAIEMENT } from "@/hooks/us
 import { OrdonnancementSignatures } from "./OrdonnancementSignatures";
 import { ParapheurIntern } from "./ParapheurIntern";
 import { ChaineDepenseTimeline } from "@/components/workflow/ChaineDepenseTimeline";
+import { DossierGED } from "@/components/ged";
 
 interface OrdonnancementDetailsProps {
   ordonnancement: any;
@@ -97,10 +99,14 @@ export function OrdonnancementDetails({
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="details" className="gap-2">
               <FileText className="h-4 w-4" />
               Détails
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="gap-2">
+              <FolderOpen className="h-4 w-4" />
+              Documents
             </TabsTrigger>
             <TabsTrigger value="parapheur" className="gap-2">
               <FileSignature className="h-4 w-4" />
@@ -320,6 +326,21 @@ export function OrdonnancementDetails({
                 </div>
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <div className="pt-4">
+              <DossierGED
+                entityType="ordonnancement"
+                entityId={ordonnancement?.id}
+                dossierId={ordonnancement?.dossier_id || undefined}
+                reference={ordonnancement?.numero || ""}
+                exercice={ordonnancement?.exercice || undefined}
+                etape="ordonnancement"
+                showChecklist={true}
+                readOnly={ordonnancement?.statut === "valide" || ordonnancement?.statut === "transmis"}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="parapheur">

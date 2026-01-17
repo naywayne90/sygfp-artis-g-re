@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Clock, XCircle, User, Building2, FileText, Calculator, Lock, FileCheck } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, User, Building2, FileText, Calculator, Lock, FileCheck, FolderOpen } from "lucide-react";
 import { Engagement, VALIDATION_STEPS, useEngagements } from "@/hooks/useEngagements";
 import { EngagementChecklist } from "./EngagementChecklist";
+import { DossierGED } from "@/components/ged";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -73,14 +74,18 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
 
         <ScrollArea className="max-h-[70vh] pr-4">
           <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="details" className="gap-1">
                 <FileText className="h-4 w-4" />
                 Détails
               </TabsTrigger>
+              <TabsTrigger value="documents" className="gap-1">
+                <FolderOpen className="h-4 w-4" />
+                Documents
+              </TabsTrigger>
               <TabsTrigger value="checklist" className="gap-1">
                 <FileCheck className="h-4 w-4" />
-                Pièces
+                Checklist
               </TabsTrigger>
             </TabsList>
 
@@ -264,6 +269,19 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
                   </CardContent>
                 </Card>
               )}
+            </TabsContent>
+
+            <TabsContent value="documents">
+              <DossierGED
+                entityType="engagement"
+                entityId={engagement.id}
+                dossierId={(engagement as any).dossier_id || undefined}
+                reference={engagement.numero}
+                exercice={engagement.exercice || undefined}
+                etape="engagement"
+                showChecklist={true}
+                readOnly={engagement.statut === "valide"}
+              />
             </TabsContent>
 
             <TabsContent value="checklist">
