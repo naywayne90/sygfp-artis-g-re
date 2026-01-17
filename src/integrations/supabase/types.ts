@@ -11647,6 +11647,45 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_statuses: {
+        Row: {
+          bg_color: string | null
+          code: string
+          color: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_pending: boolean | null
+          is_terminal: boolean | null
+          label: string
+          ordre: number | null
+        }
+        Insert: {
+          bg_color?: string | null
+          code: string
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_pending?: boolean | null
+          is_terminal?: boolean | null
+          label: string
+          ordre?: number | null
+        }
+        Update: {
+          bg_color?: string | null
+          code?: string
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_pending?: boolean | null
+          is_terminal?: boolean | null
+          label?: string
+          ordre?: number | null
+        }
+        Relationships: []
+      }
       workflow_tasks: {
         Row: {
           action_taken: string | null
@@ -11805,6 +11844,114 @@ export type Database = {
             referencedColumns: ["dossier_id"]
           },
         ]
+      }
+      workflow_transition_history: {
+        Row: {
+          action_code: string
+          entity_code: string | null
+          entity_id: string
+          exercice: number | null
+          from_status: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          module: string
+          motif: string | null
+          performed_at: string
+          performed_by: string | null
+          to_status: string
+        }
+        Insert: {
+          action_code: string
+          entity_code?: string | null
+          entity_id: string
+          exercice?: number | null
+          from_status: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          module: string
+          motif?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          to_status: string
+        }
+        Update: {
+          action_code?: string
+          entity_code?: string | null
+          entity_id?: string
+          exercice?: number | null
+          from_status?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          module?: string
+          motif?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_transition_history_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_transition_history_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_transitions: {
+        Row: {
+          action_code: string
+          action_label: string
+          created_at: string | null
+          from_status: string
+          id: string
+          is_active: boolean | null
+          module: string
+          required_roles: string[]
+          requires_budget_check: boolean | null
+          requires_montant: boolean | null
+          requires_motif: boolean | null
+          to_status: string
+        }
+        Insert: {
+          action_code: string
+          action_label: string
+          created_at?: string | null
+          from_status: string
+          id?: string
+          is_active?: boolean | null
+          module: string
+          required_roles?: string[]
+          requires_budget_check?: boolean | null
+          requires_montant?: boolean | null
+          requires_motif?: boolean | null
+          to_status: string
+        }
+        Update: {
+          action_code?: string
+          action_label?: string
+          created_at?: string | null
+          from_status?: string
+          id?: string
+          is_active?: boolean | null
+          module?: string
+          required_roles?: string[]
+          requires_budget_check?: boolean | null
+          requires_montant?: boolean | null
+          requires_motif?: boolean | null
+          to_status?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -12545,6 +12692,22 @@ export type Database = {
       }
       can_export_notes_sef: { Args: { p_user_id: string }; Returns: boolean }
       can_qualify_supplier: { Args: { p_supplier_id: string }; Returns: Json }
+      can_transition: {
+        Args: {
+          p_from_status: string
+          p_module: string
+          p_to_status: string
+          p_user_id?: string
+        }
+        Returns: {
+          action_code: string
+          action_label: string
+          allowed: boolean
+          reason: string
+          requires_budget_check: boolean
+          requires_motif: boolean
+        }[]
+      }
       can_view_note_sef: {
         Args: {
           p_note_created_by: string
@@ -12708,6 +12871,22 @@ export type Database = {
         Args: { p_transfer_id: string; p_user_id?: string }
         Returns: Json
       }
+      execute_transition: {
+        Args: {
+          p_entity_code: string
+          p_entity_id: string
+          p_from_status: string
+          p_metadata?: Json
+          p_module: string
+          p_motif?: string
+          p_to_status: string
+        }
+        Returns: {
+          action_code: string
+          message: string
+          success: boolean
+        }[]
+      }
       finalize_import_run: { Args: { p_run_id: string }; Returns: Json }
       generate_arti_reference: {
         Args: { p_date?: string; p_etape: number }
@@ -12772,6 +12951,16 @@ export type Database = {
         }
         Returns: string
       }
+      get_available_transitions: {
+        Args: { p_current_status: string; p_module: string; p_user_id?: string }
+        Returns: {
+          action_code: string
+          action_label: string
+          requires_budget_check: boolean
+          requires_motif: boolean
+          to_status: string
+        }[]
+      }
       get_dossier_current_step: {
         Args: { p_dossier_id: string }
         Returns: {
@@ -12791,6 +12980,20 @@ export type Database = {
           etape_libelle: string
           etape_ordre: number
           statut: string
+        }[]
+      }
+      get_entity_transition_history: {
+        Args: { p_entity_id: string; p_module: string }
+        Returns: {
+          action_code: string
+          from_status: string
+          id: string
+          metadata: Json
+          motif: string
+          performed_at: string
+          performed_by: string
+          performer_name: string
+          to_status: string
         }[]
       }
       get_exercice_budget_summary: {
