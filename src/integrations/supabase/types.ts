@@ -639,6 +639,13 @@ export type Database = {
             foreignKeyName: "budg_alerts_ligne_budgetaire_id_fkey"
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budg_alerts_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -728,6 +735,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_activities_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -927,6 +941,13 @@ export type Database = {
             foreignKeyName: "budget_engagements_budget_line_id_fkey"
             columns: ["budget_line_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_engagements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -1082,6 +1103,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -1247,6 +1275,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_line_history_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -1542,6 +1577,13 @@ export type Database = {
             foreignKeyName: "budget_lines_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -1807,6 +1849,135 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles_display"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_movements: {
+        Row: {
+          budget_line_id: string
+          commentaire: string | null
+          created_at: string
+          created_by: string | null
+          disponible_apres: number | null
+          disponible_avant: number | null
+          dossier_id: string | null
+          entity_code: string | null
+          entity_id: string | null
+          entity_type: string | null
+          exercice: number
+          id: string
+          montant: number
+          motif: string | null
+          reserve_apres: number | null
+          reserve_avant: number | null
+          sens: string
+          statut: string
+          type_mouvement: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          budget_line_id: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          dossier_id?: string | null
+          entity_code?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          exercice?: number
+          id?: string
+          montant: number
+          motif?: string | null
+          reserve_apres?: number | null
+          reserve_avant?: number | null
+          sens: string
+          statut?: string
+          type_mouvement: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          budget_line_id?: string
+          commentaire?: string | null
+          created_at?: string
+          created_by?: string | null
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          dossier_id?: string | null
+          entity_code?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          exercice?: number
+          id?: string
+          montant?: number
+          motif?: string | null
+          reserve_apres?: number | null
+          reserve_avant?: number | null
+          sens?: string
+          statut?: string
+          type_mouvement?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_movements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "budget_movements_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "budget_movements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "dossiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_movements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_dossier_chaine"
+            referencedColumns: ["dossier_id"]
+          },
+          {
+            foreignKeyName: "budget_movements_dossier_id_fkey"
+            columns: ["dossier_id"]
+            isOneToOne: false
+            referencedRelation: "v_paiements_a_venir"
+            referencedColumns: ["dossier_id"]
           },
         ]
       }
@@ -2364,6 +2535,13 @@ export type Database = {
             foreignKeyName: "credit_transfers_from_budget_line_id_fkey"
             columns: ["from_budget_line_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_from_budget_line_id_fkey"
+            columns: ["from_budget_line_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -2400,6 +2578,13 @@ export type Database = {
             columns: ["to_budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transfers_to_budget_line_id_fkey"
+            columns: ["to_budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -3287,6 +3472,13 @@ export type Database = {
             foreignKeyName: "dossiers_budget_line_id_fkey"
             columns: ["budget_line_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dossiers_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -4083,6 +4275,13 @@ export type Database = {
             foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expressions_besoin_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -4249,6 +4448,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_budget_staging_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -4630,6 +4836,98 @@ export type Database = {
           },
         ]
       }
+      imputation_lignes: {
+        Row: {
+          budget_line_id: string
+          created_at: string
+          created_by: string | null
+          disponible_apres: number | null
+          disponible_avant: number | null
+          id: string
+          imputation_id: string
+          montant: number
+          movement_id: string | null
+          pourcentage: number | null
+          statut: string
+        }
+        Insert: {
+          budget_line_id: string
+          created_at?: string
+          created_by?: string | null
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          id?: string
+          imputation_id: string
+          montant: number
+          movement_id?: string | null
+          pourcentage?: number | null
+          statut?: string
+        }
+        Update: {
+          budget_line_id?: string
+          created_at?: string
+          created_by?: string | null
+          disponible_apres?: number | null
+          disponible_avant?: number | null
+          id?: string
+          imputation_id?: string
+          montant?: number
+          movement_id?: string | null
+          pourcentage?: number | null
+          statut?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imputation_lignes_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_reglement_stats"
+            referencedColumns: ["budget_line_id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_imputation_id_fkey"
+            columns: ["imputation_id"]
+            isOneToOne: false
+            referencedRelation: "imputations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputation_lignes_movement_id_fkey"
+            columns: ["movement_id"]
+            isOneToOne: false
+            referencedRelation: "budget_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       imputations: {
         Row: {
           action_id: string | null
@@ -4643,10 +4941,12 @@ export type Database = {
           differed_at: string | null
           differed_by: string | null
           direction_id: string | null
+          disponible_au_moment: number | null
           dossier_id: string | null
           exercice: number
           forcer_imputation: boolean | null
           id: string
+          is_multi_ligne: boolean | null
           justification_depassement: string | null
           mission_id: string | null
           montant: number
@@ -4682,10 +4982,12 @@ export type Database = {
           differed_at?: string | null
           differed_by?: string | null
           direction_id?: string | null
+          disponible_au_moment?: number | null
           dossier_id?: string | null
           exercice: number
           forcer_imputation?: boolean | null
           id?: string
+          is_multi_ligne?: boolean | null
           justification_depassement?: string | null
           mission_id?: string | null
           montant: number
@@ -4721,10 +5023,12 @@ export type Database = {
           differed_at?: string | null
           differed_by?: string | null
           direction_id?: string | null
+          disponible_au_moment?: number | null
           dossier_id?: string | null
           exercice?: number
           forcer_imputation?: boolean | null
           id?: string
+          is_multi_ligne?: boolean | null
           justification_depassement?: string | null
           mission_id?: string | null
           montant?: number
@@ -4775,6 +5079,13 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "imputations_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -6655,6 +6966,13 @@ export type Database = {
             foreignKeyName: "notes_dg_budget_line_id_fkey"
             columns: ["budget_line_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -6740,6 +7058,13 @@ export type Database = {
             columns: ["ligne_budgetaire_id"]
             isOneToOne: false
             referencedRelation: "v_budget_disponibilite"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_dg_ligne_budgetaire_id_fkey"
+            columns: ["ligne_budgetaire_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
             referencedColumns: ["id"]
           },
           {
@@ -11042,6 +11367,13 @@ export type Database = {
             foreignKeyName: "taches_budget_line_id_fkey"
             columns: ["budget_line_id"]
             isOneToOne: false
+            referencedRelation: "v_budget_disponibilite_complet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "taches_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
             referencedRelation: "v_engagement_stats"
             referencedColumns: ["budget_line_id"]
           },
@@ -12418,6 +12750,83 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_top_os_imputations"
             referencedColumns: ["os_id"]
+          },
+        ]
+      }
+      v_budget_disponibilite_complet: {
+        Row: {
+          code: string | null
+          direction_code: string | null
+          direction_id: string | null
+          direction_label: string | null
+          disponible_brut: number | null
+          disponible_net: number | null
+          dotation_actuelle: number | null
+          dotation_initiale: number | null
+          dotation_modifiee: number | null
+          exercice: number | null
+          id: string | null
+          is_active: boolean | null
+          label: string | null
+          mission_id: string | null
+          montant_reserve: number | null
+          nbe_id: string | null
+          os_code: string | null
+          os_id: string | null
+          os_libelle: string | null
+          statut: string | null
+          sysco_id: string | null
+          total_engage: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_directions_imputations"
+            referencedColumns: ["direction_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_nbe_id_fkey"
+            columns: ["nbe_id"]
+            isOneToOne: false
+            referencedRelation: "nomenclature_nbe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "objectifs_strategiques"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_os_id_fkey"
+            columns: ["os_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_os_imputations"
+            referencedColumns: ["os_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_sysco_id_fkey"
+            columns: ["sysco_id"]
+            isOneToOne: false
+            referencedRelation: "plan_comptable_sysco"
+            referencedColumns: ["id"]
           },
         ]
       }
