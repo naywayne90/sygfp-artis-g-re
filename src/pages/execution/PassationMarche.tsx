@@ -12,12 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { usePassationsMarche, PassationMarche, MODES_PASSATION, STATUTS, EBValidee } from "@/hooks/usePassationsMarche";
-import { PassationMarcheForm } from "@/components/passation-marche/PassationMarcheForm";
+import { 
+  PassationMarcheForm,
+  PassationDetails,
+  PassationValidateDialog,
+  PassationRejectDialog,
+  PassationDeferDialog,
+} from "@/components/passation-marche";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,7 +33,6 @@ import {
   CheckCircle2,
   XCircle,
   PauseCircle,
-  Plus,
   Search,
   Loader2,
   ShoppingCart,
@@ -77,17 +79,11 @@ export default function PassationMarchePage() {
   const [isLoadingSource, setIsLoadingSource] = useState(false);
 
   // Dialogs
-  const [rejectDialog, setRejectDialog] = useState<{ open: boolean; id: string | null }>({
-    open: false,
-    id: null,
-  });
-  const [deferDialog, setDeferDialog] = useState<{ open: boolean; id: string | null }>({
-    open: false,
-    id: null,
-  });
-  const [rejectMotif, setRejectMotif] = useState("");
-  const [deferMotif, setDeferMotif] = useState("");
-  const [deferDate, setDeferDate] = useState("");
+  const [selectedPassation, setSelectedPassation] = useState<PassationMarche | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [validateOpen, setValidateOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [deferOpen, setDeferOpen] = useState(false);
 
   // Gérer sourceEB depuis l'URL
   useEffect(() => {
@@ -123,24 +119,50 @@ export default function PassationMarchePage() {
     setSearchParams(searchParams, { replace: true });
   };
 
-  const handleReject = async () => {
-    if (rejectDialog.id && rejectMotif) {
-      await rejectPassation({ id: rejectDialog.id, motif: rejectMotif });
-      setRejectDialog({ open: false, id: null });
-      setRejectMotif("");
+  const handleViewDetails = (pm: PassationMarche) => {
+    setSelectedPassation(pm);
+    setDetailsOpen(true);
+  };
+
+  const handleValidateClick = (pm: PassationMarche) => {
+    setSelectedPassation(pm);
+    setValidateOpen(true);
+  };
+
+  const handleRejectClick = (pm: PassationMarche) => {
+    setSelectedPassation(pm);
+    setRejectOpen(true);
+  };
+
+  const handleDeferClick = (pm: PassationMarche) => {
+    setSelectedPassation(pm);
+    setDeferOpen(true);
+  };
+
+  const handleConfirmValidate = async () => {
+    if (selectedPassation) {
+      await validatePassation(selectedPassation.id);
+      setValidateOpen(false);
+      setSelectedPassation(null);
+      refetch();
     }
   };
 
-  const handleDefer = async () => {
-    if (deferDialog.id && deferMotif) {
-      await deferPassation({
-        id: deferDialog.id,
-        motif: deferMotif,
-        dateReprise: deferDate || undefined,
-      });
-      setDeferDialog({ open: false, id: null });
-      setDeferMotif("");
-      setDeferDate("");
+  const handleConfirmReject = async (motif: string) => {
+    if (selectedPassation) {
+      await rejectPassation({ id: selectedPassation.id, motif });
+      setRejectOpen(false);
+      setSelectedPassation(null);
+      refetch();
+    }
+  };
+
+  const handleConfirmDefer = async (motif: string, dateReprise?: string) => {
+    if (selectedPassation) {
+      await deferPassation({ id: selectedPassation.id, motif, dateReprise });
+      setDeferOpen(false);
+      setSelectedPassation(null);
+      refetch();
     }
   };
 
