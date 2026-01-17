@@ -4,7 +4,12 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Liquidation, VALIDATION_STEPS, DOCUMENTS_REQUIS } from "@/hooks/useLiquidations";
 import { LiquidationChecklist } from "./LiquidationChecklist";
+import { ServiceFaitForm } from "./ServiceFaitForm";
+import { ControleSdctForm } from "./ControleSdctForm";
+import { ValidationDgForm } from "./ValidationDgForm";
 import { DossierGED } from "@/components/ged";
+import { DossierTimeline } from "@/components/dossier/DossierTimeline";
+import { DossierAuditLog } from "@/components/dossier/DossierAuditLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
@@ -19,11 +24,17 @@ import {
   Download,
   FileCheck,
   FolderOpen,
+  ClipboardCheck,
+  Shield,
+  History,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LiquidationDetailsProps {
   liquidation: Liquidation;
+  onRefresh?: () => void;
 }
 
 const formatMontant = (montant: number | null) => {
@@ -38,14 +49,22 @@ const getStatusBadge = (statut: string | null) => {
     valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
     rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
     differe: { label: "Différé", className: "bg-warning/10 text-warning border-warning/20" },
+    en_validation_dg: { label: "En validation DG", className: "bg-primary/10 text-primary border-primary/20" },
   };
   const variant = variants[statut || "brouillon"] || variants.brouillon;
   return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
 };
 
-export function LiquidationDetails({ liquidation }: LiquidationDetailsProps) {
+export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetailsProps) {
+  const queryClient = useQueryClient();
+  
   const getDocLabel = (code: string) => {
     return DOCUMENTS_REQUIS.find(d => d.code === code)?.label || code;
+  };
+
+  const handleSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["liquidations"] });
+    onRefresh?.();
   };
 
   return (
@@ -244,6 +263,96 @@ export function LiquidationDetails({ liquidation }: LiquidationDetailsProps) {
         </CardContent>
       </Card>
 
+      {/* === SECTION VALIDATIONS === */}
+      <Separator className="my-6" />
+      
+      {/* Formulaire Service Fait - pour saisie/certification */}
+      {liquidation.statut !== "valide" && liquidation.statut !== "rejete" && (
+        <ServiceFaitForm
+          liquidationId={liquidation.id}
+          liquidation={{
+            id: liquidation.id,
+            numero: liquidation.numero,
+            montant: liquidation.montant,
+            service_fait: liquidation.service_fait,
+            service_fait_date: liquidation.service_fait_date || undefined,
+            service_fait_certifie_par: liquidation.service_fait_certifie_par || undefined,
+            reference_facture: liquidation.reference_facture || undefined,
+            observation: liquidation.observation || undefined,
+            statut: liquidation.statut || undefined,
+            engagement: liquidation.engagement ? {
+              numero: liquidation.engagement.numero,
+              objet: liquidation.engagement.objet,
+              fournisseur: liquidation.engagement.fournisseur || undefined,
+            } : undefined,
+          }}
+          onSuccess={handleSuccess}
+          readOnly={liquidation.statut === "valide"}
+        />
+      )}
+
+      {/* Contrôle SDCT - affiché si service fait est certifié */}
+      {liquidation.service_fait && 
+       liquidation.statut !== "valide" && 
+       liquidation.statut !== "rejete" &&
+       liquidation.statut !== "en_validation_dg" && (
+        <ControleSdctForm
+          liquidationId={liquidation.id}
+          liquidation={{
+            id: liquidation.id,
+            numero: liquidation.numero,
+            montant: liquidation.montant,
+            montant_ht: liquidation.montant_ht || undefined,
+            net_a_payer: liquidation.net_a_payer || undefined,
+            service_fait: liquidation.service_fait,
+            current_step: liquidation.current_step || undefined,
+            statut: liquidation.statut || undefined,
+            engagement: liquidation.engagement ? {
+              numero: liquidation.engagement.numero,
+              montant: liquidation.engagement.montant,
+              budget_line: liquidation.engagement.budget_line ? {
+                code: liquidation.engagement.budget_line.code,
+                label: liquidation.engagement.budget_line.label,
+              } : undefined,
+            } : undefined,
+          }}
+          onSuccess={handleSuccess}
+        />
+      )}
+
+      {/* Validation DG - affiché si en attente de validation DG */}
+      {liquidation.statut === "en_validation_dg" && (
+        <ValidationDgForm
+          liquidationId={liquidation.id}
+          liquidation={{
+            id: liquidation.id,
+            numero: liquidation.numero,
+            montant: liquidation.montant,
+            montant_ht: liquidation.montant_ht || undefined,
+            net_a_payer: liquidation.net_a_payer || undefined,
+            statut: liquidation.statut || undefined,
+            current_step: liquidation.current_step || undefined,
+            service_fait: liquidation.service_fait,
+            service_fait_date: liquidation.service_fait_date || undefined,
+            reference_facture: liquidation.reference_facture || undefined,
+            engagement: liquidation.engagement ? {
+              numero: liquidation.engagement.numero,
+              objet: liquidation.engagement.objet,
+              montant: liquidation.engagement.montant,
+              fournisseur: liquidation.engagement.fournisseur || undefined,
+              budget_line: liquidation.engagement.budget_line ? {
+                code: liquidation.engagement.budget_line.code,
+                label: liquidation.engagement.budget_line.label,
+                direction: liquidation.engagement.budget_line.direction || undefined,
+              } : undefined,
+            } : undefined,
+          }}
+          onSuccess={handleSuccess}
+        />
+      )}
+
+      <Separator className="my-6" />
+
       {/* GED Documents */}
       <Card>
         <CardHeader>
@@ -276,7 +385,8 @@ export function LiquidationDetails({ liquidation }: LiquidationDetailsProps) {
             {VALIDATION_STEPS.map((step) => {
               const currentStep = liquidation.current_step || 0;
               const isCompleted = liquidation.statut === "valide" || step.order < currentStep;
-              const isCurrent = step.order === currentStep && liquidation.statut === "soumis";
+              const isCurrent = step.order === currentStep && 
+                (liquidation.statut === "soumis" || liquidation.statut === "en_validation_dg");
               const isRejected = liquidation.statut === "rejete" && step.order === currentStep;
 
               return (
@@ -316,6 +426,41 @@ export function LiquidationDetails({ liquidation }: LiquidationDetailsProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Timeline & Audit */}
+      <Separator className="my-6" />
+      
+      <Tabs defaultValue="timeline" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="timeline" className="gap-1">
+            <History className="h-4 w-4" />
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-1">
+            <Shield className="h-4 w-4" />
+            Audit
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="timeline" className="mt-4">
+          <DossierTimeline 
+            dossierId={(liquidation as any).dossier_id || liquidation.id}
+            entityType="liquidation"
+            entityId={liquidation.id}
+            maxItems={20}
+            compact={true}
+          />
+        </TabsContent>
+        
+        <TabsContent value="audit" className="mt-4">
+          <DossierAuditLog
+            entityType="liquidation"
+            entityId={liquidation.id}
+            title="Journal d'audit - Liquidation"
+            maxItems={50}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
