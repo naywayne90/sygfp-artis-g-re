@@ -15,3 +15,6 @@ export * from './helpers';
 
 // Service d'accès aux données
 export * from './notesSefService';
+
+// Service de génération de références ARTI
+export * from './referenceService';
