@@ -6,6 +6,24 @@
  * - Tout nouveau module DOIT être ajouté ici avant de créer sa route
  * - Les routes dans App.tsx doivent correspondre à ce registre
  * - La sidebar génère son menu depuis ce registre
+ *
+ * CHAMPS:
+ * - id: Identifiant unique du module
+ * - name: Libellé affiché dans le menu
+ * - icon: Icône Lucide
+ * - route: Chemin de la route (null si groupe parent)
+ * - parent: ID du module parent (null si racine)
+ * - order: Ordre d'affichage dans le menu
+ * - canonicalOrder: Ordre logique dans le workflow (peut différer de order)
+ * - status: ready | beta | todo | deprecated
+ * - isEnabled: Module activé ou non
+ * - roles: Rôles autorisés ('all' pour tous)
+ * - requiredCapabilities: Capacités requises (permissions spécifiques)
+ * - stepCode: Code étape workflow (pour la chaîne de dépense)
+ * - step: Numéro d'étape (affichage)
+ * - badge/badgeKey: Configuration des badges de notification
+ * - subSection: Sous-section pour le regroupement
+ * - description: Description du module
  */
 
 import {
@@ -52,6 +70,13 @@ import {
   CheckSquare,
   User,
   TestTube,
+  HelpCircle,
+  Link,
+  GitBranch,
+  FileQuestion,
+  Coins,
+  ScanLine,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 
@@ -68,14 +93,34 @@ export interface ModuleConfig {
   route: string | null;
   parent: string | null;
   order: number;
+  canonicalOrder: number; // Ordre logique workflow (peut différer de order)
   status: ModuleStatus;
+  isEnabled: boolean;
   roles: string[];
+  requiredCapabilities?: string[];
   badge?: boolean;
   badgeKey?: string;
   description?: string;
   step?: number;
+  stepCode?: string; // Code étape pour le workflow
   subSection?: string;
 }
+
+// ============================================
+// CONSTANTES STEP CODES (chaîne de dépense)
+// ============================================
+
+export const STEP_CODES = {
+  NOTE_SEF: 'NOTE_SEF',
+  NOTE_AEF: 'NOTE_AEF',
+  IMPUTATION: 'IMPUTATION',
+  EXPRESSION_BESOIN: 'EXPRESSION_BESOIN',
+  PASSATION_MARCHE: 'PASSATION_MARCHE',
+  ENGAGEMENT: 'ENGAGEMENT',
+  LIQUIDATION: 'LIQUIDATION',
+  ORDONNANCEMENT: 'ORDONNANCEMENT',
+  REGLEMENT: 'REGLEMENT',
+} as const;
 
 // ============================================
 // REGISTRE PRINCIPAL DES MODULES
@@ -90,7 +135,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/',
     parent: null,
     order: 0,
+    canonicalOrder: 0,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: 'Vue d\'ensemble et indicateurs clés'
   },
@@ -101,7 +148,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/recherche',
     parent: null,
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: 'Recherche transversale de dossiers'
   },
@@ -114,7 +163,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: '9 étapes du flux de dépense'
   },
@@ -125,10 +176,13 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/notes-sef',
     parent: 'chaine-depense',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     badge: true,
     step: 1,
+    stepCode: STEP_CODES.NOTE_SEF,
     description: 'Sans Engagement Financier'
   },
   {
@@ -138,10 +192,13 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/notes-aef',
     parent: 'chaine-depense',
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     badge: true,
     step: 2,
+    stepCode: STEP_CODES.NOTE_AEF,
     description: 'Avec Engagement Financier'
   },
   {
@@ -151,9 +208,13 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/execution/imputation',
     parent: 'chaine-depense',
     order: 3,
+    canonicalOrder: 3,
     status: 'ready',
+    isEnabled: true,
     roles: ['sdct', 'daaf', 'cb'],
+    requiredCapabilities: ['imputation.create', 'imputation.validate'],
     step: 3,
+    stepCode: STEP_CODES.IMPUTATION,
     description: 'Imputation budgétaire'
   },
   {
@@ -163,9 +224,12 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/execution/expression-besoin',
     parent: 'chaine-depense',
     order: 4,
+    canonicalOrder: 4,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     step: 4,
+    stepCode: STEP_CODES.EXPRESSION_BESOIN,
     description: 'Formalisation du besoin'
   },
   {
@@ -175,9 +239,13 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/marches',
     parent: 'chaine-depense',
     order: 5,
+    canonicalOrder: 5,
     status: 'ready',
+    isEnabled: true,
     roles: ['sdpm', 'daaf'],
+    requiredCapabilities: ['marche.create', 'marche.validate'],
     step: 5,
+    stepCode: STEP_CODES.PASSATION_MARCHE,
     description: 'Si montant > seuil'
   },
   {
@@ -187,12 +255,33 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/engagements',
     parent: 'chaine-depense',
     order: 6,
+    canonicalOrder: 6,
     status: 'ready',
+    isEnabled: true,
     roles: ['cb'],
+    requiredCapabilities: ['engagement.create', 'engagement.validate'],
     badge: true,
     badgeKey: 'engagementsAValider',
     step: 6,
+    stepCode: STEP_CODES.ENGAGEMENT,
     description: 'Réservation crédits'
+  },
+  {
+    id: 'scanning-engagement',
+    name: 'Scanning Engagement',
+    icon: ScanLine,
+    route: '/execution/scanning-engagement',
+    parent: 'chaine-depense',
+    order: 6.5,
+    canonicalOrder: 6.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['cb', 'daaf', 'operateur'],
+    requiredCapabilities: ['engagement.create'],
+    badge: false,
+    step: 6,
+    stepCode: STEP_CODES.ENGAGEMENT,
+    description: 'Numérisation pièces engagement'
   },
   {
     id: 'liquidation',
@@ -201,12 +290,33 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/liquidations',
     parent: 'chaine-depense',
     order: 7,
+    canonicalOrder: 7,
     status: 'ready',
+    isEnabled: true,
     roles: ['sdct', 'daaf'],
+    requiredCapabilities: ['liquidation.create', 'liquidation.validate'],
     badge: true,
     badgeKey: 'liquidationsAValider',
     step: 7,
+    stepCode: STEP_CODES.LIQUIDATION,
     description: 'Constatation service fait'
+  },
+  {
+    id: 'scanning-liquidation',
+    name: 'Scanning Liquidation',
+    icon: ScanLine,
+    route: '/execution/scanning-liquidation',
+    parent: 'chaine-depense',
+    order: 7.5,
+    canonicalOrder: 7.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'operateur'],
+    requiredCapabilities: ['liquidation.create'],
+    badge: false,
+    step: 7,
+    stepCode: STEP_CODES.LIQUIDATION,
+    description: 'Numérisation pièces liquidation'
   },
   {
     id: 'ordonnancement',
@@ -215,11 +325,15 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/ordonnancements',
     parent: 'chaine-depense',
     order: 8,
+    canonicalOrder: 8,
     status: 'ready',
+    isEnabled: true,
     roles: ['dg'],
+    requiredCapabilities: ['ordonnancement.create', 'ordonnancement.sign'],
     badge: true,
     badgeKey: 'ordonnancementsAValider',
     step: 8,
+    stepCode: STEP_CODES.ORDONNANCEMENT,
     description: 'Ordre de paiement'
   },
   {
@@ -229,9 +343,13 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/reglements',
     parent: 'chaine-depense',
     order: 9,
+    canonicalOrder: 9,
     status: 'ready',
+    isEnabled: true,
     roles: ['tresorerie'],
+    requiredCapabilities: ['reglement.execute'],
     step: 9,
+    stepCode: STEP_CODES.REGLEMENT,
     description: 'Paiement effectif'
   },
 
@@ -243,7 +361,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 3,
+    canonicalOrder: 10,
     status: 'ready',
+    isEnabled: true,
     roles: ['daaf', 'cb', 'admin'],
     description: 'Planification et structure budgétaire'
   },
@@ -254,7 +374,33 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/planification/structure',
     parent: 'budget',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin']
+  },
+  {
+    id: 'planification-budget',
+    name: 'Planification Budgétaire',
+    icon: Target,
+    route: '/planification/budget',
+    parent: 'budget',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin']
+  },
+  {
+    id: 'planification-physique',
+    name: 'Planification Physique',
+    icon: Activity,
+    route: '/planification/physique',
+    parent: 'budget',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
     roles: ['daaf', 'cb', 'admin']
   },
   {
@@ -263,8 +409,10 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: ClipboardList,
     route: '/planification/plan-travail',
     parent: 'budget',
-    order: 2,
+    order: 4,
+    canonicalOrder: 4,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -273,9 +421,24 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: ArrowRightLeft,
     route: '/planification/virements',
     parent: 'budget',
-    order: 3,
+    order: 5,
+    canonicalOrder: 5,
     status: 'ready',
+    isEnabled: true,
     roles: ['cb', 'daaf']
+  },
+  {
+    id: 'notifications-budgetaires',
+    name: 'Notifications Budgétaires',
+    icon: Bell,
+    route: '/planification/notifications',
+    parent: 'budget',
+    order: 6,
+    canonicalOrder: 6,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'cb', 'dg'],
+    description: 'Gestion des notifications budgétaires'
   },
   {
     id: 'import-export-budget',
@@ -283,9 +446,50 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: FileUp,
     route: '/planification/import-export',
     parent: 'budget',
-    order: 4,
+    order: 7,
+    canonicalOrder: 7,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin', 'daaf']
+  },
+  {
+    id: 'feuilles-route',
+    name: 'Feuilles de Route',
+    icon: ClipboardList,
+    route: '/planification/feuilles-route',
+    parent: 'budget',
+    order: 7.5,
+    canonicalOrder: 7.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'directeur'],
+    description: 'Import des activités par direction'
+  },
+  {
+    id: 'soumissions-feuilles-route',
+    name: 'Soumissions Feuilles',
+    icon: FileCheck,
+    route: '/planification/soumissions-feuilles-route',
+    parent: 'budget',
+    order: 7.6,
+    canonicalOrder: 7.6,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Validation des feuilles de route par direction'
+  },
+  {
+    id: 'execution-physique',
+    name: 'Exécution Physique',
+    icon: ListChecks,
+    route: '/planification/execution-physique',
+    parent: 'budget',
+    order: 7.7,
+    canonicalOrder: 7.7,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'directeur', 'operateur'],
+    description: 'Suivi de l\'avancement des activités'
   },
   {
     id: 'historique-imports',
@@ -293,8 +497,34 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: History,
     route: '/planification/historique-imports',
     parent: 'budget',
-    order: 5,
+    order: 8,
+    canonicalOrder: 8,
     status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf']
+  },
+  {
+    id: 'documentation-import',
+    name: 'Documentation Import',
+    icon: BookOpen,
+    route: '/planification/documentation-import',
+    parent: 'budget',
+    order: 9,
+    canonicalOrder: 9,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf']
+  },
+  {
+    id: 'aide-import',
+    name: 'Aide Import Budget',
+    icon: HelpCircle,
+    route: '/planification/aide-import',
+    parent: 'budget',
+    order: 10,
+    canonicalOrder: 10,
+    status: 'ready',
+    isEnabled: true,
     roles: ['admin', 'daaf']
   },
   {
@@ -303,8 +533,10 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: Database,
     route: '/admin/import-budget',
     parent: 'budget',
-    order: 6,
+    order: 11,
+    canonicalOrder: 11,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin']
   },
 
@@ -316,7 +548,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 4,
+    canonicalOrder: 20,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: 'Gestion des prestataires et contrats'
   },
@@ -327,7 +561,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/contractualisation/prestataires',
     parent: 'partenaires',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -337,7 +573,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/contractualisation/contrats',
     parent: 'partenaires',
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
 
@@ -349,7 +587,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 5,
+    canonicalOrder: 30,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: 'Modules complémentaires'
   },
@@ -360,7 +600,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/approvisionnement',
     parent: 'gestion',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -370,7 +612,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/tresorerie',
     parent: 'gestion',
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['tresorerie', 'dg']
   },
   {
@@ -380,7 +624,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/recettes',
     parent: 'gestion',
     order: 3,
+    canonicalOrder: 3,
     status: 'ready',
+    isEnabled: true,
     roles: ['daaf', 'tresorerie']
   },
   {
@@ -390,7 +636,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/contractualisation/comptabilite-matiere',
     parent: 'gestion',
     order: 4,
+    canonicalOrder: 4,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
 
@@ -402,7 +650,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 6,
+    canonicalOrder: 40,
     status: 'ready',
+    isEnabled: true,
     roles: ['daaf', 'cb', 'dg'],
     description: 'Suivi de l\'exécution'
   },
@@ -413,8 +663,48 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/execution/dashboard',
     parent: 'execution-budgetaire',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
+  },
+  {
+    id: 'dashboard-dg',
+    name: 'Dashboard DG',
+    icon: BarChart3,
+    route: '/execution/dashboard-dg',
+    parent: 'execution-budgetaire',
+    order: 1.5,
+    canonicalOrder: 1.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['dg', 'admin'],
+    description: 'Vue consolidée Direction Générale'
+  },
+  {
+    id: 'dashboard-direction',
+    name: 'Dashboard Direction',
+    icon: Building2,
+    route: '/execution/dashboard-direction',
+    parent: 'execution-budgetaire',
+    order: 1.6,
+    canonicalOrder: 1.6,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['directeur', 'all'],
+    description: 'Vue par Direction'
+  },
+  {
+    id: 'passation-marche-execution',
+    name: 'Passation Marché',
+    icon: ShoppingCart,
+    route: '/execution/passation-marche',
+    parent: 'execution-budgetaire',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['sdpm', 'daaf']
   },
 
   // ========== RAPPORTS (groupe parent) ==========
@@ -425,7 +715,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 7,
+    canonicalOrder: 50,
     status: 'ready',
+    isEnabled: true,
     roles: ['daaf', 'cb', 'dg'],
     description: 'États et analyses'
   },
@@ -436,7 +728,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/etats-execution',
     parent: 'rapports',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -446,7 +740,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/alertes-budgetaires',
     parent: 'rapports',
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['cb', 'daaf']
   },
 
@@ -458,7 +754,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: null,
     parent: null,
     order: 8,
+    canonicalOrder: 60,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin', 'dg'],
     description: 'Configuration système'
   },
@@ -471,7 +769,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/exercices',
     parent: 'parametrage',
     order: 1,
+    canonicalOrder: 1,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -482,7 +782,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/parametres-programmatiques',
     parent: 'parametrage',
     order: 2,
+    canonicalOrder: 2,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -493,7 +795,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/architecture',
     parent: 'parametrage',
     order: 3,
+    canonicalOrder: 3,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -504,7 +808,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/codification',
     parent: 'parametrage',
     order: 4,
+    canonicalOrder: 4,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -515,7 +821,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/secteurs-activite',
     parent: 'parametrage',
     order: 5,
+    canonicalOrder: 5,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -526,7 +834,22 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/dictionnaire',
     parent: 'parametrage',
     order: 6,
+    canonicalOrder: 6,
     status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    subSection: 'Référentiels'
+  },
+  {
+    id: 'documentation-modules',
+    name: 'Documentation Modules',
+    icon: FileQuestion,
+    route: '/admin/documentation',
+    parent: 'parametrage',
+    order: 7,
+    canonicalOrder: 7,
+    status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Référentiels'
   },
@@ -539,7 +862,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/utilisateurs',
     parent: 'parametrage',
     order: 10,
+    canonicalOrder: 10,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Utilisateurs'
   },
@@ -550,7 +875,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/roles',
     parent: 'parametrage',
     order: 11,
+    canonicalOrder: 11,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Utilisateurs'
   },
@@ -561,7 +888,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/autorisations',
     parent: 'parametrage',
     order: 12,
+    canonicalOrder: 12,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Utilisateurs'
   },
@@ -572,7 +901,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/delegations',
     parent: 'parametrage',
     order: 13,
+    canonicalOrder: 13,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Utilisateurs'
   },
@@ -585,7 +916,22 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/parametres',
     parent: 'parametrage',
     order: 20,
+    canonicalOrder: 20,
     status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    subSection: 'Système'
+  },
+  {
+    id: 'parametres-exercice',
+    name: 'Paramètres Exercice',
+    icon: Calendar,
+    route: '/admin/parametres-exercice',
+    parent: 'parametrage',
+    order: 21,
+    canonicalOrder: 21,
+    status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Système'
   },
@@ -595,10 +941,66 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: ClipboardList,
     route: '/admin/journal-audit',
     parent: 'parametrage',
-    order: 21,
+    order: 22,
+    canonicalOrder: 22,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin', 'dg'],
     subSection: 'Système'
+  },
+  {
+    id: 'matrice-raci',
+    name: 'Matrice RACI',
+    icon: GitBranch,
+    route: '/admin/raci',
+    parent: 'parametrage',
+    order: 23,
+    canonicalOrder: 23,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    subSection: 'Système'
+  },
+  {
+    id: 'checklist-production',
+    name: 'Checklist Production',
+    icon: CheckSquare,
+    route: '/admin/checklist-production',
+    parent: 'parametrage',
+    order: 24,
+    canonicalOrder: 24,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    subSection: 'Système'
+  },
+
+  // Sous-section: Finance
+  {
+    id: 'comptes-bancaires',
+    name: 'Comptes Bancaires',
+    icon: Landmark,
+    route: '/admin/comptes-bancaires',
+    parent: 'parametrage',
+    order: 25,
+    canonicalOrder: 25,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'tresorerie', 'cb'],
+    subSection: 'Finance'
+  },
+  {
+    id: 'origines-fonds',
+    name: 'Origines des Fonds',
+    icon: Coins,
+    route: '/admin/origines-fonds',
+    parent: 'parametrage',
+    order: 26,
+    canonicalOrder: 26,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf'],
+    subSection: 'Finance'
   },
 
   // Sous-section: Outils
@@ -609,7 +1011,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/doublons',
     parent: 'parametrage',
     order: 30,
+    canonicalOrder: 30,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Outils'
   },
@@ -620,7 +1024,22 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/admin/compteurs-references',
     parent: 'parametrage',
     order: 31,
+    canonicalOrder: 31,
     status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    subSection: 'Outils'
+  },
+  {
+    id: 'liens-lambda',
+    name: 'Liens Lambda',
+    icon: Link,
+    route: '/admin/liens-lambda',
+    parent: 'parametrage',
+    order: 32,
+    canonicalOrder: 32,
+    status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Outils'
   },
@@ -630,8 +1049,10 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     icon: TestTube,
     route: '/admin/test-non-regression',
     parent: 'parametrage',
-    order: 32,
+    order: 33,
+    canonicalOrder: 33,
     status: 'ready',
+    isEnabled: true,
     roles: ['admin'],
     subSection: 'Outils'
   },
@@ -644,7 +1065,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/notifications',
     parent: null,
     order: 100,
+    canonicalOrder: 100,
     status: 'ready',
+    isEnabled: true,
     roles: ['all'],
     description: 'Centre de notifications'
   },
@@ -655,7 +1078,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/alertes',
     parent: null,
     order: 101,
+    canonicalOrder: 101,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -665,7 +1090,9 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/taches',
     parent: null,
     order: 102,
+    canonicalOrder: 102,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
   },
   {
@@ -675,8 +1102,99 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     route: '/mon-profil',
     parent: null,
     order: 103,
+    canonicalOrder: 103,
     status: 'ready',
+    isEnabled: true,
     roles: ['all']
+  },
+
+  // ========== ROUTES DÉTAIL (non affichées dans menu) ==========
+  {
+    id: 'note-sef-detail',
+    name: 'Détail Note SEF',
+    icon: FileText,
+    route: '/notes-sef/:id',
+    parent: null,
+    order: 200,
+    canonicalOrder: 200,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all']
+  },
+  {
+    id: 'note-sef-validation',
+    name: 'Validation Notes SEF',
+    icon: FileCheck,
+    route: '/notes-sef/validation',
+    parent: null,
+    order: 201,
+    canonicalOrder: 201,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['dg', 'admin']
+  },
+  {
+    id: 'note-aef-detail',
+    name: 'Détail Note AEF',
+    icon: FileEdit,
+    route: '/notes-aef/:id',
+    parent: null,
+    order: 202,
+    canonicalOrder: 202,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all']
+  },
+  {
+    id: 'note-aef-validation',
+    name: 'Validation Notes AEF',
+    icon: FileCheck,
+    route: '/notes-aef/validation',
+    parent: null,
+    order: 203,
+    canonicalOrder: 203,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['directeur', 'dg', 'admin']
+  },
+
+  // ========== ROUTES AUTH (hors layout) ==========
+  {
+    id: 'auth-login',
+    name: 'Connexion',
+    icon: User,
+    route: '/auth',
+    parent: null,
+    order: 300,
+    canonicalOrder: 300,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all']
+  },
+  {
+    id: 'select-exercice',
+    name: 'Sélection Exercice',
+    icon: Calendar,
+    route: '/select-exercice',
+    parent: null,
+    order: 301,
+    canonicalOrder: 301,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all']
+  },
+  {
+    id: 'no-open-exercice',
+    name: 'Aucun exercice ouvert',
+    icon: AlertTriangle,
+    route: '/no-open-exercice',
+    parent: null,
+    order: 302,
+    canonicalOrder: 302,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all'],
+    description: 'Page affichée quand aucun exercice budgétaire n\'est ouvert'
   },
 ];
 
@@ -697,11 +1215,11 @@ export const getModuleByRoute = (route: string): ModuleConfig | undefined =>
   MODULES_REGISTRY.find(m => m.route === route);
 
 /**
- * Récupère les enfants d'un module parent
+ * Récupère les enfants d'un module parent (modules activés uniquement)
  */
 export const getChildModules = (parentId: string): ModuleConfig[] =>
   MODULES_REGISTRY
-    .filter(m => m.parent === parentId)
+    .filter(m => m.parent === parentId && m.isEnabled)
     .sort((a, b) => a.order - b.order);
 
 /**
@@ -709,21 +1227,21 @@ export const getChildModules = (parentId: string): ModuleConfig[] =>
  */
 export const getRootModules = (): ModuleConfig[] =>
   MODULES_REGISTRY
-    .filter(m => m.parent === null && m.order < 100)
+    .filter(m => m.parent === null && m.order < 100 && m.isEnabled)
     .sort((a, b) => a.order - b.order);
 
 /**
  * Récupère tous les modules avec une route (pour vérification)
  */
 export const getRoutedModules = (): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.route !== null);
+  MODULES_REGISTRY.filter(m => m.route !== null && m.isEnabled);
 
 /**
  * Récupère les modules par rôle
  */
 export const getModulesByRole = (role: string): ModuleConfig[] =>
   MODULES_REGISTRY.filter(m =>
-    m.roles.includes('all') || m.roles.includes(role)
+    m.isEnabled && (m.roles.includes('all') || m.roles.includes(role))
   );
 
 /**
@@ -736,7 +1254,7 @@ export const getModulesByStatus = (status: ModuleStatus): ModuleConfig[] =>
  * Récupère les modules avec badge
  */
 export const getModulesWithBadge = (): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.badge === true);
+  MODULES_REGISTRY.filter(m => m.badge === true && m.isEnabled);
 
 /**
  * Récupère les sous-sections d'un groupe
@@ -755,7 +1273,7 @@ export const getSubSections = (parentId: string): string[] => {
  */
 export const getModulesBySubSection = (parentId: string, subSection: string): ModuleConfig[] =>
   MODULES_REGISTRY
-    .filter(m => m.parent === parentId && m.subSection === subSection)
+    .filter(m => m.parent === parentId && m.subSection === subSection && m.isEnabled)
     .sort((a, b) => a.order - b.order);
 
 /**
@@ -769,3 +1287,57 @@ export const moduleExists = (id: string): boolean =>
  */
 export const routeExists = (route: string): boolean =>
   MODULES_REGISTRY.some(m => m.route === route);
+
+/**
+ * Récupère un module par son stepCode
+ */
+export const getModuleByStepCode = (stepCode: string): ModuleConfig | undefined =>
+  MODULES_REGISTRY.find(m => m.stepCode === stepCode);
+
+/**
+ * Récupère les modules de la chaîne de dépense dans l'ordre canonique
+ */
+export const getChaineDepenseModules = (): ModuleConfig[] =>
+  MODULES_REGISTRY
+    .filter(m => m.parent === 'chaine-depense' && m.isEnabled)
+    .sort((a, b) => a.canonicalOrder - b.canonicalOrder);
+
+/**
+ * Vérifie si un utilisateur peut accéder à un module
+ */
+export const canAccessModule = (
+  moduleId: string,
+  userRoles: string[],
+  userCapabilities: string[] = []
+): boolean => {
+  const module = getModuleById(moduleId);
+  if (!module || !module.isEnabled) return false;
+
+  // Vérifier les rôles
+  const hasRole = module.roles.includes('all') ||
+    module.roles.some(r => userRoles.includes(r));
+
+  // Vérifier les capacités si définies
+  const hasCapabilities = !module.requiredCapabilities ||
+    module.requiredCapabilities.every(c => userCapabilities.includes(c));
+
+  return hasRole && hasCapabilities;
+};
+
+/**
+ * Récupère tous les modules "todo" (Coming Soon)
+ */
+export const getComingSoonModules = (): ModuleConfig[] =>
+  MODULES_REGISTRY.filter(m => m.status === 'todo');
+
+/**
+ * Génère une liste de vérification des routes pour le debug
+ */
+export const getRouteVerificationList = (): { route: string; moduleId: string; status: ModuleStatus }[] =>
+  MODULES_REGISTRY
+    .filter(m => m.route !== null)
+    .map(m => ({
+      route: m.route!,
+      moduleId: m.id,
+      status: m.status
+    }));

@@ -23,6 +23,7 @@ import {
 import { AlertTriangle } from "lucide-react";
 import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
 import { SYSCOTypeahead } from "./SYSCOTypeahead";
+import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
 
 interface BudgetLineFormProps {
   open: boolean;
@@ -32,13 +33,7 @@ interface BudgetLineFormProps {
   isLoading?: boolean;
 }
 
-const SOURCE_FINANCEMENT_OPTIONS = [
-  { value: "budget_etat", label: "Budget État" },
-  { value: "ressources_propres", label: "Ressources Propres" },
-  { value: "partenaires", label: "Partenaires Techniques et Financiers" },
-  { value: "emprunts", label: "Emprunts" },
-  { value: "dons", label: "Dons et Subventions" },
-];
+// Les options de source de financement sont maintenant gérées par FundingSourceSelect
 
 const LEVEL_OPTIONS = [
   { value: "chapitre", label: "Chapitre" },
@@ -277,21 +272,11 @@ export function BudgetLineForm({
 
             <div className="space-y-2">
               <Label htmlFor="source_financement">Source de financement</Label>
-              <Select
-                value={formData.source_financement || "budget_etat"}
+              <FundingSourceSelect
+                value={formData.source_financement}
                 onValueChange={(value) => setFormData({ ...formData, source_financement: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SOURCE_FINANCEMENT_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                useLegacyValue={true}
+              />
             </div>
           </div>
 

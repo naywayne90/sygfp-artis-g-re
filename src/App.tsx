@@ -19,6 +19,7 @@ import Marches from "./pages/Marches";
 import Recherche from "./pages/Recherche";
 import EtatsExecution from "./pages/EtatsExecution";
 import SelectExercice from "./pages/SelectExercice";
+import NoOpenExercise from "./pages/NoOpenExercise";
 import LoginPage from "./pages/auth/LoginPage";
 import NotFound from "./pages/NotFound";
 import NoteSEFDetail from "./pages/NoteSEFDetail";
@@ -51,6 +52,8 @@ import ParametresExercice from "./pages/admin/ParametresExercice";
 import GestionDoublons from "./pages/admin/GestionDoublons";
 import CompteursReferences from "./pages/admin/CompteursReferences";
 import ImportBudgetAdmin from "./pages/admin/ImportBudgetAdmin";
+import CompteBancaires from "./pages/admin/CompteBancaires";
+import OriginesFonds from "./pages/admin/OriginesFonds";
 import TestNonRegression from "./pages/TestNonRegression";
 
 // Pages Planification
@@ -63,12 +66,20 @@ import ImportExport from "./pages/planification/ImportExport";
 import DocumentationImport from "./pages/planification/DocumentationImport";
 import HistoriqueImports from "./pages/planification/HistoriqueImports";
 import AideImportBudget from "./pages/planification/AideImportBudget";
+import NotificationsBudgetaires from "./pages/planification/NotificationsBudgetaires";
+import FeuilleRouteImportPage from "./pages/planification/FeuilleRouteImportPage";
+import RoadmapSubmissionsPage from "./pages/planification/RoadmapSubmissionsPage";
+import TaskExecutionPage from "./pages/execution/TaskExecutionPage";
+import DashboardDGPage from "./pages/execution/DashboardDGPage";
+import DashboardDirectionPage from "./pages/execution/DashboardDirectionPage";
 
 // Pages Exécution
 import ExpressionBesoin from "./pages/execution/ExpressionBesoin";
 import ImputationPage from "./pages/execution/ImputationPage";
 import DashboardExecution from "./pages/execution/DashboardExecution";
 import PassationMarche from "./pages/execution/PassationMarche";
+import ScanningEngagement from "./pages/ScanningEngagement";
+import ScanningLiquidation from "./pages/ScanningLiquidation";
 
 // Pages Approvisionnement
 import Approvisionnement from "./pages/approvisionnement/Approvisionnement";
@@ -113,6 +124,7 @@ const App = () => (
             {/* Routes indépendantes (sans layout) */}
             <Route path="/auth" element={<LoginPage />} />
             <Route path="/select-exercice" element={<SelectExercice />} />
+            <Route path="/no-open-exercice" element={<NoOpenExercise />} />
             
             {/* Routes avec layout */}
             <Route element={<LayoutWrapper />}>
@@ -146,6 +158,8 @@ const App = () => (
               <Route path="/admin/doublons" element={<GestionDoublons />} />
               <Route path="/admin/compteurs-references" element={<CompteursReferences />} />
               <Route path="/admin/import-budget" element={<ImportBudgetAdmin />} />
+              <Route path="/admin/comptes-bancaires" element={<CompteBancaires />} />
+              <Route path="/admin/origines-fonds" element={<OriginesFonds />} />
               <Route path="/admin/test-non-regression" element={<TestNonRegression />} />
               
               {/* Planification */}
@@ -158,9 +172,15 @@ const App = () => (
               <Route path="/planification/documentation-import" element={<DocumentationImport />} />
               <Route path="/planification/historique-imports" element={<HistoriqueImports />} />
               <Route path="/planification/aide-import" element={<AideImportBudget />} />
-              
+              <Route path="/planification/notifications" element={<NotificationsBudgetaires />} />
+              <Route path="/planification/feuilles-route" element={<FeuilleRouteImportPage />} />
+              <Route path="/planification/soumissions-feuilles-route" element={<RoadmapSubmissionsPage />} />
+              <Route path="/planification/execution-physique" element={<TaskExecutionPage />} />
+
               {/* Exécution Budgétaire */}
               <Route path="/execution/dashboard" element={<DashboardExecution />} />
+              <Route path="/execution/dashboard-dg" element={<DashboardDGPage />} />
+              <Route path="/execution/dashboard-direction" element={<DashboardDirectionPage />} />
               
               <Route path="/notes-sef" element={<NotesSEF />} />
               <Route path="/notes-sef/validation" element={<ValidationNotesSEF />} />
@@ -173,7 +193,9 @@ const App = () => (
               <Route path="/execution/passation-marche" element={<PassationMarche />} />
               <Route path="/marches" element={<Marches />} />
               <Route path="/engagements" element={<Engagements />} />
+              <Route path="/execution/scanning-engagement" element={<ScanningEngagement />} />
               <Route path="/liquidations" element={<Liquidations />} />
+              <Route path="/execution/scanning-liquidation" element={<ScanningLiquidation />} />
               <Route path="/ordonnancements" element={<Ordonnancements />} />
               <Route path="/reglements" element={<Reglements />} />
               

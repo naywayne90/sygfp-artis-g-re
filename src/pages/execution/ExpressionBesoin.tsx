@@ -246,6 +246,26 @@ export default function ExpressionBesoin() {
         </Card>
       </div>
 
+      {/* Alerte si aucune imputation validée */}
+      {imputationsValidees.length === 0 && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-amber-800 dark:text-amber-300">
+                  Imputation budgétaire requise
+                </h4>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                  Pour créer une Expression de Besoin, vous devez d'abord disposer d'au moins une imputation validée.
+                  Rendez-vous sur la page <a href="/execution/imputation" className="underline font-medium">Imputation</a> pour imputer une Note AEF validée.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Liste des expressions */}
       <Card>
         <CardHeader>

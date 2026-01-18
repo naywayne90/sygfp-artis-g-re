@@ -5,9 +5,11 @@ import { useCallback } from "react";
 /**
  * Hook pour protéger les actions d'écriture sur un exercice clôturé
  * Retourne une fonction wrapper qui empêche l'exécution si l'exercice est en lecture seule
+ *
+ * Note: Les admins peuvent écrire même sur un exercice clôturé (bypass)
  */
 export function useExerciceWriteGuard() {
-  const { exercice, exerciceInfo, isReadOnly, canWrite } = useExercice();
+  const { exercice, exerciceInfo, isReadOnly, canWrite, isUserAdmin } = useExercice();
 
   /**
    * Affiche un toast d'erreur si l'exercice est en lecture seule
@@ -61,6 +63,13 @@ export function useExerciceWriteGuard() {
       : "Exercice en lecture seule";
   }, [isReadOnly, exerciceInfo]);
 
+  /**
+   * Indique si l'exercice est techniquement clôturé mais l'admin a le bypass
+   */
+  const isExerciceClosed = exerciceInfo
+    ? !["ouvert", "en_cours"].includes(exerciceInfo.statut)
+    : false;
+
   return {
     isReadOnly,
     canWrite,
@@ -70,5 +79,7 @@ export function useExerciceWriteGuard() {
     checkCanWrite,
     showReadOnlyError,
     getDisabledMessage,
+    isUserAdmin,
+    isExerciceClosed, // L'exercice est clôturé (indépendamment du bypass admin)
   };
 }

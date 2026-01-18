@@ -285,3 +285,426 @@ export function useDashboardStats() {
     enabled: !!exercice,
   });
 }
+
+// ============================================
+// NOUVEAUX HOOKS POUR DASHBOARD AVANCÉ
+// ============================================
+
+export interface RoadmapStats {
+  total_activites: number;
+  activites_realisees: number;
+  activites_en_cours: number;
+  activites_bloquees: number;
+  activites_non_demarrees: number;
+  taux_realisation: number;
+  taux_avancement_moyen: number;
+}
+
+export interface BudgetChainStats {
+  montant_prevu: number;
+  montant_engage: number;
+  montant_liquide: number;
+  montant_ordonnance: number;
+  montant_regle: number;
+  taux_engagement: number;
+  taux_liquidation: number;
+  taux_ordonnancement: number;
+  taux_reglement: number;
+  nb_engagements: number;
+  nb_liquidations: number;
+  nb_ordonnancements: number;
+  nb_reglements: number;
+}
+
+export interface AlertStats {
+  dossiers_bloques: number;
+  taches_en_retard: number;
+  engagements_en_attente: number;
+  liquidations_en_attente: number;
+  ordonnancements_en_attente: number;
+}
+
+export interface DirectionStats {
+  direction_id: string;
+  direction_code: string;
+  direction_label: string;
+  roadmap: RoadmapStats;
+  budget: BudgetChainStats;
+}
+
+export interface OSStats {
+  os_id: string;
+  os_code: string;
+  os_libelle: string;
+  total_activites: number;
+  activites_realisees: number;
+  taux_realisation: number;
+  montant_prevu: number;
+  montant_engage: number;
+}
+
+export interface MissionStats {
+  mission_id: string;
+  mission_code: string;
+  mission_libelle: string;
+  direction_id: string;
+  total_activites: number;
+  activites_realisees: number;
+  taux_realisation: number;
+}
+
+/**
+ * Hook pour les stats globales (vue DG)
+ */
+export function useDashboardGlobalStats() {
+  const { exerciceId } = useExercice();
+
+  // Stats feuille de route globales
+  const roadmapQuery = useQuery({
+    queryKey: ["dashboard-roadmap-global", exerciceId],
+    queryFn: async (): Promise<RoadmapStats> => {
+      const { data: executions, error } = await supabase
+        .from("task_executions")
+        .select("status, taux_avancement")
+        .eq("exercice_id", exerciceId!);
+
+      if (error) throw error;
+
+      const total = executions?.length || 0;
+      const realisees = executions?.filter(e => e.status === "realise").length || 0;
+      const enCours = executions?.filter(e => e.status === "en_cours").length || 0;
+      const bloquees = executions?.filter(e => e.status === "bloque").length || 0;
+      const nonDemarrees = executions?.filter(e => e.status === "non_demarre").length || 0;
+
+      const tauxMoyen = total > 0
+        ? Math.round(executions!.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
+        : 0;
+
+      return {
+        total_activites: total,
+        activites_realisees: realisees,
+        activites_en_cours: enCours,
+        activites_bloquees: bloquees,
+        activites_non_demarrees: nonDemarrees,
+        taux_realisation: total > 0 ? Math.round((realisees / total) * 100) : 0,
+        taux_avancement_moyen: tauxMoyen,
+      };
+    },
+    enabled: !!exerciceId,
+  });
+
+  // Alertes
+  const alertsQuery = useQuery({
+    queryKey: ["dashboard-alerts-global", exerciceId],
+    queryFn: async (): Promise<AlertStats> => {
+      const { count: bloquees } = await supabase
+        .from("task_executions")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("status", "bloque");
+
+      const today = new Date().toISOString().split("T")[0];
+      const { count: enRetard } = await supabase
+        .from("task_executions")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .lt("date_fin_prevue", today)
+        .neq("status", "realise")
+        .neq("status", "annule");
+
+      const { count: engAttente } = await supabase
+        .from("budget_engagements")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("statut", "soumis");
+
+      const { count: liqAttente } = await supabase
+        .from("budget_liquidations")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("statut", "soumise");
+
+      const { count: ordAttente } = await supabase
+        .from("ordonnancements")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("statut", "en_attente");
+
+      return {
+        dossiers_bloques: bloquees || 0,
+        taches_en_retard: enRetard || 0,
+        engagements_en_attente: engAttente || 0,
+        liquidations_en_attente: liqAttente || 0,
+        ordonnancements_en_attente: ordAttente || 0,
+      };
+    },
+    enabled: !!exerciceId,
+  });
+
+  // Stats par direction
+  const directionsQuery = useQuery({
+    queryKey: ["dashboard-directions-stats", exerciceId],
+    queryFn: async (): Promise<DirectionStats[]> => {
+      const { data: directions } = await supabase
+        .from("directions")
+        .select("id, code, label")
+        .order("code");
+
+      if (!directions) return [];
+
+      const stats: DirectionStats[] = [];
+
+      for (const dir of directions) {
+        const { data: executions } = await supabase
+          .from("v_task_executions")
+          .select("status, taux_avancement, activite_montant")
+          .eq("exercice_id", exerciceId!)
+          .eq("direction_id", dir.id);
+
+        const total = executions?.length || 0;
+        if (total === 0) continue;
+
+        const realisees = executions?.filter(e => e.status === "realise").length || 0;
+        const enCours = executions?.filter(e => e.status === "en_cours").length || 0;
+        const bloquees = executions?.filter(e => e.status === "bloque").length || 0;
+        const montantPrevu = executions?.reduce((sum, e) => sum + (e.activite_montant || 0), 0) || 0;
+
+        stats.push({
+          direction_id: dir.id,
+          direction_code: dir.code,
+          direction_label: dir.label,
+          roadmap: {
+            total_activites: total,
+            activites_realisees: realisees,
+            activites_en_cours: enCours,
+            activites_bloquees: bloquees,
+            activites_non_demarrees: total - realisees - enCours - bloquees,
+            taux_realisation: Math.round((realisees / total) * 100),
+            taux_avancement_moyen: Math.round(executions!.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total),
+          },
+          budget: {
+            montant_prevu: montantPrevu,
+            montant_engage: 0,
+            montant_liquide: 0,
+            montant_ordonnance: 0,
+            montant_regle: 0,
+            taux_engagement: 0,
+            taux_liquidation: 0,
+            taux_ordonnancement: 0,
+            taux_reglement: 0,
+            nb_engagements: 0,
+            nb_liquidations: 0,
+            nb_ordonnancements: 0,
+            nb_reglements: 0,
+          },
+        });
+      }
+
+      return stats.sort((a, b) => b.roadmap.total_activites - a.roadmap.total_activites);
+    },
+    enabled: !!exerciceId,
+  });
+
+  // Stats par OS
+  const osQuery = useQuery({
+    queryKey: ["dashboard-os-stats", exerciceId],
+    queryFn: async (): Promise<OSStats[]> => {
+      const { data: osData } = await supabase
+        .from("objectifs_strategiques")
+        .select("id, code, libelle")
+        .order("code");
+
+      if (!osData) return [];
+
+      const stats: OSStats[] = [];
+
+      for (const os of osData) {
+        const { data: executions } = await supabase
+          .from("v_task_executions")
+          .select("status, activite_montant")
+          .eq("exercice_id", exerciceId!)
+          .eq("os_id", os.id);
+
+        const total = executions?.length || 0;
+        if (total === 0) continue;
+
+        const realisees = executions?.filter(e => e.status === "realise").length || 0;
+        const montantPrevu = executions?.reduce((sum, e) => sum + (e.activite_montant || 0), 0) || 0;
+
+        stats.push({
+          os_id: os.id,
+          os_code: os.code,
+          os_libelle: os.libelle,
+          total_activites: total,
+          activites_realisees: realisees,
+          taux_realisation: Math.round((realisees / total) * 100),
+          montant_prevu: montantPrevu,
+          montant_engage: 0,
+        });
+      }
+
+      return stats;
+    },
+    enabled: !!exerciceId,
+  });
+
+  return {
+    roadmap: roadmapQuery.data,
+    alerts: alertsQuery.data,
+    directions: directionsQuery.data || [],
+    objectifsStrategiques: osQuery.data || [],
+    isLoading: roadmapQuery.isLoading || alertsQuery.isLoading,
+    isError: roadmapQuery.isError,
+    refetch: () => {
+      roadmapQuery.refetch();
+      alertsQuery.refetch();
+      directionsQuery.refetch();
+      osQuery.refetch();
+    },
+  };
+}
+
+/**
+ * Hook pour les stats d'une direction (vue Directeur)
+ */
+export function useDashboardDirectionStats(directionId: string | null) {
+  const { exerciceId } = useExercice();
+
+  const roadmapQuery = useQuery({
+    queryKey: ["dashboard-roadmap-direction", exerciceId, directionId],
+    queryFn: async (): Promise<RoadmapStats> => {
+      const { data: executions, error } = await supabase
+        .from("v_task_executions")
+        .select("status, taux_avancement")
+        .eq("exercice_id", exerciceId!)
+        .eq("direction_id", directionId!);
+
+      if (error) throw error;
+
+      const total = executions?.length || 0;
+      const realisees = executions?.filter(e => e.status === "realise").length || 0;
+      const enCours = executions?.filter(e => e.status === "en_cours").length || 0;
+      const bloquees = executions?.filter(e => e.status === "bloque").length || 0;
+      const nonDemarrees = executions?.filter(e => e.status === "non_demarre").length || 0;
+
+      return {
+        total_activites: total,
+        activites_realisees: realisees,
+        activites_en_cours: enCours,
+        activites_bloquees: bloquees,
+        activites_non_demarrees: nonDemarrees,
+        taux_realisation: total > 0 ? Math.round((realisees / total) * 100) : 0,
+        taux_avancement_moyen: total > 0
+          ? Math.round(executions!.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
+          : 0,
+      };
+    },
+    enabled: !!exerciceId && !!directionId,
+  });
+
+  const missionsQuery = useQuery({
+    queryKey: ["dashboard-missions-direction", exerciceId, directionId],
+    queryFn: async (): Promise<MissionStats[]> => {
+      const { data: missions } = await supabase
+        .from("missions")
+        .select("id, code, libelle")
+        .eq("direction_id", directionId!)
+        .order("code");
+
+      if (!missions) return [];
+
+      const stats: MissionStats[] = [];
+
+      for (const mission of missions) {
+        const { data: executions } = await supabase
+          .from("v_task_executions")
+          .select("status")
+          .eq("exercice_id", exerciceId!)
+          .eq("mission_id", mission.id);
+
+        const total = executions?.length || 0;
+        if (total === 0) continue;
+
+        const realisees = executions?.filter(e => e.status === "realise").length || 0;
+
+        stats.push({
+          mission_id: mission.id,
+          mission_code: mission.code,
+          mission_libelle: mission.libelle,
+          direction_id: directionId!,
+          total_activites: total,
+          activites_realisees: realisees,
+          taux_realisation: Math.round((realisees / total) * 100),
+        });
+      }
+
+      return stats;
+    },
+    enabled: !!exerciceId && !!directionId,
+  });
+
+  const alertsQuery = useQuery({
+    queryKey: ["dashboard-alerts-direction", exerciceId, directionId],
+    queryFn: async (): Promise<AlertStats> => {
+      const { count: bloquees } = await supabase
+        .from("v_task_executions")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("direction_id", directionId!)
+        .eq("status", "bloque");
+
+      const today = new Date().toISOString().split("T")[0];
+      const { count: enRetard } = await supabase
+        .from("v_task_executions")
+        .select("*", { count: "exact", head: true })
+        .eq("exercice_id", exerciceId!)
+        .eq("direction_id", directionId!)
+        .lt("date_fin_prevue", today)
+        .neq("status", "realise")
+        .neq("status", "annule");
+
+      return {
+        dossiers_bloques: bloquees || 0,
+        taches_en_retard: enRetard || 0,
+        engagements_en_attente: 0,
+        liquidations_en_attente: 0,
+        ordonnancements_en_attente: 0,
+      };
+    },
+    enabled: !!exerciceId && !!directionId,
+  });
+
+  return {
+    roadmap: roadmapQuery.data,
+    missions: missionsQuery.data || [],
+    alerts: alertsQuery.data,
+    isLoading: roadmapQuery.isLoading || missionsQuery.isLoading,
+    isError: roadmapQuery.isError,
+    refetch: () => {
+      roadmapQuery.refetch();
+      missionsQuery.refetch();
+      alertsQuery.refetch();
+    },
+  };
+}
+
+/**
+ * Hook pour récupérer la direction de l'utilisateur connecté
+ */
+export function useUserDirection() {
+  return useQuery({
+    queryKey: ["user-direction"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("direction_id, profil_fonctionnel, directions(id, code, label)")
+        .eq("id", user.id)
+        .single();
+
+      return profile;
+    },
+  });
+}

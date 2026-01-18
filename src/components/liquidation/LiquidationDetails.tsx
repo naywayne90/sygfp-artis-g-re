@@ -7,19 +7,20 @@ import { LiquidationChecklist } from "./LiquidationChecklist";
 import { ServiceFaitForm } from "./ServiceFaitForm";
 import { ControleSdctForm } from "./ControleSdctForm";
 import { ValidationDgForm } from "./ValidationDgForm";
+import { LiquidationTimeline } from "./LiquidationTimeline";
 import { DossierGED } from "@/components/ged";
 import { DossierTimeline } from "@/components/dossier/DossierTimeline";
 import { DossierAuditLog } from "@/components/dossier/DossierAuditLog";
 import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { 
-  Building, 
-  Calendar, 
-  FileText, 
-  Receipt, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Building,
+  Calendar,
+  FileText,
+  Receipt,
+  CheckCircle,
+  XCircle,
   Clock,
   AlertCircle,
   Download,
@@ -29,6 +30,7 @@ import {
   Shield,
   History,
   Crown,
+  GitBranch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -441,20 +443,28 @@ export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetail
       {/* Timeline & Audit */}
       <Separator className="my-6" />
       
-      <Tabs defaultValue="timeline" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="workflow" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="workflow" className="gap-1">
+            <GitBranch className="h-4 w-4" />
+            Workflow
+          </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1">
             <History className="h-4 w-4" />
-            Timeline
+            Historique
           </TabsTrigger>
           <TabsTrigger value="audit" className="gap-1">
             <Shield className="h-4 w-4" />
             Audit
           </TabsTrigger>
         </TabsList>
-        
+
+        <TabsContent value="workflow" className="mt-4">
+          <LiquidationTimeline liquidation={liquidation} />
+        </TabsContent>
+
         <TabsContent value="timeline" className="mt-4">
-          <DossierTimeline 
+          <DossierTimeline
             dossierId={(liquidation as any).dossier_id || liquidation.id}
             entityType="liquidation"
             entityId={liquidation.id}
@@ -462,7 +472,7 @@ export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetail
             compact={true}
           />
         </TabsContent>
-        
+
         <TabsContent value="audit" className="mt-4">
           <DossierAuditLog
             entityType="liquidation"

@@ -247,10 +247,14 @@ export function NoteSEFList({
                   onClick={() => handleNavigateToDetail(note)}
                 >
                   <TableCell className="font-medium">
-                    <ARTIReferenceInline 
-                      reference={note.reference_pivot || note.numero} 
-                      className="text-primary"
-                    />
+                    {note.dossier_ref ? (
+                      <span className="font-mono text-primary">{note.dossier_ref}</span>
+                    ) : (
+                      <ARTIReferenceInline
+                        reference={note.reference_pivot || note.numero}
+                        className="text-primary"
+                      />
+                    )}
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[250px] truncate">
                     {note.objet}

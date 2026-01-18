@@ -15,18 +15,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  MoreHorizontal, 
-  Edit, 
-  Send, 
-  Check, 
-  X, 
-  Trash2, 
-  History, 
-  Copy, 
-  ChevronRight, 
+import {
+  MoreHorizontal,
+  Edit,
+  Send,
+  Check,
+  X,
+  Trash2,
+  History,
+  Copy,
+  ChevronRight,
   ChevronDown,
-  FolderTree
+  FolderTree,
+  FileEdit,
+  RotateCcw
 } from "lucide-react";
 import { BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +43,8 @@ interface BudgetTreeViewProps {
   onReject: (id: string, reason: string) => void;
   onDelete: (id: string) => void;
   onViewHistory: (line: BudgetLineWithRelations) => void;
+  onEditWithVersioning?: (line: BudgetLineWithRelations) => void;
+  onViewVersionHistory?: (line: BudgetLineWithRelations) => void;
 }
 
 const formatCurrency = (amount: number) => {
@@ -119,6 +123,8 @@ export function BudgetTreeView({
   onReject,
   onDelete,
   onViewHistory,
+  onEditWithVersioning,
+  onViewVersionHistory,
 }: BudgetTreeViewProps) {
   const { exercice } = useExercice();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -332,16 +338,28 @@ export function BudgetTreeView({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => onEdit(line)}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Modifier
+                            Modifier (formulaire)
                           </DropdownMenuItem>
+                          {onEditWithVersioning && (
+                            <DropdownMenuItem onClick={() => onEditWithVersioning(line)}>
+                              <FileEdit className="mr-2 h-4 w-4 text-blue-600" />
+                              Modifier (avec versioning)
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => onDuplicate(line)}>
                             <Copy className="mr-2 h-4 w-4" />
                             Dupliquer
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => onViewHistory(line)}>
                             <History className="mr-2 h-4 w-4" />
-                            Historique
+                            Historique champs
                           </DropdownMenuItem>
+                          {onViewVersionHistory && (
+                            <DropdownMenuItem onClick={() => onViewVersionHistory(line)}>
+                              <RotateCcw className="mr-2 h-4 w-4 text-purple-600" />
+                              Historique versions
+                            </DropdownMenuItem>
+                          )}
                           {line.statut === "brouillon" && (
                             <DropdownMenuItem onClick={() => onSubmit(line.id)}>
                               <Send className="mr-2 h-4 w-4" />

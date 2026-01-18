@@ -34,15 +34,56 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const ACTION_COLORS: Record<string, string> = {
+  // CRUD
   create: "bg-green-100 text-green-800",
   update: "bg-blue-100 text-blue-800",
   delete: "bg-red-100 text-red-800",
+  // Workflow
   validate: "bg-primary/20 text-primary",
   reject: "bg-orange-100 text-orange-800",
   submit: "bg-indigo-100 text-indigo-800",
+  defer: "bg-yellow-100 text-yellow-800",
+  archive: "bg-gray-200 text-gray-800",
+  cancel: "bg-red-200 text-red-900",
+  sign: "bg-emerald-100 text-emerald-800",
+  // Budget
+  impute: "bg-cyan-100 text-cyan-800",
+  transfer: "bg-teal-100 text-teal-800",
+  budget_modified: "bg-amber-100 text-amber-800",
+  // Import/Export
+  import: "bg-violet-100 text-violet-800",
+  export: "bg-fuchsia-100 text-fuchsia-800",
+  upload: "bg-sky-100 text-sky-800",
+  download: "bg-slate-100 text-slate-800",
+  // Tâches
+  task_start: "bg-lime-100 text-lime-800",
+  task_started: "bg-lime-100 text-lime-800",
+  task_complete: "bg-green-200 text-green-900",
+  task_completed: "bg-green-200 text-green-900",
+  task_block: "bg-red-100 text-red-700",
+  task_blocked: "bg-red-100 text-red-700",
+  task_unblock: "bg-emerald-100 text-emerald-700",
+  progress_update: "bg-blue-50 text-blue-700",
+  // Roadmap
+  roadmap_submitted: "bg-indigo-100 text-indigo-800",
+  roadmap_validated: "bg-green-100 text-green-800",
+  roadmap_rejected: "bg-red-100 text-red-800",
+  roadmap_revision_requested: "bg-amber-100 text-amber-800",
+  roadmap_submission_created: "bg-purple-100 text-purple-800",
+  // Rôles
   DIFFERE: "bg-yellow-100 text-yellow-800",
+  RESOUMIS_APRES_DIFFERE: "bg-blue-100 text-blue-800",
   ROLE_ADDED: "bg-purple-100 text-purple-800",
   ROLE_REMOVED: "bg-pink-100 text-pink-800",
+  ROLE_CHANGED: "bg-violet-100 text-violet-800",
+  update_locked_field: "bg-orange-200 text-orange-900",
+  // Auth
+  login: "bg-green-50 text-green-700",
+  logout: "bg-gray-100 text-gray-700",
+  // Execution
+  execute: "bg-indigo-200 text-indigo-900",
+  IMPORT_COMPLETE: "bg-green-100 text-green-800",
+  IMPORT_ROLLBACK: "bg-red-100 text-red-800",
 };
 
 export function AuditLogList() {

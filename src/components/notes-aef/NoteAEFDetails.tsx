@@ -20,7 +20,9 @@ import {
   Zap,
   History,
   ExternalLink,
+  Package,
 } from "lucide-react";
+import { LignesEstimativesReadonly } from "./LignesEstimativesEditor";
 
 interface NoteAEFDetailsProps {
   open: boolean;
@@ -247,6 +249,16 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
                 </span>
               </div>
             )}
+          </div>
+
+          {/* Lignes estimatives */}
+          <Separator />
+          <div className="space-y-2">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Détail des lignes estimatives
+            </h4>
+            <LignesEstimativesReadonly noteAefId={note.id} />
           </div>
 
           {/* Imputation */}

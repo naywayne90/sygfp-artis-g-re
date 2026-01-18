@@ -29,14 +29,22 @@ import {
   Edit,
   Download,
   Loader2,
+  FileSpreadsheet,
+  Printer,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
-  const { exportNotesSEF, isExporting, exportProgress } = useNotesSEFExport();
+  const { exportNotesSEF, exportNotesSEFPDF, isExporting, exportProgress } = useNotesSEFExport();
   
   // Nouveau hook pour la liste paginée avec filtres avancés
   const {
@@ -99,6 +107,13 @@ export default function NotesSEF() {
 
   const handleExportExcel = async () => {
     await exportNotesSEF(
+      { statut: statutFilterForExport, search: searchQuery || undefined },
+      activeTab
+    );
+  };
+
+  const handleExportPDF = async () => {
+    await exportNotesSEFPDF(
       { statut: statutFilterForExport, search: searchQuery || undefined },
       activeTab
     );
@@ -185,28 +200,32 @@ export default function NotesSEF() {
               Espace validation ({aValiderCount})
             </Button>
           )}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  onClick={handleExportExcel}
-                  disabled={isExporting}
-                  className="gap-2"
-                >
-                  {isExporting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
-                  )}
-                  {isExporting ? (exportProgress || "Export...") : "Exporter Excel"}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Exporter les notes de l'onglet actuel en Excel</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={isExporting}
+                className="gap-2"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {isExporting ? (exportProgress || "Export...") : "Exporter"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportExcel} disabled={isExporting}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Exporter en Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
+                <Printer className="h-4 w-4 mr-2" />
+                Exporter en PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

@@ -12,7 +12,13 @@ export { ImputationSummaryCard } from "./ImputationSummaryCard";
 export { ImputationRejectDialog } from "./ImputationRejectDialog";
 export { ImputationDeferDialog } from "./ImputationDeferDialog";
 
-export { 
-  DossierImputationSummary, 
-  DossierImputationBadge 
+export {
+  DossierImputationSummary,
+  DossierImputationBadge
 } from "./DossierImputationSummary";
+
+export {
+  ImputationCodeDisplay,
+  ImputationCodeInline
+} from "./ImputationCodeDisplay";
+export type { ImputationSegment } from "./ImputationCodeDisplay";

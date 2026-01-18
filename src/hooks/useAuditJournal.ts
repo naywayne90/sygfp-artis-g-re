@@ -25,33 +25,100 @@ export interface AuditFilters {
 }
 
 export const ENTITY_TYPES = [
-  { value: "note", label: "Notes" },
+  // Chaîne de dépense
+  { value: "note_sef", label: "Notes SEF" },
+  { value: "note_aef", label: "Notes AEF" },
+  { value: "note", label: "Notes (legacy)" },
+  { value: "imputation", label: "Imputations" },
   { value: "engagement", label: "Engagements" },
   { value: "liquidation", label: "Liquidations" },
   { value: "ordonnancement", label: "Ordonnancements" },
   { value: "reglement", label: "Règlements" },
+  // Budget
+  { value: "budget", label: "Budget" },
   { value: "budget_line", label: "Lignes budgétaires" },
-  { value: "user_role", label: "Rôles utilisateurs" },
-  { value: "dossier", label: "Dossiers" },
+  { value: "budget_import", label: "Import budget" },
+  { value: "budget_transfer", label: "Virements budgétaires" },
+  // Feuille de route
+  { value: "roadmap", label: "Feuille de route" },
+  { value: "roadmap_submission", label: "Soumission feuille de route" },
+  { value: "task_execution", label: "Exécution tâche" },
+  // Scanning / Documents
+  { value: "document_scan", label: "Document scanné" },
+  { value: "attachment", label: "Pièce jointe" },
+  // Marchés / Contrats
   { value: "marche", label: "Marchés" },
   { value: "contrat", label: "Contrats" },
+  { value: "prestataire", label: "Prestataires" },
+  // Dossiers
+  { value: "dossier", label: "Dossiers" },
+  // Utilisateurs
+  { value: "user", label: "Utilisateurs" },
+  { value: "user_role", label: "Rôles utilisateurs" },
+  // Notifications
+  { value: "notification", label: "Notifications" },
+  { value: "alert", label: "Alertes" },
+  // Système
+  { value: "system", label: "Système" },
+  { value: "exercice", label: "Exercices" },
 ];
 
 export const ACTION_TYPES = [
+  // CRUD basique
   { value: "create", label: "Création" },
   { value: "update", label: "Modification" },
   { value: "delete", label: "Suppression" },
+  // Workflow
   { value: "validate", label: "Validation" },
   { value: "reject", label: "Rejet" },
   { value: "submit", label: "Soumission" },
   { value: "defer", label: "Report" },
   { value: "archive", label: "Archivage" },
+  { value: "cancel", label: "Annulation" },
+  { value: "sign", label: "Signature" },
+  // Budget
+  { value: "impute", label: "Imputation" },
+  { value: "transfer", label: "Virement" },
+  { value: "budget_modified", label: "Modification budget" },
+  // Import / Export
+  { value: "import", label: "Import" },
+  { value: "export", label: "Export" },
+  { value: "upload", label: "Upload fichier" },
+  { value: "download", label: "Téléchargement" },
+  // Tâches
+  { value: "task_start", label: "Démarrage tâche" },
+  { value: "task_complete", label: "Achèvement tâche" },
+  { value: "task_block", label: "Blocage tâche" },
+  { value: "task_unblock", label: "Déblocage tâche" },
+  { value: "progress_update", label: "Mise à jour progression" },
+  // Rôles / Utilisateurs
   { value: "update_locked_field", label: "Modification champ verrouillé" },
   { value: "DIFFERE", label: "Différé" },
   { value: "RESOUMIS_APRES_DIFFERE", label: "Resoumis après différé" },
   { value: "ROLE_ADDED", label: "Rôle ajouté" },
   { value: "ROLE_REMOVED", label: "Rôle retiré" },
   { value: "ROLE_CHANGED", label: "Rôle modifié" },
+  // Auth
+  { value: "login", label: "Connexion" },
+  { value: "logout", label: "Déconnexion" },
+  // Exécution
+  { value: "execute", label: "Exécution" },
+  // Roadmap spécifiques
+  { value: "roadmap_submitted", label: "Feuille de route soumise" },
+  { value: "roadmap_validated", label: "Feuille de route validée" },
+  { value: "roadmap_rejected", label: "Feuille de route rejetée" },
+  { value: "roadmap_revision_requested", label: "Révision demandée" },
+  { value: "roadmap_submission_created", label: "Soumission créée" },
+  // Tâches spécifiques
+  { value: "task_started", label: "Tâche démarrée" },
+  { value: "task_completed", label: "Tâche terminée" },
+  { value: "task_blocked", label: "Tâche bloquée" },
+  // Import budget
+  { value: "IMPORT_COMPLETE", label: "Import terminé" },
+  { value: "IMPORT_ROLLBACK", label: "Import annulé" },
+  // Documents
+  { value: "SUBMIT", label: "Document soumis" },
+  { value: "EXPORT", label: "Export document" },
 ];
 
 export function useAuditJournal(filters: AuditFilters = {}) {

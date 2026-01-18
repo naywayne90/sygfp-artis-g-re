@@ -12,8 +12,11 @@ import { TopOSWidget } from "@/components/budget/TopOSWidget";
 import { BudgetLineForm } from "@/components/budget/BudgetLineForm";
 import { BudgetFilters } from "@/components/budget/BudgetFilters";
 import { BudgetImportAdvanced } from "@/components/budget/BudgetImportAdvanced";
+import { BudgetImportHistory } from "@/components/budget/BudgetImportHistory";
 import { ImportExcelWizard } from "@/components/budget/ImportExcelWizard";
 import { BudgetLineHistory } from "@/components/budget/BudgetLineHistory";
+import { BudgetLineEditDialog } from "@/components/budget/BudgetLineEditDialog";
+import { BudgetLineVersionHistoryDialog } from "@/components/budget/BudgetLineVersionHistoryDialog";
 import { BudgetValidation } from "@/components/budget/BudgetValidation";
 import { BudgetVersionHistory } from "@/components/budget/BudgetVersionHistory";
 import { CreditTransferForm } from "@/components/budget/CreditTransferForm";
@@ -52,6 +55,7 @@ export default function PlanificationBudgetaire() {
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showExcelImport, setShowExcelImport] = useState(false);
+  const [showImportHistory, setShowImportHistory] = useState(false);
   const [showTransferForm, setShowTransferForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
@@ -59,6 +63,10 @@ export default function PlanificationBudgetaire() {
   const [editingLine, setEditingLine] = useState<BudgetLineWithRelations | null>(null);
   const [selectedLineForHistory, setSelectedLineForHistory] = useState<BudgetLineWithRelations | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "tree">("table");
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showVersionHistoryDialog, setShowVersionHistoryDialog] = useState(false);
+  const [selectedLineForEdit, setSelectedLineForEdit] = useState<BudgetLineWithRelations | null>(null);
+  const [selectedLineForVersions, setSelectedLineForVersions] = useState<BudgetLineWithRelations | null>(null);
   
 
   const {
@@ -104,6 +112,16 @@ export default function PlanificationBudgetaire() {
   const handleViewHistory = (line: BudgetLineWithRelations) => {
     setSelectedLineForHistory(line);
     setShowHistory(true);
+  };
+
+  const handleEditWithVersioning = (line: BudgetLineWithRelations) => {
+    setSelectedLineForEdit(line);
+    setShowEditDialog(true);
+  };
+
+  const handleViewVersionHistory = (line: BudgetLineWithRelations) => {
+    setSelectedLineForVersions(line);
+    setShowVersionHistoryDialog(true);
   };
 
   const handleDuplicate = (line: BudgetLineWithRelations) => {
@@ -376,6 +394,10 @@ export default function PlanificationBudgetaire() {
                 <Upload className="mr-2 h-4 w-4" />
                 Importer CSV
               </Button>
+              <Button variant="outline" onClick={() => setShowImportHistory(true)}>
+                <History className="mr-2 h-4 w-4" />
+                Historique imports
+              </Button>
               <Button variant="outline" onClick={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
                 Exporter CSV
@@ -429,6 +451,8 @@ export default function PlanificationBudgetaire() {
                   onReject={(id, reason) => rejectBudgetLine({ id, reason })}
                   onDelete={deleteBudgetLine}
                   onViewHistory={handleViewHistory}
+                  onEditWithVersioning={handleEditWithVersioning}
+                  onViewVersionHistory={handleViewVersionHistory}
                 />
               ) : (
                 <BudgetLineTable
@@ -440,6 +464,8 @@ export default function PlanificationBudgetaire() {
                   onReject={(id, reason) => rejectBudgetLine({ id, reason })}
                   onDelete={deleteBudgetLine}
                   onViewHistory={handleViewHistory}
+                  onEditWithVersioning={handleEditWithVersioning}
+                  onViewVersionHistory={handleViewVersionHistory}
                 />
               )}
             </CardContent>
@@ -538,6 +564,33 @@ export default function PlanificationBudgetaire() {
           // Refresh data after import
           window.location.reload();
         }}
+      />
+
+      <BudgetImportHistory
+        open={showImportHistory}
+        onOpenChange={setShowImportHistory}
+      />
+
+      <BudgetLineEditDialog
+        open={showEditDialog}
+        onOpenChange={(open) => {
+          setShowEditDialog(open);
+          if (!open) setSelectedLineForEdit(null);
+        }}
+        budgetLine={selectedLineForEdit}
+        onSuccess={() => {
+          setShowEditDialog(false);
+          setSelectedLineForEdit(null);
+        }}
+      />
+
+      <BudgetLineVersionHistoryDialog
+        open={showVersionHistoryDialog}
+        onOpenChange={(open) => {
+          setShowVersionHistoryDialog(open);
+          if (!open) setSelectedLineForVersions(null);
+        }}
+        budgetLine={selectedLineForVersions}
       />
     </div>
   );

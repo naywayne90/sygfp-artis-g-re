@@ -40,6 +40,7 @@ import { AlertsPanelEnhanced } from "@/components/dashboard/AlertsPanelEnhanced"
 import { RecentActivitiesPanel } from "@/components/dashboard/RecentActivitiesPanel";
 import { PendingTasksPanel } from "@/components/dashboard/PendingTasksPanel";
 import { KPICards } from "@/components/dashboard/KPICards";
+import { BudgetAlertsWidget } from "@/components/dashboard/BudgetAlertsWidget";
 
 // Import des constantes centralisées
 import { formatMontantCompact, formatMontant, ETAPES_CONFIG, ETAPES_CHAINE_DEPENSE } from "@/lib/config/sygfp-constants";
@@ -566,7 +567,10 @@ export default function Dashboard() {
             <RecentActivitiesPanel maxItems={8} showViewAll={true} />
           </div>
 
-          {/* Tâches à traiter + Alertes */}
+          {/* Alertes Seuils Budgétaires */}
+          <BudgetAlertsWidget />
+
+          {/* Tâches à traiter + Alertes générales */}
           <div className="grid gap-6 lg:grid-cols-2">
             <PendingTasksPanel maxItems={8} />
             <AlertsPanelEnhanced maxItems={5} />

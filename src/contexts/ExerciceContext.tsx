@@ -21,9 +21,11 @@ interface ExerciceContextType {
   setExercice: (year: number | null, showToast?: boolean) => void;
   clearExercice: () => void;
   isLoading: boolean;
-  isReadOnly: boolean; // Exercice clôturé = lecture seule
+  isReadOnly: boolean; // Exercice clôturé = lecture seule (sauf Admin)
   canWrite: boolean; // Peut-on écrire dans cet exercice
   refreshExercice: () => Promise<void>;
+  hasNoOpenExercice: boolean; // Aucun exercice ouvert disponible
+  isUserAdmin: boolean; // L'utilisateur est-il admin (bypass lecture seule)
 }
 
 const ExerciceContext = createContext<ExerciceContextType | undefined>(undefined);
@@ -40,10 +42,58 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
   const [exerciceId, setExerciceId] = useState<string | null>(null);
   const [exerciceInfo, setExerciceInfo] = useState<ExerciceInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasNoOpenExercice, setHasNoOpenExercice] = useState(false);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
-  // Calculer si l'exercice est en lecture seule
-  const isReadOnly = exerciceInfo 
-    ? !WRITABLE_STATUTS.includes(exerciceInfo.statut) 
+  // Vérifier si l'utilisateur est admin
+  useEffect(() => {
+    async function checkAdminStatus() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setIsUserAdmin(false);
+          return;
+        }
+
+        // Vérifier dans user_roles
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("is_active", true);
+
+        if (roles?.some(r => r.role === "ADMIN" || r.role === "admin")) {
+          setIsUserAdmin(true);
+          return;
+        }
+
+        // Vérifier dans profiles
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("profil_fonctionnel")
+          .eq("id", user.id)
+          .single();
+
+        setIsUserAdmin(profile?.profil_fonctionnel === "Admin");
+      } catch (err) {
+        console.error("Erreur vérification admin:", err);
+        setIsUserAdmin(false);
+      }
+    }
+
+    checkAdminStatus();
+
+    // Écouter les changements d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdminStatus();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Calculer si l'exercice est en lecture seule (les admins peuvent toujours écrire)
+  const isReadOnly = exerciceInfo
+    ? !WRITABLE_STATUTS.includes(exerciceInfo.statut) && !isUserAdmin
     : false;
   const canWrite = !isReadOnly;
 
@@ -116,6 +166,7 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
 
         if (error) {
           console.error("Erreur auto-sélection exercice:", error);
+          setHasNoOpenExercice(true);
           return;
         }
 
@@ -134,8 +185,11 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
             date_ouverture: data.date_ouverture,
             date_cloture: data.date_cloture,
           });
+          setHasNoOpenExercice(false);
+        } else {
+          // Aucun exercice ouvert trouvé
+          setHasNoOpenExercice(true);
         }
-        // Si aucun exercice ouvert, on laisse null pour afficher la page de sélection
       } finally {
         setIsLoading(false);
       }
@@ -147,10 +201,11 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
   // Changer d'exercice avec invalidation du cache et audit
   const setExercice = useCallback(async (year: number | null, showToast = true) => {
     const previousExercice = exercice;
-    
+
     setExerciceState(year);
     if (year) {
       localStorage.setItem("sygfp_exercice", year.toString());
+      setHasNoOpenExercice(false); // L'utilisateur a sélectionné un exercice
     } else {
       localStorage.removeItem("sygfp_exercice");
     }
@@ -197,20 +252,40 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
   const refreshExercice = useCallback(async () => {
     if (exercice) {
       await loadExerciceInfo(exercice);
+    } else {
+      // Si pas d'exercice, revérifier s'il y en a un ouvert
+      const { data } = await supabase
+        .from("exercices_budgetaires")
+        .select("*")
+        .in("statut", ["ouvert", "en_cours"])
+        .eq("est_actif", true)
+        .order("annee", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (data) {
+        setExerciceState(data.annee);
+        localStorage.setItem("sygfp_exercice", data.annee.toString());
+        setHasNoOpenExercice(false);
+      } else {
+        setHasNoOpenExercice(true);
+      }
     }
   }, [exercice, loadExerciceInfo]);
 
   return (
-    <ExerciceContext.Provider value={{ 
-      exercice, 
-      exerciceId, 
-      exerciceInfo, 
-      setExercice, 
+    <ExerciceContext.Provider value={{
+      exercice,
+      exerciceId,
+      exerciceInfo,
+      setExercice,
       clearExercice,
       isLoading,
       isReadOnly,
       canWrite,
       refreshExercice,
+      hasNoOpenExercice,
+      isUserAdmin,
     }}>
       {children}
     </ExerciceContext.Provider>

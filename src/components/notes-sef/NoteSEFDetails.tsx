@@ -400,7 +400,7 @@ export function NoteSEFDetails({
             <DialogTitle className="flex items-center gap-3">
               <FileText className="h-6 w-6 text-primary" />
               <div>
-                <span className="font-mono text-lg">{note.reference_pivot || note.numero || "Nouvelle note"}</span>
+                <span className="font-mono text-lg">{note.dossier_ref || note.reference_pivot || note.numero || "Nouvelle note"}</span>
                 <span className="text-muted-foreground font-normal text-sm ml-2">
                   Exercice {note.exercice}
                 </span>

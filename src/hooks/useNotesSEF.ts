@@ -9,6 +9,8 @@ export interface NoteSEF {
   id: string;
   numero: string | null;
   reference_pivot: string | null;
+  /** Référence pivot dossier immuable: ARTI + MM + YY + NNNNNN (14 chars) */
+  dossier_ref: string | null;
   exercice: number;
   direction_id: string | null;
   demandeur_id: string | null;
@@ -235,7 +237,7 @@ export function useNotesSEF() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
       toast({ 
-        title: `Note ${data.reference_pivot || data.numero} créée`, 
+        title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} créée`,
         description: "La note a été enregistrée en brouillon",
       });
     },
@@ -350,7 +352,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
       toast({ 
-        title: `Note ${data.reference_pivot || data.numero} soumise`,
+        title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} soumise`,
         description: "Les validateurs ont été notifiés",
       });
     },
@@ -578,7 +580,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
-      toast({ title: `Note ${data.reference_pivot || data.numero} rejetée` });
+      toast({ title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} rejetée` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur de rejet", description: error.message, variant: "destructive" });
@@ -651,7 +653,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
-      toast({ title: `Note ${(data as any).reference_pivot || (data as any).numero} différée` });
+      toast({ title: `Note ${(data as any).dossier_ref || (data as any).reference_pivot || (data as any).numero} différée` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur de report", description: error.message, variant: "destructive" });
@@ -728,7 +730,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ["notes-sef-list"] });
       queryClient.invalidateQueries({ queryKey: ["notes-sef-counts"] });
       toast({ 
-        title: `Note ${(data as any).reference_pivot || (data as any).numero} re-soumise`,
+        title: `Note ${(data as any).dossier_ref || (data as any).reference_pivot || (data as any).numero} re-soumise`,
         description: "Les validateurs ont été notifiés",
       });
     },
@@ -787,7 +789,7 @@ export function useNotesSEF() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ title: `Note ${data.reference_pivot || data.numero} créée (copie)` });
+      toast({ title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} créée (copie)` });
     },
     onError: (error: Error) => {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });

@@ -645,29 +645,135 @@ export function useImputation() {
     },
   });
 
-  // Construire le code d'imputation
-  const buildImputationCode = (data: ImputationData): string => {
+  // Construire le code d'imputation complet
+  // Format: [OS]-[Action]-[Activité]-[Sous-Activité]-[NBE]-[SYSCO]
+  const buildImputationCode = (
+    data: ImputationData,
+    contextData?: {
+      actionCode?: string;
+      activiteCode?: string;
+      sousActiviteCode?: string;
+    }
+  ): string => {
     const parts: string[] = [];
-    
-    // On récupère les codes des éléments sélectionnés
+
+    // OS (Objectif Stratégique)
     if (data.os_id) {
       const os = objectifsStrategiques.find(o => o.id === data.os_id);
       if (os) parts.push(os.code);
     }
-    if (data.mission_id) {
-      const mission = missions.find(m => m.id === data.mission_id);
-      if (mission) parts.push(mission.code);
+
+    // Action (si fourni dans context ou récupéré dynamiquement)
+    if (contextData?.actionCode) {
+      parts.push(contextData.actionCode);
     }
+
+    // Activité (si fourni dans context ou récupéré dynamiquement)
+    if (contextData?.activiteCode) {
+      parts.push(contextData.activiteCode);
+    }
+
+    // Sous-Activité (si fourni dans context)
+    if (contextData?.sousActiviteCode) {
+      parts.push(contextData.sousActiviteCode);
+    }
+
+    // NBE
     if (data.nbe_id) {
       const nbe = nomenclaturesNBE.find(n => n.id === data.nbe_id);
       if (nbe) parts.push(nbe.code);
     }
+
+    // SYSCO
     if (data.sysco_id && planComptableSYSCO.length > 0) {
       const sysco = planComptableSYSCO.find((s: any) => s.id === data.sysco_id);
       if (sysco) parts.push(sysco.code);
     }
 
     return parts.join("-") || "N/A";
+  };
+
+  // Construire la chaîne d'imputation lisible pour affichage
+  // Format: "# [OS: libellé] > [Action: libellé] > [Activité: libellé] > [Sous-Activité: libellé] | NBE: code | SYSCO: code"
+  const buildImputationChainReadable = (
+    data: ImputationData,
+    contextData?: {
+      actionCode?: string;
+      actionLibelle?: string;
+      activiteCode?: string;
+      activiteLibelle?: string;
+      sousActiviteCode?: string;
+      sousActiviteLibelle?: string;
+    }
+  ): {
+    code: string;
+    readable: string;
+    segments: {
+      type: string;
+      code: string;
+      libelle: string;
+    }[];
+  } => {
+    const segments: { type: string; code: string; libelle: string }[] = [];
+
+    // OS
+    if (data.os_id) {
+      const os = objectifsStrategiques.find(o => o.id === data.os_id);
+      if (os) {
+        segments.push({ type: "OS", code: os.code, libelle: os.libelle });
+      }
+    }
+
+    // Action
+    if (contextData?.actionCode && contextData?.actionLibelle) {
+      segments.push({ type: "Action", code: contextData.actionCode, libelle: contextData.actionLibelle });
+    }
+
+    // Activité
+    if (contextData?.activiteCode && contextData?.activiteLibelle) {
+      segments.push({ type: "Activité", code: contextData.activiteCode, libelle: contextData.activiteLibelle });
+    }
+
+    // Sous-Activité
+    if (contextData?.sousActiviteCode && contextData?.sousActiviteLibelle) {
+      segments.push({ type: "Sous-Activité", code: contextData.sousActiviteCode, libelle: contextData.sousActiviteLibelle });
+    }
+
+    // NBE
+    if (data.nbe_id) {
+      const nbe = nomenclaturesNBE.find(n => n.id === data.nbe_id);
+      if (nbe) {
+        segments.push({ type: "NBE", code: nbe.code, libelle: nbe.libelle });
+      }
+    }
+
+    // SYSCO
+    if (data.sysco_id && planComptableSYSCO.length > 0) {
+      const sysco = planComptableSYSCO.find((s: any) => s.id === data.sysco_id);
+      if (sysco) {
+        segments.push({ type: "SYSCO", code: sysco.code, libelle: sysco.libelle });
+      }
+    }
+
+    // Construire le code compact
+    const code = segments.map(s => s.code).join("-") || "N/A";
+
+    // Construire la chaîne lisible
+    const programmaticParts = segments
+      .filter(s => ["OS", "Action", "Activité", "Sous-Activité"].includes(s.type))
+      .map(s => `[${s.type}: ${s.code}]`)
+      .join(" > ");
+
+    const nomenclatureParts = segments
+      .filter(s => ["NBE", "SYSCO"].includes(s.type))
+      .map(s => `${s.type}: ${s.code}`)
+      .join(" | ");
+
+    const readable = programmaticParts
+      ? (nomenclatureParts ? `# ${programmaticParts} | ${nomenclatureParts}` : `# ${programmaticParts}`)
+      : (nomenclatureParts ? `# ${nomenclatureParts}` : "N/A");
+
+    return { code, readable, segments };
   };
 
   return {
@@ -688,6 +794,7 @@ export function useImputation() {
     // Calculs
     calculateAvailability,
     buildImputationCode,
+    buildImputationChainReadable,
     // Vérification
     checkAlreadyImputed,
     // Protection exercice

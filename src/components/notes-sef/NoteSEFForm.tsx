@@ -402,7 +402,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
         if (uploadedFiles.length > 0) {
           await uploadFiles(note.id);
         }
-        toast.success(`Note ${note.reference_pivot || note.numero} mise à jour`);
+        toast.success(`Note ${note.dossier_ref || note.reference_pivot || note.numero} mise à jour`);
         onOpenChange(false);
       } else {
         // Mode création
@@ -419,7 +419,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
             try {
               await submitNote(result.id);
               toast.success(
-                `Note ${result.reference_pivot || result.numero} créée et soumise`,
+                `Note ${result.dossier_ref || result.reference_pivot || result.numero} créée et soumise`,
                 { description: "Les validateurs ont été notifiés" }
               );
             } catch (submitError) {
@@ -429,7 +429,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
             }
           } else {
             toast.success(
-              `Brouillon créé : ${result.reference_pivot || result.numero}`,
+              `Brouillon créé : ${result.dossier_ref || result.reference_pivot || result.numero}`,
               { description: uploadedFiles.length > 0 ? `${uploadedFiles.length} pièce(s) jointe(s)` : undefined }
             );
           }
@@ -487,16 +487,23 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Affichage de la référence ARTI en lecture seule (mode édition uniquement) */}
-          {note && (note.reference_pivot || note.numero) && (
+          {note && (note.dossier_ref || note.reference_pivot || note.numero) && (
             <div className="bg-muted/50 rounded-lg p-3 border flex items-center justify-between">
               <div>
-                <Label className="text-xs text-muted-foreground">Référence (lecture seule)</Label>
-                <div className="mt-1">
-                  <ARTIReferenceBadge 
-                    reference={note.reference_pivot || note.numero} 
-                    size="lg"
-                    showIcon
-                  />
+                <Label className="text-xs text-muted-foreground">
+                  {note.dossier_ref ? "Référence Dossier (immuable)" : "Référence (lecture seule)"}
+                </Label>
+                <div className="mt-1 flex items-center gap-2">
+                  {/* Afficher dossier_ref en priorité s'il existe */}
+                  {note.dossier_ref ? (
+                    <span className="font-mono text-lg font-bold text-primary">{note.dossier_ref}</span>
+                  ) : (
+                    <ARTIReferenceBadge
+                      reference={note.reference_pivot || note.numero}
+                      size="lg"
+                      showIcon
+                    />
+                  )}
                 </div>
               </div>
               {note.statut && (

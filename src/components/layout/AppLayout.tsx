@@ -1,6 +1,10 @@
 /**
  * AppLayout V2 - Layout principal unifié
  * TopBar + SidebarV2 + Contenu principal
+ *
+ * Gère les redirections automatiques :
+ * - Vers /no-open-exercice si aucun exercice ouvert
+ * - Vers /select-exercice si pas d'exercice sélectionné
  */
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,15 +20,21 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { exercice, isReadOnly, isLoading } = useExercice();
+  const { exercice, isReadOnly, isLoading, hasNoOpenExercice } = useExercice();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Si pas d'exercice et pas en cours de chargement, rediriger vers la sélection
+    // Si pas d'exercice et pas en cours de chargement
     if (!exercice && !isLoading) {
-      navigate("/select-exercice");
+      // Si aucun exercice ouvert, rediriger vers la page dédiée
+      if (hasNoOpenExercice) {
+        navigate("/no-open-exercice");
+      } else {
+        // Sinon, vers la sélection d'exercice
+        navigate("/select-exercice");
+      }
     }
-  }, [exercice, isLoading, navigate]);
+  }, [exercice, isLoading, hasNoOpenExercice, navigate]);
 
   // Afficher un loader pendant le chargement initial
   if (isLoading) {
@@ -47,7 +57,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="flex min-h-screen w-full">
         {/* Sidebar sombre V2 */}
         <SidebarV2 />
-        
+
         {/* Zone principale */}
         <div className="flex flex-1 flex-col">
           {/* TopBar unifiée */}

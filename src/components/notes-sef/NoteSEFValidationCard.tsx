@@ -88,7 +88,7 @@ export function NoteSEFValidationCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-mono text-lg font-semibold text-primary">
-                {note.reference_pivot || note.numero || "Nouvelle note"}
+                {note.dossier_ref || note.reference_pivot || note.numero || "Nouvelle note"}
               </span>
               {getUrgenceBadge(note.urgence)}
             </div>

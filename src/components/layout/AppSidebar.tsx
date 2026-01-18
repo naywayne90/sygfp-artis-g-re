@@ -11,12 +11,16 @@ import {
   HandCoins,
   Activity,
   TrendingUp,
+  Shield,
 } from "lucide-react";
 import logoArti from "@/assets/logo-arti.jpg";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { canAccessRoute, PROFILS_FONCTIONNELS } from "@/lib/config/rbac-config";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -126,6 +130,50 @@ export function AppSidebar() {
   // Fetch stats for badges
   const { data: stats } = useDashboardStats();
 
+  // Récupérer le profil utilisateur pour le filtrage RBAC
+  const { data: userProfile } = useQuery({
+    queryKey: ['sidebar-user-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, profil_fonctionnel, role_hierarchique, direction_id')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fonction de filtrage des modules selon les permissions
+  const filterModulesByAccess = useMemo(() => {
+    return (modules: ModuleConfig[]) => {
+      if (!userProfile) return modules;
+
+      const profile = userProfile.profil_fonctionnel || 'OPERATEUR';
+      const hierarchy = userProfile.role_hierarchique;
+
+      // Admin voit tout
+      if (profile === 'ADMIN' || profile === 'Admin') return modules;
+
+      return modules.filter(module => {
+        if (!module.route) return true; // Groupes parent toujours visibles
+        return canAccessRoute(module.route, profile, hierarchy || undefined);
+      });
+    };
+  }, [userProfile]);
+
+  // Infos profil pour affichage
+  const profilInfo = useMemo(() => {
+    if (!userProfile?.profil_fonctionnel) return null;
+    const profil = PROFILS_FONCTIONNELS[userProfile.profil_fonctionnel as keyof typeof PROFILS_FONCTIONNELS];
+    return profil || { label: userProfile.profil_fonctionnel, color: '#6b7280' };
+  }, [userProfile]);
+
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     if (path.includes("?")) {
@@ -134,14 +182,21 @@ export function AppSidebar() {
     return location.pathname.startsWith(path);
   };
 
-  // Récupérer les modules depuis le registre
-  const chaineDepenseModules = getChildModules('chaine-depense');
-  const budgetModules = getChildModules('budget');
-  const partenairesModules = getChildModules('partenaires');
-  const gestionModules = getChildModules('gestion');
-  const executionModules = getChildModules('execution-budgetaire');
-  const rapportsModules = getChildModules('rapports');
+  // Récupérer les modules depuis le registre ET les filtrer selon RBAC
+  const chaineDepenseModules = filterModulesByAccess(getChildModules('chaine-depense'));
+  const budgetModules = filterModulesByAccess(getChildModules('budget'));
+  const partenairesModules = filterModulesByAccess(getChildModules('partenaires'));
+  const gestionModules = filterModulesByAccess(getChildModules('gestion'));
+  const executionModules = filterModulesByAccess(getChildModules('execution-budgetaire'));
+  const rapportsModules = filterModulesByAccess(getChildModules('rapports'));
   const parametrageSubSections = getSubSections('parametrage');
+
+  // Vérifier si l'utilisateur peut voir le paramétrage
+  const canSeeParametrage = useMemo(() => {
+    if (!userProfile) return true;
+    const profile = userProfile.profil_fonctionnel || 'OPERATEUR';
+    return ['ADMIN', 'Admin', 'DG', 'DAAF', 'CB', 'TRESORERIE'].includes(profile);
+  }, [userProfile]);
 
   const isChaineActive = chaineDepenseModules.some(m => m.route && isActive(m.route));
   const isExecutionActive = executionModules.some(m => m.route && isActive(m.route));
@@ -410,77 +465,80 @@ export function AppSidebar() {
           isActive={isActive}
         />
 
-        {/* ========== PARAMÉTRAGE (Collapsible) ========== */}
-        <SidebarGroup className="mt-4">
-          {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
-              <Cog className="h-3.5 w-3.5" />
-              Paramétrage
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Collapsible
-                open={parametrageOpen}
-                onOpenChange={setParametrageOpen}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      tooltip="Configuration système"
-                      className={cn(
-                        "w-full justify-between",
-                        isParametrageActive && "bg-sidebar-accent"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Settings className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="text-sm">Configuration</span>}
-                      </div>
-                      {!collapsed && (
-                        <ChevronRight className={cn(
-                          "h-4 w-4 transition-transform",
-                          parametrageOpen && "rotate-90"
-                        )} />
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {parametrageSubSections.map((section) => {
-                        const sectionModules = getModulesBySubSection('parametrage', section);
-                        return (
-                          <div key={section}>
-                            <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
-                              {section}
+        {/* ========== PARAMÉTRAGE (Collapsible) - Visible selon profil ========== */}
+        {canSeeParametrage && (
+          <SidebarGroup className="mt-4">
+            {!collapsed && (
+              <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
+                <Cog className="h-3.5 w-3.5" />
+                Paramétrage
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <Collapsible
+                  open={parametrageOpen}
+                  onOpenChange={setParametrageOpen}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip="Configuration système"
+                        className={cn(
+                          "w-full justify-between",
+                          isParametrageActive && "bg-sidebar-accent"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Settings className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span className="text-sm">Configuration</span>}
+                        </div>
+                        {!collapsed && (
+                          <ChevronRight className={cn(
+                            "h-4 w-4 transition-transform",
+                            parametrageOpen && "rotate-90"
+                          )} />
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {parametrageSubSections.map((section) => {
+                          const sectionModules = filterModulesByAccess(getModulesBySubSection('parametrage', section));
+                          if (sectionModules.length === 0) return null;
+                          return (
+                            <div key={section}>
+                              <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                                {section}
+                              </div>
+                              {sectionModules.map((module) => (
+                                <SidebarMenuSubItem key={module.id}>
+                                  <SidebarMenuSubButton asChild isActive={module.route ? isActive(module.route) : false}>
+                                    <NavLink
+                                      to={module.route || "#"}
+                                      className={cn(
+                                        "flex items-center gap-2 text-sm py-1.5",
+                                        module.route && isActive(module.route) && "text-sidebar-primary font-medium"
+                                      )}
+                                    >
+                                      <module.icon className="h-3.5 w-3.5" />
+                                      <span>{module.name}</span>
+                                    </NavLink>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
                             </div>
-                            {sectionModules.map((module) => (
-                              <SidebarMenuSubItem key={module.id}>
-                                <SidebarMenuSubButton asChild isActive={module.route ? isActive(module.route) : false}>
-                                  <NavLink
-                                    to={module.route || "#"}
-                                    className={cn(
-                                      "flex items-center gap-2 text-sm py-1.5",
-                                      module.route && isActive(module.route) && "text-sidebar-primary font-medium"
-                                    )}
-                                  >
-                                    <module.icon className="h-3.5 w-3.5" />
-                                    <span>{module.name}</span>
-                                  </NavLink>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-2">
@@ -488,30 +546,75 @@ export function AppSidebar() {
           <DropdownMenuTrigger asChild>
             <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm">
-                  U
+                <AvatarFallback
+                  className="text-sm"
+                  style={{
+                    backgroundColor: profilInfo?.color ? `${profilInfo.color}20` : undefined,
+                    color: profilInfo?.color
+                  }}
+                >
+                  {userProfile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               {!collapsed && (
                 <>
-                  <div className="flex flex-1 flex-col text-left">
-                    <span className="text-sm font-medium">Utilisateur</span>
-                    <span className="text-xs text-sidebar-foreground/70">Invité</span>
+                  <div className="flex flex-1 flex-col text-left min-w-0">
+                    <span className="text-sm font-medium truncate">
+                      {userProfile?.full_name || 'Utilisateur'}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {profilInfo && (
+                        <Badge
+                          variant="outline"
+                          className="text-[9px] px-1.5 py-0 h-4 font-medium"
+                          style={{
+                            borderColor: profilInfo.color,
+                            color: profilInfo.color
+                          }}
+                        >
+                          {profilInfo.label}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/70" />
+                  <ChevronDown className="h-4 w-4 text-sidebar-foreground/70 shrink-0" />
                 </>
               )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
+            {/* Afficher le profil et le rôle */}
+            <div className="px-2 py-2 border-b">
+              <div className="text-sm font-medium">{userProfile?.full_name || 'Utilisateur'}</div>
+              <div className="text-xs text-muted-foreground">{userProfile?.email}</div>
+              <div className="flex items-center gap-2 mt-1.5">
+                {profilInfo && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px]"
+                    style={{ borderColor: profilInfo.color, color: profilInfo.color }}
+                  >
+                    <Shield className="h-3 w-3 mr-1" />
+                    {profilInfo.label}
+                  </Badge>
+                )}
+                {userProfile?.role_hierarchique && (
+                  <span className="text-[10px] text-muted-foreground">
+                    {userProfile.role_hierarchique}
+                  </span>
+                )}
+              </div>
+            </div>
             <DropdownMenuItem onClick={() => navigate("/mon-profil")}>
               <User className="mr-2 h-4 w-4" />
               Mon profil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/parametres")}>
-              <Settings className="mr-2 h-4 w-4" />
-              Paramètres
-            </DropdownMenuItem>
+            {canSeeParametrage && (
+              <DropdownMenuItem onClick={() => navigate("/admin/parametres")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive"
@@ -521,7 +624,7 @@ export function AppSidebar() {
                   toast.error("Erreur lors de la déconnexion");
                 } else {
                   toast.success("Déconnexion réussie");
-                  navigate("/");
+                  navigate("/auth");
                 }
               }}
             >

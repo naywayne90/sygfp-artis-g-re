@@ -23,12 +23,17 @@ import {
   FileSignature,
   History,
   FolderOpen,
+  Shield,
+  QrCode,
+  Lock,
+  GitBranch,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useOrdonnancements, VALIDATION_STEPS, MODES_PAIEMENT } from "@/hooks/useOrdonnancements";
 import { OrdonnancementSignatures } from "./OrdonnancementSignatures";
 import { ParapheurIntern } from "./ParapheurIntern";
+import { OrdonnancementTimeline } from "./OrdonnancementTimeline";
 import { ChaineDepenseTimeline } from "@/components/workflow/ChaineDepenseTimeline";
 import { DossierGED } from "@/components/ged";
 import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
@@ -40,11 +45,13 @@ interface OrdonnancementDetailsProps {
 }
 
 const getStatusBadge = (status: string) => {
-  const variants: Record<string, { label: string; className: string }> = {
+  const variants: Record<string, { label: string; className: string; icon?: React.ReactNode }> = {
     brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
     soumis: { label: "Soumis", className: "bg-secondary/10 text-secondary border-secondary/20" },
     en_validation: { label: "En validation", className: "bg-warning/10 text-warning border-warning/20" },
     valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
+    en_signature: { label: "En signature", className: "bg-blue-100 text-blue-700 border-blue-200" },
+    ordonnance: { label: "ORDONNANCÉ", className: "bg-green-600 text-white border-green-700 font-bold" },
     rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
     differe: { label: "Différé", className: "bg-orange-100 text-orange-700 border-orange-200" },
     transmis: { label: "Transmis", className: "bg-primary/10 text-primary border-primary/20" },
@@ -147,6 +154,50 @@ export function OrdonnancementDetails({
                   </div>
                   {getStatusBadge(ordonnancement?.statut || ordonnancement?.workflow_status)}
                 </div>
+
+                {/* Statut ORDONNANCÉ avec signature */}
+                {ordonnancement?.statut === "ordonnance" && (
+                  <Card className="border-green-500 bg-green-50 dark:bg-green-950/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-6 w-6 text-green-600 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <p className="font-bold text-green-700 text-lg">ORDONNANCÉ</p>
+                            <Lock className="h-4 w-4 text-green-600" />
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Cet ordonnancement a été validé et signé. Les étapes précédentes sont verrouillées.
+                          </p>
+                          {ordonnancement.date_ordonnancement && (
+                            <p className="text-sm">
+                              <Calendar className="h-4 w-4 inline mr-1" />
+                              Date d'ordonnancement: {format(new Date(ordonnancement.date_ordonnancement), "dd MMMM yyyy à HH:mm", { locale: fr })}
+                            </p>
+                          )}
+                          {ordonnancement.signature_hash && (
+                            <div className="mt-3 p-3 bg-white dark:bg-background rounded border">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Shield className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-medium">Empreinte de signature</span>
+                              </div>
+                              <p className="font-mono text-xs break-all">{ordonnancement.signature_hash}</p>
+                            </div>
+                          )}
+                          {ordonnancement.qr_code_data && (
+                            <div className="mt-3 p-3 bg-white dark:bg-background rounded border">
+                              <div className="flex items-center gap-2 mb-2">
+                                <QrCode className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-medium">Données QR de vérification</span>
+                              </div>
+                              <p className="font-mono text-xs break-all overflow-x-auto">{ordonnancement.qr_code_data}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Alerte si rejeté ou différé */}
                 {ordonnancement?.statut === "rejete" && ordonnancement?.rejection_reason && (
@@ -352,7 +403,7 @@ export function OrdonnancementDetails({
                 exercice={ordonnancement?.exercice || undefined}
                 etape="ordonnancement"
                 showChecklist={true}
-                readOnly={ordonnancement?.statut === "valide" || ordonnancement?.statut === "transmis"}
+                readOnly={ordonnancement?.statut === "valide" || ordonnancement?.statut === "transmis" || ordonnancement?.statut === "ordonnance"}
               />
             </div>
           </TabsContent>
@@ -377,24 +428,38 @@ export function OrdonnancementDetails({
           </TabsContent>
 
           <TabsContent value="timeline">
-            <div className="pt-4">
-              <ChaineDepenseTimeline
-                engagement={engagement ? { id: engagement.id, numero: engagement.numero, statut: "valide" } : null}
-                liquidation={liquidation ? { id: liquidation.id, numero: liquidation.numero, statut: "valide" } : null}
-                ordonnancement={ordonnancement ? { 
-                  id: ordonnancement.id, 
-                  numero: ordonnancement.numero, 
-                  statut: ordonnancement.statut,
-                  montant: ordonnancement.montant 
-                } : null}
-                reglement={ordonnancement?.montant_paye > 0 ? { 
-                  id: "paid", 
-                  numero: null, 
-                  statut: "valide",
-                  montant: ordonnancement.montant_paye 
-                } : null}
-                currentEtape="ordonnancement"
-              />
+            <div className="pt-4 space-y-4">
+              {/* Workflow interne ordonnancement */}
+              <OrdonnancementTimeline ordonnancement={ordonnancement} />
+
+              {/* Chaîne de dépense globale */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Chaîne de dépense
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChaineDepenseTimeline
+                    engagement={engagement ? { id: engagement.id, numero: engagement.numero, statut: "valide" } : null}
+                    liquidation={liquidation ? { id: liquidation.id, numero: liquidation.numero, statut: "valide" } : null}
+                    ordonnancement={ordonnancement ? {
+                      id: ordonnancement.id,
+                      numero: ordonnancement.numero,
+                      statut: ordonnancement.statut,
+                      montant: ordonnancement.montant
+                    } : null}
+                    reglement={ordonnancement?.montant_paye > 0 ? {
+                      id: "paid",
+                      numero: null,
+                      statut: "valide",
+                      montant: ordonnancement.montant_paye
+                    } : null}
+                    currentEtape="ordonnancement"
+                  />
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>

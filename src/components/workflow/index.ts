@@ -5,11 +5,14 @@
 export { WorkflowStatusBadge } from './WorkflowStatusBadge';
 export { WorkflowActionsBar } from './WorkflowActionsBar';
 export { WorkflowStepsProgress } from './WorkflowStepsProgress';
-export { 
-  WorkflowBlockingPanel, 
-  WorkflowGuidancePanel, 
-  NextStepCard 
+export {
+  WorkflowBlockingPanel,
+  WorkflowGuidancePanel,
+  NextStepCard
 } from './WorkflowGuidancePanel';
+
+// SpendingCase Timeline (nouveau workflow structuré)
+export { SpendingCaseTimeline } from './SpendingCaseTimeline';
 
 // Re-export du workflow engine
 export {

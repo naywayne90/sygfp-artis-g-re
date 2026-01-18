@@ -544,12 +544,12 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   };
 
   const getEtatBySYSCO = () => {
-    const grouped: Record<string, { 
-      sysco: RefItem; 
-      dotation: number; 
-      engage: number; 
-      liquide: number; 
-      ordonnance: number; 
+    const grouped: Record<string, {
+      sysco: RefItem;
+      dotation: number;
+      engage: number;
+      liquide: number;
+      ordonnance: number;
       paye: number;
     }> = {};
 
@@ -576,6 +576,165 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
     return Object.values(grouped);
   };
 
+  // Fetch projets data for project-based aggregation
+  const { data: projetsData = [] } = useQuery({
+    queryKey: ["etats-projets-execution", exercice, filters],
+    queryFn: async () => {
+      // Get dossiers (projets) with their execution chain
+      const dossierFilters: Record<string, any> = { exercice };
+      if (filters.direction_id) dossierFilters.direction_id = filters.direction_id;
+
+      const dossiers = await queryTable<{
+        id: string;
+        dossier_ref: string;
+        objet: string;
+        direction_id: string | null;
+        statut_global: string | null;
+        montant_estime: number;
+      }>("dossiers", "id, dossier_ref, objet, direction_id, statut_global, montant_estime", dossierFilters);
+
+      // Get expressions de besoin linked to dossiers
+      const expBesoins = await queryTable<{
+        id: string;
+        dossier_id: string;
+        montant_estime: number | null;
+      }>("expressions_besoin", "id, dossier_id, montant_estime", { exercice });
+
+      // Get engagements linked to expressions de besoin
+      const engagements = await queryTable<{
+        id: string;
+        expression_besoin_id: string;
+        montant: number;
+        statut: string | null;
+      }>("budget_engagements", "id, expression_besoin_id, montant, statut", { exercice, neq_statut: "annule" });
+
+      // Build expression → dossier map
+      const expDossierMap: Record<string, string> = {};
+      expBesoins.forEach(exp => {
+        if (exp.dossier_id) expDossierMap[exp.id] = exp.dossier_id;
+      });
+
+      // Build engagement → dossier map
+      const engDossierMap: Record<string, string> = {};
+      engagements.forEach(eng => {
+        const dossierId = expDossierMap[eng.expression_besoin_id];
+        if (dossierId) engDossierMap[eng.id] = dossierId;
+      });
+
+      // Get liquidations
+      const liquidations = await queryTable<{
+        id: string;
+        engagement_id: string;
+        montant: number;
+        statut: string | null;
+      }>("budget_liquidations", "id, engagement_id, montant, statut", { exercice, neq_statut: "annule" });
+
+      // Build liquidation → dossier map
+      const liqDossierMap: Record<string, string> = {};
+      liquidations.forEach(liq => {
+        const dossierId = engDossierMap[liq.engagement_id];
+        if (dossierId) liqDossierMap[liq.id] = dossierId;
+      });
+
+      // Get ordonnancements
+      const ordonnancements = await queryTable<{
+        id: string;
+        liquidation_id: string;
+        montant: number;
+        statut: string | null;
+      }>("ordonnancements", "id, liquidation_id, montant, statut", { exercice, neq_statut: "annule" });
+
+      // Build ordonnancement → dossier map
+      const ordDossierMap: Record<string, string> = {};
+      ordonnancements.forEach(ord => {
+        const dossierId = liqDossierMap[ord.liquidation_id];
+        if (dossierId) ordDossierMap[ord.id] = dossierId;
+      });
+
+      // Get reglements
+      const reglements = await queryTable<{
+        id: string;
+        ordonnancement_id: string;
+        montant: number;
+        statut: string | null;
+      }>("reglements", "id, ordonnancement_id, montant, statut", { exercice, neq_statut: "annule" });
+
+      // Aggregate by dossier
+      const projetData: Record<string, {
+        dossier: { id: string; code: string; libelle: string };
+        direction_id: string | null;
+        statut: string | null;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }> = {};
+
+      // Initialize with dossiers
+      dossiers.forEach(d => {
+        projetData[d.id] = {
+          dossier: { id: d.id, code: d.dossier_ref || "-", libelle: d.objet || "Sans objet" },
+          direction_id: d.direction_id,
+          statut: d.statut_global,
+          dotation: d.montant_estime || 0,
+          engage: 0,
+          liquide: 0,
+          ordonnance: 0,
+          paye: 0,
+        };
+      });
+
+      // Sum engagements
+      engagements.forEach(eng => {
+        const dossierId = engDossierMap[eng.id];
+        if (dossierId && projetData[dossierId]) {
+          projetData[dossierId].engage += eng.montant || 0;
+        }
+      });
+
+      // Sum liquidations
+      liquidations.forEach(liq => {
+        const dossierId = liqDossierMap[liq.id];
+        if (dossierId && projetData[dossierId]) {
+          projetData[dossierId].liquide += liq.montant || 0;
+        }
+      });
+
+      // Sum ordonnancements
+      ordonnancements.forEach(ord => {
+        const dossierId = ordDossierMap[ord.id];
+        if (dossierId && projetData[dossierId]) {
+          projetData[dossierId].ordonnance += ord.montant || 0;
+        }
+      });
+
+      // Sum reglements
+      reglements.forEach(reg => {
+        const dossierId = ordDossierMap[reg.ordonnancement_id];
+        if (dossierId && projetData[dossierId]) {
+          projetData[dossierId].paye += reg.montant || 0;
+        }
+      });
+
+      return Object.values(projetData);
+    },
+    enabled: !!exercice,
+  });
+
+  const getEtatByProjet = () => {
+    return projetsData.map(p => ({
+      item: p.dossier,
+      direction_id: p.direction_id,
+      statut: p.statut,
+      dotation: p.dotation,
+      engage: p.engage,
+      liquide: p.liquide,
+      ordonnance: p.ordonnance,
+      paye: p.paye,
+    }));
+  };
+
   return {
     // Data
     budgetLinesExecution,
@@ -588,6 +747,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
     getEtatByMission,
     getEtatByNBE,
     getEtatBySYSCO,
+    getEtatByProjet,
     
     // Referential
     directions,

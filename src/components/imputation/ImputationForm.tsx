@@ -31,6 +31,7 @@ import { useImputation, BudgetAvailability, ImputationData } from "@/hooks/useIm
 import { useNavigate } from "react-router-dom";
 import { ImputationSummaryCard } from "./ImputationSummaryCard";
 import { BudgetLineSelector, SelectedBudgetLine } from "./BudgetLineSelector";
+import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
 
 interface Note {
   id: string;
@@ -47,14 +48,7 @@ interface ImputationFormProps {
   onCancel?: () => void;
 }
 
-const SOURCES_FINANCEMENT = [
-  { value: "budget_etat", label: "Budget de l'État" },
-  { value: "ressources_propres", label: "Ressources propres" },
-  { value: "subventions", label: "Subventions" },
-  { value: "dons_legs", label: "Dons et legs" },
-  { value: "emprunts", label: "Emprunts" },
-  { value: "partenaires", label: "Partenaires techniques et financiers" },
-];
+// Les options de source de financement sont maintenant gérées par FundingSourceSelect
 
 export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProps) {
   const navigate = useNavigate();
@@ -459,19 +453,12 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
             {/* Source de financement */}
             <div>
               <Label>Source de financement</Label>
-              <Select
+              <FundingSourceSelect
                 value={formData.source_financement}
                 onValueChange={(v) => setFormData(prev => ({ ...prev, source_financement: v }))}
-              >
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SOURCES_FINANCEMENT.map(s => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                useLegacyValue={true}
+                className="mt-1.5"
+              />
             </div>
           </CardContent>
         </Card>

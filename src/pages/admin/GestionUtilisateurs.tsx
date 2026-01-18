@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Search, Edit, UserCheck, UserX, Filter, HelpCircle, Users, Shield, Building2, Briefcase, CheckCircle2, Plus, Loader2, Eye, EyeOff } from "lucide-react";
+import { Search, Edit, UserCheck, UserX, Filter, HelpCircle, Users, Shield, Building2, Briefcase, CheckCircle2, Plus, Loader2, Eye, EyeOff, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -27,6 +28,7 @@ type Profile = {
   is_active: boolean | null;
   role_hierarchique: string | null;
   profil_fonctionnel: string | null;
+  exercises_allowed: number[] | null;
   direction?: { label: string } | null;
 };
 
@@ -34,6 +36,13 @@ type Direction = {
   id: string;
   label: string;
   code: string;
+};
+
+type Exercice = {
+  id: string;
+  annee: number;
+  statut: string;
+  est_actif: boolean;
 };
 
 const ROLES_HIERARCHIQUES = ['Agent', 'Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'];
@@ -86,6 +95,18 @@ export default function GestionUtilisateurs() {
     },
   });
 
+  const { data: exercices } = useQuery({
+    queryKey: ["exercices-for-users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("exercices_budgetaires")
+        .select("id, annee, statut, est_actif")
+        .order("annee", { ascending: false });
+      if (error) throw error;
+      return data as Exercice[];
+    },
+  });
+
   const filteredUsers = users?.filter((user) => {
     const matchesSearch = 
       user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,7 +128,21 @@ export default function GestionUtilisateurs() {
       role_hierarchique: user.role_hierarchique,
       profil_fonctionnel: user.profil_fonctionnel,
       is_active: user.is_active,
+      exercises_allowed: user.exercises_allowed,
     });
+  };
+
+  const toggleExercise = (annee: number) => {
+    const current = formData.exercises_allowed || [];
+    if (current.includes(annee)) {
+      setFormData({ ...formData, exercises_allowed: current.filter(a => a !== annee) });
+    } else {
+      setFormData({ ...formData, exercises_allowed: [...current, annee] });
+    }
+  };
+
+  const selectAllExercises = () => {
+    setFormData({ ...formData, exercises_allowed: null }); // null = tous
   };
 
   const handleSave = async () => {
@@ -123,6 +158,7 @@ export default function GestionUtilisateurs() {
           role_hierarchique: formData.role_hierarchique as any,
           profil_fonctionnel: formData.profil_fonctionnel as any,
           is_active: formData.is_active,
+          exercises_allowed: formData.exercises_allowed,
         })
         .eq("id", editingUser.id);
 
@@ -526,6 +562,56 @@ export default function GestionUtilisateurs() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Exercices autorisés */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Exercices autorisés
+                </Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={selectAllExercises}
+                >
+                  Tous
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mb-2">
+                {formData.exercises_allowed === null
+                  ? "Accès à tous les exercices"
+                  : formData.exercises_allowed?.length
+                    ? `${formData.exercises_allowed.length} exercice(s) sélectionné(s)`
+                    : "Aucun exercice sélectionné (accès limité)"}
+              </p>
+              <div className="grid grid-cols-4 gap-2 max-h-32 overflow-auto p-2 border rounded-md">
+                {exercices?.map((ex) => (
+                  <div key={ex.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`ex-${ex.annee}`}
+                      checked={formData.exercises_allowed === null || (formData.exercises_allowed?.includes(ex.annee) ?? false)}
+                      onCheckedChange={() => {
+                        if (formData.exercises_allowed === null) {
+                          // Si "tous", on passe à une sélection spécifique
+                          setFormData({ ...formData, exercises_allowed: [ex.annee] });
+                        } else {
+                          toggleExercise(ex.annee);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`ex-${ex.annee}`}
+                      className={`text-sm ${ex.est_actif ? "font-medium" : "text-muted-foreground"}`}
+                    >
+                      {ex.annee}
+                      {ex.statut === "en_cours" && <span className="text-xs text-green-600 ml-1">(actif)</span>}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

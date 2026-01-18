@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PassationChecklist } from "./PassationChecklist";
+import { PassationTimeline } from "./PassationTimeline";
+import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 import { PassationMarche, MODES_PASSATION, STATUTS, DECISIONS_SORTIE, LotMarche } from "@/hooks/usePassationsMarche";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -30,6 +32,7 @@ import {
   CreditCard,
   FileCheck,
   ExternalLink,
+  History,
 } from "lucide-react";
 
 interface PassationDetailsProps {
@@ -100,10 +103,10 @@ export function PassationDetails({
         </DialogHeader>
 
         <Tabs defaultValue="infos" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="infos" className="gap-1">
               <ClipboardList className="h-3 w-3" />
-              Informations
+              Infos
             </TabsTrigger>
             {passation.allotissement && lots.length > 0 && (
               <TabsTrigger value="lots" className="gap-1">
@@ -113,7 +116,7 @@ export function PassationDetails({
             )}
             <TabsTrigger value="prestataires" className="gap-1">
               <Users className="h-3 w-3" />
-              Prestataires ({prestataires.length})
+              Prestataires
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-1">
               <FileText className="h-3 w-3" />
@@ -122,6 +125,10 @@ export function PassationDetails({
             <TabsTrigger value="analyse" className="gap-1">
               <BarChart3 className="h-3 w-3" />
               Analyse
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="gap-1">
+              <History className="h-3 w-3" />
+              Historique
             </TabsTrigger>
           </TabsList>
 
@@ -474,6 +481,21 @@ export function PassationDetails({
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Timeline / Historique */}
+          <TabsContent value="timeline" className="mt-4 space-y-4">
+            {/* Chaîne de la dépense (si lié à un dossier) */}
+            {passation.dossier_id && (
+              <DossierStepTimeline
+                dossierId={passation.dossier_id}
+                highlightStep="passation_marche"
+                showNavigation
+              />
+            )}
+
+            {/* Workflow interne de la passation */}
+            <PassationTimeline passation={passation} />
           </TabsContent>
         </Tabs>
 

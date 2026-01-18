@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -11,7 +12,10 @@ import {
   Lock,
   ExternalLink,
   History,
-  Wallet
+  Wallet,
+  XCircle,
+  RotateCcw,
+  AlertTriangle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +25,23 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { MODES_PAIEMENT, COMPTES_BANCAIRES_ARTI, useReglements } from "@/hooks/useReglements";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { MODES_PAIEMENT, COMPTES_BANCAIRES_ARTI, RENVOI_TARGETS, useReglements, RenvoiTarget } from "@/hooks/useReglements";
 import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
+import { ReglementTimeline } from "./ReglementTimeline";
+import { useRBAC } from "@/hooks/useRBAC";
 
 interface ReglementDetailsProps {
   reglement: any;
@@ -42,7 +60,12 @@ const getCompteLabel = (compte: string) => {
 };
 
 export function ReglementDetails({ reglement }: ReglementDetailsProps) {
-  const { getTreasuryLink } = useReglements();
+  const { getTreasuryLink, rejectReglement } = useReglements();
+  const { isAdmin } = useRBAC();
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectMotif, setRejectMotif] = useState("");
+  const [renvoiTarget, setRenvoiTarget] = useState<RenvoiTarget>("engagement");
+
   const ordonnancement = reglement.ordonnancement;
   const engagement = ordonnancement?.liquidation?.engagement;
   const liquidation = ordonnancement?.liquidation;
@@ -53,9 +76,27 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
   const restantAPayer = montantOrdonnance - montantPaye;
   const progressPaiement = montantOrdonnance > 0 ? (montantPaye / montantOrdonnance) * 100 : 0;
   const isFullyPaid = restantAPayer <= 0;
+  const isRejected = reglement.statut === "rejete";
+
+  // Read-only mode: dossier soldé is read-only except for Admin
+  const isReadOnly = isFullyPaid && !isAdmin;
 
   // Treasury link
   const treasuryLink = getTreasuryLink(reglement.id, reglement.compte_bancaire_arti);
+
+  const handleReject = async () => {
+    if (!rejectMotif.trim()) return;
+
+    await rejectReglement.mutateAsync({
+      reglementId: reglement.id,
+      motif: rejectMotif,
+      renvoiTarget,
+    });
+
+    setRejectDialogOpen(false);
+    setRejectMotif("");
+    setRenvoiTarget("engagement");
+  };
 
   return (
     <div className="space-y-6">
@@ -68,7 +109,12 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {isFullyPaid ? (
+          {isRejected ? (
+            <Badge variant="destructive">
+              <XCircle className="mr-1 h-3 w-3" />
+              Rejeté
+            </Badge>
+          ) : isFullyPaid ? (
             <Badge className="bg-success text-success-foreground">
               <CheckCircle className="mr-1 h-3 w-3" />
               Soldé
@@ -87,6 +133,75 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
               <ExternalLink className="ml-2 h-3 w-3" />
             </Link>
           </Button>
+          {/* Reject button - only for non-rejected, non-closed reglements, and authorized users */}
+          {!isRejected && !isFullyPaid && !isReadOnly && (
+            <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Rejeter
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-5 w-5" />
+                    Rejeter le règlement
+                  </DialogTitle>
+                  <DialogDescription>
+                    Le règlement sera annulé et le dossier sera renvoyé vers l'étape choisie pour correction.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="renvoiTarget">Renvoyer vers</Label>
+                    <RadioGroup
+                      value={renvoiTarget}
+                      onValueChange={(v) => setRenvoiTarget(v as RenvoiTarget)}
+                    >
+                      {RENVOI_TARGETS.map((target) => (
+                        <div key={target.value} className="flex items-center space-x-2">
+                          <RadioGroupItem value={target.value} id={target.value} />
+                          <Label htmlFor={target.value} className="flex flex-col">
+                            <span className="font-medium">{target.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {target.description}
+                            </span>
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="motif">Motif de rejet (obligatoire)</Label>
+                    <Textarea
+                      id="motif"
+                      placeholder="Décrivez la raison du rejet..."
+                      value={rejectMotif}
+                      onChange={(e) => setRejectMotif(e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setRejectDialogOpen(false)}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleReject}
+                    disabled={!rejectMotif.trim() || rejectReglement.isPending}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {rejectReglement.isPending ? "En cours..." : "Rejeter et renvoyer"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
@@ -96,8 +211,30 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
           <Lock className="h-4 w-4 text-success" />
           <AlertTitle className="text-success">Dossier clôturé</AlertTitle>
           <AlertDescription>
-            Le dossier est maintenant en lecture seule. Tous les paiements ont été effectués.
+            Le dossier est maintenant en lecture seule{isAdmin ? " (vous avez accès Admin)" : ""}. Tous les paiements ont été effectués.
             La chaîne de dépense est complète.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Rejection alert */}
+      {isRejected && (
+        <Alert variant="destructive">
+          <XCircle className="h-4 w-4" />
+          <AlertTitle>Règlement rejeté</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p><strong>Motif:</strong> {reglement.motif_rejet}</p>
+            {reglement.renvoi_target && (
+              <p>
+                <strong>Renvoyé vers:</strong>{" "}
+                {RENVOI_TARGETS.find(t => t.value === reglement.renvoi_target)?.label || reglement.renvoi_target}
+              </p>
+            )}
+            {reglement.date_rejet && (
+              <p className="text-xs">
+                Rejeté le {format(new Date(reglement.date_rejet), "dd MMMM yyyy à HH:mm", { locale: fr })}
+              </p>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -116,12 +253,16 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
         compact
       />
 
-      {/* Tabs for details and journal */}
+      {/* Tabs for details, workflow and journal */}
       <Tabs defaultValue="details" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details" className="gap-2">
             <FileText className="h-4 w-4" />
             Détails
+          </TabsTrigger>
+          <TabsTrigger value="workflow" className="gap-2">
+            <Wallet className="h-4 w-4" />
+            Workflow
           </TabsTrigger>
           <TabsTrigger value="journal" className="gap-2">
             <History className="h-4 w-4" />
@@ -290,6 +431,10 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="workflow" className="pt-4">
+          <ReglementTimeline reglement={reglement} />
         </TabsContent>
 
         <TabsContent value="journal" className="pt-4">

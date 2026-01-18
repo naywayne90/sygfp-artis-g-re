@@ -289,6 +289,26 @@ export default function PassationMarchePage() {
         </Card>
       </div>
 
+      {/* Alerte si aucune EB validée */}
+      {ebValidees.length === 0 && (
+        <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <ShoppingCart className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-amber-800 dark:text-amber-300">
+                  Expression de Besoin validée requise
+                </h4>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                  Pour créer une Passation de Marché, vous devez d'abord disposer d'au moins une Expression de Besoin validée.
+                  Rendez-vous sur la page <a href="/execution/expression-besoin" className="underline font-medium">Expression de Besoin</a> pour en créer ou valider une.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Recherche */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

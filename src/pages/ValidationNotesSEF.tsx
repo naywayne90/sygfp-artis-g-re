@@ -37,6 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useNotesSEFList } from "@/hooks/useNotesSEFList";
 import { useNotesSEF } from "@/hooks/useNotesSEF";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useCanValidateSEF } from "@/hooks/useDelegations";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
 import { format } from "date-fns";
@@ -105,7 +106,10 @@ export default function ValidationNotesSEF() {
   const navigate = useNavigate();
   const { exercice } = useExercice();
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+  const { canValidate: canValidateSEF, viaDelegation, isLoading: delegationLoading } = useCanValidateSEF();
+
+  // Autorisation : rôle direct OU délégation active
+  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]) || canValidateSEF;
 
   // États des dialogs
   const [selectedNote, setSelectedNote] = useState<NoteSEFEntity | null>(null);
@@ -225,10 +229,18 @@ export default function ValidationNotesSEF() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle
-          title="Validation Notes SEF"
-          description="Espace de validation pour les décideurs"
-        />
+        <div>
+          <ExerciceSubtitle
+            title="Validation Notes SEF"
+            description="Espace de validation pour les décideurs"
+          />
+          {viaDelegation && (
+            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
+              <User className="h-3 w-3 mr-1" />
+              Validation par délégation du DG
+            </Badge>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => navigate("/notes-sef")}>
             Retour à la liste

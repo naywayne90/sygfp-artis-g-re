@@ -13,3 +13,4 @@ export {
   DossierHeaderWithARTI
 } from './ARTIReferenceBadge';
 export { DossierStepTimeline, ETAPES_CHAINE_DEPENSE } from './DossierStepTimeline';
+export { FundingSourceSelect, FundingSourceLabel } from './FundingSourceSelect';

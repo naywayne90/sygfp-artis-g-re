@@ -20,6 +20,7 @@ export default function EtatsExecution() {
     getEtatByMission,
     getEtatByNBE,
     getEtatBySYSCO,
+    getEtatByProjet,
     directions,
     objectifsStrategiques,
     missions,
@@ -74,6 +75,7 @@ export default function EtatsExecution() {
       <Tabs defaultValue="suivi" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="suivi">Suivi Budgétaire</TabsTrigger>
+          <TabsTrigger value="projet">Par Projet</TabsTrigger>
           <TabsTrigger value="direction">Par Direction</TabsTrigger>
           <TabsTrigger value="os">Par OS</TabsTrigger>
           <TabsTrigger value="mission">Par Mission</TabsTrigger>
@@ -84,6 +86,15 @@ export default function EtatsExecution() {
 
         <TabsContent value="suivi">
           <SuiviBudgetaire summary={summary} />
+        </TabsContent>
+
+        <TabsContent value="projet">
+          <EtatGenerique
+            data={getEtatByProjet().map((d) => ({ ...d, item: d.item }))}
+            title="État par Projet / Dossier"
+            itemLabel="Projet (Réf. Dossier)"
+            filename="etat_par_projet"
+          />
         </TabsContent>
 
         <TabsContent value="direction">
