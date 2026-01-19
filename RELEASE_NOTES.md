@@ -31,6 +31,22 @@
   - `useAuditLog` : Logging basique des actions
   - `useAuditTrail` : Logging avancé avec signatures QR
 
+### Détection d'Anomalies et Cohérence
+
+- **Règles de Validation** :
+  - Activité doit appartenir à 1 Plan, 1 Direction, 1 Exercice
+  - Dépense liée à une activité existante (si renseignée)
+  - Montant ne dépassant pas le disponible (si renseigné)
+  - Détection des doublons de référence
+  - Contrôle des montants négatifs
+- **Rapport de Cohérence** : Génération automatique ou à la demande
+- **Interface Admin** : `/admin/anomalies` pour gestion des anomalies
+- **Composants** :
+  - `CoherenceReportCard` : Affichage du rapport complet
+  - `CoherenceCheckButton` : Bouton de vérification rapide
+  - `ImportValidationAlert` : Alerte pré-import
+- **Hook** : `useCoherenceCheck` avec 5 règles de validation
+
 ### Sécurité
 
 - **RLS (Row Level Security)** : Actif sur 18 tables critiques
@@ -58,7 +74,7 @@
 /execution/dashboard, /execution/imputation, /execution/expression-besoin, /execution/passation-marche
 /engagements, /liquidations, /ordonnancements, /reglements
 /planification/budget, /planification/physique, /planification/structure
-/admin/exercices, /admin/utilisateurs, /admin/roles, /admin/parametres, /admin/journal-audit
+/admin/exercices, /admin/utilisateurs, /admin/roles, /admin/parametres, /admin/journal-audit, /admin/anomalies
 /contractualisation/prestataires, /contractualisation/contrats
 /test-non-regression
 ```
@@ -104,7 +120,7 @@
 
 ## Données de Démo
 
-La migration `20260118300000_seed_demo_data.sql` crée :
+La migration `20260119100000_seed_demo_data.sql` crée :
 
 | Élément | Détail |
 |---------|--------|

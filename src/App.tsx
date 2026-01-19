@@ -54,6 +54,7 @@ import CompteursReferences from "./pages/admin/CompteursReferences";
 import ImportBudgetAdmin from "./pages/admin/ImportBudgetAdmin";
 import CompteBancaires from "./pages/admin/CompteBancaires";
 import OriginesFonds from "./pages/admin/OriginesFonds";
+import GestionAnomalies from "./pages/admin/GestionAnomalies";
 import TestNonRegression from "./pages/TestNonRegression";
 
 // Pages Planification
@@ -160,6 +161,7 @@ const App = () => (
               <Route path="/admin/import-budget" element={<ImportBudgetAdmin />} />
               <Route path="/admin/comptes-bancaires" element={<CompteBancaires />} />
               <Route path="/admin/origines-fonds" element={<OriginesFonds />} />
+              <Route path="/admin/anomalies" element={<GestionAnomalies />} />
               <Route path="/admin/test-non-regression" element={<TestNonRegression />} />
               
               {/* Planification */}
