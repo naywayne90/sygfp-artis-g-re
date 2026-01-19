@@ -33,6 +33,12 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   echeance: <Clock className="h-4 w-4 text-purple-500" />,
   budget_insuffisant: <Banknote className="h-4 w-4 text-destructive" />,
   assignation: <User className="h-4 w-4 text-primary" />,
+  roadmap_soumission: <FileText className="h-4 w-4 text-indigo-500" />,
+  roadmap_validation: <FileCheck className="h-4 w-4 text-green-500" />,
+  roadmap_rejet: <X className="h-4 w-4 text-destructive" />,
+  tache_bloquee: <AlertTriangle className="h-4 w-4 text-red-500" />,
+  tache_retard: <Clock className="h-4 w-4 text-orange-600" />,
+  dossier_a_valider: <FileText className="h-4 w-4 text-primary" />,
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -45,6 +51,12 @@ const TYPE_COLORS: Record<string, string> = {
   echeance: "bg-purple-100 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800",
   budget_insuffisant: "bg-destructive/10 border-destructive/20",
   assignation: "bg-primary/10 border-primary/20",
+  roadmap_soumission: "bg-indigo-100 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800",
+  roadmap_validation: "bg-green-100 border-green-200 dark:bg-green-900/20 dark:border-green-800",
+  roadmap_rejet: "bg-destructive/10 border-destructive/20",
+  tache_bloquee: "bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800",
+  tache_retard: "bg-orange-100 border-orange-200 dark:bg-orange-900/20 dark:border-orange-800",
+  dossier_a_valider: "bg-primary/10 border-primary/20",
 };
 
 const ENTITY_ROUTES: Record<string, string> = {
@@ -71,6 +83,8 @@ const ENTITY_ROUTES: Record<string, string> = {
   reglements: "/reglements",
   virement: "/planification/virements",
   credit_transfers: "/planification/virements",
+  roadmap_submission: "/planification/soumissions-feuilles-route",
+  task_execution: "/planification/execution-physique",
 };
 
 export function NotificationBell() {

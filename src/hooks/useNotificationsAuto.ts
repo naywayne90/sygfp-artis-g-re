@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 
 interface NotificationAutoParams {
-  type: "validation" | "rejet" | "differe" | "piece_manquante" | "alerte" | "info" | "echeance" | "budget_insuffisant" | "assignation";
+  type: "validation" | "rejet" | "differe" | "piece_manquante" | "alerte" | "info" | "echeance" | "budget_insuffisant" | "assignation" | "roadmap_soumission" | "roadmap_validation" | "roadmap_rejet" | "tache_bloquee" | "tache_retard" | "dossier_a_valider";
   title: string;
   message: string;
   entityType?: string;
@@ -10,6 +10,7 @@ interface NotificationAutoParams {
   isUrgent?: boolean;
   recipientUserId?: string;
   recipientRole?: string;
+  actionUrl?: string;
 }
 
 /**
@@ -228,6 +229,184 @@ export function useNotificationsAuto() {
     });
   };
 
+  /**
+   * Notifications pour les soumissions de feuille de route
+   */
+  const onRoadmapSoumission = async (
+    roadmapId: string,
+    roadmapCode: string,
+    directionName: string
+  ) => {
+    // Notifier le DG et DAAF
+    await notifyRole({
+      type: "roadmap_soumission",
+      title: "Feuille de route à valider",
+      message: `La feuille de route ${roadmapCode} de la direction ${directionName} nécessite votre validation.`,
+      entityType: "roadmap_submission",
+      entityId: roadmapId,
+      recipientRole: "DG",
+    });
+    await notifyRole({
+      type: "roadmap_soumission",
+      title: "Feuille de route à valider",
+      message: `La feuille de route ${roadmapCode} de la direction ${directionName} nécessite votre validation.`,
+      entityType: "roadmap_submission",
+      entityId: roadmapId,
+      recipientRole: "DAAF",
+    });
+  };
+
+  /**
+   * Notifications pour la validation de feuille de route
+   */
+  const onRoadmapValidation = async (
+    roadmapId: string,
+    roadmapCode: string,
+    creatorId: string
+  ) => {
+    await notifyUser({
+      type: "roadmap_validation",
+      title: "Feuille de route validée",
+      message: `Votre feuille de route ${roadmapCode} a été validée avec succès.`,
+      entityType: "roadmap_submission",
+      entityId: roadmapId,
+      recipientUserId: creatorId,
+    });
+  };
+
+  /**
+   * Notifications pour le rejet de feuille de route
+   */
+  const onRoadmapRejet = async (
+    roadmapId: string,
+    roadmapCode: string,
+    creatorId: string,
+    motif: string
+  ) => {
+    await notifyUser({
+      type: "roadmap_rejet",
+      title: "Feuille de route rejetée",
+      message: `Votre feuille de route ${roadmapCode} a été rejetée. Motif: ${motif}`,
+      entityType: "roadmap_submission",
+      entityId: roadmapId,
+      isUrgent: true,
+      recipientUserId: creatorId,
+    });
+  };
+
+  /**
+   * Notifications pour les tâches bloquées
+   */
+  const onTacheBloquee = async (
+    taskId: string,
+    taskName: string,
+    assigneeId: string,
+    blockedReason: string
+  ) => {
+    // Notifier l'assigné
+    await notifyUser({
+      type: "tache_bloquee",
+      title: "Tâche bloquée",
+      message: `La tâche "${taskName}" est bloquée. Raison: ${blockedReason}`,
+      entityType: "task_execution",
+      entityId: taskId,
+      isUrgent: true,
+      recipientUserId: assigneeId,
+    });
+    // Notifier les managers (Directeurs)
+    await notifyRole({
+      type: "tache_bloquee",
+      title: "Tâche bloquée dans votre direction",
+      message: `La tâche "${taskName}" est bloquée. Raison: ${blockedReason}`,
+      entityType: "task_execution",
+      entityId: taskId,
+      isUrgent: true,
+      recipientRole: "Directeur",
+    });
+  };
+
+  /**
+   * Notifications pour les tâches en retard
+   */
+  const onTacheRetard = async (
+    taskId: string,
+    taskName: string,
+    assigneeId: string,
+    daysLate: number
+  ) => {
+    await notifyUser({
+      type: "tache_retard",
+      title: "Tâche en retard",
+      message: `La tâche "${taskName}" est en retard de ${daysLate} jour(s).`,
+      entityType: "task_execution",
+      entityId: taskId,
+      isUrgent: daysLate > 3,
+      recipientUserId: assigneeId,
+    });
+  };
+
+  /**
+   * Notifications pour les dossiers de dépense à valider
+   * Notifie DG et Directeurs selon le type de dossier
+   */
+  const onDossierAValider = async (
+    entityType: string,
+    entityId: string,
+    entityCode: string,
+    montant: number
+  ) => {
+    const montantFormatted = montant.toLocaleString("fr-FR");
+
+    // Pour les Notes SEF, notifier le DG
+    if (entityType === "note_sef" || entityType === "notes_sef") {
+      await notifyRole({
+        type: "dossier_a_valider",
+        title: "Note SEF à valider",
+        message: `La Note SEF ${entityCode} (${montantFormatted} FCFA) nécessite votre validation.`,
+        entityType,
+        entityId,
+        recipientRole: "DG",
+      });
+    }
+
+    // Pour les Notes AEF, notifier les Directeurs
+    if (entityType === "note_aef" || entityType === "notes_dg") {
+      await notifyRole({
+        type: "dossier_a_valider",
+        title: "Note AEF à valider",
+        message: `La Note AEF ${entityCode} (${montantFormatted} FCFA) nécessite votre validation.`,
+        entityType,
+        entityId,
+        recipientRole: "Directeur",
+      });
+    }
+
+    // Pour les engagements, notifier le CB
+    if (entityType === "engagement" || entityType === "budget_engagements") {
+      await notifyRole({
+        type: "dossier_a_valider",
+        title: "Engagement à valider",
+        message: `L'engagement ${entityCode} (${montantFormatted} FCFA) nécessite votre validation.`,
+        entityType,
+        entityId,
+        recipientRole: "CB",
+      });
+    }
+
+    // Pour les ordonnancements, notifier le DG pour signature
+    if (entityType === "ordonnancement" || entityType === "ordonnancements") {
+      await notifyRole({
+        type: "dossier_a_valider",
+        title: "Ordonnancement à signer",
+        message: `L'ordonnancement ${entityCode} (${montantFormatted} FCFA) nécessite votre signature.`,
+        entityType,
+        entityId,
+        isUrgent: true,
+        recipientRole: "DG",
+      });
+    }
+  };
+
   return {
     notifyUser,
     notifyRole,
@@ -238,5 +417,11 @@ export function useNotificationsAuto() {
     onBudgetInsuffisant,
     onAssignation,
     onEcheance,
+    onRoadmapSoumission,
+    onRoadmapValidation,
+    onRoadmapRejet,
+    onTacheBloquee,
+    onTacheRetard,
+    onDossierAValider,
   };
 }

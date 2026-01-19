@@ -42,6 +42,12 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   echeance: <Clock className="h-5 w-5 text-purple-500" />,
   budget_insuffisant: <Banknote className="h-5 w-5 text-destructive" />,
   assignation: <User className="h-5 w-5 text-primary" />,
+  roadmap_soumission: <FileText className="h-5 w-5 text-indigo-500" />,
+  roadmap_validation: <CheckCheck className="h-5 w-5 text-green-500" />,
+  roadmap_rejet: <X className="h-5 w-5 text-destructive" />,
+  tache_bloquee: <AlertTriangle className="h-5 w-5 text-red-500" />,
+  tache_retard: <Clock className="h-5 w-5 text-orange-600" />,
+  dossier_a_valider: <FileText className="h-5 w-5 text-primary" />,
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -54,6 +60,12 @@ const TYPE_LABELS: Record<string, string> = {
   echeance: "Échéance",
   budget_insuffisant: "Budget insuffisant",
   assignation: "Assignation",
+  roadmap_soumission: "Feuille de route soumise",
+  roadmap_validation: "Feuille de route validée",
+  roadmap_rejet: "Feuille de route rejetée",
+  tache_bloquee: "Tâche bloquée",
+  tache_retard: "Tâche en retard",
+  dossier_a_valider: "Dossier à valider",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -66,6 +78,12 @@ const TYPE_COLORS: Record<string, string> = {
   echeance: "bg-purple-100 border-purple-200 text-purple-700 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-400",
   budget_insuffisant: "bg-destructive/10 border-destructive/20 text-destructive",
   assignation: "bg-primary/10 border-primary/20 text-primary",
+  roadmap_soumission: "bg-indigo-100 border-indigo-200 text-indigo-700 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-400",
+  roadmap_validation: "bg-green-100 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400",
+  roadmap_rejet: "bg-destructive/10 border-destructive/20 text-destructive",
+  tache_bloquee: "bg-red-100 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400",
+  tache_retard: "bg-orange-100 border-orange-200 text-orange-700 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-400",
+  dossier_a_valider: "bg-primary/10 border-primary/20 text-primary",
 };
 
 const ENTITY_ROUTES: Record<string, string> = {
@@ -90,6 +108,8 @@ const ENTITY_ROUTES: Record<string, string> = {
   dossiers: "/recherche",
   reglement: "/reglements",
   reglements: "/reglements",
+  roadmap_submission: "/planification/soumissions-feuilles-route",
+  task_execution: "/planification/execution-physique",
 };
 
 export default function Notifications() {

@@ -10,6 +10,14 @@ export const TYPES_NOTIFICATION = [
   { value: "alerte", label: "Alerte" },
   { value: "info", label: "Information" },
   { value: "echeance", label: "Échéance" },
+  { value: "budget_insuffisant", label: "Budget insuffisant" },
+  { value: "assignation", label: "Assignation" },
+  { value: "roadmap_soumission", label: "Feuille de route soumise" },
+  { value: "roadmap_validation", label: "Feuille de route validée" },
+  { value: "roadmap_rejet", label: "Feuille de route rejetée" },
+  { value: "tache_bloquee", label: "Tâche bloquée" },
+  { value: "tache_retard", label: "Tâche en retard" },
+  { value: "dossier_a_valider", label: "Dossier à valider" },
 ];
 
 export interface Notification {
