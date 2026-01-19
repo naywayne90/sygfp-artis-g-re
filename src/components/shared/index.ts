@@ -14,3 +14,6 @@ export {
 } from './ARTIReferenceBadge';
 export { DossierStepTimeline, ETAPES_CHAINE_DEPENSE } from './DossierStepTimeline';
 export { FundingSourceSelect, FundingSourceLabel } from './FundingSourceSelect';
+
+// Export components
+export { ExportButtons } from '../etats/ExportButtons';
