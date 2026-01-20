@@ -60,6 +60,8 @@ import { toast } from "sonner";
 import { EngagementChecklist } from "@/components/engagement/EngagementChecklist";
 import { useEngagementDocuments } from "@/hooks/useEngagementDocuments";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { ExportButtons } from "@/components/etats/ExportButtons";
+import { ExportColumn } from "@/lib/export";
 
 // Types
 interface ScanningEngagement {
@@ -79,6 +81,7 @@ interface ScanningEngagement {
   dotation_initiale: number;
   cumul_engagements: number;
   disponible: number;
+  os_code: string | null;
   documents_count: number;
   documents_provided: number;
   documents_obligatory: number;
@@ -88,7 +91,7 @@ interface ScanningEngagement {
 interface DirectionOption {
   id: string;
   code: string;
-  libelle: string;
+  label: string;
 }
 
 interface ActiviteOption {
@@ -148,7 +151,7 @@ export default function ScanningEngagement() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("directions")
-        .select("id, code, libelle")
+        .select("id, code, label")
         .order("code");
       if (error) throw error;
       return data as DirectionOption[];
@@ -187,8 +190,9 @@ export default function ScanningEngagement() {
             id,
             code,
             dotation_initiale,
-            direction:directions(id, code, libelle),
-            activite:activites(id, code, libelle)
+            direction:directions(id, code, label),
+            activite:activites(id, code, libelle),
+            os:objectifs_strategiques(id, code, libelle)
           )
         `)
         .eq("exercice", exercice)
@@ -228,6 +232,7 @@ export default function ScanningEngagement() {
         const budgetLine = eng.budget_line as any;
         const direction = budgetLine?.direction;
         const activite = budgetLine?.activite;
+        const os = budgetLine?.os;
         const stats = docStats[eng.id] || { total: 0, provided: 0, obligatory: 0, obligatoryProvided: 0 };
 
         return {
@@ -240,13 +245,14 @@ export default function ScanningEngagement() {
           statut: eng.statut,
           direction_id: direction?.id || null,
           direction_code: direction?.code || null,
-          direction_libelle: direction?.libelle || null,
+          direction_libelle: direction?.label || null,
           activite_code: activite?.code || null,
           activite_libelle: activite?.libelle || null,
           budget_line_code: budgetLine?.code || null,
           dotation_initiale: budgetLine?.dotation_initiale || 0,
           cumul_engagements: 0, // Could be calculated if needed
           disponible: budgetLine?.dotation_initiale || 0,
+          os_code: os?.code || null,
           documents_count: stats.total,
           documents_provided: stats.provided,
           documents_obligatory: stats.obligatory,
@@ -367,6 +373,22 @@ export default function ScanningEngagement() {
     setSelectedStatus("all");
   };
 
+  // Export columns definition
+  const exportColumns: ExportColumn[] = [
+    { key: "numero", label: "Numéro", type: "text" },
+    { key: "date_engagement", label: "Date", type: "date" },
+    { key: "fournisseur", label: "Fournisseur", type: "text" },
+    { key: "objet", label: "Objet", type: "text" },
+    { key: "montant", label: "Montant", type: "currency" },
+    { key: "dotation_initiale", label: "Dotation", type: "currency" },
+    { key: "cumul_engagements", label: "Cumul", type: "currency" },
+    { key: "disponible", label: "Disponible", type: "currency" },
+    { key: "direction_code", label: "Direction", type: "text" },
+    { key: "activite_code", label: "Code Activité", type: "text" },
+    { key: "os_code", label: "N° OS", type: "text" },
+    { key: "statut", label: "Statut", type: "text" },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
@@ -380,10 +402,23 @@ export default function ScanningEngagement() {
             Numérisation et upload des pièces justificatives pour les engagements
           </p>
         </div>
-        <Button variant="outline" onClick={() => refetch()} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Actualiser
-        </Button>
+        <div className="flex gap-2">
+          <ExportButtons
+            data={filteredEngagements as unknown as Record<string, unknown>[]}
+            columns={exportColumns}
+            filename="scanning_engagements"
+            title="Liste des Engagements - Scanning"
+            subtitle={`Exercice ${exercice}`}
+            showCopy
+            showPrint
+            showTotals
+            totalColumns={["montant", "dotation_initiale", "disponible"]}
+          />
+          <Button variant="outline" onClick={() => refetch()} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -459,7 +494,7 @@ export default function ScanningEngagement() {
                 <SelectItem value="all">Toutes les directions</SelectItem>
                 {directions.map(dir => (
                   <SelectItem key={dir.id} value={dir.id}>
-                    {dir.code} - {dir.libelle}
+                    {dir.code} - {dir.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -546,7 +581,11 @@ export default function ScanningEngagement() {
                       <TableHead>Fournisseur</TableHead>
                       <TableHead>Direction</TableHead>
                       <TableHead className="text-right">Dotation</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
+                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
                       <TableHead className="text-center">Documents</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -576,8 +615,22 @@ export default function ScanningEngagement() {
                         <TableCell className="text-right text-muted-foreground">
                           {formatMontant(eng.dotation_initiale)}
                         </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
+                          {formatMontant(eng.cumul_engagements)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell">
+                          <span className={eng.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                            {formatMontant(eng.disponible)}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(eng.montant)}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {eng.activite_code || "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {eng.os_code || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(
@@ -634,7 +687,12 @@ export default function ScanningEngagement() {
                       <TableHead>Objet</TableHead>
                       <TableHead>Fournisseur</TableHead>
                       <TableHead>Direction</TableHead>
+                      <TableHead className="text-right">Dotation</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
+                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
                       <TableHead className="text-center">Documents</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -661,8 +719,25 @@ export default function ScanningEngagement() {
                             "-"
                           )}
                         </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {formatMontant(eng.dotation_initiale)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
+                          {formatMontant(eng.cumul_engagements)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell">
+                          <span className={eng.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                            {formatMontant(eng.disponible)}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(eng.montant)}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {eng.activite_code || "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {eng.os_code || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(

@@ -76,6 +76,10 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
     type_depense: "",
     os_id: "",
     mission_id: "",
+    // Champs contenu de la note (Prompt 26)
+    expose: "",
+    avis: "",
+    recommandations: "",
   });
 
   // Type pour les référentiels
@@ -136,6 +140,9 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
         type_depense: note.type_depense || "",
         os_id: note.os_id || "",
         mission_id: note.mission_id || "",
+        expose: note.expose || "",
+        avis: note.avis || "",
+        recommandations: note.recommandations || "",
       });
       // Déterminer le type de bénéficiaire selon les données existantes
       if (note.beneficiaire_id) {
@@ -161,6 +168,9 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
         type_depense: "",
         os_id: "",
         mission_id: "",
+        expose: "",
+        avis: "",
+        recommandations: "",
       });
       setTypeBeneficiaire("");
       setUploadedFiles([]);
@@ -393,6 +403,10 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
         type_depense: formData.type_depense || null,
         os_id: formData.os_id || null,
         mission_id: formData.mission_id || null,
+        // Champs contenu de la note (Prompt 26)
+        expose: formData.expose || null,
+        avis: formData.avis || null,
+        recommandations: formData.recommandations || null,
       };
 
       if (note) {
@@ -861,6 +875,62 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
                 placeholder="Description détaillée de la note"
                 rows={3}
               />
+            </div>
+
+            {/* Section Contenu de la note (Prompt 26) */}
+            <div className="col-span-2 space-y-4 p-4 rounded-lg border bg-blue-50/50 dark:bg-blue-950/20">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <Label className="text-base font-medium">Contenu de la note</Label>
+              </div>
+
+              {/* Exposé */}
+              <div className="space-y-1.5">
+                <Label htmlFor="expose" className="text-sm">Exposé</Label>
+                <Textarea
+                  id="expose"
+                  value={formData.expose}
+                  onChange={(e) => setFormData({ ...formData, expose: e.target.value })}
+                  placeholder="Exposé détaillé de la situation ou du contexte de la demande..."
+                  rows={4}
+                  className="resize-y min-h-[100px]"
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {formData.expose.length} caractère(s)
+                </p>
+              </div>
+
+              {/* Avis */}
+              <div className="space-y-1.5">
+                <Label htmlFor="avis" className="text-sm">Avis</Label>
+                <Textarea
+                  id="avis"
+                  value={formData.avis}
+                  onChange={(e) => setFormData({ ...formData, avis: e.target.value })}
+                  placeholder="Avis technique ou fonctionnel sur la demande..."
+                  rows={3}
+                  className="resize-y min-h-[80px]"
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {formData.avis.length} caractère(s)
+                </p>
+              </div>
+
+              {/* Recommandations */}
+              <div className="space-y-1.5">
+                <Label htmlFor="recommandations" className="text-sm">Recommandations</Label>
+                <Textarea
+                  id="recommandations"
+                  value={formData.recommandations}
+                  onChange={(e) => setFormData({ ...formData, recommandations: e.target.value })}
+                  placeholder="Recommandations pour le traitement de la demande..."
+                  rows={3}
+                  className="resize-y min-h-[80px]"
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {formData.recommandations.length} caractère(s)
+                </p>
+              </div>
             </div>
 
             {/* Pièces jointes - Utilisation du composant FileList amélioré */}

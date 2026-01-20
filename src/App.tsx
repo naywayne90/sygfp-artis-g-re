@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { ExerciceProvider } from "@/contexts/ExerciceContext";
+import { RBACProvider } from "@/contexts/RBACContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 // Pages principales
@@ -71,6 +72,10 @@ import NotificationsBudgetaires from "./pages/planification/NotificationsBudgeta
 import FeuilleRouteImportPage from "./pages/planification/FeuilleRouteImportPage";
 import RoadmapSubmissionsPage from "./pages/planification/RoadmapSubmissionsPage";
 import TaskExecutionPage from "./pages/execution/TaskExecutionPage";
+import EtatExecutionTachesPage from "./pages/gestion-taches/EtatExecutionTachesPage";
+import TachesRealiseesPage from "./pages/gestion-taches/TachesRealiseesPage";
+import TachesDiffereesPage from "./pages/gestion-taches/TachesDiffereesPage";
+import MajFeuillesRoutePage from "./pages/gestion-taches/MajFeuillesRoutePage";
 import DashboardDGPage from "./pages/execution/DashboardDGPage";
 import DashboardDirectionPage from "./pages/execution/DashboardDirectionPage";
 
@@ -81,15 +86,34 @@ import DashboardExecution from "./pages/execution/DashboardExecution";
 import PassationMarche from "./pages/execution/PassationMarche";
 import ScanningEngagement from "./pages/ScanningEngagement";
 import ScanningLiquidation from "./pages/ScanningLiquidation";
+import NotesDirectionGenerale from "./pages/NotesDirectionGenerale";
+import ValidationNotesDG from "./pages/ValidationNotesDG";
+import VerificationNoteDG from "./pages/VerificationNoteDG";
+import NotesAValider from "./pages/dg/NotesAValider";
+import ValiderNoteDG from "./pages/dg/ValiderNoteDG";
 
 // Pages Approvisionnement
 import Approvisionnement from "./pages/approvisionnement/Approvisionnement";
 
 // Pages Trésorerie
 import GestionTresorerie from "./pages/tresorerie/GestionTresorerie";
+import {
+  ApprovisionnementsBanque,
+  ApprovisionnementsCaisse,
+  MouvementsBanque,
+  MouvementsCaisse,
+} from "./pages/tresorerie";
 
 // Pages Recettes
 import DeclarationRecette from "./pages/recettes/DeclarationRecette";
+
+// Pages Programmatique
+import {
+  ChargerBudget,
+  MiseAJourBudget,
+  ListeBudget,
+  Reamenagement,
+} from "./pages/programmatique";
 
 // Pages Contractualisation
 import Prestataires from "./pages/contractualisation/Prestataires";
@@ -118,15 +142,18 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ExerciceProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <RBACProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             {/* Routes indépendantes (sans layout) */}
             <Route path="/auth" element={<LoginPage />} />
             <Route path="/select-exercice" element={<SelectExercice />} />
             <Route path="/no-open-exercice" element={<NoOpenExercise />} />
-            
+            <Route path="/verification/note-dg/:token" element={<VerificationNoteDG />} />
+            <Route path="/dg/valider/:token" element={<ValiderNoteDG />} />
+
             {/* Routes avec layout */}
             <Route element={<LayoutWrapper />}>
               {/* Accueil */}
@@ -178,6 +205,10 @@ const App = () => (
               <Route path="/planification/feuilles-route" element={<FeuilleRouteImportPage />} />
               <Route path="/planification/soumissions-feuilles-route" element={<RoadmapSubmissionsPage />} />
               <Route path="/planification/execution-physique" element={<TaskExecutionPage />} />
+              <Route path="/planification/maj-feuilles-route" element={<MajFeuillesRoutePage />} />
+              <Route path="/gestion-taches/etat-execution" element={<EtatExecutionTachesPage />} />
+              <Route path="/gestion-taches/taches-realisees" element={<TachesRealiseesPage />} />
+              <Route path="/gestion-taches/taches-differees" element={<TachesDiffereesPage />} />
 
               {/* Exécution Budgétaire */}
               <Route path="/execution/dashboard" element={<DashboardExecution />} />
@@ -190,6 +221,9 @@ const App = () => (
               <Route path="/notes-aef" element={<NotesAEF />} />
               <Route path="/notes-aef/validation" element={<ValidationNotesAEF />} />
               <Route path="/notes-aef/:id" element={<NoteAEFDetail />} />
+              <Route path="/notes-dg" element={<NotesDirectionGenerale />} />
+              <Route path="/notes-dg/validation" element={<ValidationNotesDG />} />
+              <Route path="/dg/notes-a-valider" element={<NotesAValider />} />
               <Route path="/execution/imputation" element={<ImputationPage />} />
               <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
               <Route path="/execution/passation-marche" element={<PassationMarche />} />
@@ -209,9 +243,19 @@ const App = () => (
               
               {/* Trésorerie */}
               <Route path="/tresorerie" element={<GestionTresorerie />} />
+              <Route path="/tresorerie/approvisionnements/banque" element={<ApprovisionnementsBanque />} />
+              <Route path="/tresorerie/approvisionnements/caisse" element={<ApprovisionnementsCaisse />} />
+              <Route path="/tresorerie/mouvements/banque" element={<MouvementsBanque />} />
+              <Route path="/tresorerie/mouvements/caisse" element={<MouvementsCaisse />} />
               
               {/* Recettes */}
               <Route path="/recettes" element={<DeclarationRecette />} />
+
+              {/* Programmatique */}
+              <Route path="/programmatique/charger-budget" element={<ChargerBudget />} />
+              <Route path="/programmatique/mise-a-jour" element={<MiseAJourBudget />} />
+              <Route path="/programmatique/liste-budget" element={<ListeBudget />} />
+              <Route path="/programmatique/reamenagement" element={<Reamenagement />} />
               
               {/* Contractualisation */}
               <Route path="/contractualisation/prestataires" element={<Prestataires />} />
@@ -222,7 +266,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
-        </BrowserRouter>
+          </BrowserRouter>
+        </RBACProvider>
       </ExerciceProvider>
     </TooltipProvider>
   </QueryClientProvider>

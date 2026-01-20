@@ -170,7 +170,7 @@ export function useAuditTrail() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, full_name, email, role_hierarchique, profil_fonctionnel, direction_id, direction:directions(code, libelle)")
+      .select("id, full_name, email, role_hierarchique, profil_fonctionnel, direction_id, direction:directions(code, label)")
       .eq("id", user.id)
       .single();
 
@@ -293,7 +293,7 @@ export function useAuditTrail() {
           _signature_hash: signature.hash,
           _signature_qr: signature.qrPayload,
         } : {}),
-      } as Json;
+      } as unknown as Json;
 
       // Try RPC first
       const { error: rpcError } = await supabase.rpc("log_audit_action", {

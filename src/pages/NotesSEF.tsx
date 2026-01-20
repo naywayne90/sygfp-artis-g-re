@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NoteSEFForm } from "@/components/notes-sef/NoteSEFForm";
 import { NoteSEFList } from "@/components/notes-sef/NoteSEFList";
-import { NoteSEFDetails } from "@/components/notes-sef/NoteSEFDetails";
+import { NoteSEFPreviewDrawer } from "@/components/notes-sef/NoteSEFPreviewDrawer";
 import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
 import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
 import { useNotesSEF, NoteSEF } from "@/hooks/useNotesSEF";
@@ -78,7 +78,7 @@ export default function NotesSEF() {
   // État local pour les dialogs
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<NoteSEF | null>(null);
-  const [viewingNote, setViewingNote] = useState<NoteSEF | null>(null);
+  const [previewNote, setPreviewNote] = useState<NoteSEF | null>(null); // Drawer aperçu rapide (Prompt 26)
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
 
@@ -371,7 +371,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Toutes les notes SEF"
             description={`${pagination.total} note(s) trouvée(s)`}
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             onValidate={handleValidate}
@@ -390,7 +390,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Brouillons"
             description="Notes en cours de rédaction"
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             onDelete={handleDelete}
@@ -407,7 +407,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes à valider"
             description="Notes en attente de validation"
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             onValidate={canValidate ? handleValidate : undefined}
             onReject={canValidate ? setRejectingNote : undefined}
             onDefer={canValidate ? setDeferringNote : undefined}
@@ -424,7 +424,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes validées"
             description="Notes ayant été validées"
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             showActions={true}
             onRetry={refetch}
             isLoading={isLoading}
@@ -438,7 +438,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes différées"
             description="Notes en attente de conditions de reprise"
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             onValidate={canValidate ? handleValidate : undefined}
             onResume={handleResume}
             showActions={true}
@@ -454,7 +454,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes rejetées"
             description="Notes ayant été rejetées"
-            onView={(note) => setViewingNote(note)}
+            onView={(note) => setPreviewNote(note)}
             showActions={true}
             onRetry={refetch}
             isLoading={isLoading}
@@ -483,17 +483,6 @@ export default function NotesSEF() {
         note={editingNote}
       />
 
-      <NoteSEFDetails
-        open={!!viewingNote}
-        onOpenChange={() => setViewingNote(null)}
-        note={viewingNote}
-        onEdit={handleEdit}
-        onSubmit={handleSubmit}
-        onValidate={canValidate ? handleValidate : undefined}
-        onReject={canValidate ? setRejectingNote : undefined}
-        onDefer={canValidate ? setDeferringNote : undefined}
-      />
-
       <NoteSEFRejectDialog
         open={!!rejectingNote}
         onOpenChange={() => setRejectingNote(null)}
@@ -506,6 +495,14 @@ export default function NotesSEF() {
         onOpenChange={() => setDeferringNote(null)}
         note={deferringNote}
         onConfirm={handleDefer}
+      />
+
+      {/* Drawer aperçu rapide (Prompt 26) */}
+      <NoteSEFPreviewDrawer
+        open={!!previewNote}
+        onOpenChange={(open) => !open && setPreviewNote(null)}
+        note={previewNote}
+        onEdit={handleEdit}
       />
     </div>
   );

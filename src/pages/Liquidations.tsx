@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, Receipt, CheckCircle, XCircle, Clock, FileText, Tag, CreditCard, MoreHorizontal, Eye, FileSignature } from "lucide-react";
+import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
 import { useLiquidations, Liquidation, VALIDATION_STEPS } from "@/hooks/useLiquidations";
 import { LiquidationForm } from "@/components/liquidation/LiquidationForm";
 import { LiquidationList } from "@/components/liquidation/LiquidationList";
@@ -167,12 +168,15 @@ export default function Liquidations() {
             Gestion des liquidations après constatation du service fait
           </p>
         </div>
-        <PermissionGuard permission="liquidation.create" showDelegationBadge>
-          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4" />
-            Nouvelle liquidation
-          </Button>
-        </PermissionGuard>
+        <div className="flex gap-2">
+          <BudgetChainExportButton step="liquidation" />
+          <PermissionGuard permission="liquidation.create" showDelegationBadge>
+            <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4" />
+              Nouvelle liquidation
+            </Button>
+          </PermissionGuard>
+        </div>
       </div>
 
       {/* Search */}

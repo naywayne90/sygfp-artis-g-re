@@ -115,9 +115,9 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
   const { data: objectifsStrategiques = [] } = useQuery<RefItem[]>({
     queryKey: ["os-ref-etats"],
-    queryFn: () => queryTable<RefItem>("objectifs_strategiques", "id, code, libelle", { 
-      est_active: true, 
-      order: "code" 
+    queryFn: () => queryTable<RefItem>("objectifs_strategiques", "id, code, libelle", {
+      est_actif: true,
+      order: "code"
     }),
   });
 
@@ -586,12 +586,12 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
       const dossiers = await queryTable<{
         id: string;
-        dossier_ref: string;
+        numero: string;
         objet: string;
         direction_id: string | null;
         statut_global: string | null;
         montant_estime: number;
-      }>("dossiers", "id, dossier_ref, objet, direction_id, statut_global, montant_estime", dossierFilters);
+      }>("dossiers", "id, numero, objet, direction_id, statut_global, montant_estime", dossierFilters);
 
       // Get expressions de besoin linked to dossiers
       const expBesoins = await queryTable<{
@@ -674,7 +674,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       // Initialize with dossiers
       dossiers.forEach(d => {
         projetData[d.id] = {
-          dossier: { id: d.id, code: d.dossier_ref || "-", libelle: d.objet || "Sans objet" },
+          dossier: { id: d.id, code: d.numero || "-", libelle: d.objet || "Sans objet" },
           direction_id: d.direction_id,
           statut: d.statut_global,
           dotation: d.montant_estime || 0,

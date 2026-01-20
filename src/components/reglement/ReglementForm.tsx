@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,14 +34,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import { 
-  useReglements, 
-  MODES_PAIEMENT, 
+import {
+  useReglements,
+  MODES_PAIEMENT,
   COMPTES_BANCAIRES_ARTI,
   DOCUMENTS_REGLEMENT,
   ReglementFormData,
   CompteBancaire
 } from "@/hooks/useReglements";
+import { useImputationValidation } from "@/hooks/useImputationValidation";
+import { ImputationWarning } from "@/components/budget/ImputationWarning";
+import { splitImputation } from "@/lib/budget/imputation-utils";
 
 const formSchema = z.object({
   ordonnancement_id: z.string().min(1, "Sélectionnez un ordonnancement"),
@@ -67,12 +70,14 @@ const formatMontant = (montant: number) => {
 };
 
 export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdonnancementId }: ReglementFormProps) {
-  const { 
-    ordonnancementsValides, 
+  const {
+    ordonnancementsValides,
     comptesBancaires,
-    createReglement, 
-    calculateReglementAvailability 
+    createReglement,
+    calculateReglementAvailability
   } = useReglements();
+  const { validateImputation, logImputationWarning } = useImputationValidation();
+
   const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<any>(null);
   const [availability, setAvailability] = useState<{
     montantOrdonnance: number;
@@ -81,6 +86,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   } | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [preuvePaiementUploaded, setPreuvePaiementUploaded] = useState(false);
+  const [imputationJustification, setImputationJustification] = useState("");
 
   // Utiliser les vrais comptes bancaires ou le fallback
   const comptesDisponibles: Array<{ value: string; label: string; banque: string; solde?: number | null }> = 
@@ -110,6 +116,18 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   const watchedMontant = form.watch("montant");
   const watchedCompte = form.watch("compte_bancaire_arti");
 
+  // Valider l'imputation de l'ordonnancement sélectionné (via liquidation → engagement)
+  const imputationValidation = useMemo(() => {
+    if (!selectedOrdonnancement) return null;
+    const budgetLineCode =
+      selectedOrdonnancement.liquidation?.engagement?.budget_line?.code;
+    return validateImputation(budgetLineCode, { allowUnknownWithJustification: true });
+  }, [selectedOrdonnancement, validateImputation]);
+
+  // Vérifier si la justification est requise et suffisante
+  const needsJustification = imputationValidation && !imputationValidation.isFoundInBudget;
+  const justificationValid = !needsJustification || imputationJustification.length >= 10;
+
   // Pré-sélectionner l'ordonnancement si fourni
   useEffect(() => {
     if (preselectedOrdonnancementId && ordonnancementsValides.length > 0) {
@@ -131,6 +149,8 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
       setSelectedOrdonnancement(null);
       setAvailability(null);
     }
+    // Reset justification quand l'ordonnancement change
+    setImputationJustification("");
   }, [watchedOrdonnancementId, ordonnancementsValides]);
 
   // Trouver le compte sélectionné
@@ -148,6 +168,11 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   };
 
   const onSubmit = async (values: FormValues) => {
+    // Vérifier la justification si imputation non trouvée
+    if (needsJustification && !justificationValid) {
+      return; // Ne pas soumettre sans justification
+    }
+
     // Vérifier que la preuve de paiement est fournie (recommandée)
     if (!preuvePaiementUploaded) {
       const confirm = window.confirm(
@@ -157,7 +182,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
     }
 
     const compte = comptesDisponibles.find(c => c.value === values.compte_bancaire_arti);
-    
+
     const data: ReglementFormData = {
       ordonnancement_id: values.ordonnancement_id,
       date_paiement: format(values.date_paiement, "yyyy-MM-dd"),
@@ -170,13 +195,28 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
       observation: values.observation,
     };
 
-    await createReglement.mutateAsync(data);
+    const result = await createReglement.mutateAsync(data);
+
+    // Logger le warning si imputation non trouvée (avec justification)
+    if (needsJustification && result?.id) {
+      const budgetLineCode =
+        selectedOrdonnancement?.liquidation?.engagement?.budget_line?.code || "";
+      await logImputationWarning(
+        "reglement",
+        result.id,
+        budgetLineCode,
+        imputationJustification
+      );
+    }
+
+    setImputationJustification("");
     onSuccess?.();
   };
 
-  const isFormValid = form.formState.isValid && 
-    availability && 
-    watchedMontant <= availability.restantAPayer;
+  const isFormValid = form.formState.isValid &&
+    availability &&
+    watchedMontant <= availability.restantAPayer &&
+    justificationValid;
 
   return (
     <Form {...form}>
@@ -242,8 +282,39 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                     <span className="text-muted-foreground">RIB:</span>
                     <p className="font-medium">{selectedOrdonnancement.rib || "-"}</p>
                   </div>
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Imputation:</span>
+                    <p className="font-mono">
+                      {(() => {
+                        const { imputation_10, imputation_suite } = splitImputation(
+                          selectedOrdonnancement.liquidation?.engagement?.budget_line?.code
+                        );
+                        return (
+                          <>
+                            <span className="font-semibold">{imputation_10}</span>
+                            {imputation_suite !== "-" && (
+                              <span className="text-muted-foreground">{imputation_suite}</span>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </p>
+                  </div>
                 </div>
               </div>
+            )}
+
+            {/* Warning si imputation non trouvée dans le budget */}
+            {selectedOrdonnancement && imputationValidation && (
+              <ImputationWarning
+                validation={imputationValidation}
+                imputation={selectedOrdonnancement.liquidation?.engagement?.budget_line?.code}
+                onJustificationChange={setImputationJustification}
+                justification={imputationJustification}
+                showJustificationField={true}
+                minJustificationLength={10}
+                className="mt-4"
+              />
             )}
           </CardContent>
         </Card>

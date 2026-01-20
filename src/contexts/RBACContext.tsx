@@ -85,7 +85,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
         .from('profiles')
         .select(`
           *,
-          direction:directions(code, libelle)
+          direction:directions(code, label)
         `)
         .eq('id', user.id)
         .single();
@@ -108,7 +108,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
       roleHierarchique: profile.role_hierarchique || 'Agent',
       directionId: profile.direction_id,
       directionCode: profile.direction?.code || null,
-      directionLibelle: profile.direction?.libelle || null,
+      directionLibelle: profile.direction?.label || null,
       isActive: profile.is_active ?? true,
     };
   }, [profile]);

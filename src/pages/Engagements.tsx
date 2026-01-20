@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2, Lock, Tag, MoreHorizontal, Eye, Send, FolderOpen, Receipt } from "lucide-react";
+import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
 import { useEngagements, Engagement } from "@/hooks/useEngagements";
 import { EngagementForm } from "@/components/engagement/EngagementForm";
 import { EngagementFromPMForm } from "@/components/engagement/EngagementFromPMForm";
@@ -161,24 +162,27 @@ export default function Engagements() {
             Gestion des engagements budgétaires
           </p>
         </div>
-        <PermissionGuard permission="engagement.create" showDelegationBadge>
-          {isReadOnly ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button className="gap-2" disabled>
-                  <Lock className="h-4 w-4" />
-                  Nouvel engagement
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{getDisabledMessage()}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
-              <Plus className="h-4 w-4" />
-              Nouvel engagement
-            </Button>
-          )}
-        </PermissionGuard>
+        <div className="flex gap-2">
+          <BudgetChainExportButton step="engagement" />
+          <PermissionGuard permission="engagement.create" showDelegationBadge>
+            {isReadOnly ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="gap-2" disabled>
+                    <Lock className="h-4 w-4" />
+                    Nouvel engagement
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{getDisabledMessage()}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
+                <Plus className="h-4 w-4" />
+                Nouvel engagement
+              </Button>
+            )}
+          </PermissionGuard>
+        </div>
       </div>
 
       {/* Stats Cards */}

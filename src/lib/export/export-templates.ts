@@ -329,7 +329,7 @@ export const feuillesRouteTemplates: ExportTemplate[] = [
     description: "Toutes les feuilles de route",
     columns: [
       { key: "reference", label: "Référence", type: "text", width: 18 },
-      { key: "direction.libelle", label: "Direction", type: "text", width: 25 },
+      { key: "direction.label", label: "Direction", type: "text", width: 25 },
       { key: "statut", label: "Statut", type: "text", format: formatters.status, width: 12 },
       { key: "budget_total", label: "Budget Total", type: "currency", width: 15 },
       { key: "taux_execution", label: "Taux Exec.", type: "text", format: (v) => v ? `${v}%` : "-", width: 10 },

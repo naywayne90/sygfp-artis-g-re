@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -32,6 +32,9 @@ import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Calculator, CreditCard, FileText, Building2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useOrdonnancements, MODES_PAIEMENT, OrdonnancementFormData } from "@/hooks/useOrdonnancements";
+import { useImputationValidation } from "@/hooks/useImputationValidation";
+import { ImputationWarning } from "@/components/budget/ImputationWarning";
+import { splitImputation } from "@/lib/budget/imputation-utils";
 
 const formSchema = z.object({
   liquidation_id: z.string().min(1, "Veuillez sélectionner une liquidation"),
@@ -64,12 +67,15 @@ export function OrdonnancementForm({
     calculateOrdonnancementAvailability,
   } = useOrdonnancements();
 
+  const { validateImputation, logImputationWarning } = useImputationValidation();
+
   const [selectedLiquidation, setSelectedLiquidation] = useState<any>(null);
   const [availability, setAvailability] = useState({
     montantLiquide: 0,
     ordonnancementsAnterieurs: 0,
     restantAOrdonnancer: 0,
   });
+  const [imputationJustification, setImputationJustification] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,6 +94,17 @@ export function OrdonnancementForm({
 
   const watchedLiquidationId = form.watch("liquidation_id");
   const watchedMontant = form.watch("montant");
+
+  // Valider l'imputation de la liquidation sélectionnée
+  const imputationValidation = useMemo(() => {
+    if (!selectedLiquidation) return null;
+    const budgetLineCode = selectedLiquidation.engagement?.budget_line?.code;
+    return validateImputation(budgetLineCode, { allowUnknownWithJustification: true });
+  }, [selectedLiquidation, validateImputation]);
+
+  // Vérifier si la justification est requise et suffisante
+  const needsJustification = imputationValidation && !imputationValidation.isFoundInBudget;
+  const justificationValid = !needsJustification || imputationJustification.length >= 10;
 
   // Charger les données de la liquidation sélectionnée
   useEffect(() => {
@@ -116,12 +133,32 @@ export function OrdonnancementForm({
         restantAOrdonnancer: 0,
       });
     }
+    // Reset justification quand la liquidation change
+    setImputationJustification("");
   }, [watchedLiquidationId, liquidationsValidees]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await createOrdonnancement.mutateAsync(data as OrdonnancementFormData);
+      // Vérifier la justification si imputation non trouvée
+      if (needsJustification && !justificationValid) {
+        return; // Ne pas soumettre sans justification
+      }
+
+      const result = await createOrdonnancement.mutateAsync(data as OrdonnancementFormData);
+
+      // Logger le warning si imputation non trouvée (avec justification)
+      if (needsJustification && result?.id) {
+        const budgetLineCode = selectedLiquidation?.engagement?.budget_line?.code || "";
+        await logImputationWarning(
+          "ordonnancement",
+          result.id,
+          budgetLineCode,
+          imputationJustification
+        );
+      }
+
       form.reset();
+      setImputationJustification("");
       onOpenChange(false);
     } catch (error) {
       // Error handled by mutation
@@ -207,12 +244,40 @@ export function OrdonnancementForm({
                       </div>
                       <div className="col-span-2">
                         <span className="text-muted-foreground">Imputation:</span>
-                        <span className="ml-2 font-medium">
-                          {selectedLiquidation.engagement?.budget_line?.code} - {selectedLiquidation.engagement?.budget_line?.label}
+                        <span className="ml-2 font-mono">
+                          {(() => {
+                            const { imputation_10, imputation_suite } = splitImputation(
+                              selectedLiquidation.engagement?.budget_line?.code
+                            );
+                            return (
+                              <>
+                                <span className="font-semibold">{imputation_10}</span>
+                                {imputation_suite !== "-" && (
+                                  <span className="text-muted-foreground">{imputation_suite}</span>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </span>
+                        <span className="ml-2 text-muted-foreground">
+                          - {selectedLiquidation.engagement?.budget_line?.label}
                         </span>
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Warning si imputation non trouvée dans le budget */}
+                {selectedLiquidation && imputationValidation && (
+                  <ImputationWarning
+                    validation={imputationValidation}
+                    imputation={selectedLiquidation.engagement?.budget_line?.code}
+                    onJustificationChange={setImputationJustification}
+                    justification={imputationJustification}
+                    showJustificationField={true}
+                    minJustificationLength={10}
+                    className="mt-4"
+                  />
                 )}
               </CardContent>
             </Card>
@@ -445,7 +510,12 @@ export function OrdonnancementForm({
               </Button>
               <Button
                 type="submit"
-                disabled={createOrdonnancement.isPending || isOverBudget || !selectedLiquidation}
+                disabled={
+                  createOrdonnancement.isPending ||
+                  isOverBudget ||
+                  !selectedLiquidation ||
+                  !justificationValid
+                }
               >
                 {createOrdonnancement.isPending ? "Création..." : "Créer l'ordonnancement"}
               </Button>

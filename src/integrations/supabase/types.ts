@@ -7214,6 +7214,162 @@ export type Database = {
           },
         ]
       }
+      note_imputations: {
+        Row: {
+          id: string
+          note_sef_id: string
+          impute_par_user_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          note_sef_id: string
+          impute_par_user_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          note_sef_id?: string
+          impute_par_user_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "note_imputations_note_sef_id_fkey"
+            columns: ["note_sef_id"]
+            isOneToOne: true
+            referencedRelation: "notes_sef"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_imputations_impute_par_user_id_fkey"
+            columns: ["impute_par_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      note_imputation_lignes: {
+        Row: {
+          id: string
+          imputation_id: string
+          destinataire: string
+          destinataire_id: string | null
+          instruction_type: Database["public"]["Enums"]["instruction_type"]
+          action_detail: string | null
+          priorite: Database["public"]["Enums"]["imputation_priorite"]
+          delai: string | null
+          ordre: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          imputation_id: string
+          destinataire: string
+          destinataire_id?: string | null
+          instruction_type?: Database["public"]["Enums"]["instruction_type"]
+          action_detail?: string | null
+          priorite?: Database["public"]["Enums"]["imputation_priorite"]
+          delai?: string | null
+          ordre?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          imputation_id?: string
+          destinataire?: string
+          destinataire_id?: string | null
+          instruction_type?: Database["public"]["Enums"]["instruction_type"]
+          action_detail?: string | null
+          priorite?: Database["public"]["Enums"]["imputation_priorite"]
+          delai?: string | null
+          ordre?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "note_imputation_lignes_imputation_id_fkey"
+            columns: ["imputation_id"]
+            isOneToOne: false
+            referencedRelation: "note_imputations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_imputation_lignes_destinataire_id_fkey"
+            columns: ["destinataire_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validation_dg: {
+        Row: {
+          id: string
+          note_type: Database["public"]["Enums"]["validation_note_type"]
+          note_id: string
+          token: string
+          status: Database["public"]["Enums"]["validation_dg_status"]
+          validated_by_user_id: string | null
+          validated_at: string | null
+          commentaire: string | null
+          qr_payload_url: string | null
+          exercice_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          note_type?: Database["public"]["Enums"]["validation_note_type"]
+          note_id: string
+          token?: string
+          status?: Database["public"]["Enums"]["validation_dg_status"]
+          validated_by_user_id?: string | null
+          validated_at?: string | null
+          commentaire?: string | null
+          qr_payload_url?: string | null
+          exercice_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          note_type?: Database["public"]["Enums"]["validation_note_type"]
+          note_id?: string
+          token?: string
+          status?: Database["public"]["Enums"]["validation_dg_status"]
+          validated_by_user_id?: string | null
+          validated_at?: string | null
+          commentaire?: string | null
+          qr_payload_url?: string | null
+          exercice_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validation_dg_validated_by_user_id_fkey"
+            columns: ["validated_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validation_dg_exercice_id_fkey"
+            columns: ["exercice_id"]
+            isOneToOne: false
+            referencedRelation: "exercices_budgetaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes_sef: {
         Row: {
           beneficiaire_id: string | null
@@ -7231,6 +7387,9 @@ export type Database = {
           demandeur_id: string | null
           description: string | null
           dg_validation_required: boolean | null
+          expose: string | null
+          avis: string | null
+          recommandations: string | null
           differe_at: string | null
           differe_by: string | null
           differe_condition: string | null
@@ -7276,6 +7435,9 @@ export type Database = {
           demandeur_id?: string | null
           description?: string | null
           dg_validation_required?: boolean | null
+          expose?: string | null
+          avis?: string | null
+          recommandations?: string | null
           differe_at?: string | null
           differe_by?: string | null
           differe_condition?: string | null
@@ -7321,6 +7483,9 @@ export type Database = {
           demandeur_id?: string | null
           description?: string | null
           dg_validation_required?: boolean | null
+          expose?: string | null
+          avis?: string | null
+          recommandations?: string | null
           differe_at?: string | null
           differe_by?: string | null
           differe_condition?: string | null
@@ -13782,6 +13947,25 @@ export type Database = {
         | "Sous-Directeur"
         | "Directeur"
         | "DG"
+      instruction_type:
+        | "ATTRIBUTION"
+        | "DIFFUSION"
+        | "SUIVI"
+        | "A_FAIRE_SUITE"
+        | "CLASSEMENT"
+      imputation_priorite:
+        | "basse"
+        | "normale"
+        | "haute"
+        | "urgente"
+      validation_dg_status:
+        | "PENDING"
+        | "APPROVED"
+        | "REJECTED"
+        | "DEFERRED"
+      validation_note_type:
+        | "SEF"
+        | "AEF"
     }
     CompositeTypes: {
       [_ in never]: never

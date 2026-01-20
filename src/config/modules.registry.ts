@@ -41,6 +41,7 @@ import {
   Wallet,
   ClipboardList,
   ArrowRightLeft,
+  ArrowLeftRight,
   FileUp,
   History,
   Database,
@@ -169,6 +170,50 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     roles: ['all'],
     description: '9 étapes du flux de dépense'
   },
+
+  // ========== GESTION TÂCHES (groupe parent) ==========
+  {
+    id: 'gestion-taches',
+    name: 'Gestion Tâches',
+    icon: ListChecks,
+    route: null,
+    parent: null,
+    order: 2.5,
+    canonicalOrder: 2.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
+    description: 'Planification et exécution des tâches'
+  },
+  // Sous-groupe: Plannif. Tâches
+  {
+    id: 'plannif-taches',
+    name: 'Plannif. Tâches',
+    icon: Calendar,
+    route: null,
+    parent: 'gestion-taches',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'directeur'],
+    description: 'Planification des tâches et feuilles de route'
+  },
+  // Sous-groupe: Execution - Tâches
+  {
+    id: 'execution-taches',
+    name: 'Execution - Tâches',
+    icon: Activity,
+    route: null,
+    parent: 'gestion-taches',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
+    description: 'Suivi de l\'exécution des tâches'
+  },
+
   {
     id: 'notes-sef',
     name: 'Notes SEF',
@@ -200,6 +245,20 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     step: 2,
     stepCode: STEP_CODES.NOTE_AEF,
     description: 'Avec Engagement Financier'
+  },
+  {
+    id: 'notes-dg-officielles',
+    name: 'Notes DG',
+    icon: FileSignature,
+    route: '/notes-dg',
+    parent: 'chaine-depense',
+    order: 2.5,
+    canonicalOrder: 2.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['dg', 'admin', 'daaf', 'directeur'],
+    badge: false,
+    description: 'Notes officielles du Directeur Général avec imputations'
   },
   {
     id: 'imputation',
@@ -452,44 +511,152 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     isEnabled: true,
     roles: ['admin', 'daaf']
   },
+  // ---- Plannif. Tâches children ----
   {
     id: 'feuilles-route',
-    name: 'Feuilles de Route',
-    icon: ClipboardList,
+    name: 'Charg. feuilles de routes',
+    icon: FileUp,
     route: '/planification/feuilles-route',
-    parent: 'budget',
-    order: 7.5,
-    canonicalOrder: 7.5,
+    parent: 'plannif-taches',
+    order: 1,
+    canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur'],
-    description: 'Import des activités par direction'
+    description: 'Chargement et import des feuilles de route par direction'
   },
   {
+    id: 'maj-feuilles-route',
+    name: 'Mise à jour Feuilles',
+    icon: FileEdit,
+    route: '/planification/maj-feuilles-route',
+    parent: 'plannif-taches',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'directeur'],
+    description: 'Réaménagement et modification des feuilles de routes'
+  },
+  // ---- Execution - Tâches children ----
+  {
     id: 'soumissions-feuilles-route',
-    name: 'Soumissions Feuilles',
+    name: 'Soumission feuilles',
     icon: FileCheck,
     route: '/planification/soumissions-feuilles-route',
-    parent: 'budget',
-    order: 7.6,
-    canonicalOrder: 7.6,
+    parent: 'execution-taches',
+    order: 1,
+    canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Validation des feuilles de route par direction'
+    description: 'Soumission des feuilles de route pour validation'
+  },
+  {
+    id: 'taches-realisees',
+    name: 'Tâches réalisées',
+    icon: CheckSquare,
+    route: '/gestion-taches/taches-realisees',
+    parent: 'execution-taches',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
+    description: 'Liste des tâches réalisées'
+  },
+  {
+    id: 'taches-differees',
+    name: 'Tâches différées',
+    icon: AlertTriangle,
+    route: '/gestion-taches/taches-differees',
+    parent: 'execution-taches',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Liste des tâches différées ou bloquées'
   },
   {
     id: 'execution-physique',
-    name: 'Exécution Physique',
+    name: 'Suivi exécution',
     icon: ListChecks,
     route: '/planification/execution-physique',
-    parent: 'budget',
-    order: 7.7,
-    canonicalOrder: 7.7,
+    parent: 'execution-taches',
+    order: 4,
+    canonicalOrder: 4,
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur', 'operateur'],
     description: 'Suivi de l\'avancement des activités'
+  },
+  // ---- État d'exécution (sous-groupe) ----
+  {
+    id: 'etat-execution-taches',
+    name: 'Etat d\'exéc. Tâches',
+    icon: BarChart3,
+    route: null,
+    parent: 'gestion-taches',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Suivi de l\'exécution physique par Direction, Mission, OS'
+  },
+  // État d'exécution sub-items
+  {
+    id: 'exec-physique-mission',
+    name: 'Exécution par mission',
+    icon: Target,
+    route: '/gestion-taches/etat-execution',
+    parent: 'etat-execution-taches',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Exécution physique par mission'
+  },
+  {
+    id: 'exec-physique-os',
+    name: 'Exécution par OS',
+    icon: Target,
+    route: '/gestion-taches/etat-execution?view=os',
+    parent: 'etat-execution-taches',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Exécution physique par objectif stratégique'
+  },
+  {
+    id: 'exec-physique-projet',
+    name: 'Exécution par projet',
+    icon: Briefcase,
+    route: '/gestion-taches/etat-execution?view=projet',
+    parent: 'etat-execution-taches',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Exécution physique par projet'
+  },
+  {
+    id: 'exec-physique-activite',
+    name: 'Exécution par activité',
+    icon: Activity,
+    route: '/gestion-taches/etat-execution?view=activite',
+    parent: 'etat-execution-taches',
+    order: 4,
+    canonicalOrder: 4,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'dg', 'daaf', 'directeur'],
+    description: 'Exécution physique par activité'
   },
   {
     id: 'historique-imports',
@@ -540,11 +707,78 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     roles: ['admin']
   },
 
-  // ========== PARTENAIRES (groupe parent) ==========
+  // ========== PROGRAMMATIQUE (groupe parent) ==========
   {
-    id: 'partenaires',
-    name: 'Partenaires',
-    icon: Building2,
+    id: 'programmatique',
+    name: 'Programmatique',
+    icon: BarChart3,
+    route: null,
+    parent: null,
+    order: 3.5,
+    canonicalOrder: 15,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin', 'dg'],
+    description: 'Gestion programmatique du budget'
+  },
+  {
+    id: 'prog-charger-budget',
+    name: 'Charger le Budget',
+    icon: FileUp,
+    route: '/programmatique/charger-budget',
+    parent: 'programmatique',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'admin'],
+    description: 'Import Excel du budget'
+  },
+  {
+    id: 'prog-mise-a-jour',
+    name: 'Mise à jour Budget',
+    icon: FileEdit,
+    route: '/programmatique/mise-a-jour',
+    parent: 'programmatique',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin'],
+    description: 'Ajustements budgétaires avec justification'
+  },
+  {
+    id: 'prog-liste-budget',
+    name: 'Liste Budget',
+    icon: ClipboardList,
+    route: '/programmatique/liste-budget',
+    parent: 'programmatique',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin', 'dg', 'directeur'],
+    description: 'Consultation avec drill-down'
+  },
+  {
+    id: 'prog-reamenagement',
+    name: 'Réaménagement',
+    icon: ArrowLeftRight,
+    route: '/programmatique/reamenagement',
+    parent: 'programmatique',
+    order: 4,
+    canonicalOrder: 4,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'cb', 'admin'],
+    description: 'Virements internes entre lignes'
+  },
+
+  // ========== CONTRACTUALISATION (groupe parent) ==========
+  {
+    id: 'contractualisation',
+    name: 'Contractualisation',
+    icon: FileSignature,
     route: null,
     parent: null,
     order: 4,
@@ -552,31 +786,100 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Gestion des prestataires et contrats'
+    description: 'Gestion des marchés et contrats'
   },
   {
-    id: 'prestataires',
-    name: 'Prestataires',
-    icon: Building2,
-    route: '/contractualisation/prestataires',
-    parent: 'partenaires',
+    id: 'marches-contractualisation',
+    name: 'Marchés',
+    icon: ShoppingCart,
+    route: '/marches',
+    parent: 'contractualisation',
     order: 1,
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['sdpm', 'daaf', 'admin'],
+    description: 'Gestion des marchés publics'
+  },
+  {
+    id: 'lots-marches',
+    name: 'Lots',
+    icon: Layers,
+    route: '/contractualisation/lots',
+    parent: 'contractualisation',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['sdpm', 'daaf', 'admin'],
+    description: 'Gestion des lots de marchés'
+  },
+  {
+    id: 'soumissions-marches',
+    name: 'Soumissions',
+    icon: FileUp,
+    route: '/contractualisation/soumissions',
+    parent: 'contractualisation',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['sdpm', 'daaf', 'admin'],
+    description: 'Gestion des soumissions aux marchés'
   },
   {
     id: 'contrats',
     name: 'Contrats',
     icon: FileSignature,
     route: '/contractualisation/contrats',
-    parent: 'partenaires',
+    parent: 'contractualisation',
+    order: 4,
+    canonicalOrder: 4,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all'],
+    description: 'Gestion des contrats'
+  },
+
+  // ========== PRESTATAIRES (groupe parent) ==========
+  {
+    id: 'prestataires-group',
+    name: 'Prestataires',
+    icon: Building2,
+    route: null,
+    parent: null,
+    order: 4.5,
+    canonicalOrder: 21,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all'],
+    description: 'Gestion des prestataires'
+  },
+  {
+    id: 'prestataires-ajouter',
+    name: 'Ajouter un prestataire',
+    icon: User,
+    route: '/contractualisation/prestataires?action=new',
+    parent: 'prestataires-group',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['daaf', 'sdpm', 'admin'],
+    description: 'Ajout d\'un nouveau prestataire'
+  },
+  {
+    id: 'prestataires-liste',
+    name: 'Liste',
+    icon: ClipboardList,
+    route: '/contractualisation/prestataires',
+    parent: 'prestataires-group',
     order: 2,
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
+    description: 'Liste des prestataires'
   },
 
   // ========== GESTION COMPLÉMENTAIRE (groupe parent) ==========
@@ -609,13 +912,73 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     id: 'tresorerie',
     name: 'Trésorerie',
     icon: Landmark,
-    route: '/tresorerie',
+    route: null,
     parent: 'gestion',
     order: 2,
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+  },
+  {
+    id: 'tresorerie-tableau-bord',
+    name: 'Tableau de bord',
+    icon: TrendingUp,
+    route: '/tresorerie',
+    parent: 'tresorerie',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+  },
+  {
+    id: 'tresorerie-appro-banque',
+    name: 'Appro. Banque',
+    icon: Building2,
+    route: '/tresorerie/approvisionnements/banque',
+    parent: 'tresorerie',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+  },
+  {
+    id: 'tresorerie-appro-caisse',
+    name: 'Appro. Caisse',
+    icon: Wallet,
+    route: '/tresorerie/approvisionnements/caisse',
+    parent: 'tresorerie',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+  },
+  {
+    id: 'tresorerie-mvt-banque',
+    name: 'Mouvements Banque',
+    icon: ArrowLeftRight,
+    route: '/tresorerie/mouvements/banque',
+    parent: 'tresorerie',
+    order: 4,
+    canonicalOrder: 4,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+  },
+  {
+    id: 'tresorerie-mvt-caisse',
+    name: 'Mouvements Caisse',
+    icon: ArrowLeftRight,
+    route: '/tresorerie/mouvements/caisse',
+    parent: 'tresorerie',
+    order: 5,
+    canonicalOrder: 5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['tresorerie', 'dg', 'daaf', 'admin']
   },
   {
     id: 'recettes',
@@ -744,6 +1107,60 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['cb', 'daaf']
+  },
+
+  // ========== UTILISATEURS (groupe parent) ==========
+  {
+    id: 'utilisateurs-group',
+    name: 'Utilisateurs',
+    icon: Users,
+    route: null,
+    parent: null,
+    order: 7.5,
+    canonicalOrder: 55,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    description: 'Gestion des utilisateurs du système'
+  },
+  {
+    id: 'utilisateurs-ajout',
+    name: 'Ajout',
+    icon: User,
+    route: '/admin/utilisateurs?action=new',
+    parent: 'utilisateurs-group',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    description: 'Ajouter un utilisateur'
+  },
+  {
+    id: 'utilisateurs-actifs',
+    name: 'Liste user actifs',
+    icon: Users,
+    route: '/admin/utilisateurs?status=actif',
+    parent: 'utilisateurs-group',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    description: 'Liste des utilisateurs actifs'
+  },
+  {
+    id: 'utilisateurs-desactives',
+    name: 'Liste user désactivés',
+    icon: Users,
+    route: '/admin/utilisateurs?status=inactif',
+    parent: 'utilisateurs-group',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin'],
+    description: 'Liste des utilisateurs désactivés'
   },
 
   // ========== PARAMÉTRAGE (groupe parent) ==========
@@ -976,24 +1393,52 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
   },
 
   // Sous-section: Finance
+  // ---- Comptes Bancaires (sous-groupe) ----
   {
     id: 'comptes-bancaires',
     name: 'Comptes Bancaires',
     icon: Landmark,
-    route: '/admin/comptes-bancaires',
+    route: null,
     parent: 'parametrage',
     order: 25,
     canonicalOrder: 25,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin', 'tresorerie', 'cb'],
+    roles: ['admin', 'daaf', 'tresorerie', 'cb'],
     subSection: 'Finance'
   },
   {
+    id: 'comptes-bancaires-actifs',
+    name: 'CB actifs',
+    icon: Landmark,
+    route: '/admin/comptes-bancaires?status=actif',
+    parent: 'comptes-bancaires',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie', 'cb'],
+    description: 'Comptes bancaires actifs'
+  },
+  {
+    id: 'comptes-bancaires-inactifs',
+    name: 'CB Inactifs',
+    icon: Landmark,
+    route: '/admin/comptes-bancaires?status=inactif',
+    parent: 'comptes-bancaires',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie', 'cb'],
+    description: 'Comptes bancaires inactifs'
+  },
+  // ---- Origine des Fonds (sous-groupe) ----
+  {
     id: 'origines-fonds',
-    name: 'Origines des Fonds',
+    name: 'Origine des Fonds',
     icon: Coins,
-    route: '/admin/origines-fonds',
+    route: null,
     parent: 'parametrage',
     order: 26,
     canonicalOrder: 26,
@@ -1001,6 +1446,178 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     isEnabled: true,
     roles: ['admin', 'daaf'],
     subSection: 'Finance'
+  },
+  {
+    id: 'origines-fonds-actives',
+    name: 'Origines Fonds actives',
+    icon: Coins,
+    route: '/admin/origines-fonds?status=actif',
+    parent: 'origines-fonds',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf'],
+    description: 'Origines de fonds actives'
+  },
+  {
+    id: 'origines-fonds-inactives',
+    name: 'Origines Fonds Inactifs',
+    icon: Coins,
+    route: '/admin/origines-fonds?status=inactif',
+    parent: 'origines-fonds',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf'],
+    description: 'Origines de fonds inactives'
+  },
+  // ---- Approvisionnement (sous-groupe) ----
+  {
+    id: 'param-approvisionnement',
+    name: 'Approvisionnement',
+    icon: Truck,
+    route: null,
+    parent: 'parametrage',
+    order: 27,
+    canonicalOrder: 27,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    subSection: 'Finance'
+  },
+  {
+    id: 'param-appro-compte-bancaire',
+    name: 'Compte Bancaire',
+    icon: Building2,
+    route: '/tresorerie/approvisionnements/banque',
+    parent: 'param-approvisionnement',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    description: 'Approvisionnements compte bancaire'
+  },
+  {
+    id: 'param-appro-caisse',
+    name: 'Caisse',
+    icon: Wallet,
+    route: '/tresorerie/approvisionnements/caisse',
+    parent: 'param-approvisionnement',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    description: 'Approvisionnements caisse'
+  },
+  // ---- Mouvements (sous-groupe) ----
+  {
+    id: 'param-mouvements',
+    name: 'Mouvements',
+    icon: ArrowLeftRight,
+    route: null,
+    parent: 'parametrage',
+    order: 28,
+    canonicalOrder: 28,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    subSection: 'Finance'
+  },
+  {
+    id: 'param-mvt-compte-bancaire',
+    name: 'Compte Bancaire',
+    icon: Building2,
+    route: '/tresorerie/mouvements/banque',
+    parent: 'param-mouvements',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    description: 'Mouvements compte bancaire'
+  },
+  {
+    id: 'param-mvt-caisse',
+    name: 'Caisse',
+    icon: Wallet,
+    route: '/tresorerie/mouvements/caisse',
+    parent: 'param-mouvements',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'tresorerie'],
+    description: 'Mouvements caisse'
+  },
+  // ---- Programmatique (sous-groupe dans Paramétrage) ----
+  {
+    id: 'param-programmatique',
+    name: 'Programmatique',
+    icon: BarChart3,
+    route: null,
+    parent: 'parametrage',
+    order: 29,
+    canonicalOrder: 29,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'cb'],
+    subSection: 'Finance'
+  },
+  {
+    id: 'param-prog-charger',
+    name: 'Charger le budget',
+    icon: FileUp,
+    route: '/programmatique/charger-budget',
+    parent: 'param-programmatique',
+    order: 1,
+    canonicalOrder: 1,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf'],
+    description: 'Charger un nouveau budget'
+  },
+  {
+    id: 'param-prog-maj',
+    name: 'Mise à jour du Budget',
+    icon: FileEdit,
+    route: '/programmatique/mise-a-jour',
+    parent: 'param-programmatique',
+    order: 2,
+    canonicalOrder: 2,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'cb'],
+    description: 'Mise à jour du budget existant'
+  },
+  {
+    id: 'param-prog-liste',
+    name: 'Liste Budget',
+    icon: ClipboardList,
+    route: '/programmatique/liste-budget',
+    parent: 'param-programmatique',
+    order: 3,
+    canonicalOrder: 3,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'cb', 'dg'],
+    description: 'Liste des budgets'
+  },
+  {
+    id: 'param-prog-reamenagement',
+    name: 'Liste reamanagement',
+    icon: ArrowLeftRight,
+    route: '/programmatique/reamenagement',
+    parent: 'param-programmatique',
+    order: 4,
+    canonicalOrder: 4,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['admin', 'daaf', 'cb'],
+    description: 'Réaménagements budgétaires'
   },
 
   // Sous-section: Outils
@@ -1156,6 +1773,33 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['directeur', 'dg', 'admin']
+  },
+  {
+    id: 'note-dg-validation',
+    name: 'Validation Notes DG',
+    icon: FileCheck,
+    route: '/notes-dg/validation',
+    parent: null,
+    order: 204,
+    canonicalOrder: 204,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['dg', 'admin'],
+    description: 'Validation des Notes Direction Générale'
+  },
+  {
+    id: 'dg-notes-a-valider',
+    name: 'Notes à valider (DG)',
+    icon: FileCheck,
+    route: '/dg/notes-a-valider',
+    parent: 'chaine-depense',
+    order: 1.5,
+    canonicalOrder: 1.5,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['dg', 'admin'],
+    badge: true,
+    description: 'File d\'attente des notes SEF à valider par le DG'
   },
 
   // ========== ROUTES AUTH (hors layout) ==========

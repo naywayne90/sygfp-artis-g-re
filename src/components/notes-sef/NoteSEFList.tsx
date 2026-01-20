@@ -98,7 +98,11 @@ function TableRowSkeleton() {
       <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-28" /></TableCell>
       <TableCell><Skeleton className="h-5 w-16" /></TableCell>
       <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
+      <TableCell className="hidden 2xl:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+      <TableCell className="hidden 2xl:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+      <TableCell className="hidden 2xl:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
       <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell className="hidden 2xl:table-cell"><Skeleton className="h-4 w-8" /></TableCell>
       <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
       <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
     </TableRow>
@@ -191,6 +195,9 @@ export function NoteSEFList({
                 <TableHead className="hidden lg:table-cell">Demandeur</TableHead>
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Exposé</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Avis</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Recommandations</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
@@ -233,6 +240,9 @@ export function NoteSEFList({
                 <TableHead className="hidden lg:table-cell">Demandeur</TableHead>
                 <TableHead>Urgence</TableHead>
                 <TableHead className="hidden xl:table-cell">Date souhaitée</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Exposé</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Avis</TableHead>
+                <TableHead className="hidden 2xl:table-cell">Recommandations</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
@@ -269,9 +279,24 @@ export function NoteSEFList({
                   </TableCell>
                   <TableCell>{getUrgenceBadge(note.urgence)}</TableCell>
                   <TableCell className="hidden xl:table-cell text-muted-foreground">
-                    {note.date_souhaitee 
+                    {note.date_souhaitee
                       ? format(new Date(note.date_souhaitee), "dd MMM yyyy", { locale: fr })
                       : "—"}
+                  </TableCell>
+                  <TableCell className="hidden 2xl:table-cell max-w-[120px]">
+                    <span className="line-clamp-1 text-sm text-muted-foreground" title={note.expose || ""}>
+                      {note.expose ? note.expose.substring(0, 40) + (note.expose.length > 40 ? "..." : "") : "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden 2xl:table-cell max-w-[120px]">
+                    <span className="line-clamp-1 text-sm text-muted-foreground" title={note.avis || ""}>
+                      {note.avis ? note.avis.substring(0, 40) + (note.avis.length > 40 ? "..." : "") : "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden 2xl:table-cell max-w-[120px]">
+                    <span className="line-clamp-1 text-sm text-muted-foreground" title={note.recommandations || ""}>
+                      {note.recommandations ? note.recommandations.substring(0, 40) + (note.recommandations.length > 40 ? "..." : "") : "—"}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

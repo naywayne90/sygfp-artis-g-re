@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, FileSpreadsheet, FileText, FileDown, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, FileDown, Loader2, Copy, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useRBAC } from "@/contexts/RBACContext";
@@ -34,6 +34,8 @@ interface ExportButtonsProps {
   showTotals?: boolean;
   totalColumns?: string[];
   direction?: string;
+  showCopy?: boolean;
+  showPrint?: boolean;
 }
 
 export function ExportButtons({
@@ -47,6 +49,8 @@ export function ExportButtons({
   showTotals,
   totalColumns,
   direction,
+  showCopy = false,
+  showPrint = false,
 }: ExportButtonsProps) {
   const [isExporting, setIsExporting] = useState(false);
   const { exercice } = useExercice();
@@ -132,6 +136,41 @@ export function ExportButtons({
     }
   };
 
+  const handleCopy = async () => {
+    if (!data || data.length === 0) {
+      toast.error("Aucune donnée à copier");
+      return;
+    }
+
+    try {
+      // Format as CSV for clipboard
+      const headers = columns.map(c => c.label).join("\t");
+      const rows = data.map(row =>
+        columns.map(col => {
+          const value = row[col.key];
+          return value !== null && value !== undefined ? String(value) : "";
+        }).join("\t")
+      );
+      const clipboardText = [headers, ...rows].join("\n");
+
+      await navigator.clipboard.writeText(clipboardText);
+      toast.success(`${data.length} ligne(s) copiée(s) dans le presse-papiers`);
+    } catch (error) {
+      console.error("Copy error:", error);
+      toast.error("Erreur lors de la copie");
+    }
+  };
+
+  const handlePrint = () => {
+    if (!data || data.length === 0) {
+      toast.error("Aucune donnée à imprimer");
+      return;
+    }
+
+    // Use the PDF export function which opens print dialog
+    exportToPDF(data, columns, exportOptions);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -145,6 +184,17 @@ export function ExportButtons({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
+        {/* Copy to clipboard */}
+        {showCopy && (
+          <>
+            <DropdownMenuItem onClick={handleCopy}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copier dans le presse-papiers
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
         {/* Excel exports */}
         {templates.length > 0 ? (
           <DropdownMenuSub>
@@ -213,6 +263,17 @@ export function ExportButtons({
             <FileText className="h-4 w-4 mr-2" />
             Exporter en PDF
           </DropdownMenuItem>
+        )}
+
+        {/* Print */}
+        {showPrint && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handlePrint}>
+              <Printer className="h-4 w-4 mr-2" />
+              Imprimer
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

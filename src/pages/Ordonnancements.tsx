@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, Filter, FileCheck, FileSignature, Clock, XCircle, Lock, Tag, MoreHorizontal, Eye, Wallet, Receipt } from "lucide-react";
+import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
 import { OrdonnancementForm } from "@/components/ordonnancement/OrdonnancementForm";
 import { OrdonnancementList } from "@/components/ordonnancement/OrdonnancementList";
 import { useOrdonnancements } from "@/hooks/useOrdonnancements";
@@ -79,31 +80,34 @@ export default function Ordonnancements() {
 
       {/* Page Header */}
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle 
-          title="Ordonnancements" 
-          description="Ordres de paiement et mandats à transmettre au Trésor" 
+        <ExerciceSubtitle
+          title="Ordonnancements"
+          description="Ordres de paiement et mandats à transmettre au Trésor"
         />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button 
-                  className="gap-2" 
-                  onClick={() => setShowForm(true)}
-                  disabled={!canWrite}
-                >
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  Nouvel ordonnancement
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {!canWrite && (
-              <TooltipContent>
-                <p>{getDisabledMessage()}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex gap-2">
+          <BudgetChainExportButton step="ordonnancement" />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    className="gap-2"
+                    onClick={() => setShowForm(true)}
+                    disabled={!canWrite}
+                  >
+                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    Nouvel ordonnancement
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canWrite && (
+                <TooltipContent>
+                  <p>{getDisabledMessage()}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* Stats Cards */}

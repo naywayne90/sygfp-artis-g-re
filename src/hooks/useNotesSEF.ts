@@ -27,6 +27,10 @@ export interface NoteSEF {
   type_depense: string | null;
   os_id: string | null;
   mission_id: string | null;
+  // Champs contenu de la note (Prompt 26)
+  expose: string | null;
+  avis: string | null;
+  recommandations: string | null;
   // Statuts
   statut: string | null;
   rejection_reason: string | null;

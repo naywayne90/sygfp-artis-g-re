@@ -55,13 +55,13 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       // Build query
       let query = supabase.from("dossiers").select(`
         *,
-        direction:directions(id, code, libelle),
+        direction:directions(id, code, label),
         demandeur:profiles!dossiers_demandeur_id_fkey(id, full_name),
         beneficiaire:prestataires(id, raison_sociale)
       `);
 
       if (dossierRef) {
-        query = query.eq("dossier_ref", dossierRef);
+        query = query.eq("numero", dossierRef);
       } else if (dossierId) {
         query = query.eq("id", dossierId);
       } else {
@@ -94,7 +94,7 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
       // Map to SpendingCase
       const spendingCase: SpendingCase = {
         id: dossier.id,
-        dossierRef: dossier.dossier_ref || dossier.numero,
+        dossierRef: dossier.numero,
         numero: dossier.numero,
         exercice: dossier.exercice,
         directionId: dossier.direction_id,

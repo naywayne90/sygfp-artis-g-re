@@ -7,9 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { NoteSEF, NoteSEFHistory, useNotesSEF } from "@/hooks/useNotesSEF";
 import { PrintButton } from "@/components/export/PrintButton";
 import { NoteSEFCreateAEFButton } from "@/components/notes-sef/NoteSEFCreateAEFButton";
+import { ImputationDGSection } from "@/components/notes-sef/ImputationDGSection";
+import { ValidationDGSection } from "@/components/notes-sef/ValidationDGSection";
+import { useExportNoteSEFPdf } from "@/hooks/useExportNoteSEFPdf";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -39,6 +47,11 @@ import {
   FileIcon,
   MessageSquare,
   CreditCard,
+  ChevronDown,
+  FileEdit,
+  ThumbsUp,
+  Lightbulb,
+  FileDown,
 } from "lucide-react";
 
 interface NoteSEFDetailsProps {
@@ -113,6 +126,7 @@ export function NoteSEFDetails({
   const { toast } = useToast();
   const { hasAnyRole } = usePermissions();
   const { fetchHistory, submitNote, validateNote } = useNotesSEF();
+  const { exportPdf, isExporting: isExportingPdf, progress: exportProgress } = useExportNoteSEFPdf();
   
   const [history, setHistory] = useState<NoteSEFHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -409,13 +423,30 @@ export function NoteSEFDetails({
             <div className="flex items-center gap-2">
               {getStatusBadge(note.statut)}
               {note.id && (
-                <PrintButton
-                  entityType="note_sef"
-                  entityId={note.id}
-                  label=""
-                  size="sm"
-                  variant="outline"
-                />
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => exportPdf(note.id)}
+                    disabled={isExportingPdf}
+                    title="Exporter PDF (NOTE DG)"
+                    className="gap-2"
+                  >
+                    {isExportingPdf ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <FileDown className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">PDF</span>
+                  </Button>
+                  <PrintButton
+                    entityType="note_sef"
+                    entityId={note.id}
+                    label=""
+                    size="sm"
+                    variant="outline"
+                  />
+                </>
               )}
             </div>
           </div>
@@ -626,6 +657,88 @@ export function NoteSEFDetails({
                 )}
               </CardContent>
             </Card>
+
+            {/* Contenu de la note (Prompt 26) - exposé, avis, recommandations */}
+            {(note.expose || note.avis || note.recommandations) && (
+              <Card className="border-blue-200/50 dark:border-blue-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <FileEdit className="h-4 w-4 text-blue-600" />
+                    Contenu de la note
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* Exposé */}
+                  {note.expose && (
+                    <Collapsible defaultOpen={true}>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Exposé</span>
+                          <Badge variant="outline" className="text-xs">
+                            {note.expose.length} car.
+                          </Badge>
+                        </div>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className="p-3 bg-muted/30 rounded-lg border-l-4 border-blue-500/50">
+                          <p className="whitespace-pre-wrap text-sm">{note.expose}</p>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
+                  {/* Avis */}
+                  {note.avis && (
+                    <Collapsible defaultOpen={true}>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group">
+                        <div className="flex items-center gap-2">
+                          <ThumbsUp className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Avis</span>
+                          <Badge variant="outline" className="text-xs">
+                            {note.avis.length} car.
+                          </Badge>
+                        </div>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className="p-3 bg-muted/30 rounded-lg border-l-4 border-green-500/50">
+                          <p className="whitespace-pre-wrap text-sm">{note.avis}</p>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+
+                  {/* Recommandations */}
+                  {note.recommandations && (
+                    <Collapsible defaultOpen={true}>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group">
+                        <div className="flex items-center gap-2">
+                          <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Recommandations</span>
+                          <Badge variant="outline" className="text-xs">
+                            {note.recommandations.length} car.
+                          </Badge>
+                        </div>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-2">
+                        <div className="p-3 bg-muted/30 rounded-lg border-l-4 border-amber-500/50">
+                          <p className="whitespace-pre-wrap text-sm">{note.recommandations}</p>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Section Imputation DG (Prompt 27) */}
+            <ImputationDGSection noteSefId={note.id} noteStatut={note.statut} />
+
+            {/* Section Validation DG avec QR Code (Prompt 29) */}
+            <ValidationDGSection noteSefId={note.id} noteStatut={note.statut} />
 
             {/* Pièces jointes */}
             <Card>

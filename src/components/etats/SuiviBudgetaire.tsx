@@ -83,7 +83,7 @@ export function SuiviBudgetaire({ summary }: SuiviBudgetaireProps) {
                   {formatMontant(summary.montant_paye)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {((summary.montant_paye / summary.dotation_totale) * 100).toFixed(1)}% de la dotation
+                  {summary.dotation_totale > 0 ? ((summary.montant_paye / summary.dotation_totale) * 100).toFixed(1) : 0}% de la dotation
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-success/10">
@@ -102,7 +102,7 @@ export function SuiviBudgetaire({ summary }: SuiviBudgetaireProps) {
                   {formatMontant(summary.reste_a_engager)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {((summary.reste_a_engager / summary.dotation_totale) * 100).toFixed(1)}% restant
+                  {summary.dotation_totale > 0 ? ((summary.reste_a_engager / summary.dotation_totale) * 100).toFixed(1) : 0}% restant
                 </p>
               </div>
               <div className="p-3 rounded-lg bg-muted">

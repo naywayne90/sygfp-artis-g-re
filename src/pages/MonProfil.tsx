@@ -38,7 +38,7 @@ export default function MonProfil() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("profiles")
-        .select("*, direction:directions(code, libelle)")
+        .select("*, direction:directions(code, label)")
         .eq("id", userId)
         .single();
       if (error) throw error;

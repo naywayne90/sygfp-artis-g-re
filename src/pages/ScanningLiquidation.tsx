@@ -49,17 +49,13 @@ import {
   Upload,
   Eye,
   Filter,
-  FolderOpen,
   Send,
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
   Building,
-  CreditCard,
   Receipt,
   ShieldAlert,
-  Download,
-  FileSpreadsheet,
   Link2,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -71,6 +67,8 @@ import { toast } from "sonner";
 import { LiquidationChecklist } from "@/components/liquidation/LiquidationChecklist";
 import { useLiquidationDocuments } from "@/hooks/useLiquidationDocuments";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { ExportButtons } from "@/components/etats/ExportButtons";
+import { ExportColumn } from "@/lib/export";
 
 // Types
 interface ScanningLiquidation {
@@ -93,6 +91,12 @@ interface ScanningLiquidation {
   direction_id: string | null;
   direction_code: string | null;
   direction_libelle: string | null;
+  // Budget line info
+  dotation_initiale: number;
+  cumul_engagements: number;
+  disponible: number;
+  activite_code: string | null;
+  os_code: string | null;
   // Document stats
   documents_count: number;
   documents_provided: number;
@@ -103,7 +107,7 @@ interface ScanningLiquidation {
 interface DirectionOption {
   id: string;
   code: string;
-  libelle: string;
+  label: string;
 }
 
 const formatMontant = (montant: number | null | undefined) => {
@@ -179,7 +183,7 @@ export default function ScanningLiquidation() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("directions")
-        .select("id, code, libelle")
+        .select("id, code, label")
         .order("code");
       if (error) throw error;
       return data as DirectionOption[];
@@ -211,7 +215,10 @@ export default function ScanningLiquidation() {
             statut,
             budget_line:budget_lines(
               id,
-              direction:directions(id, code, libelle)
+              dotation_initiale,
+              direction:directions(id, code, label),
+              activite:activites(id, code, libelle),
+              os:objectifs_strategiques(id, code, libelle)
             )
           )
         `)
@@ -261,6 +268,8 @@ export default function ScanningLiquidation() {
         const engagement = liq.engagement as any;
         const budgetLine = engagement?.budget_line;
         const direction = budgetLine?.direction;
+        const activite = budgetLine?.activite;
+        const os = budgetLine?.os;
         const stats = docStats[liq.id] || { total: 0, provided: 0, required: 0, requiredProvided: 0 };
 
         return {
@@ -280,7 +289,12 @@ export default function ScanningLiquidation() {
           engagement_montant: engagement?.montant || null,
           direction_id: direction?.id || null,
           direction_code: direction?.code || null,
-          direction_libelle: direction?.libelle || null,
+          direction_libelle: direction?.label || null,
+          dotation_initiale: budgetLine?.dotation_initiale || 0,
+          cumul_engagements: 0, // Could be calculated if needed
+          disponible: budgetLine?.dotation_initiale || 0,
+          activite_code: activite?.code || null,
+          os_code: os?.code || null,
           documents_count: stats.total,
           documents_provided: stats.provided,
           documents_required: stats.required,
@@ -410,39 +424,22 @@ export default function ScanningLiquidation() {
     setSelectedDocStatus("all");
   };
 
-  // Export to CSV
-  const handleExportCSV = () => {
-    const headers = ["Numéro", "Date", "Engagement", "Fournisseur", "Montant", "Net à payer", "Direction", "Statut", "Documents"];
-    const rows = filteredLiquidations.map(liq => [
-      liq.numero,
-      format(new Date(liq.date_liquidation), "dd/MM/yyyy"),
-      liq.engagement_numero || "",
-      liq.engagement_fournisseur || "",
-      liq.montant.toString(),
-      liq.net_a_payer?.toString() || "",
-      liq.direction_code || "",
-      liq.statut || "",
-      `${liq.documents_required_provided}/${liq.documents_required}`,
-    ]);
-
-    const csvContent = [headers, ...rows].map(row => row.join(";")).join("\n");
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `scanning_liquidations_${format(new Date(), "yyyyMMdd")}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    logAction({
-      entityType: "liquidation",
-      entityId: "export",
-      action: "EXPORT",
-      newValues: { count: filteredLiquidations.length, format: "csv" },
-    });
-
-    toast.success(`${filteredLiquidations.length} liquidation(s) exportée(s)`);
-  };
+  // Export columns definition
+  const exportColumns: ExportColumn[] = [
+    { key: "numero", label: "N° Liquidation", type: "text" },
+    { key: "date_liquidation", label: "Date", type: "date" },
+    { key: "engagement_numero", label: "N° Engagement", type: "text" },
+    { key: "engagement_fournisseur", label: "Fournisseur", type: "text" },
+    { key: "montant", label: "Montant", type: "currency" },
+    { key: "net_a_payer", label: "Net à payer", type: "currency" },
+    { key: "dotation_initiale", label: "Dotation", type: "currency" },
+    { key: "cumul_engagements", label: "Cumul", type: "currency" },
+    { key: "disponible", label: "Disponible", type: "currency" },
+    { key: "direction_code", label: "Direction", type: "text" },
+    { key: "activite_code", label: "Code Activité", type: "text" },
+    { key: "os_code", label: "N° OS", type: "text" },
+    { key: "statut", label: "Statut", type: "text" },
+  ];
 
   // Check if submit is allowed
   const canSubmit = useMemo(() => {
@@ -466,10 +463,17 @@ export default function ScanningLiquidation() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportCSV} className="gap-2">
-            <FileSpreadsheet className="h-4 w-4" />
-            Exporter CSV
-          </Button>
+          <ExportButtons
+            data={filteredLiquidations as unknown as Record<string, unknown>[]}
+            columns={exportColumns}
+            filename="scanning_liquidations"
+            title="Liste des Liquidations - Scanning"
+            subtitle={`Exercice ${exercice}`}
+            showCopy
+            showPrint
+            showTotals
+            totalColumns={["montant", "net_a_payer", "dotation_initiale", "disponible"]}
+          />
           <Button variant="outline" onClick={() => refetch()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Actualiser
@@ -562,7 +566,7 @@ export default function ScanningLiquidation() {
                 <SelectItem value="all">Toutes les directions</SelectItem>
                 {directions.map(dir => (
                   <SelectItem key={dir.id} value={dir.id}>
-                    {dir.code} - {dir.libelle}
+                    {dir.code} - {dir.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -632,7 +636,12 @@ export default function ScanningLiquidation() {
                       <TableHead>Engagement</TableHead>
                       <TableHead>Fournisseur</TableHead>
                       <TableHead>Direction</TableHead>
+                      <TableHead className="text-right">Dotation</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
+                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
                       <TableHead className="text-center">Eng. Validé</TableHead>
                       <TableHead className="text-center">Documents</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -665,8 +674,25 @@ export default function ScanningLiquidation() {
                             "-"
                           )}
                         </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {formatMontant(liq.dotation_initiale)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
+                          {formatMontant(liq.cumul_engagements)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell">
+                          <span className={liq.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                            {formatMontant(liq.disponible)}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(liq.montant)}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {liq.activite_code || "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {liq.os_code || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {getEngagementStatusBadge(liq.engagement_statut)}
@@ -733,7 +759,12 @@ export default function ScanningLiquidation() {
                       <TableHead>Engagement</TableHead>
                       <TableHead>Fournisseur</TableHead>
                       <TableHead>Direction</TableHead>
+                      <TableHead className="text-right">Dotation</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
+                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
                       <TableHead className="text-right">Montant</TableHead>
+                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
+                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
                       <TableHead className="text-center">Documents</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -760,8 +791,25 @@ export default function ScanningLiquidation() {
                             "-"
                           )}
                         </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {formatMontant(liq.dotation_initiale)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
+                          {formatMontant(liq.cumul_engagements)}
+                        </TableCell>
+                        <TableCell className="text-right hidden lg:table-cell">
+                          <span className={liq.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                            {formatMontant(liq.disponible)}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(liq.montant)}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {liq.activite_code || "-"}
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell text-muted-foreground">
+                          {liq.os_code || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(

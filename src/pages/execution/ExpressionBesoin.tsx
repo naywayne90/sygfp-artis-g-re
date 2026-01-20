@@ -28,6 +28,7 @@ import {
   ShoppingCart,
   FileSignature,
 } from "lucide-react";
+import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,6 +142,7 @@ export default function ExpressionBesoin() {
           </p>
         </div>
         <div className="flex gap-2">
+          <BudgetChainExportButton step="expression" />
           <Button variant="outline" onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Depuis marché

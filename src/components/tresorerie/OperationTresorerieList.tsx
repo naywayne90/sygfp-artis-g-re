@@ -36,7 +36,7 @@ import { fr } from "date-fns/locale";
 export function OperationTresorerieList() {
   const { operations, comptes, createOperation, rapprocher } = useTresorerie();
   const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState({ compteId: "", type: "", rapproche: "" });
+  const [filter, setFilter] = useState({ compteId: "all", type: "all", rapproche: "all" });
   const [form, setForm] = useState({
     compte_id: "",
     type_operation: "entree" as "entree" | "sortie" | "virement",
@@ -90,8 +90,8 @@ export function OperationTresorerieList() {
   };
 
   const filteredOperations = operations.data?.filter(op => {
-    if (filter.compteId && op.compte_id !== filter.compteId) return false;
-    if (filter.type && op.type_operation !== filter.type) return false;
+    if (filter.compteId !== "all" && op.compte_id !== filter.compteId) return false;
+    if (filter.type !== "all" && op.type_operation !== filter.type) return false;
     if (filter.rapproche === "true" && !op.rapproche) return false;
     if (filter.rapproche === "false" && op.rapproche) return false;
     return true;
@@ -251,7 +251,7 @@ export function OperationTresorerieList() {
               <SelectValue placeholder="Tous les comptes" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les comptes</SelectItem>
+              <SelectItem value="all">Tous les comptes</SelectItem>
               {comptes.data?.map((c) => (
                 <SelectItem key={c.id} value={c.id}>{c.code}</SelectItem>
               ))}
@@ -262,7 +262,7 @@ export function OperationTresorerieList() {
               <SelectValue placeholder="Tous types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous types</SelectItem>
+              <SelectItem value="all">Tous types</SelectItem>
               {TYPES_OPERATION.map((t) => (
                 <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
               ))}
@@ -273,7 +273,7 @@ export function OperationTresorerieList() {
               <SelectValue placeholder="Rapprochement" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous</SelectItem>
+              <SelectItem value="all">Tous</SelectItem>
               <SelectItem value="true">Rapprochées</SelectItem>
               <SelectItem value="false">Non rapprochées</SelectItem>
             </SelectContent>
