@@ -370,7 +370,7 @@ export default function NotesAEF() {
               <NoteAEFList
                 notes={filteredNotes as NoteAEF[]}
                 title="Toutes les notes AEF"
-                description={`${pagination.total} note(s) trouvée(s)`}
+                description={`${filteredNotes.length} note(s) trouvée(s)`}
                 onView={setViewingNote}
                 onEdit={handleEdit}
                 onSubmit={handleSubmit}

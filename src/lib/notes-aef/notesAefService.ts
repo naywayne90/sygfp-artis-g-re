@@ -82,7 +82,7 @@ export const notesAefService = {
       if (noteIds.length === 0) {
         return {
           success: true,
-          data: { data: [], total, page, pageSize, totalPages }
+          data: { data: [], total: 0, page, pageSize, totalPages: 0 }
         };
       }
 

@@ -170,10 +170,10 @@ export const notesSefService = {
           success: true,
           data: {
             data: [],
-            total,
+            total: 0, // Si aucune donnée retournée, le total doit être 0
             page,
             pageSize,
-            totalPages
+            totalPages: 0
           }
         };
       }

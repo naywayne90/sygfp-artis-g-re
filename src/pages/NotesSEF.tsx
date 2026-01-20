@@ -370,7 +370,7 @@ export default function NotesSEF() {
           <NoteSEFList
             notes={filteredNotes as NoteSEF[]}
             title="Toutes les notes SEF"
-            description={`${pagination.total} note(s) trouvée(s)`}
+            description={`${filteredNotes.length} note(s) trouvée(s)`}
             onView={(note) => setPreviewNote(note)}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
