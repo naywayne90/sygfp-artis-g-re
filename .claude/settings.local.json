@@ -49,7 +49,21 @@
       "mcp__supabase__sqlToRest",
       "Bash(source:*)",
       "Bash(ls:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "mcp__filesystem__list_allowed_directories",
+      "mcp__context7__resolve-library-id",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(gh auth status)",
+      "Bash(env)",
+      "Bash(npx @playwright/mcp@latest:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "github",
+    "supabase",
+    "filesystem",
+    "playwright",
+    "sequential-thinking"
+  ]
 }
