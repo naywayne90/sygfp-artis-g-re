@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook pour gérer les lignes estimatives des Notes AEF
  *

@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { PrintButton } from "@/components/export/PrintButton";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+import { WorkflowTimeline } from "@/components/workflow/WorkflowTimeline";
 import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
 import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
 import { format } from "date-fns";
@@ -1095,6 +1096,13 @@ export default function NoteSEFDetail() {
 
         {/* Colonne latérale - Historique */}
         <div className="space-y-6">
+          {/* Progression du Workflow (nouveau système wf_*) */}
+          <WorkflowTimeline
+            entityType="note_sef"
+            entityId={note.id}
+            variant="vertical"
+          />
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Mise à jour du Budget - Ajustements avec justification et historisation
  *

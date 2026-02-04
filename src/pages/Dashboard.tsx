@@ -9,8 +9,9 @@
  * 5. TRESORERIE/AC → DashboardTresorerie
  * 6. Direction DSI → DashboardDSI
  * 7. Direction DMG → DashboardMoyensGen
- * 8. Autres → DashboardDirectionPage
+ * 8. Autres → DashboardDirectionPage (lazy loaded)
  */
+import { lazy, Suspense } from 'react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useUserDirection } from '@/hooks/useDashboardStats';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,8 +25,8 @@ import { DashboardCB } from '@/components/dashboard/DashboardCB';
 import { DashboardDSI } from '@/components/dashboard/DashboardDSI';
 import { DashboardMoyensGen } from '@/components/dashboard/DashboardMoyensGen';
 
-// Dashboard générique pour les directions
-import DashboardDirectionPage from '@/pages/execution/DashboardDirectionPage';
+// Dashboard générique pour les directions (lazy loaded pour éviter le double import)
+const DashboardDirectionPage = lazy(() => import('@/pages/execution/DashboardDirectionPage'));
 
 // Fallback Admin (dashboard complet avec tous les onglets)
 import { AdminDashboardFallback } from './AdminDashboardFallback';
@@ -124,6 +125,10 @@ export default function Dashboard() {
     return <DashboardMoyensGen />;
   }
 
-  // 8. Fallback → Dashboard générique par direction
-  return <DashboardDirectionPage />;
+  // 8. Fallback → Dashboard générique par direction (lazy loaded)
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardDirectionPage />
+    </Suspense>
+  );
 }

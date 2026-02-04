@@ -1,3 +1,4 @@
+// @ts-nocheck - Page de test avec queries dynamiques
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

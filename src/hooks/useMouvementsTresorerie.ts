@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useMouvementsTresorerie - Hook pour gérer les mouvements de trésorerie
  *

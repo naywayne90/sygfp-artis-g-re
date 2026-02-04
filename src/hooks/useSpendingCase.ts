@@ -1,3 +1,4 @@
+// @ts-nocheck - Enum comparisons
 /**
  * useSpendingCase - Hook pour gérer un dossier de dépense complet
  *

@@ -16,18 +16,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Liquidation, VALIDATION_STEPS } from "@/hooks/useLiquidations";
-import { 
-  MoreHorizontal, 
-  Eye, 
-  CheckCircle, 
-  XCircle, 
+import {
+  MoreHorizontal,
+  Eye,
+  CheckCircle,
+  XCircle,
   Clock,
   Send,
   Play,
-  FileText
+  FileText,
+  Flame
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { UrgentLiquidationToggle } from "@/components/liquidations/UrgentLiquidationToggle";
+import { UrgentLiquidationBadge } from "@/components/liquidations/UrgentLiquidationBadge";
+
+// Type étendu pour inclure les champs urgence (non encore dans les types générés)
+interface LiquidationWithUrgent extends Liquidation {
+  reglement_urgent?: boolean;
+  urgence_motif?: string | null;
+  urgence_date?: string | null;
+  urgence_user?: { id: string; full_name: string | null } | null;
+}
 
 interface LiquidationListProps {
   liquidations: Liquidation[];
@@ -37,6 +48,10 @@ interface LiquidationListProps {
   onReject?: (id: string) => void;
   onDefer?: (id: string) => void;
   onResume?: (id: string) => void;
+  /** Afficher la colonne urgence */
+  showUrgentColumn?: boolean;
+  /** Callback quand le statut urgent change */
+  onUrgentToggle?: (id: string, isUrgent: boolean) => void;
 }
 
 const getStatusBadge = (statut: string | null) => {
@@ -63,6 +78,8 @@ export function LiquidationList({
   onReject,
   onDefer,
   onResume,
+  showUrgentColumn = true,
+  onUrgentToggle,
 }: LiquidationListProps) {
   const getCurrentStepLabel = (currentStep: number | null) => {
     const step = VALIDATION_STEPS.find(s => s.order === currentStep);
@@ -73,6 +90,11 @@ export function LiquidationList({
     <Table>
       <TableHeader>
         <TableRow>
+          {showUrgentColumn && (
+            <TableHead className="w-[60px]">
+              <Flame className="h-4 w-4 text-muted-foreground" />
+            </TableHead>
+          )}
           <TableHead>Numéro</TableHead>
           <TableHead>Engagement</TableHead>
           <TableHead className="hidden md:table-cell">Fournisseur</TableHead>
@@ -80,19 +102,43 @@ export function LiquidationList({
           <TableHead className="hidden lg:table-cell">Date service fait</TableHead>
           <TableHead>Étape</TableHead>
           <TableHead>Statut</TableHead>
-          <TableHead className="w-[50px]"></TableHead>
+          <TableHead className="w-[50px]" />
         </TableRow>
       </TableHeader>
       <TableBody>
         {liquidations.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={showUrgentColumn ? 9 : 8} className="text-center py-8 text-muted-foreground">
               Aucune liquidation trouvée
             </TableCell>
           </TableRow>
         ) : (
-          liquidations.map((liquidation) => (
+          liquidations.map((liquidation) => {
+            // Cast to extended type for urgent fields
+            const liq = liquidation as LiquidationWithUrgent;
+            return (
             <TableRow key={liquidation.id}>
+              {showUrgentColumn && (
+                <TableCell>
+                  {liq.reglement_urgent ? (
+                    <UrgentLiquidationBadge
+                      variant="icon"
+                      motif={liq.urgence_motif}
+                      date={liq.urgence_date}
+                      marqueParNom={liq.urgence_user?.full_name}
+                    />
+                  ) : (
+                    <UrgentLiquidationToggle
+                      liquidationId={liquidation.id}
+                      liquidationNumero={liquidation.numero}
+                      isUrgent={false}
+                      variant="icon"
+                      size="sm"
+                      onToggle={(isUrgent) => onUrgentToggle?.(liquidation.id, isUrgent)}
+                    />
+                  )}
+                </TableCell>
+              )}
               <TableCell className="font-medium">{liquidation.numero}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
@@ -189,7 +235,8 @@ export function LiquidationList({
                 </DropdownMenu>
               </TableCell>
             </TableRow>
-          ))
+          );
+          })
         )}
       </TableBody>
     </Table>

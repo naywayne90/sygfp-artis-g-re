@@ -214,6 +214,59 @@ export type Database = {
           },
         ]
       }
+      attachments: {
+        Row: {
+          id: string
+          dossier_ref: string
+          step: string
+          filename: string
+          original_name: string
+          storage_path: string
+          content_type: string
+          size: number
+          uploaded_by: string
+          created_at: string
+          entity_id: string | null
+          type_piece: string | null
+        }
+        Insert: {
+          id?: string
+          dossier_ref: string
+          step: string
+          filename: string
+          original_name: string
+          storage_path: string
+          content_type: string
+          size: number
+          uploaded_by: string
+          created_at?: string
+          entity_id?: string | null
+          type_piece?: string | null
+        }
+        Update: {
+          id?: string
+          dossier_ref?: string
+          step?: string
+          filename?: string
+          original_name?: string
+          storage_path?: string
+          content_type?: string
+          size?: number
+          uploaded_by?: string
+          created_at?: string
+          entity_id?: string | null
+          type_piece?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archived_documents: {
         Row: {
           category: string
@@ -5262,6 +5315,74 @@ export type Database = {
           {
             foreignKeyName: "imputations_validated_by_fkey"
             columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interims: {
+        Row: {
+          id: string
+          titulaire_id: string
+          interimaire_id: string
+          date_debut: string
+          date_fin: string
+          motif: string
+          est_actif: boolean | null
+          created_by: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          titulaire_id: string
+          interimaire_id: string
+          date_debut: string
+          date_fin: string
+          motif: string
+          est_actif?: boolean | null
+          created_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          titulaire_id?: string
+          interimaire_id?: string
+          date_debut?: string
+          date_fin?: string
+          motif?: string
+          est_actif?: boolean | null
+          created_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interims_titulaire_id_fkey"
+            columns: ["titulaire_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interims_titulaire_id_fkey"
+            columns: ["titulaire_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interims_interimaire_id_fkey"
+            columns: ["interimaire_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interims_interimaire_id_fkey"
+            columns: ["interimaire_id"]
             isOneToOne: false
             referencedRelation: "profiles_display"
             referencedColumns: ["id"]
@@ -13252,6 +13373,22 @@ export type Database = {
         Args: { p_alert_id: string }
         Returns: boolean
       }
+      advance_workflow: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+          p_action: string
+          p_motif?: string | null
+          p_user_name?: string | null
+          p_date_reprise?: string | null
+        }
+        Returns: {
+          success: boolean
+          workflow_complete?: boolean
+          new_step?: number
+          error?: string
+        }
+      }
       backfill_arti_references: {
         Args: never
         Returns: {
@@ -13284,6 +13421,13 @@ export type Database = {
           requires_budget_check: boolean
           requires_motif: boolean
         }[]
+      }
+      can_validate_as_interim: {
+        Args: {
+          p_user_id: string
+          p_titulaire_id: string
+        }
+        Returns: boolean
       }
       can_view_note_sef: {
         Args: {
@@ -13410,6 +13554,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_interim: {
+        Args: {
+          p_titulaire_id: string
+          p_interimaire_id: string
+          p_date_debut: string
+          p_date_fin: string
+          p_motif: string
+        }
+        Returns: string
+      }
       create_lambda_link: {
         Args: {
           p_cible_id?: string
@@ -13443,6 +13597,10 @@ export type Database = {
       debloquer_dossier: {
         Args: { p_commentaire: string; p_dossier_id: string; p_user_id: string }
         Returns: undefined
+      }
+      end_interim: {
+        Args: { p_interim_id: string }
+        Returns: boolean
       }
       execute_credit_transfer: {
         Args: { p_transfer_id: string; p_user_id?: string }
@@ -13528,6 +13686,15 @@ export type Database = {
         }
         Returns: string
       }
+      get_active_interim_for_user: {
+        Args: { p_user_id: string }
+        Returns: {
+          interim_id: string
+          titulaire_id: string
+          titulaire_nom: string
+          date_fin: string
+        }[]
+      }
       get_available_transitions: {
         Args: { p_current_status: string; p_module: string; p_user_id?: string }
         Returns: {
@@ -13537,6 +13704,10 @@ export type Database = {
           requires_motif: boolean
           to_status: string
         }[]
+      }
+      get_dashboard_data: {
+        Args: { p_exercice: number; p_direction_id?: string | null }
+        Returns: Json
       }
       get_dossier_current_step: {
         Args: { p_dossier_id: string }
@@ -13596,9 +13767,25 @@ export type Database = {
           year: number
         }[]
       }
+      get_pending_workflows: {
+        Args: { p_role_code?: string | null }
+        Returns: Json
+      }
       get_raci_informed_roles: {
         Args: { p_processus_code: string }
         Returns: Json
+      }
+      get_team_members: {
+        Args: { p_supervisor_id?: string; p_depth?: number; p_direction_id?: string }
+        Returns: {
+          id: string
+          full_name: string | null
+          email: string | null
+          role_hierarchique: string | null
+          nom: string | null
+          prenom: string | null
+          direction_id: string | null
+        }[]
       }
       get_user_direction: { Args: { _user_id: string }; Returns: string }
       get_user_direction_id: { Args: { p_user_id: string }; Returns: string }
@@ -13613,6 +13800,17 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      get_workflow_config: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_workflow_status: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+        }
+        Returns: Json
       }
       has_active_delegation: {
         Args: { p_delegataire_id: string; p_perimetre?: string }
@@ -13758,6 +13956,16 @@ export type Database = {
         Args: { p_alert_id: string; p_comment?: string }
         Returns: boolean
       }
+      resume_workflow: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+        }
+        Returns: {
+          success: boolean
+          error?: string
+        }
+      }
       search_notes_aef: {
         Args: {
           p_date_from?: string
@@ -13838,6 +14046,13 @@ export type Database = {
           id: string
         }[]
       }
+      start_workflow: {
+        Args: {
+          p_entity_type: string
+          p_entity_id: string
+        }
+        Returns: string
+      }
       sync_arti_counter_from_import: {
         Args: {
           p_annee: number
@@ -13909,6 +14124,99 @@ export type Database = {
       validate_import_run: { Args: { p_run_id: string }; Returns: Json }
       validate_prestataire_request: {
         Args: { p_request_id: string; p_validator_id: string }
+        Returns: string
+      }
+      wf_admin_delete_step: {
+        Args: { p_step_id: string }
+        Returns: boolean
+      }
+      wf_admin_reorder_steps: {
+        Args: {
+          p_workflow_id: string
+          p_step_ids: string[]
+        }
+        Returns: boolean
+      }
+      wf_admin_set_step_actions: {
+        Args: {
+          p_step_id: string
+          p_action_codes: string[]
+        }
+        Returns: boolean
+      }
+      wf_admin_set_step_permission: {
+        Args: {
+          p_step_id: string
+          p_role_code: string
+          p_service_code?: string | null
+          p_can_view?: boolean
+          p_can_act?: boolean
+          p_can_delegate?: boolean
+          p_is_primary?: boolean
+        }
+        Returns: boolean
+      }
+      wf_admin_upsert_action: {
+        Args: {
+          p_id?: string | null
+          p_code?: string | null
+          p_label?: string | null
+          p_description?: string | null
+          p_icon?: string | null
+          p_color?: string
+          p_require_motif?: boolean
+          p_require_date_reprise?: boolean
+          p_is_terminal?: boolean
+          p_est_actif?: boolean
+        }
+        Returns: string
+      }
+      wf_admin_upsert_role: {
+        Args: {
+          p_id?: string | null
+          p_code?: string | null
+          p_label?: string | null
+          p_description?: string | null
+          p_niveau_hierarchique?: number
+          p_est_actif?: boolean
+        }
+        Returns: string
+      }
+      wf_admin_upsert_service: {
+        Args: {
+          p_id?: string | null
+          p_code?: string | null
+          p_label?: string | null
+          p_description?: string | null
+          p_parent_id?: string | null
+          p_responsable_role_code?: string | null
+          p_est_actif?: boolean
+        }
+        Returns: string
+      }
+      wf_admin_upsert_step: {
+        Args: {
+          p_id?: string | null
+          p_workflow_id?: string | null
+          p_step_order?: number | null
+          p_label?: string | null
+          p_description?: string | null
+          p_role_required?: string | null
+          p_role_alternatif?: string | null
+          p_direction_required?: string | null
+          p_est_optionnel?: boolean
+          p_delai_max_heures?: number
+        }
+        Returns: string
+      }
+      wf_admin_upsert_workflow: {
+        Args: {
+          p_id?: string | null
+          p_entity_type?: string | null
+          p_nom?: string | null
+          p_description?: string | null
+          p_est_actif?: boolean
+        }
         Returns: string
       }
     }

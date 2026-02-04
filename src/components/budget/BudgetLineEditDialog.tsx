@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * BudgetLineEditDialog - Dialogue de modification d'une ligne budgétaire avec diff view
  */

@@ -257,7 +257,7 @@ async function generatePage1(
     body: [
       [
         "N° Référence",
-        note.reference || "-",
+        note.dossier_ref || note.reference_pivot || "-",
         "Date",
         formatDateShort(note.created_at),
       ],
@@ -269,9 +269,9 @@ async function generatePage1(
       ],
       [
         "Demandeur",
-        note.demandeur_display || "-",
+        note.demandeur ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim() || "-" : "-",
         "Montant",
-        formatMontant(note.montant),
+        formatMontant(note.montant_estime),
       ],
       ["Objet", { content: note.objet || "-", colSpan: 3 }],
       [
@@ -491,7 +491,7 @@ async function generatePage2(
   doc.setFontSize(fonts.body);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...colors.secondary);
-  doc.text(`Réf: ${note.reference || "N/A"}`, pageWidth / 2, yPos, { align: "center" });
+  doc.text(`Réf: ${note.dossier_ref || note.reference_pivot || "N/A"}`, pageWidth / 2, yPos, { align: "center" });
   yPos += 6;
 
   const objetTrunc = truncateText(note.objet, 80);
@@ -647,8 +647,9 @@ export async function generateNoteSEFPdf(
   await generatePage2(doc, note, validation, qrDataUrl, validationUrl);
 
   // Ajouter métadonnées
+  const noteRef = note.dossier_ref || note.reference_pivot || "Brouillon";
   doc.setProperties({
-    title: `ARTI_NOTE_DG_SYGFP - ${note.reference || "Brouillon"}`,
+    title: `ARTI_NOTE_DG_SYGFP - ${noteRef}`,
     subject: note.objet || "",
     author: "ARTI - SYGFP",
     creator: "SYGFP - Système de Gestion des Finances Publiques",
@@ -657,7 +658,7 @@ export async function generateNoteSEFPdf(
 
   // Générer le blob
   const blob = doc.output("blob");
-  const refClean = (note.reference || "DRAFT").replace(/[^a-zA-Z0-9]/g, "_");
+  const refClean = (noteRef || "DRAFT").replace(/[^a-zA-Z0-9]/g, "_");
   const filename = `ARTI_NOTE_DG_SYGFP_${refClean}_${format(
     new Date(),
     "yyyyMMdd_HHmmss"

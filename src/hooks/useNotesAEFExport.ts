@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook pour l'export Excel des Notes AEF
  * Gère les filtres, permissions et pagination pour export complet

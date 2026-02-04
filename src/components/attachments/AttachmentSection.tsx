@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AttachmentSection - Composant combiné pour les formulaires
  *

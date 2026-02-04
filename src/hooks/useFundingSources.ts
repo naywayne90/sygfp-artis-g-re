@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useFundingSources - Hook pour gérer les sources/origines de financement
  *

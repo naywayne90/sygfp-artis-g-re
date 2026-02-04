@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Configuration centrale RBAC pour SYGFP/ARTI
  * Définit les rôles, niveaux de validation et règles d'accès

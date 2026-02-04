@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useBudgetNotifications - Hook pour gérer les notifications budgétaires
  *

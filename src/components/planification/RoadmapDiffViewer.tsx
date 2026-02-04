@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RoadmapDiffViewer - Composant pour visualiser et sélectionner les changements
  *

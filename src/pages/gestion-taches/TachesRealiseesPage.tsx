@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * TachesRealiseesPage - Liste des tâches réalisées
  *

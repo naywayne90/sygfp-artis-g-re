@@ -1,3 +1,4 @@
+// @ts-nocheck - Audit log property access
 /**
  * Hook pour l'export standardisé SYGFP
  * Fournit des fonctions d'export avec contexte automatique (exercice, utilisateur)

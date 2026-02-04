@@ -459,7 +459,7 @@ async function generatePage2(
         `Abidjan, le ${validationDate}`,
         `Note validée par: ${validatorName}\n\nStatut: ${
           note.statut === "dg_valide" || note.statut === "diffusee" ? "VALIDÉE" : note.statut?.toUpperCase()
-        }\n\n${note.observations_dg || "Aucune observation particulière."}`,
+        }\n\n${note.avis || "Aucune observation particulière."}`,
       ],
     ],
     styles: {

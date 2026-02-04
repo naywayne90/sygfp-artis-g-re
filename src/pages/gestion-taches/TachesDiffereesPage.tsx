@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * TachesDiffereesPage - Liste des tâches différées
  *

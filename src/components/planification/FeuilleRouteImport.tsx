@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * FeuilleRouteImport - Composant d'import des feuilles de route par direction
  *

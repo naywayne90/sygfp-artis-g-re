@@ -43,6 +43,7 @@ import {
   Copy,
   ChevronRight,
   CircleDollarSign,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -242,6 +243,22 @@ export function SidebarV2() {
                   >
                     <Search className="h-4 w-4 shrink-0" />
                     {!collapsed && <span>Recherche Dossier</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/dashboard-dmg")} tooltip="Dashboard DMG">
+                  <NavLink
+                    to="/dashboard-dmg"
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium",
+                      isActive("/dashboard-dmg")
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                    )}
+                  >
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>Dashboard DMG</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>

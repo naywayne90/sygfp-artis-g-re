@@ -11,9 +11,8 @@
  * @module AttachmentService
  */
 
-import { getStorageProvider, type IStorageProvider, type StorageResult, type StorageObject } from "./storage";
+import { getStorageProvider, type IStorageProvider } from "./storage";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
 
 // ============================================
 // TYPES

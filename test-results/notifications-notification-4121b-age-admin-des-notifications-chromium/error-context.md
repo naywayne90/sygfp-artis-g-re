@@ -1,0 +1,264 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e10]:
+        - img "ARTI" [ref=e12]
+        - generic [ref=e13]:
+          - generic [ref=e14]: SYGFP
+          - generic [ref=e15]: Gestion Financière
+      - generic [ref=e16]:
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Tableau de bord" [ref=e21] [cursor=pointer]:
+              - /url: /
+              - img [ref=e22]
+              - generic [ref=e25]: Tableau de bord
+          - listitem [ref=e26]:
+            - link "Recherche Dossier" [ref=e27] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e28]
+              - generic [ref=e31]: Recherche Dossier
+          - listitem [ref=e32]:
+            - link "Dashboard DMG" [ref=e33] [cursor=pointer]:
+              - /url: /dashboard-dmg
+              - img [ref=e34]
+              - generic [ref=e36]: Dashboard DMG
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 9 étapes" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: 9 étapes
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                - listitem [ref=e63]:
+                  - link "2 Notes AEF" [ref=e64] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e65]:
+                      - generic [ref=e66]: "2"
+                      - generic [ref=e67]: Notes AEF
+                - listitem [ref=e68]:
+                  - link "3 Imputation" [ref=e69] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e70]:
+                      - generic [ref=e71]: "3"
+                      - generic [ref=e72]: Imputation
+                - listitem [ref=e73]:
+                  - link "4 Expression Besoin" [ref=e74] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e75]:
+                      - generic [ref=e76]: "4"
+                      - generic [ref=e77]: Expression Besoin
+                - listitem [ref=e78]:
+                  - link "5 Passation Marché" [ref=e79] [cursor=pointer]:
+                    - /url: /marches
+                    - generic [ref=e80]:
+                      - generic [ref=e81]: "5"
+                      - generic [ref=e82]: Passation Marché
+                - listitem [ref=e83]:
+                  - link "6 Engagement" [ref=e84] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e85]:
+                      - generic [ref=e86]: "6"
+                      - generic [ref=e87]: Engagement
+                - listitem [ref=e88]:
+                  - link "7 Liquidation" [ref=e89] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e90]:
+                      - generic [ref=e91]: "7"
+                      - generic [ref=e92]: Liquidation
+                - listitem [ref=e93]:
+                  - link "8 Ordonnancement" [ref=e94] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e95]:
+                      - generic [ref=e96]: "8"
+                      - generic [ref=e97]: Ordonnancement
+                - listitem [ref=e98]:
+                  - link "9 Règlement" [ref=e99] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "9"
+                      - generic [ref=e102]: Règlement
+        - generic [ref=e103]:
+          - generic [ref=e104]: Budget
+          - list [ref=e106]:
+            - listitem [ref=e107]:
+              - link "Structure Budgétaire" [ref=e108] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e109]:
+                  - img [ref=e110]
+                  - generic [ref=e113]: Structure Budgétaire
+            - listitem [ref=e114]:
+              - link "Plan de Travail" [ref=e115] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e116]:
+                  - img [ref=e117]
+                  - generic [ref=e120]: Plan de Travail
+            - listitem [ref=e121]:
+              - link "Virements" [ref=e122] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e123]:
+                  - img [ref=e124]
+                  - generic [ref=e127]: Virements
+            - listitem [ref=e128]:
+              - link "Import / Export" [ref=e129] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e130]:
+                  - img [ref=e131]
+                  - generic [ref=e135]: Import / Export
+            - listitem [ref=e136]:
+              - link "Historique Imports" [ref=e137] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e138]:
+                  - img [ref=e139]
+                  - generic [ref=e143]: Historique Imports
+        - generic [ref=e144]:
+          - generic [ref=e145]: Partenaires
+          - list [ref=e147]:
+            - listitem [ref=e148]:
+              - link "Prestataires" [ref=e149] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e150]
+                - generic [ref=e154]: Prestataires
+            - listitem [ref=e155]:
+              - link "Contrats" [ref=e156] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e157]
+                - generic [ref=e160]: Contrats
+        - generic [ref=e161]:
+          - generic [ref=e162]: Gestion
+          - list [ref=e164]:
+            - listitem [ref=e165]:
+              - link "Approvisionnement" [ref=e166] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e167]
+                - generic [ref=e172]: Approvisionnement
+            - listitem [ref=e173]:
+              - link "Trésorerie" [ref=e174] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e175]
+                - generic [ref=e177]: Trésorerie
+            - listitem [ref=e178]:
+              - link "Recettes" [ref=e179] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e180]
+                - generic [ref=e182]: Recettes
+            - listitem [ref=e183]:
+              - link "Comptabilité Matière" [ref=e184] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e185]
+                - generic [ref=e188]: Comptabilité Matière
+        - generic [ref=e189]:
+          - generic [ref=e190]: Rapports
+          - list [ref=e192]:
+            - listitem [ref=e193]:
+              - link "États d'exécution" [ref=e194] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e195]
+                - generic [ref=e197]: États d'exécution
+            - listitem [ref=e198]:
+              - link "Alertes Budgétaires" [ref=e199] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e200]
+                - generic [ref=e204]: Alertes Budgétaires
+        - generic [ref=e205]:
+          - generic [ref=e206]:
+            - img [ref=e207]
+            - text: Paramétrage
+          - list [ref=e219]:
+            - listitem [ref=e221]:
+              - button "Configuration" [ref=e222] [cursor=pointer]:
+                - generic [ref=e223]:
+                  - img [ref=e224]
+                  - generic [ref=e227]: Configuration
+                - img [ref=e228]
+    - generic [ref=e230]:
+      - banner [ref=e231]:
+        - generic [ref=e232]:
+          - img "ARTI" [ref=e234]
+          - generic [ref=e235]:
+            - generic [ref=e236]: SYGFP
+            - generic [ref=e237]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e238] [cursor=pointer]:
+          - img
+          - generic [ref=e239]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "2026 Ouvert" [ref=e240] [cursor=pointer]:
+          - img [ref=e241]
+          - generic [ref=e243]: "2026"
+          - generic [ref=e244]: Ouvert
+          - img [ref=e245]
+        - button [ref=e251] [cursor=pointer]:
+          - img
+        - button "U" [ref=e252] [cursor=pointer]:
+          - generic [ref=e254]: U
+      - main [ref=e255]:
+        - generic [ref=e256]:
+          - generic [ref=e257]:
+            - generic [ref=e258]:
+              - heading "Paramètres des notifications" [level=1] [ref=e259]:
+                - img [ref=e260]
+                - text: Paramètres des notifications
+              - paragraph [ref=e263]: Gérez les templates, destinataires et préférences de notifications
+            - button "Actualiser" [ref=e264] [cursor=pointer]:
+              - img
+              - text: Actualiser
+          - generic [ref=e265]:
+            - generic [ref=e268]:
+              - generic [ref=e269]:
+                - paragraph [ref=e270]: Templates actifs
+                - paragraph [ref=e271]: "0"
+              - img [ref=e273]
+            - generic [ref=e278]:
+              - generic [ref=e279]:
+                - paragraph [ref=e280]: Envoyées
+                - paragraph [ref=e281]: "0"
+              - img [ref=e283]
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - paragraph [ref=e290]: Lues
+                - paragraph [ref=e291]: "0"
+              - img [ref=e293]
+            - generic [ref=e298]:
+              - generic [ref=e299]:
+                - paragraph [ref=e300]: Échecs
+                - paragraph [ref=e301]: "0"
+              - img [ref=e303]
+          - generic [ref=e307]:
+            - tablist [ref=e308]:
+              - tab "Templates" [selected] [ref=e309] [cursor=pointer]:
+                - img [ref=e310]
+                - text: Templates
+              - tab "Destinataires" [ref=e313] [cursor=pointer]:
+                - img [ref=e314]
+                - text: Destinataires
+              - tab "Préférences" [ref=e319] [cursor=pointer]:
+                - img [ref=e320]
+                - text: Préférences
+            - tabpanel "Templates" [ref=e323]:
+              - generic [ref=e325]:
+                - heading "Templates de notifications" [level=3] [ref=e326]:
+                  - img [ref=e327]
+                  - text: Templates de notifications
+                - paragraph [ref=e330]: Personnalisez les messages envoyés pour chaque type d'événement
+```

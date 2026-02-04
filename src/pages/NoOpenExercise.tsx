@@ -55,7 +55,7 @@ export default function NoOpenExercise() {
         .eq("user_id", user.id)
         .eq("is_active", true);
 
-      if (roles?.some(r => r.role === "ADMIN" || r.role === "admin")) {
+      if (roles?.some(r => String(r.role).toUpperCase() === "ADMIN")) {
         return true;
       }
 

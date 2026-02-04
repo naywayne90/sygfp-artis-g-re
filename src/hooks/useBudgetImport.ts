@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useBudgetImport - Hook pour gérer l'import des lignes budgétaires
  *

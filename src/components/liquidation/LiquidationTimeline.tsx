@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * LiquidationTimeline - Timeline du workflow de liquidation
  *

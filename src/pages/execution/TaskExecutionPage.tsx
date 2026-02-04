@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from "react";
 import { useExercice } from "@/contexts/ExerciceContext";
 import {

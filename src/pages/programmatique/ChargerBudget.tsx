@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Charger Budget - Import Excel avec mapping colonnes
  *

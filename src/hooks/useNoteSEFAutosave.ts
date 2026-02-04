@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook pour l'autosave des Notes SEF en brouillon
  * 

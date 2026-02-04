@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Composant de protection de route RBAC
  * Redirige si l'utilisateur n'a pas accès

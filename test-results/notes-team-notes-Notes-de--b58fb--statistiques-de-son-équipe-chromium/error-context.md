@@ -1,0 +1,226 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e10]:
+        - img "ARTI" [ref=e12]
+        - generic [ref=e13]:
+          - generic [ref=e14]: SYGFP
+          - generic [ref=e15]: Gestion Financière
+      - generic [ref=e16]:
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Tableau de bord" [ref=e21] [cursor=pointer]:
+              - /url: /
+              - img [ref=e22]
+              - generic [ref=e25]: Tableau de bord
+          - listitem [ref=e26]:
+            - link "Recherche Dossier" [ref=e27] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e28]
+              - generic [ref=e31]: Recherche Dossier
+          - listitem [ref=e32]:
+            - link "Dashboard DMG" [ref=e33] [cursor=pointer]:
+              - /url: /dashboard-dmg
+              - img [ref=e34]
+              - generic [ref=e36]: Dashboard DMG
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 5" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "5"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                - listitem [ref=e63]:
+                  - link "2 Notes AEF" [ref=e64] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e65]:
+                      - generic [ref=e66]: "2"
+                      - generic [ref=e67]: Notes AEF
+                - listitem [ref=e68]:
+                  - link "3 Imputation" [ref=e69] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e70]:
+                      - generic [ref=e71]: "3"
+                      - generic [ref=e72]: Imputation
+                - listitem [ref=e73]:
+                  - link "4 Expression Besoin" [ref=e74] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e75]:
+                      - generic [ref=e76]: "4"
+                      - generic [ref=e77]: Expression Besoin
+                - listitem [ref=e78]:
+                  - link "5 Passation Marché 2" [ref=e79] [cursor=pointer]:
+                    - /url: /marches
+                    - generic [ref=e80]:
+                      - generic [ref=e81]: "5"
+                      - generic [ref=e82]: Passation Marché
+                    - generic [ref=e83]: "2"
+                - listitem [ref=e84]:
+                  - link "6 Engagement 3" [ref=e85] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e86]:
+                      - generic [ref=e87]: "6"
+                      - generic [ref=e88]: Engagement
+                    - generic [ref=e89]: "3"
+                - listitem [ref=e90]:
+                  - link "7 Liquidation" [ref=e91] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e92]:
+                      - generic [ref=e93]: "7"
+                      - generic [ref=e94]: Liquidation
+                - listitem [ref=e95]:
+                  - link "8 Ordonnancement" [ref=e96] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e97]:
+                      - generic [ref=e98]: "8"
+                      - generic [ref=e99]: Ordonnancement
+                - listitem [ref=e100]:
+                  - link "9 Règlement" [ref=e101] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e102]:
+                      - generic [ref=e103]: "9"
+                      - generic [ref=e104]: Règlement
+        - generic [ref=e105]:
+          - generic [ref=e106]: Budget
+          - list [ref=e108]:
+            - listitem [ref=e109]:
+              - link "Structure Budgétaire" [ref=e110] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e111]:
+                  - img [ref=e112]
+                  - generic [ref=e115]: Structure Budgétaire
+            - listitem [ref=e116]:
+              - link "Plan de Travail" [ref=e117] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e118]:
+                  - img [ref=e119]
+                  - generic [ref=e122]: Plan de Travail
+            - listitem [ref=e123]:
+              - link "Virements" [ref=e124] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e125]:
+                  - img [ref=e126]
+                  - generic [ref=e129]: Virements
+            - listitem [ref=e130]:
+              - link "Import / Export" [ref=e131] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e132]:
+                  - img [ref=e133]
+                  - generic [ref=e137]: Import / Export
+            - listitem [ref=e138]:
+              - link "Historique Imports" [ref=e139] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e140]:
+                  - img [ref=e141]
+                  - generic [ref=e145]: Historique Imports
+        - generic [ref=e146]:
+          - generic [ref=e147]: Partenaires
+          - list [ref=e149]:
+            - listitem [ref=e150]:
+              - link "Prestataires" [ref=e151] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e152]
+                - generic [ref=e156]: Prestataires
+            - listitem [ref=e157]:
+              - link "Contrats" [ref=e158] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e159]
+                - generic [ref=e162]: Contrats
+        - generic [ref=e163]:
+          - generic [ref=e164]: Gestion
+          - list [ref=e166]:
+            - listitem [ref=e167]:
+              - link "Approvisionnement" [ref=e168] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e169]
+                - generic [ref=e174]: Approvisionnement
+            - listitem [ref=e175]:
+              - link "Trésorerie" [ref=e176] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e177]
+                - generic [ref=e179]: Trésorerie
+            - listitem [ref=e180]:
+              - link "Recettes" [ref=e181] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e182]
+                - generic [ref=e184]: Recettes
+            - listitem [ref=e185]:
+              - link "Comptabilité Matière" [ref=e186] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e187]
+                - generic [ref=e190]: Comptabilité Matière
+        - generic [ref=e191]:
+          - generic [ref=e192]: Rapports
+          - list [ref=e194]:
+            - listitem [ref=e195]:
+              - link "États d'exécution" [ref=e196] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e197]
+                - generic [ref=e199]: États d'exécution
+            - listitem [ref=e200]:
+              - link "Alertes Budgétaires" [ref=e201] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e202]
+                - generic [ref=e206]: Alertes Budgétaires
+        - generic [ref=e207]:
+          - generic [ref=e208]:
+            - img [ref=e209]
+            - text: Paramétrage
+          - list [ref=e221]:
+            - listitem [ref=e223]:
+              - button "Configuration" [ref=e224] [cursor=pointer]:
+                - generic [ref=e225]:
+                  - img [ref=e226]
+                  - generic [ref=e229]: Configuration
+                - img [ref=e230]
+    - generic [ref=e232]:
+      - banner [ref=e233]:
+        - generic [ref=e234]:
+          - img "ARTI" [ref=e236]
+          - generic [ref=e237]:
+            - generic [ref=e238]: SYGFP
+            - generic [ref=e239]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e240] [cursor=pointer]:
+          - img
+          - generic [ref=e241]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "3 à traiter" [ref=e242] [cursor=pointer]:
+          - generic [ref=e246]: 3 à traiter
+        - button "2026 Ouvert" [ref=e247] [cursor=pointer]:
+          - img [ref=e248]
+          - generic [ref=e250]: "2026"
+          - generic [ref=e251]: Ouvert
+          - img [ref=e252]
+        - button "2" [ref=e258] [cursor=pointer]:
+          - img
+          - generic [ref=e259]: "2"
+        - button "U" [ref=e260] [cursor=pointer]:
+          - generic [ref=e262]: U
+      - main [ref=e263]:
+        - generic [ref=e267]:
+          - img [ref=e269]
+          - generic [ref=e272]:
+            - paragraph [ref=e273]: Direction non assignée
+            - paragraph [ref=e274]: Votre profil n'est pas rattaché à une direction. Veuillez contacter l'administrateur.
+```

@@ -136,3 +136,53 @@ npm run verify       # Vérifier types + lint + tests
 1. Note SEF → 2. Note AEF → 3. Imputation → 4. Expression de besoin
 2. Passation de marché → 6. Engagement → 7. Liquidation
 3. Ordonnancement → 9. Règlement
+
+## 🔑 Credentials et Accès
+
+**IMPORTANT**: Toutes les clés et accès sont documentés dans [docs/CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md)
+
+### Accès rapide aux credentials
+
+| Type | Fichier source |
+|------|----------------|
+| Variables frontend | `.env` |
+| Permissions Claude | `.claude/settings.local.json` |
+| Guide complet | `docs/CREDENTIALS_GUIDE.md` |
+| Template | `.env.example` |
+
+### Supabase
+```
+Project ID: tjagvgqthlibdpvztvaf
+URL: https://tjagvgqthlibdpvztvaf.supabase.co
+Dashboard: https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf
+```
+
+### GitHub
+```
+Repo: naywayne90/sygfp-artis-g-re
+URL: https://github.com/naywayne90/sygfp-artis-g-re
+```
+
+### Utilisateurs de test
+| Email | Password | Rôle |
+|-------|----------|------|
+| dg@arti.ci | Test2026! | DG/Validateur |
+| daaf@arti.ci | Test2026! | DAAF/Validateur |
+| agent.dsi@arti.ci | Test2026! | DSI/Opérationnel |
+
+### MCP Servers disponibles
+- `supabase` → Requêtes PostgREST
+- `playwright` → Tests browser
+- `filesystem` → Accès fichiers
+- `context7` → Documentation libs
+- `sequential-thinking` → Raisonnement
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md) | Clés, tokens, accès |
+| [ARCHITECTURE_TECHNIQUE.md](docs/ARCHITECTURE_TECHNIQUE.md) | Structure projet |
+| [GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md) | Base de données |
+| [GUIDE_CODE_SPLITTING.md](docs/GUIDE_CODE_SPLITTING.md) | Optimisation |
+| [RELEASE_NOTES_v2.md](docs/RELEASE_NOTES_v2.md) | Notes de version |

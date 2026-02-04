@@ -15,15 +15,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Receipt, CheckCircle, XCircle, Clock, FileText, Tag, CreditCard, MoreHorizontal, Eye, FileSignature } from "lucide-react";
+import { Plus, Search, Receipt, CheckCircle, XCircle, Clock, FileText, Tag, CreditCard, MoreHorizontal, Eye, FileSignature, Flame } from "lucide-react";
 import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
 import { useLiquidations, Liquidation, VALIDATION_STEPS } from "@/hooks/useLiquidations";
+import { useUrgentLiquidations } from "@/hooks/useUrgentLiquidations";
 import { LiquidationForm } from "@/components/liquidation/LiquidationForm";
 import { LiquidationList } from "@/components/liquidation/LiquidationList";
 import { LiquidationDetails } from "@/components/liquidation/LiquidationDetails";
 import { LiquidationRejectDialog } from "@/components/liquidation/LiquidationRejectDialog";
 import { LiquidationDeferDialog } from "@/components/liquidation/LiquidationDeferDialog";
 import { LiquidationValidateDialog } from "@/components/liquidation/LiquidationValidateDialog";
+import { UrgentLiquidationList } from "@/components/liquidations/UrgentLiquidationList";
 import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
 import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
 import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
@@ -59,6 +61,8 @@ export default function Liquidations() {
     isRejecting,
     isDeferring,
   } = useLiquidations();
+
+  const { urgentCount } = useUrgentLiquidations();
 
   const { canPerform } = usePermissionCheck();
 
@@ -195,7 +199,7 @@ export default function Liquidations() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -230,11 +234,24 @@ export default function Liquidations() {
             </div>
           </CardContent>
         </Card>
+        <Card className={urgentCount > 0 ? "border-red-300 dark:border-red-800" : ""}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Urgentes</p>
+                <p className={`text-2xl font-bold ${urgentCount > 0 ? "text-red-600 animate-pulse" : ""}`}>
+                  {urgentCount}
+                </p>
+              </div>
+              <Flame className={`h-8 w-8 ${urgentCount > 0 ? "text-red-500/70 animate-pulse" : "text-muted-foreground/50"}`} />
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Service fait certifié</p>
+                <p className="text-sm text-muted-foreground">Service fait</p>
                 <p className="text-2xl font-bold text-success">{serviceFaitCount}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
@@ -253,7 +270,7 @@ export default function Liquidations() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
+            <TabsList className="mb-4 flex-wrap">
               <TabsTrigger value="a_traiter" className="gap-1">
                 <Tag className="h-3 w-3" />
                 À traiter ({engagementsValides.length})
@@ -263,6 +280,10 @@ export default function Liquidations() {
               </TabsTrigger>
               <TabsTrigger value="a_valider" className="text-warning">
                 À valider ({aValider.length})
+              </TabsTrigger>
+              <TabsTrigger value="urgentes" className={urgentCount > 0 ? "text-red-600" : ""}>
+                <Flame className={`h-3 w-3 mr-1 ${urgentCount > 0 ? "animate-pulse" : ""}`} />
+                Urgentes ({urgentCount})
               </TabsTrigger>
               <TabsTrigger value="validees" className="text-success">
                 Validées ({validees.length})
@@ -335,6 +356,18 @@ export default function Liquidations() {
                 onValidate={canPerform("liquidation.validate") ? handleValidate : undefined}
                 onReject={canPerform("liquidation.reject") ? handleReject : undefined}
                 onDefer={canPerform("liquidation.defer") ? handleDefer : undefined}
+              />
+            </TabsContent>
+
+            {/* Onglet Urgentes */}
+            <TabsContent value="urgentes">
+              <UrgentLiquidationList
+                onViewDetail={(liq) => {
+                  const liquidation = liquidations.find(l => l.id === liq.id);
+                  if (liquidation) handleView(liquidation);
+                }}
+                maxHeight={500}
+                showStats={true}
               />
             </TabsContent>
 

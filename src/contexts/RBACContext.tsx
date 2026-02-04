@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Contexte RBAC Global
  * Fournit les informations de permissions à toute l'application

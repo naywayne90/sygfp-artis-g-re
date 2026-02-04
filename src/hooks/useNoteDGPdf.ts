@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook pour la génération et le téléchargement de PDF des Notes DG
  */

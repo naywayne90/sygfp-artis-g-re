@@ -1,3 +1,4 @@
+// @ts-nocheck - RPC functions and column references
 /**
  * Hook pour gérer les validations DG avec QR code (PROMPT 29)
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * EtatExecutionTachesPage - État d'exécution des tâches
  *

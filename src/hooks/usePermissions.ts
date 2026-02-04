@@ -20,6 +20,22 @@ export function usePermissions() {
     },
   });
 
+  // Récupérer le profil utilisateur (incluant direction_id)
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile", currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return null;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, direction_id, role_hierarchique, poste")
+        .eq("id", currentUser.id)
+        .single();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!currentUser?.id,
+  });
+
   // Récupérer les rôles de l'utilisateur
   const { data: userRoles } = useQuery({
     queryKey: ["user-roles", currentUser?.id],
@@ -105,7 +121,7 @@ export function usePermissions() {
   // ============================================
   // DÉFINITIONS STRICTES "QUI VALIDE QUOI"
   // ============================================
-  
+
   // Vérifier si l'utilisateur peut valider une Note SEF (DG uniquement)
   const canValidateNoteSEF = (): boolean => {
     return isAdmin || hasRole("DG") || hasPermission("notes_sef_validate");
@@ -167,8 +183,13 @@ export function usePermissions() {
     return roleMap[action] || "Administrateur";
   };
 
+  // Calcul de l'état de chargement
+  const isLoading = currentUser === undefined || (!!currentUser?.id && (!userRoles || !userPermissions));
+
   return {
     userId: currentUser?.id,
+    userDirectionId: userProfile?.direction_id || null,
+    userRoleHierarchique: userProfile?.role_hierarchique || null,
     userRoles: userRoles?.map((r) => r.role) || [],
     permissions: userPermissions || [],
     hasPermission,
@@ -180,7 +201,7 @@ export function usePermissions() {
     isAdmin,
     hasModuleAccess,
     getAllPermissions,
-    isLoading: !userRoles || !userPermissions,
+    isLoading,
     // Nouvelles fonctions de validation par rôle
     canValidateNoteSEF,
     canValidateNoteAEF,

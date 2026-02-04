@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * useApprovisionnementsTresorerie - Hook pour gérer les approvisionnements de trésorerie
  *

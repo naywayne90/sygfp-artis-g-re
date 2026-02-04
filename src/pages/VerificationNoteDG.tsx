@@ -45,6 +45,8 @@ export default function VerificationNoteDG() {
     queryFn: async (): Promise<VerificationResult | null> => {
       if (!token) return null;
 
+      // RPC function may not be in types yet
+      // @ts-expect-error - RPC function not in generated types
       const { data, error } = await supabase.rpc("verify_note_dg_by_token", {
         p_token: token,
       });
@@ -55,8 +57,9 @@ export default function VerificationNoteDG() {
       }
 
       // La fonction retourne un tableau, on prend le premier élément
-      if (Array.isArray(data) && data.length > 0) {
-        return data[0] as VerificationResult;
+      const result = data as unknown;
+      if (Array.isArray(result) && result.length > 0) {
+        return result[0] as VerificationResult;
       }
 
       return null;

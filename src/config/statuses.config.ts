@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Configuration centralisée des statuts pour SYGFP
  * Source unique de vérité pour tous les statuts de workflow

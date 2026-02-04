@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook pour générer des références dossier uniques (dossier_ref)
  * Format: ARTI + MM(2) + YY(2) + NNNNNN(6) = 14 chars

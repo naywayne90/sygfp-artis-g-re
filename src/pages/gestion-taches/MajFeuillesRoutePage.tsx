@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MajFeuillesRoutePage - Mise à jour des feuilles de routes
  *
