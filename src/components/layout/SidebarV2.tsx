@@ -2,7 +2,7 @@
  * Sidebar V2 - Navigation principale sombre et structurée
  * Badges compteurs temps réel, menus regroupés sans doublons
  */
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 import {
   Home,
@@ -44,6 +44,7 @@ import {
   ChevronRight,
   CircleDollarSign,
   AlertTriangle,
+  ScanLine,
 } from "lucide-react";
 import {
   Sidebar,
@@ -89,6 +90,7 @@ const BUDGET_ITEMS = [
   { title: "Structure Budgétaire", url: "/planification/structure", icon: Wallet },
   { title: "Plan de Travail", url: "/planification/plan-travail", icon: ClipboardList },
   { title: "Virements", url: "/planification/virements", icon: ArrowRightLeft, badgeKey: "virementsEnAttente" as const },
+  { title: "Réaménagements", url: "/budget/reamenagements-imputations", icon: ArrowRightLeft },
   { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
   { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
 ];
@@ -108,6 +110,11 @@ const GESTION_ITEMS = [
 const RAPPORTS_ITEMS = [
   { title: "États d'exécution", url: "/etats-execution", icon: BarChart3 },
   { title: "Alertes Budgétaires", url: "/alertes-budgetaires", icon: Target },
+];
+
+const SCANNING_ITEMS = [
+  { title: "Scan. Engagement", url: "/execution/scanning-engagement", icon: ScanLine },
+  { title: "Scan. Liquidation", url: "/execution/scanning-liquidation", icon: ScanLine },
 ];
 
 const PARAMETRAGE_REFERENTIELS = [
@@ -308,29 +315,29 @@ export function SidebarV2() {
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className="gap-2 py-1">
                       {CHAINE_DEPENSE.map((item) => {
                         const badgeCount = item.badgeKey && badges ? badges[item.badgeKey] : 0;
                         return (
-                          <SidebarMenuSubItem key={item.url}>
-                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                          <SidebarMenuSubItem key={item.url} className="mb-0.5">
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)} className="min-h-8 h-auto">
                               <NavLink
                                 to={item.url}
                                 className={cn(
-                                  "flex items-center justify-between gap-2 text-sm py-1.5",
+                                  "flex items-center justify-between gap-2 text-sm py-2",
                                   isActive(item.url) && "text-sidebar-primary font-medium"
                                 )}
                               >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
                                   <span className={cn(
-                                    "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold",
+                                    "flex items-center justify-center w-5 h-5 shrink-0 rounded-full text-[10px] font-bold",
                                     isActive(item.url)
                                       ? "bg-sidebar-primary text-sidebar-primary-foreground"
                                       : "bg-sidebar-accent text-sidebar-foreground"
                                   )}>
                                     {item.step}
                                   </span>
-                                  <span>{item.title}</span>
+                                  <span className="truncate">{item.title}</span>
                                 </div>
                                 <BadgeCounter count={badgeCount} />
                               </NavLink>
@@ -455,6 +462,38 @@ export function SidebarV2() {
           <SidebarGroupContent>
             <SidebarMenu>
               {RAPPORTS_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink
+                      to={item.url}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                        isActive(item.url)
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ========== SCANNING / NUMÉRISATION ========== */}
+        <SidebarGroup className="mt-4">
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
+              <ScanLine className="h-3.5 w-3.5" />
+              Numérisation
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {SCANNING_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <NavLink

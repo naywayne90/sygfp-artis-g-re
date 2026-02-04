@@ -17,6 +17,7 @@ import {
   XCircle,
   RotateCcw,
   AlertTriangle,
+  Banknote,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +43,7 @@ import { MODES_PAIEMENT, COMPTES_BANCAIRES_ARTI, RENVOI_TARGETS, useReglements, 
 import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
 import { AuditLogViewer } from "@/components/audit/AuditLogViewer";
 import { ReglementTimeline } from "./ReglementTimeline";
+import { MouvementsBancairesDialog } from "./MouvementsBancairesDialog";
 import { useRBAC } from "@/hooks/useRBAC";
 
 interface ReglementDetailsProps {
@@ -66,6 +68,7 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectMotif, setRejectMotif] = useState("");
   const [renvoiTarget, setRenvoiTarget] = useState<RenvoiTarget>("engagement");
+  const [showMouvementsDialog, setShowMouvementsDialog] = useState(false);
 
   const ordonnancement = reglement.ordonnancement;
   const engagement = ordonnancement?.liquidation?.engagement;
@@ -133,6 +136,15 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
               Ouvrir dans Trésorerie
               <ExternalLink className="ml-2 h-3 w-3" />
             </Link>
+          </Button>
+          {/* Mouvements bancaires button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMouvementsDialog(true)}
+          >
+            <Banknote className="mr-2 h-4 w-4" />
+            Mouvements bancaires
           </Button>
           {/* Reject button - only for non-rejected, non-closed reglements, and authorized users */}
           {!isRejected && !isFullyPaid && !isReadOnly && (
@@ -442,6 +454,16 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
           <AuditLogViewer entityType="reglement" entityId={reglement.id} />
         </TabsContent>
       </Tabs>
+
+      {/* Mouvements bancaires dialog */}
+      <MouvementsBancairesDialog
+        open={showMouvementsDialog}
+        onOpenChange={setShowMouvementsDialog}
+        reglementId={reglement.id}
+        numeroReglement={reglement.numero}
+        montantTotal={reglement.montant || 0}
+        beneficiaire={ordonnancement?.beneficiaire}
+      />
     </div>
   );
 }

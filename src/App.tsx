@@ -133,6 +133,9 @@ const MiseAJourBudget = lazy(() => import("./pages/programmatique/MiseAJourBudge
 const ListeBudget = lazy(() => import("./pages/programmatique/ListeBudget"));
 const Reamenagement = lazy(() => import("./pages/programmatique/Reamenagement"));
 
+// Pages Budget
+const ReamenementsImputations = lazy(() => import("./pages/budget/ReamenementsImputations"));
+
 // Pages Contractualisation
 const Prestataires = lazy(() => import("./pages/contractualisation/Prestataires"));
 const Contrats = lazy(() => import("./pages/contractualisation/Contrats"));
@@ -324,6 +327,9 @@ const App = () => (
                 <Route path="/programmatique/mise-a-jour" element={<MiseAJourBudget />} />
                 <Route path="/programmatique/liste-budget" element={<ListeBudget />} />
                 <Route path="/programmatique/reamenagement" element={<Reamenagement />} />
+
+                {/* Budget - Réaménagements par imputations */}
+                <Route path="/budget/reamenagements-imputations" element={<ReamenementsImputations />} />
 
                 {/* Contractualisation */}
                 <Route path="/contractualisation/prestataires" element={<Prestataires />} />

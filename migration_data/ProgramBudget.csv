@@ -1,0 +1,380 @@
+ProgramBudgetID||Imputation||CodeOS||Action||Activite||SousActivite||Direction||NatureDepense||NatureEconomiqueEco||BudgetInitial||EstActif||DateCreation||DirectionEnCharge
+23394|1101101001022671700|11|01|101|001|02|2 Biens et services|671700 : Int,r^ts et frais financiers - dette int,rieure|142980394|1|2025-01-08 16:19:57.857|DAAF
+23395|1101104001024231100|11|01|104|001|02|2 Biens et services|231100 : BŸtiments administratifs . usage de bureau|11857510|1|2025-01-08 16:19:58.167|SDMG
+23396|1101105001024264900|11|01|105|001|02|2 Biens et services|264900 : Autres d,p"ts et cautionnement|250000000|1|2025-01-08 16:19:58.170|DAAF
+23397|1101103001022601100|11|01|103|001|02|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.170|SDMG
+23398|1101102001022601100|11|01|102|001|02|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.183|SDMG
+23399|1101102001022601990|11|01|102|001|02|2 Biens et services|601990 : Autres achats de fournitures|0|1|2025-01-08 16:19:58.183|SDMG
+23400|1404401001061611100|14|04|401|001|06|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|100000|1|2025-01-08 16:19:58.183|SDMG
+23401|1404401001061611200|14|04|401|001|06|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|350000|1|2025-01-08 16:19:58.183|DGPECRP
+23402|1404401001062601100|14|04|401|001|06|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|7750000|1|2025-01-08 16:19:58.183|SDMG
+23403|1404401001062612700|14|04|401|001|06|2 Biens et services|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.183|SDMG
+23404|1404401001062618900|14|04|401|001|06|2 Biens et services|618900 : Autres d,penses de communication|1125000|1|2025-01-08 16:19:58.200|SDMG
+23405|1303301001061611100|13|03|301|001|06|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.217|SDMG
+23406|1303301001061611200|13|03|301|001|06|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.217|DGPECRP
+23407|1303301001062612700|13|03|301|001|06|2 Biens et services|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.217|SDMG
+23408|1303301001062622200|13|03|301|001|06|2 Biens et services|622200 : Honoraires et frais annexes|0|1|2025-01-08 16:19:58.217|SDMG
+23409|1404402001061611100|14|04|402|001|06|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.217|SDMG
+23410|1404402001061611200|14|04|402|001|06|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.217|DGPECRP
+23411|1404402001061611900|14|04|402|001|06|2 Biens et services|611900 : Autres frais de transport et de mission|0|1|2025-01-08 16:19:58.233|SDMG
+23412|1404402001062622100|14|04|402|001|06|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|21000000|1|2025-01-08 16:19:58.233|SDMG
+23413|1101106001141611100|11|01|106|001|15|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|90000|1|2025-01-08 16:19:58.233|SDMG
+23414|1101106001141611200|11|01|106|001|15|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|1560000|1|2025-01-08 16:19:58.247|DGPECRP
+23415|1101106001141611900|11|01|106|001|15|2 Biens et services|611900 : Autres frais de transport et de mission|636100|1|2025-01-08 16:19:58.263|SDMG
+23416|1101106001142612900|11|01|106|001|15|2 Biens et services|612900 : Autres locations|2807000|1|2025-01-08 16:19:58.263|SDMG
+23417|1101106001142622960|11|01|106|001|15|2 Biens et services|622960 : Restauration|91610|1|2025-01-08 16:19:58.263|SDMG
+23418|1101107001141611100|11|01|107|001|15|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.263|SDMG
+23419|1101107001141611200|11|01|107|001|15|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.263|DGPECRP
+23420|1101107001141611900|11|01|107|001|15|2 Biens et services|611900 : Autres frais de transport et de mission|0|1|2025-01-08 16:19:58.280|SDMG
+23421|1101107001142612900|11|01|107|001|15|2 Biens et services|612900 : Autres locations|0|1|2025-01-08 16:19:58.280|SDMG
+23422|1101107001142622960|11|01|107|001|15|2 Biens et services|622960 : Restauration|0|1|2025-01-08 16:19:58.280|SDMG
+23423|1101108001141611100|11|01|108|001|15|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|65000|1|2025-01-08 16:19:58.280|SDMG
+23424|1101108001141611200|11|01|108|001|15|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|170000|1|2025-01-08 16:19:58.280|DGPECRP
+23425|1101108001141611900|11|01|108|001|15|2 Biens et services|611900 : Autres frais de transport et de mission|0|1|2025-01-08 16:19:58.280|SDMG
+23426|1101108001142612900|11|01|108|001|15|2 Biens et services|612900 : Autres locations|0|1|2025-01-08 16:19:58.280|SDMG
+23427|1101108001142622960|11|01|108|001|15|2 Biens et services|622960 : Restauration|0|1|2025-01-08 16:19:58.293|SDMG
+23428|1101109001051611100|11|01|109|001|05|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.297|SDMG
+23429|1101109001051611200|11|01|109|001|05|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.297|DGPECRP
+23430|1101109001051611300|11|01|109|001|05|2 Biens et services|611300 : Frais de transport des agents en mission . l',tranger|0|1|2025-01-08 16:19:58.297|SDMG
+23431|1101109001051611400|11|01|109|001|05|2 Biens et services|611400 : Indemnit,s de mission . l',tranger|0|1|2025-01-08 16:19:58.297|DGPECRP
+23432|1101109001051611900|11|01|109|001|05|2 Biens et services|611900 : Autres frais de transport et de mission|0|1|2025-01-08 16:19:58.310|SDMG
+23433|1101109001052601100|11|01|109|001|05|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.310|SDMG
+23434|1101109001052612900|11|01|109|001|05|2 Biens et services|612900 : Autres locations|0|1|2025-01-08 16:19:58.310|SDMG
+23435|1101109001052612700|11|01|109|001|05|2 Biens et services|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.327|SDMG
+23436|1101109001052618900|11|01|109|001|05|2 Biens et services|618900 : Autres d,penses de communication|10800000|1|2025-01-08 16:19:58.343|SDMG
+23437|1101109001052622960|11|01|109|001|05|2 Biens et services|622960 : Restauration|0|1|2025-01-08 16:19:58.343|SDMG
+23438|1101109001053644900|11|01|109|001|05|2 Biens et services|644900 : Autres Transfert en capital aux institutions a but non lucratif|512880|1|2025-01-08 16:19:58.343|DAAF
+23439|1101110001052622100|11|01|110|001|05|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.343|SDMG
+23440|1101111001051611100|11|01|111|001|05|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|15000|1|2025-01-08 16:19:58.343|SDMG
+23441|1101111001051611200|11|01|111|001|05|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|150000|1|2025-01-08 16:19:58.357|DGPECRP
+23442|1101111001051611300|11|01|111|001|05|2 Biens et services|611300 : Frais de transport des agents en mission . l',tranger|11348600|1|2025-01-08 16:19:58.357|SDMG
+23443|1101111001051611400|11|01|111|001|05|4 Investissements|611400 : Indemnit,s de mission . l',tranger|10360000|1|2025-01-08 16:19:58.373|DGPECRP
+23444|1101111001051611900|11|01|111|001|05|4 Investissements|611900 : Autres frais de transport et de mission|0|1|2025-01-08 16:19:58.373|SDMG
+23445|1101111001052612700|11|01|111|001|05|4 Investissements|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.373|SDMG
+23446|1101111001052623100|11|01|111|001|05|4 Investissements|623100 : Prestation des organismes de formation r,sidents|90903022|1|2025-01-08 16:19:58.390|SDMG
+23447|1101111001052623200|11|01|111|001|05|1 Personnels|623200 : Prestation des organismes de formation non r,sidents|0|1|2025-01-08 16:19:58.407|SDMG
+23448|1101112001052601100|11|01|112|001|05|1 Personnels|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.420|SDMG
+23449|1101112001053618900|11|01|112|001|05|1 Personnels|618900 : Autres d,penses de communication|16301200|1|2025-01-08 16:19:58.437|SDMG
+23450|1101112001054213100|11|01|112|001|05|1 Personnels|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.437|SDMG
+23451|1101113001052622100|11|01|113|001|05|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.437|SDMG
+23452|1101113001054213100|11|01|113|001|05|1 Personnels|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.437|SDMG
+23453|1101114001052601100|11|01|114|001|05|1 Personnels|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.460|SDMG
+23454|1101115001052617900|11|01|115|001|05|1 Personnels|617900 : Autres frais de relations publiques|0|1|2025-01-08 16:19:58.467|SDMG
+23455|1101115001053644900|11|01|115|001|05|1 Personnels|644900 : Autres Transfert en capital aux institutions a but non lucratif|0|1|2025-01-08 16:19:58.467|DAAF
+23456|1202201001072622100|12|02|201|001|07|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.467|SDMG
+23457|1303302001071663100|13|03|302|001|07|1 Personnels|663100 : Indemnit,s de fonction|14000000|1|2025-01-08 16:19:58.467|DGPECRP
+23458|1505501001072601100|15|05|501|001|07|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|15000000|1|2025-01-08 16:19:58.467|SDMG
+23459|1303303001072622100|13|03|303|001|07|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|9500000|1|2025-01-08 16:19:58.483|SDMG
+23460|1506502001072622100|15|05|502|001|07|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.483|SDMG
+23461|1101116001072622100|11|01|116|001|07|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.517|SDMG
+23462|1404403001071611100|14|04|403|001|07|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|1601200|1|2025-01-08 16:19:58.517|SDMG
+23463|1404403001071611200|14|04|403|001|07|4 Investissements|611200 : Indemnit,s de mission . l'int,rieur|5730000|1|2025-01-08 16:19:58.517|DGPECRP
+23464|1404403001072612700|14|04|403|001|07|2 Biens et services|612700 : Locations de v,hicules|5967403|1|2025-01-08 16:19:58.530|SDMG
+23465|1404403001072618900|14|04|403|001|07|2 Biens et services|618900 : Autres d,penses de communication|60701730|1|2025-01-08 16:19:58.530|SDMG
+23466|1404403001073644900|14|04|403|001|07|2 Biens et services|644900 : Autres Transfert en capital aux institutions a but non lucratif|16250000|1|2025-01-08 16:19:58.530|SDMG
+23467|1507503001072601100|15|05|503|001|07|4 Investissements|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.530|SDMG
+23468|1202202001071611100|12|02|202|001|07|4 Investissements|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.547|SDMG
+23469|1202202001071611200|12|02|202|001|07|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.547|DGPECRP
+23470|1202202001072612700|12|02|202|001|07|1 Personnels|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.547|SDMG
+23471|1202202001072622100|12|02|202|001|07|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.547|SDMG
+23472|1508504001072622100|15|05|504|001|07|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|9065635|1|2025-01-08 16:19:58.547|SDMG
+23473|1509505001072601100|15|05|505|001|07|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.547|SDMG
+23474|1202203001071611100|12|02|203|001|07|1 Personnels|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.547|SDMG
+23475|1202203001071611200|12|02|203|001|07|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.560|DGPECRP
+23476|1202203001072612700|12|02|203|001|07|1 Personnels|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.560|SDMG
+23477|1202203001072622100|12|02|203|001|07|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.563|SDMG
+23478|1202203001074213100|12|02|203|001|07|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.563|SDMG
+23479|1101117001042601100|11|01|117|001|04|1 Personnels|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.563|SDMG
+23480|1101118001042601100|11|01|118|001|04|1 Personnels|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-01-08 16:19:58.563|SDMG
+23481|1202204001041611100|12|02|204|001|04|1 Personnels|611100 : Frais de transport des agents en mission . l'int,rieur|50000|1|2025-01-08 16:19:58.563|SDMG
+23482|1202204001041611200|12|02|204|001|04|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|50000|1|2025-01-08 16:19:58.563|DGPECRP
+23483|1202204001042622100|12|02|204|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.580|SDMG
+23484|1202204001044213100|12|02|204|001|04|1 Personnels|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.610|SDMG
+23485|1202205001042622100|12|02|205|001|04|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.610|SDMG
+23486|1303304001042622100|13|03|304|001|04|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.643|SDMG
+23487|1303305001041611300|13|03|305|001|04|1 Personnels|611300 : Frais de transport des agents en mission . l',tranger|51047620|1|2025-01-08 16:19:58.643|SDMG
+23488|1303305001041611400|13|03|305|001|04|2 Biens et services|611400 : Indemnit,s de mission . l',tranger|27508232|1|2025-01-08 16:19:58.643|DGPECRP
+23489|1303305001042612700|13|03|305|001|04|2 Biens et services|612700 : Locations de v,hicules|9839355|1|2025-01-08 16:19:58.643|SDMG
+23490|1303305001043622100|13|03|305|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.643|SDMG
+23491|1303306001042622100|13|03|306|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.643|SDMG
+23492|1202206001042622100|12|02|206|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.643|SDMG
+23493|1303307001041611100|13|03|307|001|04|3 Transferts|611100 : Frais de transport des agents en mission . l'int,rieur|7915500|1|2025-01-08 16:19:58.673|SDMG
+23494|1303307001041611200|13|03|307|001|04|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|5365000|1|2025-01-08 16:19:58.673|DGPECRP
+23495|1303307001042622100|13|03|307|001|04|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.673|SDMG
+23496|1303307001043644900|13|03|307|001|04|1 Personnels|644900 : Autres Transfert en capital aux institutions a but non lucratif|48929810|1|2025-01-08 16:19:58.673|DAAF
+23497|1202207001042617500|12|02|207|001|04|1 Personnels|617500 : Publications|5476200|1|2025-01-08 16:19:58.673|SDMG
+23498|1202208001041611100|12|02|208|001|05|1 Personnels|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.673|SDMG
+23499|1202208001041611200|12|02|208|001|04|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.673|DGPECRP
+23500|1202208001042612700|12|02|208|001|04|2 Biens et services|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.673|SDMG
+23501|1202208001043622100|12|02|208|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.707|SDMG
+23502|1303308001042622100|13|03|308|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.707|SDMG
+23503|1303309001041611300|13|03|309|001|04|2 Biens et services|611300 : Frais de transport des agents en mission . l',tranger|41737313|1|2025-01-08 16:19:58.707|SDMG
+23504|1303309001041611400|13|03|309|001|04|3 Biens et services|611400 : Indemnit,s de mission . l',tranger|41794822|1|2025-01-08 16:19:58.707|DGPECRP
+23505|1303309001041611100|13|03|309|001|04|4 Investissements|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.707|SDMG
+23506|1303309001041611200|13|03|309|001|04|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.733|DGPECRP
+23507|1303309001042622100|13|03|309|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|5000000|1|2025-01-08 16:19:58.737|SDMG
+23508|1303310001041611100|13|03|310|001|04|4 Investissements|611100 : Frais de transport des agents en mission . l'int,rieur|125000|1|2025-01-08 16:19:58.753|SDMG
+23509|1303310001041611200|13|03|310|001|04|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|280000|1|2025-01-08 16:19:58.760|DGPECRP
+23510|1303310001042622100|13|03|310|001|04|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.760|SDMG
+23511|1303310001044213100|13|03|310|001|04|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.763|SDMG
+23512|1202209001042622100|12|02|209|001|04|3 Transferts|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.770|SDMG
+23513|1202209001044213100|12|02|209|001|04|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.770|SDMG
+23514|1202210001092622100|12|02|210|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.787|SDMG
+23515|1202210001094213100|12|02|210|001|09|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.787|SDMG
+23516|1101119001092622100|11|01|119|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|20860|1|2025-01-08 16:19:58.797|SDMG
+23517|1202211001092622100|12|02|211|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.797|SDMG
+23518|1202211001094213100|12|02|211|001|09|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.800|SDMG
+23519|1101120001092622100|11|01|120|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.833|SDMG
+23520|1202212001092622100|12|02|212|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|43965654|1|2025-01-08 16:19:58.833|SDMG
+23521|1202212001094213100|12|02|212|001|09|1 Personnels|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-01-08 16:19:58.833|SDMG
+23522|1404401001092622100|14|04|401|001|09|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.850|SDMG
+23523|1101113001092622100|11|01|113|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.857|SDMG
+23524|1101112001092622100|11|01|112|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.857|SDMG
+23525|1101116001092622100|11|01|116|001|09|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.860|SDMG
+23526|1202201001092622100|12|02|201|001|09|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.860|SDMG
+23527|1303310001091611100|13|03|310|001|09|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|15000|1|2025-01-08 16:19:58.863|SDMG
+23528|1303310001091611200|13|03|310|001|09|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|70000|1|2025-01-08 16:19:58.863|DGPECRP
+23529|1303310001092622100|13|03|310|001|09|4 Investissements|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.863|SDMG
+23530|1303305001091611300|13|03|305|001|09|1 Personnels|611300 : Frais de transport des agents en mission . l',tranger|0|1|2025-01-08 16:19:58.863|SDMG
+23531|1303305001091611400|13|03|305|001|09|1 Personnels|611400 : Indemnit,s de mission . l',tranger|2480000|1|2025-01-08 16:19:58.863|DGPECRP
+23532|1303305001091611100|13|03|305|001|09|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.863|SDMG
+23533|1303305001091611200|13|03|305|001|09|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.863|DGPECRP
+23534|1303305001092612700|13|03|305|001|09|1 Personnels|612700 : Locations de v,hicules|0|1|2025-01-08 16:19:58.890|SDMG
+23535|1303305001092622100|13|03|305|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.897|SDMG
+23536|1202204001092622100|12|02|204|001|09|4 Investissements|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.897|SDMG
+23537|1202203001091611100|12|02|203|001|09|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|0|1|2025-01-08 16:19:58.897|SDMG
+23538|1202203001091611200|12|02|203|001|09|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|0|1|2025-01-08 16:19:58.897|DGPECRP
+23539|1202203001092622100|12|02|203|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.897|SDMG
+23540|1202206001092622100|12|02|206|001|09|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|0|1|2025-01-08 16:19:58.897|SDMG
+23541|1101121003021629131|11|01|121|003|02|2 Biens et services|629131 : Imp"ts sur salaires part patronale|13610315|1|2025-01-08 16:19:58.897|DGPECRP
+23542|1101122003021629190|11|01|122|003|02|1 Personnels|629190 : Autres imp"ts, taxes et droits directs|0|1|2025-01-08 16:19:58.913|DAAF
+23543|1101123003021664300|11|01|123|003|02|1 Personnels|664300 : Cotisations CNPS des agents contractuels et d,cisionnaires|3419555|1|2025-01-08 16:19:58.913|DGPECRP
+23544|1101124003022601590|11|01|124|003|02|2 Biens et services|601590 : Autres achats de petits mat,riels et fournitures techniques|0|1|2025-01-08 16:19:58.913|SDMG
+23545|1101125003022614300|11|01|125|003|02|3 Transferts|614300 : Entretien des installations ,lectriques, climatiseurs, sanitaires et plomberies|452000|1|2025-01-08 16:19:58.913|SDMG
+23546|1101126003022622100|11|01|126|003|02|2 Biens et services|622100 : R,mun,rations de prestations ext,rieures|45640000|1|2025-01-08 16:19:58.920|SDMG
+23547|1101127003022622200|11|01|127|003|02|4 Investissements|622200 : Honoraires et frais annexes|40448320|1|2025-01-08 16:19:58.920|SDMG
+23548|1101128003022623100|11|01|128|003|02|2 Biens et services|623100 : Prestation des organismes de formation r,sidents|0|1|2025-01-08 16:19:58.920|SDMG
+23549|1101129003024231100|11|01|129|003|02|4 Investissements|231100 : BŸtiments administratifs . usage de bureau|0|1|2025-01-08 16:19:58.920|SDMG
+23550|1101131002051629131|11|01|131|002|05|2 Biens et services|629131 : Imp"ts sur salaires part patronale|215755395|1|2025-01-08 16:19:58.920|DGPECRP
+23551|1101131002051629190|11|01|131|002|05|4 Investissements|629190 : Autres imp"ts, taxes et droits directs|12040678|1|2025-01-08 16:19:58.927|DAAF
+23552|1101131002051629200|11|01|131|002|05|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|18997445|1|2025-01-08 16:19:58.927|SDMG
+23553|1101131002051662110|11|01|131|002|05|4 Investissements|662110 : Salaires et appointements du personnel sous contrat et des d,cisionnaires ivoiriens|680529093|1|2025-01-08 16:19:58.927|DGPECRP
+23554|1101131002051662200|11|01|131|002|05|1 Personnels|662200 : R,mun,rations du personnel occasionnel|20430670|1|2025-01-08 16:19:58.927|DGPECRP
+23555|1101131002051663100|11|01|131|002|05|1 Personnels|663100 : Indemnit,s de fonction|99724837|1|2025-01-08 16:19:58.927|DGPECRP
+23556|1101131002051663900|11|01|131|002|05|2 Biens et services|663900 : Autres primes et indemnit,s (dont indemnit,s de correction)|0|1|2025-01-08 16:19:58.927|DGPECRP
+23557|1101131002051664300|11|01|131|002|05|2 Biens et services|664300 : Cotisations CNPS des agents contractuels et d,cisionnaires|120551520|1|2025-01-08 16:19:58.927|DGPECRP
+23558|1101131002022601100|11|01|131|002|02|1 Personnels|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|32716626|1|2025-01-08 16:19:58.927|SDMG
+23559|1101131002022601200|11|01|131|002|02|2 Biens et services|601200 : Achats de carburants et lubrifiants|91951090|1|2025-01-08 16:19:58.927|SDMG
+23560|1101131002022601400|11|01|131|002|02|2 Biens et services|601400 : Achats de fournitures et consommables pour le mat,riel informatique|17078450|1|2025-01-08 16:19:58.927|SDMG
+23561|1101131002022601590|11|01|131|002|02|1 Personnels|601590 : Autres achats de petits mat,riels et fournitures techniques|9677041|1|2025-01-08 16:19:58.943|SDMG
+23562|1101131002022601600|11|01|131|002|02|1 Personnels|601600 : Achats d'alimentation (non destin,s au personnel)|1601368|1|2025-01-08 16:19:58.943|SDMG
+23563|1101131002022601910|11|01|131|002|02|2 Biens et services|601910 : Fournitures d'hygiSne et de sant,|575205|1|2025-01-08 16:19:58.943|SDMG
+23564|1101131002022601990|11|01|131|002|02|3 Transferts|601990 : Autres achats de fournitures|687420|1|2025-01-08 16:19:58.943|SDMG
+23565|1101131002022605200|11|01|131|002|02|1 Personnels|605200 : Abonnements et consommation d'eau|470244|1|2025-01-08 16:19:58.953|SDMG
+23566|1101131002022605300|11|01|131|002|02|1 Personnels|605300 : Abonnements et consommation d',lectricit,|13951585|1|2025-01-08 16:19:58.953|SDMG
+23567|1101131002022605900|11|01|131|002|02|1 Personnels|605900 : Autres sources d',nergie|269900|1|2025-01-08 16:19:58.953|SDMG
+23568|1101131002022609900|11|01|131|002|02|1 Personnels|609900 : Autres achats de biens|750292|1|2025-01-08 16:19:58.953|SDMG
+23569|1101131002022611100|11|01|131|002|02|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|2560000|1|2025-01-08 16:19:58.977|SDMG
+23570|1101131002022611200|11|01|131|002|02|2 Biens et services|611200 : Indemnit,s de mission . l'int,rieur|9940000|1|2025-01-08 16:19:58.977|DGPECRP
+23571|1101131002022611300|11|01|131|002|02|2 Biens et services|611300 : Frais de transport des agents en mission . l',tranger|6786100|1|2025-01-08 16:19:58.993|SDMG
+23572|1101131002022611400|11|01|131|002|02|1 Personnels|611400 : Indemnit,s de mission . l',tranger|13659127|1|2025-01-08 16:19:58.993|DGPECRP
+23573|1101131002022611910|11|01|131|002|02|1 Personnels|611910 : Transports de personnes (sauf personnel)|100000|1|2025-01-08 16:19:58.993|SDMG
+23574|1101131002022611900|11|01|131|002|02|2 Biens et services|611900 : Autres frais de transport et de mission|4584855|1|2025-01-08 16:19:58.993|SDMG
+23575|1101131002022612100|11|01|131|002|02|3 Transferts|612100 : Loyers et charges locatives des locaux (hors logements de personnel)|49317500|1|2025-01-08 16:19:58.993|SDMG
+23576|1101131002022612700|11|01|131|002|02|2 Biens et services|612700 : Locations de v,hicules|7285714|1|2025-01-08 16:19:59.007|SDMG
+23577|1101131002022614110|11|01|131|002|02|1 Personnels|614110 : Entretien des locaux|18271333|1|2025-01-08 16:19:59.007|SDMG
+23578|1101131002022614140|11|01|131|002|02|1 Personnels|614140 : Entretien et r,parations des bŸtiments|34324949|1|2025-01-08 16:19:59.007|SDMG
+23579|1101131002022614150|11|01|131|002|02|1 Personnels|614150 : Entretien des espaces verts et autres sites am,nag,s|6911362|1|2025-01-08 16:19:59.007|SDMG
+23580|1101131002022614300|11|01|131|002|02|1 Personnels|614300 : Entretien des installations ,lectriques, climatiseurs, sanitaires et plomberies|24848809|1|2025-01-08 16:19:59.013|SDMG
+23581|1101131002022614400|11|01|131|002|02|2 Biens et services|614400 : Entretien et maintenance des mobiliers et mat,riels informatiques|10842808|1|2025-01-08 16:19:59.013|SDMG
+23582|1101131002022614710|11|01|131|002|02|1 Personnels|614710 : Entretien et r,paration des v,hicules|14784276|1|2025-01-08 16:19:59.013|SDMG
+23583|1101131002022614910|11|01|131|002|02|1 Personnels|614910 : Frais de maintenance des ,quipements|523778|1|2025-01-08 16:19:59.013|SDMG
+23584|1101131002022614120|11|01|131|002|02|2 Biens et services|614120 : Produits d'entretien|226900|1|2025-01-08 16:19:59.013|SDMG
+23585|1101131002022614730|11|01|131|002|02|4 Investissements|614730 : Pneumatiques|0|1|2025-01-08 16:19:59.023|SDMG
+23586|1101131002022615100|11|01|131|002|02|1 Personnels|615100 : Assurances des immeubles|6521220|1|2025-01-08 16:19:59.023|SDMG
+23587|1101131002022615200|11|01|131|002|02|1 Personnels|615200 : Assurances des v,hicules automobiles, v,hicules . 2 roues et tricycles|21812613|1|2025-01-08 16:19:59.023|SDMG
+23588|1101131002022615900|11|01|131|002|02|2 Biens et services|615900 : Autres assurances|1350000|1|2025-01-08 16:19:59.023|SDMG
+23589|1101131002022617400|11|01|131|002|02|1 Personnels|617400 : Foires et expositions|0|1|2025-01-08 16:19:59.023|SDMG
+23590|1101131002022617700|11|01|131|002|02|1 Personnels|617700 : Frais de colloque, s,minaires, conf,rences|0|1|2025-01-08 16:19:59.023|SDMG
+23591|1101131002022617900|11|01|131|002|02|2 Biens et services|617900 : Autres frais de relations publiques|6641000|1|2025-01-08 16:19:59.023|SDMG
+23592|1101131002022618100|11|01|131|002|02|2 Biens et services|618100 : Abonnements et consommations de t,l,phone, et d'autres t,l,communications|13376369|1|2025-01-08 16:19:59.023|SDMG
+23593|1101131002022618300|11|01|131|002|02|2 Biens et services|618300 Abonnements et consommations Internet |3761297|1|2025-01-08 16:19:59.023|SDMG
+23594|1101131002022618400|11|01|131|002|02|2 Biens et services|618400 : Affanchissement du courrier et autres frais de correspondance|0|1|2025-01-08 16:19:59.040|SDMG
+23595|1101131002022618900|11|01|131|002|02|1 Personnels|618900 : Autres d,penses de communication|17769267|1|2025-01-08 16:19:59.057|SDMG
+23596|1101131002022621100|11|01|131|002|02|1 Personnels|621100 : Frais Bancaires|3955032|1|2025-01-08 16:19:59.057|DAAF
+23597|1101131002022622100|11|01|131|002|02|1 Personnels|622100 : R,mun,rations de prestations ext,rieures|931000|1|2025-01-08 16:19:59.077|SDMG
+23598|1101131002022622500|11|01|131|002|02|2 Biens et services|622500 : Services ext,rieurs de gardiennage|24015360|1|2025-01-08 16:19:59.077|SDMG
+23599|1101131002022622960|11|01|131|002|02|1 Personnels|622960 : Restauration|90718922|1|2025-01-08 16:19:59.077|SDMG
+23600|1101131002022622990|11|01|131|002|02|1 Personnels|622990 : Autres prestations de services|15538375|1|2025-01-08 16:19:59.077|SDMG
+23601|1101131002022623100|11|01|131|002|02|2 Biens et services|623100 : Prestation des organismes de formation r,sidents|11003250|1|2025-01-08 16:19:59.077|SDMG
+23602|1101131002022624100|11|01|131|002|02|2 Biens et services|624100 : Redevances pour brevets, licences et logiciels|18708258|1|2025-01-08 16:19:59.087|SDMG
+23603|1101131002022659930|11|01|131|002|02|3 Transferts|659930 : Subventions et dons|17007960|1|2025-01-08 16:19:59.087|DAAF
+23604|1101131002022665100|11|01|131|002|02|2 Biens et services|665100 : Frais d'alimentation du personnel|1044000|1|2025-01-08 16:19:59.087|SDMG
+23605|1101131002022665600|11|01|131|002|02|2 Biens et services|665600 : Assurances maladie en faveur du personnel|40790000|1|2025-01-08 16:19:59.087|DGPECRP
+23606|1101131002024213100|11|01|131|002|02|2 Biens et services|213100 : Conception de systSmes d'organisation - progiciels|42172|1|2025-01-08 16:19:59.107|SDMG
+23607|1101131002024231100|11|01|131|002|02|2 Biens et services|231100 : BŸtiments administratifs . usage de bureau|2352000|1|2025-01-08 16:19:59.107|SDMG
+23608|1101131002024241100|11|01|131|002|02|2 Biens et services|241100 : Mobilier et mat,riel de bureau (autre qu'informatique)|8769700|1|2025-01-08 16:19:59.107|SDMG
+23609|1101131002024243200|11|01|131|002|07|2 Biens et services|243200 : Voitures de service ou de liaison|383500000|1|2025-01-08 16:19:59.120|SDMG
+23610|1101112001054699000|11|01|112|001|05|1 Personnels|699000 : Compte tempon|99982000|0|2025-03-21 16:10:15.973|DAAF
+23611|1203213001044242100|12|03|213|001|04|4 Investissements|242100 : Mat,riel informatique|11696700|1|2025-03-24 16:54:26.553|SDMG
+23612|1103213001042601100|11|03|213|001|04|2 Biens et services|601100 : Achats de petits mat,riels, fournitures de bureau et documentation|0|1|2025-03-24 16:54:26.823|SDMG
+23613|1203213001042601200|12|03|213|001|04|2 Biens et services|601200 : Achats de carburants et lubrifiants|200000|1|2025-03-24 16:54:26.823|SDMG
+23614|1101114001052601200|11|01|114|001|05|2 Biens et services|601200 : Achats de carburants et lubrifiants|0|1|2025-03-24 16:54:26.827|SDMG
+23615|1203213001042601990|12|03|213|001|04|2 Biens et services|601990 : Autres achats de fournitures|3375600|1|2025-03-24 16:54:26.830|SDMG
+23616|1203213001041611100|12|03|213|001|04|1 Personnels|611100 : Frais de transport des agents en mission . l'int,rieur|1399000|1|2025-03-24 16:54:26.833|SDMG
+23617|1203213001041611200|12|03|213|001|04|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|10750000|1|2025-03-24 16:54:26.833|DGPECRP
+23618|1203213001042612700|12|03|213|001|04|2 Biens et services|612700 : Locations de v,hicules|20787591|1|2025-03-24 16:54:26.837|SDMG
+23619|1203213001042612900|12|03|213|001|04|2 Biens et services|612900 : Autres locations|653500|1|2025-03-24 16:54:26.840|SDMG
+23620|1101131002022614500|11|01|131|002|02|2 Biens et services|614500 : Entretien et maintenance des centraux t,l,phoniques, t,l,phones, t,l,copieurs et mat,riel de t,l,communication|1051800|1|2025-03-24 16:54:26.840|SDMG
+23621|1203213001042617900|12|03|213|001|04|2 Biens et services|617900 : Autres frais de relations publiques|0|1|2025-03-24 16:54:26.843|SDMG
+23622|1203213001042618900|12|03|213|001|04|2 Biens et services|618900 : Autres d,penses de communication|78400143|1|2025-03-24 16:54:26.847|SDMG
+23623|1203213001042622960|12|03|213|001|04|2 Biens et services|622960 : Restauration|0|1|2025-03-24 16:54:26.850|SDMG
+23624|1101131002022618700|11|01|131|002|02|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|0|1|2025-03-24 16:54:26.853|SDMG
+33610|1101132001051611900|11|01|132|001|05|1 Personnels|611900 : Autres frais de transport et de mission|0|1|2025-05-20 14:52:42.467|SDMG
+33611|1101132001052617700|11|01|132|001|05|2 Biens et services|617700 : Frais de colloque, s,minaires, conf,rences|106361660|1|2025-05-20 14:52:42.507|SDMG
+33612|1101131001051663700|11|01|131|001|05|1 Personnels|663700 : Indemnit,s de D,part . la Retraite|0|1|2025-05-21 11:40:58.153|DGPECRP
+43610|1101110001052618900|11|01|110|001|05|2 Biens et services|618900 : Autres d,penses de communication|1|0|2025-06-20 15:31:10.773|NULL
+43611|1101110001052618900|11|01|110|001|05|2 Biens et services|618900 : Autres d,penses de communication|1|0|2025-06-20 15:31:17.877|NULL
+43612|1101110001052618900|11|01|110|001|05|2 Biens et services|618900 : Autres d,penses de communication|5453700|1|2025-06-20 15:31:34.137|SDMG
+53610|1404403001072629200|14|04|403|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|3268000|1|2025-07-18 15:39:45.550|SDMG
+53611|1101132001052617500|11|01|132|001|05|2 Biens et services|617500 : Publications|5942800|1|2025-07-18 15:39:45.567|SDMG
+53612|1101132001052618700|11|01|132|001|05|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|1|1|2025-07-18 15:39:45.567|NULL
+53613|1501502001072629200|15|01|502|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|31984750|1|2025-07-18 15:39:45.567|SDMG
+53614|1101132001052618900|11|01|132|001|05|2 Biens et services|618900 : Autres d,penses de communication|24956880|1|2025-07-18 15:39:45.567|SDMG
+53615|1101101001024213100|11|01|101|001|02|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.583|NULL
+53616|1101102001024213100|11|01|102|001|02|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|72950000|1|2025-07-18 15:39:45.583|SDMG
+53617|1101103001024213100|11|01|103|001|02|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.583|NULL
+53618|1101104001024213100|11|01|104|001|02|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.583|NULL
+53619|1101105001024213100|11|01|105|001|02|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.583|NULL
+53620|1401401001064213100|14|01|401|001|06|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|7500000|1|2025-07-18 15:39:45.583|SDMG
+53621|1301301001064213100|13|01|301|001|06|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.583|NULL
+53622|1401402001064213100|14|01|402|001|06|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|6860000|1|2025-07-18 15:39:45.583|SDMG
+53623|1101106001144213100|11|01|106|001|14|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|7500000|1|2025-07-18 15:39:45.600|SDMG
+53624|1101107001144213100|11|01|107|001|14|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|6860000|1|2025-07-18 15:39:45.600|SDMG
+53625|1101108001144213100|11|01|108|001|14|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53626|1101109001054213100|11|01|109|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53627|1101110001054213100|11|01|110|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53628|1101111001054213100|11|01|111|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53629|1101112001054213100|11|01|112|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53630|1101113001054213100|11|01|113|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.600|NULL
+53631|1101114001054213100|11|01|114|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|14320000|1|2025-07-18 15:39:45.600|SDMG
+53632|1101115001054213100|11|01|115|001|05|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53633|1201201001074213100|12|01|201|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53634|1501501001074213100|15|01|501|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53635|1301303001074213100|13|01|303|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53636|1501502001074213100|15|01|502|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|18680000|1|2025-07-18 15:39:45.613|SDMG
+53637|1101116001074213100|11|01|116|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53638|1401403001074213100|14|01|403|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53639|1501503001074213100|15|01|503|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.613|NULL
+53640|1201202001074213100|12|01|202|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|0|2025-07-18 15:39:45.647|NULL
+53641|1501504001074213100|15|01|504|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|14270000|1|2025-07-18 15:39:45.647|SDMG
+53642|1501505001074213100|15|01|505|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.647|NULL
+53643|1201203001074213100|12|01|203|001|07|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.647|NULL
+53644|1101117001044213100|11|01|117|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.660|NULL
+53645|1101118001044213100|11|01|118|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.677|NULL
+53646|1201204001044213100|12|01|204|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.677|NULL
+53647|1201205001044213100|12|01|205|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|14270000|1|2025-07-18 15:39:45.677|SDMG
+53648|1301304001044213100|13|01|304|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.677|NULL
+53649|1301305001044213100|13|01|305|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.677|NULL
+53650|1301306001044213100|13|01|306|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53651|1201206001044213100|12|01|206|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53652|1301307001044213100|13|01|307|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53653|1201207001044213100|12|01|207|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53654|1201208001044213100|12|01|208|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53655|1301308001044213100|13|01|308|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53656|1301309001044213100|13|01|309|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53657|1301310001044213100|13|01|310|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53658|1201209001044213100|12|01|209|001|04|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.693|NULL
+53659|1201210001094213100|12|01|210|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53660|1101119001094213100|11|01|119|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53661|1201211001094213100|12|01|211|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53662|1101120001094213100|11|01|120|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53663|1201212001094213100|12|01|212|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53664|1401401001094213100|14|01|401|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|15250000|1|2025-07-18 15:39:45.707|SDMG
+53665|1101113001094213100|11|01|113|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|8820000|1|2025-07-18 15:39:45.707|SDMG
+53666|1101112001094213100|11|01|112|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53667|1101116001094213100|11|01|116|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.707|NULL
+53668|1201201001094213100|12|01|201|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53669|1301310001094213100|13|01|310|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53670|1301305001094213100|13|01|305|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53671|1201204001094213100|12|01|204|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53672|1201203001094213100|12|01|203|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53673|1201206001094213100|12|01|206|001|09|4 Investissements|213100 : Conception de systSmes d'organisation - progiciels|0|1|2025-07-18 15:39:45.723|NULL
+53674|1101131002022629200|11|01|131|002|02|2 Biens et services|629200 : Actions et Interventions urgentes|1|1|2025-07-18 15:39:45.723|NULL
+53675|1101131002022629500|11|01|131|002|02|2 Biens et services|629500 : Actions et Interventions urgentes|2790946|1|2025-07-18 16:02:47.630|SDMG
+53676|1101141001051611200|11|01|141|001|05|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|400000|1|2025-07-30 17:25:02.987|DGPECRP
+53677|1101131002022234500|11|01|131|002|02|2 Biens et services|234500 : R,seaux d'Electricit,|250000|1|2025-07-30 17:25:03.013|SDMG
+63676|1303307001042622200|13|03|307|001|04|2 Biens et services|622200 : Honoraires et Frais Annexes|184278000|1|2025-08-06 13:29:40.160|SDMG
+63677|1101132001052617600|11|01|132|001|05|2 Biens et services|617600 : Cadeaux . la clientSle|765090|1|2025-08-06 13:29:40.180|SDMG
+63678|1303309001042629200|13|03|309|001|04|2 Biens et services|629200 : Frais de R,ception,de f^tes et de c,r,monies|0|1|2025-08-08 15:21:57.030|SDMG
+63679|1101101001022622200|11|01|101|001|02|2 Biens et services|622200 : Honoraires et Frais Annexes|350000|1|2025-08-08 15:21:57.090|SDMG
+63680|1101141001051611100|11|01|141|001|05|1 Personnels|611100 : Frais de transport des agents en mission . l'int,rieur|600000|1|2025-08-13 15:21:01.223|SDMG
+73676|1101131002022622300|11|01|131|002|02|2 Biens et Services|622300 : Frais d'actes et de contentieux, frais de justice|165000|1|2025-08-18 13:45:18.927|SDMG
+73677|1101101001022622300|11|01|101|001|02|2 Biens et Services|622300 : Frais d'actes et de contentieux, frais de justice|0|0|2025-08-18 14:34:12.870|SDMG
+83676|1101111001052622990|11|01|111|001|05|2 Biens et Services|622990 : Autres prestations de services|19237200|1|2025-08-20 18:15:16.897|SDMG
+83677|1202212001094212400|12|02|212|001|09|4 Investissements|212400 : Licences|3384000|1|2025-08-20 18:15:16.907|SDMG
+83678|1101131002022622950|11|01|131|002|02|2 Biens et services|622950 : Abonnements, documentation|317000|1|2025-09-02 17:01:32.347|SDMG
+83679|1101132001052629200|11|01|132|001|05|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|14394170|1|2025-09-11 15:49:02.297|SDMG
+83680|1101131002022659950|11|01|131|002|02|2 Biens et services|659950 : D,penses sur projets non ventil,es|0|1|2025-09-16 12:20:04.960|SDMG
+83681|1101132001051611200|11|01|132|001|05|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|50000|1|2025-09-18 10:10:24.087|DGPECRP
+83682|1101132001022611100|11|01|132|001|02|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|150000|1|2025-09-18 10:10:24.107|SDMG
+83683|1101132001022601990|11|01|132|001|02|2 Biens et services|601990 : Autres achats de fournitures|100000|1|2025-09-18 10:10:24.107|SDMG
+83684|1303307001042612700|13|03|307|001|04|2 Biens et services|612700 : Locations de v,hicules|6252206|1|2025-09-22 16:12:48.467|SDMG
+83685|1303307001042612700|13|03|307|001|04|2 Biens et services|612700 : Locations de v,hicules|0|1|2025-09-26 11:44:53.317|NULL
+83686|1303307001042622200|13|03|307|001|04|2 Biens et services|622200 : Honoraires et frais annexes|0|1|2025-09-26 11:44:53.327|NULL
+83687|1101104001022622200|11|01|104|001|02|2 Biens et Services|622200 : Honoraires et frais annexes|833980|1|2025-09-26 12:19:56.377|SDMG
+83688|1101134001052618900|11|01|134|001|05|2 Biens et services|618900 : Autres d,penses de communication|2175380|1|2025-09-30 14:22:13.330|SDMG
+83689|1101134001052601990|11|01|134|001|05|2 Biens et services|601990 : Autres achats de fournitures|10500|1|2025-09-30 14:22:13.380|SDMG
+83690|1101134001052601910|11|01|134|001|05|2 Biens et services|601910 : Fournitures d'HygiSne et de Sant,|400000|1|2025-10-01 09:16:41.060|SDMG
+83691|1501504001072612900|15|01|504|001|07|2 Biens et services|612900 : Autres locations|33075000|1|2025-10-01 09:50:01.303|SDMG
+83692|1303307001042601990|13|03|307|001|04|2 Biens et services|601990 : Autres achats de fournitures|60000|1|2025-10-01 10:59:06.853|SDMG
+83693|1101107001142629200|11|01|107|001|14|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|3430000|1|2025-10-01 11:27:26.817|SDMG
+83694|1507503001072629200|15|07|503|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|0|1|2025-10-01 11:27:26.827|SDMG
+83695|1101134001052629200|11|01|134|001|05|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|400000|1|2025-10-02 09:56:19.757|SDMG
+83696|1101101001024231100|11|01|101|001|02|4 Investissements|231100 : BŸtiments administratifs . usage de bureau|2300000000|1|2025-10-14 11:58:02.430|SDMG
+83697|1101134001052617700|11|01|134|001|05|2 Biens et services|617700 Frais de colloque, s,minaires, conf,rences|400000|1|2025-10-17 10:46:16.760|SDMG
+83698|1501502001072618900|15|01|502|001|07|2 Biens et services|618900 : Autres d,penses de communication|7769825|1|2025-10-17 11:50:27.667|SDMG
+93696|1303302001072629200|13|03|302|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|564610|1|2025-10-20 15:18:20.247|SDMG
+93697|1303307001042618900|13|03|307|001|04|2 Biens et services|618900 : Autres d,penses de communication|233640|1|2025-10-20 16:13:19.440|SDMG
+93698|1501504001072618700|15|01|504|001|07|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|592000|1|2025-10-22 11:28:13.087|SDMG
+93699|1501504001072618900|15|01|504|001|07|2 Biens et services|618900 : Autres d,penses de communication|600000|1|2025-10-22 11:28:13.103|SDMG
+93700|1501504001072617700|15|01|504|001|07|2 Biens et services|617700 : Frais de colloque, s,minaires, conf,rences|15348200|1|2025-10-22 11:28:13.103|SDMG
+93701|1101134001052618700|11|01|134|001|05|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|150000|1|2025-10-23 10:11:15.557|SDMG
+93702|1101132001052622900|11|01|132|001|05|2 Biens et services|622900 : Autres prestations de services|0|1|2025-10-23 11:24:58.727|SDMG
+93703|1101132001052605900|11|01|132|001|05|2 Biens et services|605900 : Autres sources d',nergie|3430000|1|2025-10-23 11:24:58.797|SDMG
+93704|1101132001052612700|11|01|132|001|05|2 Biens et services|612700 : Locations de v,hicules|6150000|1|2025-10-23 11:24:58.917|SDMG
+93705|1101101001022621100|11|01|101|001|02|2 Biens et Services|621100 : Frais Bancaires|30968500|1|2025-10-24 16:12:39.830|DAAF
+93706|1303309001042612700|13|03|309|001|04|2 Biens et services|612700 : Locations de v,hicules|2836976|1|2025-10-24 16:12:39.830|SDMG
+93707|1101101001022622300|11|01|101|001|02|2 Biens et Services|622300 : Frais d'actes et de contentieux, frais de justice|175277250|1|2025-10-24 16:12:39.840|DAAF
+93708|1303303001072617700|13|03|303|001|07|2 Biens et services|617700 : Frais de colloque, s,minaires, conf,rences|6840000|1|2025-10-27 16:10:55.523|SDMG
+103696|1404403001072618700|14|04|403|001|07|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|420000|1|2025-11-03 11:28:24.167|SDMG
+103697|1404403001072618700|14|04|403|001|07|2 Biens et services|618700 : Communiqu,s de presse, radio, t,l,vision et frais de publicit,|0|0|2025-11-03 11:28:43.443|SDMG
+103698|1101131001024244700|11|01|131|001|02|4 Investissements|244700 : Mat,riel de s,curit, et de s-ret,|4800000|1|2025-11-03 18:38:32.057|SDMG
+103699|1303307001042611300|13|03|307|001|04|2 Biens et services|611300 : Frais de transport des agents en mission . l',tranger|5131600|1|2025-11-06 13:09:34.520|SDMG
+103700|1101106001142612900|11|01|106|001|14|2 Biens et services|612900 : Autres locations|0|1|2025-11-07 08:45:33.460|SDMG
+103701|1101106001142618900|11|01|106|001|14|2 Biens et services|618900 : Autres d,penses de communication|57696000|1|2025-11-07 08:45:33.460|SDMG
+103702|1101106001142612700|11|01|106|001|14|2 Biens et services|612700 : Locations de v,hicules|8885180|1|2025-11-11 12:45:06.900|SDMG
+103703|1501504001072611100|15|01|504|001|07|2 Biens et services|611100 : Frais de transport des agents en mission . l'int,rieur|400000|1|2025-11-13 10:52:41.643|SDMG
+103704|1501504001071611200|15|01|504|001|07|1 Personnels|611200 : Indemnit,s de mission . l'int,rieur|600000|1|2025-11-14 09:16:29.347|DGPECRP
+103705|1203213001042622200|12|03|213|001|04|2 Biens et services|622200 : Honoraires et frais annexes|54992700|1|2025-11-14 17:12:48.020|SDMG
+103706|1101106001143644900|11|01|106|001|14|3 Transfert|644900 : Autres Transferts en capital aux institutions a but non lucratif|46000000|1|2025-11-14 17:33:07.633|SDMG
+103707|1101106001142629200|11|01|106|001|14|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|1000000|1|2025-11-14 17:42:44.463|SDMG
+103708|1101131001022612900|11|01|131|001|02|2 Biens et services|612900 : Autres locations|1500000|1|2025-12-10 09:55:39.183|SDMG
+103709|1101133001072622950|11|01|133|001|07|2 Biens et services|622950 : Abonnements, documentation|300000|1|2025-12-10 10:15:34.687|SDMG
+113708|1303307001041611400|13|03|307|001|04|1 Personnels|611400 : Indemnit,s de mission . l',tranger|1361787|1|2025-12-23 10:40:19.423|DGPECRP
+113709|1101131002021699910|11|01|131|002|02|1 Personnels|699910 : Comptes Tampon Personnels|105478936|1|2025-12-30 17:39:16.057|DAAF
+113710|1101131002022699920|11|01|131|002|02|2 Biens et services|699920 : Comptes Tampon Biens et Services|67057188|1|2025-12-30 17:39:16.120|DAAF
+113711|1101131002023699930|11|01|131|002|02|3 Transferts|699930 : Comptes Tampon Transferts|16237120|1|2025-12-30 17:39:16.120|DAAF
+113712|1101131002024699940|11|01|131|002|02|4 Investissements|699940 : Comptes Tampon Investissements|69774450|1|2025-12-30 17:39:16.120|DAAF
+113713|1501503001072629200|15|01|503|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|0|1|2025-12-31 12:51:04.347|SDMG
+113714|1505503001072629200|15|05|503|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|16840000|1|2025-12-31 12:54:30.873|SDMG
+113715|1404403001072622200|14|04|403|001|07|2 Biens et services|622200 : Honoraires et frais annexes|10084200|1|2025-12-31 14:11:43.053|SDMG
+113716|1404402001062622200|14|04|402|001|06|2 Biens et services|622200 : Honoraires et frais annexes|37084200|1|2025-12-31 14:11:43.070|SDMG
+113717|1202209001042622200|12|02|209|001|04|2 Biens et services|622200 : Honoraires et frais annexes|94000000|1|2026-01-06 16:50:20.237|SDMG
+113718|1101104001022614140|11|01|104|001|02|2 Biens et Services|614140 : Entretien et r,parations des bŸtiments|15280000|1|2026-01-08 12:45:15.507|SDMG
+113719|1404402001062612700|14|04|402|001|06|2 Biens et services|612700 : Locations de v,hicules|9000000|1|2026-01-08 12:45:15.520|SDMG
+113720|1404402001062618900|14|04|402|001|06|2 Biens et services|618900 : Autres d,penses de communication|14750000|1|2026-01-08 12:45:15.527|SDMG
+113721|1505503001072629200|15|05|503|001|07|2 Biens et services|629200 : Frais de r,ception, de f^tes et de c,r,monies|0|1|2026-01-08 12:45:15.530|SDMG
+113722|1202203001072622200|12|02|203|001|07|2 Biens et services|622200 : Honoraires et frais annexes|46350000|1|2026-01-08 12:45:15.530|SDMG
+113723|140312101122612700|14|03|121|01|12|2 Biens et services|612700 : Locations de v,hicules|1|1|2026-01-16 12:51:46.260|Charg, de Mission du DG
+113724|140312101122629200|14|03|121|01|12|2 Biens et services|629100 : Frais de r,ception, de f^tes et de c,r,monies|1|1|2026-01-16 12:51:46.530|Charg, de Mission du DG

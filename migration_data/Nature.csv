@@ -1,0 +1,530 @@
+NatureID||Nature||Code||Libelle||Etat||DateCreation
+1|211100 Frais de Recherche en vue de la valorisation des ressources humaines|211100|Frais de Recherche en vue de la valorisation des ressources humaines|NULL|NULL
+2|211200 Frais de recherche et de d,veloppement m,dical|211200|Frais de recherche et de d,veloppement m,dical|NULL|NULL
+3|211300 Frais de recherche et de d,veloppement en environnement, m,t,orologique, forestier|211300|Frais de recherche et de d,veloppement en environnement, m,t,orologique, forestier|NULL|NULL
+4|211400 Frais de recherche et de d,veloppement agricole et halieutique|211400|Frais de recherche et de d,veloppement agricole et halieutique|NULL|NULL
+5|211500 Frais de recherche et de d,veloppement minier, ,nerg,tique, g,ologique et    hydraulique |211500|Frais de recherche et de d,veloppement minier, ,nerg,tique, g,ologique et    hydraulique |NULL|NULL
+6|211600 Frais de recherche et de d,veloppement industriel |211600|Frais de recherche et de d,veloppement industriel |NULL|NULL
+7|211700 Frais de recherche et de d,veloppement des infrastructures et Technologies de l'Information et de la Communcation|211700|Frais de recherche et de d,veloppement des infrastructures et Technologies de l'Information et de la Communcation|NULL|NULL
+8|211800 Frais de recherche et de d,veloppement touristique, sportif, culturel et social|211800|Frais de recherche et de d,veloppement touristique, sportif, culturel et social|NULL|NULL
+9|211900 Autres Frais de recherche et de d,veloppement|211900|Autres Frais de recherche et de d,veloppement|NULL|NULL
+10|212100 Brevets|212100|Brevets|NULL|NULL
+11|212200 Marques de fabrique|212200|Marques de fabrique|NULL|NULL
+12|212300 Droits d'auteur|212300|Droits d'auteur|NULL|NULL
+13|212400 Licences|212400|Licences|NULL|NULL
+14|212900 Autres droits de propri,t,|212900|Autres droits de propri,t,|NULL|NULL
+15|213100 Conception de systSmes d'organisation - progiciels|213100|Conception de systSmes d'organisation - progiciels|NULL|NULL
+16|214100 Droits d'exploitation- Fonds de commerce|214100|Droits d'exploitation- Fonds de commerce|NULL|NULL
+17|218100 Immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|218100|Immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|NULL|NULL
+18|219100 Frais divers d',tablissement|219100|Frais divers d',tablissement|NULL|NULL
+19|219200 Autres immobilisations incorporelles|219200|Autres immobilisations incorporelles|NULL|NULL
+20|221100 Acquisitions de terrains|221100|Acquisitions de terrains|NULL|NULL
+21|221200 Am,nagements de terrains|221200|Am,nagements de terrains|NULL|NULL
+22|221300 Constructions de cl"ture|221300|Constructions de cl"ture|NULL|NULL
+23|222100 Sous-sols|222100|Sous-sols|NULL|NULL
+24|222200 Gisements|222200|Gisements|NULL|NULL
+25|222300 CarriSres|222300|CarriSres|NULL|NULL
+26|223100 Plantations|223100|Plantations|NULL|NULL
+27|223200 For^ts|223200|For^ts|NULL|NULL
+28|224100 Plans d'eau|224100|Plans d'eau|NULL|NULL
+29|228100 Acquisitions et am,nagement de sols et sous-sols pour le compte de tiers|228100|Acquisitions et am,nagement de sols et sous-sols pour le compte de tiers|NULL|NULL
+30|229100 Autres acquisitions et am,nagements|229100|Autres acquisitions et am,nagements|NULL|NULL
+31|231100 BŸtiments administratifs . usage de bureau|231100|BŸtiments administratifs . usage de bureau|NULL|NULL
+32|232100 Logements de fonction|232100|Logements de fonction|NULL|NULL
+33|232200 Logements d'astreinte (y compris cit,s policiSres, cit,s p,nitentiaires, sapeurs pompiers ...)|232200|Logements d'astreinte (y compris cit,s policiSres, cit,s p,nitentiaires, sapeurs pompiers ...)|NULL|NULL
+34|232300 Cellulles . usage p,nitentiaire|232300|Cellulles . usage p,nitentiaire|NULL|NULL
+35|232400 Internats |232400|Internats |NULL|NULL
+36|232500 Cit,s universitaires et de grandes ,coles|232500|Cit,s universitaires et de grandes ,coles|NULL|NULL
+37|232900 Autres bŸtiments administratifs . usage de logement|232900|Autres bŸtiments administratifs . usage de logement|NULL|NULL
+38|232910 Logement du personnel|232910|Logement du personnel|NULL|NULL
+39|232920 Immeuble de rapport|232920|Immeuble de rapport|NULL|NULL
+40|233100 Salles de classe et amphith,atres|233100|Salles de classe et amphith,atres|NULL|NULL
+41|233200 Salles sp,cialis,es, laboratoires|233200|Salles sp,cialis,es, laboratoires|NULL|NULL
+42|233300 H"pitaux, centres de sant,|233300|H"pitaux, centres de sant,|NULL|NULL
+43|233400 Aires de jeux, installations r,cr,atives et sportives|233400|Aires de jeux, installations r,cr,atives et sportives|NULL|NULL
+44|233900 Autres bŸtiments administratifs . usage de technique|233900|Autres bŸtiments administratifs . usage de technique|NULL|NULL
+45|234100 Ponts|234100|Ponts|NULL|NULL
+46|234200 Ouvrages hydrauliques, barrages et digues|234200|Ouvrages hydrauliques, barrages et digues|NULL|NULL
+47|234300 R,seaux d'eau|234300|R,seaux d'eau|NULL|NULL
+48|234400 R,seaux d'assainissement|234400|R,seaux d'assainissement|NULL|NULL
+49|234500 R,seaux d',lectricit,|234500|R,seaux d',lectricit,|NULL|NULL
+50|234600 Monuments et ouvrages historiques|234600|Monuments et ouvrages historiques|NULL|NULL
+51|234900 Autres ouvrages|234900|Autres ouvrages|NULL|NULL
+52|235100 Infrastructures routiSres|235100|Infrastructures routiSres|NULL|NULL
+53|235200 Infrastructures ferroviaires|235200|Infrastructures ferroviaires|NULL|NULL
+54|235300 Infrastructures fluviales, lagunaires et portuaires|235300|Infrastructures fluviales, lagunaires et portuaires|NULL|NULL
+55|235400 Infrastructures a,roportuaires|235400|Infrastructures a,roportuaires|NULL|NULL
+56|235500 R,seaux t,l,phoniques et de t,l,communication|235500|R,seaux t,l,phoniques et de t,l,communication|NULL|NULL
+57|235900 Autres infrastructures|235900|Autres infrastructures|NULL|NULL
+58|236100 R,seaux informatiques|236100|R,seaux informatiques|NULL|NULL
+59|238100 Immeubles acquisitions, constructions et grosses reparations pour le compte de tiers|238100|Immeubles acquisitions, constructions et grosses reparations pour le compte de tiers|NULL|NULL
+60|239100 BŸtiments . usage agricole|239100|BŸtiments . usage agricole|NULL|NULL
+61|239200 BŸtiments . usage industriel|239200|BŸtiments . usage industriel|NULL|NULL
+62|239300 BŸtiments . usage administratif et commercial|239300|BŸtiments . usage administratif et commercial|NULL|NULL
+63|239400 Agencement, am,nagement, installation de bureau|239400|Agencement, am,nagement, installation de bureau|NULL|NULL
+64|239500 Agencement, am,nagement, installation d'habitation|239500|Agencement, am,nagement, installation d'habitation|NULL|NULL
+65|239600 Immobilisations en cours|239600|Immobilisations en cours|NULL|NULL
+66|239610 Immobilisations en cours-Constructions d'exploitation|239610|Immobilisations en cours-Constructions d'exploitation|NULL|NULL
+67|239620 Immobilisations en cours-Constructions . usage social, culturel et d'habitation|239620|Immobilisations en cours-Constructions . usage social, culturel et d'habitation|NULL|NULL
+68|239690 Autres immobilisations en cours|239690|Autres immobilisations en cours|NULL|NULL
+69|239900 Autres constructions d'exploitation|239900|Autres constructions d'exploitation|NULL|NULL
+70|241100 Mobilier et mat,riel de bureau (autre qu'informatique)|241100|Mobilier et mat,riel de bureau (autre qu'informatique)|NULL|NULL
+71|241200 Mobilier et mat,riel de logement|241200|Mobilier et mat,riel de logement|NULL|NULL
+72|241300 Mobilier et mat,riel scolaire et universitaire|241300|Mobilier et mat,riel scolaire et universitaire|NULL|NULL
+73|241900 Autres Mobilier et materiel de logement et de bureau (autre qu'informatique)|241900|Autres Mobilier et materiel de logement et de bureau (autre qu'informatique)|NULL|NULL
+74|242100 Mat,riel informatique|242100|Mat,riel informatique|NULL|NULL
+75|242200 Vid,oprojecteur|242200|Vid,oprojecteur|NULL|NULL
+76|242900 Autres Materiels informatiques de bureau|242900|Autres Materiels informatiques de bureau|NULL|NULL
+77|243100 Voitures de fonction|243100|Voitures de fonction|NULL|NULL
+78|243200 Voitures de service ou de liaison|243200|Voitures de service ou de liaison|NULL|NULL
+79|243300 V,hicules . 2 roues et tricycles|243300|V,hicules . 2 roues et tricycles|NULL|NULL
+80|243900 Autres Materiels de transport de service et de fonction|243900|Autres Materiels de transport de service et de fonction|NULL|NULL
+81|244100 Mat,riel et outillage industriel|244100|Mat,riel et outillage industriel|NULL|NULL
+82|244110 Mat,riel industriel|244110|Mat,riel industriel|NULL|NULL
+83|244120 Outillage industriel|244120|Outillage industriel|NULL|NULL
+84|244210 Mat,riel de travaux publics|244210|Mat,riel de travaux publics|NULL|NULL
+85|244220 Outillage de travaux publics|244220|Outillage de travaux publics|NULL|NULL
+86|244300 Mat,riel et outillage agricole et forestier|244300|Mat,riel et outillage agricole et forestier|NULL|NULL
+87|244320 Outillage agricole et forestier|244320|Outillage agricole et forestier|NULL|NULL
+88|244400 Mat,ri,l bio-m,dical|244400|Mat,ri,l bio-m,dical|NULL|NULL
+89|244500 Mat,riel et outillage audiovisuel et t,l,communications|244500|Mat,riel et outillage audiovisuel et t,l,communications|NULL|NULL
+90|244510 Mat,riel  audiovisuel et t,l,communications|244510|Mat,riel  audiovisuel et t,l,communications|NULL|NULL
+91|244520 Outillage audiovisuel et t,l,communications|244520|Outillage audiovisuel et t,l,communications|NULL|NULL
+92|244610 Mat,riel minier, ,nerg,tique et hydraulique|244610|Mat,riel minier, ,nerg,tique et hydraulique|NULL|NULL
+93|244620 Outillage minier, ,nerg,tique et hydraulique|244620|Outillage minier, ,nerg,tique et hydraulique|NULL|NULL
+94|244700 Mat,riel de s,curit, et de s-ret,|244700|Mat,riel de s,curit, et de s-ret,|NULL|NULL
+95|244900 Autres mat,riels et outillages techniques|244900|Autres mat,riels et outillages techniques|NULL|NULL
+96|245100 V,hicules de transports en commun (autocars, autobus, minicars)|245100|V,hicules de transports en commun (autocars, autobus, minicars)|NULL|NULL
+97|245200 V,hicules de transports utilitaires (ambulances, camions, camionnettes, corbillards )|245200|V,hicules de transports utilitaires (ambulances, camions, camionnettes, corbillards )|NULL|NULL
+98|245300 Mat,riel de transport ferroviaire|245300|Mat,riel de transport ferroviaire|NULL|NULL
+99|245400 Mat,riel de transport fluvial|245400|Mat,riel de transport fluvial|NULL|NULL
+100|245500 Mat,riel de transport maritime|245500|Mat,riel de transport maritime|NULL|NULL
+101|245600 Mat,riel de transport a,rien|245600|Mat,riel de transport a,rien|NULL|NULL
+102|246100 Peintures|246100|Peintures|NULL|NULL
+103|246200 Sculptures|246200|Sculptures|NULL|NULL
+104|246300 Photographies et audiovisuel |246300|Photographies et audiovisuel |NULL|NULL
+105|246400 Litt,rature|246400|Litt,rature|NULL|NULL
+106|246500 Architectures|246500|Architectures|NULL|NULL
+107|246900 Autres collections- ouvres d'art|246900|Autres collections- ouvres d'art|NULL|NULL
+108|247100 Stocks strat,giques ou d'urgence de carburants|247100|Stocks strat,giques ou d'urgence de carburants|NULL|NULL
+109|247200 Stocks de c,r,ales et autres produits alimentaires essentiels|247200|Stocks de c,r,ales et autres produits alimentaires essentiels|NULL|NULL
+110|247300 Stocks de r,gulation des march,s|247300|Stocks de r,gulation des march,s|NULL|NULL
+111|247400 Stocks de produits pharmaceutiques|247400|Stocks de produits pharmaceutiques|NULL|NULL
+112|247900 Autres stocks|247900|Autres stocks|NULL|NULL
+113|248100 Cheptel de trait|248100|Cheptel de trait|NULL|NULL
+114|248200 Cheptel de reproduction|248200|Cheptel de reproduction|NULL|NULL
+115|248900 Autres cheptels|248900|Autres cheptels|NULL|NULL
+116|251000 BŸtiments militaires|251000|BŸtiments militaires|NULL|NULL
+117|252100 Ouvrages et infrastructures militaires|252100|Ouvrages et infrastructures militaires|NULL|NULL
+118|253100 Mobilier|253100|Mobilier|NULL|NULL
+119|253200 Mat,riel et outillage (autre qu'informatique)|253200|Mat,riel et outillage (autre qu'informatique)|NULL|NULL
+120|253300 Mat,riel informatique|253300|Mat,riel informatique|NULL|NULL
+121|253400 Voitures de fonction ou de service|253400|Voitures de fonction ou de service|NULL|NULL
+122|253500 V,hicules de transports en commun militaires|253500|V,hicules de transports en commun militaires|NULL|NULL
+123|253600 V,hicules de transports utilitaires militaires|253600|V,hicules de transports utilitaires militaires|NULL|NULL
+124|253700 Mat,riels de transport fluvial et maritime militaires|253700|Mat,riels de transport fluvial et maritime militaires|NULL|NULL
+125|253710 Mat,riels de transport fluvial militaires|253710|Mat,riels de transport fluvial militaires|NULL|NULL
+126|253720 Mat,riels de transport maritime militaires|253720|Mat,riels de transport maritime militaires|NULL|NULL
+127|253800 Mat,riels de transport a,rien militaires|253800|Mat,riels de transport a,rien militaires|NULL|NULL
+128|253900 Autres ,quipements militaires|253900|Autres ,quipements militaires|NULL|NULL
+129|261100 Prises de participations dans des entreprises publiques nationales|261100|Prises de participations dans des entreprises publiques nationales|NULL|NULL
+130|261110 Participations majoritaires|261110|Participations majoritaires|NULL|NULL
+131|261120 Participations minoritaires avec minorit, de blocage|261120|Participations minoritaires avec minorit, de blocage|NULL|NULL
+132|261130 Participations minoritaires sans minorit, de blocage|261130|Participations minoritaires sans minorit, de blocage|NULL|NULL
+133|261140 Titres de placement|261140|Titres de placement|NULL|NULL
+134|261210 Participations majoritaires|261210|Participations majoritaires|NULL|NULL
+135|261220 Participations minoritaires avec minorit, de blocage|261220|Participations minoritaires avec minorit, de blocage|NULL|NULL
+136|261230 Participations minoritaires sans minorit, de blocage|261230|Participations minoritaires sans minorit, de blocage|NULL|NULL
+137|261310 Participations majoritaires|261310|Participations majoritaires|NULL|NULL
+138|261320 Participations minoritaires avec minorit, de blocage|261320|Participations minoritaires avec minorit, de blocage|NULL|NULL
+139|261330 Participations minoritaires sans minorit, de blocage|261330|Participations minoritaires sans minorit, de blocage|NULL|NULL
+140|261340 Titres de placement|261340|Titres de placement|NULL|NULL
+141|261910 Prises de participations,  p/cpte d'entreprises publiques nles|261910|Prises de participations,  p/cpte d'entreprises publiques nles|NULL|NULL
+142|261920 Prises de participations,  p/cpte d'institutions financiSres nles|261920|Prises de participations,  p/cpte d'institutions financiSres nles|NULL|NULL
+143|261930 Prises de participations,  p/cpte d'autres secteurs de l',conomie|261930|Prises de participations,  p/cpte d'autres secteurs de l',conomie|NULL|NULL
+144|261940 Prises de participations,  pour le compte de tiers ext,rieurs|261940|Prises de participations,  pour le compte de tiers ext,rieurs|NULL|NULL
+145|261990 Autres prises de participations,  pour le compte de tiers|261990|Autres prises de participations,  pour le compte de tiers|NULL|NULL
+146|264100 D,p"ts et cautionnements-loyer d'avance|264100|D,p"ts et cautionnements-loyer d'avance|NULL|NULL
+147|264200 D,p"ts et cautionnements-gaz|264200|D,p"ts et cautionnements-gaz|NULL|NULL
+148|264300 D,p"ts et cautionnements-,lectricit,|264300|D,p"ts et cautionnements-,lectricit,|NULL|NULL
+149|264400 D,p"ts et cautionnements-gaz|264400|D,p"ts et cautionnements-gaz|NULL|NULL
+150|264500 D,p"ts et cautionnements-t,l,phone|264500|D,p"ts et cautionnements-t,l,phone|NULL|NULL
+151|264600 D,p"ts et cautionnements-t,lex|264600|D,p"ts et cautionnements-t,lex|NULL|NULL
+152|264700 D,p"ts et cautionnements-Ensemble de gestion|264700|D,p"ts et cautionnements-Ensemble de gestion|NULL|NULL
+153|264900 Autres d,p"ts et cautionnement|264900|Autres d,p"ts et cautionnement|NULL|NULL
+154|271100 Avances aux Soci,t,s d'Etat|271100|Avances aux Soci,t,s d'Etat|NULL|NULL
+155|271200 Avances aux Soci,t,s d'Economie Mixte|271200|Avances aux Soci,t,s d'Economie Mixte|NULL|NULL
+156|271300 Avances aux institutions financiSres|271300|Avances aux institutions financiSres|NULL|NULL
+157|271400 Avances aux entreprises priv,es non financiSres|271400|Avances aux entreprises priv,es non financiSres|NULL|NULL
+158|271500 Avances au personnel pour achats de logements|271500|Avances au personnel pour achats de logements|NULL|NULL
+159|271600 Avances au personnel pour achats de v,hicules|271600|Avances au personnel pour achats de v,hicules|NULL|NULL
+160|271700 Avances . l',tranger|271700|Avances . l',tranger|NULL|NULL
+161|271900 Autres avances|271900|Autres avances|NULL|NULL
+162|273100 Pr^ts aux Soci,t,s d'Etat|273100|Pr^ts aux Soci,t,s d'Etat|NULL|NULL
+163|273200 Pr^ts aux Soci,t,s d'Economie Mixte|273200|Pr^ts aux Soci,t,s d'Economie Mixte|NULL|NULL
+164|274100 Pr^ts aux institutions financiSres . l'int,rieur|274100|Pr^ts aux institutions financiSres . l'int,rieur|NULL|NULL
+165|274200 Pr^ts aux institutions financiSres . l'ext,rieur|274200|Pr^ts aux institutions financiSres . l'ext,rieur|NULL|NULL
+166|275100 Pr^ts aux entreprises priv,es non financiSres|275100|Pr^ts aux entreprises priv,es non financiSres|NULL|NULL
+167|275200 Pr^ts au personnel pour achat de logement|275200|Pr^ts au personnel pour achat de logement|NULL|NULL
+168|275300 Pr^ts au personnel pour achat de v,hicules|275300|Pr^ts au personnel pour achat de v,hicules|NULL|NULL
+169|275400 Autres pr^ts au personnel|275400|Autres pr^ts au personnel|NULL|NULL
+170|275900 Autres pr^ts int,rieurs|275900|Autres pr^ts int,rieurs|NULL|NULL
+171|276000 Pr^ts . l',tranger|276000|Pr^ts . l',tranger|NULL|NULL
+172|277100 Pr^ts r,troc,d,s - versements aux administrations publiques nationales|277100|Pr^ts r,troc,d,s - versements aux administrations publiques nationales|NULL|NULL
+173|277200 Pr^ts r,troc,d,s - versements aux entreprises publiques non financiSres nationales|277200|Pr^ts r,troc,d,s - versements aux entreprises publiques non financiSres nationales|NULL|NULL
+174|277300 Pr^ts r,troc,d,s - versements aux institutions financiSres nationales|277300|Pr^ts r,troc,d,s - versements aux institutions financiSres nationales|NULL|NULL
+175|277400 Pr^ts r,troc,d,s - versements . d'autres secteurs de l',conomie|277400|Pr^ts r,troc,d,s - versements . d'autres secteurs de l',conomie|NULL|NULL
+176|277500 Pr^ts r,troc,d,s - versements . l',tranger|277500|Pr^ts r,troc,d,s - versements . l',tranger|NULL|NULL
+177|277600 Pr^ts sur dette avalis,e int,rieure|277600|Pr^ts sur dette avalis,e int,rieure|NULL|NULL
+178|278100 Avances- Ech,ances Impay,es|278100|Avances- Ech,ances Impay,es|NULL|NULL
+179|278200 Pr^ts . d'autres administrations publiques. Ech,ances Impay,es|278200|Pr^ts . d'autres administrations publiques. Ech,ances Impay,es|NULL|NULL
+180|278300 Pr^ts aux entreprises publiques et semi publiques non financiSres. Impay,es|278300|Pr^ts aux entreprises publiques et semi publiques non financiSres. Impay,es|NULL|NULL
+181|278400 Pr^ts aux institutions. Ech,ances Impay,es|278400|Pr^ts aux institutions. Ech,ances Impay,es|NULL|NULL
+182|278500 Autres Pr^ts Int,rieurs. Ech,ances Impay,es|278500|Autres Pr^ts Int,rieurs. Ech,ances Impay,es|NULL|NULL
+183|278600 Pr^ts . l',tranger. Ech,ances Impay,es|278600|Pr^ts . l',tranger. Ech,ances Impay,es|NULL|NULL
+184|278700 Pr^ts retroc,d,s. Ech,ances Impay,es|278700|Pr^ts retroc,d,s. Ech,ances Impay,es|NULL|NULL
+185|279000 Autres pr^ts et avances|279000|Autres pr^ts et avances|NULL|NULL
+186|281100 Amortissements des frais de recherche et de d,veloppement|281100|Amortissements des frais de recherche et de d,veloppement|NULL|NULL
+187|281200 Amortissements des brevets, marques de fabrique, droits d'auteur|281200|Amortissements des brevets, marques de fabrique, droits d'auteur|NULL|NULL
+188|281300 Amortissements de la conception de systSmes d'organisation et des progiciels|281300|Amortissements de la conception de systSmes d'organisation et des progiciels|NULL|NULL
+189|281400 Amortissements des droits d'exploitation- Fonds de commerce|281400|Amortissements des droits d'exploitation- Fonds de commerce|NULL|NULL
+190|281800 Amortissements des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|281800|Amortissements des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|NULL|NULL
+191|281900 Amortissements des autres droits et valeurs incorporels|281900|Amortissements des autres droits et valeurs incorporels|NULL|NULL
+192|282100 Acquisitions et am,nagements des sols et sous- sols|282100|Acquisitions et am,nagements des sols et sous- sols|NULL|NULL
+193|282300 Acquisitions, constructions et grosses r,parations des immeubles|282300|Acquisitions, constructions et grosses r,parations des immeubles|NULL|NULL
+194|282400 Acquisitions et grosses r,parations du mat,riel et mobilier|282400|Acquisitions et grosses r,parations du mat,riel et mobilier|NULL|NULL
+195|282500 Equipements militaires|282500|Equipements militaires|NULL|NULL
+196|282600 Prises de participation et cautionnements|282600|Prises de participation et cautionnements|NULL|NULL
+197|282700 Pr^ts et avances|282700|Pr^ts et avances|NULL|NULL
+198|291200 Provisions pour d,pr,ciation des brevets, marques de fabrique, droits d'auteur|291200|Provisions pour d,pr,ciation des brevets, marques de fabrique, droits d'auteur|NULL|NULL
+199|291300 Provisions pour d,pr,ciation de la conception de systSmes d'organisation et des progiciels|291300|Provisions pour d,pr,ciation de la conception de systSmes d'organisation et des progiciels|NULL|NULL
+200|291400 Provisions pour d,pr,ciation des droits d'exploitation- Fonds de commerce|291400|Provisions pour d,pr,ciation des droits d'exploitation- Fonds de commerce|NULL|NULL
+201|291800 Provisions pour d,pr,ciation des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|291800|Provisions pour d,pr,ciation des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|NULL|NULL
+202|291900 Provisions pour d,pr,ciation des autres droits et valeurs incorporels|291900|Provisions pour d,pr,ciation des autres droits et valeurs incorporels|NULL|NULL
+203|292200 Provisions pour d,pr,ciation des acquisitions et am,nagements des sols et sous- sols|292200|Provisions pour d,pr,ciation des acquisitions et am,nagements des sols et sous- sols|NULL|NULL
+204|292300 Provisions pour d,pr,ciation acquisitions, constructions et grosses r,parations des immeubles|292300|Provisions pour d,pr,ciation acquisitions, constructions et grosses r,parations des immeubles|NULL|NULL
+205|292400 Provisions pour d,pr,ciation des acquisitions et grosses r,parations du mat,riel et mobilier|292400|Provisions pour d,pr,ciation des acquisitions et grosses r,parations du mat,riel et mobilier|NULL|NULL
+206|292500 Provisions pour d,pr,ciation des ,quipements militaires|292500|Provisions pour d,pr,ciation des ,quipements militaires|NULL|NULL
+207|292600 Provisions pour d,pr,ciation des prises de participation et cautionnements|292600|Provisions pour d,pr,ciation des prises de participation et cautionnements|NULL|NULL
+208|292700 Provisions pour d,pr,ciation des pr^ts et avances|292700|Provisions pour d,pr,ciation des pr^ts et avances|NULL|NULL
+209|601100 Achats de petits mat,riels, fournitures de bureau et documentation |NULL|Achats de petits mat,riels, fournitures de bureau et documentation |NULL|NULL
+210|601200 Achats de carburants et lubrifiants|NULL|Achats de carburants et lubrifiants|NULL|NULL
+211|601300 Achats de carburants et lubrifiants pour les avions, navires et autres v,hicules sp,ciaux |NULL|Achats de carburants et lubrifiants pour les avions, navires et autres v,hicules sp,ciaux |NULL|NULL
+212|601400 Achats de fournitures et consommables pour le mat,riel informatique |NULL|Achats de fournitures et consommables pour le mat,riel informatique |NULL|NULL
+213|601510 Achats de matiSres premiSres|NULL|Achats de matiSres premiSres|NULL|NULL
+214|601520 Achats de matiSres consommables|NULL|Achats de matiSres consommables|NULL|NULL
+215|601530 Achats d'emballages commerciaux|NULL|Achats d'emballages commerciaux|NULL|NULL
+216|601590 Autres achats de petits mat,riels et fournitures techniques |NULL|Autres achats de petits mat,riels et fournitures techniques |NULL|NULL
+217|601600 Achats d'alimentation (non destin,s au personnel) |NULL|Achats d'alimentation (non destin,s au personnel) |NULL|NULL
+218|601700 Achats d'habillement (hors personnel) |NULL|Achats d'habillement (hors personnel) |NULL|NULL
+219|601800 Achats de produits pharmaceutiques, m,dicaux et v,t,rinaires |NULL|Achats de produits pharmaceutiques, m,dicaux et v,t,rinaires |NULL|NULL
+220|601910 Fournitures d'hygiSne et de sant,|NULL|Fournitures d'hygiSne et de sant,|NULL|NULL
+221|601990 Autres achats de fournitures |NULL|Autres achats de fournitures |NULL|NULL
+222|603100 Variations  de stocks de marchandises|NULL|Variations  de stocks de marchandises|NULL|NULL
+223|603200 Variations  de stocks de matiSres premiSres|NULL|Variations  de stocks de matiSres premiSres|NULL|NULL
+224|603310 MatiSres consommables|NULL|MatiSres consommables|NULL|NULL
+225|603320 Carburant et lubrifiants|NULL|Carburant et lubrifiants|NULL|NULL
+226|603330 Fournitures de bureau|NULL|Fournitures de bureau|NULL|NULL
+227|603400 Variations  de stocks des produits et services en cours|NULL|Variations  de stocks des produits et services en cours|NULL|NULL
+228|603500 Variations  de stocks des produits finis|NULL|Variations  de stocks des produits finis|NULL|NULL
+229|605100 Branchements et raccordement des compteurs |NULL|Branchements et raccordement des compteurs |NULL|NULL
+230|605200 Abonnements et consommation d'eau |NULL|Abonnements et consommation d'eau |NULL|NULL
+231|605300 Abonnements et consommation d',lectricit, |NULL|Abonnements et consommation d',lectricit, |NULL|NULL
+232|605400 Abonnements et consommation de gaz |NULL|Abonnements et consommation de gaz |NULL|NULL
+233|605900 Autres sources d',nergie |NULL|Autres sources d',nergie |NULL|NULL
+234|609100 Achats de marchandises|NULL|Achats de marchandises|NULL|NULL
+235|609200 Frets et transports sur achats|NULL|Frets et transports sur achats|NULL|NULL
+236|609900 Autres achats de biens|NULL|Autres achats de biens|NULL|NULL
+237|611100 Frais de transport des agents en mission . l'int,rieur |NULL|Frais de transport des agents en mission . l'int,rieur |NULL|NULL
+238|611200 Indemnit,s de mission . l'int,rieur |NULL|Indemnit,s de mission . l'int,rieur |NULL|NULL
+239|611300 Frais de transport des agents en mission . l',tranger |NULL|Frais de transport des agents en mission . l',tranger |NULL|NULL
+240|611400 Indemnit,s de mission . l',tranger |NULL|Indemnit,s de mission . l',tranger |NULL|NULL
+241|611500 Frais de transport des missionnaires non agents de l'Etat |NULL|Frais de transport des missionnaires non agents de l'Etat |NULL|NULL
+242|611600 Indemnit,s de mission des missionnaires non agents de l'Etat|NULL|Indemnit,s de mission des missionnaires non agents de l'Etat|NULL|NULL
+243|611700 Frais de transports des ,tudiants |NULL|Frais de transports des ,tudiants |NULL|NULL
+244|611100 Frais de voyage des coop,rants et autres expatri,s |NULL|Frais de voyage des coop,rants et autres expatri,s |NULL|NULL
+245|611900 Autres frais de transport et de mission |NULL|Autres frais de transport et de mission |NULL|NULL
+246|611910 Transports de personnes (sauf personnel)|NULL|Transports de personnes (sauf personnel)|NULL|NULL
+247|611920 Transports et frets sur ventes|NULL|Transports et frets sur ventes|NULL|NULL
+248|611990 Loyers et charges locatives|NULL|Loyers et charges locatives|NULL|NULL
+249|612100 Loyers et charges locatives des locaux (hors logements de personnel) |612100|Loyers et charges locatives des locaux (hors logements de personnel) |NULL|NULL
+250|612200 Loyers avec option d'achat|612200|Loyers avec option d'achat|NULL|NULL
+251|612300 Location machines et mat,riel technique |612300|Location machines et mat,riel technique |NULL|NULL
+252|612400 Locations de mat,riel informatique |612400|Locations de mat,riel informatique |NULL|NULL
+253|612500 Location centraux t,l,phoniques, t,l,phones, t,l,copieurs et mat,riels de t,l,communication |612500|Location centraux t,l,phoniques, t,l,phones, t,l,copieurs et mat,riels de t,l,communication |NULL|NULL
+254|612700 Locations de v,hicules |612700|Locations de v,hicules |NULL|NULL
+255|612900 Autres locations |612900|Autres locations |NULL|NULL
+256|614110 Entretien des locaux|614110|Entretien des locaux|NULL|NULL
+257|614120 Produits d'entretien|614120|Produits d'entretien|NULL|NULL
+258|614130 Mat,riaux de construction pour usage interne|614130|Mat,riaux de construction pour usage interne|NULL|NULL
+259|614140 Entretien et r,parations des bŸtiments|614140|Entretien et r,parations des bŸtiments|NULL|NULL
+260|614150 Entretien des espaces verts et autres sites am,nag,s|614150|Entretien des espaces verts et autres sites am,nag,s|NULL|NULL
+261|614200 Entretien des ascenseurs |614200|Entretien des ascenseurs |NULL|NULL
+262|614300 Entretien des installations ,lectriques, climatiseurs, sanitaires et plomberies |614300|Entretien des installations ,lectriques, climatiseurs, sanitaires et plomberies |NULL|NULL
+263|614400 Entretien et maintenance des mobiliers et mat,riels informatiques |614400|Entretien et maintenance des mobiliers et mat,riels informatiques |NULL|NULL
+264|614500 Entretien et maintenance des centraux t,l,phoniques, t,l,phones, t,l,copieurs et mat,riel de t,l,communication|614500|Entretien et maintenance des centraux t,l,phoniques, t,l,phones, t,l,copieurs et mat,riel de t,l,communication|NULL|NULL
+265|614600 Entretien et maintenance des mobiliers et mat,riels (sauf informatiques) |614600|Entretien et maintenance des mobiliers et mat,riels (sauf informatiques) |NULL|NULL
+266|614700 Entretien et r,paration des v,hicules, pneumatiques |614700|Entretien et r,paration des v,hicules, pneumatiques |NULL|NULL
+267|614710 Entretien et r,paration des v,hicules |614710|Entretien et r,paration des v,hicules |NULL|NULL
+268|614720 PiSces de rechange des v,hicules |614720|PiSces de rechange des v,hicules |NULL|NULL
+269|614730 Pneumatiques |614730|Pneumatiques |NULL|NULL
+270|614800 Entretien et maintenance des avions, navires et autres v,hicules sp,ciaux |614800|Entretien et maintenance des avions, navires et autres v,hicules sp,ciaux |NULL|NULL
+271|614900 Autres d,penses d'entretien et de maintenance |614900|Autres d,penses d'entretien et de maintenance |NULL|NULL
+272|614910 Frais de maintenance des ,quipements|614910|Frais de maintenance des ,quipements|NULL|NULL
+273|614920 Petit outillage, piSces de rechange pour machines et engins|614920|Petit outillage, piSces de rechange pour machines et engins|NULL|NULL
+274|614930 Entretien et r,paration des machines et engins|614930|Entretien et r,paration des machines et engins|NULL|NULL
+275|615100 Assurances des immeubles |615100|Assurances des immeubles |NULL|NULL
+276|615200 Assurances des v,hicules automobiles, v,hicules . 2 roues et tricycles|615200|Assurances des v,hicules automobiles, v,hicules . 2 roues et tricycles|NULL|NULL
+277|615300 Assurances des avions, navires et autres v,hicules sp,ciaux |615300|Assurances des avions, navires et autres v,hicules sp,ciaux |NULL|NULL
+278|615400 Assurances des mat,riels et installations techniques|615400|Assurances des mat,riels et installations techniques|NULL|NULL
+279|615900 Autres assurances|615900|Autres assurances|NULL|NULL
+280|617300 Echantillons|617300|Echantillons|NULL|NULL
+281|617400 Foires et expositions|617400|Foires et expositions|NULL|NULL
+282|617500 Publications|617500|Publications|NULL|NULL
+283|617600 Cadeaux . la clientSle|617600|Cadeaux . la clientSle|NULL|NULL
+284|617700 Frais de colloque, s,minaires, conf,rences|617700|Frais de colloque, s,minaires, conf,rences|NULL|NULL
+285|617900 Autres frais de relations publiques|617900|Autres frais de relations publiques|NULL|NULL
+286|618100 Abonnements et consommations de t,l,phone, et d'autres t,l,communications |618100|Abonnements et consommations de t,l,phone, et d'autres t,l,communications |NULL|NULL
+287|618200 Abonnements et consommations de radiocommunication |618200|Abonnements et consommations de radiocommunication |NULL|NULL
+288|618300 Abonnements et consommations Internet |618300|Abonnements et consommations Internet |NULL|NULL
+289|618400 Affanchissement du courrier et autres frais de correspondance |618400|Affanchissement du courrier et autres frais de correspondance |NULL|NULL
+290|618500 Valise diplomatique |618500|Valise diplomatique |NULL|NULL
+291|618600 Franchises militaires |618600|Franchises militaires |NULL|NULL
+292|618700 Communiqu,s de presse, radio, t,l,vision et frais de publicit, |618700|Communiqu,s de presse, radio, t,l,vision et frais de publicit, |NULL|NULL
+293|618900 Autres d,penses de communication|618900|Autres d,penses de communication|NULL|NULL
+294|619900 Autres acquisitions de services|619900|Autres acquisitions de services|NULL|NULL
+295|622100 R,mun,rations de prestations ext,rieures |622100|R,mun,rations de prestations ext,rieures |NULL|NULL
+296|622110 Location de main-d'ouvre|622110|Location de main-d'ouvre|NULL|NULL
+297|622120 Travaux . faØon|622120|Travaux . faØon|NULL|NULL
+298|622200 Honoraires et frais annexes |622200|Honoraires et frais annexes |NULL|NULL
+299|622300 Frais d'actes et de contentieux, frais de justice |622300|Frais d'actes et de contentieux, frais de justice |NULL|NULL
+300|622400 Frais de formation au profit des tiers|622400|Frais de formation au profit des tiers|NULL|NULL
+301|622500 Services ext,rieurs de gardiennage |622500|Services ext,rieurs de gardiennage |NULL|NULL
+302|622600 Commissions pour contr"le, analyse et certification|622600|Commissions pour contr"le, analyse et certification|NULL|NULL
+303|622700 Frais d'audit et contr"le|622700|Frais d'audit et contr"le|NULL|NULL
+304|622900 Autres prestations de services|622900|Autres prestations de services|NULL|NULL
+305|622910 R,mun,ration des professeurs vacataires|622910|R,mun,ration des professeurs vacataires|NULL|NULL
+306|622920 R,mun,ration des heures suppl,mentaires|622920|R,mun,ration des heures suppl,mentaires|NULL|NULL
+307|622930 R,mun,ration des heures compl,mentaires|622930|R,mun,ration des heures compl,mentaires|NULL|NULL
+308|622940 R,mun,ration des moniteurs|622940|R,mun,ration des moniteurs|NULL|NULL
+309|622950 Abonnements, documentation|622950|Abonnements, documentation|NULL|NULL
+310|622960 Restauration|622960|Restauration|NULL|NULL
+311|622970 Op,rations programm,es destin,es . des tiers|622970|Op,rations programm,es destin,es . des tiers|NULL|NULL
+312|622990 Autres prestations de services|622990|Autres prestations de services|NULL|NULL
+313|623100 Prestation des organismes de formation r,sidents |623100|Prestation des organismes de formation r,sidents |NULL|NULL
+314|623200 Prestation des organismes de formation non r,sidents |623200|Prestation des organismes de formation non r,sidents |NULL|NULL
+315|623300 Indemnit,s de formation . l',tranger |623300|Indemnit,s de formation . l',tranger |NULL|NULL
+316|623400 Transport des agents en formation . l',tranger |623400|Transport des agents en formation . l',tranger |NULL|NULL
+317|623500 Indemnit,s de formation . l'int,rieur |623500|Indemnit,s de formation . l'int,rieur |NULL|NULL
+318|623600 Transport des agents en formation . l'int,rieur |623600|Transport des agents en formation . l'int,rieur |NULL|NULL
+319|623900 Autres frais de formation du personnel|623900|Autres frais de formation du personnel|NULL|NULL
+320|624100 Redevances pour brevets, licences et logiciels|624100|Redevances pour brevets, licences et logiciels|NULL|NULL
+321|629100 Imp"ts, taxes et versements assimil,s|629100|Imp"ts, taxes et versements assimil,s|NULL|NULL
+322|629110 Patentes et licenses|629110|Patentes et licenses|NULL|NULL
+323|629120 Imp"ts fonciers et taxes annexes|629120|Imp"ts fonciers et taxes annexes|NULL|NULL
+324|629131 Imp"ts sur salaires part patronale|629131|Imp"ts sur salaires part patronale|NULL|NULL
+325|629132 Taxes d'apprentissage|629132|Taxes d'apprentissage|NULL|NULL
+326|629133 Taxes de la Formation Continue|629133|Taxes de la Formation Continue|NULL|NULL
+327|629134 Imp"ts sur salaires part salari,e|629134|Imp"ts sur salaires part salari,e|NULL|NULL
+328|629190 Autres imp"ts, taxes et droits directs|629190|Autres imp"ts, taxes et droits directs|NULL|NULL
+329|629200 Frais de r,ception, de f^tes et de c,r,monies |629200|Frais de r,ception, de f^tes et de c,r,monies |NULL|NULL
+330|629300 Frais d',lection |629300|Frais d',lection |NULL|NULL
+331|629400 Fonds sp,ciaux |629400|Fonds sp,ciaux |NULL|NULL
+332|629500 Actions et interventions urgentes |629500|Actions et interventions urgentes |NULL|NULL
+333|629900 Autres services|629900|Autres services|NULL|NULL
+334|631100 Subventions d',quilibre - Personnel|631100|Subventions d',quilibre - Personnel|NULL|NULL
+335|631200 Subventions d',quilibre - Achats de biens et services|631200|Subventions d',quilibre - Achats de biens et services|NULL|NULL
+336|631300 Subventions - Primes . l'exportation|631300|Subventions - Primes . l'exportation|NULL|NULL
+337|631400 Subventions - Soutien des prix|631400|Subventions - Soutien des prix|NULL|NULL
+338|632100 Subventions d',quilibre - Personnel|632100|Subventions d',quilibre - Personnel|NULL|NULL
+339|632200 Subventions d',quilibre - Achats de biens et services|632200|Subventions d',quilibre - Achats de biens et services|NULL|NULL
+340|632300 Subventions - Primes . l'exportation|632300|Subventions - Primes . l'exportation|NULL|NULL
+341|633100 Subventions d',quilibre - Personnel|633100|Subventions d',quilibre - Personnel|NULL|NULL
+342|633200 Subventions d',quilibre - Achats de biens et services|633200|Subventions d',quilibre - Achats de biens et services|NULL|NULL
+343|633300 Subventions - Primes . l'exportation|633300|Subventions - Primes . l'exportation|NULL|NULL
+344|633400 Subventions - Soutien des prix|633400|Subventions - Soutien des prix|NULL|NULL
+345|633500 Subventions de soutien d'activit,s d'int,r^t national|633500|Subventions de soutien d'activit,s d'int,r^t national|NULL|NULL
+346|633600 Subventions de soutien d'activit,s d'int,r^t local|633600|Subventions de soutien d'activit,s d'int,r^t local|NULL|NULL
+347|634100 Subventions d',quilibre - Personnel|634100|Subventions d',quilibre - Personnel|NULL|NULL
+348|634200 Subventions d',quilibre - Achats de biens et services|634200|Subventions d',quilibre - Achats de biens et services|NULL|NULL
+349|639100 Subventions d',quilibre - Personnel|639100|Subventions d',quilibre - Personnel|NULL|NULL
+350|639200 Subventions d',quilibre - Achats de biens et services|639200|Subventions d',quilibre - Achats de biens et services|NULL|NULL
+351|641100 Transferts aux EPA|641100|Transferts aux EPA|NULL|NULL
+352|641110 Transferts pour d,penses de personnel|641110|Transferts pour d,penses de personnel|NULL|NULL
+353|641120 Transferts pour achat de biens et services|641120|Transferts pour achat de biens et services|NULL|NULL
+354|641130 Transferts pour d,penses en capital|641130|Transferts pour d,penses en capital|NULL|NULL
+355|641210 Transferts pour d,penses de personnel|641210|Transferts pour d,penses de personnel|NULL|NULL
+356|641220 Transferts pour achat de biens et services|641220|Transferts pour achat de biens et services|NULL|NULL
+357|641230 Transferts pour d,penses en capital|641230|Transferts pour d,penses en capital|NULL|NULL
+358|642110 Transferts pour d,penses de personnel|642110|Transferts pour d,penses de personnel|NULL|NULL
+359|642120 Transferts pour d,penses en capital|642120|Transferts pour d,penses en capital|NULL|NULL
+360|642130 Transferts pour achat de biens et services|642130|Transferts pour achat de biens et services|NULL|NULL
+361|642210 Transferts pour d,penses de personnel|642210|Transferts pour d,penses de personnel|NULL|NULL
+362|642220 Transferts pour d,penses en capital|642220|Transferts pour d,penses en capital|NULL|NULL
+363|642310 Transferts pour d,penses de personnel|642310|Transferts pour d,penses de personnel|NULL|NULL
+364|642320 Transferts pour d,penses en capital|642320|Transferts pour d,penses en capital|NULL|NULL
+365|642330 Transferts pour achat de biens et services|642330|Transferts pour achat de biens et services|NULL|NULL
+366|642400 Transferts aux D,partements|642400|Transferts aux D,partements|NULL|NULL
+367|642410 Transferts pour d,penses de personnel|642410|Transferts pour d,penses de personnel|NULL|NULL
+368|642420 Transferts pour d,penses en capital|642420|Transferts pour d,penses en capital|NULL|NULL
+369|642430 Transferts pour achat de biens et services|642430|Transferts pour achat de biens et services|NULL|NULL
+370|642500 Transferts aux Communaut,s Rurales|642500|Transferts aux Communaut,s Rurales|NULL|NULL
+371|642510 Transferts pour d,penses de personnel|642510|Transferts pour d,penses de personnel|NULL|NULL
+372|642520 Transferts pour d,penses en capital|642520|Transferts pour d,penses en capital|NULL|NULL
+373|642530 Transferts pour achat de biens et services|642530|Transferts pour achat de biens et services|NULL|NULL
+374|643100 Transferts aux Fonds Autonomes|643100|Transferts aux Fonds Autonomes|NULL|NULL
+375|643200 Transferts aux Institutions Nationales|643200|Transferts aux Institutions Nationales|NULL|NULL
+376|643210 Transferts aux Institutions Nationales-d,penses de personnel|643210|Transferts aux Institutions Nationales-d,penses de personnel|NULL|NULL
+377|643220 Transferts aux Institutions Nationales-d,penses en capital|643220|Transferts aux Institutions Nationales-d,penses en capital|NULL|NULL
+378|643230 ransferts aux Institutions Nationales-achats de biens et services|643230|ransferts aux Institutions Nationales-achats de biens et services|NULL|NULL
+379|644100 Transferts aux ONG|644100|Transferts aux ONG|NULL|NULL
+380|644200 Transferts aux institutions ,ducatives et m,dico-sociales|644200|Transferts aux institutions ,ducatives et m,dico-sociales|NULL|NULL
+381|644300 Transferts aux associations et autres organismes non lucratifs|644300|Transferts aux associations et autres organismes non lucratifs|NULL|NULL
+382|644400 Transferts aux organismes non lucratifs en vue de manifestations ou congrSs|644400|Transferts aux organismes non lucratifs en vue de manifestations ou congrSs|NULL|NULL
+383|644900 Autres Transfert en capital aux institutions a but non lucratif|644900|Autres Transfert en capital aux institutions a but non lucratif|NULL|NULL
+384|645100 Bourses en C"te d'Ivoire|645100|Bourses en C"te d'Ivoire|NULL|NULL
+385|645200 Frais annexes aux bourses en C"te d'Ivoire|645200|Frais annexes aux bourses en C"te d'Ivoire|NULL|NULL
+386|645300 P,cules et indemnit,s aux stagiaires et ,lSves hors fonctionnaires|645300|P,cules et indemnit,s aux stagiaires et ,lSves hors fonctionnaires|NULL|NULL
+387|645400 Bourses . l',tranger|645400|Bourses . l',tranger|NULL|NULL
+388|645500 Frais annexes aux bourses . l',tranger|645500|Frais annexes aux bourses . l',tranger|NULL|NULL
+389|645600 Contribution aux frais de transport des ,lSves et ,tudiants|645600|Contribution aux frais de transport des ,lSves et ,tudiants|NULL|NULL
+390|645700 Allocations ch"mage|645700|Allocations ch"mage|NULL|NULL
+391|645800 Aides et secours aux sinistr,s et indigents|645800|Aides et secours aux sinistr,s et indigents|NULL|NULL
+392|645810 Aides et secours aux sinistr,s|645810|Aides et secours aux sinistr,s|NULL|NULL
+393|645820 Aides et secours aux indigents|645820|Aides et secours aux indigents|NULL|NULL
+394|645900 Autres transferts aux m,nages|645900|Autres transferts aux m,nages|NULL|NULL
+395|646100 Transferts aux autorit,s supranationales|646100|Transferts aux autorit,s supranationales|NULL|NULL
+396|646200 Contributions aux organisations internationales|646200|Contributions aux organisations internationales|NULL|NULL
+397|647100 Transferts aux Budgets annexes|647100|Transferts aux Budgets annexes|NULL|NULL
+398|647200 Transferts aux Comptes d'affectation sp,ciale|647200|Transferts aux Comptes d'affectation sp,ciale|NULL|NULL
+399|647300 Transferts aux Comptes de commerce|647300|Transferts aux Comptes de commerce|NULL|NULL
+400|647400 Transferts aux Comptes de rSglement avec les gouvernements ou autres organismes ,trangers|647400|Transferts aux Comptes de rSglement avec les gouvernements ou autres organismes ,trangers|NULL|NULL
+401|647500 Transferts aux Comptes d'op,rations mon,taires|647500|Transferts aux Comptes d'op,rations mon,taires|NULL|NULL
+402|647600 Transferts aux Comptes de pr^ts|647600|Transferts aux Comptes de pr^ts|NULL|NULL
+403|647700 Transferts aux Comptes d'avances|647700|Transferts aux Comptes d'avances|NULL|NULL
+404|647800 Transferts aux Comptes de garanties et d'avals|647800|Transferts aux Comptes de garanties et d'avals|NULL|NULL
+405|648100 Pensions de retraite des fonctionnaires CGRAE|648100|Pensions de retraite des fonctionnaires CGRAE|NULL|NULL
+406|648120 Pensions de retraite des fonctionnaires CGRAE / Part Employeur|648120|Pensions de retraite des fonctionnaires CGRAE / Part Employeur|NULL|NULL
+407|648200 Pensions de retraite des autres agents de l'Etat CNPS|648200|Pensions de retraite des autres agents de l'Etat CNPS|NULL|NULL
+408|648210 Pensions de retraite des autres agents de l'Etat CNPS / Part Employeur|648210|Pensions de retraite des autres agents de l'Etat CNPS / Part Employeur|NULL|NULL
+409|648220 Pensions de retraite des autres agents de l'Etat CNPS / Part Salari,|648220|Pensions de retraite des autres agents de l'Etat CNPS / Part Salari,|NULL|NULL
+410|649100 Rentes|649100|Rentes|NULL|NULL
+411|649900 Autres transferts courants|649900|Autres transferts courants|NULL|NULL
+412|651100 Remboursements de TVA|651100|Remboursements de TVA|NULL|NULL
+413|651200 Remboursements droits et taxes . l'importation|651200|Remboursements droits et taxes . l'importation|NULL|NULL
+414|651300 Remboursements de droits et taxes . l'exportation|651300|Remboursements de droits et taxes . l'exportation|NULL|NULL
+415|651310 Remboursements de droits uniques de sortie sur produits agricoles et d,riv,s|651310|Remboursements de droits uniques de sortie sur produits agricoles et d,riv,s|NULL|NULL
+416|651311  Remboursement de droits uniques de sortie sur les bois|NULL| Remboursement de droits uniques de sortie sur les bois|NULL|NULL
+417|651312  Remboursement de droits uniques de sortie sur le caf,|NULL| Remboursement de droits uniques de sortie sur le caf,|NULL|NULL
+418|651313  Remboursement de droits uniques de sortie sur le cacao|NULL| Remboursement de droits uniques de sortie sur le cacao|NULL|NULL
+419|651314  Remboursement de droits uniques de sortie sur l'anacarde|NULL| Remboursement de droits uniques de sortie sur l'anacarde|NULL|NULL
+420|651315  Remboursement de droits uniques de sortie sur la cola|NULL| Remboursement de droits uniques de sortie sur la cola|NULL|NULL
+421|651316  Remboursement de droits uniques de sortie sur le caoutchouc|NULL| Remboursement de droits uniques de sortie sur le caoutchouc|NULL|NULL
+422|651319  Remboursement de droits uniques de sortie sur autres produits agricoles et d,riv,s|NULL| Remboursement de droits uniques de sortie sur autres produits agricoles et d,riv,s|NULL|NULL
+423|651320 Remboursements de droits de sortie sur minerais|651320|Remboursements de droits de sortie sur minerais|NULL|NULL
+424|651321  Remboursement de droits de sortie sur le diamant|NULL| Remboursement de droits de sortie sur le diamant|NULL|NULL
+425|651322  Remboursement de droits de sortie sur l'or|NULL| Remboursement de droits de sortie sur l'or|NULL|NULL
+426|651329  Remboursement de droits de sortie sur autres minerais|NULL| Remboursement de droits de sortie sur autres minerais|NULL|NULL
+427|651400 Reversements sur recettes|651400|Reversements sur recettes|NULL|NULL
+428|651600 Reversements sur commissions pour contr"le, analyse et certification|651600|Reversements sur commissions pour contr"le, analyse et certification|NULL|NULL
+429|651900 Autres annulations, reversements et restitutions|651900|Autres annulations, reversements et restitutions|NULL|NULL
+430|652100 Indemnisations et transactions amiables|652100|Indemnisations et transactions amiables|NULL|NULL
+431|652200 D,penses cons,cutives . des jugements et condamnations|652200|D,penses cons,cutives . des jugements et condamnations|NULL|NULL
+432|652300 Indemnit,s d',viction|652300|Indemnit,s d',viction|NULL|NULL
+433|654100 Valeurs comptables des immobilisations c,d,es|654100|Valeurs comptables des immobilisations c,d,es|NULL|NULL
+434|654200 Valeurs comptables des immobilisations mises au r,but|654200|Valeurs comptables des immobilisations mises au r,but|NULL|NULL
+435|654300 Valeurs comptables des immobilisations admises en non valeur|654300|Valeurs comptables des immobilisations admises en non valeur|NULL|NULL
+436|659900 Autres charges exceptionnelles|659900|Autres charges exceptionnelles|NULL|NULL
+437|659910 Cr,ances irr,couvrables admises en non valeur|659910|Cr,ances irr,couvrables admises en non valeur|NULL|NULL
+438|659920 Frais de recouvrement et de poursuites|659920|Frais de recouvrement et de poursuites|NULL|NULL
+439|659930 Subventions et dons|659930|Subventions et dons|NULL|NULL
+440|659940 D,penses hors projets non ventil,es|659940|D,penses hors projets non ventil,es|NULL|NULL
+441|659950 D,penses sur projets non ventil,es|659950|D,penses sur projets non ventil,es|NULL|NULL
+442|661100 Fonctionnaires de cat,gorie A |661100|Fonctionnaires de cat,gorie A |NULL|NULL
+443|661200 Fonctionnaires de cat,gorie B |661200|Fonctionnaires de cat,gorie B |NULL|NULL
+444|661300 Fonctionnaires de cat,gorie C |661300|Fonctionnaires de cat,gorie C |NULL|NULL
+445|661400 Fonctionnaires de cat,gorie D |661400|Fonctionnaires de cat,gorie D |NULL|NULL
+446|661500 Policiers |661500|Policiers |NULL|NULL
+447|661600 Magistrats |661600|Magistrats |NULL|NULL
+448|661700 Traitement de base des militaires |661700|Traitement de base des militaires |NULL|NULL
+449|661800 R,mun,ration des techniciens ,trangers militaires |661800|R,mun,ration des techniciens ,trangers militaires |NULL|NULL
+450|661900 Autres cat,gories de fonctionnaires et agents de l'Etat|661900|Autres cat,gories de fonctionnaires et agents de l'Etat|NULL|NULL
+451|662100 R,mun,rations du personnel sous contrat et des d,cisionnaires |662100|R,mun,rations du personnel sous contrat et des d,cisionnaires |NULL|NULL
+452|662110 Salaires et appointements du personnel sous contrat et des d,cisionnaires ivoiriens|662110|Salaires et appointements du personnel sous contrat et des d,cisionnaires ivoiriens|NULL|NULL
+453|662120 Salaires et appointements du personnel sous contrat et des d,cisionnaires ,trangers|662120|Salaires et appointements du personnel sous contrat et des d,cisionnaires ,trangers|NULL|NULL
+454|662200 R,mun,rations du personnel occasionnel |662200|R,mun,rations du personnel occasionnel |NULL|NULL
+455|662300 R,mun,rations des gens de maison |662300|R,mun,rations des gens de maison |NULL|NULL
+456|662400 R,mun,rations du personnel sous contrat en poste . l',tranger |662400|R,mun,rations du personnel sous contrat en poste . l',tranger |NULL|NULL
+457|662500 R,mun,rations de techniciens et experts ,trangers|662500|R,mun,rations de techniciens et experts ,trangers|NULL|NULL
+458|662600 P,cule hommes de troupe |662600|P,cule hommes de troupe |NULL|NULL
+459|663100 Indemnit,s de fonction |663100|Indemnit,s de fonction |NULL|NULL
+460|663200 Indemnit,s de logement |663200|Indemnit,s de logement |NULL|NULL
+461|663300 Indemnit,s de r,sidence |663300|Indemnit,s de r,sidence |NULL|NULL
+462|663400 Indemnit,s de responsabilit, |663400|Indemnit,s de responsabilit, |NULL|NULL
+463|663500 Indemnit,s de transport |663500|Indemnit,s de transport |NULL|NULL
+464|663600 Indemnit,s de mutation |663600|Indemnit,s de mutation |NULL|NULL
+465|663700 Indemnit,s de d,part . la retraite |663700|Indemnit,s de d,part . la retraite |NULL|NULL
+466|663800 Indemnit,s d'utilisation des v,hicules personnels des agents de l'Etat|663800|Indemnit,s d'utilisation des v,hicules personnels des agents de l'Etat|NULL|NULL
+467|663900 Autres primes et indemnit,s (dont indemnit,s de correction) |663900|Autres primes et indemnit,s (dont indemnit,s de correction) |NULL|NULL
+468|663910 Primes de recherche|663910|Primes de recherche|NULL|NULL
+469|663920 Primes acad,miques|663920|Primes acad,miques|NULL|NULL
+470|663930 Primes d'encadrement|663930|Primes d'encadrement|NULL|NULL
+471|663940 Emoluments hospitaliers|663940|Emoluments hospitaliers|NULL|NULL
+472|663950 Emoluments hospitaliers particuliers|663950|Emoluments hospitaliers particuliers|NULL|NULL
+473|663960 Diff,rentiel Sant,|663960|Diff,rentiel Sant,|NULL|NULL
+474|663970 Indemnit,s Para-m,dicales|663970|Indemnit,s Para-m,dicales|NULL|NULL
+475|663980 Indemnit,s forfaitaires Sant,|663980|Indemnit,s forfaitaires Sant,|NULL|NULL
+476|663990 Autres primes et indemnit,s|663990|Autres primes et indemnit,s|NULL|NULL
+477|664100 Cotisations retraite des personnels sous statut |664100|Cotisations retraite des personnels sous statut |NULL|NULL
+478|664200 Cotisations retraite des personnels militaires |664200|Cotisations retraite des personnels militaires |NULL|NULL
+479|664300 Cotisations CNPS des agents contractuels et d,cisionnaires|664300|Cotisations CNPS des agents contractuels et d,cisionnaires|NULL|NULL
+480|664320 Cotisations CNPS des agents contractuels et d,cisionnaires  (Part Employeur)|664320|Cotisations CNPS des agents contractuels et d,cisionnaires  (Part Employeur)|NULL|NULL
+481|664900 Cotisations sociales non ventil,es |664900|Cotisations sociales non ventil,es |NULL|NULL
+482|665100 Frais d'alimentation du personnel |665100|Frais d'alimentation du personnel |NULL|NULL
+483|665200 Frais d'habillement du personnel |665200|Frais d'habillement du personnel |NULL|NULL
+484|665300 Frais de scolarit, du personnel des ambassades |665300|Frais de scolarit, du personnel des ambassades |NULL|NULL
+485|665400 Baux administratifs des logements de fonction |665400|Baux administratifs des logements de fonction |NULL|NULL
+486|665500 Participation aux abonnements pay,s aux transporteurs pour le personnel |665500|Participation aux abonnements pay,s aux transporteurs pour le personnel |NULL|NULL
+487|665600 Assurances maladie en faveur du personnel |665600|Assurances maladie en faveur du personnel |NULL|NULL
+488|665700 Frais d'hospitalisation d'urgence et d',vacuation sanitaire . l',tranger |665700|Frais d'hospitalisation d'urgence et d',vacuation sanitaire . l',tranger |NULL|NULL
+489|665800 Frais d'obsSques du personnel |665800|Frais d'obsSques du personnel |NULL|NULL
+490|665900 Autres avantages en nature|665900|Autres avantages en nature|NULL|NULL
+491|665910 Primes de risques|665910|Primes de risques|NULL|NULL
+492|665920 Primes de patrouilles|665920|Primes de patrouilles|NULL|NULL
+493|665930 Primes de saturnisme|665930|Primes de saturnisme|NULL|NULL
+494|665940 Primes de t,l,phone|665940|Primes de t,l,phone|NULL|NULL
+495|665950 Primes d'int,ressement|665950|Primes d'int,ressement|NULL|NULL
+496|665960 Indemnit,s de performance|665960|Indemnit,s de performance|NULL|NULL
+497|665970 Capital d,cSs|665970|Capital d,cSs|NULL|NULL
+498|666100 Allocations familiales |666100|Allocations familiales |NULL|NULL
+499|666900 Autres prestations sociales|666900|Autres prestations sociales|NULL|NULL
+500|669100 R,compenses aux agents de l'Etat laur,ats de prix |669100|R,compenses aux agents de l'Etat laur,ats de prix |NULL|NULL
+501|669900 D,penses de personnel non ventil,es |669900|D,penses de personnel non ventil,es |NULL|NULL
+502|671100 Int,r^ts et frais financiers - dette multilat,rale|671100|Int,r^ts et frais financiers - dette multilat,rale|NULL|NULL
+503|671200 Int,r^ts et frais financiers - dette bilat,rale|671200|Int,r^ts et frais financiers - dette bilat,rale|NULL|NULL
+504|671400 Int,r^ts et frais financiers - organismes priv,s ext,rieurs|671400|Int,r^ts et frais financiers - organismes priv,s ext,rieurs|NULL|NULL
+505|671700 Int,r^ts et frais financiers - dette int,rieure|671700|Int,r^ts et frais financiers - dette int,rieure|NULL|NULL
+506|671800 Int,r^ts et frais financiers sur conventions . paiement diff,r,|671800|Int,r^ts et frais financiers sur conventions . paiement diff,r,|NULL|NULL
+507|671900 Int,r^ts et frais financiers sur dette ext,rieure r,,chelonn,e|671900|Int,r^ts et frais financiers sur dette ext,rieure r,,chelonn,e|NULL|NULL
+508|676100 Pertes de change sur dette ext,rieure|676100|Pertes de change sur dette ext,rieure|NULL|NULL
+509|676900 Autres pertes de change|676900|Autres pertes de change|NULL|NULL
+510|679100 Autres int,r^ts et frais bancaires|679100|Autres int,r^ts et frais bancaires|NULL|NULL
+511|681100 Dotations aux amortissements des frais de recherche et de d,veloppement|681100|Dotations aux amortissements des frais de recherche et de d,veloppement|NULL|NULL
+512|681200 Dotations aux amortissements des brevets, marques de fabrique, droits d'auteur|681200|Dotations aux amortissements des brevets, marques de fabrique, droits d'auteur|NULL|NULL
+513|681300 Dotations aux amortissements de la conception de systSmes d'organisation et des progiciels|681300|Dotations aux amortissements de la conception de systSmes d'organisation et des progiciels|NULL|NULL
+514|681400 Dotations aux amortissements des droits d'exploitation- Fonds de commerce|681400|Dotations aux amortissements des droits d'exploitation- Fonds de commerce|NULL|NULL
+515|681500 Dotations aux amortissements des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|681500|Dotations aux amortissements des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|NULL|NULL
+516|681600 Dotations aux amortissements des autres droits et valeurs incorporels|681600|Dotations aux amortissements des autres droits et valeurs incorporels|NULL|NULL
+517|682100 Dotations aux amortissements des acquisitions et am,nagements des sols et sous- sols|682100|Dotations aux amortissements des acquisitions et am,nagements des sols et sous- sols|NULL|NULL
+518|682200 Dotations aux amortissements des acquisitions, constructions et grosses r,parations des immeubles|682200|Dotations aux amortissements des acquisitions, constructions et grosses r,parations des immeubles|NULL|NULL
+519|682300 Dotations aux amortissements des acquisitions et grosses r,parations du mat,riel et mobilier|682300|Dotations aux amortissements des acquisitions et grosses r,parations du mat,riel et mobilier|NULL|NULL
+520|682400 Dotations aux amortissements des ,quipements militaires|682400|Dotations aux amortissements des ,quipements militaires|NULL|NULL
+521|682500 Dotations aux amortissements des prises de participation et cautionnements|682500|Dotations aux amortissements des prises de participation et cautionnements|NULL|NULL
+522|682600 Dotations aux amortissements des pr^ts et avances|682600|Dotations aux amortissements des pr^ts et avances|NULL|NULL
+523|691100 Dotations aux provisions pour d,pr,ciation des brevets, marques de fabrique, droits d'auteur|691100|Dotations aux provisions pour d,pr,ciation des brevets, marques de fabrique, droits d'auteur|NULL|NULL
+524|691200 Dotations aux provisions pour d,pr,ciation de la conception de systSmes d'organisation et des progiciels|691200|Dotations aux provisions pour d,pr,ciation de la conception de systSmes d'organisation et des progiciels|NULL|NULL
+525|691300 Dotations aux provisions pour d,pr,ciation des droits d'exploitation- Fonds de commerce|691300|Dotations aux provisions pour d,pr,ciation des droits d'exploitation- Fonds de commerce|NULL|NULL
+526|691400 Dotations aux provisions pour d,pr,ciation des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|691400|Dotations aux provisions pour d,pr,ciation des immobilisations incorporelles pour le compte de tiers-acquisitions et travaux|NULL|NULL
+527|691500 Dotations aux provisions pour d,pr,ciation des autres droits et valeurs incorporels|691500|Dotations aux provisions pour d,pr,ciation des autres droits et valeurs incorporels|NULL|NULL
+528|692600 Dotations aux provisions pour d,pr,ciation des prises de participation et cautionnements|692600|Dotations aux provisions pour d,pr,ciation des prises de participation et cautionnements|NULL|NULL
+529|692700 Dotations aux provisions pour d,pr,ciation des pr^ts et avances|692700|Dotations aux provisions pour d,pr,ciation des pr^ts et avances|NULL|NULL

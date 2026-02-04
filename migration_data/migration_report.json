@@ -1,0 +1,10 @@
+{
+  "date": "2026-02-04T13:24:30.764982",
+  "stats": {
+    "engagements": 1000,
+    "liquidations": 1000,
+    "ordonnancements": 1000
+  },
+  "source": "/home/angeyannick/sygfp-artis-g-re/migration_data",
+  "destination": "https://tjagvgqthlibdpvztvaf.supabase.co"
+}

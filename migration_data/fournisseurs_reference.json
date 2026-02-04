@@ -1,0 +1,3602 @@
+[
+  {
+    "ancien_id": "1",
+    "raison_sociale": "ADJA QUINCAILLERIE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "2",
+    "raison_sociale": "AFRIC CONSULTING & AUDIT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "3",
+    "raison_sociale": "AFRICA CAPITAL MARKETS CORPORATION (ACMC)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "4",
+    "raison_sociale": "AFRICA O'CLOCK",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "5",
+    "raison_sociale": "AFUR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "6",
+    "raison_sociale": "TRACTAFRIC MOTORS COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "7",
+    "raison_sociale": "",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "8",
+    "raison_sociale": "AIR COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "9",
+    "raison_sociale": "AIR France",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "10",
+    "raison_sociale": "AMS CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "11",
+    "raison_sociale": "ANAIS CONSTRUCTION FACTURE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "12",
+    "raison_sociale": "ANOYA SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "13",
+    "raison_sociale": "ANTHONYé FOFANA & ASSOCIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "14",
+    "raison_sociale": "ASSURE PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "15",
+    "raison_sociale": "ATC COMAFRIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "16",
+    "raison_sociale": "AUTO - CLASS MASTER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "17",
+    "raison_sociale": "AUTOMOTIVE VEHICLES & LOGISTICS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "18",
+    "raison_sociale": "BAT CLEAN DECO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "19",
+    "raison_sociale": "BBS SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "20",
+    "raison_sociale": "BERNABE CÔTE D'IVOIRE (Investissement)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "21",
+    "raison_sociale": "BERNABE CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "22",
+    "raison_sociale": "BOIRE DAOUDA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "23",
+    "raison_sociale": "BULLES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "24",
+    "raison_sociale": "COMPAGNIE IVOIRIENNE D'ELECTRICITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "25",
+    "raison_sociale": "CANAL + HORIZON",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "26",
+    "raison_sociale": "CCBI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "27",
+    "raison_sociale": "SOCIETE DE DISTRIBUTION ALIMENTAIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "28",
+    "raison_sociale": "CFAO MOTORS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "29",
+    "raison_sociale": "CLASSIC AUTO DESIGN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "30",
+    "raison_sociale": "CLUB SOCOCE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "31",
+    "raison_sociale": "COMPLEXE GBEKE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "32",
+    "raison_sociale": "CONNEXION PHOTOGRAPHY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "33",
+    "raison_sociale": "CORRECT PRINT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "34",
+    "raison_sociale": "CORLAY COTE D'IVOIRE SA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "35",
+    "raison_sociale": "CORRECT PRINT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "36",
+    "raison_sociale": "COTISATION UITP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "37",
+    "raison_sociale": "DES GATEAUX ET DU PAIN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "38",
+    "raison_sociale": "DIVERS FOURNISSEURS D'INVESTISSEMENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "39",
+    "raison_sociale": "DLP ALU",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "40",
+    "raison_sociale": "EGIB SECURITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "41",
+    "raison_sociale": "EMMA CAB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "42",
+    "raison_sociale": "EMMA CAB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "43",
+    "raison_sociale": "ETRACON SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "44",
+    "raison_sociale": "ETS AIDA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "45",
+    "raison_sociale": "ETS ETACOM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "46",
+    "raison_sociale": "EUROPCAR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "47",
+    "raison_sociale": "EXFI CONSULTING FIRM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "48",
+    "raison_sociale": "FAVà UITP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "49",
+    "raison_sociale": "FAWAZ RADWAN ôSUPER AUTOô",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "50",
+    "raison_sociale": "FONS D'ENTRETIEN ROUTIER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "51",
+    "raison_sociale": "FLEUR DE JONQUILLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "52",
+    "raison_sociale": "FLEUR'ATITUD",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "53",
+    "raison_sociale": "SOCIETE NOUVELLE DE PRESSE ET D'EDITION DE COTE DIVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "54",
+    "raison_sociale": "G4S",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "55",
+    "raison_sociale": "GALERIES PEYRISSAC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "56",
+    "raison_sociale": "DES GATEAUX ET DU PAIN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "57",
+    "raison_sociale": "GENERAL IVOIRIENNE ALIMENTAIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "58",
+    "raison_sociale": "GROUPE FSA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "59",
+    "raison_sociale": "HàEàC BUSINESS SCHOOL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60",
+    "raison_sociale": "HORIZON TECHNOLOGIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "61",
+    "raison_sociale": "HOTEL LE COLLECTIONNEUR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "62",
+    "raison_sociale": "HOTEL TIAMA ABIDJAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "63",
+    "raison_sociale": "HUGSON CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "64",
+    "raison_sociale": "IK EVENT'S RESSOURCES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "65",
+    "raison_sociale": "INP HB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "66",
+    "raison_sociale": "INTELECT PROTECTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "67",
+    "raison_sociale": "IVOIRE CARTES SYSTEMES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "68",
+    "raison_sociale": "IVOIRE QUINCAILLERIE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "69",
+    "raison_sociale": "JAKARA SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70",
+    "raison_sociale": "JUST HUSS SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "71",
+    "raison_sociale": "KABOD SIGNATURE IMMOBILIER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "72",
+    "raison_sociale": "KADIA ENTREPRISES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "73",
+    "raison_sociale": "KARLSRUHER MESSE - UND KONGRESS GMBH",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "74",
+    "raison_sociale": "KONE HASSAN IDRISS (LOYER)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "75",
+    "raison_sociale": "LA BOUQUINETTE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "76",
+    "raison_sociale": "COMPTOIR  DISTRIBUTION ELECTRIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "77",
+    "raison_sociale": "LA POSTE DE COTE DIVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "78",
+    "raison_sociale": "LA POSTE DE COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "79",
+    "raison_sociale": "LASS BOUTIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "80",
+    "raison_sociale": "LEADER PRICE COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "81",
+    "raison_sociale": "LIBRAIRIE DE FRANCE GROUPE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "82",
+    "raison_sociale": "LIBRAIRIE LA BOUQUINETTE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "83",
+    "raison_sociale": "MASTER TECHNOLOGIE INFORMATIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "84",
+    "raison_sociale": "MASTER TECHNOLOGIE INFORMATIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "85",
+    "raison_sociale": "MEDIASOFT LAFAYETTE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "86",
+    "raison_sociale": "MESSE KARLSRUHE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "87",
+    "raison_sociale": "MI3E",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "88",
+    "raison_sociale": "NASCO PIECE AUTO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "89",
+    "raison_sociale": "NOEMA CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90",
+    "raison_sociale": "NOVASYS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "91",
+    "raison_sociale": "O'CONFECTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "92",
+    "raison_sociale": "OIM TRAVEL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "93",
+    "raison_sociale": "ORANGE CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "94",
+    "raison_sociale": "ORANGE CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "95",
+    "raison_sociale": "ORANGE CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "96",
+    "raison_sociale": "PAPIGRAPH CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "97",
+    "raison_sociale": "PAPILUX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "98",
+    "raison_sociale": "PETRO IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "99",
+    "raison_sociale": "PHENICIA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100",
+    "raison_sociale": "PHENICIA IMPORT EXPORT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "101",
+    "raison_sociale": "PIVOT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "102",
+    "raison_sociale": "PMS INFORMATIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "103",
+    "raison_sociale": "POLYCLINIQUE INTERNATIONALE HOTEL DIEU",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "104",
+    "raison_sociale": "PRICEWATERHOUSECOOPERS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "105",
+    "raison_sociale": "",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "106",
+    "raison_sociale": "PULLMAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "107",
+    "raison_sociale": "QUICAILLERIE GENERALE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "108",
+    "raison_sociale": "QUICAILLERIE TITAREX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "109",
+    "raison_sociale": "RD&V",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110",
+    "raison_sociale": "RENAISSANCE HOTEL  ARC DE TRIOMPHE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "111",
+    "raison_sociale": "rgs sarl  & cnps /regroupement de service",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "112",
+    "raison_sociale": "PULLMAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "113",
+    "raison_sociale": "SERVICE AQUATIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "114",
+    "raison_sociale": "SEYDOU OUATTARA (LOYER)_BKE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "115",
+    "raison_sociale": "SGS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "116",
+    "raison_sociale": "SHALOM CLEAN SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "117",
+    "raison_sociale": "SIA GANDELA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "118",
+    "raison_sociale": "SICTA/ SGS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "119",
+    "raison_sociale": "SIGASECURITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120",
+    "raison_sociale": "SIGASECURITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "121",
+    "raison_sociale": "SILBAT SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "122",
+    "raison_sociale": "SILUE LACINA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "123",
+    "raison_sociale": "",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "124",
+    "raison_sociale": "SKY BIRD (OUATTARA & ASSOCIES)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "125",
+    "raison_sociale": "SOCIDA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "126",
+    "raison_sociale": "HYPERMARCHES-SUPERMARCHES CLUB SOCCE CENTRE COMMERCIAL CLUB SOCOE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "127",
+    "raison_sociale": "SICI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "128",
+    "raison_sociale": "SOCIETE ORCA DECO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "129",
+    "raison_sociale": "SOCIETE POUR LES INNOVATIONS CREATRICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "130",
+    "raison_sociale": "SOCOCE 2 PLATEAUX LATRILLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "131",
+    "raison_sociale": "SOCOPRIX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "132",
+    "raison_sociale": "SODECI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "133",
+    "raison_sociale": "SOFITEL HOTEL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "134",
+    "raison_sociale": "SOGELUX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "135",
+    "raison_sociale": "SOM AUTOMOBILE IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "136",
+    "raison_sociale": "SPIRAL OFFICE & HOME",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "137",
+    "raison_sociale": "TOP PISCINE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "138",
+    "raison_sociale": "TOTAL ENERGIE  CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "139",
+    "raison_sociale": "TRAITEUR ET PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "140",
+    "raison_sociale": "",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "141",
+    "raison_sociale": "BATIVOIREàCO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "142",
+    "raison_sociale": "VIPNET",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "143",
+    "raison_sociale": "",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "144",
+    "raison_sociale": "YAHAYA ISSIAKA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "145",
+    "raison_sociale": "YAM SERVICES PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "146",
+    "raison_sociale": "YESHI SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "147",
+    "raison_sociale": "YOUBA QUINCAILLERIE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "148",
+    "raison_sociale": "SANLAM COTE DIVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "149",
+    "raison_sociale": "L'OENOPHILE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "150",
+    "raison_sociale": "QUINCAILLERIE GENERALE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "151",
+    "raison_sociale": "AB SERVICE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "152",
+    "raison_sociale": "STà SAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "153",
+    "raison_sociale": "TPCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "154",
+    "raison_sociale": "UNION INTERNATIONALE DES TRANSPORTS PUBLICS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "155",
+    "raison_sociale": "2BPUB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "156",
+    "raison_sociale": "DREAM EVENTS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "157",
+    "raison_sociale": "CABINET ARCHI-SYSTEM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "158",
+    "raison_sociale": "HELIOS INTERNATIONAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "159",
+    "raison_sociale": "FLEUR DE JONQUILLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160",
+    "raison_sociale": "ONE STOP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "161",
+    "raison_sociale": "TOTAL ENERGIE  CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "162",
+    "raison_sociale": "CNPS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "163",
+    "raison_sociale": "TOTAL ENERGIE  CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "164",
+    "raison_sociale": "TOTAL ENERGIE  CÔTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "165",
+    "raison_sociale": "ECO-CLAIR SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "166",
+    "raison_sociale": "SABRAMAB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "167",
+    "raison_sociale": "LEVITIC COMPAGNIE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "168",
+    "raison_sociale": "CYPHER GLOBAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "169",
+    "raison_sociale": "FRANCK & LEOPOLD IVOIRE SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170",
+    "raison_sociale": "BARAKIEL ENTREPRISE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "171",
+    "raison_sociale": "PERSONNEL DE L'ARTI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "172",
+    "raison_sociale": "H2O PISCINE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "173",
+    "raison_sociale": "HOODA GRAPHIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "174",
+    "raison_sociale": "RESIDENCE LIMANIYA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "175",
+    "raison_sociale": "DISTRICT AUTONOME D'ABIDJAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "176",
+    "raison_sociale": "HOTELLERIE LA LICORNE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "177",
+    "raison_sociale": "MY SOLUTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "178",
+    "raison_sociale": "DGI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "179",
+    "raison_sociale": "HOTEL DE L'ART",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180",
+    "raison_sociale": "SOLIUM IT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "181",
+    "raison_sociale": "HAUTEUR D'ESPRIT RIGUEUR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "182",
+    "raison_sociale": "CHAMBRE DE COMMERCE ET D'INDUSTRIE DE COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "183",
+    "raison_sociale": "FLOPYTECH",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "184",
+    "raison_sociale": "Floréal",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "185",
+    "raison_sociale": "DIRIGEANTS SOCIAUX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "186",
+    "raison_sociale": "FOTOGRAPHIC EVENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "187",
+    "raison_sociale": "CYPHER GLOBAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "188",
+    "raison_sociale": "CYPHER GLOBAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "189",
+    "raison_sociale": "EXSOL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190",
+    "raison_sociale": "ENGINE SYSTEM MOTORS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "191",
+    "raison_sociale": "SABRAMAB ENTREPRISE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "192",
+    "raison_sociale": "ASMA&CO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "193",
+    "raison_sociale": "BERAK'ART",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "194",
+    "raison_sociale": "CASA CONCEPT INTERNATIONAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "195",
+    "raison_sociale": "LCE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "196",
+    "raison_sociale": "SOCOPRIM SA (HKB)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "197",
+    "raison_sociale": "AUTHENTICRH",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "198",
+    "raison_sociale": "CACOMIAF",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "199",
+    "raison_sociale": "T & P EVENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200",
+    "raison_sociale": "FOURNISSEURS DIVERS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "201",
+    "raison_sociale": "ASBAT-CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "202",
+    "raison_sociale": "CAM-SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "203",
+    "raison_sociale": "ESPACE YEMAD",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "204",
+    "raison_sociale": "GEGCI SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "205",
+    "raison_sociale": "MAUVILAC INDUSTRIES AFRICA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "206",
+    "raison_sociale": "MOOV AFRICA COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "207",
+    "raison_sociale": "CHEN GROUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "208",
+    "raison_sociale": "COMEUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "209",
+    "raison_sociale": "JAKARA SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "210",
+    "raison_sociale": "ALUMINIUM METALLERIE CONSTRUCTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "211",
+    "raison_sociale": "ATLANTIS SMART SOLUTIONS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "212",
+    "raison_sociale": "POLYMED",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "213",
+    "raison_sociale": "GENDARMERIE NATIONALE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "214",
+    "raison_sociale": "RIA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "215",
+    "raison_sociale": "CODINORM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "216",
+    "raison_sociale": "TRAORE DRISSA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "217",
+    "raison_sociale": "ETUDE DE MAITRE ORE  GROGUHE SANDRINE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "218",
+    "raison_sociale": "ETUDE DE MAITRE ORE  GROGUHE SANDRINE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "219",
+    "raison_sociale": "GLOBAL ALU CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220",
+    "raison_sociale": "ALLUMINIUM METALLERIE CONSTRUCTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "221",
+    "raison_sociale": "HORIZON TECHNOLOGIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "222",
+    "raison_sociale": "SOCIETE INQ",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "223",
+    "raison_sociale": "o2switch",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "224",
+    "raison_sociale": "MEDECINE DU TRAVAIL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "225",
+    "raison_sociale": "PHARMACIE  SAINTE CECILE DES VALLONS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "226",
+    "raison_sociale": "HOLY PHARM SERVICES SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "227",
+    "raison_sociale": "SOGELUX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "228",
+    "raison_sociale": "AB SERVICE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "229",
+    "raison_sociale": "No1 TECHNIQUE AUTO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "10223",
+    "raison_sociale": "UNIVERSITE NORD SUD",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "10224",
+    "raison_sociale": "GE GLOBAL- ELEC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "20223",
+    "raison_sociale": "GLUTTON",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "30223",
+    "raison_sociale": "BANQUE DES DEPOTS DU TRESOR PUBLIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "40223",
+    "raison_sociale": "AFRICAUTO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "40224",
+    "raison_sociale": "CENTRE MEDICAL INTERNATIONAL LA GOSPA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "50224",
+    "raison_sociale": "AYOUBEL AFRIKA SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "50225",
+    "raison_sociale": "MINISTERE DES TRANSPORTS DIRECTION REGIONALE DES LAGUNES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "50226",
+    "raison_sociale": "Acteurs externes de l'ARTI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60224",
+    "raison_sociale": "MCN OUTLET",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60225",
+    "raison_sociale": "VALEUR MONDE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60226",
+    "raison_sociale": "LA MAISON PALMIER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60227",
+    "raison_sociale": "LABORATOIRE DU BATIMENT ET DES TRAVAUX PUBLIQUES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60228",
+    "raison_sociale": "AU PARCHEMIN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60229",
+    "raison_sociale": "MCS INSTITUT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "60230",
+    "raison_sociale": "KYNUX TECHNOLOGIES SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70224",
+    "raison_sociale": "DIRECTION GENERALE DES TRANSPORTS TERRESTRES ET DE LA CIRCULATION ( DGTTC)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70225",
+    "raison_sociale": "OTHENTIC GROUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70226",
+    "raison_sociale": "CONCEPT CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70227",
+    "raison_sociale": "PLOMBIER BAMBA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70228",
+    "raison_sociale": "BATISS CONSTRUCTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "70229",
+    "raison_sociale": "CENTRE HOSPITALIER ET UNIVERSITAIRE DE TREICHVILLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "80225",
+    "raison_sociale": "GAOUSSOU RAMASSAGE DES ORDURES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "80226",
+    "raison_sociale": "BERAK'ART",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "80227",
+    "raison_sociale": "TEB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90225",
+    "raison_sociale": "VISUEL CONCEPT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90226",
+    "raison_sociale": "AGENCY CAMYDIA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90227",
+    "raison_sociale": "FIESTA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90228",
+    "raison_sociale": "L'OCEAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90229",
+    "raison_sociale": "W MEDIA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90230",
+    "raison_sociale": "ARTIS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90231",
+    "raison_sociale": "ARTIS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "90232",
+    "raison_sociale": "ARTIS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100225",
+    "raison_sociale": "BUROTIC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100226",
+    "raison_sociale": "ECCàCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100227",
+    "raison_sociale": "SONAPIE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100228",
+    "raison_sociale": "GOLD SOLUTION SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100229",
+    "raison_sociale": "GOLD SOLUTION SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100230",
+    "raison_sociale": "International Software Corporation",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100231",
+    "raison_sociale": "GARAGE PGA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100232",
+    "raison_sociale": "PEINTRE SIMIA ABOUBACAR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100233",
+    "raison_sociale": "SIKA GROUP ACHITECTURE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100234",
+    "raison_sociale": "AS PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100235",
+    "raison_sociale": "ATC COMAFRIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100236",
+    "raison_sociale": "OLA ENERGY CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100237",
+    "raison_sociale": "TURKISH AIRLINES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100238",
+    "raison_sociale": "INTERNATIONAL ADVISOR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100239",
+    "raison_sociale": "KENYA AIRWAYS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100240",
+    "raison_sociale": "ASBAT-CI SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100241",
+    "raison_sociale": "AQUABAT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100242",
+    "raison_sociale": "RAMAFE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100243",
+    "raison_sociale": "SLK Studios",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100244",
+    "raison_sociale": "PERFECT ORGANIZ SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100245",
+    "raison_sociale": "RESTAURANT BANIAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100246",
+    "raison_sociale": "CGE KOUROUKAN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100247",
+    "raison_sociale": "ETIC BTP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100248",
+    "raison_sociale": "PEINTRE ISSA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100249",
+    "raison_sociale": "UBA COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100250",
+    "raison_sociale": "IK EVENT' S RESSOURCES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100251",
+    "raison_sociale": "EXCELSIOR CONSULANTS CONSEILS ET AUDITEURS ASSOCIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "100252",
+    "raison_sociale": "MUCAB-MT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110250",
+    "raison_sociale": "SEDS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110251",
+    "raison_sociale": "ETS OUVRIER  & FONGBE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110252",
+    "raison_sociale": "TOP IMPEX SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110253",
+    "raison_sociale": "NOVASYS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110254",
+    "raison_sociale": "SPIRAL OFFICE & HOME",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "110255",
+    "raison_sociale": "POLYMED",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120252",
+    "raison_sociale": "DKYI SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120253",
+    "raison_sociale": "2BPUB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120254",
+    "raison_sociale": "CLASS C PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120255",
+    "raison_sociale": "CLASS C PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "120256",
+    "raison_sociale": "CLASS C PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "130254",
+    "raison_sociale": "GROUP IVOIRE MOTO-SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "140254",
+    "raison_sociale": "ETABLISSEMENT SN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "140255",
+    "raison_sociale": "RESIDENCE HOTELIERE O'LORD",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "150254",
+    "raison_sociale": "MK AUTO CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "150255",
+    "raison_sociale": "LEAD NOOVA GROUP SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "150256",
+    "raison_sociale": "SUPER ELECTRONIC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160255",
+    "raison_sociale": "MAYELIA AUTOMOTIVE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160256",
+    "raison_sociale": "COMEUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160257",
+    "raison_sociale": "ETS JEHOVAH-JIREH SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160258",
+    "raison_sociale": "VIPNET",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160259",
+    "raison_sociale": "GLOBAL BUILDING & SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160260",
+    "raison_sociale": "TEB",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160261",
+    "raison_sociale": "PERSONNEL DE L'ARTI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160262",
+    "raison_sociale": "BHCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160263",
+    "raison_sociale": "ENTRETIEN DE VEHICULE(LAVAGE)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160264",
+    "raison_sociale": "MEDIASOFT LAFAYETTE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160265",
+    "raison_sociale": "AGROSPHYSSARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160266",
+    "raison_sociale": "OFFICE IVOIRIEN DE LA PROPRIETE INTELLECTUELLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160267",
+    "raison_sociale": "INTELIGENCE MULTIMEDIA SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160268",
+    "raison_sociale": "PRESSES RADIO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160269",
+    "raison_sociale": "COMEN INTERNATIONAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160270",
+    "raison_sociale": "IMPULS'COM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "160271",
+    "raison_sociale": "STARS GROUP CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170270",
+    "raison_sociale": "OUEDRAOGO SEYDOU SERVICE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170271",
+    "raison_sociale": "EMIRATES AIRLINES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170272",
+    "raison_sociale": "OTOMASYS sarl",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170273",
+    "raison_sociale": "EVIS MULTI SERVICES EVENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170274",
+    "raison_sociale": "AFCCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170275",
+    "raison_sociale": "NEANT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170276",
+    "raison_sociale": "COMUNIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170277",
+    "raison_sociale": "PRESSES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170278",
+    "raison_sociale": "LE MATIN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170279",
+    "raison_sociale": "WINCOM GROUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170280",
+    "raison_sociale": "LE RASSEMBLEMENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170281",
+    "raison_sociale": "FNAC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170282",
+    "raison_sociale": "LIBRAIRIE DIEPKILE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170283",
+    "raison_sociale": "BEE BUILDING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170284",
+    "raison_sociale": "CODITRANS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170285",
+    "raison_sociale": "GSB HOME",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170286",
+    "raison_sociale": "CKZ ELVEHTPRO",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170287",
+    "raison_sociale": "OAZIZ TECHNOLOGY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170288",
+    "raison_sociale": "AB SERVICE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170289",
+    "raison_sociale": "MY INBOX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170290",
+    "raison_sociale": "BLACK AND WHITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "170291",
+    "raison_sociale": "HYATT REGENCY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180272",
+    "raison_sociale": "NAHICO HOTEL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180273",
+    "raison_sociale": "DIRECTION DU CADASTRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180274",
+    "raison_sociale": "HARVEST  PIME Pvt Ltd",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180275",
+    "raison_sociale": "DELIOZ CONSULTING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180276",
+    "raison_sociale": "CENTRE AFRICAIN DE MANAGEMENT ET DE PERFECTIONNEMENT DES CADRES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180277",
+    "raison_sociale": "PETRO IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180278",
+    "raison_sociale": "PRESTIGE SERRURERIE COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180279",
+    "raison_sociale": "SOCIAM SUCC 12",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180280",
+    "raison_sociale": "LEDIA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180281",
+    "raison_sociale": "HORECA WORLD SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180282",
+    "raison_sociale": "ATLANTIS SMART SOLUTIONS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180283",
+    "raison_sociale": "AFRICA VIRTUAL GROUP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180284",
+    "raison_sociale": "ETUDE DE MAITRE KOUAME NGUESSAN CHARLES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180285",
+    "raison_sociale": "MAGISTRAT ARTI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180286",
+    "raison_sociale": "NAMA RESTAURANT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180287",
+    "raison_sociale": "DOOWELL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180288",
+    "raison_sociale": "OàSà EDITION & PRODUCTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180289",
+    "raison_sociale": "TRILOGY EVENTS & COM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "180290",
+    "raison_sociale": "ACTU ROUTE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190289",
+    "raison_sociale": "IDEAL VOYAGE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190290",
+    "raison_sociale": "GCIS CONCEPT SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190291",
+    "raison_sociale": "EXPERTISE LOCALE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190292",
+    "raison_sociale": "IFACI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190293",
+    "raison_sociale": "JIREH SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190294",
+    "raison_sociale": "AMS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190295",
+    "raison_sociale": "HUMIDIT' EXPERT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190296",
+    "raison_sociale": "B COM SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190297",
+    "raison_sociale": "DIVINE DECOR",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190298",
+    "raison_sociale": "BOLLESTORE PLUS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190299",
+    "raison_sociale": "OCEANE INTERNATIONAL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "190300",
+    "raison_sociale": "LES PALMIERS MULTITISERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200290",
+    "raison_sociale": "KEDJ SECURITE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200291",
+    "raison_sociale": "INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200292",
+    "raison_sociale": "SOCIETE C5P AFRIQUE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200293",
+    "raison_sociale": "LIBRAIRIE DE FRANCE GROUPE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200294",
+    "raison_sociale": "DATACONNECT AFRICA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "200295",
+    "raison_sociale": "PAPIGRAPH CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "210290",
+    "raison_sociale": "VENAME (DOMAINE ARTI CI)",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220290",
+    "raison_sociale": "SOTRATOURISME",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220291",
+    "raison_sociale": "LA MAISON DES TELEPHONES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220292",
+    "raison_sociale": "TRANSTELECOM OEOS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220293",
+    "raison_sociale": "GROUP CARRE VERT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220294",
+    "raison_sociale": "TECHNOLOGIE MEDICALE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220295",
+    "raison_sociale": "CFAO MOBILITY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "220296",
+    "raison_sociale": "TAURUS LOGISTICS COTE D'IVOIRE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230292",
+    "raison_sociale": "MAITRE KOUAME N'GUESSAN CHARLES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230293",
+    "raison_sociale": "IB SOPE NABY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230294",
+    "raison_sociale": "WV REELCOM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230295",
+    "raison_sociale": "GPE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230296",
+    "raison_sociale": "GROUPEMENT CYPHER GLOBAL-ISC-DEVIN",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230297",
+    "raison_sociale": "SOCI?T? DES DEUX PLATEAUX",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230298",
+    "raison_sociale": "AFRICA MAINTENANCE SOLUTION",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230299",
+    "raison_sociale": "BRIC A BRAC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230300",
+    "raison_sociale": "COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230301",
+    "raison_sociale": "DMA INTERTAINMENT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230302",
+    "raison_sociale": "AGENCE RCG",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "230303",
+    "raison_sociale": "ENTREPRISE GCIS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240292",
+    "raison_sociale": "SPONSORING RESEAUX SOCIAUX ARTI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240293",
+    "raison_sociale": "CASA Ekwa",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240294",
+    "raison_sociale": "MR BRICOLAGE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240295",
+    "raison_sociale": "MY BABY BOUTIQUE SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240296",
+    "raison_sociale": "D'KHAN RESORT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240297",
+    "raison_sociale": "CARA CENTER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "240298",
+    "raison_sociale": "CABINET DE GEOMETRE EXPERT CISSE ADAMA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "250292",
+    "raison_sociale": "2MTRADING",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260292",
+    "raison_sociale": "JUMIA CIV",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260293",
+    "raison_sociale": "ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260294",
+    "raison_sociale": "CI2T & COMPAGNY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260295",
+    "raison_sociale": "CURSOR-CLAUD MAX-NEON AI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260296",
+    "raison_sociale": "TRIBUNAL DE GRAND BASSAM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260297",
+    "raison_sociale": "CAR DEPOT",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260298",
+    "raison_sociale": "MOFVAK SERVICES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260299",
+    "raison_sociale": "ENTREPRISE LAGAZE FONGBE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260300",
+    "raison_sociale": "LAWASS SERVICE & ASSOCIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260301",
+    "raison_sociale": "ETUDE DE Me MANGOUA CHARLOTTE YOLANDE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260302",
+    "raison_sociale": "MINISTERE DU COMMERCE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260303",
+    "raison_sociale": "CNDJ",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260304",
+    "raison_sociale": "FERRONNERIE BOKA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260305",
+    "raison_sociale": "SPRIINT TECH",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260306",
+    "raison_sociale": "CGI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260307",
+    "raison_sociale": "SOCIETE D'AVOCATS BILE-AKAéBRIZOUA-BI & ASSOCIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260308",
+    "raison_sociale": "IICI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260309",
+    "raison_sociale": "SODIREP",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260310",
+    "raison_sociale": "SODIMA SARL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260311",
+    "raison_sociale": "COMPTE COURANT BHCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260312",
+    "raison_sociale": "CIRAD",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260313",
+    "raison_sociale": "CATHY DELICE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260314",
+    "raison_sociale": "FONDATION AGIR CONTRE LE CANCERS",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260315",
+    "raison_sociale": "LAWAS SERVICE & ASSOCIES",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260316",
+    "raison_sociale": "PRIZY",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260317",
+    "raison_sociale": "SUCCES IMPRIM GROUPE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "260318",
+    "raison_sociale": "EULIS HOTEL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270316",
+    "raison_sociale": "HOTEL LA ROSE BLANCHE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270317",
+    "raison_sociale": "APPLE RETAIL FRANCE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270318",
+    "raison_sociale": "PRO GLASS CI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270319",
+    "raison_sociale": "PALM CLUB HOTEL",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270320",
+    "raison_sociale": "CODINORM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "270321",
+    "raison_sociale": "LE MECHOUI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "280317",
+    "raison_sociale": "COCITAM",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "280318",
+    "raison_sociale": "MKOA HOTEL JACQUEVILLE",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "280319",
+    "raison_sociale": "ROYAL AIR MAROC",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "280320",
+    "raison_sociale": "ARTCI",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "280321",
+    "raison_sociale": "GARAGE RTA",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  },
+  {
+    "ancien_id": "290320",
+    "raison_sociale": "MEER",
+    "sigle": "",
+    "adresse": "",
+    "banque": "",
+    "compte": ""
+  }
+]
