@@ -1,0 +1,50 @@
+df27547 feat: Intégration complète réaménagements budgétaires et paiements partiels
+35481df feat: Phase 6-8 - Notifications, DMG, Libellés (v3.0)
+dca14e4 docs: Analyse complète du projet SYGFP - 29/01/2026
+b6c56b8 chore: Add sensitive files to gitignore
+b163aa5 feat(dashboard): Add role-based dashboard routing and direction-specific dashboards
+0e537be chore: Add MCP server configuration
+31f4558 feat: Add testing infrastructure and development tools
+090f3a3 fix: Correction incohérence compteur vs affichage Notes SEF/AEF
+4182136 fix: Corrections multiples et ajout RBACProvider + nouvelles fonctionnalités
+023fe82 feat: Standardize exports with ARTI header and null handling
+b3b0789 feat: Add automatic notifications for roadmaps, expense dossiers and tasks
+8dfd930 Implement coherence check system and seed demo data
+ebf6c50 Ajout documentation complète d'implémentation
+97d1b0d Ajout traçabilité audit complète + dashboards DG/Direction
+fdb8c40 Implémentation complète chaîne de dépense étapes 1-11
+f0db863 Implement imputation step
+4f377f9 Changes
+fff531c Add AEF from SEF flow
+44c9371 Changes
+2dd0cce Enhance NoteSEF form
+dcf7551 Changes
+aa6c2c8 Add ARTI reference UI badge
+56f2f5e Changes
+7a28698 Standardize workflow engine
+2c9343f Changes
+429a728 Add central modules registry
+1b4d8b2 Changes
+0ebbf9e Finalize workflow and dashboards
+e6603aa Changes
+04d28e5 Integrate GED into details
+9c72105 Changes
+fc88392 Add timeline and audit
+c2d072b Changes
+80dc13b Integrate GED into pages
+6de9213 Changes
+070ea72 Add GED scaffolding
+e5ac2ed Changes
+7dd8cfb Add expression needs data model
+d458bd0 Changes
+bdf62ce Refactor passation dialogs
+7dbaa35 Changes
+fb960b8 Implement passation workflow
+33c77eb Changes
+873657f Add admin import budget page
+6aeb043 Changes
+22aa3b4 Imputer budget moves and guard
+4f14c96 Changes
+2900931 Integrate AEF creation button
+b1877e9 Changes
+d0cca75 Unify Note SEF UI and validation

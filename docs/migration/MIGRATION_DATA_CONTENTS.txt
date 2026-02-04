@@ -1,0 +1,25 @@
+total 7380
+drwxrwxr-x  3 angeyannick angeyannick    4096 févr.  4 13:37 .
+drwxrwxr-x 17 angeyannick angeyannick    4096 févr.  4 13:37 ..
+-rw-rw-r--  1 angeyannick angeyannick     840 févr.  4 13:37 Action.csv
+-rw-rw-r--  1 angeyannick angeyannick    8696 févr.  4 13:37 Activite.csv
+-rw-rw-r--  1 angeyannick angeyannick 1752499 févr.  4 13:37 Budget.csv
+-rw-rw-r--  1 angeyannick angeyannick 1908115 févr.  4 13:37 DemandeExpression.csv
+-rw-rw-r--  1 angeyannick angeyannick     359 févr.  4 13:37 Direction.csv
+-rw-rw-r--  1 angeyannick angeyannick   84550 févr.  4 13:37 engagement_mapping.json
+-rw-rw-r--  1 angeyannick angeyannick  101044 févr.  4 13:37 Fournisseur.csv
+-rw-rw-r--  1 angeyannick angeyannick  189327 févr.  4 13:37 fournisseurs_complete.json
+-rw-rw-r--  1 angeyannick angeyannick   66694 févr.  4 13:37 fournisseurs_reference.json
+-rw-rw-r--  1 angeyannick angeyannick 1678349 févr.  4 13:37 Liquidation.csv
+-rw-rw-r--  1 angeyannick angeyannick   82300 févr.  4 13:37 liquidation_mapping.json
+-rw-rw-r--  1 angeyannick angeyannick     265 févr.  4 13:37 migration_report.json
+-rw-rw-r--  1 angeyannick angeyannick   12193 févr.  4 13:37 Mission.csv
+-rw-rw-r--  1 angeyannick angeyannick   60890 févr.  4 13:37 Nature.csv
+-rw-rw-r--  1 angeyannick angeyannick     345 févr.  4 13:37 NatureDepense.csv
+-rw-rw-r--  1 angeyannick angeyannick 1488912 févr.  4 13:37 Ordonnancement.csv
+-rw-rw-r--  1 angeyannick angeyannick     354 févr.  4 13:37 OrigineFonds.csv
+-rw-rw-r--  1 angeyannick angeyannick   57003 févr.  4 13:37 ProgramBudget.csv
+-rw-rw-r--  1 angeyannick angeyannick      84 févr.  4 13:37 Programmatique.csv
+-rw-rw-r--  1 angeyannick angeyannick     249 févr.  4 13:37 SousActivite.csv
+drwxrwxr-x  2 angeyannick angeyannick    4096 févr.  4 13:37 sql_output
+-rw-rw-r--  1 angeyannick angeyannick     293 févr.  4 13:37 Utilisateur.csv
