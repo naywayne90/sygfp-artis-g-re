@@ -1,31 +1,34 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-node_modules
-dist
-dist-ssr
-*.local
+# Env
+.env
+.venv
+env/
+venv/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
 
-# Claude Code local settings (contains secrets)
+# Logs intermédiaires
+migration_output.log
+migration_v3_output.log
+migration_v3_complete.log
+migration_v3_final.log
+
+# Credentials
+.mcp.json
 .claude/settings.local.json
 
-# Playwright MCP screenshots
-.playwright-mcp/
-.mcp.json
+# Temp files
+nohup.out
+*.tmp
