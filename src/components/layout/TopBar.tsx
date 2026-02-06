@@ -32,10 +32,11 @@ export function TopBar() {
   const [showExerciceModal, setShowExerciceModal] = useState(false);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
 
-  // Keyboard shortcut: Ctrl+K to open search
+  // Note: Ctrl+K est géré par la CommandPalette globale dans AppLayout
+  // La recherche de dossier est accessible via Ctrl+Shift+F
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "f") {
         e.preventDefault();
         setShowSearchDialog(true);
       }
@@ -77,15 +78,20 @@ export function TopBar() {
           </div>
         </div>
 
-        {/* Search button */}
+        {/* Search button - Opens Command Palette */}
         <Button
           variant="outline"
           size="sm"
-          className="hidden sm:flex items-center gap-2 mr-2"
-          onClick={() => setShowSearchDialog(true)}
+          className="hidden sm:flex items-center gap-2 mr-2 group"
+          onClick={() => {
+            // Trigger Ctrl+K programmatically
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+          }}
         >
           <Search className="h-4 w-4" />
-          <span className="text-sm">Rechercher...</span>
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            Rechercher...
+          </span>
           <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
             <span className="text-xs">Ctrl</span>K
           </kbd>

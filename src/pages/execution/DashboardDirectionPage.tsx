@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useExercice } from "@/contexts/ExerciceContext";
 import {
   useDashboardDirectionStats,
@@ -9,47 +8,47 @@ import {
   type MissionStats,
 } from "@/hooks/useDashboardStats";
 import { usePermissions } from "@/hooks/usePermissions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Target,
-  TrendingUp,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Pause,
   Building2,
-  FileText,
   Download,
   RefreshCw,
   BarChart3,
   Activity,
   ArrowUpRight,
-  MapPin,
 } from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { DashboardNoDirection } from "@/components/dashboard/DashboardNoDirection";
+import { DashboardGeneric } from "@/components/dashboard/DashboardGeneric";
+import { DashboardAICB } from "@/components/dashboard/DashboardAICB";
+import { DashboardHR } from "@/components/dashboard/DashboardHR";
+import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
+import { DashboardMissions } from "@/components/dashboard/DashboardMissions";
+
+// Mapping des directions vers leurs dashboards spécialisés
+const DIRECTION_DASHBOARDS: Record<string, React.ComponentType<{
+  directionId: string;
+  directionCode: string;
+  directionNom: string;
+}>> = {
+  "AICB": DashboardAICB,
+  "DGPECRP": DashboardHR,
+  "DSESP": DashboardAnalytics,
+  "CM": DashboardMissions,
+};
 
 function KPICard({
   title,
@@ -404,24 +403,34 @@ export default function DashboardDirectionPage() {
   }
 
   if (!directionId && !isDG) {
+    return <DashboardNoDirection />;
+  }
+
+  // Vérifier si la direction a un dashboard spécialisé
+  const directionCode = directionInfo?.code || "";
+  const SpecializedDashboard = DIRECTION_DASHBOARDS[directionCode];
+
+  // Si dashboard spécialisé disponible, l'utiliser
+  if (SpecializedDashboard && directionId && directionInfo) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-amber-100">
-                <MapPin className="h-6 w-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="font-medium text-amber-800">Direction non assignée</p>
-                <p className="text-sm text-amber-600">
-                  Votre profil n'est pas rattaché à une direction. Veuillez contacter l'administrateur.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <SpecializedDashboard
+        directionId={directionId}
+        directionCode={directionInfo.code}
+        directionNom={directionInfo.label}
+      />
+    );
+  }
+
+  // Pour les directions sans dashboard spécialisé mais avec directionId, utiliser DashboardGeneric
+  // sauf pour certaines directions qui ont déjà des dashboards existants (DG, DAAF, CB, DSI, SDMG)
+  const existingDashboards = ["DG", "DAAF", "CB", "DSI", "SDMG", "DMG"];
+  if (directionId && directionInfo && !existingDashboards.includes(directionCode)) {
+    return (
+      <DashboardGeneric
+        directionId={directionId}
+        directionCode={directionInfo.code}
+        directionNom={directionInfo.label}
+      />
     );
   }
 

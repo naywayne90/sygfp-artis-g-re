@@ -84,9 +84,14 @@ export function usePrestataires() {
         .from("prestataires")
         .select("*")
         .order("raison_sociale");
-      
+
       if (error) throw error;
-      return data as Prestataire[];
+
+      // Normaliser les statuts en MAJUSCULES pour cohérence avec le code
+      return (data as Prestataire[]).map(p => ({
+        ...p,
+        statut: p.statut ? p.statut.toUpperCase() : null
+      }));
     },
   });
 

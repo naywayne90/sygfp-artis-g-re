@@ -28,3 +28,4 @@ dist-ssr
 
 # Playwright MCP screenshots
 .playwright-mcp/
+.mcp.json

@@ -13,6 +13,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarV2 } from "./SidebarV2";
 import { TopBar } from "./TopBar";
 import { ExerciceReadOnlyBanner } from "@/components/exercice/ExerciceReadOnlyBanner";
+import { CommandPalette } from "@/components/command-palette/CommandPalette";
 import { useExercice } from "@/contexts/ExerciceContext";
 
 interface AppLayoutProps {
@@ -54,6 +55,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <SidebarProvider>
+      {/* Command Palette global (Ctrl+K) */}
+      <CommandPalette />
+
       <div className="flex min-h-screen w-full">
         {/* Sidebar sombre V2 */}
         <SidebarV2 />

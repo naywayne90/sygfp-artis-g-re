@@ -95,7 +95,10 @@ export default function Prestataires() {
   };
 
   const getStatusBadge = (statut: string | null) => {
-    switch (statut) {
+    // Normaliser en majuscules pour éviter les problèmes de casse
+    const statutUpper = statut?.toUpperCase();
+
+    switch (statutUpper) {
       case "ACTIF":
         return <Badge className="bg-green-600">Actif</Badge>;
       case "SUSPENDU":

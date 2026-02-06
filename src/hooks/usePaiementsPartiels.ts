@@ -305,7 +305,7 @@ export function useAddMouvementBancaire() {
       queryClient.invalidateQueries({ queryKey: ["stats-paiements"] });
 
       toast.success("Mouvement bancaire enregistré", {
-        description: `Reste à payer: ${data.nouveau_reste?.toLocaleString("fr-FR")} FCFA`,
+        description: `Reste à payer: ${(data as { nouveau_reste?: number }).nouveau_reste?.toLocaleString("fr-FR") || "0"} FCFA`,
       });
     },
     onError: (error: Error) => {

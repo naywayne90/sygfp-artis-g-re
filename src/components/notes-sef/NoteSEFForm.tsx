@@ -471,9 +471,41 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
 
   // Filtrer les demandeurs par direction si une direction est sélectionnée
   // et créer un affichage enrichi (Nom + fonction)
-  const filteredProfiles = formData.direction_id 
+  const filteredProfiles = formData.direction_id
     ? profiles.filter(p => p.direction_id === formData.direction_id || !p.direction_id)
     : profiles;
+
+  // Quand la direction change, vérifier si le demandeur actuel est valide
+  // et auto-sélectionner un demandeur approprié si nécessaire
+  useEffect(() => {
+    if (formData.direction_id) {
+      // Obtenir les profils de la direction sélectionnée
+      const profilesInDirection = profiles.filter(
+        p => p.direction_id === formData.direction_id || !p.direction_id
+      );
+
+      // Vérifier si le demandeur actuel est dans la direction
+      const currentDemandeurIsValid = formData.demandeur_id &&
+        profilesInDirection.some(p => p.id === formData.demandeur_id);
+
+      // Si le demandeur n'est pas valide pour cette direction
+      if (!currentDemandeurIsValid && profilesInDirection.length > 0) {
+        // Chercher d'abord l'utilisateur connecté dans cette direction
+        const currentUserInDirection = profilesInDirection.find(p => p.id === userId);
+
+        if (currentUserInDirection) {
+          // Auto-sélectionner l'utilisateur connecté s'il est dans la direction
+          setFormData(prev => ({ ...prev, demandeur_id: currentUserInDirection.id }));
+        } else if (!canChangeDemandeur) {
+          // Pour les non-admins, auto-sélectionner le premier profil disponible
+          setFormData(prev => ({ ...prev, demandeur_id: profilesInDirection[0].id }));
+        } else {
+          // Pour les admins, vider le champ pour qu'ils puissent sélectionner manuellement
+          setFormData(prev => ({ ...prev, demandeur_id: "" }));
+        }
+      }
+    }
+  }, [formData.direction_id, profiles, canChangeDemandeur, userId]);
 
   // Helper pour formater l'affichage d'un profil (Nom + fonction)
   const formatProfileDisplay = (profile: typeof profiles[0]) => {
@@ -589,7 +621,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
             {/* Demandeur */}
             <div>
               <Label htmlFor="demandeur" className={errors.demandeur_id ? "text-destructive" : ""}>
-                Demandeur * {!canChangeDemandeur && "(auto)"}
+                Demandeur * {!canChangeDemandeur && filteredProfiles.length <= 1 && "(auto)"}
               </Label>
               <Select
                 value={formData.demandeur_id}
@@ -597,11 +629,11 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
                   setFormData({ ...formData, demandeur_id: value });
                   if (errors.demandeur_id) setErrors(prev => ({ ...prev, demandeur_id: "" }));
                 }}
-                disabled={!canChangeDemandeur && !note}
+                disabled={!canChangeDemandeur && !note && filteredProfiles.length <= 1}
               >
                 <SelectTrigger className={cn(
                   errors.demandeur_id ? "border-destructive" : "",
-                  !canChangeDemandeur && !note ? "opacity-70" : ""
+                  !canChangeDemandeur && !note && filteredProfiles.length <= 1 ? "opacity-70" : ""
                 )}>
                   <SelectValue placeholder="Sélectionner un demandeur" />
                 </SelectTrigger>
