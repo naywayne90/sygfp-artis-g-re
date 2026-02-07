@@ -64,6 +64,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { useSidebarBadges } from '@/hooks/useSidebarBadges';
+import { useRBAC } from '@/contexts/RBACContext';
 import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================
@@ -225,6 +226,7 @@ export function SidebarV2() {
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { data: badges } = useSidebarBadges();
+  const { isAdmin } = useRBAC();
 
   const [chaineOpen, setChaineOpen] = useState(true);
   const [parametrageOpen, setParametrageOpen] = useState(false);
@@ -506,112 +508,113 @@ export function SidebarV2() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== SECTION 5: ADMINISTRATION (Collapsible) ========== */}
-        {/* TODO: Encapsuler cette section avec une condition RBAC (ex: isAdmin) pour limiter l'accès aux administrateurs */}
-        <SidebarGroup className="mt-4">
-          {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
-              <Cog className="h-3.5 w-3.5" />
-              Administration
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <Collapsible open={parametrageOpen} onOpenChange={setParametrageOpen}>
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      tooltip="Configuration système"
-                      className={cn(
-                        'w-full justify-between',
-                        isParametrageActive && 'bg-sidebar-accent'
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Settings className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="text-sm">Configuration</span>}
-                      </div>
-                      {!collapsed && (
-                        <ChevronRight
-                          className={cn(
-                            'h-4 w-4 transition-transform',
-                            parametrageOpen && 'rotate-90'
-                          )}
-                        />
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {/* Référentiels */}
-                      <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
-                        Référentiels
-                      </div>
-                      {PARAMETRAGE_REFERENTIELS.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
-                            <NavLink
-                              to={item.url}
-                              className={cn(
-                                'flex items-center gap-2 text-sm py-1.5',
-                                isActive(item.url) && 'text-sidebar-primary font-medium'
-                              )}
-                            >
-                              <item.icon className="h-3.5 w-3.5" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+        {/* ========== SECTION 5: ADMINISTRATION (Collapsible, Admin only) ========== */}
+        {isAdmin && (
+          <SidebarGroup className="mt-4">
+            {!collapsed && (
+              <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
+                <Cog className="h-3.5 w-3.5" />
+                Administration
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <Collapsible open={parametrageOpen} onOpenChange={setParametrageOpen}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip="Configuration système"
+                        className={cn(
+                          'w-full justify-between',
+                          isParametrageActive && 'bg-sidebar-accent'
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Settings className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span className="text-sm">Configuration</span>}
+                        </div>
+                        {!collapsed && (
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform',
+                              parametrageOpen && 'rotate-90'
+                            )}
+                          />
+                        )}
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {/* Référentiels */}
+                        <div className="px-2 py-1 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                          Référentiels
+                        </div>
+                        {PARAMETRAGE_REFERENTIELS.map((item) => (
+                          <SidebarMenuSubItem key={item.url}>
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                              <NavLink
+                                to={item.url}
+                                className={cn(
+                                  'flex items-center gap-2 text-sm py-1.5',
+                                  isActive(item.url) && 'text-sidebar-primary font-medium'
+                                )}
+                              >
+                                <item.icon className="h-3.5 w-3.5" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
 
-                      {/* Utilisateurs */}
-                      <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
-                        Utilisateurs
-                      </div>
-                      {PARAMETRAGE_UTILISATEURS.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
-                            <NavLink
-                              to={item.url}
-                              className={cn(
-                                'flex items-center gap-2 text-sm py-1.5',
-                                isActive(item.url) && 'text-sidebar-primary font-medium'
-                              )}
-                            >
-                              <item.icon className="h-3.5 w-3.5" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                        {/* Utilisateurs */}
+                        <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                          Utilisateurs
+                        </div>
+                        {PARAMETRAGE_UTILISATEURS.map((item) => (
+                          <SidebarMenuSubItem key={item.url}>
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                              <NavLink
+                                to={item.url}
+                                className={cn(
+                                  'flex items-center gap-2 text-sm py-1.5',
+                                  isActive(item.url) && 'text-sidebar-primary font-medium'
+                                )}
+                              >
+                                <item.icon className="h-3.5 w-3.5" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
 
-                      {/* Système */}
-                      <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
-                        Système
-                      </div>
-                      {PARAMETRAGE_SYSTEME.map((item) => (
-                        <SidebarMenuSubItem key={item.url}>
-                          <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
-                            <NavLink
-                              to={item.url}
-                              className={cn(
-                                'flex items-center gap-2 text-sm py-1.5',
-                                isActive(item.url) && 'text-sidebar-primary font-medium'
-                              )}
-                            >
-                              <item.icon className="h-3.5 w-3.5" />
-                              <span>{item.title}</span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                        {/* Système */}
+                        <div className="px-2 py-1 mt-2 text-[9px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">
+                          Système
+                        </div>
+                        {PARAMETRAGE_SYSTEME.map((item) => (
+                          <SidebarMenuSubItem key={item.url}>
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                              <NavLink
+                                to={item.url}
+                                className={cn(
+                                  'flex items-center gap-2 text-sm py-1.5',
+                                  isActive(item.url) && 'text-sidebar-primary font-medium'
+                                )}
+                              >
+                                <item.icon className="h-3.5 w-3.5" />
+                                <span>{item.title}</span>
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
