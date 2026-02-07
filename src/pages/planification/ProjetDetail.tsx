@@ -76,7 +76,7 @@ export default function ProjetDetail() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
-        <EmptyStateNoData message="Plan de travail introuvable" />
+        <EmptyStateNoData entityName="plan de travail" />
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function ProjetDetail() {
           </div>
 
           {taches.length === 0 ? (
-            <EmptyStateNoData message="Aucune tache pour ce plan" />
+            <EmptyStateNoData entityName="tache" />
           ) : (
             <Card>
               <CardContent className="pt-4">
@@ -313,7 +313,7 @@ export default function ProjetDetail() {
             </CardHeader>
             <CardContent>
               {responsables.size === 0 ? (
-                <EmptyStateNoData message="Aucun responsable RACI renseigne" />
+                <EmptyStateNoData entityName="responsable RACI" />
               ) : (
                 <Table>
                   <TableHeader>

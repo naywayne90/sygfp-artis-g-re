@@ -128,7 +128,7 @@ export default function RoadmapDashboard() {
       <div>
         <h2 className="text-lg font-semibold mb-3">Progression par direction</h2>
         {directionStats.length === 0 ? (
-          <EmptyStateNoData message="Aucun plan de travail pour cet exercice" />
+          <EmptyStateNoData entityName="plan de travail" />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {directionStats.map((ds) => (

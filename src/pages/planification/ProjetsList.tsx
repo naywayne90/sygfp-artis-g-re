@@ -223,7 +223,7 @@ export default function ProjetsList() {
 
       {/* Table */}
       {filteredPlans.length === 0 ? (
-        <EmptyStateNoData message="Aucun plan de travail trouve" />
+        <EmptyStateNoData entityName="plan de travail" />
       ) : (
         <Card>
           <CardContent className="pt-4">

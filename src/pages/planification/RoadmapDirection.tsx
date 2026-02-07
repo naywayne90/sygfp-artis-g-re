@@ -123,7 +123,7 @@ export default function RoadmapDirection() {
       <div>
         <h2 className="text-lg font-semibold mb-3">Plans de travail</h2>
         {plans.length === 0 ? (
-          <EmptyStateNoData message="Aucun plan de travail pour votre direction" />
+          <EmptyStateNoData entityName="plan de travail" />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {plans.map((plan) => {
