@@ -314,6 +314,7 @@ const App = () => (
                 <Route path="/execution/dashboard-dg" element={<DashboardDGPage />} />
                 <Route path="/execution/dashboard-direction" element={<DashboardDirectionPage />} />
                 <Route path="/dashboard-dmg" element={<DashboardDMG />} />
+                <Route path="/dashboard-financier" element={<DashboardDMG />} />
 
                 <Route path="/notes-sef" element={<NotesSEF />} />
                 <Route path="/notes-sef/validation" element={<ValidationNotesSEF />} />

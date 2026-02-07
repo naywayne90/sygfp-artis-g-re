@@ -1,5 +1,6 @@
 /**
  * Sidebar V2 - Navigation principale sombre et structurée
+ * 6 sections: Top Items, Chaine Depense, Budget, Suivi & Pilotage, Gestion, Administration
  * Badges compteurs temps réel, menus regroupés sans doublons
  */
 import { NavLink, useLocation } from 'react-router-dom';
@@ -20,7 +21,6 @@ import {
   ClipboardList,
   ArrowRightLeft,
   FileUp,
-  History,
   Building2,
   FileSignature,
   Truck,
@@ -45,8 +45,6 @@ import {
   CircleDollarSign,
   AlertTriangle,
   ScanLine,
-  LayoutDashboard,
-  FolderKanban,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -149,35 +147,24 @@ const BUDGET_ITEMS = [
   },
   { title: 'Réaménagements', url: '/budget/reamenagements-imputations', icon: ArrowRightLeft },
   { title: 'Import / Export', url: '/planification/import-export', icon: FileUp },
-  { title: 'Historique Imports', url: '/planification/historique-imports', icon: History },
 ];
 
-const PILOTAGE_ITEMS = [
-  { title: 'Tableau de Bord', url: '/planification/roadmap-dashboard', icon: LayoutDashboard },
-  { title: 'Plans de Travail', url: '/planification/projets', icon: FolderKanban },
+const SUIVI_PILOTAGE_ITEMS = [
+  { title: 'Tableau Financier', url: '/dashboard-financier', icon: BarChart3 },
   { title: 'Ma Direction', url: '/planification/roadmap-direction', icon: Building2 },
-];
-
-const PARTENAIRES_ITEMS = [
-  { title: 'Prestataires', url: '/contractualisation/prestataires', icon: Building2 },
-  { title: 'Contrats', url: '/contractualisation/contrats', icon: FileSignature },
+  { title: "États d'Exécution", url: '/etats-execution', icon: BarChart3 },
+  { title: 'Alertes Budgétaires', url: '/alertes-budgetaires', icon: AlertTriangle },
+  { title: 'Scan. Engagement', url: '/execution/scanning-engagement', icon: ScanLine },
+  { title: 'Scan. Liquidation', url: '/execution/scanning-liquidation', icon: ScanLine },
 ];
 
 const GESTION_ITEMS = [
+  { title: 'Prestataires', url: '/contractualisation/prestataires', icon: Building2 },
+  { title: 'Contrats', url: '/contractualisation/contrats', icon: FileSignature },
   { title: 'Approvisionnement', url: '/approvisionnement', icon: Truck },
   { title: 'Trésorerie', url: '/tresorerie', icon: Landmark },
   { title: 'Recettes', url: '/recettes', icon: DollarSign },
   { title: 'Comptabilité Matière', url: '/contractualisation/comptabilite-matiere', icon: Archive },
-];
-
-const RAPPORTS_ITEMS = [
-  { title: "États d'exécution", url: '/etats-execution', icon: BarChart3 },
-  { title: 'Alertes Budgétaires', url: '/alertes-budgetaires', icon: Target },
-];
-
-const SCANNING_ITEMS = [
-  { title: 'Scan. Engagement', url: '/execution/scanning-engagement', icon: ScanLine },
-  { title: 'Scan. Liquidation', url: '/execution/scanning-liquidation', icon: ScanLine },
 ];
 
 const PARAMETRAGE_REFERENTIELS = [
@@ -284,12 +271,12 @@ export function SidebarV2() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-3 overflow-y-auto">
-        {/* ========== ACCUEIL ========== */}
+        {/* ========== ACCUEIL + RECHERCHE (Top Items) ========== */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/')} tooltip="Tableau de bord">
+                <SidebarMenuButton asChild isActive={isActive('/')} tooltip="Accueil">
                   <NavLink
                     to="/"
                     className={cn(
@@ -300,7 +287,7 @@ export function SidebarV2() {
                     )}
                   >
                     <Home className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span>Tableau de bord</span>}
+                    {!collapsed && <span>Accueil</span>}
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -324,31 +311,11 @@ export function SidebarV2() {
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive('/dashboard-dmg')}
-                  tooltip="Dashboard DMG"
-                >
-                  <NavLink
-                    to="/dashboard-dmg"
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium',
-                      isActive('/dashboard-dmg')
-                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                    )}
-                  >
-                    <AlertTriangle className="h-4 w-4 shrink-0" />
-                    {!collapsed && <span>Dashboard DMG</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== CHAÎNE DE LA DÉPENSE ========== */}
+        {/* ========== SECTION 1: CHAÎNE DE LA DÉPENSE ========== */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-primary uppercase text-[10px] font-bold tracking-wider mb-1 px-3 flex items-center gap-2">
@@ -436,7 +403,7 @@ export function SidebarV2() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== BUDGET ========== */}
+        {/* ========== SECTION 2: BUDGET ========== */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
@@ -477,16 +444,16 @@ export function SidebarV2() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== PILOTAGE ========== */}
+        {/* ========== SECTION 3: SUIVI & PILOTAGE ========== */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
-              Pilotage
+              Suivi & Pilotage
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              {PILOTAGE_ITEMS.map((item) => (
+              {SUIVI_PILOTAGE_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                     <NavLink
@@ -508,38 +475,7 @@ export function SidebarV2() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== PARTENAIRES ========== */}
-        <SidebarGroup className="mt-4">
-          {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
-              Partenaires
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {PARTENAIRES_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
-                        isActive(item.url)
-                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ========== GESTION ========== */}
+        {/* ========== SECTION 4: GESTION ========== */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
@@ -570,75 +506,13 @@ export function SidebarV2() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* ========== RAPPORTS ========== */}
-        <SidebarGroup className="mt-4">
-          {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
-              Rapports
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {RAPPORTS_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
-                        isActive(item.url)
-                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ========== SCANNING / NUMÉRISATION ========== */}
-        <SidebarGroup className="mt-4">
-          {!collapsed && (
-            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
-              <ScanLine className="h-3.5 w-3.5" />
-              Numérisation
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {SCANNING_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
-                        isActive(item.url)
-                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ========== PARAMÉTRAGE (Collapsible) ========== */}
+        {/* ========== SECTION 5: ADMINISTRATION (Collapsible) ========== */}
+        {/* TODO: Encapsuler cette section avec une condition RBAC (ex: isAdmin) pour limiter l'accès aux administrateurs */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
             <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3 flex items-center gap-2">
               <Cog className="h-3.5 w-3.5" />
-              Paramétrage
+              Administration
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
