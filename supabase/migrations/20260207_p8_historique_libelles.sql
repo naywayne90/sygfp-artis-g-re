@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS historique_libelles (
   champ_modifie TEXT NOT NULL, -- 'label', 'commentaire', etc.
   ancienne_valeur TEXT,
   nouvelle_valeur TEXT,
-  modifie_par UUID REFERENCES auth.users(id),
+  modifie_par UUID REFERENCES profiles(id),
   motif TEXT, -- Justification du changement
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -51,43 +51,46 @@ CREATE POLICY "Admins et DAAF peuvent inserer"
 -- ============================================================
 CREATE OR REPLACE FUNCTION update_budget_libelle(
   p_budget_line_id UUID,
-  p_champ TEXT,
-  p_nouvelle_valeur TEXT,
+  p_field_name TEXT,
+  p_new_value TEXT,
   p_motif TEXT DEFAULT NULL
 )
 RETURNS VOID AS $$
 DECLARE
   v_ancienne_valeur TEXT;
+  v_champ TEXT;
 BEGIN
-  -- Recuperer l'ancienne valeur
-  IF p_champ = 'label' THEN
+  -- Map field names: 'libelle' -> 'label', 'description' -> 'commentaire'
+  IF p_field_name = 'libelle' OR p_field_name = 'label' THEN
+    v_champ := 'label';
     SELECT label INTO v_ancienne_valeur FROM budget_lines WHERE id = p_budget_line_id;
-  ELSIF p_champ = 'commentaire' THEN
+  ELSIF p_field_name = 'description' OR p_field_name = 'commentaire' THEN
+    v_champ := 'commentaire';
     SELECT commentaire INTO v_ancienne_valeur FROM budget_lines WHERE id = p_budget_line_id;
   ELSE
-    RAISE EXCEPTION 'Champ non supporte: %', p_champ;
+    RAISE EXCEPTION 'Champ non supporte: %', p_field_name;
   END IF;
 
   -- Ne rien faire si la valeur n'a pas change
-  IF v_ancienne_valeur IS NOT DISTINCT FROM p_nouvelle_valeur THEN
+  IF v_ancienne_valeur IS NOT DISTINCT FROM p_new_value THEN
     RETURN;
   END IF;
 
   -- Inserer dans l'historique
   INSERT INTO historique_libelles (budget_line_id, champ_modifie, ancienne_valeur, nouvelle_valeur, modifie_par, motif)
-  VALUES (p_budget_line_id, p_champ, v_ancienne_valeur, p_nouvelle_valeur, auth.uid(), p_motif);
+  VALUES (p_budget_line_id, v_champ, v_ancienne_valeur, p_new_value, auth.uid(), p_motif);
 
   -- Mettre a jour la ligne budgetaire
-  IF p_champ = 'label' THEN
+  IF v_champ = 'label' THEN
     UPDATE budget_lines
-    SET label = p_nouvelle_valeur,
-        libelle_modifie = p_nouvelle_valeur,
+    SET label = p_new_value,
+        libelle_modifie = p_new_value,
         date_modification = now(),
         updated_at = now()
     WHERE id = p_budget_line_id;
-  ELSIF p_champ = 'commentaire' THEN
+  ELSIF v_champ = 'commentaire' THEN
     UPDATE budget_lines
-    SET commentaire = p_nouvelle_valeur,
+    SET commentaire = p_new_value,
         updated_at = now()
     WHERE id = p_budget_line_id;
   END IF;

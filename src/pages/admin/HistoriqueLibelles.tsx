@@ -30,8 +30,8 @@ export default function HistoriqueLibelles() {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
-      item.budget_line?.libelle?.toLowerCase().includes(search) ||
-      item.budget_line?.code_ligne?.toLowerCase().includes(search) ||
+      item.budget_line?.label?.toLowerCase().includes(search) ||
+      item.budget_line?.code?.toLowerCase().includes(search) ||
       item.ancienne_valeur?.toLowerCase().includes(search) ||
       item.nouvelle_valeur?.toLowerCase().includes(search) ||
       item.profile?.full_name?.toLowerCase().includes(search) ||
@@ -131,13 +131,13 @@ export default function HistoriqueLibelles() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          {item.budget_line?.code_ligne && (
+                          {item.budget_line?.code && (
                             <Badge variant="outline" className="text-xs mb-1">
-                              {item.budget_line.code_ligne}
+                              {item.budget_line.code}
                             </Badge>
                           )}
                           <p className="text-sm truncate max-w-[200px]">
-                            {item.budget_line?.libelle ?? '-'}
+                            {item.budget_line?.label ?? '-'}
                           </p>
                         </div>
                       </TableCell>

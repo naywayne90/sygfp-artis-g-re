@@ -4,8 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 export interface HistoriqueLibelleRow {
   id: string;
   budget_line_id: string | null;
-  entity_type: string | null;
-  entity_id: string | null;
   champ_modifie: string | null;
   ancienne_valeur: string | null;
   nouvelle_valeur: string | null;
@@ -13,8 +11,8 @@ export interface HistoriqueLibelleRow {
   modifie_par: string | null;
   created_at: string;
   budget_line: {
-    libelle: string | null;
-    code_ligne: string | null;
+    label: string | null;
+    code: string | null;
   } | null;
   profile: {
     full_name: string | null;
@@ -34,7 +32,7 @@ export function useHistoriqueLibelles(filters?: {
         .select(
           `
           *,
-          budget_line:budget_lines(libelle, code_ligne),
+          budget_line:budget_lines(label, code),
           profile:profiles!historique_libelles_modifie_par_fkey(full_name)
         `
         )
