@@ -87,6 +87,7 @@ const WorkflowAdmin = lazy(() => import('./pages/admin/WorkflowAdmin'));
 const NotificationSettings = lazy(() => import('./pages/admin/NotificationSettings'));
 const Interims = lazy(() => import('./pages/admin/Interims'));
 const GestionLibellesBudget = lazy(() => import('./pages/admin/GestionLibellesBudget'));
+const HistoriqueLibelles = lazy(() => import('./pages/admin/HistoriqueLibelles'));
 
 // Pages Planification
 const PlanificationBudgetaire = lazy(() => import('./pages/planification/PlanificationBudgetaire'));
@@ -117,6 +118,7 @@ const PassationMarche = lazy(() => import('./pages/execution/PassationMarche'));
 const DashboardDGPage = lazy(() => import('./pages/execution/DashboardDGPage'));
 const DashboardDirectionPage = lazy(() => import('./pages/execution/DashboardDirectionPage'));
 const DashboardDMG = lazy(() => import('./pages/DashboardDMG'));
+const DashboardFinancier = lazy(() => import('./pages/DashboardFinancier'));
 
 // Pages Gestion Tâches
 const EtatExecutionTachesPage = lazy(
@@ -273,6 +275,7 @@ const App = () => (
                 <Route path="/admin/notifications" element={<NotificationSettings />} />
                 <Route path="/admin/interims" element={<Interims />} />
                 <Route path="/admin/libelles-budget" element={<GestionLibellesBudget />} />
+                <Route path="/admin/historique-libelles" element={<HistoriqueLibelles />} />
 
                 {/* Planification */}
                 <Route path="/planification/budget" element={<PlanificationBudgetaire />} />
@@ -314,7 +317,7 @@ const App = () => (
                 <Route path="/execution/dashboard-dg" element={<DashboardDGPage />} />
                 <Route path="/execution/dashboard-direction" element={<DashboardDirectionPage />} />
                 <Route path="/dashboard-dmg" element={<DashboardDMG />} />
-                <Route path="/dashboard-financier" element={<DashboardDMG />} />
+                <Route path="/dashboard-financier" element={<DashboardFinancier />} />
 
                 <Route path="/notes-sef" element={<NotesSEF />} />
                 <Route path="/notes-sef/validation" element={<ValidationNotesSEF />} />
