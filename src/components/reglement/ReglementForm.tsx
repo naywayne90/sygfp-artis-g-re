@@ -1,14 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { CalendarIcon, Upload, AlertCircle, CheckCircle, Info } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
+import { useState, useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { CalendarIcon, Upload, AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
@@ -17,42 +17,37 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
 import {
   useReglements,
   MODES_PAIEMENT,
   COMPTES_BANCAIRES_ARTI,
-  DOCUMENTS_REGLEMENT,
   ReglementFormData,
-  CompteBancaire
-} from "@/hooks/useReglements";
-import { useImputationValidation } from "@/hooks/useImputationValidation";
-import { ImputationWarning } from "@/components/budget/ImputationWarning";
-import { splitImputation } from "@/lib/budget/imputation-utils";
+  type OrdonnancementValide,
+} from '@/hooks/useReglements';
+import { useImputationValidation } from '@/hooks/useImputationValidation';
+import { ImputationWarning } from '@/components/budget/ImputationWarning';
+import { splitImputation } from '@/lib/budget/imputation-utils';
 
 const formSchema = z.object({
-  ordonnancement_id: z.string().min(1, "Sélectionnez un ordonnancement"),
-  date_paiement: z.date({ required_error: "Date de paiement requise" }),
-  mode_paiement: z.string().min(1, "Mode de paiement requis"),
+  ordonnancement_id: z.string().min(1, 'Sélectionnez un ordonnancement'),
+  date_paiement: z.date({ required_error: 'Date de paiement requise' }),
+  mode_paiement: z.string().min(1, 'Mode de paiement requis'),
   reference_paiement: z.string().optional(),
-  compte_bancaire_arti: z.string().min(1, "Compte bancaire requis"),
-  montant: z.number().min(1, "Montant doit être supérieur à 0"),
+  compte_bancaire_arti: z.string().min(1, 'Compte bancaire requis'),
+  montant: z.number().min(1, 'Montant doit être supérieur à 0'),
   observation: z.string().optional(),
 });
 
@@ -66,19 +61,26 @@ interface ReglementFormProps {
 }
 
 const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
-export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdonnancementId }: ReglementFormProps) {
+export function ReglementForm({
+  onSuccess,
+  onCancel,
+  dossierId,
+  preselectedOrdonnancementId,
+}: ReglementFormProps) {
   const {
     ordonnancementsValides,
     comptesBancaires,
     createReglement,
-    calculateReglementAvailability
+    calculateReglementAvailability,
   } = useReglements();
   const { validateImputation, logImputationWarning } = useImputationValidation();
 
-  const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<any>(null);
+  const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<OrdonnancementValide | null>(
+    null
+  );
   const [availability, setAvailability] = useState<{
     montantOrdonnance: number;
     reglementsAnterieurs: number;
@@ -86,41 +88,45 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   } | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [preuvePaiementUploaded, setPreuvePaiementUploaded] = useState(false);
-  const [imputationJustification, setImputationJustification] = useState("");
+  const [imputationJustification, setImputationJustification] = useState('');
 
   // Utiliser les vrais comptes bancaires ou le fallback
-  const comptesDisponibles: Array<{ value: string; label: string; banque: string; solde?: number | null }> = 
-    comptesBancaires.length > 0 
-      ? comptesBancaires.map(c => ({
+  const comptesDisponibles: Array<{
+    value: string;
+    label: string;
+    banque: string;
+    solde?: number | null;
+  }> =
+    comptesBancaires.length > 0
+      ? comptesBancaires.map((c) => ({
           value: c.id,
           label: `${c.libelle}`,
-          banque: c.banque || "",
+          banque: c.banque || '',
           solde: c.solde_actuel,
         }))
-      : COMPTES_BANCAIRES_ARTI.map(c => ({ ...c, solde: undefined }));
+      : COMPTES_BANCAIRES_ARTI.map((c) => ({ ...c, solde: undefined }));
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ordonnancement_id: "",
+      ordonnancement_id: '',
       date_paiement: new Date(),
-      mode_paiement: "",
-      reference_paiement: "",
-      compte_bancaire_arti: "",
+      mode_paiement: '',
+      reference_paiement: '',
+      compte_bancaire_arti: '',
       montant: 0,
-      observation: "",
+      observation: '',
     },
   });
 
-  const watchedOrdonnancementId = form.watch("ordonnancement_id");
-  const watchedMontant = form.watch("montant");
-  const watchedCompte = form.watch("compte_bancaire_arti");
+  const watchedOrdonnancementId = form.watch('ordonnancement_id');
+  const watchedMontant = form.watch('montant');
+  const watchedCompte = form.watch('compte_bancaire_arti');
 
   // Valider l'imputation de l'ordonnancement sélectionné (via liquidation → engagement)
   const imputationValidation = useMemo(() => {
     if (!selectedOrdonnancement) return null;
-    const budgetLineCode =
-      selectedOrdonnancement.liquidation?.engagement?.budget_line?.code;
+    const budgetLineCode = selectedOrdonnancement.liquidation?.engagement?.budget_line?.code;
     return validateImputation(budgetLineCode, { allowUnknownWithJustification: true });
   }, [selectedOrdonnancement, validateImputation]);
 
@@ -131,9 +137,9 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   // Pré-sélectionner l'ordonnancement si fourni
   useEffect(() => {
     if (preselectedOrdonnancementId && ordonnancementsValides.length > 0) {
-      const ord = ordonnancementsValides.find(o => o.id === preselectedOrdonnancementId);
+      const ord = ordonnancementsValides.find((o) => o.id === preselectedOrdonnancementId);
       if (ord) {
-        form.setValue("ordonnancement_id", preselectedOrdonnancementId);
+        form.setValue('ordonnancement_id', preselectedOrdonnancementId);
       }
     }
   }, [preselectedOrdonnancementId, ordonnancementsValides, form]);
@@ -141,7 +147,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
   // Charger l'ordonnancement sélectionné et calculer la disponibilité
   useEffect(() => {
     if (watchedOrdonnancementId) {
-      const ord = ordonnancementsValides.find(o => o.id === watchedOrdonnancementId);
+      const ord = ordonnancementsValides.find((o) => o.id === watchedOrdonnancementId);
       setSelectedOrdonnancement(ord);
 
       calculateReglementAvailability(watchedOrdonnancementId).then(setAvailability);
@@ -150,18 +156,18 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
       setAvailability(null);
     }
     // Reset justification quand l'ordonnancement change
-    setImputationJustification("");
-  }, [watchedOrdonnancementId, ordonnancementsValides]);
+    setImputationJustification('');
+  }, [watchedOrdonnancementId, ordonnancementsValides, calculateReglementAvailability]);
 
   // Trouver le compte sélectionné
-  const selectedCompte = comptesDisponibles.find(c => c.value === watchedCompte);
+  const selectedCompte = comptesDisponibles.find((c) => c.value === watchedCompte);
 
   // Gérer l'upload de fichier
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       const newFiles = Array.from(files);
-      setUploadedFiles(prev => [...prev, ...newFiles]);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
       // Vérifier si une preuve de paiement est uploadée
       setPreuvePaiementUploaded(true);
     }
@@ -181,16 +187,16 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
       if (!confirm) return;
     }
 
-    const compte = comptesDisponibles.find(c => c.value === values.compte_bancaire_arti);
+    const compte = comptesDisponibles.find((c) => c.value === values.compte_bancaire_arti);
 
     const data: ReglementFormData = {
       ordonnancement_id: values.ordonnancement_id,
-      date_paiement: format(values.date_paiement, "yyyy-MM-dd"),
+      date_paiement: format(values.date_paiement, 'yyyy-MM-dd'),
       mode_paiement: values.mode_paiement,
       reference_paiement: values.reference_paiement,
       compte_id: comptesBancaires.length > 0 ? values.compte_bancaire_arti : undefined,
       compte_bancaire_arti: values.compte_bancaire_arti,
-      banque_arti: compte?.banque || "",
+      banque_arti: compte?.banque || '',
       montant: values.montant,
       observation: values.observation,
     };
@@ -200,20 +206,16 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
     // Logger le warning si imputation non trouvée (avec justification)
     if (needsJustification && result?.id) {
       const budgetLineCode =
-        selectedOrdonnancement?.liquidation?.engagement?.budget_line?.code || "";
-      await logImputationWarning(
-        "reglement",
-        result.id,
-        budgetLineCode,
-        imputationJustification
-      );
+        selectedOrdonnancement?.liquidation?.engagement?.budget_line?.code || '';
+      await logImputationWarning('reglement', result.id, budgetLineCode, imputationJustification);
     }
 
-    setImputationJustification("");
+    setImputationJustification('');
     onSuccess?.();
   };
 
-  const isFormValid = form.formState.isValid &&
+  const isFormValid =
+    form.formState.isValid &&
     availability &&
     watchedMontant <= availability.restantAPayer &&
     justificationValid;
@@ -223,10 +225,11 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {dossierId && (
           <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm">
-            Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+            Lié au dossier{' '}
+            <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
           </div>
         )}
-        
+
         {/* Sélection de l'ordonnancement */}
         <Card>
           <CardHeader>
@@ -276,11 +279,11 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                   </div>
                   <div>
                     <span className="text-muted-foreground">Banque bénéficiaire:</span>
-                    <p className="font-medium">{selectedOrdonnancement.banque || "-"}</p>
+                    <p className="font-medium">{selectedOrdonnancement.banque || '-'}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">RIB:</span>
-                    <p className="font-medium">{selectedOrdonnancement.rib || "-"}</p>
+                    <p className="font-medium">{selectedOrdonnancement.rib || '-'}</p>
                   </div>
                   <div className="col-span-2">
                     <span className="text-muted-foreground">Imputation:</span>
@@ -292,7 +295,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                         return (
                           <>
                             <span className="font-semibold">{imputation_10}</span>
-                            {imputation_suite !== "-" && (
+                            {imputation_suite !== '-' && (
                               <span className="text-muted-foreground">{imputation_suite}</span>
                             )}
                           </>
@@ -330,7 +333,10 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                     Disponible
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+                  <Badge
+                    variant="outline"
+                    className="bg-destructive/10 text-destructive border-destructive/20"
+                  >
                     Soldé
                   </Badge>
                 )}
@@ -340,7 +346,9 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(A) Montant ordonnancé</p>
-                  <p className="text-lg font-bold">{formatMontant(availability.montantOrdonnance)}</p>
+                  <p className="text-lg font-bold">
+                    {formatMontant(availability.montantOrdonnance)}
+                  </p>
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(B) Règlements antérieurs</p>
@@ -350,23 +358,25 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                 </div>
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <p className="text-xs text-muted-foreground">(C) Ce règlement</p>
-                  <p className="text-lg font-bold text-primary">
-                    {formatMontant(watchedMontant)}
-                  </p>
+                  <p className="text-lg font-bold text-primary">{formatMontant(watchedMontant)}</p>
                 </div>
-                <div className={cn(
-                  "p-3 rounded-lg",
-                  availability.restantAPayer - watchedMontant >= 0 
-                    ? "bg-success/10" 
-                    : "bg-destructive/10"
-                )}>
+                <div
+                  className={cn(
+                    'p-3 rounded-lg',
+                    availability.restantAPayer - watchedMontant >= 0
+                      ? 'bg-success/10'
+                      : 'bg-destructive/10'
+                  )}
+                >
                   <p className="text-xs text-muted-foreground">(D) Restant après</p>
-                  <p className={cn(
-                    "text-lg font-bold",
-                    availability.restantAPayer - watchedMontant >= 0 
-                      ? "text-success" 
-                      : "text-destructive"
-                  )}>
+                  <p
+                    className={cn(
+                      'text-lg font-bold',
+                      availability.restantAPayer - watchedMontant >= 0
+                        ? 'text-success'
+                        : 'text-destructive'
+                    )}
+                  >
                     {formatMontant(availability.restantAPayer - watchedMontant)}
                   </p>
                 </div>
@@ -377,8 +387,8 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Montant invalide</AlertTitle>
                   <AlertDescription>
-                    Le montant du règlement ne peut pas dépasser le restant à payer 
-                    ({formatMontant(availability.restantAPayer)})
+                    Le montant du règlement ne peut pas dépasser le restant à payer (
+                    {formatMontant(availability.restantAPayer)})
                   </AlertDescription>
                 </Alert>
               )}
@@ -388,7 +398,8 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                   <CheckCircle className="h-4 w-4 text-success" />
                   <AlertTitle className="text-success">Règlement complet</AlertTitle>
                   <AlertDescription>
-                    Ce règlement soldera complètement l'ordonnancement. Le dossier sera marqué comme "Soldé".
+                    Ce règlement soldera complètement l'ordonnancement. Le dossier sera marqué comme
+                    "Soldé".
                   </AlertDescription>
                 </Alert>
               )}
@@ -415,12 +426,12 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "dd MMMM yyyy", { locale: fr })
+                              format(field.value, 'dd MMMM yyyy', { locale: fr })
                             ) : (
                               <span>Sélectionner une date</span>
                             )}
@@ -476,9 +487,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                     <FormControl>
                       <Input placeholder="Ex: VIR-2024-00456" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Numéro de chèque ou référence de virement
-                    </FormDescription>
+                    <FormDescription>Numéro de chèque ou référence de virement</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -512,9 +521,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                       </SelectContent>
                     </Select>
                     {selectedCompte && selectedCompte.banque && (
-                      <FormDescription>
-                        Banque: {selectedCompte.banque}
-                      </FormDescription>
+                      <FormDescription>Banque: {selectedCompte.banque}</FormDescription>
                     )}
                     <FormMessage />
                   </FormItem>
@@ -580,8 +587,8 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                Il est fortement recommandé de joindre une preuve de paiement 
-                (bordereau de virement, copie de chèque, avis de crédit).
+                Il est fortement recommandé de joindre une preuve de paiement (bordereau de
+                virement, copie de chèque, avis de crédit).
               </AlertDescription>
             </Alert>
 
@@ -602,9 +609,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                 <span className="text-sm text-muted-foreground">
                   Cliquez pour téléverser des fichiers
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  PDF, JPG, PNG acceptés
-                </span>
+                <span className="text-xs text-muted-foreground">PDF, JPG, PNG acceptés</span>
               </label>
             </div>
 
@@ -622,7 +627,7 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+                        setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
                         if (uploadedFiles.length === 1) {
                           setPreuvePaiementUploaded(false);
                         }
@@ -642,11 +647,8 @@ export function ReglementForm({ onSuccess, onCancel, dossierId, preselectedOrdon
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
-          <Button 
-            type="submit" 
-            disabled={!isFormValid || createReglement.isPending}
-          >
-            {createReglement.isPending ? "Enregistrement..." : "Enregistrer le règlement"}
+          <Button type="submit" disabled={!isFormValid || createReglement.isPending}>
+            {createReglement.isPending ? 'Enregistrement...' : 'Enregistrer le règlement'}
           </Button>
         </div>
       </form>

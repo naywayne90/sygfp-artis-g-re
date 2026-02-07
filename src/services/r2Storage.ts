@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 export interface R2Object {
   key: string;
@@ -25,12 +25,12 @@ interface R2Response<T> {
 class R2StorageService {
   private async callEdgeFunction<T>(body: Record<string, unknown>): Promise<R2Response<T>> {
     try {
-      const { data, error } = await supabase.functions.invoke("r2-storage", {
+      const { data, error } = await supabase.functions.invoke('r2-storage', {
         body,
       });
 
       if (error) {
-        console.error("R2 Edge Function Error:", error);
+        console.error('R2 Edge Function Error:', error);
         return { data: null, error: error.message };
       }
 
@@ -40,8 +40,8 @@ class R2StorageService {
 
       return { data: data as T, error: null };
     } catch (err) {
-      console.error("R2 Service Error:", err);
-      return { data: null, error: err instanceof Error ? err.message : "Unknown error" };
+      console.error('R2 Service Error:', err);
+      return { data: null, error: err instanceof Error ? err.message : 'Unknown error' };
     }
   }
 
@@ -62,28 +62,28 @@ class R2StorageService {
       key: string;
       bucket: string;
     }>({
-      action: "getUploadUrl",
+      action: 'getUploadUrl',
       key: path,
-      contentType: file.type || "application/octet-stream",
+      contentType: file.type || 'application/octet-stream',
     });
 
     if (urlError || !urlData) {
-      return { data: null, error: urlError || "Failed to get upload URL" };
+      return { data: null, error: urlError || 'Failed to get upload URL' };
     }
 
     // Step 2: Upload directly to R2 using presigned URL
     try {
       const xhr = new XMLHttpRequest();
-      
+
       const uploadPromise = new Promise<void>((resolve, reject) => {
-        xhr.upload.addEventListener("progress", (event) => {
+        xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable && onProgress) {
             const percent = Math.round((event.loaded / event.total) * 100);
             onProgress(percent);
           }
         });
 
-        xhr.addEventListener("load", () => {
+        xhr.addEventListener('load', () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
@@ -91,13 +91,13 @@ class R2StorageService {
           }
         });
 
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"));
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
         });
       });
 
-      xhr.open("PUT", urlData.uploadUrl);
-      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.open('PUT', urlData.uploadUrl);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
       xhr.send(file);
 
       await uploadPromise;
@@ -113,7 +113,7 @@ class R2StorageService {
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : "Upload failed",
+        error: err instanceof Error ? err.message : 'Upload failed',
       };
     }
   }
@@ -123,18 +123,15 @@ class R2StorageService {
    * @param key - The full key of the file (including sygfp/ prefix)
    * @param expiresIn - URL expiration in seconds (default 3600)
    */
-  async getDownloadUrl(
-    key: string,
-    expiresIn = 3600
-  ): Promise<R2Response<string>> {
+  async getDownloadUrl(key: string, expiresIn = 3600): Promise<R2Response<string>> {
     const { data, error } = await this.callEdgeFunction<{ downloadUrl: string }>({
-      action: "getDownloadUrl",
+      action: 'getDownloadUrl',
       key,
       expiresIn,
     });
 
     if (error || !data) {
-      return { data: null, error: error || "Failed to get download URL" };
+      return { data: null, error: error || 'Failed to get download URL' };
     }
 
     return { data: data.downloadUrl, error: null };
@@ -145,11 +142,11 @@ class R2StorageService {
    * @param key - The full key of the file
    * @param filename - The filename for the downloaded file
    */
-  async download(key: string, filename: string): Promise<R2Response<Blob>> {
+  async download(key: string, _filename: string): Promise<R2Response<Blob>> {
     const { data: url, error } = await this.getDownloadUrl(key);
-    
+
     if (error || !url) {
-      return { data: null, error: error || "Failed to get download URL" };
+      return { data: null, error: error || 'Failed to get download URL' };
     }
 
     try {
@@ -157,13 +154,13 @@ class R2StorageService {
       if (!response.ok) {
         return { data: null, error: `Download failed: ${response.statusText}` };
       }
-      
+
       const blob = await response.blob();
       return { data: blob, error: null };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : "Download failed",
+        error: err instanceof Error ? err.message : 'Download failed',
       };
     }
   }
@@ -174,7 +171,7 @@ class R2StorageService {
    */
   async delete(key: string): Promise<R2Response<boolean>> {
     const { data, error } = await this.callEdgeFunction<{ success: boolean }>({
-      action: "deleteObject",
+      action: 'deleteObject',
       key,
     });
 
@@ -191,15 +188,69 @@ class R2StorageService {
    */
   async list(prefix?: string): Promise<R2Response<R2Object[]>> {
     const { data, error } = await this.callEdgeFunction<{ objects: R2Object[] }>({
-      action: "listObjects",
+      action: 'listObjects',
       prefix,
     });
 
     if (error || !data) {
-      return { data: null, error: error || "Failed to list objects" };
+      return { data: null, error: error || 'Failed to list objects' };
     }
 
     return { data: data.objects, error: null };
+  }
+
+  /**
+   * Upload a Blob to R2 (for generated files like PDFs)
+   * @param blob - The blob to upload
+   * @param path - The path within the bucket (will be prefixed with sygfp/)
+   * @param contentType - MIME type of the blob
+   */
+  async uploadBlob(
+    blob: Blob,
+    path: string,
+    contentType: string
+  ): Promise<R2Response<UploadResult>> {
+    // Step 1: Get presigned upload URL
+    const { data: urlData, error: urlError } = await this.callEdgeFunction<{
+      uploadUrl: string;
+      key: string;
+      bucket: string;
+    }>({
+      action: 'getUploadUrl',
+      key: path,
+      contentType,
+    });
+
+    if (urlError || !urlData) {
+      return { data: null, error: urlError || 'Failed to get upload URL' };
+    }
+
+    // Step 2: Upload directly to R2 using presigned URL
+    try {
+      const response = await fetch(urlData.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': contentType },
+        body: blob,
+      });
+
+      if (!response.ok) {
+        return { data: null, error: `Upload failed with status ${response.status}` };
+      }
+
+      return {
+        data: {
+          key: urlData.key,
+          bucket: urlData.bucket,
+          url: urlData.key,
+        },
+        error: null,
+      };
+    } catch (err) {
+      return {
+        data: null,
+        error: err instanceof Error ? err.message : 'Upload failed',
+      };
+    }
   }
 
   /**
@@ -209,19 +260,14 @@ class R2StorageService {
    * @param filename - Original filename
    * @param exercice - Optional exercise year
    */
-  generatePath(
-    entityType: string,
-    entityId: string,
-    filename: string,
-    exercice?: number
-  ): string {
+  generatePath(entityType: string, entityId: string, filename: string, exercice?: number): string {
     const timestamp = Date.now();
-    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-    
+    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+
     if (exercice) {
       return `${entityType}/${exercice}/${entityId}/${timestamp}_${safeFilename}`;
     }
-    
+
     return `${entityType}/${entityId}/${timestamp}_${safeFilename}`;
   }
 }

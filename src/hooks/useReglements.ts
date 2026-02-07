@@ -1,23 +1,22 @@
-// @ts-nocheck - Tables/columns not in generated types
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 export const MODES_PAIEMENT = [
-  { value: "virement", label: "Virement bancaire" },
-  { value: "cheque", label: "Chèque" },
-  { value: "especes", label: "Espèces" },
-  { value: "mobile_money", label: "Mobile Money" },
+  { value: 'virement', label: 'Virement bancaire' },
+  { value: 'cheque', label: 'Chèque' },
+  { value: 'especes', label: 'Espèces' },
+  { value: 'mobile_money', label: 'Mobile Money' },
 ];
 
 // Documents requis pour le règlement
 export const DOCUMENTS_REGLEMENT = [
-  { type: "preuve_paiement", label: "Preuve de paiement", obligatoire: true },
-  { type: "bordereau_virement", label: "Bordereau de virement", obligatoire: false },
-  { type: "copie_cheque", label: "Copie du chèque", obligatoire: false },
-  { type: "avis_credit", label: "Avis de crédit bancaire", obligatoire: false },
+  { type: 'preuve_paiement', label: 'Preuve de paiement', obligatoire: true },
+  { type: 'bordereau_virement', label: 'Bordereau de virement', obligatoire: false },
+  { type: 'copie_cheque', label: 'Copie du chèque', obligatoire: false },
+  { type: 'avis_credit', label: 'Avis de crédit bancaire', obligatoire: false },
 ];
 
 export interface CompteBancaire {
@@ -41,11 +40,19 @@ export interface ReglementAvailability {
 
 // Types de renvoi pour le rejet
 export const RENVOI_TARGETS = [
-  { value: "engagement", label: "Renvoi à l'Engagement", description: "Renvoyer pour correction de l'engagement" },
-  { value: "creation", label: "Renvoi à la Création", description: "Renvoyer au début du processus" },
+  {
+    value: 'engagement',
+    label: "Renvoi à l'Engagement",
+    description: "Renvoyer pour correction de l'engagement",
+  },
+  {
+    value: 'creation',
+    label: 'Renvoi à la Création',
+    description: 'Renvoyer au début du processus',
+  },
 ] as const;
 
-export type RenvoiTarget = typeof RENVOI_TARGETS[number]["value"];
+export type RenvoiTarget = (typeof RENVOI_TARGETS)[number]['value'];
 
 export interface ReglementFormData {
   ordonnancement_id: string;
@@ -59,12 +66,107 @@ export interface ReglementFormData {
   observation?: string;
 }
 
+// --- Types for joined query results ---
+
+/** Budget line nested in engagement */
+export interface BudgetLineRef {
+  id: string;
+  code: string;
+  label: string;
+}
+
+/** Engagement nested in liquidation */
+export interface EngagementRef {
+  id: string;
+  numero: string;
+  objet: string;
+  fournisseur: string;
+  montant?: number;
+  budget_line: BudgetLineRef | null;
+  expression_besoin?: {
+    dossier_id: string | null;
+  } | null;
+}
+
+/** Liquidation nested in ordonnancement */
+export interface LiquidationRef {
+  id: string;
+  numero: string;
+  montant?: number;
+  engagement_id?: string;
+  engagement: EngagementRef | null;
+}
+
+/** Ordonnancement as returned by the validated list query */
+export interface OrdonnancementValide {
+  id: string;
+  numero: string | null;
+  montant: number;
+  montant_paye: number | null;
+  is_locked: boolean | null;
+  beneficiaire: string;
+  banque: string | null;
+  rib: string | null;
+  mode_paiement: string | null;
+  objet: string;
+  liquidation: LiquidationRef | null;
+}
+
+/** Profile info attached to a reglement */
+export interface ProfileRef {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+}
+
+/** Ordonnancement nested in a reglement (includes full chain) */
+export interface OrdonnancementInReglement {
+  id: string;
+  numero: string | null;
+  montant: number;
+  beneficiaire: string;
+  banque: string | null;
+  rib: string | null;
+  mode_paiement: string | null;
+  objet: string;
+  montant_paye: number | null;
+  is_locked: boolean | null;
+  liquidation: LiquidationRef | null;
+}
+
+/** Full reglement record with relations */
+export interface ReglementWithRelations {
+  id: string;
+  numero: string;
+  ordonnancement_id: string;
+  date_paiement: string;
+  mode_paiement: string;
+  reference_paiement: string | null;
+  compte_bancaire_arti: string | null;
+  compte_id: string | null;
+  banque_arti: string | null;
+  montant: number;
+  observation: string | null;
+  statut: string | null;
+  exercice: number | null;
+  created_at: string | null;
+  created_by: string | null;
+  dossier_id: string | null;
+  // Rejection fields (added via migration, not in generated types)
+  motif_rejet?: string | null;
+  renvoi_target?: string | null;
+  date_rejet?: string | null;
+  ordonnancement: OrdonnancementInReglement | null;
+  created_by_profile: ProfileRef | null;
+}
+
 // Fallback comptes bancaires (utilisés si la table est vide)
 export const COMPTES_BANCAIRES_ARTI = [
-  { value: "SGBCI-001", label: "SGBCI - Compte Principal", banque: "SGBCI" },
-  { value: "BICICI-001", label: "BICICI - Compte Courant", banque: "BICICI" },
-  { value: "ECOBANK-001", label: "ECOBANK - Compte Opérations", banque: "ECOBANK" },
-  { value: "BOA-001", label: "BOA - Compte Trésorerie", banque: "BOA" },
+  { value: 'SGBCI-001', label: 'SGBCI - Compte Principal', banque: 'SGBCI' },
+  { value: 'BICICI-001', label: 'BICICI - Compte Courant', banque: 'BICICI' },
+  { value: 'ECOBANK-001', label: 'ECOBANK - Compte Opérations', banque: 'ECOBANK' },
+  { value: 'BOA-001', label: 'BOA - Compte Trésorerie', banque: 'BOA' },
 ];
 
 export function useReglements() {
@@ -74,13 +176,13 @@ export function useReglements() {
 
   // Récupérer les comptes bancaires actifs
   const { data: comptesBancaires = [] } = useQuery({
-    queryKey: ["comptes-bancaires"],
+    queryKey: ['comptes-bancaires'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("comptes_bancaires")
-        .select("*")
-        .eq("est_actif", true)
-        .order("libelle", { ascending: true });
+        .from('comptes_bancaires')
+        .select('*')
+        .eq('est_actif', true)
+        .order('libelle', { ascending: true });
 
       if (error) throw error;
       return data as CompteBancaire[];
@@ -92,12 +194,13 @@ export function useReglements() {
     data: reglements = [],
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["reglements", exercice],
+  } = useQuery<ReglementWithRelations[]>({
+    queryKey: ['reglements', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("reglements")
-        .select(`
+        .from('reglements')
+        .select(
+          `
           *,
           ordonnancement:ordonnancements(
             id,
@@ -134,23 +237,25 @@ export function useReglements() {
             last_name,
             full_name
           )
-        `)
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data ?? []) as unknown as ReglementWithRelations[];
     },
     enabled: !!exercice,
   });
 
   // Récupérer les ordonnancements validés disponibles pour règlement
-  const { data: ordonnancementsValides = [] } = useQuery({
-    queryKey: ["ordonnancements-valides-pour-reglement", exercice],
+  const { data: ordonnancementsValides = [] } = useQuery<OrdonnancementValide[]>({
+    queryKey: ['ordonnancements-valides-pour-reglement', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("ordonnancements")
-        .select(`
+        .from('ordonnancements')
+        .select(
+          `
           id,
           numero,
           montant,
@@ -176,14 +281,15 @@ export function useReglements() {
               )
             )
           )
-        `)
-        .eq("statut", "valide")
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'valide')
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       // Filtrer pour ne garder que ceux qui ont un restant à payer > 0
-      return (data || []).filter(ord => {
+      return ((data ?? []) as unknown as OrdonnancementValide[]).filter((ord) => {
         const restant = (ord.montant || 0) - (ord.montant_paye || 0);
         return restant > 0;
       });
@@ -199,30 +305,27 @@ export function useReglements() {
   ): Promise<ReglementAvailability> => {
     // Récupérer l'ordonnancement
     const { data: ordonnancement, error: ordError } = await supabase
-      .from("ordonnancements")
-      .select("montant, montant_paye")
-      .eq("id", ordonnancementId)
+      .from('ordonnancements')
+      .select('montant, montant_paye')
+      .eq('id', ordonnancementId)
       .single();
 
     if (ordError) throw ordError;
 
     // Récupérer les règlements existants pour cet ordonnancement (sauf le courant si édition)
     let query = supabase
-      .from("reglements")
-      .select("id, montant")
-      .eq("ordonnancement_id", ordonnancementId);
+      .from('reglements')
+      .select('id, montant')
+      .eq('ordonnancement_id', ordonnancementId);
 
     if (currentReglementId) {
-      query = query.not("id", "eq", currentReglementId);
+      query = query.not('id', 'eq', currentReglementId);
     }
 
     const { data: existingReglements, error: regError } = await query;
     if (regError) throw regError;
 
-    const totalPaye = (existingReglements || []).reduce(
-      (sum, reg) => sum + (reg.montant || 0),
-      0
-    );
+    const totalPaye = (existingReglements || []).reduce((sum, reg) => sum + (reg.montant || 0), 0);
 
     const restantAPayer = (ordonnancement?.montant || 0) - totalPaye;
 
@@ -235,21 +338,21 @@ export function useReglements() {
   };
 
   // Créer un règlement
-  const createReglement = useMutation({
+  const createReglement = useMutation<{ id: string; numero: string }, Error, ReglementFormData>({
     mutationFn: async (data: ReglementFormData) => {
       // Vérifier la disponibilité
       const availability = await calculateReglementAvailability(data.ordonnancement_id);
       if (data.montant > availability.restantAPayer) {
         throw new Error(
-          `Montant trop élevé. Restant à payer: ${availability.restantAPayer.toLocaleString("fr-FR")} FCFA`
+          `Montant trop élevé. Restant à payer: ${availability.restantAPayer.toLocaleString('fr-FR')} FCFA`
         );
       }
 
       // Créer le règlement
       const { data: reglement, error } = await supabase
-        .from("reglements")
+        .from('reglements')
         .insert({
-          numero: "", // Auto-généré par trigger
+          numero: '', // Auto-généré par trigger
           ordonnancement_id: data.ordonnancement_id,
           date_paiement: data.date_paiement,
           mode_paiement: data.mode_paiement,
@@ -258,39 +361,40 @@ export function useReglements() {
           banque_arti: data.banque_arti,
           montant: data.montant,
           observation: data.observation || null,
-          statut: "enregistre",
+          statut: 'enregistre',
           exercice: exercice,
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error || !reglement) throw error ?? new Error('Erreur lors de la création du règlement');
 
       // Mettre à jour le montant_paye de l'ordonnancement
       const newMontantPaye = availability.reglementsAnterieurs + data.montant;
-      const { data: ordonnancement } = await supabase
-        .from("ordonnancements")
-        .select("montant")
-        .eq("id", data.ordonnancement_id)
+      const { data: ordData } = await supabase
+        .from('ordonnancements')
+        .select('montant')
+        .eq('id', data.ordonnancement_id)
         .single();
 
-      const isFullyPaid = newMontantPaye >= (ordonnancement?.montant || 0);
+      const isFullyPaid = newMontantPaye >= (ordData?.montant || 0);
 
       await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
           montant_paye: newMontantPaye,
           is_locked: true, // Verrouiller dès le premier paiement partiel
         })
-        .eq("id", data.ordonnancement_id);
+        .eq('id', data.ordonnancement_id);
 
       // Si complètement payé, marquer le dossier comme soldé (CLOTURE)
       let dossierId: string | undefined;
       if (isFullyPaid) {
         // Récupérer l'ordonnancement avec sa chaîne
-        const { data: ordData } = await supabase
-          .from("ordonnancements")
-          .select(`
+        const { data: ordChainData } = await supabase
+          .from('ordonnancements')
+          .select(
+            `
             liquidation:budget_liquidations(
               engagement:budget_engagements(
                 expression_besoin:expressions_besoin(
@@ -298,29 +402,39 @@ export function useReglements() {
                 )
               )
             )
-          `)
-          .eq("id", data.ordonnancement_id)
+          `
+          )
+          .eq('id', data.ordonnancement_id)
           .single();
 
-        dossierId = ordData?.liquidation?.engagement?.expression_besoin?.dossier_id;
+        interface OrdChainResult {
+          liquidation: {
+            engagement: {
+              expression_besoin: { dossier_id: string | null } | null;
+            } | null;
+          } | null;
+        }
+        const chainResult = ordChainData as unknown as OrdChainResult | null;
+        dossierId =
+          chainResult?.liquidation?.engagement?.expression_besoin?.dossier_id ?? undefined;
 
         if (dossierId) {
           await supabase
-            .from("dossiers")
+            .from('dossiers')
             .update({
-              statut_global: "solde",
-              statut_paiement: "solde",
+              statut_global: 'solde',
+              statut_paiement: 'solde',
               date_cloture: new Date().toISOString(),
             })
-            .eq("id", dossierId);
+            .eq('id', dossierId);
         }
       }
 
       // Audit log for reglement creation
       await logAction({
-        entityType: "reglement",
+        entityType: 'reglement',
         entityId: reglement.id,
-        action: "CREATE",
+        action: 'CREATE',
         newValues: {
           numero: reglement.numero,
           montant: data.montant,
@@ -334,12 +448,12 @@ export function useReglements() {
       // If dossier was closed, log it
       if (isFullyPaid && dossierId) {
         await logAction({
-          entityType: "dossier",
+          entityType: 'dossier',
           entityId: dossierId,
-          action: "CLOSE",
+          action: 'CLOSE',
           newValues: {
-            statut_global: "solde",
-            reason: "Règlement complet effectué",
+            statut_global: 'solde',
+            reason: 'Règlement complet effectué',
             reglement_id: reglement.id,
           },
         });
@@ -348,11 +462,11 @@ export function useReglements() {
       return reglement;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reglements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements-valides-pour-reglement"] });
-      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
-      toast.success("Règlement enregistré avec succès");
+      queryClient.invalidateQueries({ queryKey: ['reglements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements-valides-pour-reglement'] });
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      toast.success('Règlement enregistré avec succès');
     },
     onError: (error: Error) => {
       toast.error(error.message || "Erreur lors de l'enregistrement");
@@ -360,30 +474,27 @@ export function useReglements() {
   });
 
   // Supprimer un règlement (annuler)
-  const deleteReglement = useMutation({
+  const deleteReglement = useMutation<void, Error, string>({
     mutationFn: async (id: string) => {
       // Récupérer le règlement pour mettre à jour l'ordonnancement
       const { data: reglement, error: fetchError } = await supabase
-        .from("reglements")
-        .select("ordonnancement_id, montant, numero")
-        .eq("id", id)
+        .from('reglements')
+        .select('ordonnancement_id, montant, numero')
+        .eq('id', id)
         .single();
 
-      if (fetchError) throw fetchError;
+      if (fetchError || !reglement) throw fetchError ?? new Error('Règlement introuvable');
 
       // Supprimer le règlement
-      const { error } = await supabase
-        .from("reglements")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from('reglements').delete().eq('id', id);
 
       if (error) throw error;
 
       // Recalculer le montant_paye de l'ordonnancement
       const { data: remainingReglements } = await supabase
-        .from("reglements")
-        .select("montant")
-        .eq("ordonnancement_id", reglement.ordonnancement_id);
+        .from('reglements')
+        .select('montant')
+        .eq('ordonnancement_id', reglement.ordonnancement_id);
 
       const newMontantPaye = (remainingReglements || []).reduce(
         (sum, reg) => sum + (reg.montant || 0),
@@ -391,18 +502,18 @@ export function useReglements() {
       );
 
       await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
           montant_paye: newMontantPaye,
           is_locked: newMontantPaye > 0,
         })
-        .eq("id", reglement.ordonnancement_id);
+        .eq('id', reglement.ordonnancement_id);
 
       // Audit log
       await logAction({
-        entityType: "reglement",
+        entityType: 'reglement',
         entityId: id,
-        action: "DELETE",
+        action: 'DELETE',
         oldValues: {
           numero: reglement.numero,
           montant: reglement.montant,
@@ -411,10 +522,10 @@ export function useReglements() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reglements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements-valides-pour-reglement"] });
-      toast.success("Règlement annulé");
+      queryClient.invalidateQueries({ queryKey: ['reglements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements-valides-pour-reglement'] });
+      toast.success('Règlement annulé');
     },
     onError: (error: Error) => {
       toast.error(error.message || "Erreur lors de l'annulation");
@@ -424,10 +535,10 @@ export function useReglements() {
   // Récupérer les pièces jointes d'un règlement
   const getAttachments = async (reglementId: string) => {
     const { data, error } = await supabase
-      .from("reglement_attachments")
-      .select("*")
-      .eq("reglement_id", reglementId)
-      .order("created_at", { ascending: false });
+      .from('reglement_attachments')
+      .select('*')
+      .eq('reglement_id', reglementId)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data;
@@ -447,28 +558,26 @@ export function useReglements() {
       // Upload du fichier
       const filePath = `reglements/${reglementId}/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
-        .from("documents")
+        .from('documents')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Enregistrer dans la base
-      const { error } = await supabase
-        .from("reglement_attachments")
-        .insert({
-          reglement_id: reglementId,
-          document_type: documentType,
-          file_name: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          file_type: file.type,
-        });
+      const { error } = await supabase.from('reglement_attachments').insert({
+        reglement_id: reglementId,
+        document_type: documentType,
+        file_name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+        file_type: file.type,
+      });
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reglements"] });
-      toast.success("Pièce jointe ajoutée");
+      queryClient.invalidateQueries({ queryKey: ['reglements'] });
+      toast.success('Pièce jointe ajoutée');
     },
     onError: (error: Error) => {
       toast.error(error.message || "Erreur lors de l'upload");
@@ -476,24 +585,49 @@ export function useReglements() {
   });
 
   // Rejeter un règlement avec renvoi vers une étape antérieure
-  const rejectReglement = useMutation({
-    mutationFn: async ({
-      reglementId,
-      motif,
-      renvoiTarget,
-    }: {
-      reglementId: string;
-      motif: string;
-      renvoiTarget: RenvoiTarget;
-    }) => {
+  interface RejectReglementParams {
+    reglementId: string;
+    motif: string;
+    renvoiTarget: RenvoiTarget;
+  }
+  const rejectReglement = useMutation<
+    { reglement: Record<string, unknown>; renvoiTarget: RenvoiTarget },
+    Error,
+    RejectReglementParams
+  >({
+    mutationFn: async ({ reglementId, motif, renvoiTarget }: RejectReglementParams) => {
       if (!motif.trim()) {
-        throw new Error("Le motif de rejet est obligatoire");
+        throw new Error('Le motif de rejet est obligatoire');
       }
 
       // Récupérer le règlement avec sa chaîne
-      const { data: reglement, error: fetchError } = await supabase
-        .from("reglements")
-        .select(`
+      interface RejectChainResult {
+        id: string;
+        numero: string;
+        montant: number;
+        ordonnancement_id: string;
+        ordonnancement: {
+          id: string;
+          numero: string;
+          liquidation_id: string;
+          liquidation: {
+            id: string;
+            engagement_id: string;
+            engagement: {
+              id: string;
+              numero: string;
+              expression_besoin_id: string | null;
+              expression_besoin: {
+                dossier_id: string | null;
+              } | null;
+            } | null;
+          } | null;
+        } | null;
+      }
+      const { data: reglementRaw, error: fetchError } = await supabase
+        .from('reglements')
+        .select(
+          `
           id,
           numero,
           montant,
@@ -515,34 +649,39 @@ export function useReglements() {
               )
             )
           )
-        `)
-        .eq("id", reglementId)
+        `
+        )
+        .eq('id', reglementId)
         .single();
 
       if (fetchError) throw fetchError;
+      const reglement = reglementRaw as unknown as RejectChainResult;
 
-      const dossierId = reglement?.ordonnancement?.liquidation?.engagement?.expression_besoin?.dossier_id;
+      const dossierId =
+        reglement?.ordonnancement?.liquidation?.engagement?.expression_besoin?.dossier_id;
       const engagementId = reglement?.ordonnancement?.liquidation?.engagement?.id;
 
       // Mettre à jour le statut du règlement
+      // Note: motif_rejet, renvoi_target, date_rejet exist in DB but not in generated types
+      const rejectPayload = {
+        statut: 'rejete',
+        motif_rejet: motif,
+        renvoi_target: renvoiTarget,
+        date_rejet: new Date().toISOString(),
+      };
       const { error: updateError } = await supabase
-        .from("reglements")
-        .update({
-          statut: "rejete",
-          motif_rejet: motif,
-          renvoi_target: renvoiTarget,
-          date_rejet: new Date().toISOString(),
-        })
-        .eq("id", reglementId);
+        .from('reglements')
+        .update(rejectPayload as typeof rejectPayload & Record<string, string>)
+        .eq('id', reglementId);
 
       if (updateError) throw updateError;
 
       // Recalculer le montant_paye de l'ordonnancement (retirer ce règlement)
       const { data: remainingReglements } = await supabase
-        .from("reglements")
-        .select("montant")
-        .eq("ordonnancement_id", reglement.ordonnancement_id)
-        .neq("statut", "rejete");
+        .from('reglements')
+        .select('montant')
+        .eq('ordonnancement_id', reglement.ordonnancement_id)
+        .neq('statut', 'rejete');
 
       const newMontantPaye = (remainingReglements || []).reduce(
         (sum, reg) => sum + (reg.montant || 0),
@@ -550,51 +689,51 @@ export function useReglements() {
       );
 
       await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
           montant_paye: newMontantPaye,
         })
-        .eq("id", reglement.ordonnancement_id);
+        .eq('id', reglement.ordonnancement_id);
 
       // Selon le renvoi_target, déverrouiller les étapes concernées
-      if (renvoiTarget === "engagement" && engagementId) {
+      if (renvoiTarget === 'engagement' && engagementId) {
         // Déverrouiller engagement et les étapes suivantes
         await supabase
-          .from("budget_engagements")
+          .from('budget_engagements')
           .update({ is_locked: false })
-          .eq("id", engagementId);
+          .eq('id', engagementId);
 
         // Mettre à jour le dossier
         if (dossierId) {
           await supabase
-            .from("dossiers")
+            .from('dossiers')
             .update({
-              statut_global: "en_correction",
-              etape_courante: "engagement",
+              statut_global: 'en_correction',
+              etape_courante: 'engagement',
             })
-            .eq("id", dossierId);
+            .eq('id', dossierId);
         }
-      } else if (renvoiTarget === "creation" && dossierId) {
+      } else if (renvoiTarget === 'creation' && dossierId) {
         // Renvoi à la création - déverrouiller toute la chaîne
         await supabase
-          .from("dossiers")
+          .from('dossiers')
           .update({
-            statut_global: "en_correction",
-            etape_courante: "creation",
+            statut_global: 'en_correction',
+            etape_courante: 'creation',
           })
-          .eq("id", dossierId);
+          .eq('id', dossierId);
       }
 
       // Audit log
       await logAction({
-        entityType: "reglement",
+        entityType: 'reglement',
         entityId: reglementId,
-        action: "REJECT",
+        action: 'REJECT',
         oldValues: {
-          statut: "enregistre",
+          statut: 'enregistre',
         },
         newValues: {
-          statut: "rejete",
+          statut: 'rejete',
           motif_rejet: motif,
           renvoi_target: renvoiTarget,
           engagement_id: engagementId,
@@ -605,11 +744,11 @@ export function useReglements() {
       // Log aussi l'action de renvoi sur le dossier
       if (dossierId) {
         await logAction({
-          entityType: "dossier",
+          entityType: 'dossier',
           entityId: dossierId,
-          action: "RENVOI",
+          action: 'RENVOI',
           newValues: {
-            from_step: "reglement",
+            from_step: 'reglement',
             to_step: renvoiTarget,
             motif,
             reglement_id: reglementId,
@@ -620,17 +759,19 @@ export function useReglements() {
       return { reglement, renvoiTarget };
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["reglements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements-valides-pour-reglement"] });
-      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
+      queryClient.invalidateQueries({ queryKey: ['reglements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements-valides-pour-reglement'] });
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
 
-      const targetLabel = RENVOI_TARGETS.find(t => t.value === variables.renvoiTarget)?.label || variables.renvoiTarget;
+      const targetLabel =
+        RENVOI_TARGETS.find((t) => t.value === variables.renvoiTarget)?.label ||
+        variables.renvoiTarget;
       toast.success(`Règlement rejeté - ${targetLabel}`);
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors du rejet");
+      toast.error(error.message || 'Erreur lors du rejet');
     },
   });
 
@@ -638,7 +779,7 @@ export function useReglements() {
   const stats = {
     total: reglements.length,
     totalMontant: reglements.reduce((sum, r) => sum + (r.montant || 0), 0),
-    partiels: reglements.filter(r => {
+    partiels: reglements.filter((r) => {
       const ord = r.ordonnancement;
       return ord && (ord.montant_paye || 0) < (ord.montant || 0);
     }).length,
@@ -647,11 +788,11 @@ export function useReglements() {
   // Helper to generate treasury link for a reglement
   const getTreasuryLink = (reglementId: string, compteId?: string) => {
     // Link format: /tresorerie/operations?reglement={id}&compte={compteId}
-    const baseUrl = "/tresorerie/operations";
+    const baseUrl = '/tresorerie/operations';
     const params = new URLSearchParams();
-    params.set("reglement", reglementId);
+    params.set('reglement', reglementId);
     if (compteId) {
-      params.set("compte", compteId);
+      params.set('compte', compteId);
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -659,13 +800,13 @@ export function useReglements() {
   // Check if dossier is in CLOTURE state (read-only)
   const isDossierClosed = async (dossierId: string) => {
     const { data, error } = await supabase
-      .from("dossiers")
-      .select("statut_global, date_cloture")
-      .eq("id", dossierId)
+      .from('dossiers')
+      .select('statut_global, date_cloture')
+      .eq('id', dossierId)
       .single();
 
     if (error) return false;
-    return data?.statut_global === "solde";
+    return data?.statut_global === 'solde';
   };
 
   return {

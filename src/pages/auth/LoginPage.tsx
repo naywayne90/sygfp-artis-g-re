@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
-import logoArti from "@/assets/logo-arti.jpg";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import logoArti from '@/assets/logo-arti.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +30,12 @@ export default function LoginPage() {
 
       if (authError) {
         // Traduire les messages d'erreur courants
-        if (authError.message.includes("Invalid login credentials")) {
-          setError("Identifiants invalides. Vérifiez votre email et mot de passe.");
-        } else if (authError.message.includes("Email not confirmed")) {
-          setError("Veuillez confirmer votre email avant de vous connecter.");
-        } else if (authError.message.includes("Too many requests")) {
-          setError("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
+        if (authError.message.includes('Invalid login credentials')) {
+          setError('Identifiants invalides. Vérifiez votre email et mot de passe.');
+        } else if (authError.message.includes('Email not confirmed')) {
+          setError('Veuillez confirmer votre email avant de vous connecter.');
+        } else if (authError.message.includes('Too many requests')) {
+          setError('Trop de tentatives. Veuillez réessayer dans quelques minutes.');
         } else {
           setError(authError.message);
         }
@@ -44,11 +44,11 @@ export default function LoginPage() {
 
       if (data.session) {
         // Connexion réussie, rediriger vers le tableau de bord
-        navigate("/", { replace: true });
+        navigate('/', { replace: true });
       }
     } catch (err) {
       setError("Une erreur inattendue s'est produite. Veuillez réessayer.");
-      console.error("Erreur de connexion:", err);
+      console.error('Erreur de connexion:', err);
     } finally {
       setIsLoading(false);
     }
@@ -59,11 +59,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo centré */}
         <div className="flex justify-center mb-6">
-          <img
-            src={logoArti}
-            alt="ARTI"
-            className="h-16 w-auto object-contain"
-          />
+          <img src={logoArti} alt="ARTI" className="h-16 w-auto object-contain" />
         </div>
 
         {/* Carte principale */}
@@ -122,7 +118,7 @@ export default function LoginPage() {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Votre mot de passe"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -137,11 +133,7 @@ export default function LoginPage() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     tabIndex={-1}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -158,23 +150,19 @@ export default function LoginPage() {
                     Connexion en cours...
                   </>
                 ) : (
-                  "Se connecter"
+                  'Se connecter'
                 )}
               </Button>
             </form>
 
             {/* Lien mot de passe oublié */}
             <div className="text-center">
-              <button
-                type="button"
+              <Link
+                to="/auth/forgot-password"
                 className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                onClick={() => {
-                  // TODO: Implémenter la récupération de mot de passe
-                  alert("Fonctionnalité à venir. Contactez l'administrateur pour réinitialiser votre mot de passe.");
-                }}
               >
                 Mot de passe oublié ?
-              </button>
+              </Link>
             </div>
           </CardContent>
         </Card>

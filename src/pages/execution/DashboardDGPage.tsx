@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useExercice } from '@/contexts/ExerciceContext';
 import {
   useDashboardGlobalStats,
   useDashboardStats,
@@ -7,21 +6,14 @@ import {
   type AlertStats,
   type DirectionStats,
   type OSStats,
-} from "@/hooks/useDashboardStats";
-import { usePermissions } from "@/hooks/usePermissions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+} from '@/hooks/useDashboardStats';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Table,
   TableBody,
@@ -29,15 +21,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Target,
-  TrendingUp,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Pause,
-  XCircle,
   Building2,
   FileText,
   Wallet,
@@ -48,15 +38,16 @@ import {
   BarChart3,
   Activity,
   ArrowUpRight,
-} from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useGenerateReport } from '@/hooks/useGenerateReport';
 
 const formatMontant = (montant: number): string => {
   if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(2)} Mds`;
   if (montant >= 1_000_000) return `${(montant / 1_000_000).toFixed(1)} M`;
   if (montant >= 1_000) return `${(montant / 1_000).toFixed(0)} K`;
-  return new Intl.NumberFormat("fr-FR").format(montant);
+  return new Intl.NumberFormat('fr-FR').format(montant);
 };
 
 function KPICard({
@@ -65,7 +56,7 @@ function KPICard({
   subtitle,
   icon: Icon,
   trend,
-  color = "primary",
+  color = 'primary',
   progress,
   link,
 }: {
@@ -74,16 +65,16 @@ function KPICard({
   subtitle?: string;
   icon: React.ElementType;
   trend?: { value: number; label: string };
-  color?: "primary" | "success" | "warning" | "destructive" | "muted";
+  color?: 'primary' | 'success' | 'warning' | 'destructive' | 'muted';
   progress?: number;
   link?: string;
 }) {
   const colorClasses = {
-    primary: "text-primary bg-primary/10",
-    success: "text-green-600 bg-green-100",
-    warning: "text-amber-600 bg-amber-100",
-    destructive: "text-red-600 bg-red-100",
-    muted: "text-muted-foreground bg-muted",
+    primary: 'text-primary bg-primary/10',
+    success: 'text-green-600 bg-green-100',
+    warning: 'text-amber-600 bg-amber-100',
+    destructive: 'text-red-600 bg-red-100',
+    muted: 'text-muted-foreground bg-muted',
   };
 
   const content = (
@@ -96,9 +87,12 @@ function KPICard({
             {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
             {trend && (
               <div className="flex items-center gap-1 text-xs">
-                <ArrowUpRight className={`h-3 w-3 ${trend.value >= 0 ? "text-green-600" : "text-red-600"}`} />
-                <span className={trend.value >= 0 ? "text-green-600" : "text-red-600"}>
-                  {trend.value >= 0 ? "+" : ""}{trend.value}%
+                <ArrowUpRight
+                  className={`h-3 w-3 ${trend.value >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                />
+                <span className={trend.value >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  {trend.value >= 0 ? '+' : ''}
+                  {trend.value}%
                 </span>
                 <span className="text-muted-foreground">{trend.label}</span>
               </div>
@@ -118,7 +112,11 @@ function KPICard({
   );
 
   if (link) {
-    return <Link to={link} className="block">{content}</Link>;
+    return (
+      <Link to={link} className="block">
+        {content}
+      </Link>
+    );
   }
 
   return content;
@@ -232,7 +230,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
                 <Pause className="h-5 w-5 text-red-600" />
                 <div className="flex-1">
-                  <p className="font-medium text-red-800">{alerts.dossiers_bloques} dossier(s) bloqué(s)</p>
+                  <p className="font-medium text-red-800">
+                    {alerts.dossiers_bloques} dossier(s) bloqué(s)
+                  </p>
                   <p className="text-xs text-red-600">Nécessitent une intervention</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-red-400" />
@@ -245,7 +245,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors">
                 <Clock className="h-5 w-5 text-amber-600" />
                 <div className="flex-1">
-                  <p className="font-medium text-amber-800">{alerts.taches_en_retard} tâche(s) en retard</p>
+                  <p className="font-medium text-amber-800">
+                    {alerts.taches_en_retard} tâche(s) en retard
+                  </p>
                   <p className="text-xs text-amber-600">Date échéance dépassée</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-amber-400" />
@@ -258,7 +260,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                 <FileText className="h-5 w-5 text-blue-600" />
                 <div className="flex-1">
-                  <p className="font-medium">{alerts.engagements_en_attente} engagement(s) en attente</p>
+                  <p className="font-medium">
+                    {alerts.engagements_en_attente} engagement(s) en attente
+                  </p>
                   <p className="text-xs text-muted-foreground">À valider</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
@@ -271,7 +275,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                 <Receipt className="h-5 w-5 text-purple-600" />
                 <div className="flex-1">
-                  <p className="font-medium">{alerts.liquidations_en_attente} liquidation(s) en attente</p>
+                  <p className="font-medium">
+                    {alerts.liquidations_en_attente} liquidation(s) en attente
+                  </p>
                   <p className="text-xs text-muted-foreground">À traiter</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
@@ -284,7 +290,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                 <FileCheck className="h-5 w-5 text-teal-600" />
                 <div className="flex-1">
-                  <p className="font-medium">{alerts.ordonnancements_en_attente} ordonnancement(s) en attente</p>
+                  <p className="font-medium">
+                    {alerts.ordonnancements_en_attente} ordonnancement(s) en attente
+                  </p>
                   <p className="text-xs text-muted-foreground">À signer</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
@@ -344,7 +352,10 @@ function DirectionsTable({ directions }: { directions: DirectionStats[] }) {
                   </TableCell>
                   <TableCell className="text-center">{dir.roadmap.total_activites}</TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <Badge
+                      variant="outline"
+                      className="bg-green-50 text-green-700 border-green-200"
+                    >
                       {dir.roadmap.activites_realisees}
                     </Badge>
                   </TableCell>
@@ -403,7 +414,9 @@ function OSTable({ objectifs }: { objectifs: OSStats[] }) {
               <div key={os.os_id} className="p-4 rounded-lg border">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <Badge variant="outline" className="mb-1">{os.os_code}</Badge>
+                    <Badge variant="outline" className="mb-1">
+                      {os.os_code}
+                    </Badge>
                     <p className="text-sm font-medium">{os.os_libelle}</p>
                   </div>
                   <div className="text-right">
@@ -458,24 +471,32 @@ function BudgetChainOverview() {
           <div className="grid grid-cols-4 gap-3">
             <div className="p-3 rounded-lg bg-blue-50 text-center">
               <Wallet className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-blue-700">{formatMontant(budgetStats.budgetEngage)}</p>
+              <p className="text-lg font-bold text-blue-700">
+                {formatMontant(budgetStats.budgetEngage)}
+              </p>
               <p className="text-xs text-blue-600">Engagé</p>
               <p className="text-xs text-blue-500 mt-1">{budgetStats.tauxEngagement}%</p>
             </div>
             <div className="p-3 rounded-lg bg-purple-50 text-center">
               <Receipt className="h-5 w-5 text-purple-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-purple-700">{formatMontant(budgetStats.budgetLiquide)}</p>
+              <p className="text-lg font-bold text-purple-700">
+                {formatMontant(budgetStats.budgetLiquide)}
+              </p>
               <p className="text-xs text-purple-600">Liquidé</p>
               <p className="text-xs text-purple-500 mt-1">{budgetStats.tauxLiquidation}%</p>
             </div>
             <div className="p-3 rounded-lg bg-teal-50 text-center">
               <FileCheck className="h-5 w-5 text-teal-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-teal-700">{formatMontant(budgetStats.budgetOrdonnance)}</p>
+              <p className="text-lg font-bold text-teal-700">
+                {formatMontant(budgetStats.budgetOrdonnance)}
+              </p>
               <p className="text-xs text-teal-600">Ordonnancé</p>
             </div>
             <div className="p-3 rounded-lg bg-green-50 text-center">
               <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-green-700">{formatMontant(budgetStats.budgetPaye)}</p>
+              <p className="text-lg font-bold text-green-700">
+                {formatMontant(budgetStats.budgetPaye)}
+              </p>
               <p className="text-xs text-green-600">Payé</p>
               <p className="text-xs text-green-500 mt-1">{budgetStats.tauxPaiement}%</p>
             </div>
@@ -490,12 +511,16 @@ function BudgetChainOverview() {
             <div className="h-4 bg-gray-100 rounded-full overflow-hidden flex">
               <div
                 className="h-full bg-blue-500"
-                style={{ width: `${Math.min(budgetStats.tauxEngagement - budgetStats.tauxLiquidation, 100)}%` }}
+                style={{
+                  width: `${Math.min(budgetStats.tauxEngagement - budgetStats.tauxLiquidation, 100)}%`,
+                }}
                 title={`Engagé: ${budgetStats.tauxEngagement}%`}
               />
               <div
                 className="h-full bg-purple-500"
-                style={{ width: `${Math.min(budgetStats.tauxLiquidation - budgetStats.tauxPaiement, 100)}%` }}
+                style={{
+                  width: `${Math.min(budgetStats.tauxLiquidation - budgetStats.tauxPaiement, 100)}%`,
+                }}
                 title={`Liquidé: ${budgetStats.tauxLiquidation}%`}
               />
               <div
@@ -525,13 +550,15 @@ function BudgetChainOverview() {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-muted-foreground">Budget disponible</p>
-                <p className="text-xl font-bold">{formatMontant(budgetStats.budgetDisponible)} FCFA</p>
+                <p className="text-xl font-bold">
+                  {formatMontant(budgetStats.budgetDisponible)} FCFA
+                </p>
               </div>
               <Badge
-                variant={budgetStats.budgetDisponible > 0 ? "outline" : "destructive"}
-                className={budgetStats.budgetDisponible > 0 ? "bg-green-50 text-green-700" : ""}
+                variant={budgetStats.budgetDisponible > 0 ? 'outline' : 'destructive'}
+                className={budgetStats.budgetDisponible > 0 ? 'bg-green-50 text-green-700' : ''}
               >
-                {budgetStats.budgetDisponible > 0 ? "Solde positif" : "Dépassement"}
+                {budgetStats.budgetDisponible > 0 ? 'Solde positif' : 'Dépassement'}
               </Badge>
             </div>
           </div>
@@ -542,27 +569,26 @@ function BudgetChainOverview() {
 }
 
 export default function DashboardDGPage() {
-  const { exercice, exerciceId } = useExercice();
+  const { exercice, exerciceId: _exerciceId } = useExercice();
   const { hasAnyRole } = usePermissions();
-  const {
-    roadmap,
-    alerts,
-    directions,
-    objectifsStrategiques,
-    isLoading,
-    refetch
-  } = useDashboardGlobalStats();
+  const { roadmap, alerts, directions, objectifsStrategiques, isLoading, refetch } =
+    useDashboardGlobalStats();
+  const { generateReport, isGenerating } = useGenerateReport();
 
   // Vérifier les permissions - DG uniquement
-  const canAccess = hasAnyRole(["DG", "Admin"]);
+  const canAccess = hasAnyRole(['DG', 'Admin']);
 
   if (!canAccess) {
     return <Navigate to="/execution/dashboard-direction" replace />;
   }
 
-  const handleExport = async (format: "pdf" | "excel") => {
+  const handleExport = async (format: 'pdf' | 'excel') => {
+    const reportFormat = format === 'pdf' ? 'html' : 'csv';
     toast.info(`Export ${format.toUpperCase()} en cours...`);
-    // TODO: Implémenter l'export via Edge Function
+    await generateReport({
+      report_type: 'execution_budgetaire',
+      format: reportFormat,
+    });
   };
 
   if (isLoading) {
@@ -573,13 +599,15 @@ export default function DashboardDGPage() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-24" />
-              </CardContent>
-            </Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-24" />
+                </CardContent>
+              </Card>
+            ))}
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           <Skeleton className="h-[400px]" />
@@ -595,22 +623,30 @@ export default function DashboardDGPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold">Dashboard Direction Générale</h1>
-          <p className="text-muted-foreground">
-            Vue consolidée - Exercice {exercice}
-          </p>
+          <p className="text-muted-foreground">Vue consolidée - Exercice {exercice}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualiser
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport("excel")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport('excel')}
+            disabled={isGenerating}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Excel
+            {isGenerating ? 'Export...' : 'Excel'}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport("pdf")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport('pdf')}
+            disabled={isGenerating}
+          >
             <Download className="h-4 w-4 mr-2" />
-            PDF
+            {isGenerating ? 'Export...' : 'PDF'}
           </Button>
         </div>
       </div>
@@ -638,7 +674,7 @@ export default function DashboardDGPage() {
           value={roadmap?.activites_bloquees || 0}
           subtitle="Nécessitent une action"
           icon={Pause}
-          color={roadmap?.activites_bloquees ? "destructive" : "muted"}
+          color={roadmap?.activites_bloquees ? 'destructive' : 'muted'}
           link="/execution/taches?filter=bloque"
         />
         <KPICard
@@ -646,7 +682,7 @@ export default function DashboardDGPage() {
           value={alerts?.taches_en_retard || 0}
           subtitle="Date échéance dépassée"
           icon={Clock}
-          color={alerts?.taches_en_retard ? "warning" : "muted"}
+          color={alerts?.taches_en_retard ? 'warning' : 'muted'}
           link="/execution/taches?filter=retard"
         />
       </div>

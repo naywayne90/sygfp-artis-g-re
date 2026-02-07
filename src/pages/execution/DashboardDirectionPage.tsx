@@ -1,19 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useExercice } from '@/contexts/ExerciceContext';
 import {
   useDashboardDirectionStats,
   useUserDirection,
   type RoadmapStats,
   type AlertStats,
   type MissionStats,
-} from "@/hooks/useDashboardStats";
-import { usePermissions } from "@/hooks/usePermissions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/hooks/useDashboardStats';
+import { usePermissions } from '@/hooks/usePermissions';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Target,
   AlertTriangle,
@@ -26,28 +25,32 @@ import {
   BarChart3,
   Activity,
   ArrowUpRight,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { DashboardNoDirection } from "@/components/dashboard/DashboardNoDirection";
-import { DashboardGeneric } from "@/components/dashboard/DashboardGeneric";
-import { DashboardAICB } from "@/components/dashboard/DashboardAICB";
-import { DashboardHR } from "@/components/dashboard/DashboardHR";
-import { DashboardAnalytics } from "@/components/dashboard/DashboardAnalytics";
-import { DashboardMissions } from "@/components/dashboard/DashboardMissions";
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useGenerateReport } from '@/hooks/useGenerateReport';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { DashboardNoDirection } from '@/components/dashboard/DashboardNoDirection';
+import { DashboardGeneric } from '@/components/dashboard/DashboardGeneric';
+import { DashboardAICB } from '@/components/dashboard/DashboardAICB';
+import { DashboardHR } from '@/components/dashboard/DashboardHR';
+import { DashboardAnalytics } from '@/components/dashboard/DashboardAnalytics';
+import { DashboardMissions } from '@/components/dashboard/DashboardMissions';
 
 // Mapping des directions vers leurs dashboards spécialisés
-const DIRECTION_DASHBOARDS: Record<string, React.ComponentType<{
-  directionId: string;
-  directionCode: string;
-  directionNom: string;
-}>> = {
-  "AICB": DashboardAICB,
-  "DGPECRP": DashboardHR,
-  "DSESP": DashboardAnalytics,
-  "CM": DashboardMissions,
+const DIRECTION_DASHBOARDS: Record<
+  string,
+  React.ComponentType<{
+    directionId: string;
+    directionCode: string;
+    directionNom: string;
+  }>
+> = {
+  AICB: DashboardAICB,
+  DGPECRP: DashboardHR,
+  DSESP: DashboardAnalytics,
+  CM: DashboardMissions,
 };
 
 function KPICard({
@@ -55,7 +58,7 @@ function KPICard({
   value,
   subtitle,
   icon: Icon,
-  color = "primary",
+  color = 'primary',
   progress,
   link,
 }: {
@@ -63,16 +66,16 @@ function KPICard({
   value: string | number;
   subtitle?: string;
   icon: React.ElementType;
-  color?: "primary" | "success" | "warning" | "destructive" | "muted";
+  color?: 'primary' | 'success' | 'warning' | 'destructive' | 'muted';
   progress?: number;
   link?: string;
 }) {
   const colorClasses = {
-    primary: "text-primary bg-primary/10",
-    success: "text-green-600 bg-green-100",
-    warning: "text-amber-600 bg-amber-100",
-    destructive: "text-red-600 bg-red-100",
-    muted: "text-muted-foreground bg-muted",
+    primary: 'text-primary bg-primary/10',
+    success: 'text-green-600 bg-green-100',
+    warning: 'text-amber-600 bg-amber-100',
+    destructive: 'text-red-600 bg-red-100',
+    muted: 'text-muted-foreground bg-muted',
   };
 
   const content = (
@@ -98,13 +101,23 @@ function KPICard({
   );
 
   if (link) {
-    return <Link to={link} className="block">{content}</Link>;
+    return (
+      <Link to={link} className="block">
+        {content}
+      </Link>
+    );
   }
 
   return content;
 }
 
-function RoadmapOverview({ stats, directionLabel }: { stats: RoadmapStats | undefined; directionLabel: string }) {
+function RoadmapOverview({
+  stats,
+  directionLabel,
+}: {
+  stats: RoadmapStats | undefined;
+  directionLabel: string;
+}) {
   if (!stats) return null;
 
   return (
@@ -207,7 +220,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 transition-colors">
                 <Pause className="h-5 w-5 text-red-600" />
                 <div className="flex-1">
-                  <p className="font-medium text-red-800">{alerts.dossiers_bloques} tâche(s) bloquée(s)</p>
+                  <p className="font-medium text-red-800">
+                    {alerts.dossiers_bloques} tâche(s) bloquée(s)
+                  </p>
                   <p className="text-xs text-red-600">Nécessitent une intervention</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-red-400" />
@@ -220,7 +235,9 @@ function AlertsOverview({ alerts }: { alerts: AlertStats | undefined }) {
               <div className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors">
                 <Clock className="h-5 w-5 text-amber-600" />
                 <div className="flex-1">
-                  <p className="font-medium text-amber-800">{alerts.taches_en_retard} tâche(s) en retard</p>
+                  <p className="font-medium text-amber-800">
+                    {alerts.taches_en_retard} tâche(s) en retard
+                  </p>
                   <p className="text-xs text-amber-600">Date échéance dépassée</p>
                 </div>
                 <ArrowUpRight className="h-4 w-4 text-amber-400" />
@@ -260,7 +277,9 @@ function MissionsTable({ missions }: { missions: MissionStats[] }) {
               <div key={mission.mission_id} className="p-4 rounded-lg border">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1 min-w-0">
-                    <Badge variant="outline" className="mb-1">{mission.mission_code}</Badge>
+                    <Badge variant="outline" className="mb-1">
+                      {mission.mission_code}
+                    </Badge>
                     <p className="text-sm font-medium truncate">{mission.mission_libelle}</p>
                   </div>
                   <div className="text-right ml-4">
@@ -284,14 +303,14 @@ function RecentActivities({ directionId }: { directionId: string }) {
   const { exerciceId } = useExercice();
 
   const { data: recentTasks, isLoading } = useQuery({
-    queryKey: ["recent-activities", exerciceId, directionId],
+    queryKey: ['recent-activities', exerciceId, directionId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("v_task_executions")
-        .select("id, activite_code, activite_libelle, status, taux_avancement, updated_at")
-        .eq("exercice_id", exerciceId!)
-        .eq("direction_id", directionId)
-        .order("updated_at", { ascending: false })
+        .from('v_task_executions')
+        .select('id, activite_code, activite_libelle, status, taux_avancement, updated_at')
+        .eq('exercice_id', exerciceId ?? '')
+        .eq('direction_id', directionId)
+        .order('updated_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
@@ -301,11 +320,11 @@ function RecentActivities({ directionId }: { directionId: string }) {
   });
 
   const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-    non_demarre: { label: "Non démarré", color: "text-gray-600", bgColor: "bg-gray-100" },
-    en_cours: { label: "En cours", color: "text-blue-600", bgColor: "bg-blue-100" },
-    realise: { label: "Réalisé", color: "text-green-600", bgColor: "bg-green-100" },
-    bloque: { label: "Bloqué", color: "text-red-600", bgColor: "bg-red-100" },
-    annule: { label: "Annulé", color: "text-orange-600", bgColor: "bg-orange-100" },
+    non_demarre: { label: 'Non démarré', color: 'text-gray-600', bgColor: 'bg-gray-100' },
+    en_cours: { label: 'En cours', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+    realise: { label: 'Réalisé', color: 'text-green-600', bgColor: 'bg-green-100' },
+    bloque: { label: 'Bloqué', color: 'text-red-600', bgColor: 'bg-red-100' },
+    annule: { label: 'Annulé', color: 'text-orange-600', bgColor: 'bg-orange-100' },
   };
 
   return (
@@ -320,9 +339,11 @@ function RecentActivities({ directionId }: { directionId: string }) {
       <CardContent>
         {isLoading ? (
           <div className="space-y-3">
-            {Array(5).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-16" />
-            ))}
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton key={i} className="h-16" />
+              ))}
           </div>
         ) : recentTasks && recentTasks.length > 0 ? (
           <ScrollArea className="h-[350px]">
@@ -342,11 +363,13 @@ function RecentActivities({ directionId }: { directionId: string }) {
                     </div>
                     <div className="flex items-center gap-3">
                       <Progress value={task.taux_avancement || 0} className="h-1.5 flex-1" />
-                      <span className="text-xs text-muted-foreground">{task.taux_avancement || 0}%</span>
+                      <span className="text-xs text-muted-foreground">
+                        {task.taux_avancement || 0}%
+                      </span>
                     </div>
                     {task.updated_at && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Modifié le {new Date(task.updated_at).toLocaleDateString("fr-FR")}
+                        Modifié le {new Date(task.updated_at).toLocaleDateString('fr-FR')}
                       </p>
                     )}
                   </div>
@@ -355,9 +378,7 @@ function RecentActivities({ directionId }: { directionId: string }) {
             </div>
           </ScrollArea>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune activité récente
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Aucune activité récente</div>
         )}
       </CardContent>
     </Card>
@@ -365,28 +386,32 @@ function RecentActivities({ directionId }: { directionId: string }) {
 }
 
 export default function DashboardDirectionPage() {
-  const { exercice, exerciceId } = useExercice();
+  const { exercice, exerciceId: _exerciceId } = useExercice();
   const { hasAnyRole } = usePermissions();
   const { data: userProfile, isLoading: loadingProfile } = useUserDirection();
 
   // Récupérer la direction de l'utilisateur
   const directionId = userProfile?.direction_id || null;
-  const directionInfo = userProfile?.directions as { id: string; code: string; label: string } | null;
+  const directionInfo = userProfile?.directions as {
+    id: string;
+    code: string;
+    label: string;
+  } | null;
 
-  const {
-    roadmap,
-    missions,
-    alerts,
-    isLoading,
-    refetch
-  } = useDashboardDirectionStats(directionId);
+  const { roadmap, missions, alerts, isLoading, refetch } = useDashboardDirectionStats(directionId);
+  const { generateReport, isGenerating } = useGenerateReport();
 
   // Si DG, rediriger vers le dashboard global
-  const isDG = hasAnyRole(["DG"]);
+  const isDG = hasAnyRole(['DG']);
 
-  const handleExport = async (format: "pdf" | "excel") => {
+  const handleExport = async (format: 'pdf' | 'excel') => {
+    const reportFormat = format === 'pdf' ? 'html' : 'csv';
     toast.info(`Export ${format.toUpperCase()} en cours...`);
-    // TODO: Implémenter l'export via Edge Function
+    await generateReport({
+      report_type: 'execution_budgetaire',
+      format: reportFormat,
+      filters: directionId ? { direction_id: directionId } : undefined,
+    });
   };
 
   if (loadingProfile) {
@@ -394,9 +419,11 @@ export default function DashboardDirectionPage() {
       <div className="container mx-auto p-6 space-y-6">
         <Skeleton className="h-8 w-64" />
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-28" />
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Skeleton key={i} className="h-28" />
+            ))}
         </div>
       </div>
     );
@@ -407,7 +434,7 @@ export default function DashboardDirectionPage() {
   }
 
   // Vérifier si la direction a un dashboard spécialisé
-  const directionCode = directionInfo?.code || "";
+  const directionCode = directionInfo?.code || '';
   const SpecializedDashboard = DIRECTION_DASHBOARDS[directionCode];
 
   // Si dashboard spécialisé disponible, l'utiliser
@@ -423,7 +450,7 @@ export default function DashboardDirectionPage() {
 
   // Pour les directions sans dashboard spécialisé mais avec directionId, utiliser DashboardGeneric
   // sauf pour certaines directions qui ont déjà des dashboards existants (DG, DAAF, CB, DSI, SDMG)
-  const existingDashboards = ["DG", "DAAF", "CB", "DSI", "SDMG", "DMG"];
+  const existingDashboards = ['DG', 'DAAF', 'CB', 'DSI', 'SDMG', 'DMG'];
   if (directionId && directionInfo && !existingDashboards.includes(directionCode)) {
     return (
       <DashboardGeneric
@@ -442,13 +469,15 @@ export default function DashboardDirectionPage() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-24" />
-              </CardContent>
-            </Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-24" />
+                </CardContent>
+              </Card>
+            ))}
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           <Skeleton className="h-[400px]" />
@@ -458,7 +487,9 @@ export default function DashboardDirectionPage() {
     );
   }
 
-  const directionLabel = directionInfo ? `${directionInfo.code} - ${directionInfo.label}` : "Ma Direction";
+  const directionLabel = directionInfo
+    ? `${directionInfo.code} - ${directionInfo.label}`
+    : 'Ma Direction';
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -475,13 +506,23 @@ export default function DashboardDirectionPage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             Actualiser
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport("excel")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport('excel')}
+            disabled={isGenerating}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Excel
+            {isGenerating ? 'Export...' : 'Excel'}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport("pdf")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport('pdf')}
+            disabled={isGenerating}
+          >
             <Download className="h-4 w-4 mr-2" />
-            PDF
+            {isGenerating ? 'Export...' : 'PDF'}
           </Button>
         </div>
       </div>
@@ -529,7 +570,7 @@ export default function DashboardDirectionPage() {
           value={roadmap?.activites_bloquees || 0}
           subtitle="Nécessitent une action"
           icon={Pause}
-          color={roadmap?.activites_bloquees ? "destructive" : "muted"}
+          color={roadmap?.activites_bloquees ? 'destructive' : 'muted'}
           link="/execution/taches?filter=bloque"
         />
         <KPICard
@@ -537,7 +578,7 @@ export default function DashboardDirectionPage() {
           value={alerts?.taches_en_retard || 0}
           subtitle="Date échéance dépassée"
           icon={Clock}
-          color={alerts?.taches_en_retard ? "warning" : "muted"}
+          color={alerts?.taches_en_retard ? 'warning' : 'muted'}
           link="/execution/taches?filter=retard"
         />
       </div>
@@ -555,9 +596,7 @@ export default function DashboardDirectionPage() {
       </div>
 
       {/* Activités récentes */}
-      {directionId && (
-        <RecentActivities directionId={directionId} />
-      )}
+      {directionId && <RecentActivities directionId={directionId} />}
     </div>
   );
 }

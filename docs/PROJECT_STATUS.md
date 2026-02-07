@@ -1,213 +1,269 @@
-# État du Projet SYGFP
+# Etat du Projet SYGFP
 
-> **Suivi de l'avancement et roadmap**  
-> Version: 1.0 | Dernière mise à jour: 2026-01-15
+> **Suivi de l'avancement et roadmap**
+> Version: 2.0 | Derniere mise a jour: 2026-02-06
 
 ---
 
 ## 1. Vue d'Ensemble
 
-| Métrique | Valeur |
-|----------|--------|
-| **Version** | 0.9 Beta |
-| **Tables DB** | ~150 |
-| **Composants** | ~200+ |
-| **Hooks** | ~60 |
-| **Pages** | ~40 |
-| **Edge Functions** | 3 |
+| Metrique            | Valeur                     |
+| ------------------- | -------------------------- |
+| **Version**         | 1.0 RC                     |
+| **Tables DB**       | ~150                       |
+| **Migrations**      | 173                        |
+| **Composants**      | 402 fichiers (46 modules)  |
+| **Hooks**           | 142                        |
+| **Pages**           | 104 fichiers (12 sections) |
+| **Lib/Utils**       | 40                         |
+| **Services**        | 12                         |
+| **Contextes**       | 2                          |
+| **Edge Functions**  | 4                          |
+| **Tests unitaires** | 22 fichiers                |
+| **Tests E2E**       | 22 fichiers                |
+| **Docs modules**    | 13 fiches                  |
 
 ---
 
-## 2. État par Module
+## 2. Migration SQL Server vers Supabase
 
-### 2.1 Chaîne de la Dépense
+> **Statut : TERMINEE (fevrier 2026)**
 
-| # | Module | Frontend | Backend | RLS | Tests | Doc | Status |
-|---|--------|----------|---------|-----|-------|-----|--------|
-| 1 | **Notes SEF** | ✅ 100% | ✅ 100% | ✅ | ⚠️ | ✅ | 🟢 Production |
-| 2 | **Notes AEF** | ✅ 95% | ✅ 95% | ✅ | ⚠️ | ⚠️ | 🟡 À finaliser |
-| 3 | **Imputation** | ✅ 90% | ✅ 90% | ✅ | ⚠️ | ⚠️ | 🟡 À finaliser |
-| 4 | **Expression Besoin** | ✅ 85% | ✅ 85% | ✅ | ⚠️ | ❌ | 🟡 En cours |
-| 5 | **Marchés** | ✅ 80% | ✅ 80% | ✅ | ❌ | ❌ | 🟡 En cours |
-| 6 | **Engagements** | ✅ 90% | ✅ 90% | ✅ | ⚠️ | ⚠️ | 🟡 À finaliser |
-| 7 | **Liquidations** | ✅ 90% | ✅ 90% | ✅ | ⚠️ | ❌ | 🟡 À finaliser |
-| 8 | **Ordonnancements** | ✅ 85% | ✅ 85% | ✅ | ❌ | ❌ | 🟡 En cours |
-| 9 | **Règlements** | ✅ 80% | ✅ 80% | ✅ | ❌ | ❌ | 🟡 En cours |
+La migration complete des donnees depuis SQL Server (eARTI_DB2, eARTIDB_2025, eARTIDB_2026) vers Supabase a ete realisee avec succes.
 
-### 2.2 Modules Support
+| Donnee          | SQL Server              | Supabase                 | Statut  |
+| --------------- | ----------------------- | ------------------------ | ------- |
+| Notes SEF       | 4 823                   | 4 836                    | Complet |
+| Engagements     | ~1 700                  | 2 805                    | Complet |
+| Liquidations    | 2 954                   | 3 633                    | Complet |
+| Ordonnancements | 2 726                   | 3 501                    | Complet |
+| Fournisseurs    | 426                     | 431                      | Complet |
+| Pieces jointes  | 27 117 fichiers (26 Go) | bucket sygfp-attachments | Complet |
 
-| Module | Frontend | Backend | RLS | Status |
-|--------|----------|---------|-----|--------|
-| **Budget** | ✅ 95% | ✅ 95% | ✅ | 🟢 Production |
-| **Virements** | ✅ 90% | ✅ 90% | ✅ | 🟢 Production |
-| **Prestataires** | ✅ 90% | ✅ 90% | ✅ | 🟢 Production |
-| **Contrats** | ✅ 85% | ✅ 85% | ✅ | 🟡 À finaliser |
-| **Trésorerie** | ✅ 80% | ✅ 80% | ✅ | 🟡 En cours |
-| **Approvisionnement** | ✅ 70% | ✅ 70% | ✅ | 🟠 Partiel |
-| **Recettes** | ✅ 60% | ✅ 60% | ⚠️ | 🟠 Partiel |
-
-### 2.3 Administration
-
-| Module | Frontend | Backend | Status |
-|--------|----------|---------|--------|
-| **Gestion Utilisateurs** | ✅ 95% | ✅ 95% | 🟢 Production |
-| **Rôles & Permissions** | ✅ 95% | ✅ 95% | 🟢 Production |
-| **Délégations** | ✅ 85% | ✅ 85% | 🟡 À finaliser |
-| **Exercices** | ✅ 95% | ✅ 95% | 🟢 Production |
-| **Paramètres Programmatiques** | ✅ 90% | ✅ 90% | 🟢 Production |
-| **Journal Audit** | ✅ 90% | ✅ 90% | 🟢 Production |
-| **Architecture SYGFP** | ✅ 80% | ✅ 80% | 🟡 En cours |
-| **Codification** | ✅ 85% | ✅ 85% | 🟡 À finaliser |
-
-### 2.4 Reporting
-
-| Module | Frontend | Backend | Status |
-|--------|----------|---------|--------|
-| **États d'exécution** | ✅ 85% | ✅ 85% | 🟡 À finaliser |
-| **Alertes Budgétaires** | ✅ 80% | ✅ 80% | 🟡 En cours |
-| **Dashboard** | ✅ 90% | ✅ 90% | 🟢 Production |
-| **Export Excel/PDF** | ✅ 75% | ✅ 75% | 🟠 Partiel |
+Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMPLETE.md) | [AUDIT_MIGRATION_COMPLET.md](AUDIT_MIGRATION_COMPLET.md)
 
 ---
 
-## 3. Légende
+## 3. Etat par Module
 
-| Icône | Signification |
-|-------|---------------|
-| 🟢 | Production - Fonctionnel et testé |
-| 🟡 | En cours - Fonctionnel, finitions en cours |
-| 🟠 | Partiel - Fonctionnalités de base seulement |
-| 🔴 | Non commencé |
-| ✅ | Complet |
-| ⚠️ | Partiel |
-| ❌ | Non fait |
+### 3.1 Chaine de la Depense
+
+| #   | Module                | Frontend | Backend | RLS | Tests   | Doc | Status      |
+| --- | --------------------- | -------- | ------- | --- | ------- | --- | ----------- |
+| 1   | **Notes SEF**         | 100%     | 100%    | Oui | Partiel | Oui | Production  |
+| 2   | **Notes AEF**         | 95%      | 95%     | Oui | Partiel | Oui | A finaliser |
+| 3   | **Imputation**        | 90%      | 90%     | Oui | Partiel | Oui | A finaliser |
+| 4   | **Expression Besoin** | 85%      | 85%     | Oui | Partiel | Oui | En cours    |
+| 5   | **Marches**           | 80%      | 80%     | Oui | Non     | Oui | En cours    |
+| 6   | **Engagements**       | 90%      | 90%     | Oui | Partiel | Oui | A finaliser |
+| 7   | **Liquidations**      | 90%      | 90%     | Oui | Partiel | Oui | A finaliser |
+| 8   | **Ordonnancements**   | 85%      | 85%     | Oui | Non     | Oui | En cours    |
+| 9   | **Reglements**        | 85%      | 85%     | Oui | Non     | Oui | En cours    |
+
+### 3.2 Modules Support
+
+| Module                | Frontend | Backend | RLS     | Status      |
+| --------------------- | -------- | ------- | ------- | ----------- |
+| **Budget**            | 95%      | 95%     | Oui     | Production  |
+| **Virements**         | 90%      | 90%     | Oui     | Production  |
+| **Prestataires**      | 90%      | 90%     | Oui     | Production  |
+| **Contrats**          | 85%      | 85%     | Oui     | A finaliser |
+| **Tresorerie**        | 80%      | 80%     | Oui     | En cours    |
+| **Approvisionnement** | 70%      | 70%     | Oui     | Partiel     |
+| **Recettes**          | 60%      | 60%     | Partiel | Partiel     |
+
+### 3.3 Administration
+
+| Module                         | Frontend | Backend | Status      |
+| ------------------------------ | -------- | ------- | ----------- |
+| **Gestion Utilisateurs**       | 95%      | 95%     | Production  |
+| **Roles & Permissions**        | 95%      | 95%     | Production  |
+| **Delegations**                | 85%      | 85%     | A finaliser |
+| **Exercices**                  | 95%      | 95%     | Production  |
+| **Parametres Programmatiques** | 90%      | 90%     | Production  |
+| **Journal Audit**              | 90%      | 90%     | Production  |
+| **Notifications**              | 90%      | 90%     | Production  |
+| **Workflows**                  | 85%      | 85%     | A finaliser |
+| **Interims**                   | 85%      | 85%     | A finaliser |
+| **Architecture SYGFP**         | 80%      | 80%     | En cours    |
+| **Codification**               | 85%      | 85%     | A finaliser |
+
+### 3.4 Reporting
+
+| Module                  | Frontend | Backend | Status      |
+| ----------------------- | -------- | ------- | ----------- |
+| **Etats d'execution**   | 85%      | 85%     | A finaliser |
+| **Alertes Budgetaires** | 80%      | 80%     | En cours    |
+| **Dashboard**           | 90%      | 90%     | Production  |
+| **Dashboard DMG**       | 85%      | 85%     | A finaliser |
+| **Export Excel/PDF**    | 75%      | 75%     | Partiel     |
 
 ---
 
-## 4. Fonctionnalités Clés
+## 4. Legende
 
-### 4.1 Implémentées ✅
+| Valeur       | Signification                      |
+| ------------ | ---------------------------------- |
+| Production   | Fonctionnel et teste               |
+| En cours     | Fonctionnel, finitions en cours    |
+| A finaliser  | Quasi complet, ajustements mineurs |
+| Partiel      | Fonctionnalites de base seulement  |
+| Non commence | Pas encore developpe               |
+
+---
+
+## 5. Fonctionnalites Cles
+
+### 5.1 Implementees
 
 - [x] Authentification email/password
-- [x] Système RBAC complet (rôles, permissions)
-- [x] Workflow 9 étapes chaîne de dépense
+- [x] Systeme RBAC complet (roles, permissions)
+- [x] Workflow 9 etapes chaine de depense
 - [x] Gestion multi-exercice
-- [x] Génération automatique références pivot
+- [x] Generation automatique references pivot
 - [x] Soft delete sur toutes les tables
 - [x] Audit trail automatique
 - [x] Import budget Excel
-- [x] Virements de crédits
-- [x] Calcul disponibilité budgétaire
-- [x] Alertes seuils budgétaires
+- [x] Virements de credits
+- [x] Calcul disponibilite budgetaire
+- [x] Alertes seuils budgetaires
 - [x] Gestion prestataires avec documents
 - [x] Qualification fournisseurs
 - [x] RLS sur tables critiques
-- [x] Dashboard par rôle
+- [x] Dashboard par role
+- [x] Migration SQL Server vers Supabase terminee
+- [x] Pieces jointes migrees vers Supabase Storage
 
-### 4.2 En cours 🔄
+### 5.2 En cours
 
-- [ ] Notifications email (edge function prête, intégration en cours)
+- [ ] Notifications email (edge function prete, integration en cours)
 - [ ] Export PDF mandats/ordonnancements
-- [ ] Validation lots marchés
+- [ ] Validation lots marches
 - [ ] Gestion avenants contrats
-- [ ] Plan de trésorerie prévisionnel
-- [ ] Reports de crédits inter-exercice
+- [ ] Plan de tresorerie previsionnel
+- [ ] Reports de credits inter-exercice
+- [ ] Module Reglements - ameliorations UI
 
-### 4.3 Planifiées 📋
+### 5.3 Planifiees
 
 - [ ] SSO / OAuth (Google, Microsoft)
 - [ ] API REST publique
 - [ ] Application mobile (PWA)
-- [ ] Signature électronique
+- [ ] Signature electronique
 - [ ] Archivage automatique
-- [ ] Tableaux de bord analytiques avancés
+- [ ] Tableaux de bord analytiques avances
 
 ---
 
-## 5. Bugs Connus
+## 6. Edge Functions Supabase
 
-| ID | Description | Sévérité | Module | Status |
-|----|-------------|----------|--------|--------|
-| #001 | ~~Direction sans profiles~~ | Minor | Notes SEF | ✅ Corrigé |
-| #002 | Timeout import gros fichiers Excel | Medium | Import | 🔄 En cours |
-| #003 | Pagination lente sur +1000 lignes | Low | Listes | 📋 Planifié |
+| Fonction                  | Description                                      | Services externes   | Statut     |
+| ------------------------- | ------------------------------------------------ | ------------------- | ---------- |
+| `send-notification-email` | Envoi d'emails de notification workflow          | Resend API          | Production |
+| `create-user`             | Creation d'utilisateur avec role (admin)         | Supabase Auth Admin | Production |
+| `generate-export`         | Generation d'exports CSV/Excel/PDF avec QR codes | QR Server API       | Production |
+| `r2-storage`              | Stockage fichiers via URLs presignees            | Cloudflare R2       | Production |
+
+> Documentation API detaillee : [API_EDGE_FUNCTIONS.md](API_EDGE_FUNCTIONS.md)
 
 ---
 
-## 6. Dette Technique
+## 7. Bugs Connus
 
-### 6.1 Priorité Haute
+| ID   | Description                        | Severite | Module    | Status   |
+| ---- | ---------------------------------- | -------- | --------- | -------- |
+| #001 | ~~Direction sans profiles~~        | Minor    | Notes SEF | Corrige  |
+| #002 | Timeout import gros fichiers Excel | Medium   | Import    | En cours |
+| #003 | Pagination lente sur +1000 lignes  | Low      | Listes    | Planifie |
+
+---
+
+## 8. Dette Technique
+
+### 8.1 Priorite Haute
 
 - [ ] Ajouter tests unitaires hooks principaux
 - [ ] Refactorer composants >500 lignes
 - [ ] Normaliser les messages d'erreur
 
-### 6.2 Priorité Moyenne
+### 8.2 Priorite Moyenne
 
 - [ ] Migrer vers React Query v6 patterns
-- [ ] Optimiser les requêtes N+1
-- [ ] Ajouter skeleton loaders cohérents
+- [ ] Optimiser les requetes N+1
+- [ ] Ajouter skeleton loaders coherents
 
-### 6.3 Priorité Basse
+### 8.3 Priorite Basse
 
 - [ ] Internationalisation (i18n)
 - [ ] Mode hors ligne (PWA)
-- [ ] Thème customisable
+- [ ] Theme customisable
 
 ---
 
-## 7. Historique des Versions
+## 9. Historique des Versions
+
+### v1.0 RC (2026-02-06)
+
+- Migration SQL Server vers Supabase terminee (100%)
+- 27 117 pieces jointes migrees (26 Go)
+- 173 migrations de base de donnees
+- 4 Edge Functions operationnelles
+- Module Reglements ameliore
+- Tests E2E ajoutes (22 fichiers)
+- Documentation technique mise a jour
 
 ### v0.9 Beta (2026-01-15)
 
-- ✅ Chaîne de dépense complète (9 étapes)
-- ✅ Documentation technique complète
-- ✅ Users test configurés
-- ✅ RLS sur toutes les tables critiques
+- Chaine de depense complete (9 etapes)
+- Documentation technique complete
+- Users test configures
+- RLS sur toutes les tables critiques
 
 ### v0.8 Alpha (2026-01-10)
 
-- ✅ Module Notes SEF finalisé
-- ✅ Import budget Excel
-- ✅ Système de virements
-- ✅ Alertes budgétaires
+- Module Notes SEF finalise
+- Import budget Excel
+- Systeme de virements
+- Alertes budgetaires
 
 ### v0.7 Alpha (2026-01-05)
 
-- ✅ Structure DB complète
-- ✅ Authentification
-- ✅ RBAC de base
-- ✅ Premiers modules
+- Structure DB complete
+- Authentification
+- RBAC de base
+- Premiers modules
 
 ---
 
-## 8. Métriques Qualité
+## 10. Metriques Qualite
 
-| Métrique | Valeur | Objectif |
-|----------|--------|----------|
-| Tables avec RLS | 95% | 100% |
-| Couverture tests | 15% | 60% |
-| Documentation modules | 40% | 100% |
-| TypeScript strict | ✅ | ✅ |
-| Pas de `any` explicite | 90% | 100% |
+| Metrique               | Valeur       | Objectif |
+| ---------------------- | ------------ | -------- |
+| Tables avec RLS        | 95%          | 100%     |
+| Couverture tests       | 20%          | 60%      |
+| Documentation modules  | 100% (13/13) | 100%     |
+| TypeScript strict      | Oui          | Oui      |
+| Pas de `any` explicite | 90%          | 100%     |
+| Tests E2E              | 22 fichiers  | 40+      |
 
 ---
 
-## 9. Prochaines Étapes
+## 11. Prochaines Etapes
 
-### Sprint 1 (Semaine prochaine)
+### Sprint actuel (fevrier 2026)
 
-1. [ ] Finaliser documentation modules restants
-2. [ ] Corriger bug timeout import
-3. [ ] Ajouter tests Notes SEF
+1. [ ] Finaliser module Reglements (UI + Edge Functions)
+2. [ ] Ecrire tests E2E pour workflow Reglements
+3. [ ] Completer Edge Functions manquantes
+4. [ ] Mise a jour documentation technique
 
-### Sprint 2
+### Sprint suivant
 
-1. [ ] Intégrer notifications email
+1. [ ] Integrer notifications email
 2. [ ] Export PDF ordonnancements
-3. [ ] Améliorer UX mobile
+3. [ ] Ameliorer UX mobile
 
-### Sprint 3
+### Sprint futur
 
 1. [ ] Module Recettes complet
 2. [ ] Reporting analytique
@@ -215,15 +271,15 @@
 
 ---
 
-## 10. Contacts
+## 12. Contacts
 
-| Rôle | Responsabilité |
-|------|----------------|
-| **Product Owner** | Définition besoins, priorisation |
-| **Tech Lead** | Architecture, code review |
-| **DBA** | Schéma DB, performances |
-| **QA** | Tests, validation |
+| Role              | Responsabilite                   |
+| ----------------- | -------------------------------- |
+| **Product Owner** | Definition besoins, priorisation |
+| **Tech Lead**     | Architecture, code review        |
+| **DBA**           | Schema DB, performances          |
+| **QA**            | Tests, validation                |
 
 ---
 
-*Dernière mise à jour: 2026-01-15*
+_Derniere mise a jour: 2026-02-06_

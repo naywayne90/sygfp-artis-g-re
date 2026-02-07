@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 export interface BudgetAlert {
   id: string;
@@ -15,14 +15,13 @@ export interface BudgetAlert {
   montant_engage: number | null;
   montant_disponible: number | null;
   message: string;
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   created_at: string;
   acknowledged_at: string | null;
   acknowledged_by: string | null;
   resolved_at: string | null;
   resolved_by: string | null;
   resolution_comment: string | null;
-  // Relations
   budget_line?: {
     id: string;
     code: string;
@@ -43,11 +42,36 @@ export interface AlertRule {
   created_at: string;
 }
 
+interface EdgeFunctionResponse {
+  success?: boolean;
+  error?: string;
+  count?: number;
+  alerts?: BudgetAlert[];
+  new_alerts?: number;
+  critical_count?: number;
+}
+
 const NIVEAU_COLORS = {
-  info: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
-  warning: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-  critical: { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
-  blocking: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' },
+  info: {
+    bg: 'bg-blue-100',
+    text: 'text-blue-800',
+    border: 'border-blue-200',
+  },
+  warning: {
+    bg: 'bg-yellow-100',
+    text: 'text-yellow-800',
+    border: 'border-yellow-200',
+  },
+  critical: {
+    bg: 'bg-orange-100',
+    text: 'text-orange-800',
+    border: 'border-orange-200',
+  },
+  blocking: {
+    bg: 'bg-red-100',
+    text: 'text-red-800',
+    border: 'border-red-200',
+  },
 };
 
 const NIVEAU_LABELS = {
@@ -57,148 +81,135 @@ const NIVEAU_LABELS = {
   blocking: 'Bloquant',
 };
 
+async function invokeBudgetAlerts(body: Record<string, unknown>): Promise<EdgeFunctionResponse> {
+  const { data, error } = await supabase.functions.invoke('budget-alerts', {
+    body,
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error as string);
+  return data as EdgeFunctionResponse;
+}
+
 export function useBudgetAlerts() {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
 
-  // Fetch all alerts for the current exercise
+  // Fetch all alerts for the current exercise via Edge Function
   const alerts = useQuery({
-    queryKey: ["budget-alerts", exercice],
+    queryKey: ['budget-alerts', exercice],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("budg_alerts")
-        .select(`
-          *,
-          budget_lines:ligne_budgetaire_id (id, code, label)
-        `)
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return (data || []) as BudgetAlert[];
+      const response = await invokeBudgetAlerts({
+        action: 'list',
+        exercice,
+      });
+      return (response.alerts || []) as BudgetAlert[];
     },
     enabled: !!exercice,
   });
 
-  // Count unacknowledged alerts
-  const unacknowledgedCount = useQuery({
-    queryKey: ["budget-alerts-unack-count", exercice],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("budg_alerts")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exercice)
-        .is("acknowledged_at", null)
-        .is("resolved_at", null);
+  // Derive unacknowledged count from the alerts list
+  const unacknowledgedCount =
+    alerts.data?.filter((a) => !a.acknowledged_at && !a.resolved_at).length ?? 0;
 
-      if (error) throw error;
-      return count || 0;
-    },
-    enabled: !!exercice,
-  });
-
-  // Fetch alert rules
+  // Fetch alert rules (direct query - the Edge Function doesn't manage rules)
   const rules = useQuery({
-    queryKey: ["budget-alert-rules"],
+    queryKey: ['budget-alert-rules'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("budg_alert_rules")
-        .select("*")
-        .order("seuil_pct");
+        .from('budg_alert_rules')
+        .select('*')
+        .order('seuil_pct');
 
       if (error) throw error;
       return (data || []) as AlertRule[];
     },
   });
 
-  // Check and trigger alerts for current exercise
+  // Check and trigger alerts via Edge Function
   const checkAlerts = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("check_budget_alerts", {
-        p_exercice: exercice,
+      return invokeBudgetAlerts({
+        action: 'check',
+        exercice,
       });
-      if (error) throw error;
-      return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts-unack-count"] });
-      if (data && data.length > 0) {
-        toast.warning(`${data.length} nouvelle(s) alerte(s) budgétaire(s) détectée(s)`);
+      queryClient.invalidateQueries({ queryKey: ['budget-alerts'] });
+      const count = data.new_alerts ?? 0;
+      if (count > 0) {
+        const critical = data.critical_count ?? 0;
+        if (critical > 0) {
+          toast.warning(`${count} nouvelle(s) alerte(s) dont ${critical} critique(s)`);
+        } else {
+          toast.warning(`${count} nouvelle(s) alerte(s) budgetaire(s) detectee(s)`);
+        }
       } else {
-        toast.success("Aucune nouvelle alerte détectée");
+        toast.success('Aucune nouvelle alerte detectee');
       }
     },
-    onError: (error) => {
-      console.error("Error checking alerts:", error);
-      toast.error("Erreur lors de la vérification des alertes");
+    onError: (error: Error) => {
+      console.error('Error checking alerts:', error);
+      toast.error('Erreur lors de la verification des alertes');
     },
   });
 
-  // Acknowledge an alert
+  // Acknowledge an alert via Edge Function
   const acknowledgeAlert = useMutation({
     mutationFn: async (alertId: string) => {
-      const { data, error } = await supabase.rpc("acknowledge_budget_alert", {
-        p_alert_id: alertId,
+      return invokeBudgetAlerts({
+        action: 'acknowledge',
+        alert_id: alertId,
       });
-      if (error) throw error;
-      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts-unack-count"] });
-      toast.success("Alerte accusée de réception");
+      queryClient.invalidateQueries({ queryKey: ['budget-alerts'] });
+      toast.success('Alerte accusee de reception');
     },
-    onError: (error) => {
-      console.error("Error acknowledging alert:", error);
-      toast.error("Erreur lors de l'accusé de réception");
+    onError: (error: Error) => {
+      console.error('Error acknowledging alert:', error);
+      toast.error("Erreur lors de l'accuse de reception");
     },
   });
 
-  // Resolve an alert
+  // Resolve an alert via Edge Function
   const resolveAlert = useMutation({
     mutationFn: async ({ alertId, comment }: { alertId: string; comment?: string }) => {
-      const { data, error } = await supabase.rpc("resolve_budget_alert", {
-        p_alert_id: alertId,
-        p_comment: comment || null,
+      return invokeBudgetAlerts({
+        action: 'resolve',
+        alert_id: alertId,
+        comment,
       });
-      if (error) throw error;
-      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-alerts-unack-count"] });
-      toast.success("Alerte résolue");
+      queryClient.invalidateQueries({ queryKey: ['budget-alerts'] });
+      toast.success('Alerte resolue');
     },
-    onError: (error) => {
-      console.error("Error resolving alert:", error);
-      toast.error("Erreur lors de la résolution");
+    onError: (error: Error) => {
+      console.error('Error resolving alert:', error);
+      toast.error('Erreur lors de la resolution');
     },
   });
 
-  // Update a rule
+  // Update a rule (direct query - Edge Function doesn't manage rules)
   const updateRule = useMutation({
     mutationFn: async ({ ruleId, updates }: { ruleId: string; updates: Partial<AlertRule> }) => {
-      const { error } = await supabase
-        .from("budg_alert_rules")
-        .update(updates)
-        .eq("id", ruleId);
+      const { error } = await supabase.from('budg_alert_rules').update(updates).eq('id', ruleId);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-alert-rules"] });
-      toast.success("Règle mise à jour");
+      queryClient.invalidateQueries({ queryKey: ['budget-alert-rules'] });
+      toast.success('Regle mise a jour');
     },
-    onError: (error) => {
-      console.error("Error updating rule:", error);
-      toast.error("Erreur lors de la mise à jour");
+    onError: (error: Error) => {
+      console.error('Error updating rule:', error);
+      toast.error('Erreur lors de la mise a jour');
     },
   });
 
   return {
     alerts: alerts.data || [],
     isLoadingAlerts: alerts.isLoading,
-    unacknowledgedCount: unacknowledgedCount.data || 0,
+    unacknowledgedCount,
     rules: rules.data || [],
     isLoadingRules: rules.isLoading,
     checkAlerts,

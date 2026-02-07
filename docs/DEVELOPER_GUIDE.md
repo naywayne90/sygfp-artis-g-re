@@ -1,7 +1,7 @@
 # Guide Développeur SYGFP
 
 > **Pour reprendre et étendre le projet**  
-> Version: 1.0 | Dernière mise à jour: 2026-01-15
+> Version: 2.0 | Derniere mise a jour: 2026-02-06
 
 ---
 
@@ -55,7 +55,24 @@ npm run dev
 bun dev
 ```
 
-L'application est disponible sur `http://localhost:5173`
+L'application est disponible sur `http://localhost:8080`
+
+### 2.4 Commandes disponibles
+
+```bash
+npm run dev           # Développement (port 8080)
+npm run build         # Build production
+npm run typecheck     # Vérification TypeScript
+npm run lint          # ESLint
+npm run lint:fix      # Correction automatique ESLint
+npm run test          # Tests Vitest
+npm run test:ui       # Vitest avec interface graphique
+npm run test:coverage # Tests avec couverture
+npm run test:e2e      # Tests Playwright
+npm run test:e2e:ui   # Playwright avec interface graphique
+npm run format        # Formater avec Prettier
+npm run verify        # typecheck + lint + test
+```
 
 ---
 
@@ -91,18 +108,18 @@ src/
 
 ```tsx
 // src/pages/MonModule.tsx
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MonModuleList } from "@/components/mon-module/MonModuleList";
-import { MonModuleForm } from "@/components/mon-module/MonModuleForm";
-import { useMonModule } from "@/hooks/useMonModule";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MonModuleList } from '@/components/mon-module/MonModuleList';
+import { MonModuleForm } from '@/components/mon-module/MonModuleForm';
+import { useMonModule } from '@/hooks/useMonModule';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export default function MonModule() {
   const { exercice } = useExercice();
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState('all');
   const [showForm, setShowForm] = useState(false);
-  
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -112,7 +129,7 @@ export default function MonModule() {
           Nouveau
         </Button>
       </div>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="all">Tous</TabsTrigger>
@@ -120,16 +137,13 @@ export default function MonModule() {
           <TabsTrigger value="soumis">Soumis</TabsTrigger>
           <TabsTrigger value="valide">Validés</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value={activeTab}>
-          <MonModuleList statut={activeTab === "all" ? undefined : activeTab} />
+          <MonModuleList statut={activeTab === 'all' ? undefined : activeTab} />
         </TabsContent>
       </Tabs>
-      
-      <MonModuleForm 
-        open={showForm} 
-        onOpenChange={setShowForm} 
-      />
+
+      <MonModuleForm open={showForm} onOpenChange={setShowForm} />
     </div>
   );
 }
@@ -143,10 +157,10 @@ export default function MonModule() {
 
 ```typescript
 // src/hooks/useMonModule.ts
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 export interface MonEntity {
   id: string;
@@ -162,154 +176,158 @@ export interface MonEntity {
 export function useMonModule() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
-  
+
   // ========== LECTURE ==========
   const { data, isLoading, error } = useQuery({
-    queryKey: ["mon-module", exercice],
+    queryKey: ['mon-module', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("ma_table")
-        .select(`
+        .from('ma_table')
+        .select(
+          `
           *,
           profiles!created_by(full_name),
           directions(code, label)
-        `)
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
-      
+        `
+        )
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
       return data as MonEntity[];
     },
     enabled: !!exercice,
   });
-  
+
   // ========== CRÉATION ==========
   const createMutation = useMutation({
     mutationFn: async (values: Partial<MonEntity>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { data, error } = await supabase
-        .from("ma_table")
+        .from('ma_table')
         .insert({
           ...values,
           exercice,
           created_by: user?.id,
-          statut: "brouillon",
+          statut: 'brouillon',
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Créé avec succès");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Créé avec succès');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
-  
+
   // ========== MISE À JOUR ==========
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...values }: Partial<MonEntity> & { id: string }) => {
-      const { error } = await supabase
-        .from("ma_table")
-        .update(values)
-        .eq("id", id);
-      
+      const { error } = await supabase.from('ma_table').update(values).eq('id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Mis à jour");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Mis à jour');
     },
   });
-  
+
   // ========== SOUMISSION ==========
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { error } = await supabase
-        .from("ma_table")
+        .from('ma_table')
         .update({
-          statut: "soumis",
+          statut: 'soumis',
           submitted_at: new Date().toISOString(),
           submitted_by: user?.id,
         })
-        .eq("id", id);
-      
+        .eq('id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Soumis pour validation");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Soumis pour validation');
     },
   });
-  
+
   // ========== VALIDATION ==========
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { error } = await supabase
-        .from("ma_table")
+        .from('ma_table')
         .update({
-          statut: "valide",
+          statut: 'valide',
           validated_at: new Date().toISOString(),
           validated_by: user?.id,
         })
-        .eq("id", id);
-      
+        .eq('id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Validé");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Validé');
     },
   });
-  
+
   // ========== REJET ==========
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       const { error } = await supabase
-        .from("ma_table")
+        .from('ma_table')
         .update({
-          statut: "rejete",
+          statut: 'rejete',
           rejected_at: new Date().toISOString(),
           rejected_by: user?.id,
           rejection_reason: reason,
         })
-        .eq("id", id);
-      
+        .eq('id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Rejeté");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Rejeté');
     },
   });
-  
+
   // ========== SUPPRESSION (soft) ==========
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("ma_table")
-        .update({ is_deleted: true })
-        .eq("id", id);
-      
+      const { error } = await supabase.from('ma_table').update({ is_deleted: true }).eq('id', id);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mon-module"] });
-      toast.success("Supprimé");
+      queryClient.invalidateQueries({ queryKey: ['mon-module'] });
+      toast.success('Supprimé');
     },
   });
-  
+
   return {
     data,
     isLoading,
@@ -332,16 +350,16 @@ export function useMonModule() {
 
 ```tsx
 // src/components/mon-module/MonModuleForm.tsx
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -349,14 +367,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useMonModule } from "@/hooks/useMonModule";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useMonModule } from '@/hooks/useMonModule';
 
 const formSchema = z.object({
   objet: z.string().min(5, "L'objet doit contenir au moins 5 caractères"),
-  montant: z.number().min(0, "Le montant doit être positif"),
+  montant: z.number().min(0, 'Le montant doit être positif'),
   description: z.string().optional(),
 });
 
@@ -370,37 +388,38 @@ interface MonModuleFormProps {
 
 export function MonModuleForm({ open, onOpenChange, editItem }: MonModuleFormProps) {
   const { create, update, isCreating, isUpdating } = useMonModule();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: editItem || {
-      objet: "",
+      objet: '',
       montant: 0,
-      description: "",
+      description: '',
     },
   });
-  
+
   const onSubmit = (values: FormValues) => {
     if (editItem) {
-      update({ id: editItem.id, ...values }, {
-        onSuccess: () => onOpenChange(false),
-      });
+      update(
+        { id: editItem.id, ...values },
+        {
+          onSuccess: () => onOpenChange(false),
+        }
+      );
     } else {
       create(values, {
         onSuccess: () => onOpenChange(false),
       });
     }
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>
-            {editItem ? "Modifier" : "Nouveau"}
-          </DialogTitle>
+          <DialogTitle>{editItem ? 'Modifier' : 'Nouveau'}</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -416,7 +435,7 @@ export function MonModuleForm({ open, onOpenChange, editItem }: MonModuleFormPro
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="montant"
@@ -424,8 +443,8 @@ export function MonModuleForm({ open, onOpenChange, editItem }: MonModuleFormPro
                 <FormItem>
                   <FormLabel>Montant</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
@@ -434,13 +453,13 @@ export function MonModuleForm({ open, onOpenChange, editItem }: MonModuleFormPro
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {editItem ? "Modifier" : "Créer"}
+                {editItem ? 'Modifier' : 'Créer'}
               </Button>
             </DialogFooter>
           </form>
@@ -462,12 +481,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useMonModule } from "@/hooks/useMonModule";
-import { formatDistance } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useMonModule } from '@/hooks/useMonModule';
+import { formatDistance } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface MonModuleListProps {
   statut?: string;
@@ -475,19 +494,17 @@ interface MonModuleListProps {
 
 export function MonModuleList({ statut }: MonModuleListProps) {
   const { data, isLoading } = useMonModule();
-  
-  const filteredData = statut 
-    ? data?.filter(item => item.statut === statut)
-    : data;
-  
+
+  const filteredData = statut ? data?.filter((item) => item.statut === statut) : data;
+
   if (isLoading) {
     return <div>Chargement...</div>;
   }
-  
+
   if (!filteredData?.length) {
     return <div className="text-center py-8 text-muted-foreground">Aucun élément</div>;
   }
-  
+
   return (
     <Table>
       <TableHeader>
@@ -507,9 +524,7 @@ export function MonModuleList({ statut }: MonModuleListProps) {
             <TableCell className="max-w-xs truncate">{item.objet}</TableCell>
             <TableCell>{item.montant?.toLocaleString()} FCFA</TableCell>
             <TableCell>
-              <Badge variant={getVariant(item.statut)}>
-                {item.statut}
-              </Badge>
+              <Badge variant={getVariant(item.statut)}>{item.statut}</Badge>
             </TableCell>
             <TableCell>
               {formatDistance(new Date(item.created_at), new Date(), {
@@ -531,10 +546,14 @@ export function MonModuleList({ statut }: MonModuleListProps) {
 
 function getVariant(statut: string) {
   switch (statut) {
-    case "valide": return "default";
-    case "rejete": return "destructive";
-    case "soumis": return "secondary";
-    default: return "outline";
+    case 'valide':
+      return 'default';
+    case 'rejete':
+      return 'destructive';
+    case 'soumis':
+      return 'secondary';
+    default:
+      return 'outline';
   }
 }
 ```
@@ -552,9 +571,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useMonModule } from "@/hooks/useMonModule";
-import { usePermissions } from "@/hooks/usePermissions";
+} from '@/components/ui/alert-dialog';
+import { useMonModule } from '@/hooks/useMonModule';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface Props {
   item: MonEntity;
@@ -565,25 +584,24 @@ interface Props {
 export function MonModuleValidateDialog({ item, open, onOpenChange }: Props) {
   const { validate, isValidating } = useMonModule();
   const { canValidateMonModule } = usePermissions();
-  
+
   if (!canValidateMonModule()) {
     return null;
   }
-  
+
   const handleValidate = () => {
     validate(item.id, {
       onSuccess: () => onOpenChange(false),
     });
   };
-  
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmer la validation</AlertDialogTitle>
           <AlertDialogDescription>
-            Êtes-vous sûr de vouloir valider "{item.objet}" ?
-            Cette action est irréversible.
+            Êtes-vous sûr de vouloir valider "{item.objet}" ? Cette action est irréversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -619,10 +637,10 @@ export default function MaNouvellePage() {
 
 ```tsx
 // src/App.tsx
-import MaNouvellePage from "./pages/MaNouvellePage";
+import MaNouvellePage from './pages/MaNouvellePage';
 
 // Dans les routes
-<Route path="/ma-nouvelle-page" element={<MaNouvellePage />} />
+<Route path="/ma-nouvelle-page" element={<MaNouvellePage />} />;
 ```
 
 ### 5.3 Ajouter au menu
@@ -695,13 +713,14 @@ Chaque modification dans Lovable génère un preview automatique.
 console.log(data);
 
 // Vérifier les erreurs Supabase
-const { data, error } = await supabase.from("table").select("*");
+const { data, error } = await supabase.from('table').select('*');
 if (error) console.error(error);
 ```
 
 ### 9.2 Logs Supabase
 
 Consulter les logs dans le dashboard Supabase :
+
 - Database → Logs
 - Auth → Logs
 - Edge Functions → Logs
@@ -710,7 +729,7 @@ Consulter les logs dans le dashboard Supabase :
 
 ```sql
 -- Tester une policy
-SELECT * FROM notes_sef 
+SELECT * FROM notes_sef
 WHERE has_role(auth.uid(), 'DG');
 ```
 
@@ -730,4 +749,4 @@ Avant chaque modification majeure :
 
 ---
 
-*Documentation générée le 2026-01-15*
+_Documentation generee le 2026-01-15, mise a jour le 2026-02-06_
