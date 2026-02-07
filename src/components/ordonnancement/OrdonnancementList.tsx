@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -6,16 +7,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   MoreHorizontal,
   Eye,
@@ -26,15 +27,15 @@ import {
   Trash2,
   Printer,
   Play,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { OrdonnancementDetails } from "./OrdonnancementDetails";
-import { OrdonnancementValidateDialog } from "./OrdonnancementValidateDialog";
-import { OrdonnancementRejectDialog } from "./OrdonnancementRejectDialog";
-import { OrdonnancementDeferDialog } from "./OrdonnancementDeferDialog";
-import { OrdrePayer } from "./OrdrePayer";
-import { useOrdonnancements, VALIDATION_STEPS } from "@/hooks/useOrdonnancements";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { OrdonnancementDetails } from './OrdonnancementDetails';
+import { OrdonnancementValidateDialog } from './OrdonnancementValidateDialog';
+import { OrdonnancementRejectDialog } from './OrdonnancementRejectDialog';
+import { OrdonnancementDeferDialog } from './OrdonnancementDeferDialog';
+import { OrdrePayer } from './OrdrePayer';
+import { useOrdonnancements, VALIDATION_STEPS } from '@/hooks/useOrdonnancements';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,37 +45,47 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 interface OrdonnancementListProps {
   ordonnancements: any[];
   filter?: string;
+  canValidate?: boolean;
 }
 
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    soumis: { label: "Soumis", className: "bg-secondary/10 text-secondary border-secondary/20" },
-    en_validation: { label: "En validation", className: "bg-warning/10 text-warning border-warning/20" },
-    valide: { label: "Validé", className: "bg-success/10 text-success border-success/20" },
-    rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    differe: { label: "Différé", className: "bg-orange-100 text-orange-700 border-orange-200" },
-    transmis: { label: "Transmis", className: "bg-primary/10 text-primary border-primary/20" },
+    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
+    soumis: { label: 'Soumis', className: 'bg-secondary/10 text-secondary border-secondary/20' },
+    en_validation: {
+      label: 'En validation',
+      className: 'bg-warning/10 text-warning border-warning/20',
+    },
+    valide: { label: 'Validé', className: 'bg-success/10 text-success border-success/20' },
+    rejete: {
+      label: 'Rejeté',
+      className: 'bg-destructive/10 text-destructive border-destructive/20',
+    },
+    differe: { label: 'Différé', className: 'bg-orange-100 text-orange-700 border-orange-200' },
+    transmis: { label: 'Transmis', className: 'bg-primary/10 text-primary border-primary/20' },
   };
   const variant = variants[status] || variants.brouillon;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
-export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementListProps) {
-  const {
-    submitOrdonnancement,
-    validateStep,
-    deleteOrdonnancement,
-    resumeOrdonnancement,
-  } = useOrdonnancements();
+export function OrdonnancementList({
+  ordonnancements,
+  filter,
+  canValidate = true,
+}: OrdonnancementListProps) {
+  const { submitOrdonnancement, validateStep, deleteOrdonnancement, resumeOrdonnancement } =
+    useOrdonnancements();
 
   const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -86,11 +97,12 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
 
   // Filtrer selon le filtre
   const filteredOrdonnancements = ordonnancements.filter((ord) => {
-    if (!filter || filter === "tous") return true;
-    if (filter === "a_valider") return ord.statut === "soumis" || ord.workflow_status === "en_validation";
-    if (filter === "valides") return ord.statut === "valide";
-    if (filter === "rejetes") return ord.statut === "rejete";
-    if (filter === "differes") return ord.statut === "differe";
+    if (!filter || filter === 'tous') return true;
+    if (filter === 'a_valider')
+      return ord.statut === 'soumis' || ord.workflow_status === 'en_validation';
+    if (filter === 'valides') return ord.statut === 'valide';
+    if (filter === 'rejetes') return ord.statut === 'rejete';
+    if (filter === 'differes') return ord.statut === 'differe';
     return true;
   });
 
@@ -126,7 +138,7 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
             <TableHead className="text-right">Montant</TableHead>
             <TableHead>Mode</TableHead>
             <TableHead>Statut</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
+            <TableHead className="w-[50px]" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -139,7 +151,7 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
           ) : (
             filteredOrdonnancements.map((ord) => (
               <TableRow key={ord.id}>
-                <TableCell className="font-medium">{ord.numero || "—"}</TableCell>
+                <TableCell className="font-medium">{ord.numero || '—'}</TableCell>
                 <TableCell>{ord.beneficiaire}</TableCell>
                 <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                   {ord.objet}
@@ -149,7 +161,7 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
                 <TableCell>
                   <div className="flex flex-col gap-1">
                     {getStatusBadge(ord.statut || ord.workflow_status)}
-                    {ord.workflow_status === "en_validation" && (
+                    {ord.workflow_status === 'en_validation' && (
                       <span className="text-xs text-muted-foreground">
                         Étape: {getCurrentStep(ord)?.label}
                       </span>
@@ -174,7 +186,7 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
                         Voir détails
                       </DropdownMenuItem>
 
-                      {ord.statut === "valide" && (
+                      {ord.statut === 'valide' && (
                         <DropdownMenuItem
                           onClick={() => {
                             setSelectedOrdonnancement(ord);
@@ -188,7 +200,7 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
 
                       <DropdownMenuSeparator />
 
-                      {ord.statut === "brouillon" && (
+                      {ord.statut === 'brouillon' && (
                         <>
                           <DropdownMenuItem onClick={() => handleSubmit(ord.id)}>
                             <Send className="mr-2 h-4 w-4" />
@@ -207,39 +219,40 @@ export function OrdonnancementList({ ordonnancements, filter }: OrdonnancementLi
                         </>
                       )}
 
-                      {(ord.statut === "soumis" || ord.workflow_status === "en_validation") && (
-                        <>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedOrdonnancement(ord);
-                              setShowValidateDialog(true);
-                            }}
-                          >
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Valider l'étape
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedOrdonnancement(ord);
-                              setShowRejectDialog(true);
-                            }}
-                          >
-                            <XCircle className="mr-2 h-4 w-4" />
-                            Rejeter
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedOrdonnancement(ord);
-                              setShowDeferDialog(true);
-                            }}
-                          >
-                            <Clock className="mr-2 h-4 w-4" />
-                            Différer
-                          </DropdownMenuItem>
-                        </>
-                      )}
+                      {canValidate &&
+                        (ord.statut === 'soumis' || ord.workflow_status === 'en_validation') && (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOrdonnancement(ord);
+                                setShowValidateDialog(true);
+                              }}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Valider l'étape
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOrdonnancement(ord);
+                                setShowRejectDialog(true);
+                              }}
+                            >
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Rejeter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOrdonnancement(ord);
+                                setShowDeferDialog(true);
+                              }}
+                            >
+                              <Clock className="mr-2 h-4 w-4" />
+                              Différer
+                            </DropdownMenuItem>
+                          </>
+                        )}
 
-                      {ord.statut === "differe" && (
+                      {ord.statut === 'differe' && (
                         <DropdownMenuItem onClick={() => handleResume(ord.id)}>
                           <Play className="mr-2 h-4 w-4" />
                           Reprendre

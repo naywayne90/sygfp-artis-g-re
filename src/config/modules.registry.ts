@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /**
  * Registre centralisé des modules SYGFP
  * Source unique de vérité pour la navigation et les routes
@@ -79,7 +80,7 @@ import {
   ScanLine,
   ListChecks,
   type LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
 // ============================================
 // TYPES
@@ -140,7 +141,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Vue d\'ensemble et indicateurs clés'
+    description: "Vue d'ensemble et indicateurs clés",
   },
   {
     id: 'recherche',
@@ -153,7 +154,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Recherche transversale de dossiers'
+    description: 'Recherche transversale de dossiers',
   },
 
   // ========== CHAÎNE DE LA DÉPENSE (groupe parent) ==========
@@ -168,7 +169,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: '9 étapes du flux de dépense'
+    description: '9 étapes du flux de dépense',
   },
 
   // ========== GESTION TÂCHES (groupe parent) ==========
@@ -183,7 +184,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
-    description: 'Planification et exécution des tâches'
+    description: 'Planification et exécution des tâches',
   },
   // Sous-groupe: Plannif. Tâches
   {
@@ -197,7 +198,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur'],
-    description: 'Planification des tâches et feuilles de route'
+    description: 'Planification des tâches et feuilles de route',
   },
   // Sous-groupe: Execution - Tâches
   {
@@ -211,7 +212,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
-    description: 'Suivi de l\'exécution des tâches'
+    description: "Suivi de l'exécution des tâches",
   },
 
   {
@@ -228,7 +229,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badge: true,
     step: 1,
     stepCode: STEP_CODES.NOTE_SEF,
-    description: 'Sans Engagement Financier'
+    description: 'Sans Engagement Financier',
   },
   {
     id: 'notes-aef',
@@ -244,7 +245,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badge: true,
     step: 2,
     stepCode: STEP_CODES.NOTE_AEF,
-    description: 'Avec Engagement Financier'
+    description: 'Avec Engagement Financier',
   },
   {
     id: 'notes-dg-officielles',
@@ -258,7 +259,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     isEnabled: true,
     roles: ['dg', 'admin', 'daaf', 'directeur'],
     badge: false,
-    description: 'Notes officielles du Directeur Général avec imputations'
+    description: 'Notes officielles du Directeur Général avec imputations',
   },
   {
     id: 'imputation',
@@ -274,7 +275,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     requiredCapabilities: ['imputation.create', 'imputation.validate'],
     step: 3,
     stepCode: STEP_CODES.IMPUTATION,
-    description: 'Imputation budgétaire'
+    description: 'Imputation budgétaire',
   },
   {
     id: 'expression-besoin',
@@ -289,7 +290,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     roles: ['all'],
     step: 4,
     stepCode: STEP_CODES.EXPRESSION_BESOIN,
-    description: 'Formalisation du besoin'
+    description: 'Formalisation du besoin',
   },
   {
     id: 'passation-marche',
@@ -305,7 +306,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     requiredCapabilities: ['marche.create', 'marche.validate'],
     step: 5,
     stepCode: STEP_CODES.PASSATION_MARCHE,
-    description: 'Si montant > seuil'
+    description: 'Si montant > seuil',
   },
   {
     id: 'engagement',
@@ -323,7 +324,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badgeKey: 'engagementsAValider',
     step: 6,
     stepCode: STEP_CODES.ENGAGEMENT,
-    description: 'Réservation crédits'
+    description: 'Réservation crédits',
   },
   {
     id: 'scanning-engagement',
@@ -340,7 +341,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badge: false,
     step: 6,
     stepCode: STEP_CODES.ENGAGEMENT,
-    description: 'Numérisation pièces engagement'
+    description: 'Numérisation pièces engagement',
   },
   {
     id: 'liquidation',
@@ -358,7 +359,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badgeKey: 'liquidationsAValider',
     step: 7,
     stepCode: STEP_CODES.LIQUIDATION,
-    description: 'Constatation service fait'
+    description: 'Constatation service fait',
   },
   {
     id: 'scanning-liquidation',
@@ -375,7 +376,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badge: false,
     step: 7,
     stepCode: STEP_CODES.LIQUIDATION,
-    description: 'Numérisation pièces liquidation'
+    description: 'Numérisation pièces liquidation',
   },
   {
     id: 'ordonnancement',
@@ -393,7 +394,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     badgeKey: 'ordonnancementsAValider',
     step: 8,
     stepCode: STEP_CODES.ORDONNANCEMENT,
-    description: 'Ordre de paiement'
+    description: 'Ordre de paiement',
   },
   {
     id: 'reglement',
@@ -409,7 +410,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     requiredCapabilities: ['reglement.execute'],
     step: 9,
     stepCode: STEP_CODES.REGLEMENT,
-    description: 'Paiement effectif'
+    description: 'Paiement effectif',
   },
 
   // ========== BUDGET (groupe parent) ==========
@@ -424,7 +425,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'admin'],
-    description: 'Planification et structure budgétaire'
+    description: 'Planification et structure budgétaire',
   },
   {
     id: 'structure-budgetaire',
@@ -436,7 +437,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['daaf', 'cb', 'admin']
+    roles: ['daaf', 'cb', 'admin'],
   },
   {
     id: 'planification-budget',
@@ -448,7 +449,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['daaf', 'cb', 'admin']
+    roles: ['daaf', 'cb', 'admin'],
   },
   {
     id: 'planification-physique',
@@ -460,7 +461,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 3,
     status: 'ready',
     isEnabled: true,
-    roles: ['daaf', 'cb', 'admin']
+    roles: ['daaf', 'cb', 'admin'],
   },
   {
     id: 'plan-travail',
@@ -472,7 +473,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 4,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'virements',
@@ -484,7 +485,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 5,
     status: 'ready',
     isEnabled: true,
-    roles: ['cb', 'daaf']
+    roles: ['cb', 'daaf'],
   },
   {
     id: 'notifications-budgetaires',
@@ -497,7 +498,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'cb', 'dg'],
-    description: 'Gestion des notifications budgétaires'
+    description: 'Gestion des notifications budgétaires',
   },
   {
     id: 'import-export-budget',
@@ -509,7 +510,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 7,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin', 'daaf']
+    roles: ['admin', 'daaf'],
   },
   // ---- Plannif. Tâches children ----
   {
@@ -523,7 +524,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur'],
-    description: 'Chargement et import des feuilles de route par direction'
+    description: 'Chargement et import des feuilles de route par direction',
   },
   {
     id: 'maj-feuilles-route',
@@ -536,7 +537,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur'],
-    description: 'Réaménagement et modification des feuilles de routes'
+    description: 'Réaménagement et modification des feuilles de routes',
   },
   // ---- Execution - Tâches children ----
   {
@@ -550,7 +551,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Soumission des feuilles de route pour validation'
+    description: 'Soumission des feuilles de route pour validation',
   },
   {
     id: 'taches-realisees',
@@ -563,7 +564,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur', 'operateur'],
-    description: 'Liste des tâches réalisées'
+    description: 'Liste des tâches réalisées',
   },
   {
     id: 'taches-differees',
@@ -576,7 +577,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Liste des tâches différées ou bloquées'
+    description: 'Liste des tâches différées ou bloquées',
   },
   {
     id: 'execution-physique',
@@ -589,12 +590,12 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'directeur', 'operateur'],
-    description: 'Suivi de l\'avancement des activités'
+    description: "Suivi de l'avancement des activités",
   },
   // ---- État d'exécution (sous-groupe) ----
   {
     id: 'etat-execution-taches',
-    name: 'Etat d\'exéc. Tâches',
+    name: "Etat d'exéc. Tâches",
     icon: BarChart3,
     route: null,
     parent: 'gestion-taches',
@@ -603,7 +604,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Suivi de l\'exécution physique par Direction, Mission, OS'
+    description: "Suivi de l'exécution physique par Direction, Mission, OS",
   },
   // État d'exécution sub-items
   {
@@ -617,7 +618,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Exécution physique par mission'
+    description: 'Exécution physique par mission',
   },
   {
     id: 'exec-physique-os',
@@ -630,7 +631,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Exécution physique par objectif stratégique'
+    description: 'Exécution physique par objectif stratégique',
   },
   {
     id: 'exec-physique-projet',
@@ -643,7 +644,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Exécution physique par projet'
+    description: 'Exécution physique par projet',
   },
   {
     id: 'exec-physique-activite',
@@ -656,7 +657,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg', 'daaf', 'directeur'],
-    description: 'Exécution physique par activité'
+    description: 'Exécution physique par activité',
   },
   {
     id: 'historique-imports',
@@ -668,7 +669,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 8,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin', 'daaf']
+    roles: ['admin', 'daaf'],
   },
   {
     id: 'documentation-import',
@@ -680,7 +681,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 9,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin', 'daaf']
+    roles: ['admin', 'daaf'],
   },
   {
     id: 'aide-import',
@@ -692,7 +693,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 10,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin', 'daaf']
+    roles: ['admin', 'daaf'],
   },
   {
     id: 'import-budget-admin',
@@ -704,7 +705,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 11,
     status: 'ready',
     isEnabled: true,
-    roles: ['admin']
+    roles: ['admin'],
   },
 
   // ========== PROGRAMMATIQUE (groupe parent) ==========
@@ -719,7 +720,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'admin', 'dg'],
-    description: 'Gestion programmatique du budget'
+    description: 'Gestion programmatique du budget',
   },
   {
     id: 'prog-charger-budget',
@@ -732,7 +733,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'admin'],
-    description: 'Import Excel du budget'
+    description: 'Import Excel du budget',
   },
   {
     id: 'prog-mise-a-jour',
@@ -745,7 +746,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'admin'],
-    description: 'Ajustements budgétaires avec justification'
+    description: 'Ajustements budgétaires avec justification',
   },
   {
     id: 'prog-liste-budget',
@@ -758,7 +759,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'admin', 'dg', 'directeur'],
-    description: 'Consultation avec drill-down'
+    description: 'Consultation avec drill-down',
   },
   {
     id: 'prog-reamenagement',
@@ -771,7 +772,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'admin'],
-    description: 'Virements internes entre lignes'
+    description: 'Virements internes entre lignes',
   },
 
   // ========== CONTRACTUALISATION (groupe parent) ==========
@@ -786,7 +787,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Gestion des marchés et contrats'
+    description: 'Gestion des marchés et contrats',
   },
   {
     id: 'marches-contractualisation',
@@ -799,7 +800,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['sdpm', 'daaf', 'admin'],
-    description: 'Gestion des marchés publics'
+    description: 'Gestion des marchés publics',
   },
   {
     id: 'lots-marches',
@@ -812,7 +813,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['sdpm', 'daaf', 'admin'],
-    description: 'Gestion des lots de marchés'
+    description: 'Gestion des lots de marchés',
   },
   {
     id: 'soumissions-marches',
@@ -825,7 +826,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['sdpm', 'daaf', 'admin'],
-    description: 'Gestion des soumissions aux marchés'
+    description: 'Gestion des soumissions aux marchés',
   },
   {
     id: 'contrats',
@@ -838,7 +839,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Gestion des contrats'
+    description: 'Gestion des contrats',
   },
 
   // ========== PRESTATAIRES (groupe parent) ==========
@@ -853,7 +854,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Gestion des prestataires'
+    description: 'Gestion des prestataires',
   },
   {
     id: 'prestataires-ajouter',
@@ -866,7 +867,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'sdpm', 'admin'],
-    description: 'Ajout d\'un nouveau prestataire'
+    description: "Ajout d'un nouveau prestataire",
   },
   {
     id: 'prestataires-liste',
@@ -879,7 +880,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Liste des prestataires'
+    description: 'Liste des prestataires',
   },
 
   // ========== GESTION COMPLÉMENTAIRE (groupe parent) ==========
@@ -894,7 +895,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Modules complémentaires'
+    description: 'Modules complémentaires',
   },
   {
     id: 'approvisionnement',
@@ -906,7 +907,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'tresorerie',
@@ -918,7 +919,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'tresorerie-tableau-bord',
@@ -930,7 +931,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'tresorerie-appro-banque',
@@ -942,7 +943,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'tresorerie-appro-caisse',
@@ -954,7 +955,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 3,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'tresorerie-mvt-banque',
@@ -966,7 +967,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 4,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'tresorerie-mvt-caisse',
@@ -978,7 +979,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 5,
     status: 'ready',
     isEnabled: true,
-    roles: ['tresorerie', 'dg', 'daaf', 'admin']
+    roles: ['tresorerie', 'dg', 'daaf', 'admin'],
   },
   {
     id: 'recettes',
@@ -990,7 +991,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 3,
     status: 'ready',
     isEnabled: true,
-    roles: ['daaf', 'tresorerie']
+    roles: ['daaf', 'tresorerie'],
   },
   {
     id: 'comptabilite-matiere',
@@ -1002,7 +1003,22 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 4,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
+  },
+
+  // ========== SUIVI DOSSIERS ==========
+  {
+    id: 'suivi-dossiers',
+    name: 'Suivi Dossiers',
+    icon: ClipboardList,
+    route: '/suivi-dossiers',
+    parent: null,
+    order: 5.5,
+    canonicalOrder: 35,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all'],
+    description: 'Vue unifiée des dossiers et leur progression dans la chaîne de dépense',
   },
 
   // ========== EXÉCUTION BUDGÉTAIRE (groupe parent) ==========
@@ -1017,7 +1033,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'dg'],
-    description: 'Suivi de l\'exécution'
+    description: "Suivi de l'exécution",
   },
   {
     id: 'dashboard-execution',
@@ -1029,7 +1045,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'dashboard-dg',
@@ -1042,7 +1058,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['dg', 'admin'],
-    description: 'Vue consolidée Direction Générale'
+    description: 'Vue consolidée Direction Générale',
   },
   {
     id: 'dashboard-direction',
@@ -1055,7 +1071,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['directeur', 'all'],
-    description: 'Vue par Direction'
+    description: 'Vue par Direction',
   },
   {
     id: 'passation-marche-execution',
@@ -1067,7 +1083,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['sdpm', 'daaf']
+    roles: ['sdpm', 'daaf'],
   },
 
   // ========== RAPPORTS (groupe parent) ==========
@@ -1082,11 +1098,11 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['daaf', 'cb', 'dg'],
-    description: 'États et analyses'
+    description: 'États et analyses',
   },
   {
     id: 'etats-execution',
-    name: 'États d\'exécution',
+    name: "États d'exécution",
     icon: BarChart3,
     route: '/etats-execution',
     parent: 'rapports',
@@ -1094,7 +1110,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 1,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'alertes-budgetaires',
@@ -1106,7 +1122,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 2,
     status: 'ready',
     isEnabled: true,
-    roles: ['cb', 'daaf']
+    roles: ['cb', 'daaf'],
   },
 
   // ========== UTILISATEURS (groupe parent) ==========
@@ -1121,7 +1137,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    description: 'Gestion des utilisateurs du système'
+    description: 'Gestion des utilisateurs du système',
   },
   {
     id: 'utilisateurs-ajout',
@@ -1134,7 +1150,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    description: 'Ajouter un utilisateur'
+    description: 'Ajouter un utilisateur',
   },
   {
     id: 'utilisateurs-actifs',
@@ -1147,7 +1163,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    description: 'Liste des utilisateurs actifs'
+    description: 'Liste des utilisateurs actifs',
   },
   {
     id: 'utilisateurs-desactives',
@@ -1160,7 +1176,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    description: 'Liste des utilisateurs désactivés'
+    description: 'Liste des utilisateurs désactivés',
   },
 
   // ========== PARAMÉTRAGE (groupe parent) ==========
@@ -1175,7 +1191,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg'],
-    description: 'Configuration système'
+    description: 'Configuration système',
   },
 
   // Sous-section: Référentiels
@@ -1190,7 +1206,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'parametres-programmatiques',
@@ -1203,7 +1219,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'architecture',
@@ -1216,7 +1232,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'codification',
@@ -1229,11 +1245,11 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'secteurs-activite',
-    name: 'Secteurs d\'Activité',
+    name: "Secteurs d'Activité",
     icon: Layers,
     route: '/admin/secteurs-activite',
     parent: 'parametrage',
@@ -1242,7 +1258,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'dictionnaire',
@@ -1255,7 +1271,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
   {
     id: 'documentation-modules',
@@ -1268,7 +1284,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Référentiels'
+    subSection: 'Référentiels',
   },
 
   // Sous-section: Utilisateurs
@@ -1283,7 +1299,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Utilisateurs'
+    subSection: 'Utilisateurs',
   },
   {
     id: 'roles',
@@ -1296,7 +1312,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Utilisateurs'
+    subSection: 'Utilisateurs',
   },
   {
     id: 'autorisations',
@@ -1309,7 +1325,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Utilisateurs'
+    subSection: 'Utilisateurs',
   },
   {
     id: 'delegations',
@@ -1322,7 +1338,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Utilisateurs'
+    subSection: 'Utilisateurs',
   },
 
   // Sous-section: Système
@@ -1337,7 +1353,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Système'
+    subSection: 'Système',
   },
   {
     id: 'parametres-exercice',
@@ -1350,11 +1366,11 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Système'
+    subSection: 'Système',
   },
   {
     id: 'journal-audit',
-    name: 'Journal d\'Audit',
+    name: "Journal d'Audit",
     icon: ClipboardList,
     route: '/admin/journal-audit',
     parent: 'parametrage',
@@ -1363,7 +1379,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'dg'],
-    subSection: 'Système'
+    subSection: 'Système',
   },
   {
     id: 'matrice-raci',
@@ -1376,7 +1392,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Système'
+    subSection: 'Système',
   },
   {
     id: 'checklist-production',
@@ -1389,7 +1405,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Système'
+    subSection: 'Système',
   },
 
   // Sous-section: Finance
@@ -1405,7 +1421,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie', 'cb'],
-    subSection: 'Finance'
+    subSection: 'Finance',
   },
   {
     id: 'comptes-bancaires-actifs',
@@ -1418,7 +1434,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie', 'cb'],
-    description: 'Comptes bancaires actifs'
+    description: 'Comptes bancaires actifs',
   },
   {
     id: 'comptes-bancaires-inactifs',
@@ -1431,7 +1447,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie', 'cb'],
-    description: 'Comptes bancaires inactifs'
+    description: 'Comptes bancaires inactifs',
   },
   // ---- Origine des Fonds (sous-groupe) ----
   {
@@ -1445,7 +1461,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf'],
-    subSection: 'Finance'
+    subSection: 'Finance',
   },
   {
     id: 'origines-fonds-actives',
@@ -1458,7 +1474,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf'],
-    description: 'Origines de fonds actives'
+    description: 'Origines de fonds actives',
   },
   {
     id: 'origines-fonds-inactives',
@@ -1471,7 +1487,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf'],
-    description: 'Origines de fonds inactives'
+    description: 'Origines de fonds inactives',
   },
   // ---- Approvisionnement (sous-groupe) ----
   {
@@ -1485,7 +1501,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    subSection: 'Finance'
+    subSection: 'Finance',
   },
   {
     id: 'param-appro-compte-bancaire',
@@ -1498,7 +1514,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    description: 'Approvisionnements compte bancaire'
+    description: 'Approvisionnements compte bancaire',
   },
   {
     id: 'param-appro-caisse',
@@ -1511,7 +1527,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    description: 'Approvisionnements caisse'
+    description: 'Approvisionnements caisse',
   },
   // ---- Mouvements (sous-groupe) ----
   {
@@ -1525,7 +1541,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    subSection: 'Finance'
+    subSection: 'Finance',
   },
   {
     id: 'param-mvt-compte-bancaire',
@@ -1538,7 +1554,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    description: 'Mouvements compte bancaire'
+    description: 'Mouvements compte bancaire',
   },
   {
     id: 'param-mvt-caisse',
@@ -1551,7 +1567,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'tresorerie'],
-    description: 'Mouvements caisse'
+    description: 'Mouvements caisse',
   },
   // ---- Programmatique (sous-groupe dans Paramétrage) ----
   {
@@ -1565,7 +1581,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'cb'],
-    subSection: 'Finance'
+    subSection: 'Finance',
   },
   {
     id: 'param-prog-charger',
@@ -1578,7 +1594,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf'],
-    description: 'Charger un nouveau budget'
+    description: 'Charger un nouveau budget',
   },
   {
     id: 'param-prog-maj',
@@ -1591,7 +1607,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'cb'],
-    description: 'Mise à jour du budget existant'
+    description: 'Mise à jour du budget existant',
   },
   {
     id: 'param-prog-liste',
@@ -1604,7 +1620,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'cb', 'dg'],
-    description: 'Liste des budgets'
+    description: 'Liste des budgets',
   },
   {
     id: 'param-prog-reamenagement',
@@ -1617,7 +1633,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin', 'daaf', 'cb'],
-    description: 'Réaménagements budgétaires'
+    description: 'Réaménagements budgétaires',
   },
 
   // Sous-section: Outils
@@ -1632,7 +1648,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Outils'
+    subSection: 'Outils',
   },
   {
     id: 'compteurs-references',
@@ -1645,7 +1661,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Outils'
+    subSection: 'Outils',
   },
   {
     id: 'liens-lambda',
@@ -1658,7 +1674,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Outils'
+    subSection: 'Outils',
   },
   {
     id: 'test-non-regression',
@@ -1671,7 +1687,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['admin'],
-    subSection: 'Outils'
+    subSection: 'Outils',
   },
 
   // ========== MODULES UTILISATEUR (non affichés dans menu principal) ==========
@@ -1686,7 +1702,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Centre de notifications'
+    description: 'Centre de notifications',
   },
   {
     id: 'alertes',
@@ -1698,7 +1714,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 101,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'taches',
@@ -1710,7 +1726,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 102,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'profil',
@@ -1722,7 +1738,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 103,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
 
   // ========== ROUTES DÉTAIL (non affichées dans menu) ==========
@@ -1736,7 +1752,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 200,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'note-sef-validation',
@@ -1748,7 +1764,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 201,
     status: 'ready',
     isEnabled: true,
-    roles: ['dg', 'admin']
+    roles: ['dg', 'admin'],
   },
   {
     id: 'note-aef-detail',
@@ -1760,7 +1776,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 202,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'note-aef-validation',
@@ -1772,7 +1788,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 203,
     status: 'ready',
     isEnabled: true,
-    roles: ['directeur', 'dg', 'admin']
+    roles: ['directeur', 'dg', 'admin'],
   },
   {
     id: 'note-dg-validation',
@@ -1785,7 +1801,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['dg', 'admin'],
-    description: 'Validation des Notes Direction Générale'
+    description: 'Validation des Notes Direction Générale',
   },
   {
     id: 'dg-notes-a-valider',
@@ -1799,7 +1815,21 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     isEnabled: true,
     roles: ['dg', 'admin'],
     badge: true,
-    description: 'File d\'attente des notes SEF à valider par le DG'
+    description: "File d'attente des notes SEF à valider par le DG",
+  },
+
+  {
+    id: 'dossier-detail',
+    name: 'Détail Dossier',
+    icon: ClipboardList,
+    route: '/suivi-dossiers/:id',
+    parent: null,
+    order: 210,
+    canonicalOrder: 210,
+    status: 'ready',
+    isEnabled: true,
+    roles: ['all'],
+    description: "Vue détaillée d'un dossier avec timeline chaîne de dépense",
   },
 
   // ========== ROUTES AUTH (hors layout) ==========
@@ -1813,7 +1843,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 300,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'select-exercice',
@@ -1825,7 +1855,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 301,
     status: 'ready',
     isEnabled: true,
-    roles: ['all']
+    roles: ['all'],
   },
   {
     id: 'no-open-exercice',
@@ -1838,7 +1868,7 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     status: 'ready',
     isEnabled: true,
     roles: ['all'],
-    description: 'Page affichée quand aucun exercice budgétaire n\'est ouvert'
+    description: "Page affichée quand aucun exercice budgétaire n'est ouvert",
   },
 ];
 
@@ -1850,55 +1880,55 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
  * Récupère un module par son ID
  */
 export const getModuleById = (id: string): ModuleConfig | undefined =>
-  MODULES_REGISTRY.find(m => m.id === id);
+  MODULES_REGISTRY.find((m) => m.id === id);
 
 /**
  * Récupère un module par sa route
  */
 export const getModuleByRoute = (route: string): ModuleConfig | undefined =>
-  MODULES_REGISTRY.find(m => m.route === route);
+  MODULES_REGISTRY.find((m) => m.route === route);
 
 /**
  * Récupère les enfants d'un module parent (modules activés uniquement)
  */
 export const getChildModules = (parentId: string): ModuleConfig[] =>
-  MODULES_REGISTRY
-    .filter(m => m.parent === parentId && m.isEnabled)
-    .sort((a, b) => a.order - b.order);
+  MODULES_REGISTRY.filter((m) => m.parent === parentId && m.isEnabled).sort(
+    (a, b) => a.order - b.order
+  );
 
 /**
  * Récupère les modules racine (sans parent) pour le menu principal
  */
 export const getRootModules = (): ModuleConfig[] =>
-  MODULES_REGISTRY
-    .filter(m => m.parent === null && m.order < 100 && m.isEnabled)
-    .sort((a, b) => a.order - b.order);
+  MODULES_REGISTRY.filter((m) => m.parent === null && m.order < 100 && m.isEnabled).sort(
+    (a, b) => a.order - b.order
+  );
 
 /**
  * Récupère tous les modules avec une route (pour vérification)
  */
 export const getRoutedModules = (): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.route !== null && m.isEnabled);
+  MODULES_REGISTRY.filter((m) => m.route !== null && m.isEnabled);
 
 /**
  * Récupère les modules par rôle
  */
 export const getModulesByRole = (role: string): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m =>
-    m.isEnabled && (m.roles.includes('all') || m.roles.includes(role))
+  MODULES_REGISTRY.filter(
+    (m) => m.isEnabled && (m.roles.includes('all') || m.roles.includes(role))
   );
 
 /**
  * Récupère les modules par statut
  */
 export const getModulesByStatus = (status: ModuleStatus): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.status === status);
+  MODULES_REGISTRY.filter((m) => m.status === status);
 
 /**
  * Récupère les modules avec badge
  */
 export const getModulesWithBadge = (): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.badge === true && m.isEnabled);
+  MODULES_REGISTRY.filter((m) => m.badge === true && m.isEnabled);
 
 /**
  * Récupère les sous-sections d'un groupe
@@ -1906,7 +1936,7 @@ export const getModulesWithBadge = (): ModuleConfig[] =>
 export const getSubSections = (parentId: string): string[] => {
   const children = getChildModules(parentId);
   const sections = new Set<string>();
-  children.forEach(m => {
+  children.forEach((m) => {
     if (m.subSection) sections.add(m.subSection);
   });
   return Array.from(sections);
@@ -1916,35 +1946,34 @@ export const getSubSections = (parentId: string): string[] => {
  * Récupère les modules d'une sous-section
  */
 export const getModulesBySubSection = (parentId: string, subSection: string): ModuleConfig[] =>
-  MODULES_REGISTRY
-    .filter(m => m.parent === parentId && m.subSection === subSection && m.isEnabled)
-    .sort((a, b) => a.order - b.order);
+  MODULES_REGISTRY.filter(
+    (m) => m.parent === parentId && m.subSection === subSection && m.isEnabled
+  ).sort((a, b) => a.order - b.order);
 
 /**
  * Vérifie si un module existe
  */
-export const moduleExists = (id: string): boolean =>
-  MODULES_REGISTRY.some(m => m.id === id);
+export const moduleExists = (id: string): boolean => MODULES_REGISTRY.some((m) => m.id === id);
 
 /**
  * Vérifie si une route est enregistrée
  */
 export const routeExists = (route: string): boolean =>
-  MODULES_REGISTRY.some(m => m.route === route);
+  MODULES_REGISTRY.some((m) => m.route === route);
 
 /**
  * Récupère un module par son stepCode
  */
 export const getModuleByStepCode = (stepCode: string): ModuleConfig | undefined =>
-  MODULES_REGISTRY.find(m => m.stepCode === stepCode);
+  MODULES_REGISTRY.find((m) => m.stepCode === stepCode);
 
 /**
  * Récupère les modules de la chaîne de dépense dans l'ordre canonique
  */
 export const getChaineDepenseModules = (): ModuleConfig[] =>
-  MODULES_REGISTRY
-    .filter(m => m.parent === 'chaine-depense' && m.isEnabled)
-    .sort((a, b) => a.canonicalOrder - b.canonicalOrder);
+  MODULES_REGISTRY.filter((m) => m.parent === 'chaine-depense' && m.isEnabled).sort(
+    (a, b) => a.canonicalOrder - b.canonicalOrder
+  );
 
 /**
  * Vérifie si un utilisateur peut accéder à un module
@@ -1958,12 +1987,12 @@ export const canAccessModule = (
   if (!module || !module.isEnabled) return false;
 
   // Vérifier les rôles
-  const hasRole = module.roles.includes('all') ||
-    module.roles.some(r => userRoles.includes(r));
+  const hasRole = module.roles.includes('all') || module.roles.some((r) => userRoles.includes(r));
 
   // Vérifier les capacités si définies
-  const hasCapabilities = !module.requiredCapabilities ||
-    module.requiredCapabilities.every(c => userCapabilities.includes(c));
+  const hasCapabilities =
+    !module.requiredCapabilities ||
+    module.requiredCapabilities.every((c) => userCapabilities.includes(c));
 
   return hasRole && hasCapabilities;
 };
@@ -1972,16 +2001,18 @@ export const canAccessModule = (
  * Récupère tous les modules "todo" (Coming Soon)
  */
 export const getComingSoonModules = (): ModuleConfig[] =>
-  MODULES_REGISTRY.filter(m => m.status === 'todo');
+  MODULES_REGISTRY.filter((m) => m.status === 'todo');
 
 /**
  * Génère une liste de vérification des routes pour le debug
  */
-export const getRouteVerificationList = (): { route: string; moduleId: string; status: ModuleStatus }[] =>
-  MODULES_REGISTRY
-    .filter(m => m.route !== null)
-    .map(m => ({
-      route: m.route!,
-      moduleId: m.id,
-      status: m.status
-    }));
+export const getRouteVerificationList = (): {
+  route: string;
+  moduleId: string;
+  status: ModuleStatus;
+}[] =>
+  MODULES_REGISTRY.filter((m) => m.route !== null).map((m) => ({
+    route: m.route!,
+    moduleId: m.id,
+    status: m.status,
+  }));

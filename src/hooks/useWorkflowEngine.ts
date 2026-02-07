@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRBAC } from '@/contexts/RBACContext';
+import { useInterimPermissions } from '@/hooks/useInterimPermissions';
 
 interface WorkflowStep {
   step_order: number;
@@ -26,6 +27,7 @@ interface WorkflowStatusData {
   status?: 'en_cours' | 'complete' | 'rejete' | 'annule';
   current_step?: number;
   current_role_required?: string;
+  direction_id?: string | null;
   started_at?: string;
   completed_at?: string;
   steps?: WorkflowStep[];
@@ -40,41 +42,57 @@ interface AdvanceResult {
   error?: string;
 }
 
-export type WorkflowAction = 'valide' | 'differe' | 'rejete' | 'retourne' | 'commente' | 'delegue' | 'demande_info' | 'annule';
+export type WorkflowAction =
+  | 'valide'
+  | 'differe'
+  | 'rejete'
+  | 'retourne'
+  | 'commente'
+  | 'delegue'
+  | 'demande_info'
+  | 'annule';
 
 /**
  * Hook pour gérer le workflow dynamique basé sur les tables wf_*
  * Utilise les fonctions RPC: get_workflow_status, start_workflow, advance_workflow, resume_workflow
  */
-export function useWorkflowEngine(entityType: string, entityId: string) {
+export function useWorkflowEngine(
+  entityType: string,
+  entityId: string,
+  entityDirectionId?: string | null
+) {
   const { toast } = useToast();
-  const { user } = useRBAC();
+  const { user, canAccessData } = useRBAC();
   const queryClient = useQueryClient();
+  const { interimWorkflowRoles, isActingAsInterim, titulaireNom } = useInterimPermissions();
 
   // Récupérer le statut du workflow
-  const { data: status, isLoading, error, refetch } = useQuery<WorkflowStatusData>({
+  const {
+    data: status,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<WorkflowStatusData>({
     queryKey: ['wf-status', entityType, entityId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_workflow_status', {
-          p_entity_type: entityType,
-          p_entity_id: entityId
-        });
+      const { data, error } = await supabase.rpc('get_workflow_status', {
+        p_entity_type: entityType,
+        p_entity_id: entityId,
+      });
       if (error) throw error;
       return data as unknown as WorkflowStatusData;
     },
     enabled: !!entityType && !!entityId,
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   // Démarrer un workflow
   const startMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase
-        .rpc('start_workflow', {
-          p_entity_type: entityType,
-          p_entity_id: entityId
-        });
+      const { data, error } = await supabase.rpc('start_workflow', {
+        p_entity_type: entityType,
+        p_entity_id: entityId,
+      });
       if (error) throw error;
       return data;
     },
@@ -84,16 +102,16 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
       queryClient.invalidateQueries({ queryKey: ['workflow-tasks'] });
       toast({
         title: 'Workflow démarré',
-        description: `Instance créée avec l'ID: ${data}`
+        description: `Instance créée avec l'ID: ${data}`,
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors du démarrage du workflow',
-        variant: 'destructive'
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Faire avancer le workflow (valider, rejeter, différer, etc.)
@@ -101,29 +119,32 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
     mutationFn: async ({
       action,
       motif,
-      dateReprise
+      dateReprise,
     }: {
       action: WorkflowAction;
       motif?: string;
       dateReprise?: string;
     }) => {
-      const userName = user?.fullName || null;
+      // Si l'utilisateur agit en intérim, indiquer "P.I." dans le nom
+      const userName =
+        isActingAsInterim && titulaireNom
+          ? `${user?.fullName || ''} (P.I. ${titulaireNom})`
+          : user?.fullName || null;
 
-      const { data, error } = await supabase
-        .rpc('advance_workflow', {
-          p_entity_type: entityType,
-          p_entity_id: entityId,
-          p_action: action,
-          p_motif: motif || null,
-          p_user_name: userName,
-          p_date_reprise: dateReprise || null
-        });
+      const { data, error } = await supabase.rpc('advance_workflow', {
+        p_entity_type: entityType,
+        p_entity_id: entityId,
+        p_action: action,
+        p_motif: motif || null,
+        p_user_name: userName,
+        p_date_reprise: dateReprise || null,
+      });
 
       if (error) throw error;
 
       const result = data as AdvanceResult;
       if (!result?.success) {
-        throw new Error(result?.error || 'Erreur lors de l\'action');
+        throw new Error(result?.error || "Erreur lors de l'action");
       }
       return result;
     },
@@ -137,11 +158,11 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
         valide: data.workflow_complete ? 'Workflow terminé avec succès !' : 'Validation effectuée',
         differe: 'Dossier différé',
         rejete: 'Dossier rejeté',
-        retourne: 'Dossier retourné à l\'étape précédente',
+        retourne: "Dossier retourné à l'étape précédente",
         commente: 'Commentaire ajouté',
         delegue: 'Dossier délégué',
-        demande_info: 'Demande d\'information envoyée',
-        annule: 'Workflow annulé'
+        demande_info: "Demande d'information envoyée",
+        annule: 'Workflow annulé',
       };
 
       toast({
@@ -150,26 +171,25 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
           ? 'Le circuit de validation est terminé'
           : data.new_step
             ? `Passage à l'étape ${data.new_step}`
-            : undefined
+            : undefined,
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
-        description: error.message || 'Erreur lors de l\'action',
-        variant: 'destructive'
+        description: error.message || "Erreur lors de l'action",
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Reprendre un workflow différé
   const resumeMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase
-        .rpc('resume_workflow', {
-          p_entity_type: entityType,
-          p_entity_id: entityId
-        });
+      const { data, error } = await supabase.rpc('resume_workflow', {
+        p_entity_type: entityType,
+        p_entity_id: entityId,
+      });
 
       if (error) throw error;
 
@@ -186,16 +206,16 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
 
       toast({
         title: 'Workflow repris',
-        description: 'Le dossier est de nouveau en cours de traitement'
+        description: 'Le dossier est de nouveau en cours de traitement',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Erreur',
         description: error.message || 'Erreur lors de la reprise',
-        variant: 'destructive'
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Vérifier si l'utilisateur peut agir sur l'étape courante
@@ -212,12 +232,12 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
     // Ajouter le rôle hiérarchique
     if (user.roleHierarchique) {
       const roleMapping: Record<string, string> = {
-        'DG': 'DG',
-        'DGA': 'DGA',
-        'Directeur': 'DIRECTEUR',
+        DG: 'DG',
+        DGA: 'DGA',
+        Directeur: 'DIRECTEUR',
         'Sous-Directeur': 'SOUS_DIRECTEUR',
         'Chef de Service': 'CHEF_SERVICE',
-        'Agent': 'AGENT'
+        Agent: 'AGENT',
       };
       const mappedRole = roleMapping[user.roleHierarchique];
       if (mappedRole) userRoles.push(mappedRole);
@@ -226,18 +246,46 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
     // Ajouter le profil fonctionnel
     if (user.profilFonctionnel) {
       const profilMapping: Record<string, string[]> = {
-        'Admin': ['DG', 'DGA', 'DIRECTEUR', 'SOUS_DIRECTEUR', 'CHEF_SERVICE', 'CONTROLEUR', 'TRESORIER', 'VALIDATEUR', 'AGENT', 'AUDITEUR'],
-        'Validateur': ['VALIDATEUR'],
-        'Controleur': ['CONTROLEUR'],
-        'Tresorerie': ['TRESORIER'],
-        'Operationnel': ['AGENT']
+        Admin: [
+          'DG',
+          'DGA',
+          'DIRECTEUR',
+          'SOUS_DIRECTEUR',
+          'CHEF_SERVICE',
+          'CONTROLEUR',
+          'TRESORIER',
+          'VALIDATEUR',
+          'AGENT',
+          'AUDITEUR',
+        ],
+        Validateur: ['VALIDATEUR'],
+        Controleur: ['CONTROLEUR'],
+        Tresorerie: ['TRESORIER'],
+        Operationnel: ['AGENT'],
       };
       const additionalRoles = profilMapping[user.profilFonctionnel] || [];
       userRoles.push(...additionalRoles);
     }
 
+    // Ajouter les rôles hérités via intérim actif
+    if (interimWorkflowRoles.length > 0) {
+      userRoles.push(...interimWorkflowRoles);
+    }
+
     // Vérifier si le rôle requis correspond à l'un des rôles de l'utilisateur
-    return userRoles.includes(currentRole);
+    if (!userRoles.includes(currentRole)) return false;
+
+    // Vérifier le périmètre direction : les rôles hiérarchiques intermédiaires
+    // (Directeur, Sous-Directeur, Chef de Service, Agent) ne peuvent agir
+    // que sur les documents de leur propre direction.
+    // Admin, DG, CB, DAAF, Trésorerie et Auditeur conservent un accès global.
+    // Utilise entityDirectionId (passé explicitement) ou direction_id du workflow status (depuis le backend).
+    const directionToCheck = entityDirectionId ?? status?.direction_id;
+    if (directionToCheck) {
+      return canAccessData(directionToCheck);
+    }
+
+    return true;
   };
 
   // Obtenir les actions disponibles pour l'utilisateur
@@ -277,6 +325,8 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
     // Permissions
     canUserAct: canUserAct(),
     availableActions: getAvailableActions(),
+    isActingAsInterim,
+    interimTitulaireNom: titulaireNom,
 
     // Mutations
     startWorkflow: startMutation.mutateAsync,
@@ -287,7 +337,7 @@ export function useWorkflowEngine(entityType: string, entityId: string) {
     isStarting: startMutation.isPending,
     isAdvancing: advanceMutation.isPending,
     isResuming: resumeMutation.isPending,
-    isMutating: startMutation.isPending || advanceMutation.isPending || resumeMutation.isPending
+    isMutating: startMutation.isPending || advanceMutation.isPending || resumeMutation.isPending,
   };
 }
 
@@ -298,13 +348,12 @@ export function usePendingWorkflows(roleCode?: string) {
   return useQuery({
     queryKey: ['pending-workflows', roleCode],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('get_pending_workflows', {
-          p_role_code: roleCode || null
-        });
+      const { data, error } = await supabase.rpc('get_pending_workflows', {
+        p_role_code: roleCode || null,
+      });
       if (error) throw error;
       return data || [];
     },
-    refetchInterval: 60000
+    refetchInterval: 60000,
   });
 }

@@ -1,36 +1,61 @@
-import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Plus, Search, CreditCard, CheckCircle, XCircle, Clock, Loader2, Lock, Tag, MoreHorizontal, Eye, Send, FolderOpen, Receipt } from "lucide-react";
-import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
-import { useEngagements, Engagement } from "@/hooks/useEngagements";
-import { EngagementForm } from "@/components/engagement/EngagementForm";
-import { EngagementFromPMForm } from "@/components/engagement/EngagementFromPMForm";
-import { EngagementList } from "@/components/engagement/EngagementList";
-import { EngagementDetails } from "@/components/engagement/EngagementDetails";
-import { EngagementRejectDialog } from "@/components/engagement/EngagementRejectDialog";
-import { EngagementDeferDialog } from "@/components/engagement/EngagementDeferDialog";
-import { EngagementValidateDialog } from "@/components/engagement/EngagementValidateDialog";
-import { EngagementPrintDialog } from "@/components/engagement/EngagementPrintDialog";
-import { PermissionGuard, usePermissionCheck } from "@/components/auth/PermissionGuard";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+} from '@/components/ui/dropdown-menu';
+import {
+  Plus,
+  Search,
+  CreditCard,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Loader2,
+  Lock,
+  Tag,
+  MoreHorizontal,
+  Eye,
+  Send,
+  FolderOpen,
+  Receipt,
+  User,
+} from 'lucide-react';
+import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
+import { useEngagements, Engagement } from '@/hooks/useEngagements';
+import { EngagementForm } from '@/components/engagement/EngagementForm';
+import { EngagementFromPMForm } from '@/components/engagement/EngagementFromPMForm';
+import { EngagementList } from '@/components/engagement/EngagementList';
+import { EngagementDetails } from '@/components/engagement/EngagementDetails';
+import { EngagementRejectDialog } from '@/components/engagement/EngagementRejectDialog';
+import { EngagementDeferDialog } from '@/components/engagement/EngagementDeferDialog';
+import { EngagementValidateDialog } from '@/components/engagement/EngagementValidateDialog';
+import { EngagementPrintDialog } from '@/components/engagement/EngagementPrintDialog';
+import { PermissionGuard, usePermissionCheck } from '@/components/auth/PermissionGuard';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { useCanValidateEngagement } from '@/hooks/useDelegations';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const formatMontant = (montant: number) => {
   return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
@@ -39,7 +64,7 @@ const formatMontant = (montant: number) => {
 export default function Engagements() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const {
     engagements,
     engagementsAValider,
@@ -58,8 +83,18 @@ export default function Engagements() {
 
   const { canPerform } = usePermissionCheck();
   const { isReadOnly, getDisabledMessage, checkCanWrite } = useExerciceWriteGuard();
+  const {
+    canValidate: canValidateViaDelegation,
+    viaDelegation: engagementViaDelegation,
+    delegatorInfo: engagementDelegatorInfo,
+  } = useCanValidateEngagement();
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // Combine permission directe et délégation pour la validation
+  const canValidateEngagementFinal = canPerform('engagement.validate') || canValidateViaDelegation;
+  const canRejectEngagementFinal = canPerform('engagement.reject') || canValidateViaDelegation;
+  const canDeferEngagementFinal = canPerform('engagement.defer') || canValidateViaDelegation;
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCreateFromPM, setShowCreateFromPM] = useState(false);
   const [selectedPM, setSelectedPM] = useState<any>(null);
@@ -72,13 +107,13 @@ export default function Engagements() {
 
   // Handle sourcePM URL parameter
   useEffect(() => {
-    const sourcePMId = searchParams.get("sourcePM");
+    const sourcePMId = searchParams.get('sourcePM');
     if (sourcePMId && passationsValidees.length > 0) {
       const pm = passationsValidees.find((p: any) => p.id === sourcePMId);
       if (pm) {
         setSelectedPM(pm);
         setShowCreateFromPM(true);
-        searchParams.delete("sourcePM");
+        searchParams.delete('sourcePM');
         setSearchParams(searchParams, { replace: true });
       }
     }
@@ -94,10 +129,12 @@ export default function Engagements() {
   };
 
   const filterEngagements = (list: Engagement[]) => {
-    return list.filter(eng =>
-      eng.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      eng.objet.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (eng.fournisseur?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+    return list.filter(
+      (eng) =>
+        eng.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        eng.objet.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        eng.fournisseur?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        false
     );
   };
 
@@ -158,9 +195,14 @@ export default function Engagements() {
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="page-title">Engagements</h1>
-          <p className="page-description">
-            Gestion des engagements budgétaires
-          </p>
+          <p className="page-description">Gestion des engagements budgétaires</p>
+          {engagementViaDelegation && (
+            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
+              <User className="h-3 w-3 mr-1" />
+              Validation par délégation
+              {engagementDelegatorInfo ? ` du ${engagementDelegatorInfo.role}` : ''}
+            </Badge>
+          )}
         </div>
         <div className="flex gap-2">
           <BudgetChainExportButton step="engagement" />
@@ -260,8 +302,7 @@ export default function Engagements() {
       <Tabs defaultValue="a_traiter" className="space-y-4">
         <TabsList>
           <TabsTrigger value="a_traiter" className="gap-1">
-            <Tag className="h-3 w-3" />
-            À traiter ({passationsValidees.length})
+            <Tag className="h-3 w-3" />À traiter ({passationsValidees.length})
           </TabsTrigger>
           <TabsTrigger value="tous">Tous ({engagements.length})</TabsTrigger>
           <TabsTrigger value="a_valider">À valider ({engagementsAValider.length})</TabsTrigger>
@@ -287,11 +328,11 @@ export default function Engagements() {
                 <EngagementList
                   engagements={filterEngagements(engagements)}
                   onView={handleView}
-                  onValidate={canPerform("engagement.validate") ? handleValidate : undefined}
-                  onReject={canPerform("engagement.reject") ? handleReject : undefined}
-                  onDefer={canPerform("engagement.defer") ? handleDefer : undefined}
-                  onSubmit={canPerform("engagement.submit") ? submitEngagement : undefined}
-                  onResume={canPerform("engagement.resume") ? resumeEngagement : undefined}
+                  onValidate={canValidateEngagementFinal ? handleValidate : undefined}
+                  onReject={canRejectEngagementFinal ? handleReject : undefined}
+                  onDefer={canDeferEngagementFinal ? handleDefer : undefined}
+                  onSubmit={canPerform('engagement.submit') ? submitEngagement : undefined}
+                  onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
                   onPrint={handlePrint}
                 />
               )}
@@ -333,16 +374,14 @@ export default function Engagements() {
                   <TableBody>
                     {passationsValidees.map((pm: any) => (
                       <TableRow key={pm.id}>
-                        <TableCell className="font-mono text-sm">{pm.reference || "-"}</TableCell>
+                        <TableCell className="font-mono text-sm">{pm.reference || '-'}</TableCell>
                         <TableCell className="max-w-[200px] truncate">
-                          {pm.expression_besoin?.objet || "-"}
+                          {pm.expression_besoin?.objet || '-'}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{pm.mode_passation}</Badge>
                         </TableCell>
-                        <TableCell>
-                          {pm.prestataire_retenu?.raison_sociale || "-"}
-                        </TableCell>
+                        <TableCell>{pm.prestataire_retenu?.raison_sociale || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(pm.montant_retenu || 0)}
                         </TableCell>
@@ -366,16 +405,17 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements à valider</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsAValider).length} engagement(s) en attente de validation
+                {filterEngagements(engagementsAValider).length} engagement(s) en attente de
+                validation
               </CardDescription>
             </CardHeader>
             <CardContent>
               <EngagementList
                 engagements={filterEngagements(engagementsAValider)}
                 onView={handleView}
-                onValidate={canPerform("engagement.validate") ? handleValidate : undefined}
-                onReject={canPerform("engagement.reject") ? handleReject : undefined}
-                onDefer={canPerform("engagement.defer") ? handleDefer : undefined}
+                onValidate={canValidateEngagementFinal ? handleValidate : undefined}
+                onReject={canRejectEngagementFinal ? handleReject : undefined}
+                onDefer={canDeferEngagementFinal ? handleDefer : undefined}
                 onPrint={handlePrint}
               />
             </CardContent>
@@ -388,7 +428,8 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements validés</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsValides).length} engagement(s) validé(s) - prêts pour liquidation
+                {filterEngagements(engagementsValides).length} engagement(s) validé(s) - prêts pour
+                liquidation
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -414,7 +455,7 @@ export default function Engagements() {
                       <TableRow key={eng.id}>
                         <TableCell className="font-mono text-sm">{eng.numero}</TableCell>
                         <TableCell className="max-w-[200px] truncate">{eng.objet}</TableCell>
-                        <TableCell>{eng.fournisseur || "-"}</TableCell>
+                        <TableCell>{eng.fournisseur || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(eng.montant)}
                         </TableCell>
@@ -431,7 +472,7 @@ export default function Engagements() {
                                 Voir détails
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => handleCreateLiquidation(eng.id)}
                                 className="text-primary"
                               >
@@ -480,7 +521,7 @@ export default function Engagements() {
               <EngagementList
                 engagements={filterEngagements(engagementsDifferes)}
                 onView={handleView}
-                onResume={canPerform("engagement.resume") ? resumeEngagement : undefined}
+                onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
                 onPrint={handlePrint}
               />
             </CardContent>
@@ -490,14 +531,14 @@ export default function Engagements() {
 
       {/* Dialogs */}
       <EngagementForm open={showCreateForm} onOpenChange={setShowCreateForm} />
-      
+
       <EngagementFromPMForm
         open={showCreateFromPM}
         onOpenChange={setShowCreateFromPM}
         passation={selectedPM}
         onSuccess={() => setSelectedPM(null)}
       />
-      
+
       <EngagementDetails
         engagement={selectedEngagement}
         open={showDetails}

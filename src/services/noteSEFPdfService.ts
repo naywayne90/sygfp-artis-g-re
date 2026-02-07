@@ -6,12 +6,12 @@
  * - Page 2: Observations du Directeur Général avec QR Code de validation
  */
 
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import { QRCodeCanvas } from "qrcode.react";
-import { createRoot } from "react-dom/client";
-import { createElement } from "react";
-import { NoteSEF } from "@/hooks/useNotesSEF";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { QRCodeCanvas } from 'qrcode.react';
+import { createRoot } from 'react-dom/client';
+import { createElement } from 'react';
+import { NoteSEF } from '@/hooks/useNotesSEF';
 import {
   NoteImputation,
   NoteImputationLigne,
@@ -19,18 +19,26 @@ import {
   PRIORITE_LABELS,
   InstructionType,
   ImputationPriorite,
-} from "@/hooks/useNoteImputations";
-import {
-  ValidationDG,
-  VALIDATION_STATUS_LABELS,
-} from "@/hooks/useValidationDG";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import logoArti from "@/assets/logo-arti.jpg";
+} from '@/hooks/useNoteImputations';
+import { ValidationDG, VALIDATION_STATUS_LABELS } from '@/hooks/useValidationDG';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================================================
 // TYPES
 // ============================================================================
+
+export interface SignataireInterimInfo {
+  /** True si le validateur agit en intérim */
+  isInterim: boolean;
+  /** Nom du titulaire pour lequel l'intérimaire agit */
+  titulaireNom?: string;
+  /** True si le validateur agit par délégation */
+  isDelegation: boolean;
+  /** Nom du délégateur */
+  delegateurNom?: string;
+}
 
 export interface NoteSEFPdfOptions {
   note: NoteSEF;
@@ -38,6 +46,8 @@ export interface NoteSEFPdfOptions {
   validation?: ValidationDG | null;
   attachmentsCount?: number;
   baseUrl?: string;
+  /** Information sur l'intérim/délégation du signataire */
+  signataire?: SignataireInterimInfo;
 }
 
 export interface PdfGenerationResult {
@@ -84,9 +94,9 @@ const PDF_CONFIG = {
  */
 async function generateQRCodeDataUrl(data: string, size: number = 150): Promise<string> {
   return new Promise((resolve) => {
-    const container = document.createElement("div");
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
     document.body.appendChild(container);
 
     const root = createRoot(container);
@@ -94,17 +104,17 @@ async function generateQRCodeDataUrl(data: string, size: number = 150): Promise<
       createElement(QRCodeCanvas, {
         value: data,
         size: size,
-        level: "H",
+        level: 'H',
         includeMargin: true,
       })
     );
 
     setTimeout(() => {
-      const canvas = container.querySelector("canvas");
+      const canvas = container.querySelector('canvas');
       if (canvas) {
-        resolve(canvas.toDataURL("image/png"));
+        resolve(canvas.toDataURL('image/png'));
       } else {
-        resolve("");
+        resolve('');
       }
       root.unmount();
       document.body.removeChild(container);
@@ -118,20 +128,20 @@ async function generateQRCodeDataUrl(data: string, size: number = 150): Promise<
 async function loadImageAsDataUrl(src: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/jpeg"));
+        resolve(canvas.toDataURL('image/jpeg'));
       } else {
-        reject(new Error("Failed to get canvas context"));
+        reject(new Error('Failed to get canvas context'));
       }
     };
-    img.onerror = () => reject(new Error("Failed to load image"));
+    img.onerror = () => reject(new Error('Failed to load image'));
     img.src = src;
   });
 }
@@ -140,11 +150,11 @@ async function loadImageAsDataUrl(src: string): Promise<string> {
  * Formatte une date en français
  */
 function formatDateFr(date: string | Date | null): string {
-  if (!date) return "-";
+  if (!date) return '-';
   try {
-    return format(new Date(date), "dd MMMM yyyy", { locale: fr });
+    return format(new Date(date), 'dd MMMM yyyy', { locale: fr });
   } catch {
-    return "-";
+    return '-';
   }
 }
 
@@ -152,11 +162,11 @@ function formatDateFr(date: string | Date | null): string {
  * Formatte une date courte
  */
 function formatDateShort(date: string | Date | null): string {
-  if (!date) return "-";
+  if (!date) return '-';
   try {
-    return format(new Date(date), "dd/MM/yyyy", { locale: fr });
+    return format(new Date(date), 'dd/MM/yyyy', { locale: fr });
   } catch {
-    return "-";
+    return '-';
   }
 }
 
@@ -164,17 +174,17 @@ function formatDateShort(date: string | Date | null): string {
  * Formatte un montant en FCFA
  */
 function formatMontant(montant: number | null): string {
-  if (!montant) return "-";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  if (!montant) return '-';
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 }
 
 /**
  * Tronque le texte si trop long
  */
 function truncateText(text: string | null, maxLength: number): string {
-  if (!text) return "-";
+  if (!text) return '-';
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - 3) + "...";
+  return text.substring(0, maxLength - 3) + '...';
 }
 
 // ============================================================================
@@ -187,7 +197,8 @@ async function generatePage1(
   imputation: NoteImputation | null,
   qrDataUrl: string,
   logoDataUrl: string,
-  attachmentsCount: number
+  attachmentsCount: number,
+  signataire?: SignataireInterimInfo
 ): Promise<number> {
   const { margins, colors, fonts } = PDF_CONFIG;
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -201,33 +212,33 @@ async function generatePage1(
   // Logo ARTI (gauche)
   if (logoDataUrl) {
     try {
-      doc.addImage(logoDataUrl, "JPEG", margins.left, yPos, 25, 25);
+      doc.addImage(logoDataUrl, 'JPEG', margins.left, yPos, 25, 25);
     } catch (e) {
-      console.warn("Could not add logo:", e);
+      console.warn('Could not add logo:', e);
     }
   }
 
   // QR Code discret (droite - petit)
   if (qrDataUrl) {
     try {
-      doc.addImage(qrDataUrl, "PNG", pageWidth - margins.right - 18, yPos, 18, 18);
+      doc.addImage(qrDataUrl, 'PNG', pageWidth - margins.right - 18, yPos, 18, 18);
     } catch (e) {
-      console.warn("Could not add QR code:", e);
+      console.warn('Could not add QR code:', e);
     }
   }
 
   // Texte en-tête (centré)
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.secondary);
-  doc.text("RÉPUBLIQUE DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 4, { align: "center" });
+  doc.text("RÉPUBLIQUE DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 4, { align: 'center' });
   doc.setFontSize(fonts.small - 1);
-  doc.text("Union - Discipline - Travail", pageWidth / 2, yPos + 8, { align: "center" });
+  doc.text('Union - Discipline - Travail', pageWidth / 2, yPos + 8, { align: 'center' });
 
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.primary);
-  doc.setFont("helvetica", "bold");
-  doc.text("AUTORITÉ DE RÉGULATION DES", pageWidth / 2, yPos + 15, { align: "center" });
-  doc.text("TÉLÉCOMMUNICATIONS DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 19, { align: "center" });
+  doc.setFont('helvetica', 'bold');
+  doc.text('AUTORITÉ DE RÉGULATION DES', pageWidth / 2, yPos + 15, { align: 'center' });
+  doc.text("TÉLÉCOMMUNICATIONS DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 19, { align: 'center' });
 
   yPos += 28;
 
@@ -242,9 +253,9 @@ async function generatePage1(
   // ─────────────────────────────────────────────────────────────────────────
 
   doc.setFontSize(fonts.title);
-  doc.setFont("helvetica", "bold");
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(...colors.primary);
-  doc.text("NOTE SEF - SYGFP", pageWidth / 2, yPos, { align: "center" });
+  doc.text('NOTE SEF - SYGFP', pageWidth / 2, yPos, { align: 'center' });
   yPos += 8;
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -256,29 +267,31 @@ async function generatePage1(
     head: [],
     body: [
       [
-        "N° Référence",
-        note.dossier_ref || note.reference_pivot || "-",
-        "Date",
+        'N° Référence',
+        note.dossier_ref || note.reference_pivot || '-',
+        'Date',
         formatDateShort(note.created_at),
       ],
       [
-        "Direction",
-        note.direction?.sigle || note.direction?.label || "-",
-        "Urgence",
-        note.urgence ? "OUI" : "Non",
+        'Direction',
+        note.direction?.sigle || note.direction?.label || '-',
+        'Urgence',
+        note.urgence ? 'OUI' : 'Non',
       ],
       [
-        "Demandeur",
-        note.demandeur ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim() || "-" : "-",
-        "Montant",
+        'Demandeur',
+        note.demandeur
+          ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim() || '-'
+          : '-',
+        'Montant',
         formatMontant(note.montant_estime),
       ],
-      ["Objet", { content: note.objet || "-", colSpan: 3 }],
+      ['Objet', { content: note.objet || '-', colSpan: 3 }],
       [
-        "Documents annexés",
-        attachmentsCount > 0 ? `${attachmentsCount} pièce(s) jointe(s)` : "Aucun",
-        "Nb. pages",
-        "2",
+        'Documents annexés',
+        attachmentsCount > 0 ? `${attachmentsCount} pièce(s) jointe(s)` : 'Aucun',
+        'Nb. pages',
+        '2',
       ],
     ],
     styles: {
@@ -286,12 +299,12 @@ async function generatePage1(
       cellPadding: 2.5,
     },
     columnStyles: {
-      0: { fontStyle: "bold", cellWidth: 32, fillColor: colors.lightGray },
+      0: { fontStyle: 'bold', cellWidth: 32, fillColor: colors.lightGray },
       1: { cellWidth: 50 },
-      2: { fontStyle: "bold", cellWidth: 28, fillColor: colors.lightGray },
+      2: { fontStyle: 'bold', cellWidth: 28, fillColor: colors.lightGray },
       3: { cellWidth: 50 },
     },
-    theme: "grid",
+    theme: 'grid',
     margin: { left: margins.left, right: margins.right },
   });
 
@@ -307,23 +320,23 @@ async function generatePage1(
   // Exposé
   if (note.expose) {
     doc.setFontSize(fonts.subtitle);
-    doc.setFont("helvetica", "bold");
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.primary);
-    doc.text("EXPOSÉ", margins.left, yPos);
+    doc.text('EXPOSÉ', margins.left, yPos);
     yPos += 5;
 
     // Cadre coloré
     doc.setFillColor(...colors.exposeBlue);
     const exposeLines = doc.splitTextToSize(note.expose, contentWidth - 6);
     const exposeHeight = Math.min(exposeLines.length * 4 + 4, 40);
-    doc.rect(margins.left, yPos, contentWidth, exposeHeight, "F");
+    doc.rect(margins.left, yPos, contentWidth, exposeHeight, 'F');
 
     // Bordure gauche colorée
     doc.setFillColor(66, 133, 244); // Bleu
-    doc.rect(margins.left, yPos, 2, exposeHeight, "F");
+    doc.rect(margins.left, yPos, 2, exposeHeight, 'F');
 
     doc.setFontSize(fonts.body);
-    doc.setFont("helvetica", "normal");
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(...colors.text);
     doc.text(exposeLines.slice(0, 10), margins.left + 5, yPos + 4); // Max 10 lignes
     yPos += exposeHeight + 5;
@@ -332,21 +345,21 @@ async function generatePage1(
   // Avis
   if (note.avis && yPos < maxContentHeight) {
     doc.setFontSize(fonts.subtitle);
-    doc.setFont("helvetica", "bold");
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.primary);
-    doc.text("AVIS", margins.left, yPos);
+    doc.text('AVIS', margins.left, yPos);
     yPos += 5;
 
     doc.setFillColor(...colors.avisGreen);
     const avisLines = doc.splitTextToSize(note.avis, contentWidth - 6);
     const avisHeight = Math.min(avisLines.length * 4 + 4, 30);
-    doc.rect(margins.left, yPos, contentWidth, avisHeight, "F");
+    doc.rect(margins.left, yPos, contentWidth, avisHeight, 'F');
 
     doc.setFillColor(52, 168, 83); // Vert
-    doc.rect(margins.left, yPos, 2, avisHeight, "F");
+    doc.rect(margins.left, yPos, 2, avisHeight, 'F');
 
     doc.setFontSize(fonts.body);
-    doc.setFont("helvetica", "normal");
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(...colors.text);
     doc.text(avisLines.slice(0, 7), margins.left + 5, yPos + 4);
     yPos += avisHeight + 5;
@@ -355,21 +368,21 @@ async function generatePage1(
   // Recommandations
   if (note.recommandations && yPos < maxContentHeight) {
     doc.setFontSize(fonts.subtitle);
-    doc.setFont("helvetica", "bold");
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.primary);
-    doc.text("RECOMMANDATIONS", margins.left, yPos);
+    doc.text('RECOMMANDATIONS', margins.left, yPos);
     yPos += 5;
 
     doc.setFillColor(...colors.recoAmber);
     const recoLines = doc.splitTextToSize(note.recommandations, contentWidth - 6);
     const recoHeight = Math.min(recoLines.length * 4 + 4, 30);
-    doc.rect(margins.left, yPos, contentWidth, recoHeight, "F");
+    doc.rect(margins.left, yPos, contentWidth, recoHeight, 'F');
 
     doc.setFillColor(251, 188, 4); // Ambre
-    doc.rect(margins.left, yPos, 2, recoHeight, "F");
+    doc.rect(margins.left, yPos, 2, recoHeight, 'F');
 
     doc.setFontSize(fonts.body);
-    doc.setFont("helvetica", "normal");
+    doc.setFont('helvetica', 'normal');
     doc.setTextColor(...colors.text);
     doc.text(recoLines.slice(0, 7), margins.left + 5, yPos + 4);
     yPos += recoHeight + 8;
@@ -382,22 +395,24 @@ async function generatePage1(
   const lignes = imputation?.lignes || [];
   if (lignes.length > 0 && yPos < pageHeight - 60) {
     doc.setFontSize(fonts.subtitle);
-    doc.setFont("helvetica", "bold");
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.primary);
     doc.text("INFORMATIONS D'IMPUTATION", margins.left, yPos);
     yPos += 5;
 
-    const imputationData = lignes.slice(0, 6).map((imp: NoteImputationLigne, idx: number) => [
-      String(idx + 1),
-      truncateText(imp.destinataire, 30),
-      INSTRUCTION_TYPE_LABELS[imp.instruction_type as InstructionType] || imp.instruction_type,
-      PRIORITE_LABELS[imp.priorite as ImputationPriorite] || imp.priorite,
-      imp.delai || "-",
-    ]);
+    const imputationData = lignes
+      .slice(0, 6)
+      .map((imp: NoteImputationLigne, idx: number) => [
+        String(idx + 1),
+        truncateText(imp.destinataire, 30),
+        INSTRUCTION_TYPE_LABELS[imp.instruction_type as InstructionType] || imp.instruction_type,
+        PRIORITE_LABELS[imp.priorite as ImputationPriorite] || imp.priorite,
+        imp.delai || '-',
+      ]);
 
     autoTable(doc, {
       startY: yPos,
-      head: [["N°", "Destinataire", "Type", "Priorité", "Délai"]],
+      head: [['N°', 'Destinataire', 'Type', 'Priorité', 'Délai']],
       body: imputationData,
       styles: {
         fontSize: fonts.small,
@@ -406,16 +421,16 @@ async function generatePage1(
       headStyles: {
         fillColor: colors.primary,
         textColor: [255, 255, 255],
-        fontStyle: "bold",
+        fontStyle: 'bold',
       },
       columnStyles: {
-        0: { cellWidth: 10, halign: "center" },
+        0: { cellWidth: 10, halign: 'center' },
         1: { cellWidth: 55 },
         2: { cellWidth: 35 },
         3: { cellWidth: 25 },
-        4: { cellWidth: 35, halign: "center" },
+        4: { cellWidth: 35, halign: 'center' },
       },
-      theme: "grid",
+      theme: 'grid',
       margin: { left: margins.left, right: margins.right },
     });
 
@@ -429,24 +444,46 @@ async function generatePage1(
   const signatureY = pageHeight - 30;
 
   doc.setFontSize(fonts.body);
-  doc.setFont("helvetica", "normal");
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(...colors.text);
 
   // Lieu et date
   doc.text(`Abidjan, le ${formatDateFr(new Date())}`, pageWidth - margins.right - 55, signatureY);
 
-  // Titre signataire
-  doc.setFont("helvetica", "bold");
-  doc.text("Le Directeur Général", pageWidth - margins.right - 55, signatureY + 6);
+  // Titre signataire - avec mention P.I. ou délégation si applicable
+  doc.setFont('helvetica', 'bold');
+  if (signataire?.isInterim) {
+    doc.text('Le Directeur Général P.I.', pageWidth - margins.right - 55, signatureY + 6);
+    if (signataire.titulaireNom) {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(fonts.small);
+      doc.text(
+        `(Par intérim de ${signataire.titulaireNom})`,
+        pageWidth - margins.right - 55,
+        signatureY + 11
+      );
+    }
+  } else if (signataire?.isDelegation) {
+    doc.text('Le Directeur Général', pageWidth - margins.right - 55, signatureY + 6);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(fonts.small);
+    doc.text(
+      `Par délégation de ${signataire.delegateurNom || 'signature'}`,
+      pageWidth - margins.right - 55,
+      signatureY + 11
+    );
+  } else {
+    doc.text('Le Directeur Général', pageWidth - margins.right - 55, signatureY + 6);
+  }
 
   // Pied de page
   doc.setFontSize(fonts.small - 1);
   doc.setTextColor(...colors.secondary);
   doc.text(
-    "Document généré par SYGFP - Système de Gestion des Finances Publiques ARTI",
+    'Document généré par SYGFP - Système de Gestion des Finances Publiques ARTI',
     pageWidth / 2,
     pageHeight - 8,
-    { align: "center" }
+    { align: 'center' }
   );
 
   return yPos;
@@ -461,7 +498,8 @@ async function generatePage2(
   note: NoteSEF,
   validation: ValidationDG | null,
   qrDataUrl: string,
-  validationUrl: string
+  validationUrl: string,
+  signataire?: SignataireInterimInfo
 ): Promise<void> {
   const { margins, colors, fonts } = PDF_CONFIG;
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -475,9 +513,16 @@ async function generatePage2(
   // ─────────────────────────────────────────────────────────────────────────
 
   doc.setFontSize(fonts.title + 2);
-  doc.setFont("helvetica", "bold");
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(...colors.primary);
-  doc.text("OBSERVATIONS DU DIRECTEUR GÉNÉRAL", pageWidth / 2, yPos + 10, { align: "center" });
+
+  if (signataire?.isInterim) {
+    doc.text('OBSERVATIONS DU DIRECTEUR GÉNÉRAL P.I.', pageWidth / 2, yPos + 10, {
+      align: 'center',
+    });
+  } else {
+    doc.text('OBSERVATIONS DU DIRECTEUR GÉNÉRAL', pageWidth / 2, yPos + 10, { align: 'center' });
+  }
 
   yPos += 20;
 
@@ -489,13 +534,15 @@ async function generatePage2(
 
   // Référence de la note
   doc.setFontSize(fonts.body);
-  doc.setFont("helvetica", "normal");
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(...colors.secondary);
-  doc.text(`Réf: ${note.dossier_ref || note.reference_pivot || "N/A"}`, pageWidth / 2, yPos, { align: "center" });
+  doc.text(`Réf: ${note.dossier_ref || note.reference_pivot || 'N/A'}`, pageWidth / 2, yPos, {
+    align: 'center',
+  });
   yPos += 6;
 
   const objetTrunc = truncateText(note.objet, 80);
-  doc.text(`Objet: ${objetTrunc}`, pageWidth / 2, yPos, { align: "center" });
+  doc.text(`Objet: ${objetTrunc}`, pageWidth / 2, yPos, { align: 'center' });
   yPos += 15;
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -506,20 +553,26 @@ async function generatePage2(
     ? formatDateFr(validation.validated_at)
     : formatDateFr(new Date());
 
-  const validatorName = validation?.validated_by
-    ? `${validation.validated_by.first_name || ""} ${validation.validated_by.last_name || ""}`.trim() ||
-      "Le Directeur Général"
-    : "Le Directeur Général";
+  const baseValidatorName = validation?.validated_by
+    ? `${validation.validated_by.first_name || ''} ${validation.validated_by.last_name || ''}`.trim() ||
+      'Le Directeur Général'
+    : 'Le Directeur Général';
+
+  const validatorName = signataire?.isInterim
+    ? `${baseValidatorName} (P.I. ${signataire.titulaireNom || ''})`
+    : signataire?.isDelegation
+      ? `${baseValidatorName} (Par délégation de ${signataire.delegateurNom || ''})`
+      : baseValidatorName;
 
   const statusText = validation?.status
     ? VALIDATION_STATUS_LABELS[validation.status]
-    : "En attente";
+    : 'En attente';
 
-  const observations = validation?.commentaire || "Aucune observation particulière.";
+  const observations = validation?.commentaire || 'Aucune observation particulière.';
 
   autoTable(doc, {
     startY: yPos,
-    head: [["Date de validation", "Informations sur la validation du DG"]],
+    head: [['Date de validation', 'Informations sur la validation du DG']],
     body: [
       [
         `Abidjan, le ${validationDate}`,
@@ -529,19 +582,19 @@ async function generatePage2(
     styles: {
       fontSize: fonts.body,
       cellPadding: 6,
-      valign: "top",
+      valign: 'top',
     },
     headStyles: {
       fillColor: colors.primary,
       textColor: [255, 255, 255],
-      fontStyle: "bold",
-      halign: "center",
+      fontStyle: 'bold',
+      halign: 'center',
     },
     columnStyles: {
-      0: { cellWidth: 45, halign: "center" },
+      0: { cellWidth: 45, halign: 'center' },
       1: { cellWidth: 115 },
     },
-    theme: "grid",
+    theme: 'grid',
     margin: { left: margins.left, right: margins.right },
   });
 
@@ -559,7 +612,7 @@ async function generatePage2(
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.secondary);
   doc.text("Scannez ce QR Code pour vérifier l'authenticité", pageWidth / 2, qrY - 8, {
-    align: "center",
+    align: 'center',
   });
 
   // Cadre décoratif autour du QR
@@ -570,35 +623,36 @@ async function generatePage2(
   // QR Code
   if (qrDataUrl) {
     try {
-      doc.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+      doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
     } catch (e) {
-      console.warn("Could not add QR code on page 2:", e);
+      console.warn('Could not add QR code on page 2:', e);
     }
   }
 
   // URL de vérification sous le QR
   doc.setFontSize(fonts.small - 1);
   doc.setTextColor(...colors.primary);
-  const urlTrunc = validationUrl.length > 60 ? validationUrl.substring(0, 57) + "..." : validationUrl;
-  doc.text(urlTrunc, pageWidth / 2, qrY + qrSize + 8, { align: "center" });
+  const urlTrunc =
+    validationUrl.length > 60 ? validationUrl.substring(0, 57) + '...' : validationUrl;
+  doc.text(urlTrunc, pageWidth / 2, qrY + qrSize + 8, { align: 'center' });
 
   // Note de sécurité
   doc.setFontSize(fonts.small - 1);
   doc.setTextColor(...colors.secondary);
   doc.text(
-    "Ce document est authentifié électroniquement. Toute falsification est passible de poursuites.",
+    'Ce document est authentifié électroniquement. Toute falsification est passible de poursuites.',
     pageWidth / 2,
     qrY + qrSize + 16,
-    { align: "center" }
+    { align: 'center' }
   );
 
   // Pied de page
   doc.setFontSize(fonts.small - 1);
   doc.text(
-    "ARTI - SYGFP | Document officiel généré automatiquement",
+    'ARTI - SYGFP | Document officiel généré automatiquement',
     pageWidth / 2,
     pageHeight - 8,
-    { align: "center" }
+    { align: 'center' }
   );
 }
 
@@ -606,15 +660,14 @@ async function generatePage2(
 // FONCTION PRINCIPALE DE GÉNÉRATION
 // ============================================================================
 
-export async function generateNoteSEFPdf(
-  options: NoteSEFPdfOptions
-): Promise<PdfGenerationResult> {
+export async function generateNoteSEFPdf(options: NoteSEFPdfOptions): Promise<PdfGenerationResult> {
   const {
     note,
     imputation = null,
     validation = null,
     attachmentsCount = 0,
     baseUrl = window.location.origin,
+    signataire,
   } = options;
 
   // URL de validation
@@ -626,43 +679,40 @@ export async function generateNoteSEFPdf(
   const qrDataUrl = await generateQRCodeDataUrl(validationUrl, 150);
 
   // Charger le logo
-  let logoDataUrl = "";
+  let logoDataUrl = '';
   try {
     logoDataUrl = await loadImageAsDataUrl(logoArti);
   } catch (e) {
-    console.warn("Could not load logo:", e);
+    console.warn('Could not load logo:', e);
   }
 
   // Créer le document PDF
   const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
   });
 
   // Page 1: Informations principales
-  await generatePage1(doc, note, imputation, qrDataUrl, logoDataUrl, attachmentsCount);
+  await generatePage1(doc, note, imputation, qrDataUrl, logoDataUrl, attachmentsCount, signataire);
 
   // Page 2: Observations du DG
-  await generatePage2(doc, note, validation, qrDataUrl, validationUrl);
+  await generatePage2(doc, note, validation, qrDataUrl, validationUrl, signataire);
 
   // Ajouter métadonnées
-  const noteRef = note.dossier_ref || note.reference_pivot || "Brouillon";
+  const noteRef = note.dossier_ref || note.reference_pivot || 'Brouillon';
   doc.setProperties({
     title: `ARTI_NOTE_DG_SYGFP - ${noteRef}`,
-    subject: note.objet || "",
-    author: "ARTI - SYGFP",
-    creator: "SYGFP - Système de Gestion des Finances Publiques",
-    keywords: "note, SEF, DG, ARTI, officiel, validation",
+    subject: note.objet || '',
+    author: 'ARTI - SYGFP',
+    creator: 'SYGFP - Système de Gestion des Finances Publiques',
+    keywords: 'note, SEF, DG, ARTI, officiel, validation',
   });
 
   // Générer le blob
-  const blob = doc.output("blob");
-  const refClean = (noteRef || "DRAFT").replace(/[^a-zA-Z0-9]/g, "_");
-  const filename = `ARTI_NOTE_DG_SYGFP_${refClean}_${format(
-    new Date(),
-    "yyyyMMdd_HHmmss"
-  )}.pdf`;
+  const blob = doc.output('blob');
+  const refClean = (noteRef || 'DRAFT').replace(/[^a-zA-Z0-9]/g, '_');
+  const filename = `ARTI_NOTE_DG_SYGFP_${refClean}_${format(new Date(), 'yyyyMMdd_HHmmss')}.pdf`;
 
   return { blob, filename };
 }
@@ -676,7 +726,7 @@ export async function downloadNoteSEFPdf(options: NoteSEFPdfOptions): Promise<vo
 
   // Créer un lien de téléchargement
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);

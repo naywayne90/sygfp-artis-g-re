@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import {
   ChevronDown,
   ChevronRight,
@@ -13,15 +13,16 @@ import {
   Activity,
   TrendingUp,
   Shield,
-} from "lucide-react";
-import logoArti from "@/assets/logo-arti.jpg";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import { canAccessRoute, PROFILS_FONCTIONNELS } from "@/lib/config/rbac-config";
-import { Badge } from "@/components/ui/badge";
+  FolderOpen,
+} from 'lucide-react';
+import logoArti from '@/assets/logo-arti.jpg';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
+import { canAccessRoute, PROFILS_FONCTIONNELS } from '@/lib/config/rbac-config';
+import { Badge } from '@/components/ui/badge';
 import {
   Sidebar,
   SidebarContent,
@@ -37,22 +38,18 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { useDashboardStats } from "@/hooks/useDashboardStats";
+} from '@/components/ui/dropdown-menu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 // Import du registre centralisé
 import {
@@ -62,7 +59,7 @@ import {
   getSubSections,
   getModulesBySubSection,
   type ModuleConfig,
-} from "@/config/modules.registry";
+} from '@/config/modules.registry';
 
 // ============================================
 // COMPOSANT MENU SECTION SIMPLE
@@ -95,12 +92,12 @@ function MenuSection({ title, modules, collapsed, isActive }: MenuSectionProps) 
                 tooltip={module.name}
               >
                 <NavLink
-                  to={module.route || "#"}
+                  to={module.route || '#'}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                    'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                     module.route && isActive(module.route)
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent'
                   )}
                 >
                   <module.icon className="h-4 w-4 shrink-0" />
@@ -121,7 +118,7 @@ function MenuSection({ title, modules, collapsed, isActive }: MenuSectionProps) 
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
   const location = useLocation();
   const navigate = useNavigate();
   const [chaineOpen, setChaineOpen] = useState(true);
@@ -135,7 +132,9 @@ export function AppSidebar() {
   const { data: userProfile } = useQuery({
     queryKey: ['sidebar-user-profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -161,7 +160,7 @@ export function AppSidebar() {
       // Admin voit tout
       if (profile === 'ADMIN' || profile === 'Admin') return modules;
 
-      return modules.filter(module => {
+      return modules.filter((module) => {
         if (!module.route) return true; // Groupes parent toujours visibles
         return canAccessRoute(module.route, profile, hierarchy || undefined);
       });
@@ -171,13 +170,14 @@ export function AppSidebar() {
   // Infos profil pour affichage
   const profilInfo = useMemo(() => {
     if (!userProfile?.profil_fonctionnel) return null;
-    const profil = PROFILS_FONCTIONNELS[userProfile.profil_fonctionnel as keyof typeof PROFILS_FONCTIONNELS];
+    const profil =
+      PROFILS_FONCTIONNELS[userProfile.profil_fonctionnel as keyof typeof PROFILS_FONCTIONNELS];
     return profil || { label: userProfile.profil_fonctionnel, color: '#6b7280' };
   }, [userProfile]);
 
   const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
-    if (path.includes("?")) {
+    if (path === '/') return location.pathname === '/';
+    if (path.includes('?')) {
       return location.pathname + location.search === path;
     }
     return location.pathname.startsWith(path);
@@ -199,13 +199,17 @@ export function AppSidebar() {
     return ['ADMIN', 'Admin', 'DG', 'DAAF', 'CB', 'TRESORERIE'].includes(profile);
   }, [userProfile]);
 
-  const isChaineActive = chaineDepenseModules.some(m => m.route && isActive(m.route));
-  const isExecutionActive = executionModules.some(m => m.route && isActive(m.route));
-  const isParametrageActive = getChildModules('parametrage').some(m => m.route && isActive(m.route));
+  const isChaineActive = chaineDepenseModules.some((m) => m.route && isActive(m.route));
+  const isExecutionActive = executionModules.some((m) => m.route && isActive(m.route));
+  const isParametrageActive = getChildModules('parametrage').some(
+    (m) => m.route && isActive(m.route)
+  );
 
   // Calcul du total des badges
   const totalBadgeCount = stats
-    ? (stats.engagementsAValider || 0) + (stats.liquidationsAValider || 0) + (stats.ordonnancementsAValider || 0)
+    ? (stats.engagementsAValider || 0) +
+      (stats.liquidationsAValider || 0) +
+      (stats.ordonnancementsAValider || 0)
     : 0;
 
   return (
@@ -213,16 +217,16 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 items-center justify-center rounded-lg bg-white/95 px-2 shadow-sm">
-            <img
-              src={logoArti}
-              alt="ARTI"
-              className="h-7 w-auto object-contain"
-            />
+            <img src={logoArti} alt="ARTI" className="h-7 w-auto object-contain" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-sidebar-foreground text-lg tracking-tight">SYGFP</span>
-              <span className="text-[9px] text-sidebar-primary font-medium uppercase tracking-wider">Gestion Financière</span>
+              <span className="font-bold text-sidebar-foreground text-lg tracking-tight">
+                SYGFP
+              </span>
+              <span className="text-[9px] text-sidebar-primary font-medium uppercase tracking-wider">
+                Gestion Financière
+              </span>
             </div>
           )}
         </div>
@@ -234,18 +238,14 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive("/")}
-                  tooltip="Tableau de bord"
-                >
+                <SidebarMenuButton asChild isActive={isActive('/')} tooltip="Tableau de bord">
                   <NavLink
                     to="/"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
-                      isActive("/")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                      isActive('/')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
                     )}
                   >
                     <Home className="h-4 w-4 shrink-0" />
@@ -256,16 +256,16 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive("/recherche")}
+                  isActive={isActive('/recherche')}
                   tooltip="Recherche Dossier"
                 >
                   <NavLink
                     to="/recherche"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium",
-                      isActive("/recherche")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium',
+                      isActive('/recherche')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
                     )}
                   >
                     <Search className="h-4 w-4 shrink-0" />
@@ -297,25 +297,25 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       tooltip="9 étapes du flux de dépense"
                       className={cn(
-                        "w-full justify-between",
-                        isChaineActive && "bg-sidebar-accent"
+                        'w-full justify-between',
+                        isChaineActive && 'bg-sidebar-accent'
                       )}
                     >
                       <div className="flex items-center gap-3">
                         <HandCoins className="h-4 w-4 shrink-0" />
-                        {!collapsed && (
-                          <span className="text-sm font-medium">Flux de dépense</span>
-                        )}
+                        {!collapsed && <span className="text-sm font-medium">Flux de dépense</span>}
                       </div>
                       {!collapsed && (
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center text-[10px] px-1.5 py-0 h-5 bg-sidebar-primary/20 text-sidebar-primary-foreground border border-sidebar-primary/40 rounded-md font-medium">
                             {chaineDepenseModules.length} étapes
                           </span>
-                          <ChevronRight className={cn(
-                            "h-4 w-4 transition-transform",
-                            chaineOpen && "rotate-90"
-                          )} />
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform',
+                              chaineOpen && 'rotate-90'
+                            )}
+                          />
                         </div>
                       )}
                     </SidebarMenuButton>
@@ -324,20 +324,27 @@ export function AppSidebar() {
                     <SidebarMenuSub>
                       {chaineDepenseModules.map((module) => (
                         <SidebarMenuSubItem key={module.id}>
-                          <SidebarMenuSubButton asChild isActive={module.route ? isActive(module.route) : false}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={module.route ? isActive(module.route) : false}
+                          >
                             <NavLink
-                              to={module.route || "#"}
+                              to={module.route || '#'}
                               className={cn(
-                                "flex items-center gap-2 text-sm py-1.5",
-                                module.route && isActive(module.route) && "text-sidebar-primary font-medium"
+                                'flex items-center gap-2 text-sm py-1.5',
+                                module.route &&
+                                  isActive(module.route) &&
+                                  'text-sidebar-primary font-medium'
                               )}
                             >
-                              <span className={cn(
-                                "flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold",
-                                module.route && isActive(module.route)
-                                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                  : "bg-sidebar-accent text-sidebar-foreground"
-                              )}>
+                              <span
+                                className={cn(
+                                  'flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold',
+                                  module.route && isActive(module.route)
+                                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                                    : 'bg-sidebar-accent text-sidebar-foreground'
+                                )}
+                              >
                                 {module.step}
                               </span>
                               <span>{module.name}</span>
@@ -377,6 +384,34 @@ export function AppSidebar() {
           isActive={isActive}
         />
 
+        {/* ========== SUIVI DOSSIERS ========== */}
+        <SidebarGroup className="mt-2">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/suivi-dossiers')}
+                  tooltip="Suivi Dossiers"
+                >
+                  <NavLink
+                    to="/suivi-dossiers"
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium',
+                      isActive('/suivi-dossiers')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                    )}
+                  >
+                    <FolderOpen className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>Suivi Dossiers</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* ========== EXÉCUTION BUDGÉTAIRE (Groupe extensible) ========== */}
         <SidebarGroup className="mt-4">
           {!collapsed && (
@@ -397,15 +432,13 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       tooltip="Suivi de l'exécution"
                       className={cn(
-                        "w-full justify-between",
-                        isExecutionActive && "bg-sidebar-accent"
+                        'w-full justify-between',
+                        isExecutionActive && 'bg-sidebar-accent'
                       )}
                     >
                       <div className="flex items-center gap-3">
                         <TrendingUp className="h-4 w-4 shrink-0" />
-                        {!collapsed && (
-                          <span className="text-sm font-medium">Suivi Exécution</span>
-                        )}
+                        {!collapsed && <span className="text-sm font-medium">Suivi Exécution</span>}
                       </div>
                       {!collapsed && (
                         <div className="flex items-center gap-2">
@@ -414,10 +447,12 @@ export function AppSidebar() {
                               {totalBadgeCount}
                             </span>
                           )}
-                          <ChevronRight className={cn(
-                            "h-4 w-4 transition-transform",
-                            executionOpen && "rotate-90"
-                          )} />
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform',
+                              executionOpen && 'rotate-90'
+                            )}
+                          />
                         </div>
                       )}
                     </SidebarMenuButton>
@@ -425,15 +460,21 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {executionModules.map((module) => {
-                        const badgeCount = module.badgeKey && stats ? (stats as any)[module.badgeKey] : 0;
+                        const badgeCount =
+                          module.badgeKey && stats ? (stats as any)[module.badgeKey] : 0;
                         return (
                           <SidebarMenuSubItem key={module.id}>
-                            <SidebarMenuSubButton asChild isActive={module.route ? isActive(module.route) : false}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={module.route ? isActive(module.route) : false}
+                            >
                               <NavLink
-                                to={module.route || "#"}
+                                to={module.route || '#'}
                                 className={cn(
-                                  "flex items-center justify-between gap-2 text-sm py-1.5",
-                                  module.route && isActive(module.route) && "text-sidebar-primary font-medium"
+                                  'flex items-center justify-between gap-2 text-sm py-1.5',
+                                  module.route &&
+                                    isActive(module.route) &&
+                                    'text-sidebar-primary font-medium'
                                 )}
                               >
                                 <div className="flex items-center gap-2">
@@ -442,7 +483,7 @@ export function AppSidebar() {
                                 </div>
                                 {badgeCount > 0 && (
                                   <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full text-[10px] font-bold bg-warning/20 text-warning-foreground dark:text-warning">
-                                    {badgeCount > 99 ? "99+" : badgeCount}
+                                    {badgeCount > 99 ? '99+' : badgeCount}
                                   </span>
                                 )}
                               </NavLink>
@@ -487,8 +528,8 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         tooltip="Configuration système"
                         className={cn(
-                          "w-full justify-between",
-                          isParametrageActive && "bg-sidebar-accent"
+                          'w-full justify-between',
+                          isParametrageActive && 'bg-sidebar-accent'
                         )}
                       >
                         <div className="flex items-center gap-3">
@@ -496,17 +537,21 @@ export function AppSidebar() {
                           {!collapsed && <span className="text-sm">Configuration</span>}
                         </div>
                         {!collapsed && (
-                          <ChevronRight className={cn(
-                            "h-4 w-4 transition-transform",
-                            parametrageOpen && "rotate-90"
-                          )} />
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform',
+                              parametrageOpen && 'rotate-90'
+                            )}
+                          />
                         )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {parametrageSubSections.map((section) => {
-                          const sectionModules = filterModulesByAccess(getModulesBySubSection('parametrage', section));
+                          const sectionModules = filterModulesByAccess(
+                            getModulesBySubSection('parametrage', section)
+                          );
                           if (sectionModules.length === 0) return null;
                           return (
                             <div key={section}>
@@ -515,12 +560,17 @@ export function AppSidebar() {
                               </div>
                               {sectionModules.map((module) => (
                                 <SidebarMenuSubItem key={module.id}>
-                                  <SidebarMenuSubButton asChild isActive={module.route ? isActive(module.route) : false}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={module.route ? isActive(module.route) : false}
+                                  >
                                     <NavLink
-                                      to={module.route || "#"}
+                                      to={module.route || '#'}
                                       className={cn(
-                                        "flex items-center gap-2 text-sm py-1.5",
-                                        module.route && isActive(module.route) && "text-sidebar-primary font-medium"
+                                        'flex items-center gap-2 text-sm py-1.5',
+                                        module.route &&
+                                          isActive(module.route) &&
+                                          'text-sidebar-primary font-medium'
                                       )}
                                     >
                                       <module.icon className="h-3.5 w-3.5" />
@@ -551,7 +601,7 @@ export function AppSidebar() {
                   className="text-sm"
                   style={{
                     backgroundColor: profilInfo?.color ? `${profilInfo.color}20` : undefined,
-                    color: profilInfo?.color
+                    color: profilInfo?.color,
                   }}
                 >
                   {userProfile?.full_name?.charAt(0)?.toUpperCase() || 'U'}
@@ -570,7 +620,7 @@ export function AppSidebar() {
                           className="text-[9px] px-1.5 py-0 h-4 font-medium"
                           style={{
                             borderColor: profilInfo.color,
-                            color: profilInfo.color
+                            color: profilInfo.color,
                           }}
                         >
                           {profilInfo.label}
@@ -606,12 +656,12 @@ export function AppSidebar() {
                 )}
               </div>
             </div>
-            <DropdownMenuItem onClick={() => navigate("/mon-profil")}>
+            <DropdownMenuItem onClick={() => navigate('/mon-profil')}>
               <User className="mr-2 h-4 w-4" />
               Mon profil
             </DropdownMenuItem>
             {canSeeParametrage && (
-              <DropdownMenuItem onClick={() => navigate("/admin/parametres")}>
+              <DropdownMenuItem onClick={() => navigate('/admin/parametres')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Paramètres
               </DropdownMenuItem>
@@ -622,10 +672,10 @@ export function AppSidebar() {
               onClick={async () => {
                 const { error } = await supabase.auth.signOut();
                 if (error) {
-                  toast.error("Erreur lors de la déconnexion");
+                  toast.error('Erreur lors de la déconnexion');
                 } else {
-                  toast.success("Déconnexion réussie");
-                  navigate("/auth");
+                  toast.success('Déconnexion réussie');
+                  navigate('/auth');
                 }
               }}
             >

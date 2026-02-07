@@ -52,6 +52,8 @@ const ScanningEngagement = lazy(() => import('./pages/ScanningEngagement'));
 const ScanningLiquidation = lazy(() => import('./pages/ScanningLiquidation'));
 const TestNonRegression = lazy(() => import('./pages/TestNonRegression'));
 const VerifyDocument = lazy(() => import('./pages/VerifyDocument'));
+const SuiviDossiers = lazy(() => import('./pages/SuiviDossiers'));
+const DossierDetails = lazy(() => import('./pages/DossierDetails'));
 
 // Pages DG
 const NotesAValider = lazy(() => import('./pages/dg/NotesAValider'));
@@ -324,6 +326,10 @@ const App = () => (
                 <Route path="/execution/scanning-liquidation" element={<ScanningLiquidation />} />
                 <Route path="/ordonnancements" element={<Ordonnancements />} />
                 <Route path="/reglements" element={<Reglements />} />
+
+                {/* Suivi Dossiers */}
+                <Route path="/suivi-dossiers" element={<SuiviDossiers />} />
+                <Route path="/suivi-dossiers/:id" element={<DossierDetails />} />
 
                 {/* États d'exécution */}
                 <Route path="/etats-execution" element={<EtatsExecution />} />
