@@ -1,74 +1,55 @@
 -- ============================================================
--- P6: Systeme de notifications
+-- P6: Complement systeme de notifications
 -- Migration: 20260207_p6_notifications.sql
 -- ============================================================
+-- La table `notifications` existe deja avec le schema:
+--   id, user_id, title, message, type, category, entity_type, entity_id,
+--   is_read, is_urgent, urgence, email_envoye, date_email, created_at, read_at
+-- Les tables notification_templates, notification_recipients,
+--   notification_logs, notification_preferences existent aussi.
+-- Les triggers sur ordonnancements/reglements existent deja dans
+--   20260203170000_triggers_notifications.sql
+-- ============================================================
 
--- Table principale des notifications
-CREATE TABLE IF NOT EXISTS notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (type IN ('info', 'warning', 'success', 'error', 'workflow')),
-  title TEXT NOT NULL,
-  message TEXT NOT NULL,
-  read BOOLEAN NOT NULL DEFAULT false,
-  entity_type TEXT, -- 'note_sef', 'engagement', 'liquidation', etc.
-  entity_id UUID,
-  metadata JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  read_at TIMESTAMPTZ
-);
+-- Fonctions utilitaires adaptees au schema existant (is_read au lieu de read)
 
--- Index pour performance
-CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, read);
-CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at DESC);
-
--- RLS: chaque user ne voit que ses notifications
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view own notifications"
-  ON notifications FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own notifications"
-  ON notifications FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- Les admins et le systeme peuvent inserer des notifications
-CREATE POLICY "System can insert notifications"
-  ON notifications FOR INSERT
-  WITH CHECK (true);
-
--- Fonction pour marquer comme lu
+-- Marquer une notification comme lue
 CREATE OR REPLACE FUNCTION mark_notification_read(p_notification_id UUID)
 RETURNS VOID AS $$
 BEGIN
   UPDATE notifications
-  SET read = true, read_at = now()
+  SET is_read = true, read_at = now()
   WHERE id = p_notification_id AND user_id = auth.uid();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Fonction pour marquer toutes comme lues
+-- Marquer toutes les notifications comme lues
 CREATE OR REPLACE FUNCTION mark_all_notifications_read()
 RETURNS VOID AS $$
 BEGIN
   UPDATE notifications
-  SET read = true, read_at = now()
-  WHERE user_id = auth.uid() AND read = false;
+  SET is_read = true, read_at = now()
+  WHERE user_id = auth.uid() AND is_read = false;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Fonction pour compter les non-lues
+-- Compter les notifications non lues
 CREATE OR REPLACE FUNCTION get_unread_notification_count()
 RETURNS INTEGER AS $$
 BEGIN
-  RETURN (SELECT COUNT(*)::INTEGER FROM notifications WHERE user_id = auth.uid() AND read = false);
+  RETURN (SELECT COUNT(*)::INTEGER FROM notifications WHERE user_id = auth.uid() AND is_read = false);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Fonction pour creer une notification (appelable par triggers)
+-- Alias pour compatibilite (certaines migrations utilisent get_unread_notifications_count)
+CREATE OR REPLACE FUNCTION get_unread_notifications_count()
+RETURNS INTEGER AS $$
+BEGIN
+  RETURN get_unread_notification_count();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Fonction pour creer une notification (compatible avec le schema existant)
 CREATE OR REPLACE FUNCTION create_notification(
   p_user_id UUID,
   p_type TEXT,
@@ -82,8 +63,8 @@ RETURNS UUID AS $$
 DECLARE
   v_id UUID;
 BEGIN
-  INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, metadata)
-  VALUES (p_user_id, p_type, p_title, p_message, p_entity_type, p_entity_id, p_metadata)
+  INSERT INTO notifications (user_id, type, title, message, entity_type, entity_id, category, is_read, is_urgent, urgence)
+  VALUES (p_user_id, p_type, p_title, p_message, p_entity_type, p_entity_id, 'workflow', false, false, 'normale')
   RETURNING id INTO v_id;
   RETURN v_id;
 END;
@@ -92,7 +73,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================================
 -- Trigger: notifier le prochain validateur quand un step workflow est complete
 -- Adapte au schema reel: wf_step_history.action = 'valide'
--- wf_steps.step_order, wf_instances.entity_type/entity_id
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION notify_workflow_step()
@@ -128,7 +108,6 @@ BEGIN
           ))
           AND p.is_active = true
       LOOP
-        -- Creer notification pour chaque validateur
         PERFORM create_notification(
           v_validator.id,
           'workflow',
