@@ -2,12 +2,13 @@
  * DashboardHR - Dashboard spécialisé Ressources Humaines (DGPECRP)
  * Focalisé sur: Effectifs, Mouvements de personnel, Budget masse salariale
  */
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Users,
   UserPlus,
@@ -18,13 +19,12 @@ import {
   RefreshCw,
   DollarSign,
   Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
   PieChart,
-} from "lucide-react";
-import { useDirectionDashboard } from "@/hooks/dashboard/useDirectionDashboard";
-import { formatMontant } from "@/lib/config/sygfp-constants";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { useDirectionDashboard } from '@/hooks/dashboard/useDirectionDashboard';
+import { useHRDashboardData } from '@/hooks/useHRDashboardData';
+import { formatMontant } from '@/lib/config/sygfp-constants';
+import { cn } from '@/lib/utils';
 
 interface DashboardHRProps {
   directionId: string;
@@ -32,42 +32,29 @@ interface DashboardHRProps {
   directionNom: string;
 }
 
-export function DashboardHR({
-  directionId,
-  directionCode,
-  directionNom,
-}: DashboardHRProps) {
+export function DashboardHR({ directionId, directionCode, directionNom }: DashboardHRProps) {
   const navigate = useNavigate();
-  const { kpis, alertes, isLoading, refetch } = useDirectionDashboard(directionId);
+  const { kpis, isLoading: dirLoading, refetch: dirRefetch } = useDirectionDashboard(directionId);
+  const { data: hrData, isLoading: hrLoading, refetch: hrRefetch } = useHRDashboardData();
+
+  const isLoading = dirLoading || hrLoading;
 
   if (isLoading) {
     return <DashboardHRSkeleton />;
   }
 
-  // Données simulées pour le dashboard RH (à remplacer par vraies données)
-  const hrStats = {
-    effectifTotal: 156,
-    effectifCDI: 142,
-    effectifCDD: 14,
-    recrutementsMois: 3,
-    departsMois: 1,
-    masseSalariale: 450000000,
-    budgetFormation: 25000000,
-    budgetFormationUtilise: 12500000,
-    congesEnCours: 12,
-    missionsEnCours: 8,
-    directionsParEffectif: [
-      { code: "DSI", nom: "Direction SI", effectif: 28 },
-      { code: "DAAF", nom: "Direction Admin. Fin.", effectif: 24 },
-      { code: "DG", nom: "Direction Générale", effectif: 18 },
-      { code: "SDMG", nom: "Moyens Généraux", effectif: 22 },
-      { code: "Autres", nom: "Autres directions", effectif: 64 },
-    ],
-  };
+  const effectifTotal = hrData?.effectifTotal ?? 0;
+  const directionsParEffectif = hrData?.directionsParEffectif ?? [];
+  const budgetFormation = hrData?.budgetFormation ?? 0;
+  const budgetFormationUtilise = hrData?.budgetFormationUtilise ?? 0;
 
-  const tauxFormation = Math.round(
-    (hrStats.budgetFormationUtilise / hrStats.budgetFormation) * 100
-  );
+  const tauxFormation =
+    budgetFormation > 0 ? Math.round((budgetFormationUtilise / budgetFormation) * 100) : 0;
+
+  const refetch = () => {
+    dirRefetch();
+    hrRefetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -101,76 +88,84 @@ export function DashboardHR({
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{hrStats.effectifTotal}</div>
-            <div className="flex gap-2 mt-2">
-              <Badge variant="outline" className="text-xs">
-                {hrStats.effectifCDI} CDI
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {hrStats.effectifCDD} CDD
-              </Badge>
-            </div>
+            <div className="text-3xl font-bold">{effectifTotal}</div>
+            <p className="text-xs text-muted-foreground mt-2">Agents actifs</p>
           </CardContent>
         </Card>
 
-        {/* Mouvements */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Mouvements du Mois</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-success">
-                <UserPlus className="h-4 w-4" />
-                <span className="text-lg font-bold">+{hrStats.recrutementsMois}</span>
-              </div>
-              <div className="flex items-center gap-1 text-destructive">
-                <UserMinus className="h-4 w-4" />
-                <span className="text-lg font-bold">-{hrStats.departsMois}</span>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Solde: +{hrStats.recrutementsMois - hrStats.departsMois}
-            </p>
-          </CardContent>
-        </Card>
+        {/* Mouvements - SIRH requis */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="opacity-50 pointer-events-none">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Mouvements du Mois</CardTitle>
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <UserPlus className="h-4 w-4" />
+                      <span className="text-lg font-bold">--</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <UserMinus className="h-4 w-4" />
+                      <span className="text-lg font-bold">--</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">N/D</p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>Module SIRH requis</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-        {/* Masse Salariale */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Masse Salariale</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatMontant(hrStats.masseSalariale)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Budget mensuel
-            </p>
-          </CardContent>
-        </Card>
+        {/* Masse Salariale - SIRH requis */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="opacity-50 pointer-events-none">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Masse Salariale</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-muted-foreground">N/D</div>
+                  <p className="text-xs text-muted-foreground mt-1">Module SIRH requis</p>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>Module SIRH requis</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-        {/* Absences */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">En Absence</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <div>
-                <span className="text-2xl font-bold">{hrStats.congesEnCours}</span>
-                <span className="text-xs text-muted-foreground ml-1">congés</span>
-              </div>
-              <div>
-                <span className="text-2xl font-bold">{hrStats.missionsEnCours}</span>
-                <span className="text-xs text-muted-foreground ml-1">missions</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Absences - SIRH requis */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Card className="opacity-50 pointer-events-none">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">En Absence</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <span className="text-2xl font-bold text-muted-foreground">--</span>
+                      <span className="text-xs text-muted-foreground ml-1">congés</span>
+                    </div>
+                    <div>
+                      <span className="text-2xl font-bold text-muted-foreground">--</span>
+                      <span className="text-xs text-muted-foreground ml-1">missions</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TooltipTrigger>
+            <TooltipContent>Module SIRH requis</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Budget Formation et Répartition */}
@@ -187,19 +182,19 @@ export function DashboardHR({
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Budget alloué</span>
-              <span className="font-semibold">{formatMontant(hrStats.budgetFormation)}</span>
+              <span className="font-semibold">{formatMontant(budgetFormation)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Utilisé</span>
               <span className="font-semibold text-primary">
-                {formatMontant(hrStats.budgetFormationUtilise)}
+                {formatMontant(budgetFormationUtilise)}
               </span>
             </div>
             <Progress value={tauxFormation} className="h-3" />
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">{tauxFormation}% utilisé</span>
               <span className="text-muted-foreground">
-                Reste: {formatMontant(hrStats.budgetFormation - hrStats.budgetFormationUtilise)}
+                Reste: {formatMontant(budgetFormation - budgetFormationUtilise)}
               </span>
             </div>
           </CardContent>
@@ -216,17 +211,23 @@ export function DashboardHR({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {hrStats.directionsParEffectif.map((dir, index) => {
-                const percent = Math.round((dir.effectif / hrStats.effectifTotal) * 100);
+              {directionsParEffectif.map((dir, index) => {
+                const percent =
+                  effectifTotal > 0 ? Math.round((dir.effectif / effectifTotal) * 100) : 0;
                 const colors = [
-                  "bg-blue-500",
-                  "bg-green-500",
-                  "bg-purple-500",
-                  "bg-orange-500",
-                  "bg-gray-400",
+                  'bg-blue-500',
+                  'bg-green-500',
+                  'bg-purple-500',
+                  'bg-orange-500',
+                  'bg-gray-400',
+                  'bg-cyan-500',
+                  'bg-rose-500',
+                  'bg-amber-500',
+                  'bg-indigo-500',
+                  'bg-teal-500',
                 ];
                 return (
-                  <div key={dir.code} className="space-y-1">
+                  <div key={dir.direction_id} className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span className="font-medium">{dir.code}</span>
                       <span className="text-muted-foreground">
@@ -235,7 +236,10 @@ export function DashboardHR({
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={cn("h-full rounded-full transition-all", colors[index])}
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          colors[index % colors.length]
+                        )}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -287,7 +291,7 @@ export function DashboardHR({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/admin/utilisateurs")}
+              onClick={() => navigate('/admin/utilisateurs')}
             >
               <Users className="h-4 w-4" />
               Gérer les Utilisateurs
@@ -295,7 +299,7 @@ export function DashboardHR({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/notes-sef?action=new")}
+              onClick={() => navigate('/notes-sef?action=new')}
             >
               <Briefcase className="h-4 w-4" />
               Nouvelle Demande
@@ -303,7 +307,7 @@ export function DashboardHR({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/etats-execution")}
+              onClick={() => navigate('/etats-execution')}
             >
               <TrendingUp className="h-4 w-4" />
               Rapports
@@ -311,7 +315,7 @@ export function DashboardHR({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/admin/delegations")}
+              onClick={() => navigate('/admin/delegations')}
             >
               <Building2 className="h-4 w-4" />
               Délégations
