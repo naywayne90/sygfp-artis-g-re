@@ -2,8 +2,8 @@
  * Sidebar V2 - Navigation principale sombre et structurée
  * Badges compteurs temps réel, menus regroupés sans doublons
  */
-import { NavLink, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import {
   Home,
   Search,
@@ -45,7 +45,9 @@ import {
   CircleDollarSign,
   AlertTriangle,
   ScanLine,
-} from "lucide-react";
+  LayoutDashboard,
+  FolderKanban,
+} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -60,84 +62,145 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
-import { useSidebarBadges } from "@/hooks/useSidebarBadges";
-import logoArti from "@/assets/logo-arti.jpg";
+} from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { cn } from '@/lib/utils';
+import { useSidebarBadges } from '@/hooks/useSidebarBadges';
+import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================
 // CONFIGURATION DES MENUS (sans doublons)
 // ============================================
 
 const CHAINE_DEPENSE = [
-  { step: 1, title: "Notes SEF", url: "/notes-sef", icon: FileText, badgeKey: "sefAValider" as const },
-  { step: 2, title: "Notes AEF", url: "/notes-aef", icon: FileEdit, badgeKey: "aefAValider" as const },
-  { step: 3, title: "Imputation", url: "/execution/imputation", icon: Tag, badgeKey: "imputationsATraiter" as const },
-  { step: 4, title: "Expression Besoin", url: "/execution/expression-besoin", icon: Briefcase, badgeKey: "ebAValider" as const },
-  { step: 5, title: "Passation Marché", url: "/marches", icon: ShoppingCart, badgeKey: "marchesEnCours" as const },
-  { step: 6, title: "Engagement", url: "/engagements", icon: CreditCard, badgeKey: "engagementsAValider" as const },
-  { step: 7, title: "Liquidation", url: "/liquidations", icon: Receipt, badgeKey: "liquidationsAValider" as const },
-  { step: 8, title: "Ordonnancement", url: "/ordonnancements", icon: FileCheck, badgeKey: "ordoAValider" as const },
-  { step: 9, title: "Règlement", url: "/reglements", icon: Banknote, badgeKey: "reglementsATraiter" as const },
+  {
+    step: 1,
+    title: 'Notes SEF',
+    url: '/notes-sef',
+    icon: FileText,
+    badgeKey: 'sefAValider' as const,
+  },
+  {
+    step: 2,
+    title: 'Notes AEF',
+    url: '/notes-aef',
+    icon: FileEdit,
+    badgeKey: 'aefAValider' as const,
+  },
+  {
+    step: 3,
+    title: 'Imputation',
+    url: '/execution/imputation',
+    icon: Tag,
+    badgeKey: 'imputationsATraiter' as const,
+  },
+  {
+    step: 4,
+    title: 'Expression Besoin',
+    url: '/execution/expression-besoin',
+    icon: Briefcase,
+    badgeKey: 'ebAValider' as const,
+  },
+  {
+    step: 5,
+    title: 'Passation Marché',
+    url: '/marches',
+    icon: ShoppingCart,
+    badgeKey: 'marchesEnCours' as const,
+  },
+  {
+    step: 6,
+    title: 'Engagement',
+    url: '/engagements',
+    icon: CreditCard,
+    badgeKey: 'engagementsAValider' as const,
+  },
+  {
+    step: 7,
+    title: 'Liquidation',
+    url: '/liquidations',
+    icon: Receipt,
+    badgeKey: 'liquidationsAValider' as const,
+  },
+  {
+    step: 8,
+    title: 'Ordonnancement',
+    url: '/ordonnancements',
+    icon: FileCheck,
+    badgeKey: 'ordoAValider' as const,
+  },
+  {
+    step: 9,
+    title: 'Règlement',
+    url: '/reglements',
+    icon: Banknote,
+    badgeKey: 'reglementsATraiter' as const,
+  },
 ];
 
 const BUDGET_ITEMS = [
-  { title: "Structure Budgétaire", url: "/planification/structure", icon: Wallet },
-  { title: "Plan de Travail", url: "/planification/plan-travail", icon: ClipboardList },
-  { title: "Virements", url: "/planification/virements", icon: ArrowRightLeft, badgeKey: "virementsEnAttente" as const },
-  { title: "Réaménagements", url: "/budget/reamenagements-imputations", icon: ArrowRightLeft },
-  { title: "Import / Export", url: "/planification/import-export", icon: FileUp },
-  { title: "Historique Imports", url: "/planification/historique-imports", icon: History },
+  { title: 'Structure Budgétaire', url: '/planification/structure', icon: Wallet },
+  { title: 'Plan de Travail', url: '/planification/plan-travail', icon: ClipboardList },
+  {
+    title: 'Virements',
+    url: '/planification/virements',
+    icon: ArrowRightLeft,
+    badgeKey: 'virementsEnAttente' as const,
+  },
+  { title: 'Réaménagements', url: '/budget/reamenagements-imputations', icon: ArrowRightLeft },
+  { title: 'Import / Export', url: '/planification/import-export', icon: FileUp },
+  { title: 'Historique Imports', url: '/planification/historique-imports', icon: History },
+];
+
+const PILOTAGE_ITEMS = [
+  { title: 'Tableau de Bord', url: '/planification/roadmap-dashboard', icon: LayoutDashboard },
+  { title: 'Plans de Travail', url: '/planification/projets', icon: FolderKanban },
+  { title: 'Ma Direction', url: '/planification/roadmap-direction', icon: Building2 },
 ];
 
 const PARTENAIRES_ITEMS = [
-  { title: "Prestataires", url: "/contractualisation/prestataires", icon: Building2 },
-  { title: "Contrats", url: "/contractualisation/contrats", icon: FileSignature },
+  { title: 'Prestataires', url: '/contractualisation/prestataires', icon: Building2 },
+  { title: 'Contrats', url: '/contractualisation/contrats', icon: FileSignature },
 ];
 
 const GESTION_ITEMS = [
-  { title: "Approvisionnement", url: "/approvisionnement", icon: Truck },
-  { title: "Trésorerie", url: "/tresorerie", icon: Landmark },
-  { title: "Recettes", url: "/recettes", icon: DollarSign },
-  { title: "Comptabilité Matière", url: "/contractualisation/comptabilite-matiere", icon: Archive },
+  { title: 'Approvisionnement', url: '/approvisionnement', icon: Truck },
+  { title: 'Trésorerie', url: '/tresorerie', icon: Landmark },
+  { title: 'Recettes', url: '/recettes', icon: DollarSign },
+  { title: 'Comptabilité Matière', url: '/contractualisation/comptabilite-matiere', icon: Archive },
 ];
 
 const RAPPORTS_ITEMS = [
-  { title: "États d'exécution", url: "/etats-execution", icon: BarChart3 },
-  { title: "Alertes Budgétaires", url: "/alertes-budgetaires", icon: Target },
+  { title: "États d'exécution", url: '/etats-execution', icon: BarChart3 },
+  { title: 'Alertes Budgétaires', url: '/alertes-budgetaires', icon: Target },
 ];
 
 const SCANNING_ITEMS = [
-  { title: "Scan. Engagement", url: "/execution/scanning-engagement", icon: ScanLine },
-  { title: "Scan. Liquidation", url: "/execution/scanning-liquidation", icon: ScanLine },
+  { title: 'Scan. Engagement', url: '/execution/scanning-engagement', icon: ScanLine },
+  { title: 'Scan. Liquidation', url: '/execution/scanning-liquidation', icon: ScanLine },
 ];
 
 const PARAMETRAGE_REFERENTIELS = [
-  { title: "Exercices", url: "/admin/exercices", icon: Calendar },
-  { title: "Paramètres Programmatiques", url: "/admin/parametres-programmatiques", icon: Target },
-  { title: "Architecture SYGFP", url: "/admin/architecture", icon: Database },
-  { title: "Codification", url: "/admin/codification", icon: Hash },
-  { title: "Secteurs d'Activité", url: "/admin/secteurs-activite", icon: Layers },
-  { title: "Dictionnaire Variables", url: "/admin/dictionnaire", icon: BookOpen },
+  { title: 'Exercices', url: '/admin/exercices', icon: Calendar },
+  { title: 'Paramètres Programmatiques', url: '/admin/parametres-programmatiques', icon: Target },
+  { title: 'Architecture SYGFP', url: '/admin/architecture', icon: Database },
+  { title: 'Codification', url: '/admin/codification', icon: Hash },
+  { title: "Secteurs d'Activité", url: '/admin/secteurs-activite', icon: Layers },
+  { title: 'Dictionnaire Variables', url: '/admin/dictionnaire', icon: BookOpen },
 ];
 
 const PARAMETRAGE_UTILISATEURS = [
-  { title: "Utilisateurs", url: "/admin/utilisateurs", icon: Users },
-  { title: "Profils & Rôles", url: "/admin/roles", icon: Shield },
-  { title: "Autorisations", url: "/admin/autorisations", icon: Lock },
-  { title: "Délégations", url: "/admin/delegations", icon: UserCog },
+  { title: 'Utilisateurs', url: '/admin/utilisateurs', icon: Users },
+  { title: 'Profils & Rôles', url: '/admin/roles', icon: Shield },
+  { title: 'Autorisations', url: '/admin/autorisations', icon: Lock },
+  { title: 'Délégations', url: '/admin/delegations', icon: UserCog },
 ];
 
 const PARAMETRAGE_SYSTEME = [
-  { title: "Paramètres Système", url: "/admin/parametres", icon: Settings },
-  { title: "Journal d'Audit", url: "/admin/journal-audit", icon: ClipboardList },
-  { title: "Gestion Doublons", url: "/admin/doublons", icon: Copy },
-  { title: "Compteurs Références", url: "/admin/compteurs-references", icon: Hash },
+  { title: 'Paramètres Système', url: '/admin/parametres', icon: Settings },
+  { title: "Journal d'Audit", url: '/admin/journal-audit', icon: ClipboardList },
+  { title: 'Gestion Doublons', url: '/admin/doublons', icon: Copy },
+  { title: 'Compteurs Références', url: '/admin/compteurs-references', icon: Hash },
 ];
 
 // ============================================
@@ -146,52 +209,58 @@ const PARAMETRAGE_SYSTEME = [
 
 interface BadgeCounterProps {
   count: number;
-  variant?: "default" | "warning" | "success";
+  variant?: 'default' | 'warning' | 'success';
 }
 
-function BadgeCounter({ count, variant = "warning" }: BadgeCounterProps) {
+function BadgeCounter({ count, variant = 'warning' }: BadgeCounterProps) {
   if (count <= 0) return null;
-  
+
   const variantClasses = {
-    default: "bg-sidebar-primary/20 text-sidebar-primary-foreground",
-    warning: "bg-warning/80 text-warning-foreground",
-    success: "bg-success/80 text-success-foreground",
+    default: 'bg-sidebar-primary/20 text-sidebar-primary-foreground',
+    warning: 'bg-warning/80 text-warning-foreground',
+    success: 'bg-success/80 text-success-foreground',
   };
-  
+
   return (
-    <span className={cn(
-      "inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[10px] font-bold",
-      variantClasses[variant]
-    )}>
-      {count > 99 ? "99+" : count}
+    <span
+      className={cn(
+        'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[10px] font-bold',
+        variantClasses[variant]
+      )}
+    >
+      {count > 99 ? '99+' : count}
     </span>
   );
 }
 
 export function SidebarV2() {
   const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const collapsed = state === 'collapsed';
   const location = useLocation();
   const { data: badges } = useSidebarBadges();
-  
+
   const [chaineOpen, setChaineOpen] = useState(true);
   const [parametrageOpen, setParametrageOpen] = useState(false);
 
   const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
+    if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
-  const isChaineActive = CHAINE_DEPENSE.some(item => isActive(item.url));
+  const isChaineActive = CHAINE_DEPENSE.some((item) => isActive(item.url));
   const isParametrageActive = [
     ...PARAMETRAGE_REFERENTIELS,
     ...PARAMETRAGE_UTILISATEURS,
-    ...PARAMETRAGE_SYSTEME
-  ].some(item => isActive(item.url));
+    ...PARAMETRAGE_SYSTEME,
+  ].some((item) => isActive(item.url));
 
   // Total badges chaîne de dépense
-  const chaineTotalBadge = badges ? 
-    CHAINE_DEPENSE.reduce((sum, item) => sum + (item.badgeKey ? (badges[item.badgeKey] || 0) : 0), 0) : 0;
+  const chaineTotalBadge = badges
+    ? CHAINE_DEPENSE.reduce(
+        (sum, item) => sum + (item.badgeKey ? badges[item.badgeKey] || 0 : 0),
+        0
+      )
+    : 0;
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 bg-sidebar">
@@ -199,15 +268,13 @@ export function SidebarV2() {
       <SidebarHeader className="border-b border-sidebar-border px-3 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-10 items-center justify-center rounded-lg bg-white/95 px-2 shadow-sm">
-            <img 
-              src={logoArti} 
-              alt="ARTI" 
-              className="h-7 w-auto object-contain"
-            />
+            <img src={logoArti} alt="ARTI" className="h-7 w-auto object-contain" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-sidebar-foreground text-lg tracking-tight">SYGFP</span>
+              <span className="font-bold text-sidebar-foreground text-lg tracking-tight">
+                SYGFP
+              </span>
               <span className="text-[9px] text-sidebar-primary font-medium uppercase tracking-wider">
                 Gestion Financière
               </span>
@@ -222,14 +289,14 @@ export function SidebarV2() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/")} tooltip="Tableau de bord">
+                <SidebarMenuButton asChild isActive={isActive('/')} tooltip="Tableau de bord">
                   <NavLink
                     to="/"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
-                      isActive("/")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                      isActive('/')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
                     )}
                   >
                     <Home className="h-4 w-4 shrink-0" />
@@ -238,14 +305,18 @@ export function SidebarV2() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/recherche")} tooltip="Recherche Dossier">
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/recherche')}
+                  tooltip="Recherche Dossier"
+                >
                   <NavLink
                     to="/recherche"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium",
-                      isActive("/recherche")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium',
+                      isActive('/recherche')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
                     )}
                   >
                     <Search className="h-4 w-4 shrink-0" />
@@ -254,14 +325,18 @@ export function SidebarV2() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/dashboard-dmg")} tooltip="Dashboard DMG">
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/dashboard-dmg')}
+                  tooltip="Dashboard DMG"
+                >
                   <NavLink
                     to="/dashboard-dmg"
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium",
-                      isActive("/dashboard-dmg")
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent"
+                      'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm font-medium',
+                      isActive('/dashboard-dmg')
+                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent'
                     )}
                   >
                     <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -289,8 +364,8 @@ export function SidebarV2() {
                     <SidebarMenuButton
                       tooltip="9 étapes du flux"
                       className={cn(
-                        "w-full justify-between",
-                        isChaineActive && "bg-sidebar-accent"
+                        'w-full justify-between',
+                        isChaineActive && 'bg-sidebar-accent'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -306,10 +381,12 @@ export function SidebarV2() {
                               9 étapes
                             </span>
                           )}
-                          <ChevronRight className={cn(
-                            "h-4 w-4 transition-transform",
-                            chaineOpen && "rotate-90"
-                          )} />
+                          <ChevronRight
+                            className={cn(
+                              'h-4 w-4 transition-transform',
+                              chaineOpen && 'rotate-90'
+                            )}
+                          />
                         </div>
                       )}
                     </SidebarMenuButton>
@@ -320,21 +397,27 @@ export function SidebarV2() {
                         const badgeCount = item.badgeKey && badges ? badges[item.badgeKey] : 0;
                         return (
                           <SidebarMenuSubItem key={item.url} className="mb-0.5">
-                            <SidebarMenuSubButton asChild isActive={isActive(item.url)} className="min-h-8 h-auto">
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive(item.url)}
+                              className="min-h-8 h-auto"
+                            >
                               <NavLink
                                 to={item.url}
                                 className={cn(
-                                  "flex items-center justify-between gap-2 text-sm py-2",
-                                  isActive(item.url) && "text-sidebar-primary font-medium"
+                                  'flex items-center justify-between gap-2 text-sm py-2',
+                                  isActive(item.url) && 'text-sidebar-primary font-medium'
                                 )}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <span className={cn(
-                                    "flex items-center justify-center w-5 h-5 shrink-0 rounded-full text-[10px] font-bold",
-                                    isActive(item.url)
-                                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                      : "bg-sidebar-accent text-sidebar-foreground"
-                                  )}>
+                                  <span
+                                    className={cn(
+                                      'flex items-center justify-center w-5 h-5 shrink-0 rounded-full text-[10px] font-bold',
+                                      isActive(item.url)
+                                        ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                                        : 'bg-sidebar-accent text-sidebar-foreground'
+                                    )}
+                                  >
                                     {item.step}
                                   </span>
                                   <span className="truncate">{item.title}</span>
@@ -363,17 +446,21 @@ export function SidebarV2() {
           <SidebarGroupContent>
             <SidebarMenu>
               {BUDGET_ITEMS.map((item) => {
-                const badgeCount = (item as any).badgeKey && badges ? badges[(item as any).badgeKey] : 0;
+                const itemWithBadge = item as typeof item & {
+                  badgeKey?: keyof NonNullable<typeof badges>;
+                };
+                const badgeCount =
+                  itemWithBadge.badgeKey && badges ? badges[itemWithBadge.badgeKey] : 0;
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                       <NavLink
                         to={item.url}
                         className={cn(
-                          "flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                          'flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                           isActive(item.url)
-                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent"
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent'
                         )}
                       >
                         <div className="flex items-center gap-3">
@@ -386,6 +473,37 @@ export function SidebarV2() {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ========== PILOTAGE ========== */}
+        <SidebarGroup className="mt-4">
+          {!collapsed && (
+            <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
+              Pilotage
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {PILOTAGE_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                    <NavLink
+                      to={item.url}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                        isActive(item.url)
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                      )}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -405,10 +523,10 @@ export function SidebarV2() {
                     <NavLink
                       to={item.url}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                         isActive(item.url)
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -436,10 +554,10 @@ export function SidebarV2() {
                     <NavLink
                       to={item.url}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                         isActive(item.url)
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -467,10 +585,10 @@ export function SidebarV2() {
                     <NavLink
                       to={item.url}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                         isActive(item.url)
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -499,10 +617,10 @@ export function SidebarV2() {
                     <NavLink
                       to={item.url}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm",
+                        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
                         isActive(item.url)
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent"
+                          ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
@@ -531,8 +649,8 @@ export function SidebarV2() {
                     <SidebarMenuButton
                       tooltip="Configuration système"
                       className={cn(
-                        "w-full justify-between",
-                        isParametrageActive && "bg-sidebar-accent"
+                        'w-full justify-between',
+                        isParametrageActive && 'bg-sidebar-accent'
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -540,10 +658,12 @@ export function SidebarV2() {
                         {!collapsed && <span className="text-sm">Configuration</span>}
                       </div>
                       {!collapsed && (
-                        <ChevronRight className={cn(
-                          "h-4 w-4 transition-transform",
-                          parametrageOpen && "rotate-90"
-                        )} />
+                        <ChevronRight
+                          className={cn(
+                            'h-4 w-4 transition-transform',
+                            parametrageOpen && 'rotate-90'
+                          )}
+                        />
                       )}
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -559,8 +679,8 @@ export function SidebarV2() {
                             <NavLink
                               to={item.url}
                               className={cn(
-                                "flex items-center gap-2 text-sm py-1.5",
-                                isActive(item.url) && "text-sidebar-primary font-medium"
+                                'flex items-center gap-2 text-sm py-1.5',
+                                isActive(item.url) && 'text-sidebar-primary font-medium'
                               )}
                             >
                               <item.icon className="h-3.5 w-3.5" />
@@ -580,8 +700,8 @@ export function SidebarV2() {
                             <NavLink
                               to={item.url}
                               className={cn(
-                                "flex items-center gap-2 text-sm py-1.5",
-                                isActive(item.url) && "text-sidebar-primary font-medium"
+                                'flex items-center gap-2 text-sm py-1.5',
+                                isActive(item.url) && 'text-sidebar-primary font-medium'
                               )}
                             >
                               <item.icon className="h-3.5 w-3.5" />
@@ -601,8 +721,8 @@ export function SidebarV2() {
                             <NavLink
                               to={item.url}
                               className={cn(
-                                "flex items-center gap-2 text-sm py-1.5",
-                                isActive(item.url) && "text-sidebar-primary font-medium"
+                                'flex items-center gap-2 text-sm py-1.5',
+                                isActive(item.url) && 'text-sidebar-primary font-medium'
                               )}
                             >
                               <item.icon className="h-3.5 w-3.5" />
