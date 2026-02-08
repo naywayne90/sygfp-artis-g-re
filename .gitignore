@@ -1,34 +1,61 @@
+# =========================
+# SYGFP .gitignore
+# =========================
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+.mcp.json
+.claude/settings.local.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Env
-.env
-.venv
+.venv/
 env/
 venv/
 
-# IDE
-.vscode/
-.idea/
+# Test artifacts
+test-results/
+playwright-report/
+.playwright/
+coverage/
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs intermédiaires
+# Logs
+*.log
+*.log.*
 migration_output.log
 migration_v3_output.log
 migration_v3_complete.log
 migration_v3_final.log
 
-# Credentials
-.mcp.json
-.claude/settings.local.json
-
 # Temp files
 nohup.out
 *.tmp
+tmpclaude-*
+cookies.txt
+
+# Lock files (on utilise npm, pas bun)
+bun.lockb
