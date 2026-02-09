@@ -166,6 +166,7 @@ const GESTION_ITEMS = [
   { title: 'Trésorerie', url: '/tresorerie', icon: Landmark },
   { title: 'Recettes', url: '/recettes', icon: DollarSign },
   { title: 'Comptabilité Matière', url: '/contractualisation/comptabilite-matiere', icon: Archive },
+  { title: 'Espace Direction', url: '/espace-direction', icon: BookOpen },
 ];
 
 const PARAMETRAGE_REFERENTIELS = [

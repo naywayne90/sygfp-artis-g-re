@@ -8385,6 +8385,99 @@ export type Database = {
           },
         ];
       };
+      notes_direction: {
+        Row: {
+          contenu: string | null;
+          contenu_brut: string | null;
+          created_at: string;
+          created_by: string | null;
+          direction_id: string;
+          exercice_id: string | null;
+          fichier_original_nom: string | null;
+          fichier_original_url: string | null;
+          id: string;
+          priorite: string;
+          statut: string;
+          tags: string[] | null;
+          titre: string;
+          type_note: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          contenu?: string | null;
+          contenu_brut?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          direction_id: string;
+          exercice_id?: string | null;
+          fichier_original_nom?: string | null;
+          fichier_original_url?: string | null;
+          id?: string;
+          priorite?: string;
+          statut?: string;
+          tags?: string[] | null;
+          titre: string;
+          type_note?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          contenu?: string | null;
+          contenu_brut?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          direction_id?: string;
+          exercice_id?: string | null;
+          fichier_original_nom?: string | null;
+          fichier_original_url?: string | null;
+          id?: string;
+          priorite?: string;
+          statut?: string;
+          tags?: string[] | null;
+          titre?: string;
+          type_note?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notes_direction_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_exercice_id_fkey';
+            columns: ['exercice_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercices_budgetaires';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       notes_sef: {
         Row: {
           beneficiaire_id: string | null;

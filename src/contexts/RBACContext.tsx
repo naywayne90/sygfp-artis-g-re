@@ -1,10 +1,10 @@
-// @ts-nocheck
+/* eslint-disable react-refresh/only-export-components */
 /**
  * Contexte RBAC Global
  * Fournit les informations de permissions à toute l'application
  */
 
-import React, { createContext, useContext, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -79,15 +79,19 @@ export function RBACProvider({ children }: RBACProviderProps) {
   const { data: profile, isLoading } = useQuery({
     queryKey: ['rbac-context-profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
         .from('profiles')
-        .select(`
+        .select(
+          `
           *,
-          direction:directions(code, label)
-        `)
+          direction:directions!profiles_direction_id_fkey(code, label)
+        `
+        )
         .eq('id', user.id)
         .single();
 
@@ -127,7 +131,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
   // Niveau hiérarchique
   const hierarchyLevel = useMemo(() => {
     if (!user?.roleHierarchique) return 1;
-    const role = Object.values(ROLES_HIERARCHIQUES).find(r => r.code === user.roleHierarchique);
+    const role = Object.values(ROLES_HIERARCHIQUES).find((r) => r.code === user.roleHierarchique);
     return role?.niveau || 1;
   }, [user?.roleHierarchique]);
 
@@ -202,19 +206,21 @@ export function RBACProvider({ children }: RBACProviderProps) {
   // Labels et couleurs
   const getProfilLabel = (): string => {
     if (!user) return '';
-    const profil = PROFILS_FONCTIONNELS[user.profilFonctionnel as keyof typeof PROFILS_FONCTIONNELS];
+    const profil =
+      PROFILS_FONCTIONNELS[user.profilFonctionnel as keyof typeof PROFILS_FONCTIONNELS];
     return profil?.label || user.profilFonctionnel;
   };
 
   const getProfilColor = (): string => {
     if (!user) return '#6b7280';
-    const profil = PROFILS_FONCTIONNELS[user.profilFonctionnel as keyof typeof PROFILS_FONCTIONNELS];
+    const profil =
+      PROFILS_FONCTIONNELS[user.profilFonctionnel as keyof typeof PROFILS_FONCTIONNELS];
     return profil?.color || '#6b7280';
   };
 
   const getRoleLabel = (): string => {
     if (!user) return '';
-    const role = Object.values(ROLES_HIERARCHIQUES).find(r => r.code === user.roleHierarchique);
+    const role = Object.values(ROLES_HIERARCHIQUES).find((r) => r.code === user.roleHierarchique);
     return role?.label || user.roleHierarchique;
   };
 
@@ -247,11 +253,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
     getRoleLabel,
   };
 
-  return (
-    <RBACContext.Provider value={value}>
-      {children}
-    </RBACContext.Provider>
-  );
+  return <RBACContext.Provider value={value}>{children}</RBACContext.Provider>;
 }
 
 /**

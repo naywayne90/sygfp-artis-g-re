@@ -35,6 +35,7 @@ const Engagements = lazy(() => import('./pages/Engagements'));
 const Liquidations = lazy(() => import('./pages/Liquidations'));
 const Ordonnancements = lazy(() => import('./pages/Ordonnancements'));
 const Reglements = lazy(() => import('./pages/Reglements'));
+const EspaceDirection = lazy(() => import('./pages/EspaceDirection'));
 const Marches = lazy(() => import('./pages/Marches'));
 const Recherche = lazy(() => import('./pages/Recherche'));
 const EtatsExecution = lazy(() => import('./pages/EtatsExecution'));
@@ -345,6 +346,9 @@ const App = () => (
 
                 {/* États d'exécution */}
                 <Route path="/etats-execution" element={<EtatsExecution />} />
+
+                {/* Espace Direction */}
+                <Route path="/espace-direction" element={<EspaceDirection />} />
 
                 {/* Approvisionnement */}
                 <Route path="/approvisionnement" element={<Approvisionnement />} />
