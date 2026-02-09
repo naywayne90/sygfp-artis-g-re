@@ -38,14 +38,14 @@ export function useRoadmapDashboard() {
     queryKey: ['roadmap-dashboard-plans', exerciceId],
     queryFn: async () => {
       const { data, error } = await (
-        supabase.from('plans_travail' as string) as ReturnType<typeof supabase.from>
-      )
+        supabase.from as (table: string) => ReturnType<typeof supabase.from>
+      )('plans_travail')
         .select('*, direction:directions(id, code, nom)')
         .eq('est_actif', true)
         .eq('exercice_id', exerciceId);
 
       if (error) throw error;
-      return (data ?? []) as unknown as PlanTravail[];
+      return (data ?? []) as PlanTravail[];
     },
     enabled: !!exerciceId,
   });
@@ -53,9 +53,8 @@ export function useRoadmapDashboard() {
   const tachesQuery = useQuery({
     queryKey: ['roadmap-dashboard-taches', exercice],
     queryFn: async () => {
-      const { data, error } = await (
-        supabase.from('taches' as string) as ReturnType<typeof supabase.from>
-      )
+      const { data, error } = await supabase
+        .from('taches')
         .select(
           '*, responsable:profiles!responsable_id(id, nom, prenom), sous_activite:sous_activites(id, code, libelle)'
         )

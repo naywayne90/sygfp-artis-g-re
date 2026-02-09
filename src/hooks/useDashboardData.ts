@@ -127,10 +127,10 @@ export function useDashboardData(options?: { refetchInterval?: number }) {
       }
 
       // Essayer d'utiliser la fonction RPC si elle existe
-      const { data: rpcData, error: rpcError } = await supabase.rpc(
-        'get_dashboard_data',
-        { p_exercice: exercice, p_direction_id: userDirectionId }
-      );
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_dashboard_data', {
+        p_exercice: exercice,
+        p_direction_id: userDirectionId,
+      });
 
       if (!rpcError && rpcData) {
         return transformRPCData(rpcData);
@@ -222,9 +222,7 @@ async function fetchNotesStats(exercice: number) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const notesCreees7j = notes.filter(
-    (n) => new Date(n.created_at) >= sevenDaysAgo
-  ).length;
+  const notesCreees7j = notes.filter((n) => new Date(n.created_at) >= sevenDaysAgo).length;
   const notesValidees7j = notes.filter(
     (n) => n.validated_at && new Date(n.validated_at) >= sevenDaysAgo
   ).length;
@@ -235,11 +233,26 @@ async function fetchNotesStats(exercice: number) {
       ...statuts,
       aValider: statuts.a_valider,
     },
-    notesAEF: { total: 0, enCours: 0, valide: 0 }, // À implémenter si table notes_aef existe
+    notesAEF: await fetchNotesAEFStats(exercice),
     delaiMoyenValidation,
     notesCreees7j,
     notesValidees7j,
   };
+}
+
+async function fetchNotesAEFStats(exercice: number) {
+  const { data: notesAEF } = await supabase
+    .from('notes_dg')
+    .select('id, statut')
+    .eq('exercice', exercice);
+
+  const notes = notesAEF || [];
+  const enCours = notes.filter(
+    (n) => n.statut && !['valide', 'impute', 'rejete'].includes(n.statut)
+  ).length;
+  const valide = notes.filter((n) => n.statut === 'valide' || n.statut === 'impute').length;
+
+  return { total: notes.length, enCours, valide };
 }
 
 async function fetchDossiersStats(exercice: number) {
@@ -255,9 +268,8 @@ async function fetchDossiersStats(exercice: number) {
     enCours: items.filter((d) => d.statut_global === 'en_cours').length,
     valide: items.filter((d) => d.statut_global === 'valide').length,
     solde: items.filter((d) => d.statut_global === 'solde').length,
-    bloque: items.filter(
-      (d) => d.statut_global === 'differe' || d.statut_global === 'rejete'
-    ).length,
+    bloque: items.filter((d) => d.statut_global === 'differe' || d.statut_global === 'rejete')
+      .length,
     delaiMoyenTraitement: 0,
     dossiersTraites7j: 0,
   };
@@ -276,9 +288,7 @@ async function fetchDossiersStats(exercice: number) {
   // Activité 7 derniers jours
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  stats.dossiersTraites7j = items.filter(
-    (d) => new Date(d.updated_at) >= sevenDaysAgo
-  ).length;
+  stats.dossiersTraites7j = items.filter((d) => new Date(d.updated_at) >= sevenDaysAgo).length;
 
   return stats;
 }
@@ -303,9 +313,7 @@ async function fetchBudgetStats(exercice: number) {
     { total: 0, engage: 0, liquide: 0, ordonnance: 0, paye: 0 }
   );
 
-  const tauxExecution = totals.total > 0
-    ? Math.round((totals.paye / totals.total) * 100)
-    : 0;
+  const tauxExecution = totals.total > 0 ? Math.round((totals.paye / totals.total) * 100) : 0;
 
   return {
     ...totals,
@@ -315,10 +323,7 @@ async function fetchBudgetStats(exercice: number) {
 }
 
 async function fetchEvolutionMensuelle(exercice: number) {
-  const mois = [
-    'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
-    'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc',
-  ];
+  const mois = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
   const { data: notes } = await supabase
     .from('notes_sef')
@@ -354,11 +359,13 @@ async function fetchEvolutionMensuelle(exercice: number) {
 async function fetchDirectionStats(exercice: number) {
   const { data: notes } = await supabase
     .from('notes_sef')
-    .select(`
+    .select(
+      `
       id,
       montant_estime,
       direction:directions(id, sigle, label)
-    `)
+    `
+    )
     .eq('exercice', exercice);
 
   const directionMap = new Map<string, { notes: number; montant: number }>();

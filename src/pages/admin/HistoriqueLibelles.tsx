@@ -34,7 +34,7 @@ export default function HistoriqueLibelles() {
       item.budget_line?.code?.toLowerCase().includes(search) ||
       item.ancienne_valeur?.toLowerCase().includes(search) ||
       item.nouvelle_valeur?.toLowerCase().includes(search) ||
-      item.profile?.full_name?.toLowerCase().includes(search) ||
+      item.modifie_par?.toLowerCase().includes(search) ||
       item.motif?.toLowerCase().includes(search)
     );
   });
@@ -127,7 +127,9 @@ export default function HistoriqueLibelles() {
                   {filteredData.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="text-sm">
-                        {format(new Date(item.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                        {item.created_at
+                          ? format(new Date(item.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })
+                          : '-'}
                       </TableCell>
                       <TableCell>
                         <div>
@@ -158,7 +160,7 @@ export default function HistoriqueLibelles() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {item.profile?.full_name ?? 'Inconnu'}
+                        {item.modifie_par?.slice(0, 8) ?? 'Inconnu'}
                       </TableCell>
                       <TableCell>
                         <p className="text-sm text-muted-foreground truncate max-w-[200px]">

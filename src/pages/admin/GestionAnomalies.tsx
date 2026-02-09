@@ -2,51 +2,53 @@
  * GestionAnomalies - Page d'administration des anomalies de cohérence
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   AlertTriangle,
   AlertCircle,
   Info,
   CheckCircle2,
   RefreshCw,
-  Download,
   Filter,
   ShieldCheck,
   History,
-  TrendingUp,
   X,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
 import {
   useCoherenceCheck,
+  useCoherenceReports,
+  useUpdateCoherenceReportStatus,
   CoherenceReport,
   Anomaly,
   ANOMALY_TYPE_LABELS,
   ANOMALY_SEVERITY_CONFIG,
   AnomalyType,
   AnomalySeverity,
-} from "@/hooks/useCoherenceCheck";
-import { CoherenceReportCard } from "@/components/coherence/CoherenceReportCard";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from '@/hooks/useCoherenceCheck';
+import { CoherenceReportCard } from '@/components/coherence/CoherenceReportCard';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export default function GestionAnomalies() {
   const { exercice } = useExercice();
   const { generateReportAsync, isGenerating, lastReport } = useCoherenceCheck();
+  const { data: reportHistory = [] } = useCoherenceReports();
+  const updateStatus = useUpdateCoherenceReportStatus();
   const [currentReport, setCurrentReport] = useState<CoherenceReport | null>(null);
   const [filters, setFilters] = useState<{
     severity?: AnomalySeverity;
@@ -55,21 +57,22 @@ export default function GestionAnomalies() {
 
   const handleGenerateReport = async () => {
     try {
-      const report = await generateReportAsync("manual");
+      const report = await generateReportAsync('manual');
       setCurrentReport(report);
-      toast.success("Rapport de cohérence généré");
-    } catch (error) {
-      toast.error("Erreur lors de la génération du rapport");
+      toast.success('Rapport de cohérence généré');
+    } catch {
+      toast.error('Erreur lors de la génération du rapport');
     }
   };
 
   const report = currentReport || lastReport;
 
-  const filteredAnomalies = report?.anomalies.filter((a) => {
-    if (filters.severity && a.severity !== filters.severity) return false;
-    if (filters.type && a.type !== filters.type) return false;
-    return true;
-  }) || [];
+  const filteredAnomalies =
+    report?.anomalies.filter((a) => {
+      if (filters.severity && a.severity !== filters.severity) return false;
+      if (filters.type && a.type !== filters.type) return false;
+      return true;
+    }) || [];
 
   const clearFilters = () => setFilters({});
   const hasFilters = Object.values(filters).some(Boolean);
@@ -176,6 +179,15 @@ export default function GestionAnomalies() {
             <ShieldCheck className="h-4 w-4" />
             Rapport complet
           </TabsTrigger>
+          <TabsTrigger value="historique" className="gap-2">
+            <History className="h-4 w-4" />
+            Historique
+            {reportHistory.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {reportHistory.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="regles" className="gap-2">
             <Filter className="h-4 w-4" />
             Règles de validation
@@ -191,8 +203,8 @@ export default function GestionAnomalies() {
                   <CardTitle>Liste des anomalies</CardTitle>
                   <CardDescription>
                     {report
-                      ? `Dernière vérification: ${format(new Date(report.generatedAt), "dd/MM/yyyy HH:mm", { locale: fr })}`
-                      : "Aucune vérification effectuée"}
+                      ? `Dernière vérification: ${format(new Date(report.generatedAt), 'dd/MM/yyyy HH:mm', { locale: fr })}`
+                      : 'Aucune vérification effectuée'}
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
@@ -200,9 +212,12 @@ export default function GestionAnomalies() {
                   <div className="flex items-center gap-2">
                     <Label className="text-xs">Sévérité:</Label>
                     <Select
-                      value={filters.severity || "all"}
+                      value={filters.severity || 'all'}
                       onValueChange={(v) =>
-                        setFilters({ ...filters, severity: v === "all" ? undefined : (v as AnomalySeverity) })
+                        setFilters({
+                          ...filters,
+                          severity: v === 'all' ? undefined : (v as AnomalySeverity),
+                        })
                       }
                     >
                       <SelectTrigger className="w-[140px]">
@@ -219,9 +234,12 @@ export default function GestionAnomalies() {
                   <div className="flex items-center gap-2">
                     <Label className="text-xs">Type:</Label>
                     <Select
-                      value={filters.type || "all"}
+                      value={filters.type || 'all'}
                       onValueChange={(v) =>
-                        setFilters({ ...filters, type: v === "all" ? undefined : (v as AnomalyType) })
+                        setFilters({
+                          ...filters,
+                          type: v === 'all' ? undefined : (v as AnomalyType),
+                        })
                       }
                     >
                       <SelectTrigger className="w-[200px]">
@@ -251,7 +269,9 @@ export default function GestionAnomalies() {
                 <div className="text-center py-12 text-muted-foreground">
                   <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="font-medium">Aucune vérification effectuée</p>
-                  <p className="text-sm">Cliquez sur "Lancer une vérification" pour détecter les anomalies</p>
+                  <p className="text-sm">
+                    Cliquez sur "Lancer une vérification" pour détecter les anomalies
+                  </p>
                 </div>
               ) : filteredAnomalies.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
@@ -259,8 +279,8 @@ export default function GestionAnomalies() {
                   <p className="font-medium">Aucune anomalie</p>
                   <p className="text-sm">
                     {hasFilters
-                      ? "Aucune anomalie ne correspond aux filtres"
-                      : "Toutes les vérifications sont passées avec succès"}
+                      ? 'Aucune anomalie ne correspond aux filtres'
+                      : 'Toutes les vérifications sont passées avec succès'}
                   </p>
                 </div>
               ) : (
@@ -292,6 +312,96 @@ export default function GestionAnomalies() {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Onglet Historique */}
+        <TabsContent value="historique">
+          <Card>
+            <CardHeader>
+              <CardTitle>Historique des rapports</CardTitle>
+              <CardDescription>
+                Derniers rapports de coherence generes pour l'exercice {exercice}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {reportHistory.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">Aucun historique</p>
+                  <p className="text-sm">Les rapports generes apparaitront ici</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[500px]">
+                  <div className="space-y-3">
+                    {reportHistory.map((histReport) => (
+                      <div
+                        key={histReport.id}
+                        className="p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => setCurrentReport(histReport)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm">
+                                {format(new Date(histReport.generatedAt), 'dd/MM/yyyy HH:mm', {
+                                  locale: fr,
+                                })}
+                              </span>
+                              <span className="text-xs text-muted-foreground capitalize">
+                                Source: {histReport.source}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {histReport.errorsCount > 0 && (
+                              <Badge variant="destructive" className="text-xs">
+                                {histReport.errorsCount} erreur(s)
+                              </Badge>
+                            )}
+                            {histReport.warningsCount > 0 && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs bg-amber-100 text-amber-800 border-amber-300"
+                              >
+                                {histReport.warningsCount} avert.
+                              </Badge>
+                            )}
+                            {histReport.anomaliesCount === 0 && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs bg-green-100 text-green-800 border-green-300"
+                              >
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                OK
+                              </Badge>
+                            )}
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {histReport.status}
+                            </Badge>
+                            {histReport.status === 'pending' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateStatus.mutate({
+                                    reportId: histReport.id,
+                                    status: 'reviewed',
+                                  });
+                                }}
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Onglet Règles */}
@@ -351,9 +461,9 @@ function AnomalyCard({ anomaly }: AnomalyCardProps) {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            {anomaly.severity === "error" && <AlertCircle className="h-4 w-4 text-red-600" />}
-            {anomaly.severity === "warning" && <AlertTriangle className="h-4 w-4 text-amber-600" />}
-            {anomaly.severity === "info" && <Info className="h-4 w-4 text-blue-600" />}
+            {anomaly.severity === 'error' && <AlertCircle className="h-4 w-4 text-red-600" />}
+            {anomaly.severity === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-600" />}
+            {anomaly.severity === 'info' && <Info className="h-4 w-4 text-blue-600" />}
             <Badge variant="outline" className={config.color}>
               {config.label}
             </Badge>
@@ -390,9 +500,9 @@ function RuleCard({ title, description, severity }: RuleCardProps) {
   return (
     <div className={`p-4 rounded-lg border ${config.bgColor} border-opacity-30`}>
       <div className="flex items-start gap-3">
-        {severity === "error" && <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />}
-        {severity === "warning" && <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />}
-        {severity === "info" && <Info className="h-5 w-5 text-blue-600 mt-0.5" />}
+        {severity === 'error' && <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />}
+        {severity === 'warning' && <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />}
+        {severity === 'info' && <Info className="h-5 w-5 text-blue-600 mt-0.5" />}
         <div>
           <h4 className="font-medium">{title}</h4>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>

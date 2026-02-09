@@ -2,7 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
 import type { Tache, TacheInput } from '@/types/roadmap';
+
+type TacheUpdate = Database['public']['Tables']['taches']['Update'];
 
 interface TacheStats {
   total: number;
@@ -22,7 +25,8 @@ export function useProjetTaches(sousActiviteId?: string) {
   const query = useQuery({
     queryKey: ['projet-taches', exercice, sousActiviteId],
     queryFn: async () => {
-      let q = (supabase.from('taches' as string) as ReturnType<typeof supabase.from>)
+      let q = supabase
+        .from('taches')
         .select(
           '*, responsable:profiles!responsable_id(id, nom, prenom), sous_activite:sous_activites(id, code, libelle)'
         )
@@ -70,9 +74,8 @@ export function useProjetTaches(sousActiviteId?: string) {
 
   const createMutation = useMutation({
     mutationFn: async (input: TacheInput) => {
-      const { data, error } = await (
-        supabase.from('taches' as string) as ReturnType<typeof supabase.from>
-      )
+      const { data, error } = await supabase
+        .from('taches')
         .insert({
           ...input,
           avancement: input.avancement ?? 0,
@@ -98,10 +101,9 @@ export function useProjetTaches(sousActiviteId?: string) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Tache> & { id: string }) => {
-      const { data, error } = await (
-        supabase.from('taches' as string) as ReturnType<typeof supabase.from>
-      )
-        .update(updates)
+      const { data, error } = await supabase
+        .from('taches')
+        .update(updates as unknown as TacheUpdate)
         .eq('id', id)
         .select()
         .single();
@@ -121,16 +123,17 @@ export function useProjetTaches(sousActiviteId?: string) {
   const updateAvancementMutation = useMutation({
     mutationFn: async ({ id, avancement }: { id: string; avancement: number }) => {
       const statut = avancement >= 100 ? 'termine' : undefined;
-      const updateData: Record<string, unknown> = { avancement };
+      const updatePayload: { avancement: number; statut?: string; date_fin_reelle?: string } = {
+        avancement,
+      };
       if (statut) {
-        updateData.statut = statut;
-        updateData.date_fin_reelle = new Date().toISOString().split('T')[0];
+        updatePayload.statut = statut;
+        updatePayload.date_fin_reelle = new Date().toISOString().split('T')[0];
       }
 
-      const { data, error } = await (
-        supabase.from('taches' as string) as ReturnType<typeof supabase.from>
-      )
-        .update(updateData)
+      const { data, error } = await supabase
+        .from('taches')
+        .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
@@ -149,11 +152,7 @@ export function useProjetTaches(sousActiviteId?: string) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (
-        supabase.from('taches' as string) as ReturnType<typeof supabase.from>
-      )
-        .update({ est_active: false })
-        .eq('id', id);
+      const { error } = await supabase.from('taches').update({ est_active: false }).eq('id', id);
 
       if (error) throw error;
     },

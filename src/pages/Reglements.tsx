@@ -268,7 +268,7 @@ export default function Reglements() {
           description="Enregistrement des paiements effectués (étape 4)"
         />
         <div className="flex gap-2">
-          <BordereauReglement reglements={reglements} exercice={exercice} />
+          <BordereauReglement reglements={reglements} exercice={String(exercice ?? '')} />
           <BudgetChainExportButton step="reglement" />
           <TooltipProvider>
             <Tooltip>

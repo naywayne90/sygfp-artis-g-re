@@ -153,7 +153,7 @@ export interface ReglementWithRelations {
   created_at: string | null;
   created_by: string | null;
   dossier_id: string | null;
-  // Rejection fields (added via migration, not in generated types)
+  // Rejection fields - not in DB schema, parsed from observation for display
   motif_rejet?: string | null;
   renvoi_target?: string | null;
   date_rejet?: string | null;
@@ -243,7 +243,21 @@ export function useReglements() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as unknown as ReglementWithRelations[];
+      // Parse rejection details from observation field for rejected reglements
+      return ((data ?? []) as unknown as ReglementWithRelations[]).map((reg) => {
+        if (reg.statut === 'rejete' && reg.observation?.startsWith('[REJET ')) {
+          const match = reg.observation.match(/^\[REJET (.+?)\] Motif: (.+?) \| Renvoi: (.+)$/);
+          if (match) {
+            return {
+              ...reg,
+              date_rejet: match[1],
+              motif_rejet: match[2],
+              renvoi_target: match[3],
+            };
+          }
+        }
+        return reg;
+      });
     },
     enabled: !!exercice,
   });
@@ -662,16 +676,14 @@ export function useReglements() {
       const engagementId = reglement?.ordonnancement?.liquidation?.engagement?.id;
 
       // Mettre à jour le statut du règlement
-      // Note: motif_rejet, renvoi_target, date_rejet exist in DB but not in generated types
-      const rejectPayload = {
-        statut: 'rejete',
-        motif_rejet: motif,
-        renvoi_target: renvoiTarget,
-        date_rejet: new Date().toISOString(),
-      };
+      // Store rejection details in observation since motif_rejet/renvoi_target/date_rejet columns don't exist
+      const rejectObservation = `[REJET ${new Date().toISOString()}] Motif: ${motif} | Renvoi: ${renvoiTarget}`;
       const { error: updateError } = await supabase
         .from('reglements')
-        .update(rejectPayload as typeof rejectPayload & Record<string, string>)
+        .update({
+          statut: 'rejete',
+          observation: rejectObservation,
+        })
         .eq('id', reglementId);
 
       if (updateError) throw updateError;

@@ -9,13 +9,10 @@ export interface HistoriqueLibelleRow {
   nouvelle_valeur: string | null;
   motif: string | null;
   modifie_par: string | null;
-  created_at: string;
+  created_at: string | null;
   budget_line: {
     label: string | null;
     code: string | null;
-  } | null;
-  profile: {
-    full_name: string | null;
   } | null;
 }
 
@@ -32,8 +29,7 @@ export function useHistoriqueLibelles(filters?: {
         .select(
           `
           *,
-          budget_line:budget_lines(label, code),
-          profile:profiles!historique_libelles_modifie_par_fkey(full_name)
+          budget_line:budget_lines(label, code)
         `
         )
         .order('created_at', { ascending: false })

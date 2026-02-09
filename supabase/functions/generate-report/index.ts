@@ -502,7 +502,7 @@ function generateHTMLReport(
   <div class="meta">Exercice ${exercice} - Genere le ${new Date().toLocaleDateString('fr-FR')} a ${new Date().toLocaleTimeString('fr-FR')}</div>
   ${summaryHTML}
   ${tableHTML}
-  <div class="footer">SYGFP - Systeme de Gestion Financiere et Programmatique - ARTI Gabon</div>
+  <div class="footer">SYGFP - Systeme de Gestion Financiere et Programmatique - ARTI Côte d'Ivoire</div>
 </body>
 </html>`;
 }

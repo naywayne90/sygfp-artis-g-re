@@ -305,8 +305,9 @@ function RecentActivities({ directionId }: { directionId: string }) {
   const { data: recentTasks, isLoading } = useQuery({
     queryKey: ['recent-activities', exerciceId, directionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_task_executions')
+      const { data, error } = await (
+        supabase.from as (table: string) => ReturnType<typeof supabase.from>
+      )('v_task_executions')
         .select('id, activite_code, activite_libelle, status, taux_avancement, updated_at')
         .eq('exercice_id', exerciceId ?? '')
         .eq('direction_id', directionId)

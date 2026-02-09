@@ -11,7 +11,9 @@ export function usePlansTravail(directionId?: string) {
   const query = useQuery({
     queryKey: ['plans-travail', exerciceId, directionId],
     queryFn: async () => {
-      let q = (supabase.from('plans_travail' as string) as ReturnType<typeof supabase.from>)
+      let q = (supabase.from as (table: string) => ReturnType<typeof supabase.from>)(
+        'plans_travail'
+      )
         .select(
           '*, direction:directions(id, code, nom), responsable:profiles!responsable_id(id, nom, prenom)'
         )
@@ -28,7 +30,7 @@ export function usePlansTravail(directionId?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as unknown as PlanTravail[];
+      return (data ?? []) as PlanTravail[];
     },
     enabled: !!exerciceId,
   });
@@ -41,8 +43,8 @@ export function usePlansTravail(directionId?: string) {
       if (!user) throw new Error('Non authentifie');
 
       const { data, error } = await (
-        supabase.from('plans_travail' as string) as ReturnType<typeof supabase.from>
-      )
+        supabase.from as (table: string) => ReturnType<typeof supabase.from>
+      )('plans_travail')
         .insert({
           ...input,
           budget_consomme: 0,
@@ -53,7 +55,7 @@ export function usePlansTravail(directionId?: string) {
         .single();
 
       if (error) throw error;
-      return data as unknown as PlanTravail;
+      return data as PlanTravail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
@@ -67,15 +69,15 @@ export function usePlansTravail(directionId?: string) {
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PlanTravail> & { id: string }) => {
       const { data, error } = await (
-        supabase.from('plans_travail' as string) as ReturnType<typeof supabase.from>
-      )
+        supabase.from as (table: string) => ReturnType<typeof supabase.from>
+      )('plans_travail')
         .update(updates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as PlanTravail;
+      return data as PlanTravail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
@@ -89,8 +91,8 @@ export function usePlansTravail(directionId?: string) {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await (
-        supabase.from('plans_travail' as string) as ReturnType<typeof supabase.from>
-      )
+        supabase.from as (table: string) => ReturnType<typeof supabase.from>
+      )('plans_travail')
         .update({ est_actif: false })
         .eq('id', id);
 
