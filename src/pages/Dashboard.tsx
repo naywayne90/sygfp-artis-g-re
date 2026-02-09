@@ -24,6 +24,8 @@ import { DashboardTresorerie } from '@/components/dashboard/DashboardTresorerie'
 import { DashboardCB } from '@/components/dashboard/DashboardCB';
 import { DashboardDSI } from '@/components/dashboard/DashboardDSI';
 import { DashboardMoyensGen } from '@/components/dashboard/DashboardMoyensGen';
+import { DashboardHR } from '@/components/dashboard/DashboardHR';
+import { DashboardAICB } from '@/components/dashboard/DashboardAICB';
 
 // Dashboard générique pour les directions (lazy loaded pour éviter le double import)
 const DashboardDirectionPage = lazy(() => import('@/pages/execution/DashboardDirectionPage'));
@@ -120,9 +122,31 @@ export default function Dashboard() {
     return <DashboardDSI />;
   }
 
-  // Direction DMG (Moyens Généraux)
-  if (directionCode === 'DMG') {
+  // Direction SDMG / DMG (Moyens Généraux)
+  if (directionCode === 'SDMG' || directionCode === 'DMG') {
     return <DashboardMoyensGen />;
+  }
+
+  // Direction DGPECRP (Ressources Humaines)
+  if (directionCode === 'DGPECRP') {
+    return (
+      <DashboardHR
+        directionId={userDir?.direction_id || ''}
+        directionCode={directionCode || ''}
+        directionNom={userDir?.directions?.label || 'Ressources Humaines'}
+      />
+    );
+  }
+
+  // Direction AICB (Auditeur Interne / Contrôleur Budgétaire)
+  if (directionCode === 'AICB') {
+    return (
+      <DashboardAICB
+        directionId={userDir?.direction_id || ''}
+        directionCode={directionCode || ''}
+        directionNom={userDir?.directions?.label || 'Audit Interne'}
+      />
+    );
   }
 
   // 8. Fallback → Dashboard générique par direction (lazy loaded)

@@ -1,7 +1,7 @@
-// @ts-nocheck
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export interface DashboardStats {
   // Notes SEF
@@ -67,33 +67,40 @@ export function useDashboardStats() {
   const { exercice } = useExercice();
 
   return useQuery({
-    queryKey: ["dashboard-stats", exercice],
+    queryKey: ['dashboard-stats', exercice],
     queryFn: async (): Promise<DashboardStats> => {
       // Fetch Notes SEF stats
       const { data: notesSEF, error: notesSEFError } = await supabase
-        .from("notes_sef")
-        .select("id, statut")
-        .eq("exercice", exercice);
+        .from('notes_sef')
+        .select('id, statut')
+        .eq('exercice', exercice);
 
       if (notesSEFError) throw notesSEFError;
 
       const notesSEFTotal = notesSEF?.length || 0;
-      const notesSEFEnAttente = notesSEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente").length || 0;
-      const notesSEFAValider = notesSEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente" || n.statut === "a_valider_dg").length || 0;
-      const notesSEFValidees = notesSEF?.filter(n => n.statut === "valide" || n.statut === "valide_auto").length || 0;
+      const notesSEFEnAttente =
+        notesSEF?.filter((n) => n.statut === 'soumis' || n.statut === 'en_attente').length || 0;
+      const notesSEFAValider =
+        notesSEF?.filter(
+          (n) => n.statut === 'soumis' || n.statut === 'en_attente' || n.statut === 'a_valider_dg'
+        ).length || 0;
+      const notesSEFValidees =
+        notesSEF?.filter((n) => n.statut === 'valide' || n.statut === 'valide_auto').length || 0;
 
       // Fetch Notes AEF stats
       const { data: notesAEF, error: notesAEFError } = await supabase
-        .from("notes_dg")
-        .select("id, statut")
-        .eq("exercice", exercice);
+        .from('notes_dg')
+        .select('id, statut')
+        .eq('exercice', exercice);
 
       if (notesAEFError) throw notesAEFError;
 
       const notesAEFTotal = notesAEF?.length || 0;
-      const notesAEFEnAttente = notesAEF?.filter(n => n.statut === "soumis" || n.statut === "en_attente").length || 0;
-      const notesAEFAValider = notesAEF?.filter(n => n.statut === "soumis" || n.statut === "a_valider").length || 0;
-      const notesAEFImputees = notesAEF?.filter(n => n.statut === "impute").length || 0;
+      const notesAEFEnAttente =
+        notesAEF?.filter((n) => n.statut === 'soumis' || n.statut === 'en_attente').length || 0;
+      const notesAEFAValider =
+        notesAEF?.filter((n) => n.statut === 'soumis' || n.statut === 'a_valider').length || 0;
+      const notesAEFImputees = notesAEF?.filter((n) => n.statut === 'impute').length || 0;
 
       // Legacy totaux combinés
       const notesTotal = notesSEFTotal + notesAEFTotal;
@@ -102,104 +109,123 @@ export function useDashboardStats() {
 
       // Fetch expressions de besoin stats
       const { data: expressionsBesoin, error: ebError } = await supabase
-        .from("expressions_besoin")
-        .select("id, statut")
-        .eq("exercice", exercice);
+        .from('expressions_besoin')
+        .select('id, statut')
+        .eq('exercice', exercice);
 
       if (ebError) throw ebError;
 
       const ebTotal = expressionsBesoin?.length || 0;
-      const ebAValider = expressionsBesoin?.filter(e => e.statut === "soumis").length || 0;
-      const ebValidees = expressionsBesoin?.filter(e => e.statut === "validé").length || 0;
+      const ebAValider = expressionsBesoin?.filter((e) => e.statut === 'soumis').length || 0;
+      const ebValidees = expressionsBesoin?.filter((e) => e.statut === 'validé').length || 0;
 
       // Fetch engagements stats
       const { data: engagements, error: engagementsError } = await supabase
-        .from("budget_engagements")
-        .select("id, statut, montant")
-        .eq("exercice", exercice);
+        .from('budget_engagements')
+        .select('id, statut, montant')
+        .eq('exercice', exercice);
 
       if (engagementsError) throw engagementsError;
 
-      const engagementsEnCours = engagements?.filter(e => e.statut === "en_attente" || e.statut === "en_cours").length || 0;
-      const engagementsAValider = engagements?.filter(e => e.statut === "soumis" || e.statut === "en_attente").length || 0;
+      const engagementsEnCours =
+        engagements?.filter((e) => e.statut === 'en_attente' || e.statut === 'en_cours').length ||
+        0;
+      const engagementsAValider =
+        engagements?.filter((e) => e.statut === 'soumis' || e.statut === 'en_attente').length || 0;
       const engagementsTotal = engagements?.length || 0;
       // CORRECTION: Ne compter que les engagements VALIDES
-      const budgetEngage = engagements
-        ?.filter(e => e.statut === "valide")
-        .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const budgetEngage =
+        engagements
+          ?.filter((e) => e.statut === 'valide')
+          .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
 
       // Fetch liquidations stats
       const { data: liquidations, error: liquidationsError } = await supabase
-        .from("budget_liquidations")
-        .select("id, statut, montant")
-        .eq("exercice", exercice);
+        .from('budget_liquidations')
+        .select('id, statut, montant')
+        .eq('exercice', exercice);
 
       if (liquidationsError) throw liquidationsError;
 
-      const liquidationsATraiter = liquidations?.filter(l => l.statut === "en_attente").length || 0;
-      const liquidationsAValider = liquidations?.filter(l => l.statut === "soumis" || l.statut === "en_attente").length || 0;
+      const liquidationsATraiter =
+        liquidations?.filter((l) => l.statut === 'en_attente').length || 0;
+      const liquidationsAValider =
+        liquidations?.filter((l) => l.statut === 'soumis' || l.statut === 'en_attente').length || 0;
       const liquidationsTotal = liquidations?.length || 0;
-      const budgetLiquide = liquidations?.filter(l => l.statut === "valide").reduce((sum, l) => sum + (l.montant || 0), 0) || 0;
+      const budgetLiquide =
+        liquidations
+          ?.filter((l) => l.statut === 'valide')
+          .reduce((sum, l) => sum + (l.montant || 0), 0) || 0;
 
       // Fetch ordonnancements stats
       const { data: ordonnancements, error: ordoError } = await supabase
-        .from("ordonnancements")
-        .select("id, statut, montant")
-        .eq("exercice", exercice);
+        .from('ordonnancements')
+        .select('id, statut, montant')
+        .eq('exercice', exercice);
 
       if (ordoError) throw ordoError;
 
       const ordonnancementsTotal = ordonnancements?.length || 0;
-      const ordonnancementsEnSignature = ordonnancements?.filter(o => o.statut === "en_signature" || o.statut === "en_attente").length || 0;
-      const ordonnancementsAValider = ordonnancements?.filter(o => o.statut === "soumis" || o.statut === "en_attente" || o.statut === "en_signature").length || 0;
+      const ordonnancementsEnSignature =
+        ordonnancements?.filter((o) => o.statut === 'en_signature' || o.statut === 'en_attente')
+          .length || 0;
+      const ordonnancementsAValider =
+        ordonnancements?.filter(
+          (o) => o.statut === 'soumis' || o.statut === 'en_attente' || o.statut === 'en_signature'
+        ).length || 0;
 
       // CORRECTION: Fetch reglements pour le montant payé (pas ordonnancements)
       const { data: reglements, error: reglementsError } = await supabase
-        .from("reglements")
-        .select("id, statut, montant")
-        .eq("exercice", exercice);
+        .from('reglements')
+        .select('id, statut, montant')
+        .eq('exercice', exercice);
 
       if (reglementsError) throw reglementsError;
 
       // Budget payé = règlements au statut "paye"
-      const budgetPaye = reglements
-        ?.filter(r => r.statut === "paye")
-        .reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
+      const budgetPaye =
+        reglements
+          ?.filter((r) => r.statut === 'paye')
+          .reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
 
       // Fetch marches stats
       const { data: marches, error: marchesError } = await supabase
-        .from("marches")
-        .select("id, statut");
+        .from('marches')
+        .select('id, statut');
 
       if (marchesError) throw marchesError;
 
-      const marchesEnCours = marches?.filter(m => m.statut !== "termine" && m.statut !== "annule").length || 0;
+      const marchesEnCours =
+        marches?.filter((m) => m.statut !== 'termine' && m.statut !== 'annule').length || 0;
       const marchesTotal = marches?.length || 0;
 
       // Fetch budget lines for total budget with engagement details
       const { data: budgetLines, error: budgetError } = await supabase
-        .from("budget_lines")
-        .select("id, code, label, dotation_initiale, total_engage")
-        .eq("exercice", exercice);
+        .from('budget_lines')
+        .select('id, code, label, dotation_initiale, total_engage')
+        .eq('exercice', exercice);
 
       if (budgetError) throw budgetError;
 
-      const budgetTotal = budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
-      
+      const budgetTotal =
+        budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
+
       // Fetch ordonnancement totals
-      const budgetOrdonnance = ordonnancements
-        ?.filter(o => o.statut === "valide" || o.statut === "signe")
-        .reduce((sum, o) => sum + ((o as any).montant || 0), 0) || 0;
+      const budgetOrdonnance =
+        ordonnancements
+          ?.filter((o) => o.statut === 'valide' || o.statut === 'signe')
+          .reduce((sum, o) => sum + ((o as any).montant || 0), 0) || 0;
 
       // CORRECTION: Disponibilité = Budget - Engagé validé (peut être négatif pour détecter dépassement)
       const budgetDisponibleRaw = budgetTotal - budgetEngage;
       const budgetDisponible = Math.max(0, budgetDisponibleRaw);
-      
+
       // CORRECTION: Taux d'engagement sécurisé
       const tauxEngagement = budgetTotal > 0 ? Math.round((budgetEngage / budgetTotal) * 100) : 0;
-      const tauxLiquidation = budgetEngage > 0 ? Math.round((budgetLiquide / budgetEngage) * 100) : 0;
+      const tauxLiquidation =
+        budgetEngage > 0 ? Math.round((budgetLiquide / budgetEngage) * 100) : 0;
       const tauxPaiement = budgetLiquide > 0 ? Math.round((budgetPaye / budgetLiquide) * 100) : 0;
-      
+
       // Indicateur si le budget est chargé
       const isBudgetLoaded = budgetTotal > 0;
 
@@ -224,7 +250,7 @@ export function useDashboardStats() {
 
       // Calculer les top lignes en dépassement
       const topLignesDepassement = (budgetLines || [])
-        .map(bl => ({
+        .map((bl) => ({
           id: bl.id,
           code: bl.code,
           label: bl.label,
@@ -232,7 +258,7 @@ export function useDashboardStats() {
           engage: bl.total_engage || 0,
           depassement: (bl.total_engage || 0) - (bl.dotation_initiale || 0),
         }))
-        .filter(bl => bl.depassement > 0)
+        .filter((bl) => bl.depassement > 0)
         .sort((a, b) => b.depassement - a.depassement)
         .slice(0, 5);
 
@@ -362,25 +388,27 @@ export function useDashboardGlobalStats() {
 
   // Stats feuille de route globales
   const roadmapQuery = useQuery({
-    queryKey: ["dashboard-roadmap-global", exerciceId],
+    queryKey: ['dashboard-roadmap-global', exerciceId],
     queryFn: async (): Promise<RoadmapStats> => {
       // Utiliser la table taches au lieu de task_executions
       const { data: taches, error } = await supabase
-        .from("taches")
-        .select("statut, taux_avancement")
-        .eq("exercice", exerciceId!);
+        .from('taches')
+        .select('statut, taux_avancement')
+        .eq('exercice', exerciceId!);
 
       if (error) throw error;
 
       const total = taches?.length || 0;
-      const realisees = taches?.filter(e => e.statut === "termine").length || 0;
-      const enCours = taches?.filter(e => e.statut === "en_cours").length || 0;
-      const bloquees = taches?.filter(e => e.statut === "bloque").length || 0;
-      const nonDemarrees = taches?.filter(e => e.statut === "non_demarre" || e.statut === "planifie").length || 0;
+      const realisees = taches?.filter((e) => e.statut === 'termine').length || 0;
+      const enCours = taches?.filter((e) => e.statut === 'en_cours').length || 0;
+      const bloquees = taches?.filter((e) => e.statut === 'bloque').length || 0;
+      const nonDemarrees =
+        taches?.filter((e) => e.statut === 'non_demarre' || e.statut === 'planifie').length || 0;
 
-      const tauxMoyen = total > 0
-        ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
-        : 0;
+      const tauxMoyen =
+        total > 0
+          ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
+          : 0;
 
       return {
         total_activites: total,
@@ -397,40 +425,40 @@ export function useDashboardGlobalStats() {
 
   // Alertes
   const alertsQuery = useQuery({
-    queryKey: ["dashboard-alerts-global", exerciceId],
+    queryKey: ['dashboard-alerts-global', exerciceId],
     queryFn: async (): Promise<AlertStats> => {
       // Utiliser la table taches qui existe pour les tâches bloquées
       const { count: bloquees } = await supabase
-        .from("taches")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("statut", "bloque");
+        .from('taches')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('statut', 'bloque');
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
       const { count: enRetard } = await supabase
-        .from("taches")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .lt("date_fin_prevue", today)
-        .not("statut", "in", '("termine","annule")');
+        .from('taches')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .lt('date_fin_prevue', today)
+        .not('statut', 'in', '("termine","annule")');
 
       const { count: engAttente } = await supabase
-        .from("budget_engagements")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("statut", "soumis");
+        .from('budget_engagements')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('statut', 'soumis');
 
       const { count: liqAttente } = await supabase
-        .from("budget_liquidations")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("statut", "soumise");
+        .from('budget_liquidations')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('statut', 'soumise');
 
       const { count: ordAttente } = await supabase
-        .from("ordonnancements")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("statut", "en_attente");
+        .from('ordonnancements')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('statut', 'en_attente');
 
       return {
         dossiers_bloques: bloquees || 0,
@@ -445,12 +473,12 @@ export function useDashboardGlobalStats() {
 
   // Stats par direction
   const directionsQuery = useQuery({
-    queryKey: ["dashboard-directions-stats", exerciceId],
+    queryKey: ['dashboard-directions-stats', exerciceId],
     queryFn: async (): Promise<DirectionStats[]> => {
       const { data: directions } = await supabase
-        .from("directions")
-        .select("id, code, label")
-        .order("code");
+        .from('directions')
+        .select('id, code, label')
+        .order('code');
 
       if (!directions) return [];
 
@@ -459,17 +487,17 @@ export function useDashboardGlobalStats() {
       for (const dir of directions) {
         // Utiliser la table taches au lieu de v_task_executions
         const { data: taches } = await supabase
-          .from("taches")
-          .select("id, statut, taux_avancement, montant_prevu")
-          .eq("exercice", exerciceId!)
-          .eq("direction_id", dir.id);
+          .from('taches')
+          .select('id, statut, taux_avancement, montant_prevu')
+          .eq('exercice', exerciceId!)
+          .eq('direction_id', dir.id);
 
         const total = taches?.length || 0;
         if (total === 0) continue;
 
-        const realisees = taches?.filter(e => e.statut === "termine").length || 0;
-        const enCours = taches?.filter(e => e.statut === "en_cours").length || 0;
-        const bloquees = taches?.filter(e => e.statut === "bloque").length || 0;
+        const realisees = taches?.filter((e) => e.statut === 'termine').length || 0;
+        const enCours = taches?.filter((e) => e.statut === 'en_cours').length || 0;
+        const bloquees = taches?.filter((e) => e.statut === 'bloque').length || 0;
         const montantPrevu = taches?.reduce((sum, e) => sum + (e.montant_prevu || 0), 0) || 0;
 
         stats.push({
@@ -483,7 +511,10 @@ export function useDashboardGlobalStats() {
             activites_bloquees: bloquees,
             activites_non_demarrees: total - realisees - enCours - bloquees,
             taux_realisation: Math.round((realisees / total) * 100),
-            taux_avancement_moyen: total > 0 ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total) : 0,
+            taux_avancement_moyen:
+              total > 0
+                ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
+                : 0,
           },
           budget: {
             montant_prevu: montantPrevu,
@@ -510,12 +541,12 @@ export function useDashboardGlobalStats() {
 
   // Stats par OS
   const osQuery = useQuery({
-    queryKey: ["dashboard-os-stats", exerciceId],
+    queryKey: ['dashboard-os-stats', exerciceId],
     queryFn: async (): Promise<OSStats[]> => {
       const { data: osData } = await supabase
-        .from("objectifs_strategiques")
-        .select("id, code, libelle")
-        .order("code");
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .order('code');
 
       if (!osData) return [];
 
@@ -524,15 +555,15 @@ export function useDashboardGlobalStats() {
       for (const os of osData) {
         // Utiliser la table taches au lieu de v_task_executions
         const { data: taches } = await supabase
-          .from("taches")
-          .select("id, statut, montant_prevu")
-          .eq("exercice", exerciceId!)
-          .eq("os_id", os.id);
+          .from('taches')
+          .select('id, statut, montant_prevu')
+          .eq('exercice', exerciceId!)
+          .eq('os_id', os.id);
 
         const total = taches?.length || 0;
         if (total === 0) continue;
 
-        const realisees = taches?.filter(e => e.statut === "termine").length || 0;
+        const realisees = taches?.filter((e) => e.statut === 'termine').length || 0;
         const montantPrevu = taches?.reduce((sum, e) => sum + (e.montant_prevu || 0), 0) || 0;
 
         stats.push({
@@ -575,22 +606,23 @@ export function useDashboardDirectionStats(directionId: string | null) {
   const { exerciceId } = useExercice();
 
   const roadmapQuery = useQuery({
-    queryKey: ["dashboard-roadmap-direction", exerciceId, directionId],
+    queryKey: ['dashboard-roadmap-direction', exerciceId, directionId],
     queryFn: async (): Promise<RoadmapStats> => {
       // Utiliser la table taches au lieu de v_task_executions
       const { data: taches, error } = await supabase
-        .from("taches")
-        .select("statut, taux_avancement")
-        .eq("exercice", exerciceId!)
-        .eq("direction_id", directionId!);
+        .from('taches')
+        .select('statut, taux_avancement')
+        .eq('exercice', exerciceId!)
+        .eq('direction_id', directionId!);
 
       if (error) throw error;
 
       const total = taches?.length || 0;
-      const realisees = taches?.filter(e => e.statut === "termine").length || 0;
-      const enCours = taches?.filter(e => e.statut === "en_cours").length || 0;
-      const bloquees = taches?.filter(e => e.statut === "bloque").length || 0;
-      const nonDemarrees = taches?.filter(e => e.statut === "non_demarre" || e.statut === "planifie").length || 0;
+      const realisees = taches?.filter((e) => e.statut === 'termine').length || 0;
+      const enCours = taches?.filter((e) => e.statut === 'en_cours').length || 0;
+      const bloquees = taches?.filter((e) => e.statut === 'bloque').length || 0;
+      const nonDemarrees =
+        taches?.filter((e) => e.statut === 'non_demarre' || e.statut === 'planifie').length || 0;
 
       return {
         total_activites: total,
@@ -599,22 +631,23 @@ export function useDashboardDirectionStats(directionId: string | null) {
         activites_bloquees: bloquees,
         activites_non_demarrees: nonDemarrees,
         taux_realisation: total > 0 ? Math.round((realisees / total) * 100) : 0,
-        taux_avancement_moyen: total > 0
-          ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
-          : 0,
+        taux_avancement_moyen:
+          total > 0
+            ? Math.round(taches.reduce((sum, e) => sum + (e.taux_avancement || 0), 0) / total)
+            : 0,
       };
     },
     enabled: !!exerciceId && !!directionId,
   });
 
   const missionsQuery = useQuery({
-    queryKey: ["dashboard-missions-direction", exerciceId, directionId],
+    queryKey: ['dashboard-missions-direction', exerciceId, directionId],
     queryFn: async (): Promise<MissionStats[]> => {
       const { data: missions } = await supabase
-        .from("missions")
-        .select("id, code, libelle")
-        .eq("direction_id", directionId!)
-        .order("code");
+        .from('missions')
+        .select('id, code, libelle')
+        .eq('direction_id', directionId!)
+        .order('code');
 
       if (!missions) return [];
 
@@ -623,15 +656,15 @@ export function useDashboardDirectionStats(directionId: string | null) {
       for (const mission of missions) {
         // Utiliser la table taches au lieu de v_task_executions
         const { data: taches } = await supabase
-          .from("taches")
-          .select("statut")
-          .eq("exercice", exerciceId!)
-          .eq("mission_id", mission.id);
+          .from('taches')
+          .select('statut')
+          .eq('exercice', exerciceId!)
+          .eq('mission_id', mission.id);
 
         const total = taches?.length || 0;
         if (total === 0) continue;
 
-        const realisees = taches?.filter(e => e.statut === "termine").length || 0;
+        const realisees = taches?.filter((e) => e.statut === 'termine').length || 0;
 
         stats.push({
           mission_id: mission.id,
@@ -650,24 +683,24 @@ export function useDashboardDirectionStats(directionId: string | null) {
   });
 
   const alertsQuery = useQuery({
-    queryKey: ["dashboard-alerts-direction", exerciceId, directionId],
+    queryKey: ['dashboard-alerts-direction', exerciceId, directionId],
     queryFn: async (): Promise<AlertStats> => {
       // Utiliser la table taches au lieu de v_task_executions
       const { count: bloquees } = await supabase
-        .from("taches")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("direction_id", directionId!)
-        .eq("statut", "bloque");
+        .from('taches')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('direction_id', directionId!)
+        .eq('statut', 'bloque');
 
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
       const { count: enRetard } = await supabase
-        .from("taches")
-        .select("*", { count: "exact", head: true })
-        .eq("exercice", exerciceId!)
-        .eq("direction_id", directionId!)
-        .lt("date_fin_prevue", today)
-        .not("statut", "in", '("termine","annule")');
+        .from('taches')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', exerciceId!)
+        .eq('direction_id', directionId!)
+        .lt('date_fin_prevue', today)
+        .not('statut', 'in', '("termine","annule")');
 
       return {
         dossiers_bloques: bloquees || 0,
@@ -699,15 +732,19 @@ export function useDashboardDirectionStats(directionId: string | null) {
  */
 export function useUserDirection() {
   return useQuery({
-    queryKey: ["user-direction"],
+    queryKey: ['user-direction'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("direction_id, profil_fonctionnel, directions(id, code, label)")
-        .eq("id", user.id)
+        .from('profiles')
+        .select(
+          'direction_id, profil_fonctionnel, directions:directions!profiles_direction_id_fkey(id, code, label)'
+        )
+        .eq('id', user.id)
         .single();
 
       return profile;
