@@ -32,6 +32,23 @@ export interface NoteDirection {
   updated_by: string | null;
   created_at: string;
   updated_at: string;
+  // Canvas fields
+  reference: string | null;
+  destinataire: string | null;
+  expediteur: string | null;
+  objet: string | null;
+  date_note: string | null;
+  template_id: string | null;
+  metadata: Record<string, unknown> | null;
+  objectifs_strategiques: string | null;
+  action_rattachement: string | null;
+  budget_previsionnel: string | null;
+  observations_dg: string | null;
+  decision_dg: string | null;
+  date_decision: string | null;
+  signataire_nom: string | null;
+  signataire_titre: string | null;
+  // Relations
   direction?: { code: string; label: string; sigle: string } | null;
   creator?: { full_name: string; email: string } | null;
 }
@@ -48,6 +65,22 @@ export interface CreateNoteInput {
   fichier_original_url?: string;
   fichier_original_nom?: string;
   priorite?: PrioriteNote;
+  // Canvas fields (all optional for backward compatibility)
+  reference?: string;
+  destinataire?: string;
+  expediteur?: string;
+  objet?: string;
+  date_note?: string;
+  template_id?: string;
+  metadata?: Record<string, unknown>;
+  objectifs_strategiques?: string;
+  action_rattachement?: string;
+  budget_previsionnel?: string;
+  observations_dg?: string;
+  decision_dg?: string;
+  date_decision?: string;
+  signataire_nom?: string;
+  signataire_titre?: string;
 }
 
 export interface UpdateNoteInput {
@@ -59,6 +92,22 @@ export interface UpdateNoteInput {
   statut?: StatutNote;
   tags?: string[];
   priorite?: PrioriteNote;
+  // Canvas fields
+  reference?: string;
+  destinataire?: string;
+  expediteur?: string;
+  objet?: string;
+  date_note?: string;
+  template_id?: string;
+  metadata?: Record<string, unknown>;
+  objectifs_strategiques?: string;
+  action_rattachement?: string;
+  budget_previsionnel?: string;
+  observations_dg?: string;
+  decision_dg?: string;
+  date_decision?: string;
+  signataire_nom?: string;
+  signataire_titre?: string;
 }
 
 export interface NotesDirectionFilters {

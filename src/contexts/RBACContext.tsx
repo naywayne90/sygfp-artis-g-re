@@ -4,7 +4,7 @@
  * Fournit les informations de permissions à toute l'application
  */
 
-import React, { createContext, useContext, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -75,14 +75,40 @@ interface RBACProviderProps {
 }
 
 export function RBACProvider({ children }: RBACProviderProps) {
-  // Récupérer le profil utilisateur avec direction
+  // Extract userId synchronously from localStorage, then track via onAuthStateChange
+  const [userId, setUserId] = useState<string | null>(() => {
+    try {
+      const stored = localStorage.getItem('sb-tjagvgqthlibdpvztvaf-auth-token');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed?.user?.id ?? null;
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    // Confirm session and listen for auth state changes (login/logout)
+    supabase.auth.getSession().then(({ data }) => {
+      setUserId(data.session?.user?.id ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Récupérer le profil utilisateur avec direction - skip getUser(), use userId directly
   const { data: profile, isLoading } = useQuery({
-    queryKey: ['rbac-context-profile'],
+    queryKey: ['rbac-context-profile', userId],
     queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!userId) return null;
 
       const { data, error } = await supabase
         .from('profiles')
@@ -92,14 +118,22 @@ export function RBACProvider({ children }: RBACProviderProps) {
           direction:directions!profiles_direction_id_fkey(code, label)
         `
         )
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[RBAC] Profile query error:', error.message);
+        throw error;
+      }
+      if (!data) {
+        console.warn('[RBAC] Profile query returned null for user:', userId);
+      }
       return data;
     },
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
-    retry: 1,
+    retry: 2,
+    retryDelay: 500,
   });
 
   // Construire l'objet utilisateur
@@ -224,9 +258,12 @@ export function RBACProvider({ children }: RBACProviderProps) {
     return role?.label || user.roleHierarchique;
   };
 
+  // isLoading is true while user is not identified OR profile query is running
+  const effectiveLoading = !userId || isLoading;
+
   const value: RBACContextValue = {
     user,
-    isLoading,
+    isLoading: effectiveLoading,
     isAuthenticated: !!user,
     isAdmin,
     isDG,

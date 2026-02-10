@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable react-refresh/only-export-components */
 // @ts-nocheck
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export interface ExerciceInfo {
   id: string;
@@ -33,52 +35,47 @@ interface ExerciceContextType {
 const ExerciceContext = createContext<ExerciceContextType | undefined>(undefined);
 
 // Statuts qui autorisent l'écriture
-const WRITABLE_STATUTS = ["ouvert", "en_cours"];
+const WRITABLE_STATUTS = ['ouvert', 'en_cours'];
 
 export function ExerciceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [exercice, setExerciceState] = useState<number | null>(() => {
-    const stored = localStorage.getItem("sygfp_exercice");
+    const stored = localStorage.getItem('sygfp_exercice');
     return stored ? parseInt(stored, 10) : null;
   });
   const [exerciceId, setExerciceId] = useState<string | null>(null);
   const [exerciceInfo, setExerciceInfo] = useState<ExerciceInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Don't block if we already have a stored exercice year - load details in background
+  const [isLoading, setIsLoading] = useState(() => {
+    return !localStorage.getItem('sygfp_exercice');
+  });
   const [hasNoOpenExercice, setHasNoOpenExercice] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
 
-  // Vérifier si l'utilisateur est admin
+  // Vérifier si l'utilisateur est admin (requêtes en parallèle)
   useEffect(() => {
     async function checkAdminStatus() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
           setIsUserAdmin(false);
           return;
         }
 
-        // Vérifier dans user_roles
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("is_active", true);
+        // Lancer les 2 vérifications EN PARALLÈLE au lieu de séquentiellement
+        const [rolesResult, profileResult] = await Promise.all([
+          supabase.from('user_roles').select('role').eq('user_id', user.id).eq('is_active', true),
+          supabase.from('profiles').select('profil_fonctionnel').eq('id', user.id).single(),
+        ]);
 
-        if (roles?.some(r => r.role === "ADMIN" || r.role === "admin")) {
-          setIsUserAdmin(true);
-          return;
-        }
+        const isAdminRole = rolesResult.data?.some((r) => r.role === 'ADMIN' || r.role === 'admin');
+        const isAdminProfile = profileResult.data?.profil_fonctionnel === 'Admin';
 
-        // Vérifier dans profiles
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("profil_fonctionnel")
-          .eq("id", user.id)
-          .single();
-
-        setIsUserAdmin(profile?.profil_fonctionnel === "Admin");
+        setIsUserAdmin(isAdminRole || isAdminProfile);
       } catch (err) {
-        console.error("Erreur vérification admin:", err);
+        console.error('Erreur vérification admin:', err);
         setIsUserAdmin(false);
       }
     }
@@ -86,7 +83,9 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
     checkAdminStatus();
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       checkAdminStatus();
     });
 
@@ -111,13 +110,13 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("exercices_budgetaires")
-        .select("*")
-        .eq("annee", annee)
+        .from('exercices_budgetaires')
+        .select('*')
+        .eq('annee', annee)
         .maybeSingle();
 
       if (error) {
-        console.error("Erreur chargement exercice:", error);
+        console.error('Erreur chargement exercice:', error);
         setExerciceId(null);
         setExerciceInfo(null);
         return;
@@ -158,16 +157,16 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
       try {
         // Chercher le dernier exercice OUVERT ou EN_COURS
         const { data, error } = await supabase
-          .from("exercices_budgetaires")
-          .select("*")
-          .in("statut", ["ouvert", "en_cours"])
-          .eq("est_actif", true)
-          .order("annee", { ascending: false })
+          .from('exercices_budgetaires')
+          .select('*')
+          .in('statut', ['ouvert', 'en_cours'])
+          .eq('est_actif', true)
+          .order('annee', { ascending: false })
           .limit(1)
           .maybeSingle();
 
         if (error) {
-          console.error("Erreur auto-sélection exercice:", error);
+          console.error('Erreur auto-sélection exercice:', error);
           setHasNoOpenExercice(true);
           return;
         }
@@ -175,7 +174,7 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
         if (data) {
           // Auto-sélectionner sans toast
           setExerciceState(data.annee);
-          localStorage.setItem("sygfp_exercice", data.annee.toString());
+          localStorage.setItem('sygfp_exercice', data.annee.toString());
           setExerciceId(data.id);
           setExerciceInfo({
             id: data.id,
@@ -201,54 +200,59 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Changer d'exercice avec invalidation du cache et audit
-  const setExercice = useCallback(async (year: number | null, showToast = true) => {
-    const previousExercice = exercice;
+  const setExercice = useCallback(
+    async (year: number | null, showToast = true) => {
+      const previousExercice = exercice;
 
-    setExerciceState(year);
-    if (year) {
-      localStorage.setItem("sygfp_exercice", year.toString());
-      setHasNoOpenExercice(false); // L'utilisateur a sélectionné un exercice
-    } else {
-      localStorage.removeItem("sygfp_exercice");
-    }
-
-    // Invalider toutes les requêtes pour forcer le rechargement
-    await queryClient.invalidateQueries();
-
-    // Afficher le toast si demandé
-    if (showToast && year && previousExercice !== year) {
-      toast.success(`Exercice changé : ${year}`, {
-        description: "Toutes les données ont été rechargées.",
-        duration: 3000,
-      });
-    }
-
-    // Auditer le changement d'exercice
-    if (previousExercice !== year && year !== null) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from("audit_logs").insert({
-            user_id: user.id,
-            entity_type: "exercice",
-            entity_id: null,
-            action: "change_exercice",
-            old_values: previousExercice ? { exercice: previousExercice } : null,
-            new_values: { exercice: year },
-            exercice: year,
-          });
-        }
-      } catch (err) {
-        console.error("Erreur audit changement exercice:", err);
+      setExerciceState(year);
+      if (year) {
+        localStorage.setItem('sygfp_exercice', year.toString());
+        setHasNoOpenExercice(false); // L'utilisateur a sélectionné un exercice
+      } else {
+        localStorage.removeItem('sygfp_exercice');
       }
-    }
-  }, [exercice, queryClient]);
+
+      // Invalider toutes les requêtes pour forcer le rechargement
+      await queryClient.invalidateQueries();
+
+      // Afficher le toast si demandé
+      if (showToast && year && previousExercice !== year) {
+        toast.success(`Exercice changé : ${year}`, {
+          description: 'Toutes les données ont été rechargées.',
+          duration: 3000,
+        });
+      }
+
+      // Auditer le changement d'exercice
+      if (previousExercice !== year && year !== null) {
+        try {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('audit_logs').insert({
+              user_id: user.id,
+              entity_type: 'exercice',
+              entity_id: null,
+              action: 'change_exercice',
+              old_values: previousExercice ? { exercice: previousExercice } : null,
+              new_values: { exercice: year },
+              exercice: year,
+            });
+          }
+        } catch (err) {
+          console.error('Erreur audit changement exercice:', err);
+        }
+      }
+    },
+    [exercice, queryClient]
+  );
 
   const clearExercice = useCallback(() => {
     setExerciceState(null);
     setExerciceId(null);
     setExerciceInfo(null);
-    localStorage.removeItem("sygfp_exercice");
+    localStorage.removeItem('sygfp_exercice');
   }, []);
 
   const refreshExercice = useCallback(async () => {
@@ -257,17 +261,17 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
     } else {
       // Si pas d'exercice, revérifier s'il y en a un ouvert
       const { data } = await supabase
-        .from("exercices_budgetaires")
-        .select("*")
-        .in("statut", ["ouvert", "en_cours"])
-        .eq("est_actif", true)
-        .order("annee", { ascending: false })
+        .from('exercices_budgetaires')
+        .select('*')
+        .in('statut', ['ouvert', 'en_cours'])
+        .eq('est_actif', true)
+        .order('annee', { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (data) {
         setExerciceState(data.annee);
-        localStorage.setItem("sygfp_exercice", data.annee.toString());
+        localStorage.setItem('sygfp_exercice', data.annee.toString());
         setHasNoOpenExercice(false);
       } else {
         setHasNoOpenExercice(true);
@@ -276,20 +280,22 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
   }, [exercice, loadExerciceInfo]);
 
   return (
-    <ExerciceContext.Provider value={{
-      exercice,
-      exerciceId,
-      exerciceInfo,
-      selectedExercice: exerciceInfo, // Alias pour compatibilité
-      setExercice,
-      clearExercice,
-      isLoading,
-      isReadOnly,
-      canWrite,
-      refreshExercice,
-      hasNoOpenExercice,
-      isUserAdmin,
-    }}>
+    <ExerciceContext.Provider
+      value={{
+        exercice,
+        exerciceId,
+        exerciceInfo,
+        selectedExercice: exerciceInfo, // Alias pour compatibilité
+        setExercice,
+        clearExercice,
+        isLoading,
+        isReadOnly,
+        canWrite,
+        refreshExercice,
+        hasNoOpenExercice,
+        isUserAdmin,
+      }}
+    >
       {children}
     </ExerciceContext.Provider>
   );
@@ -298,7 +304,7 @@ export function ExerciceProvider({ children }: { children: ReactNode }) {
 export function useExercice() {
   const context = useContext(ExerciceContext);
   if (context === undefined) {
-    throw new Error("useExercice must be used within an ExerciceProvider");
+    throw new Error('useExercice must be used within an ExerciceProvider');
   }
   return context;
 }

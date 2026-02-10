@@ -6,22 +6,22 @@
  * - Vers /no-open-exercice si aucun exercice ouvert
  * - Vers /select-exercice si pas d'exercice sélectionné
  */
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarV2 } from "./SidebarV2";
-import { TopBar } from "./TopBar";
-import { ExerciceReadOnlyBanner } from "@/components/exercice/ExerciceReadOnlyBanner";
-import { CommandPalette } from "@/components/command-palette/CommandPalette";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarV2 } from './SidebarV2';
+import { TopBar } from './TopBar';
+import { ExerciceReadOnlyBanner } from '@/components/exercice/ExerciceReadOnlyBanner';
+import { CommandPalette } from '@/components/command-palette/CommandPalette';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { exercice, isReadOnly, isLoading, hasNoOpenExercice } = useExercice();
+  const { exercice, isReadOnly: _isReadOnly, isLoading, hasNoOpenExercice } = useExercice();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,27 +29,16 @@ export function AppLayout({ children }: AppLayoutProps) {
     if (!exercice && !isLoading) {
       // Si aucun exercice ouvert, rediriger vers la page dédiée
       if (hasNoOpenExercice) {
-        navigate("/no-open-exercice");
+        navigate('/no-open-exercice');
       } else {
         // Sinon, vers la sélection d'exercice
-        navigate("/select-exercice");
+        navigate('/select-exercice');
       }
     }
   }, [exercice, isLoading, hasNoOpenExercice, navigate]);
 
-  // Afficher un loader pendant le chargement initial
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Chargement de l'exercice...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!exercice) {
+  // Show shell immediately; only block content area while exercice loads
+  if (!exercice && !isLoading) {
     return null;
   }
 
@@ -69,9 +58,20 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Contenu principal */}
           <main className="flex-1 overflow-auto p-4 lg:p-6">
-            {/* Bannière lecture seule */}
-            <ExerciceReadOnlyBanner />
-            {children}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Chargement de l'exercice...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Bannière lecture seule */}
+                <ExerciceReadOnlyBanner />
+                {children}
+              </>
+            )}
           </main>
         </div>
       </div>

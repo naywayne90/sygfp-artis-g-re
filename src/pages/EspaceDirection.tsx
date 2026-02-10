@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -118,6 +119,7 @@ const PRIORITE_LABELS: Record<PrioriteNote, string> = {
 // ============================================
 
 export default function EspaceDirection() {
+  const navigate = useNavigate();
   const { user, isAdmin, isLoading: rbacLoading } = useRBAC();
   const { exerciceId } = useExercice();
 
@@ -135,7 +137,7 @@ export default function EspaceDirection() {
 
   // Dialog création/modification note
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState<NoteDirection | null>(null);
+  const [editingNote, _setEditingNote] = useState<NoteDirection | null>(null);
   const [viewingNote, setViewingNote] = useState<NoteDirection | null>(null);
   const [archiveConfirmId, setArchiveConfirmId] = useState<string | null>(null);
 
@@ -212,25 +214,8 @@ export default function EspaceDirection() {
   // HANDLERS
   // ============================================
 
-  const openCreateDialog = useCallback(() => {
-    setEditingNote(null);
-    setFormTitre('');
-    setFormContenu('');
-    setFormType('interne');
-    setFormPriorite('normale');
-    setFormStatut('brouillon');
-    setNoteDialogOpen(true);
-  }, []);
-
-  const openEditDialog = useCallback((note: NoteDirection) => {
-    setEditingNote(note);
-    setFormTitre(note.titre);
-    setFormContenu(note.contenu || '');
-    setFormType(note.type_note);
-    setFormPriorite(note.priorite);
-    setFormStatut(note.statut);
-    setNoteDialogOpen(true);
-  }, []);
+  // Note: openCreateDialog and openEditDialog removed - now using canvas navigation instead
+  // The dialog below is kept as a fallback but no longer triggered from the UI
 
   const handleSaveNote = useCallback(async () => {
     if (!formTitre.trim()) {
@@ -470,7 +455,7 @@ export default function EspaceDirection() {
                 <Upload className="h-4 w-4 mr-2" />
                 {importWord.isPending ? 'Import...' : 'Importer Word'}
               </Button>
-              <Button onClick={openCreateDialog}>
+              <Button onClick={() => navigate('/espace-direction/notes/new/canvas')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvelle Note
               </Button>
@@ -553,7 +538,9 @@ export default function EspaceDirection() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => setViewingNote(note)}
+                              onClick={() =>
+                                navigate(`/espace-direction/notes/${note.id}/canvas?mode=view`)
+                              }
                               title="Voir"
                             >
                               <Eye className="h-4 w-4" />
@@ -561,7 +548,7 @@ export default function EspaceDirection() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => openEditDialog(note)}
+                              onClick={() => navigate(`/espace-direction/notes/${note.id}/canvas`)}
                               title="Modifier"
                             >
                               <Edit className="h-4 w-4" />
