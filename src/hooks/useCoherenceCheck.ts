@@ -91,8 +91,8 @@ const VALIDATION_RULES = {
     const exerciceAnnee = parseInt(exerciceId.slice(0, 4)) || new Date().getFullYear();
 
     // Vérifier les activités sans sous-activité (orphelines)
-    const { data: orphanActivites, error } = await supabase
-      .from('activites')
+    const { data: orphanActivites, error } = await (supabase
+      .from('activites') as any)
       .select('id, code, libelle')
       .eq('exercice', exerciceAnnee)
       .is('sous_activite_id', null);
@@ -118,8 +118,8 @@ const VALIDATION_RULES = {
     });
 
     // Vérifier les activités sans direction
-    const { data: activitesSansDirection } = await supabase
-      .from('activites')
+    const { data: activitesSansDirection } = await (supabase
+      .from('activites') as any)
       .select('id, code, libelle')
       .eq('exercice', exerciceAnnee)
       .is('direction_id', null);
@@ -288,8 +288,8 @@ const VALIDATION_RULES = {
     const exerciceAnnee = parseInt(exerciceId.slice(0, 4)) || new Date().getFullYear();
 
     // Doublons de codes d'activités
-    const { data: activites } = await supabase
-      .from('activites')
+    const { data: activites } = await (supabase
+      .from('activites') as any)
       .select('code')
       .eq('exercice', exerciceAnnee);
 
@@ -450,7 +450,7 @@ export function useCoherenceCheck() {
       };
 
       // Sauvegarder le rapport dans Supabase
-      const { error: insertError } = await supabase.from('coherence_reports').insert({
+      const { error: insertError } = await (supabase.from as any)('coherence_reports').insert({
         id: reportId,
         exercice_id: exerciceId,
         generated_by: userId,
@@ -513,8 +513,7 @@ export function useCoherenceReports() {
   return useQuery({
     queryKey: ['coherence-reports', exerciceId],
     queryFn: async (): Promise<CoherenceReport[]> => {
-      const { data, error } = await supabase
-        .from('coherence_reports')
+      const { data, error } = await (supabase.from as any)('coherence_reports')
         .select('*')
         .eq('exercice_id', exerciceId ?? '')
         .order('generated_at', { ascending: false })
@@ -558,8 +557,7 @@ export function useUpdateCoherenceReportStatus() {
       reportId: string;
       status: CoherenceReport['status'];
     }) => {
-      const { error } = await supabase
-        .from('coherence_reports')
+      const { error } = await (supabase.from as any)('coherence_reports')
         .update({ status })
         .eq('id', reportId);
 

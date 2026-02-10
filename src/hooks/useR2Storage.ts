@@ -91,7 +91,7 @@ export function useR2Storage(options: UseR2StorageOptions = {}) {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (key: string) => {
-      const { _data, error } = await r2Storage.delete(key);
+      const { data: _data, error } = await r2Storage.delete(key);
       
       if (error) {
         throw new Error(error);

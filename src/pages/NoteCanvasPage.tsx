@@ -38,15 +38,13 @@ function createDefaultMetadata(): NoteCanvasMetadata {
 
 function noteToMetadata(note: NoteDirection): NoteCanvasMetadata {
   // Parse metadata from the note's metadata JSONB field if present
-  const meta = (note as Record<string, unknown>).metadata as Record<string, unknown> | null;
+  const meta = note.metadata as Record<string, unknown> | null;
   return {
-    reference: ((note as Record<string, unknown>).reference as string) || '',
-    destinataire: ((note as Record<string, unknown>).destinataire as string) || '',
-    expediteur: ((note as Record<string, unknown>).expediteur as string) || '',
-    dateNote:
-      ((note as Record<string, unknown>).date_note as string) ||
-      new Date().toISOString().split('T')[0],
-    objet: ((note as Record<string, unknown>).objet as string) || note.titre || '',
+    reference: note.reference || '',
+    destinataire: note.destinataire || '',
+    expediteur: note.expediteur || '',
+    dateNote: note.date_note || new Date().toISOString().split('T')[0],
+    objet: note.objet || note.titre || '',
     typeNote: note.type_note,
     priorite: note.priorite,
     statut: note.statut,
@@ -114,7 +112,7 @@ export default function NoteCanvasPage() {
         .eq('id', noteId)
         .single();
       if (error) throw error;
-      return data as NoteDirection;
+      return data as unknown as NoteDirection;
     },
     enabled: !!noteId,
   });
@@ -181,22 +179,26 @@ export default function NoteCanvasPage() {
           },
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const untypedClient = supabase as any;
+
         if (noteId) {
           // Update existing note
-          const { error } = await supabase
+          const { error } = await untypedClient
             .from('notes_direction')
             .update(noteData)
             .eq('id', noteId);
           if (error) throw error;
         } else {
-          // Create new note
+          // Create new note - ensure titre is present for the insert
           const insertData = {
             ...noteData,
+            titre: (noteData.titre as string) || 'Note sans titre',
             direction_id: directionId,
             exercice_id: exerciceId || null,
             created_by: authUser.id,
           };
-          const { data, error } = await supabase
+          const { data, error } = await untypedClient
             .from('notes_direction')
             .insert(insertData)
             .select('id')

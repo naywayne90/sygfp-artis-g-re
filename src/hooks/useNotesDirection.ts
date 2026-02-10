@@ -160,7 +160,7 @@ export function useNotesDirection(filters: NotesDirectionFilters) {
 
       const { data, error } = await query.limit(100);
       if (error) throw error;
-      return (data || []) as NoteDirection[];
+      return (data || []) as unknown as NoteDirection[];
     },
     enabled: !!filters.directionId,
   });

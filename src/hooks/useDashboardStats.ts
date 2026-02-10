@@ -391,10 +391,9 @@ export function useDashboardGlobalStats() {
     queryKey: ['dashboard-roadmap-global', exerciceId],
     queryFn: async (): Promise<RoadmapStats> => {
       // Utiliser la table taches au lieu de task_executions
-      const { data: taches, error } = await supabase
-        .from('taches')
+      const { data: taches, error } = await (supabase.from as any)('taches')
         .select('statut, taux_avancement')
-        .eq('exercice', exerciceId!);
+        .eq('exercice', exerciceId as any);
 
       if (error) throw error;
 
@@ -428,36 +427,34 @@ export function useDashboardGlobalStats() {
     queryKey: ['dashboard-alerts-global', exerciceId],
     queryFn: async (): Promise<AlertStats> => {
       // Utiliser la table taches qui existe pour les tâches bloquées
-      const { count: bloquees } = await supabase
-        .from('taches')
+      const { count: bloquees } = await (supabase.from as any)('taches')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('statut', 'bloque');
 
       const today = new Date().toISOString().split('T')[0];
-      const { count: enRetard } = await supabase
-        .from('taches')
+      const { count: enRetard } = await (supabase.from as any)('taches')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .lt('date_fin_prevue', today)
         .not('statut', 'in', '("termine","annule")');
 
       const { count: engAttente } = await supabase
         .from('budget_engagements')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('statut', 'soumis');
 
       const { count: liqAttente } = await supabase
         .from('budget_liquidations')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('statut', 'soumise');
 
       const { count: ordAttente } = await supabase
         .from('ordonnancements')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('statut', 'en_attente');
 
       return {
@@ -486,10 +483,9 @@ export function useDashboardGlobalStats() {
 
       for (const dir of directions) {
         // Utiliser la table taches au lieu de v_task_executions
-        const { data: taches } = await supabase
-          .from('taches')
+        const { data: taches } = await (supabase.from as any)('taches')
           .select('id, statut, taux_avancement, montant_prevu')
-          .eq('exercice', exerciceId!)
+          .eq('exercice', exerciceId as any)
           .eq('direction_id', dir.id);
 
         const total = taches?.length || 0;
@@ -554,10 +550,9 @@ export function useDashboardGlobalStats() {
 
       for (const os of osData) {
         // Utiliser la table taches au lieu de v_task_executions
-        const { data: taches } = await supabase
-          .from('taches')
+        const { data: taches } = await (supabase.from as any)('taches')
           .select('id, statut, montant_prevu')
-          .eq('exercice', exerciceId!)
+          .eq('exercice', exerciceId as any)
           .eq('os_id', os.id);
 
         const total = taches?.length || 0;
@@ -609,10 +604,9 @@ export function useDashboardDirectionStats(directionId: string | null) {
     queryKey: ['dashboard-roadmap-direction', exerciceId, directionId],
     queryFn: async (): Promise<RoadmapStats> => {
       // Utiliser la table taches au lieu de v_task_executions
-      const { data: taches, error } = await supabase
-        .from('taches')
+      const { data: taches, error } = await (supabase.from as any)('taches')
         .select('statut, taux_avancement')
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('direction_id', directionId!);
 
       if (error) throw error;
@@ -643,8 +637,8 @@ export function useDashboardDirectionStats(directionId: string | null) {
   const missionsQuery = useQuery({
     queryKey: ['dashboard-missions-direction', exerciceId, directionId],
     queryFn: async (): Promise<MissionStats[]> => {
-      const { data: missions } = await supabase
-        .from('missions')
+      const { data: missions } = await (supabase
+        .from('missions') as any)
         .select('id, code, libelle')
         .eq('direction_id', directionId!)
         .order('code');
@@ -655,10 +649,9 @@ export function useDashboardDirectionStats(directionId: string | null) {
 
       for (const mission of missions) {
         // Utiliser la table taches au lieu de v_task_executions
-        const { data: taches } = await supabase
-          .from('taches')
+        const { data: taches } = await (supabase.from as any)('taches')
           .select('statut')
-          .eq('exercice', exerciceId!)
+          .eq('exercice', exerciceId as any)
           .eq('mission_id', mission.id);
 
         const total = taches?.length || 0;
@@ -686,18 +679,16 @@ export function useDashboardDirectionStats(directionId: string | null) {
     queryKey: ['dashboard-alerts-direction', exerciceId, directionId],
     queryFn: async (): Promise<AlertStats> => {
       // Utiliser la table taches au lieu de v_task_executions
-      const { count: bloquees } = await supabase
-        .from('taches')
+      const { count: bloquees } = await (supabase.from as any)('taches')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('direction_id', directionId!)
         .eq('statut', 'bloque');
 
       const today = new Date().toISOString().split('T')[0];
-      const { count: enRetard } = await supabase
-        .from('taches')
+      const { count: enRetard } = await (supabase.from as any)('taches')
         .select('*', { count: 'exact', head: true })
-        .eq('exercice', exerciceId!)
+        .eq('exercice', exerciceId as any)
         .eq('direction_id', directionId!)
         .lt('date_fin_prevue', today)
         .not('statut', 'in', '("termine","annule")');

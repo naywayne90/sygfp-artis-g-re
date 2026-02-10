@@ -75,7 +75,7 @@ export default function Reamenagement() {
   const [selectedTransfer, setSelectedTransfer] = useState<any>(null);
 
   const { budgetLines } = useBudgetLines();
-  const { transfers, isLoading, stats, createTransfer, submitTransfer, validateTransfer, rejectTransfer, executeTransfer, _cancelTransfer, isCreating, isExecuting } = useBudgetTransfers({
+  const { transfers, isLoading, stats, createTransfer, submitTransfer, validateTransfer, rejectTransfer, executeTransfer, cancelTransfer: _cancelTransfer, isCreating, isExecuting } = useBudgetTransfers({
     status: statusFilter !== "all" ? statusFilter : undefined,
     type_transfer: "virement",
   });

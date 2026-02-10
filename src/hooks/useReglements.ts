@@ -605,7 +605,7 @@ export function useReglements() {
     renvoiTarget: RenvoiTarget;
   }
   const rejectReglement = useMutation<
-    { reglement: Record<string, unknown>; renvoiTarget: RenvoiTarget },
+    { reglement: unknown; renvoiTarget: RenvoiTarget },
     Error,
     RejectReglementParams
   >({
@@ -712,7 +712,7 @@ export function useReglements() {
         // Déverrouiller engagement et les étapes suivantes
         await supabase
           .from('budget_engagements')
-          .update({ is_locked: false })
+          .update({ is_locked: false } as Record<string, unknown>)
           .eq('id', engagementId);
 
         // Mettre à jour le dossier

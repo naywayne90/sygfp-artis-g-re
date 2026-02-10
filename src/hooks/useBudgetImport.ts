@@ -118,7 +118,7 @@ export function useBudgetImport() {
         .limit(50);
 
       if (error) throw error;
-      return data as BudgetImportRecord[];
+      return data as unknown as BudgetImportRecord[];
     },
     enabled: !!exercice,
   });
@@ -177,7 +177,7 @@ export function useBudgetImport() {
         .update({
           success_rows: params.successRows,
           error_rows: params.errorRows,
-          errors: params.errors || null,
+          errors: (params.errors || null) as any,
           status,
           completed_at: new Date().toISOString(),
         })
@@ -626,7 +626,7 @@ export function useBudgetImport() {
           .from('budget_imports')
           .update({
             status: 'echec',
-            errors: [{ row: 0, message }],
+            errors: [{ row: 0, message }] as any,
             completed_at: new Date().toISOString(),
           })
           .eq('id', importRecord.id);

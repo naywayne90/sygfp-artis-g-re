@@ -189,8 +189,7 @@ export default function NoteAEFDetail() {
     queryKey: ['note-aef-detail', id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from('notes_dg')
+      const { data, error } = await (supabase.from as any)('notes_dg')
         .select(
           `
           *,

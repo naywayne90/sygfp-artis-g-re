@@ -38,7 +38,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
 };
 
 export default function HistoriqueImports() {
-  const { _exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const { fetchAllJobs, fetchImportRows, exportErrors, retryImport } = useImportJobs();
   
   const [jobs, setJobs] = useState<ImportJob[]>([]);

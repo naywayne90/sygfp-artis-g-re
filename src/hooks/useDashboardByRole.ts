@@ -720,9 +720,10 @@ export function useControleurDashboard() {
       let countDelaiLiq = 0;
       liquidations?.forEach((l) => {
         // Utiliser validated_at si disponible, sinon updated_at
-        const validationDate = l.validated_at || l.updated_at;
+        const item = l as any;
+        const validationDate = item.validated_at || item.updated_at;
         if (validationDate) {
-          const creation = new Date(l.created_at);
+          const creation = new Date(item.created_at);
           const validation = new Date(validationDate);
           const delaiJours = Math.floor(
             (validation.getTime() - creation.getTime()) / (1000 * 60 * 60 * 24)

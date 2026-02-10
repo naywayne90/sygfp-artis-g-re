@@ -14,6 +14,10 @@
 import { getStorageProvider, type IStorageProvider } from "./storage";
 import { supabase } from "@/integrations/supabase/client";
 
+// The 'attachments' table is not in the generated Supabase types yet
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseUntyped = supabase as any;
+
 // ============================================
 // TYPES
 // ============================================
@@ -274,7 +278,7 @@ class AttachmentServiceClass {
       };
 
       // Sauvegarder en base de données
-      const { data: savedAttachment, error: dbError } = await supabase
+      const { data: savedAttachment, error: dbError } = await supabaseUntyped
         .from("attachments")
         .insert({
           dossier_ref: metadata.dossier_ref,
@@ -362,7 +366,7 @@ class AttachmentServiceClass {
     step?: AttachmentStep
   ): Promise<ListAttachmentsResult> {
     try {
-      let query = supabase
+      let query = supabaseUntyped
         .from("attachments")
         .select("*")
         .eq("dossier_ref", dossierRef)
@@ -407,7 +411,7 @@ class AttachmentServiceClass {
    */
   async listByEntity(entityId: string): Promise<ListAttachmentsResult> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseUntyped
         .from("attachments")
         .select("*")
         .eq("entity_id", entityId)
@@ -501,7 +505,7 @@ class AttachmentServiceClass {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       // Récupérer les infos de l'attachment
-      const { data: attachment, error: fetchError } = await supabase
+      const { data: attachment, error: fetchError } = await supabaseUntyped
         .from("attachments")
         .select("*")
         .eq("id", attachmentId)
@@ -532,7 +536,7 @@ class AttachmentServiceClass {
       }
 
       // Supprimer de la base de données
-      const { error: dbError } = await supabase
+      const { error: dbError } = await supabaseUntyped
         .from("attachments")
         .delete()
         .eq("id", attachmentId);

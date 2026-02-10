@@ -78,7 +78,7 @@ interface ImputationDGSectionProps {
   noteStatut: string | null;
 }
 
-export function ImputationDGSection({ noteSefId, _noteStatut }: ImputationDGSectionProps) {
+export function ImputationDGSection({ noteSefId, noteStatut: _noteStatut }: ImputationDGSectionProps) {
   const { hasAnyRole } = usePermissions();
   const canEdit = hasAnyRole(["DG", "ADMIN"]);
 

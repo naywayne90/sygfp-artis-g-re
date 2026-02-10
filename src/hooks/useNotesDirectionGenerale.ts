@@ -385,7 +385,7 @@ export function useNotesDirectionGenerale() {
         .select('role')
         .eq('user_id', user.id);
 
-      const hasDGRole = userRoles?.some((r) => r.role === 'Admin' || r.role === 'DG');
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
         throw new Error('Seuls les utilisateurs DG ou Admin peuvent valider une note');
       }
@@ -450,7 +450,7 @@ export function useNotesDirectionGenerale() {
         .select('role')
         .eq('user_id', user.id);
 
-      const hasDGRole = userRoles?.some((r) => r.role === 'Admin' || r.role === 'DG');
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
         throw new Error('Seuls les utilisateurs DG ou Admin peuvent rejeter une note');
       }

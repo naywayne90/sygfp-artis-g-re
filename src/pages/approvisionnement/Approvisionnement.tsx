@@ -11,7 +11,7 @@ import { InventaireList } from "@/components/approvisionnement/InventaireList";
 
 export default function Approvisionnement() {
   const { exercice } = useExercice();
-  const { stats, _loadingArticles } = useApprovisionnement();
+  const { stats, loadingArticles: _loadingArticles } = useApprovisionnement();
 
   return (
     <div className="space-y-6 animate-fade-in">

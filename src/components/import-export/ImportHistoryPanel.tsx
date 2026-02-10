@@ -56,7 +56,7 @@ interface ImportHistoryPanelProps {
   exercice: number;
 }
 
-export function ImportHistoryPanel({ _exercice }: ImportHistoryPanelProps) {
+export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelProps) {
   const [runs, setRuns] = useState<ImportRun[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRun, setSelectedRun] = useState<ImportRun | null>(null);

@@ -31,6 +31,10 @@ import { toast } from 'sonner';
 import { useGenerateReport } from '@/hooks/useGenerateReport';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+
+// View not in generated Supabase types - use untyped client as workaround
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseUntyped = supabase as any;
 import { DashboardNoDirection } from '@/components/dashboard/DashboardNoDirection';
 import { DashboardGeneric } from '@/components/dashboard/DashboardGeneric';
 import { DashboardAICB } from '@/components/dashboard/DashboardAICB';
@@ -305,9 +309,8 @@ function RecentActivities({ directionId }: { directionId: string }) {
   const { data: recentTasks, isLoading } = useQuery({
     queryKey: ['recent-activities', exerciceId, directionId],
     queryFn: async () => {
-      const { data, error } = await (
-        supabase.from as (table: string) => ReturnType<typeof supabase.from>
-      )('v_task_executions')
+      const { data, error } = await supabaseUntyped
+        .from('v_task_executions')
         .select('id, activite_code, activite_libelle, status, taux_avancement, updated_at')
         .eq('exercice_id', exerciceId ?? '')
         .eq('direction_id', directionId)
@@ -315,7 +318,7 @@ function RecentActivities({ directionId }: { directionId: string }) {
         .limit(10);
 
       if (error) throw error;
-      return data;
+      return (data || []) as { id: string; activite_code: string; activite_libelle: string; status: string; taux_avancement: number | null; updated_at: string | null }[];
     },
     enabled: !!exerciceId && !!directionId,
   });

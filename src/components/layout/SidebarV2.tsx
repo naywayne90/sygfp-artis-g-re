@@ -352,7 +352,7 @@ export function SidebarV2() {
             <SidebarMenu>
               {visibleBudgetItems.map((item) => {
                 const typedItem = item as { badgeKey?: string; title: string; url: string; icon: typeof Wallet };
-                const badgeCount = typedItem.badgeKey && badges ? badges[typedItem.badgeKey as keyof typeof badges] : 0;
+                const badgeCount = typedItem.badgeKey && badges ? Number(badges[typedItem.badgeKey as keyof typeof badges]) || 0 : 0;
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>

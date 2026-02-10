@@ -8,12 +8,15 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
-// Types extraits de la base de données
-export type InstructionType = Database["public"]["Enums"]["instruction_type"];
-export type ImputationPriorite = Database["public"]["Enums"]["imputation_priorite"];
+// Tables not yet in generated Supabase types - use untyped client as workaround
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const untypedSupabase = supabase as any;
+
+// Types définis localement (non générés par Supabase)
+export type InstructionType = "ATTRIBUTION" | "DIFFUSION" | "SUIVI" | "A_FAIRE_SUITE" | "CLASSEMENT";
+export type ImputationPriorite = "basse" | "normale" | "haute" | "urgente";
 
 export interface NoteImputationLigne {
   id: string;
@@ -81,7 +84,7 @@ export function useNoteImputation(noteSefId: string | undefined) {
       if (!noteSefId) return null;
 
       // Récupérer l'imputation principale
-      const { data: imputation, error: impError } = await supabase
+      const { data: imputation, error: impError } = await untypedSupabase
         .from("note_imputations")
         .select(`
           *,
@@ -102,7 +105,7 @@ export function useNoteImputation(noteSefId: string | undefined) {
       if (!imputation) return null;
 
       // Récupérer les lignes
-      const { data: lignes, error: lignesError } = await supabase
+      const { data: lignes, error: lignesError } = await untypedSupabase
         .from("note_imputation_lignes")
         .select(`
           *,
@@ -143,20 +146,20 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
     if (!noteSefId) throw new Error("ID note SEF manquant");
 
     // Vérifier si une imputation existe déjà
-    const { data: existing } = await supabase
+    const { data: existing } = await untypedSupabase
       .from("note_imputations")
       .select("id")
       .eq("note_sef_id", noteSefId)
       .maybeSingle();
 
-    if (existing) return existing.id;
+    if (existing) return (existing as any).id;
 
     // Récupérer l'utilisateur courant
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("Utilisateur non connecté");
 
     // Créer l'imputation
-    const { data, error } = await supabase
+    const { data, error } = await untypedSupabase
       .from("note_imputations")
       .insert({
         note_sef_id: noteSefId,
@@ -166,7 +169,7 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
       .single();
 
     if (error) throw error;
-    return data.id;
+    return (data as any).id;
   }, [noteSefId]);
 
   /**
@@ -179,7 +182,7 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
         const imputationId = await getOrCreateImputation();
 
         // Déterminer l'ordre (max + 1)
-        const { data: maxOrdre } = await supabase
+        const { data: maxOrdre } = await untypedSupabase
           .from("note_imputation_lignes")
           .select("ordre")
           .eq("imputation_id", imputationId)
@@ -187,9 +190,9 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
           .limit(1)
           .maybeSingle();
 
-        const nextOrdre = (maxOrdre?.ordre ?? -1) + 1;
+        const nextOrdre = ((maxOrdre as any)?.ordre ?? -1) + 1;
 
-        const { data, error } = await supabase
+        const { data, error } = await untypedSupabase
           .from("note_imputation_lignes")
           .insert({
             imputation_id: imputationId,
@@ -229,7 +232,7 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
       try {
         const { id, ...updates } = input;
 
-        const { data, error } = await supabase
+        const { data, error } = await untypedSupabase
           .from("note_imputation_lignes")
           .update(updates)
           .eq("id", id)
@@ -259,7 +262,7 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
     mutationFn: async (ligneId: string) => {
       setIsLoading(true);
       try {
-        const { error } = await supabase
+        const { error } = await untypedSupabase
           .from("note_imputation_lignes")
           .delete()
           .eq("id", ligneId);
@@ -288,7 +291,7 @@ export function useNoteImputationMutations(noteSefId: string | undefined) {
       try {
         // Mettre à jour l'ordre de chaque ligne
         const updates = ligneIds.map((id, index) =>
-          supabase
+          untypedSupabase
             .from("note_imputation_lignes")
             .update({ ordre: index })
             .eq("id", id)

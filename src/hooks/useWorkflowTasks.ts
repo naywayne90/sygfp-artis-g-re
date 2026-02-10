@@ -229,7 +229,7 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
 
 export function useWorkflowTasksStats() {
   const { exercice } = useExercice();
-  const { userRoles, _userId } = usePermissions();
+  const { userRoles, userId: _userId } = usePermissions();
 
   return useQuery({
     queryKey: ["workflow-tasks-stats", exercice, userRoles],

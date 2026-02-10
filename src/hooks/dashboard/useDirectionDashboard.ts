@@ -100,13 +100,13 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
     queryFn: async () => {
       if (!directionId || !exercice) return null;
 
-      const { data, error } = await supabase.rpc("get_direction_kpis", {
+      const { data, error } = await (supabase.rpc as any)("get_direction_kpis", {
         p_direction_id: directionId,
         p_exercice: exercice,
       });
 
       if (error) throw error;
-      return data as DirectionKPIs;
+      return data as unknown as DirectionKPIs;
     },
     enabled: !!directionId && !!exercice,
   });
@@ -117,8 +117,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
     queryFn: async () => {
       if (!directionId) return [];
 
-      const { data, error } = await supabase
-        .from("v_alertes_direction")
+      const { data, error } = await (supabase.from as any)("v_alertes_direction")
         .select("*")
         .eq("direction_id", directionId);
 
@@ -126,7 +125,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
         console.warn("Alertes direction non disponibles:", error.message);
         return [];
       }
-      return (data as DirectionAlerte[]) || [];
+      return (data as unknown as DirectionAlerte[]) || [];
     },
     enabled: !!directionId,
   });
@@ -137,7 +136,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
     queryFn: async () => {
       if (!directionId || !exercice) return [];
 
-      const { data, error } = await supabase.rpc("get_evolution_mensuelle_direction", {
+      const { data, error } = await (supabase.rpc as any)("get_evolution_mensuelle_direction", {
         p_direction_id: directionId,
         p_exercice: exercice,
       });
@@ -146,7 +145,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
         console.warn("Évolution mensuelle non disponible:", error.message);
         return [];
       }
-      return (data as EvolutionMensuelle[]) || [];
+      return (data as unknown as EvolutionMensuelle[]) || [];
     },
     enabled: !!directionId && !!exercice,
   });
@@ -157,7 +156,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
     queryFn: async () => {
       if (!directionId || !exercice) return [];
 
-      const { data, error } = await supabase.rpc("get_dossiers_recents_direction", {
+      const { data, error } = await (supabase.rpc as any)("get_dossiers_recents_direction", {
         p_direction_id: directionId,
         p_exercice: exercice,
         p_limit: 10,
@@ -167,7 +166,7 @@ export function useDirectionDashboard(directionId: string | null): UseDirectionD
         console.warn("Dossiers récents non disponibles:", error.message);
         return [];
       }
-      return (data as DossierRecent[]) || [];
+      return (data as unknown as DossierRecent[]) || [];
     },
     enabled: !!directionId && !!exercice,
   });
@@ -214,13 +213,13 @@ export function useDirectionKPIs(directionId: string | null) {
     queryFn: async () => {
       if (!directionId || !exercice) return null;
 
-      const { data, error } = await supabase.rpc("get_direction_kpis", {
+      const { data, error } = await (supabase.rpc as any)("get_direction_kpis", {
         p_direction_id: directionId,
         p_exercice: exercice,
       });
 
       if (error) throw error;
-      return data as DirectionKPIs;
+      return data as unknown as DirectionKPIs;
     },
     enabled: !!directionId && !!exercice,
   });
@@ -235,8 +234,7 @@ export function useDirectionAlertes(directionId: string | null) {
     queryFn: async () => {
       if (!directionId) return [];
 
-      const { data, error } = await supabase
-        .from("v_alertes_direction")
+      const { data, error } = await (supabase.from as any)("v_alertes_direction")
         .select("*")
         .eq("direction_id", directionId);
 
@@ -244,7 +242,7 @@ export function useDirectionAlertes(directionId: string | null) {
         console.warn("Alertes non disponibles:", error.message);
         return [];
       }
-      return (data as DirectionAlerte[]) || [];
+      return (data as unknown as DirectionAlerte[]) || [];
     },
     enabled: !!directionId,
   });
@@ -261,8 +259,7 @@ export function useAllDirectionsStats() {
     queryFn: async () => {
       if (!exercice) return [];
 
-      const { data, error } = await supabase
-        .from("v_dashboard_direction")
+      const { data, error } = await (supabase.from as any)("v_dashboard_direction")
         .select("*")
         .eq("exercice", exercice)
         .order("direction_code");

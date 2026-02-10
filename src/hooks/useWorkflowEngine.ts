@@ -142,7 +142,7 @@ export function useWorkflowEngine(
 
       if (error) throw error;
 
-      const result = data as AdvanceResult;
+      const result = data as unknown as AdvanceResult;
       if (!result?.success) {
         throw new Error(result?.error || "Erreur lors de l'action");
       }
@@ -348,8 +348,9 @@ export function usePendingWorkflows(roleCode?: string) {
   return useQuery({
     queryKey: ['pending-workflows', roleCode],
     queryFn: async () => {
+      // The RPC function accepts p_user_id (optional), not p_role_code
       const { data, error } = await supabase.rpc('get_pending_workflows', {
-        p_role_code: roleCode || null,
+        p_user_id: roleCode || undefined,
       });
       if (error) throw error;
       return data || [];

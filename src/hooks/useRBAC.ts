@@ -78,7 +78,7 @@ interface RBACContext {
 // ============================================
 
 export function useRBAC(): RBACContext {
-  const { _exercice, isUserAdmin: exerciceAdmin } = useExercice();
+  const { exercice: _exercice, isUserAdmin: exerciceAdmin } = useExercice();
 
   // Récupérer l'utilisateur authentifié
   const { data: authUser, isLoading: isLoadingAuth } = useQuery({

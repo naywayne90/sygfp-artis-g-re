@@ -4,6 +4,10 @@ import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
 import type { PlanTravail, PlanTravailInput } from '@/types/roadmap';
 
+// Table not yet in generated Supabase types - use untyped client as workaround
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseUntyped = supabase as any;
+
 export function usePlansTravail(directionId?: string) {
   const { exerciceId } = useExercice();
   const queryClient = useQueryClient();
@@ -11,9 +15,8 @@ export function usePlansTravail(directionId?: string) {
   const query = useQuery({
     queryKey: ['plans-travail', exerciceId, directionId],
     queryFn: async () => {
-      let q = (supabase.from as (table: string) => ReturnType<typeof supabase.from>)(
-        'plans_travail'
-      )
+      let q = supabaseUntyped
+        .from('plans_travail')
         .select(
           '*, direction:directions(id, code, nom), responsable:profiles!responsable_id(id, nom, prenom)'
         )
@@ -30,7 +33,7 @@ export function usePlansTravail(directionId?: string) {
 
       const { data, error } = await q;
       if (error) throw error;
-      return (data ?? []) as PlanTravail[];
+      return (data ?? []) as unknown as PlanTravail[];
     },
     enabled: !!exerciceId,
   });
@@ -42,9 +45,8 @@ export function usePlansTravail(directionId?: string) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifie');
 
-      const { data, error } = await (
-        supabase.from as (table: string) => ReturnType<typeof supabase.from>
-      )('plans_travail')
+      const { data, error } = await supabaseUntyped
+        .from('plans_travail')
         .insert({
           ...input,
           budget_consomme: 0,
@@ -55,7 +57,7 @@ export function usePlansTravail(directionId?: string) {
         .single();
 
       if (error) throw error;
-      return data as PlanTravail;
+      return data as unknown as PlanTravail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
@@ -68,16 +70,15 @@ export function usePlansTravail(directionId?: string) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PlanTravail> & { id: string }) => {
-      const { data, error } = await (
-        supabase.from as (table: string) => ReturnType<typeof supabase.from>
-      )('plans_travail')
+      const { data, error } = await supabaseUntyped
+        .from('plans_travail')
         .update(updates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as PlanTravail;
+      return data as unknown as PlanTravail;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
@@ -90,9 +91,8 @@ export function usePlansTravail(directionId?: string) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (
-        supabase.from as (table: string) => ReturnType<typeof supabase.from>
-      )('plans_travail')
+      const { error } = await supabaseUntyped
+        .from('plans_travail')
         .update({ est_actif: false })
         .eq('id', id);
 

@@ -36,7 +36,7 @@ export interface WorkflowProgress {
 export function useWorkflowDossier(dossierId: string | undefined) {
   const { toast } = useToast();
   const { logAction } = useAuditLog();
-  const { _exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const queryClient = useQueryClient();
 
   // Récupérer les instances de workflow pour ce dossier

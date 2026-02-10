@@ -124,7 +124,7 @@ export function NoteSEFDetails({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { hasAnyRole } = usePermissions();
-  const { fetchHistory, _submitNote, _validateNote } = useNotesSEF();
+  const { fetchHistory, submitNote: _submitNote, validateNote: _validateNote } = useNotesSEF();
   const { exportPdf, isExporting: isExportingPdf, progress: _exportProgress } = useExportNoteSEFPdf();
   
   const [history, setHistory] = useState<NoteSEFHistory[]>([]);

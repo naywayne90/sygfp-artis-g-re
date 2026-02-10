@@ -374,7 +374,7 @@ function NoteDetailDrawer({
 
 export default function NotesAValider() {
   const navigate = useNavigate();
-  const { _exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const { hasAnyRole } = usePermissions();
   const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
   const { exportPdf, isExporting: isExportingPdf } = useExportNoteSEFPdf();

@@ -28,7 +28,7 @@ interface AccessControlResult {
 }
 
 export function useNoteAccessControl(note: NoteAccessParams | null, noteType: 'SEF' | 'AEF' = 'SEF'): AccessControlResult {
-  const { userId, _hasRole, hasAnyRole, isAdmin: isAdminRole, isLoading: permissionsLoading } = usePermissions();
+  const { userId, hasRole: _hasRole, hasAnyRole, isAdmin: isAdminRole, isLoading: permissionsLoading } = usePermissions();
 
   // Récupérer le profil utilisateur avec sa direction
   const { data: userProfile, isLoading: profileLoading } = useQuery({

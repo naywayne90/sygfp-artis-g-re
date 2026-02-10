@@ -3,6 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import type { DirectionRoadmapStats, RoadmapStats, PlanTravail, Tache } from '@/types/roadmap';
 
+// Table not yet in generated Supabase types - use untyped client as workaround
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseUntyped = supabase as any;
+
 function computeStats(plans: PlanTravail[], taches: Tache[]): RoadmapStats {
   const today = new Date();
   const tachesEnRetard = taches.filter((t) => {
@@ -37,15 +41,14 @@ export function useRoadmapDashboard() {
   const plansQuery = useQuery({
     queryKey: ['roadmap-dashboard-plans', exerciceId],
     queryFn: async () => {
-      const { data, error } = await (
-        supabase.from as (table: string) => ReturnType<typeof supabase.from>
-      )('plans_travail')
+      const { data, error } = await supabaseUntyped
+        .from('plans_travail')
         .select('*, direction:directions(id, code, nom)')
         .eq('est_actif', true)
         .eq('exercice_id', exerciceId);
 
       if (error) throw error;
-      return (data ?? []) as PlanTravail[];
+      return (data ?? []) as unknown as PlanTravail[];
     },
     enabled: !!exerciceId,
   });

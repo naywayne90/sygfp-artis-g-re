@@ -68,7 +68,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   } = useImportJobs();
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
-  const { importAllReferentiels, refreshDropdowns, _isSyncing, _detectReferenceSheets } = useReferentielSync();
+  const { importAllReferentiels, refreshDropdowns, isSyncing: _isSyncing, detectReferenceSheets: _detectReferenceSheets } = useReferentielSync();
   
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

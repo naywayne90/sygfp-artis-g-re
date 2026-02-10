@@ -86,7 +86,7 @@ export function ServiceFaitForm({
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { logAction } = useAuditLog();
-  const { hasAnyRole, _userRoles } = usePermissions();
+  const { hasAnyRole, userRoles: _userRoles } = usePermissions();
 
   // Rôles autorisés pour certifier le service fait
   const canCertify = hasAnyRole(["ADMIN", "SDCT", "DAAF", "DIRECTION"]) && !readOnly;

@@ -164,8 +164,8 @@ export function SpendingCaseTimeline({
     spendingCase: loadedCase,
     isLoading,
     getAvailableTransitions,
-    _transition,
-    _isTransitioning,
+    transition: _transition,
+    isTransitioning: _isTransitioning,
   } = useSpendingCase({
     dossierRef,
     dossierId,
@@ -509,7 +509,7 @@ function StageDetailDialog({
   onNavigate,
 }: StageDetailDialogProps) {
   // Hooks must be called unconditionally before any early return
-  const { canValidate, _userRole, requiredRole } = useStagePermission(stage ?? "note_sef");
+  const { canValidate, userRole: _userRole, requiredRole } = useStagePermission(stage ?? "note_sef");
 
   if (!stage) return null;
 

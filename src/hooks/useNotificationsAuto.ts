@@ -18,7 +18,7 @@ interface NotificationAutoParams {
  * Utilisé pour notifier les utilisateurs lors d'actions du workflow
  */
 export function useNotificationsAuto() {
-  const { _exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
 
   /**
    * Crée une notification pour un utilisateur spécifique

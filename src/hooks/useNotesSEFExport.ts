@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import type { Json } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
@@ -505,10 +506,10 @@ export function useNotesSEFExport() {
           newValues: {
             exercice,
             tab: tabLabel,
-            filters,
+            filters: filters as unknown as Json,
             count: exportData.length,
             fileName,
-          },
+          } as unknown as Json,
         });
 
         toast.success(`${exportData.length} note(s) exportée(s) en Excel`);
@@ -587,9 +588,9 @@ export function useNotesSEFExport() {
           newValues: {
             exercice,
             tab: tabLabel,
-            filters,
+            filters: filters as unknown as Json,
             count: exportData.length,
-          },
+          } as unknown as Json,
         });
 
         // Ouvrir la fenêtre d'impression

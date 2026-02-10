@@ -153,7 +153,7 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as BudgetLineWithRelations[];
+      return data as unknown as BudgetLineWithRelations[];
     },
     enabled: !!exercice,
   });
@@ -334,7 +334,7 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   // Soft delete (deactivate) via RPC
   const deleteMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const { error } = await supabase.rpc('deactivate_budget_line', {
+      const { error } = await (supabase.rpc as any)('deactivate_budget_line', {
         p_budget_line_id: id,
         p_reason: reason || 'Désactivation manuelle',
       });

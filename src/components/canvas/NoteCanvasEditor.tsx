@@ -82,7 +82,7 @@ export function NoteCanvasEditor({
   const setContent = useCallback(
     (newContent: string) => {
       if (editor && newContent !== editor.getHTML()) {
-        editor.commands.setContent(newContent, false);
+        editor.commands.setContent(newContent, { emitUpdate: false });
       }
     },
     [editor]

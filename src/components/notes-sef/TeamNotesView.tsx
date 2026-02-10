@@ -104,7 +104,7 @@ export function TeamNotesView({
     queryKey: ['team-members', userId, depth],
     queryFn: async (): Promise<Collaborator[]> => {
       // Essayer d'utiliser la fonction RPC si disponible
-      const { data: rpcData, error: rpcError } = await supabase.rpc(
+      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)(
         'get_team_members',
         { p_supervisor_id: userId, p_depth: depth }
       );

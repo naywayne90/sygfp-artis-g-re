@@ -34,7 +34,7 @@ export function ExportButtons({
   entityType = "budget_lines",
   showReferentielsOption = true,
 }: ExportButtonsProps) {
-  const { isExporting, exportBudgetLines, _exportToCSV } = useExport();
+  const { isExporting, exportBudgetLines, exportToCSV: _exportToCSV } = useExport();
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [includeReferentiels, setIncludeReferentiels] = useState(true);
 

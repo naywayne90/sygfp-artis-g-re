@@ -131,7 +131,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
           break;
         case "q4":
           dateStart = `${exercice}-10-01`;
-          _dateEnd = `${exercice}-12-31`;
+          dateEnd = `${exercice}-12-31`;
           break;
         case "last3":
           dateStart = format(subMonths(now, 3), "yyyy-MM-dd");
@@ -140,7 +140,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
           dateStart = format(subMonths(now, 6), "yyyy-MM-dd");
           break;
         default: // ytd
-          _dateStart = `${exercice}-01-01`;
+          dateStart = `${exercice}-01-01`;
       }
 
       // Fetch all data in parallel

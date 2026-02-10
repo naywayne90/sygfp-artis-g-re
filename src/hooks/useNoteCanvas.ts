@@ -140,7 +140,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
         .single();
 
       if (error) throw error;
-      return data as NoteDirection;
+      return data as unknown as NoteDirection;
     },
     enabled: !!effectiveNoteId,
   });
@@ -178,7 +178,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
         .single();
 
       if (error) throw error;
-      return data as NoteDirection;
+      return data as unknown as NoteDirection;
     },
   });
 
@@ -202,7 +202,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
         .single();
 
       if (error) throw error;
-      return data as NoteDirection;
+      return data as unknown as NoteDirection;
     },
   });
 

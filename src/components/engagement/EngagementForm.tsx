@@ -25,14 +25,13 @@ interface EngagementFormProps {
 export function EngagementForm({ open, onOpenChange, dossierId }: EngagementFormProps) {
   const { expressionsValidees, createEngagement, calculateAvailability, isCreating } = useEngagements();
   const { budgetLines } = useBudgetLines();
-  const { _createLink, linkTypes } = useLambdaLinks();
+  const { createLink: _createLink, linkTypes } = useLambdaLinks();
   const { exercice } = useExercice();
   
   // Fetch marchés validés
   const { data: marchesValides = [] } = useQuery({
     queryKey: ["marches-valides-for-engagement", exercice],
     queryFn: async () => {
-      // @ts-expect-error Supabase type instantiation issue workaround
       const { data, error } = await supabase
         .from("marches")
         .select(`

@@ -354,14 +354,6 @@ export function ReglementDetails({ reglement }: ReglementDetailsProps) {
       {/* Dossier step timeline */}
       <DossierStepTimeline
         currentStep="reglement"
-        engagementId={engagement?.id}
-        liquidationId={liquidation?.id}
-        ordonnancementId={ordonnancement?.id}
-        reglementId={reglement.id}
-        engagementStatus="valide"
-        liquidationStatus="valide"
-        ordonnancementStatus="valide"
-        reglementStatus={isFullyPaid ? 'solde' : 'en_cours'}
         compact
       />
 

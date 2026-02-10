@@ -17,7 +17,7 @@ interface ExportDossierButtonProps {
 
 export function ExportDossierButton({
   dossierId,
-  _dossierNumero,
+  dossierNumero: _dossierNumero,
   variant = "outline",
   size = "default",
 }: ExportDossierButtonProps) {

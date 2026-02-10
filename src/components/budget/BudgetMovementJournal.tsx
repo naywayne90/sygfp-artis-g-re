@@ -101,16 +101,16 @@ interface BudgetMovement {
 // ============================================================================
 
 const EXPORT_COLUMNS: ExportColumn[] = [
-  { key: 'date', label: 'Date', type: 'string', width: 20 },
-  { key: 'type', label: 'Type', type: 'string', width: 20 },
-  { key: 'ligne', label: 'Ligne budgétaire', type: 'string', width: 15 },
-  { key: 'ligne_label', label: 'Libellé', type: 'string', width: 30 },
-  { key: 'delta', label: 'Delta (FCFA)', type: 'number', format: 'currency', width: 18 },
-  { key: 'dotation_avant', label: 'Dotation avant', type: 'number', format: 'currency', width: 18 },
-  { key: 'dotation_apres', label: 'Dotation après', type: 'number', format: 'currency', width: 18 },
-  { key: 'reference', label: 'Référence', type: 'string', width: 18 },
-  { key: 'commentaire', label: 'Commentaire', type: 'string', width: 30 },
-  { key: 'utilisateur', label: 'Utilisateur', type: 'string', width: 20 },
+  { key: 'date', label: 'Date', type: 'text', width: 20 },
+  { key: 'type', label: 'Type', type: 'text', width: 20 },
+  { key: 'ligne', label: 'Ligne budgétaire', type: 'text', width: 15 },
+  { key: 'ligne_label', label: 'Libellé', type: 'text', width: 30 },
+  { key: 'delta', label: 'Delta (FCFA)', type: 'currency', width: 18 },
+  { key: 'dotation_avant', label: 'Dotation avant', type: 'currency', width: 18 },
+  { key: 'dotation_apres', label: 'Dotation après', type: 'currency', width: 18 },
+  { key: 'reference', label: 'Référence', type: 'text', width: 18 },
+  { key: 'commentaire', label: 'Commentaire', type: 'text', width: 30 },
+  { key: 'utilisateur', label: 'Utilisateur', type: 'text', width: 20 },
 ];
 
 function prepareExportData(movements: BudgetMovement[]) {
@@ -214,7 +214,7 @@ export function BudgetMovementJournal() {
     exportToCSV(
       prepareExportData(filteredMovements),
       EXPORT_COLUMNS,
-      `journal_mouvements_${exercice}`
+      { title: `Journal des Mouvements Budgétaires`, filename: `journal_mouvements_${exercice}` }
     );
     toast.success('Export CSV réussi');
   };
@@ -223,7 +223,7 @@ export function BudgetMovementJournal() {
     exportToExcel(
       prepareExportData(filteredMovements),
       EXPORT_COLUMNS,
-      `journal_mouvements_${exercice}`
+      { title: `Journal des Mouvements Budgétaires`, filename: `journal_mouvements_${exercice}` }
     );
     toast.success('Export Excel réussi');
   };
@@ -232,8 +232,7 @@ export function BudgetMovementJournal() {
     exportToPDF(
       prepareExportData(filteredMovements),
       EXPORT_COLUMNS,
-      `Journal des Mouvements Budgétaires - Exercice ${exercice}`,
-      `journal_mouvements_${exercice}`
+      { title: `Journal des Mouvements Budgétaires - Exercice ${exercice}`, filename: `journal_mouvements_${exercice}` }
     );
     toast.success('Export PDF réussi');
   };
@@ -408,7 +407,7 @@ export function BudgetMovementJournal() {
             </div>
           ) : movements.length === 0 ? (
             <EmptyState
-              icon={<History className="h-12 w-12" />}
+              icon={History}
               title="Aucun mouvement budgétaire"
               description="Les mouvements apparaîtront ici lors de l'exécution de virements, engagements et autres opérations."
             />

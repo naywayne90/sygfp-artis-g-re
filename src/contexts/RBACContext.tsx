@@ -189,7 +189,7 @@ export function RBACProvider({ children }: RBACProviderProps) {
 
     const rule = VALIDATION_MATRIX[entityType];
     if (!rule) return false;
-    return rule.validators.includes(user.profilFonctionnel);
+    return (rule.validators as readonly string[]).includes(user.profilFonctionnel);
   };
 
   // Vérifier l'accès aux données par direction

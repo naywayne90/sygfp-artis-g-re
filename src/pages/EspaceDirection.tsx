@@ -183,8 +183,7 @@ export default function EspaceDirection() {
   const { data: plans, isLoading: plansLoading } = useQuery({
     queryKey: ['plans-travail-direction', directionId],
     queryFn: async () => {
-      const fromTable = supabase.from as (table: string) => ReturnType<typeof supabase.from>;
-      const { data, error } = await fromTable('plans_travail')
+      const { data, error } = await (supabase.from as any)('plans_travail')
         .select('*')
         .eq('direction_id', directionId)
         .eq('est_actif', true)

@@ -122,7 +122,13 @@ export default function GestionUtilisateurs() {
         .select(`*, direction:directions!profiles_direction_id_fkey(label)`)
         .order('full_name');
       if (error) throw error;
-      return data as Profile[];
+      // exercises_allowed is string[] in Supabase but we use number[] locally
+      return (data || []).map((d: Record<string, unknown>) => ({
+        ...d,
+        exercises_allowed: d.exercises_allowed
+          ? (d.exercises_allowed as string[]).map(Number)
+          : null,
+      })) as Profile[];
     },
   });
 
@@ -201,7 +207,10 @@ export default function GestionUtilisateurs() {
           role_hierarchique: formData.role_hierarchique as any,
           profil_fonctionnel: formData.profil_fonctionnel as any,
           is_active: formData.is_active,
-          exercises_allowed: formData.exercises_allowed,
+          // Convert number[] to string[] for Supabase
+          exercises_allowed: formData.exercises_allowed
+            ? formData.exercises_allowed.map(String)
+            : null,
         })
         .eq('id', editingUser.id);
 

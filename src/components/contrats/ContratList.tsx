@@ -37,7 +37,7 @@ import { fr } from "date-fns/locale";
 import { ContratDetails } from "./ContratDetails";
 
 export function ContratList() {
-  const { contrats, createContrat, _updateContrat } = useContrats();
+  const { contrats, createContrat, updateContrat: _updateContrat } = useContrats();
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedContrat, setSelectedContrat] = useState<Contrat | null>(null);

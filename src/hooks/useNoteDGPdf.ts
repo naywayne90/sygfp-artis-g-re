@@ -173,7 +173,7 @@ export function useNoteDGPdf({ noteId: _noteId }: UseNoteDGPdfOptions) {
         const storedKey = uploadResult.key;
 
         // Mettre à jour la note avec les infos PDF
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseUntyped
           .from('notes_direction_generale')
           .update({
             pdf_generated_at: new Date().toISOString(),

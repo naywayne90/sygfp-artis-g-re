@@ -153,7 +153,7 @@ export function useCanValidateSEF() {
   });
 
   const isDG = userRoles?.includes('DG') ?? false;
-  const isAdmin = userRoles?.includes('ADMIN') || userRoles?.includes('admin');
+  const isAdmin = userRoles?.includes('ADMIN');
   const hasDelegation = hasDGDelegationForNotes();
 
   return {
@@ -192,8 +192,8 @@ function useCanValidateModule(scope: string, directRoles: string[]) {
     },
   });
 
-  const hasDirectRole = directRoles.some((role) => userRoles?.includes(role)) ?? false;
-  const isAdmin = userRoles?.includes('ADMIN') || userRoles?.includes('admin');
+  const hasDirectRole = directRoles.some((role) => (userRoles as string[] | undefined)?.includes(role)) ?? false;
+  const isAdmin = userRoles?.includes('ADMIN');
   const hasDelegation = hasDelegationFor(scope);
   const delegatorInfo = getDelegatorInfo(scope);
 

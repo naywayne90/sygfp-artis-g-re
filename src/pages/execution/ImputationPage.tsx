@@ -89,7 +89,7 @@ export default function ImputationPage() {
   const [searchQuery, setSearchQuery] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sourceAefNote, setSourceAefNote] = useState<any>(null);
-  const [_isLoadingSource, _setIsLoadingSource] = useState(false);
+  const [_isLoadingSource, setIsLoadingSource] = useState(false);
   const [viewingImputation, setViewingImputation] = useState<Imputation | null>(null);
   const [rejectingImputation, setRejectingImputation] = useState<Imputation | null>(null);
   const [deferringImputation, setDeferringImputation] = useState<Imputation | null>(null);

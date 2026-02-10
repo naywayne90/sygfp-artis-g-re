@@ -84,8 +84,8 @@ export function BudgetAlertsWidget({
     unacknowledgedCount,
     checkAlerts,
     acknowledgeAlert,
-    _NIVEAU_COLORS,
-    _NIVEAU_LABELS,
+    NIVEAU_COLORS: _NIVEAU_COLORS,
+    NIVEAU_LABELS: _NIVEAU_LABELS,
   } = useBudgetAlerts();
 
   const { summary, isLoading: isLoadingSummary } = useBudgetSummary();

@@ -27,7 +27,7 @@ import { toast } from "sonner";
 export default function ValidationPrestataires() {
   const { 
     requests, 
-    _pendingRequests, 
+    pendingRequests: _pendingRequests,
     isLoading, 
     stats,
     setEnVerification,

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "github",
+    "supabase",
+    "filesystem",
+    "playwright",
+    "sequential-thinking"
+  ],
+  "enableAllProjectMcpServers": true
+}

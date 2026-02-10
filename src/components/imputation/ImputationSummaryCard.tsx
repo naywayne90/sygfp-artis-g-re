@@ -47,7 +47,7 @@ interface ImputationSummaryCardProps {
 }
 
 export function ImputationSummaryCard({
-  _montantTotal,
+  montantTotal: _montantTotal,
   montantImpute,
   disponibleAvant,
   disponibleApres,
