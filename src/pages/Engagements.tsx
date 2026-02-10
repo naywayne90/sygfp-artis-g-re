@@ -39,6 +39,7 @@ import {
   Receipt,
   User,
 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import { useEngagements, Engagement } from '@/hooks/useEngagements';
 import { EngagementForm } from '@/components/engagement/EngagementForm';
@@ -192,40 +193,40 @@ export default function Engagements() {
       <ModuleHelp {...MODULE_HELP_CONFIG.engagements} />
 
       {/* Page Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Engagements</h1>
-          <p className="page-description">Gestion des engagements budgétaires</p>
-          {engagementViaDelegation && (
-            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
-              <User className="h-3 w-3 mr-1" />
-              Validation par délégation
-              {engagementDelegatorInfo ? ` du ${engagementDelegatorInfo.role}` : ''}
-            </Badge>
+      <PageHeader
+        title="Engagements"
+        description="Gestion des engagements budgétaires"
+        icon={CreditCard}
+        stepNumber={6}
+        backUrl="/"
+      >
+        {engagementViaDelegation && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <User className="h-3 w-3 mr-1" />
+            Validation par délégation
+            {engagementDelegatorInfo ? ` du ${engagementDelegatorInfo.role}` : ''}
+          </Badge>
+        )}
+        <BudgetChainExportButton step="engagement" />
+        <PermissionGuard permission="engagement.create" showDelegationBadge>
+          {isReadOnly ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button className="gap-2" disabled>
+                  <Lock className="h-4 w-4" />
+                  Nouvel engagement
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{getDisabledMessage()}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4" />
+              Nouvel engagement
+            </Button>
           )}
-        </div>
-        <div className="flex gap-2">
-          <BudgetChainExportButton step="engagement" />
-          <PermissionGuard permission="engagement.create" showDelegationBadge>
-            {isReadOnly ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button className="gap-2" disabled>
-                    <Lock className="h-4 w-4" />
-                    Nouvel engagement
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{getDisabledMessage()}</TooltipContent>
-              </Tooltip>
-            ) : (
-              <Button className="gap-2" onClick={() => setShowCreateForm(true)}>
-                <Plus className="h-4 w-4" />
-                Nouvel engagement
-              </Button>
-            )}
-          </PermissionGuard>
-        </div>
-      </div>
+        </PermissionGuard>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-5">

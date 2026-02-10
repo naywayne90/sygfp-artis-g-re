@@ -3,7 +3,7 @@
  * Gère les exports Excel, CSV et PDF avec en-tête ARTI
  */
 
-import * as XLSX from "xlsx";
+import * as XLSX from 'xlsx';
 
 // ============================================================================
 // Types et Interfaces
@@ -12,7 +12,7 @@ import * as XLSX from "xlsx";
 export interface ExportColumn {
   key: string;
   label: string;
-  type?: "text" | "number" | "date" | "currency" | "boolean";
+  type?: 'text' | 'number' | 'date' | 'currency' | 'boolean';
   format?: (value: unknown) => string;
   width?: number;
 }
@@ -36,7 +36,7 @@ export interface ExportOptions {
   filters?: Record<string, unknown>;
   showTotals?: boolean;
   totalColumns?: string[];
-  orientation?: "portrait" | "landscape";
+  orientation?: 'portrait' | 'landscape';
 }
 
 export interface ExportResult {
@@ -52,82 +52,82 @@ export interface ExportResult {
 
 export const formatters = {
   currency: (value: unknown): string => {
-    if (value === null || value === undefined || value === "") return "-";
-    const num = typeof value === "number" ? value : parseFloat(String(value));
-    if (isNaN(num)) return "-";
-    return new Intl.NumberFormat("fr-FR").format(num) + " FCFA";
+    if (value === null || value === undefined || value === '') return '-';
+    const num = typeof value === 'number' ? value : parseFloat(String(value));
+    if (isNaN(num)) return '-';
+    return new Intl.NumberFormat('fr-FR').format(num) + ' FCFA';
   },
 
   number: (value: unknown): string => {
-    if (value === null || value === undefined || value === "") return "-";
-    const num = typeof value === "number" ? value : parseFloat(String(value));
-    if (isNaN(num)) return "-";
-    return new Intl.NumberFormat("fr-FR").format(num);
+    if (value === null || value === undefined || value === '') return '-';
+    const num = typeof value === 'number' ? value : parseFloat(String(value));
+    if (isNaN(num)) return '-';
+    return new Intl.NumberFormat('fr-FR').format(num);
   },
 
   date: (value: unknown): string => {
-    if (!value) return "-";
+    if (!value) return '-';
     try {
       const date = new Date(String(value));
-      if (isNaN(date.getTime())) return "-";
-      return date.toLocaleDateString("fr-FR");
+      if (isNaN(date.getTime())) return '-';
+      return date.toLocaleDateString('fr-FR');
     } catch {
-      return "-";
+      return '-';
     }
   },
 
   datetime: (value: unknown): string => {
-    if (!value) return "-";
+    if (!value) return '-';
     try {
       const date = new Date(String(value));
-      if (isNaN(date.getTime())) return "-";
-      return `${date.toLocaleDateString("fr-FR")} ${date.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit"
+      if (isNaN(date.getTime())) return '-';
+      return `${date.toLocaleDateString('fr-FR')} ${date.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
       })}`;
     } catch {
-      return "-";
+      return '-';
     }
   },
 
   boolean: (value: unknown): string => {
-    if (value === null || value === undefined) return "-";
-    return value ? "Oui" : "Non";
+    if (value === null || value === undefined) return '-';
+    return value ? 'Oui' : 'Non';
   },
 
   text: (value: unknown): string => {
-    if (value === null || value === undefined) return "-";
+    if (value === null || value === undefined) return '-';
     return String(value);
   },
 
   status: (value: unknown): string => {
-    if (!value) return "-";
+    if (!value) return '-';
     const statusMap: Record<string, string> = {
-      draft: "Brouillon",
-      brouillon: "Brouillon",
-      pending: "En attente",
-      en_attente: "En attente",
-      en_attente_validation: "En attente de validation",
-      soumis: "Soumis",
-      submitted: "Soumis",
-      valide: "Validé",
-      validé: "Validé",
-      validated: "Validé",
-      approved: "Approuvé",
-      rejete: "Rejeté",
-      rejeté: "Rejeté",
-      rejected: "Rejeté",
-      annule: "Annulé",
-      annulé: "Annulé",
-      cancelled: "Annulé",
-      completed: "Terminé",
-      termine: "Terminé",
-      terminé: "Terminé",
-      en_cours: "En cours",
-      in_progress: "En cours",
-      blocked: "Bloqué",
-      bloque: "Bloqué",
-      bloqué: "Bloqué",
+      draft: 'Brouillon',
+      brouillon: 'Brouillon',
+      pending: 'En attente',
+      en_attente: 'En attente',
+      en_attente_validation: 'En attente de validation',
+      soumis: 'Soumis',
+      submitted: 'Soumis',
+      valide: 'Validé',
+      validé: 'Validé',
+      validated: 'Validé',
+      approved: 'Approuvé',
+      rejete: 'Rejeté',
+      rejeté: 'Rejeté',
+      rejected: 'Rejeté',
+      annule: 'Annulé',
+      annulé: 'Annulé',
+      cancelled: 'Annulé',
+      completed: 'Terminé',
+      termine: 'Terminé',
+      terminé: 'Terminé',
+      en_cours: 'En cours',
+      in_progress: 'En cours',
+      blocked: 'Bloqué',
+      bloque: 'Bloqué',
+      bloqué: 'Bloqué',
     };
     return statusMap[String(value).toLowerCase()] || String(value);
   },
@@ -138,7 +138,7 @@ export const formatters = {
 // ============================================================================
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  return path.split(".").reduce((current: unknown, key: string) => {
+  return path.split('.').reduce((current: unknown, key: string) => {
     if (current === null || current === undefined) return undefined;
     return (current as Record<string, unknown>)[key];
   }, obj);
@@ -156,13 +156,13 @@ function formatCellValue(value: unknown, column: ExportColumn): string {
 
   // Type-based formatting
   switch (column.type) {
-    case "currency":
+    case 'currency':
       return formatters.currency(value);
-    case "number":
+    case 'number':
       return formatters.number(value);
-    case "date":
+    case 'date':
       return formatters.date(value);
-    case "boolean":
+    case 'boolean':
       return formatters.boolean(value);
     default:
       return formatters.text(value);
@@ -180,39 +180,41 @@ export function exportToExcel(
 ): ExportResult {
   try {
     if (!data || data.length === 0) {
-      return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+      return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
     }
 
     const workbook = XLSX.utils.book_new();
 
     // Prepare header info
     const headerRows = [
-      [`ARTI - Agence de Régulation des Télécommunications et des TIC`],
+      [`ARTI - Autorité de Régulation du Transport Intérieur`],
       [options.title],
       options.subtitle ? [options.subtitle] : [],
-      [`Exercice: ${options.exercice || "N/A"}`],
+      [`Exercice: ${options.exercice || 'N/A'}`],
       options.direction ? [`Direction: ${options.direction}`] : [],
-      [`Généré le: ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`],
+      [
+        `Généré le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
+      ],
       options.user ? [`Par: ${options.user}`] : [],
       [], // Empty row before data
-    ].filter(row => row.length > 0);
+    ].filter((row) => row.length > 0);
 
     // Create worksheet with headers
     const worksheet = XLSX.utils.aoa_to_sheet(headerRows);
 
     // Add column headers
-    const colHeaders = columns.map(c => c.label);
+    const colHeaders = columns.map((c) => c.label);
     XLSX.utils.sheet_add_aoa(worksheet, [colHeaders], { origin: `A${headerRows.length + 1}` });
 
     // Prepare data rows with proper null handling
-    const dataRows = data.map(row =>
-      columns.map(col => {
+    const dataRows = data.map((row) =>
+      columns.map((col) => {
         const rawValue = getNestedValue(row, col.key);
         // For Excel, keep numbers as numbers for calculations
-        if (col.type === "currency" || col.type === "number") {
-          if (rawValue === null || rawValue === undefined || rawValue === "") return "";
-          const num = typeof rawValue === "number" ? rawValue : parseFloat(String(rawValue));
-          return isNaN(num) ? "" : num;
+        if (col.type === 'currency' || col.type === 'number') {
+          if (rawValue === null || rawValue === undefined || rawValue === '') return '';
+          const num = typeof rawValue === 'number' ? rawValue : parseFloat(String(rawValue));
+          return isNaN(num) ? '' : num;
         }
         return formatCellValue(rawValue, col);
       })
@@ -223,19 +225,19 @@ export function exportToExcel(
 
     // Add totals row if requested
     if (options.showTotals && options.totalColumns && options.totalColumns.length > 0) {
-      const totalsRow = columns.map(col => {
+      const totalsRow = columns.map((col) => {
         if (options.totalColumns?.includes(col.key)) {
           const sum = data.reduce((acc, row) => {
             const val = getNestedValue(row, col.key);
-            const num = typeof val === "number" ? val : parseFloat(String(val));
+            const num = typeof val === 'number' ? val : parseFloat(String(val));
             return acc + (isNaN(num) ? 0 : num);
           }, 0);
           return sum;
         }
-        return col === columns[0] ? "TOTAL" : "";
+        return col === columns[0] ? 'TOTAL' : '';
       });
       XLSX.utils.sheet_add_aoa(worksheet, [totalsRow], {
-        origin: `A${headerRows.length + 2 + dataRows.length}`
+        origin: `A${headerRows.length + 2 + dataRows.length}`,
       });
     }
 
@@ -245,33 +247,33 @@ export function exportToExcel(
       // Calculate based on content
       const maxContentWidth = Math.max(
         col.label.length,
-        ...dataRows.map(row => String(row[i] ?? "").length)
+        ...dataRows.map((row) => String(row[i] ?? '').length)
       );
       return { wch: Math.min(Math.max(maxContentWidth + 2, 10), 50) };
     });
-    worksheet["!cols"] = colWidths;
+    worksheet['!cols'] = colWidths;
 
     // Freeze header rows
-    worksheet["!freeze"] = { xSplit: 0, ySplit: headerRows.length + 1 };
+    worksheet['!freeze'] = { xSplit: 0, ySplit: headerRows.length + 1 };
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Données");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Données');
 
     // Generate and download
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    const filename = `${options.filename}_${new Date().toISOString().split("T")[0]}.xlsx`;
+    const filename = `${options.filename}_${new Date().toISOString().split('T')[0]}.xlsx`;
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
 
     return { success: true, filename, rowCount: data.length };
   } catch (error) {
-    console.error("Excel export error:", error);
+    console.error('Excel export error:', error);
     return { success: false, error: String(error) };
   }
 }
@@ -287,38 +289,40 @@ export function exportToCSV(
 ): ExportResult {
   try {
     if (!data || data.length === 0) {
-      return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+      return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
     }
 
     // Header row
-    const headers = columns.map(c => `"${c.label}"`).join(";");
+    const headers = columns.map((c) => `"${c.label}"`).join(';');
 
     // Data rows with proper null handling and escaping
-    const rows = data.map(row =>
-      columns.map(col => {
-        const rawValue = getNestedValue(row, col.key);
-        const formatted = formatCellValue(rawValue, col);
-        // Escape quotes and wrap in quotes
-        return `"${String(formatted).replace(/"/g, '""')}"`;
-      }).join(";")
+    const rows = data.map((row) =>
+      columns
+        .map((col) => {
+          const rawValue = getNestedValue(row, col.key);
+          const formatted = formatCellValue(rawValue, col);
+          // Escape quotes and wrap in quotes
+          return `"${String(formatted).replace(/"/g, '""')}"`;
+        })
+        .join(';')
     );
 
     // UTF-8 BOM for Excel compatibility
-    const BOM = "\uFEFF";
-    const csvContent = BOM + [headers, ...rows].join("\n");
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers, ...rows].join('\n');
 
-    const blob = new Blob([csvContent], { type: "text/csv; charset=utf-8" });
+    const blob = new Blob([csvContent], { type: 'text/csv; charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    const filename = `${options.filename}_${new Date().toISOString().split("T")[0]}.csv`;
+    const filename = `${options.filename}_${new Date().toISOString().split('T')[0]}.csv`;
     link.download = filename;
     link.click();
     URL.revokeObjectURL(url);
 
     return { success: true, filename, rowCount: data.length };
   } catch (error) {
-    console.error("CSV export error:", error);
+    console.error('CSV export error:', error);
     return { success: false, error: String(error) };
   }
 }
@@ -334,25 +338,25 @@ export function exportToPDF(
 ): ExportResult {
   try {
     if (!data || data.length === 0) {
-      return { success: false, error: "Aucune donnée à exporter", rowCount: 0 };
+      return { success: false, error: 'Aucune donnée à exporter', rowCount: 0 };
     }
 
-    const logoUrl = `${window.location.origin}/logo-arti.jpg`;
-    const orientation = options.orientation || (columns.length > 6 ? "landscape" : "portrait");
+    const logoUrl = `${window.location.origin}/logo-arti.jpg`; // Logo copied to public/
+    const orientation = options.orientation || (columns.length > 6 ? 'landscape' : 'portrait');
 
     // Calculate totals if needed
     let totalsRow: string[] = [];
     if (options.showTotals && options.totalColumns && options.totalColumns.length > 0) {
-      totalsRow = columns.map(col => {
+      totalsRow = columns.map((col) => {
         if (options.totalColumns?.includes(col.key)) {
           const sum = data.reduce((acc, row) => {
             const val = getNestedValue(row, col.key);
-            const num = typeof val === "number" ? val : parseFloat(String(val));
+            const num = typeof val === 'number' ? val : parseFloat(String(val));
             return acc + (isNaN(num) ? 0 : num);
           }, 0);
           return formatters.currency(sum);
         }
-        return col === columns[0] ? "<strong>TOTAL</strong>" : "";
+        return col === columns[0] ? '<strong>TOTAL</strong>' : '';
       });
     }
 
@@ -498,57 +502,74 @@ export function exportToPDF(
           <div class="header-left">
             <img src="${logoUrl}" alt="ARTI" class="logo" onerror="this.style.display='none'" />
             <div>
-              <div class="header-title">ARTI - Agence de Régulation des Télécommunications et des TIC</div>
+              <div class="header-title">ARTI - Autorité de Régulation du Transport Intérieur</div>
               <div class="header-subtitle">Système de Gestion des Finances Publiques (SYGFP)</div>
             </div>
           </div>
           <div class="header-info">
-            <div><strong>Exercice:</strong> ${options.exercice || "N/A"}</div>
-            ${options.direction ? `<div><strong>Direction:</strong> ${options.direction}</div>` : ""}
-            <div><strong>Date:</strong> ${new Date().toLocaleDateString("fr-FR")}</div>
-            <div><strong>Heure:</strong> ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>
-            ${options.user ? `<div><strong>Par:</strong> ${options.user}</div>` : ""}
+            <div><strong>Exercice:</strong> ${options.exercice || 'N/A'}</div>
+            ${options.direction ? `<div><strong>Direction:</strong> ${options.direction}</div>` : ''}
+            <div><strong>Date:</strong> ${new Date().toLocaleDateString('fr-FR')}</div>
+            <div><strong>Heure:</strong> ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+            ${options.user ? `<div><strong>Par:</strong> ${options.user}</div>` : ''}
           </div>
         </div>
 
         <h1>${options.title}</h1>
-        ${options.subtitle ? `<div class="subtitle">${options.subtitle}</div>` : ""}
+        ${options.subtitle ? `<div class="subtitle">${options.subtitle}</div>` : ''}
 
-        ${options.filters && Object.keys(options.filters).length > 0 ? `
+        ${
+          options.filters && Object.keys(options.filters).length > 0
+            ? `
           <div class="meta-info">
-            <span><strong>Filtres appliqués:</strong> ${Object.entries(options.filters)
-              .filter(([, v]) => v !== undefined && v !== null && v !== "")
-              .map(([k, v]) => `${k}: ${v}`)
-              .join(", ") || "Aucun"}</span>
+            <span><strong>Filtres appliqués:</strong> ${
+              Object.entries(options.filters)
+                .filter(([, v]) => v !== undefined && v !== null && v !== '')
+                .map(([k, v]) => `${k}: ${v}`)
+                .join(', ') || 'Aucun'
+            }</span>
             <span><strong>Nombre d'enregistrements:</strong> ${data.length}</span>
           </div>
-        ` : ""}
+        `
+            : ''
+        }
 
         <table>
           <thead>
             <tr>
-              ${columns.map(col => `<th>${col.label}</th>`).join("")}
+              ${columns.map((col) => `<th>${col.label}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
-            ${data.map(row => `
+            ${data
+              .map(
+                (row) => `
               <tr>
-                ${columns.map(col => {
-                  const rawValue = getNestedValue(row, col.key);
-                  const formatted = formatCellValue(rawValue, col);
-                  const cellClass = col.type === "currency" || col.type === "number" ? col.type : "";
-                  return `<td class="${cellClass}">${formatted}</td>`;
-                }).join("")}
+                ${columns
+                  .map((col) => {
+                    const rawValue = getNestedValue(row, col.key);
+                    const formatted = formatCellValue(rawValue, col);
+                    const cellClass =
+                      col.type === 'currency' || col.type === 'number' ? col.type : '';
+                    return `<td class="${cellClass}">${formatted}</td>`;
+                  })
+                  .join('')}
               </tr>
-            `).join("")}
+            `
+              )
+              .join('')}
           </tbody>
-          ${totalsRow.length > 0 ? `
+          ${
+            totalsRow.length > 0
+              ? `
             <tfoot>
               <tr>
-                ${totalsRow.map(val => `<td>${val}</td>`).join("")}
+                ${totalsRow.map((val) => `<td>${val}</td>`).join('')}
               </tr>
             </tfoot>
-          ` : ""}
+          `
+              : ''
+          }
         </table>
 
         <div class="row-count">${data.length} enregistrement(s)</div>
@@ -564,7 +585,7 @@ export function exportToPDF(
       </html>
     `;
 
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(html);
       printWindow.document.close();
@@ -575,7 +596,7 @@ export function exportToPDF(
 
     return { success: true, rowCount: data.length };
   } catch (error) {
-    console.error("PDF export error:", error);
+    console.error('PDF export error:', error);
     return { success: false, error: String(error) };
   }
 }

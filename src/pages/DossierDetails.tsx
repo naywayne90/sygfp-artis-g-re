@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   ArrowLeft,
+  ClipboardList,
   FileText,
   FileEdit,
   Tag,
@@ -205,18 +207,18 @@ export default function DossierDetails() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Back + Title */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/suivi-dossiers')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold flex items-center gap-3">
-            Dossier {dossier.numero}
-            {getStatutBadge(dossier.statut_global)}
-          </h1>
-          <p className="text-muted-foreground">{dossier.objet}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={`Dossier - ${dossier.reference_pivot || dossier.numero || ''}`}
+        description={dossier.objet || 'Suivi detaille du dossier'}
+        icon={ClipboardList}
+        backUrl="/suivi-dossiers"
+        breadcrumbs={[
+          { label: 'Suivi Dossiers', href: '/suivi-dossiers' },
+          { label: dossier.reference_pivot || dossier.numero || 'Detail' },
+        ]}
+      >
+        {getStatutBadge(dossier.statut_global)}
+      </PageHeader>
 
       {/* Info Cards */}
       <div className="grid gap-4 md:grid-cols-3">

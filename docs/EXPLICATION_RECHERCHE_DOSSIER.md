@@ -25,6 +25,7 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 > **Un dossier = Un projet de dépense complet**
 
 **Exemple concret :**
+
 - Vous voulez acheter 10 ordinateurs pour le service informatique
 - Vous créez **1 dossier** qui va suivre toute la procédure :
   - Expression du besoin
@@ -102,6 +103,7 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 ### 1️⃣ Header (En-tête)
 
 **Ce que vous voyez :**
+
 ```
 ┌──────────────────────────────────────────────────┐
 │  Recherche Dossier                    [Aide] [+ Nouveau dossier] │
@@ -110,6 +112,7 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 ```
 
 **À quoi ça sert :**
+
 - **Titre** : Vous rappelle où vous êtes
 - **Bouton "Aide"** : Ouvre/ferme l'explication détaillée
 - **Bouton "+ Nouveau dossier"** : Crée un nouveau dossier (le plus important !)
@@ -120,6 +123,7 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 ### 2️⃣ Chaîne de la Dépense (Schéma visuel)
 
 **Ce que vous voyez :**
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  Chaîne de la Dépense                        8 étapes   │
@@ -135,29 +139,31 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 ```
 
 **À quoi ça sert :**
+
 - **Visualiser le parcours** d'une dépense
 - **Cliquer sur une étape** pour accéder directement au module correspondant
 - **Comprendre l'ordre** : on ne peut pas faire l'étape 6 avant l'étape 5
 
 **Les 9 étapes expliquées simplement :**
 
-| Étape | Nom | Explication simple |
-|-------|-----|-------------------|
-| 1 | Note SEF | "Je demande à dépenser de l'argent pour un service" |
-| 2 | Note AEF | "Je demande à dépenser de l'argent pour acheter quelque chose" |
-| 3 | Imputation | "Sur quel budget je prends l'argent ?" |
-| 4 | Expression Besoin | "Exactement de quoi j'ai besoin ?" |
-| 5 | Passation Marché | "Je cherche un fournisseur et je négocie le prix" |
-| 6 | Engagement | "Je réserve l'argent (je m'engage à payer)" |
-| 7 | Liquidation | "Le fournisseur a livré, je vérifie et j'approuve le paiement" |
-| 8 | Ordonnancement | "Le Trésorier dit OK pour payer" |
-| 9 | Règlement | "L'argent est viré au fournisseur !" |
+| Étape | Nom               | Explication simple                                             |
+| ----- | ----------------- | -------------------------------------------------------------- |
+| 1     | Note SEF          | "Je demande à dépenser de l'argent pour un service"            |
+| 2     | Note AEF          | "Je demande à dépenser de l'argent pour acheter quelque chose" |
+| 3     | Imputation        | "Sur quel budget je prends l'argent ?"                         |
+| 4     | Expression Besoin | "Exactement de quoi j'ai besoin ?"                             |
+| 5     | Passation Marché  | "Je cherche un fournisseur et je négocie le prix"              |
+| 6     | Engagement        | "Je réserve l'argent (je m'engage à payer)"                    |
+| 7     | Liquidation       | "Le fournisseur a livré, je vérifie et j'approuve le paiement" |
+| 8     | Ordonnancement    | "Le Trésorier dit OK pour payer"                               |
+| 9     | Règlement         | "L'argent est viré au fournisseur !"                           |
 
 ---
 
 ### 3️⃣ Section d'Aide
 
 **Comment l'ouvrir :**
+
 1. Cliquez sur le bouton **"Aide"** en haut à droite
 2. La section se déplie (ou se replie si déjà ouverte)
 
@@ -166,11 +172,13 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 #### a) Qu'est-ce qu'un dossier ?
 
 **Texte exact de l'aide :**
+
 > Un dossier représente une opération de dépense complète dans SYGFP. Il regroupe toutes les étapes de la chaîne de dépense : de l'expression de besoin jusqu'au règlement final. C'est le fil conducteur qui permet de suivre l'avancement d'une dépense de bout en bout.
 
 #### b) Rechercher un dossier
 
 **Comment faire :**
+
 - Utiliser la **barre de recherche** pour trouver par :
   - Numéro (ex: DOS-2026-001)
   - Objet (ex: "achat ordinateurs")
@@ -185,6 +193,7 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 #### c) Créer un nouveau dossier
 
 **Pourquoi créer un dossier ?**
+
 > Chaque dépense que l'ARTI souhaite effectuer doit être formalisée dans un dossier. C'est le point de départ obligatoire qui permet de tracer, valider et exécuter la dépense de manière structurée.
 
 **Les 3 types de dossiers :**
@@ -202,11 +211,13 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
    - Exemples : gros contrats, travaux, fournitures importantes
 
 **Une fois créé :**
+
 > Le dossier suivra automatiquement la chaîne de dépense avec toutes ses étapes de validation.
 
 #### d) Consulter un dossier
 
 **Actions possibles :**
+
 - **👁️ Œil** : Voir les détails complets
 - **📊 Timeline** : Visualiser les étapes (note, engagement, liquidation...)
 - **📎 Documents** : Consulter les pièces jointes
@@ -214,19 +225,21 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 
 #### e) Actions possibles
 
-| Action | Icône | Description |
-|--------|-------|-------------|
-| **Modifier** | ✏️ | Mettre à jour les informations du dossier |
-| **Attacher** | 📎 | Joindre des documents justificatifs |
-| **Assigner** | 👤 | Affecter le dossier à un agent |
-| **Bloquer/Débloquer** | 🚫 | Suspendre ou reprendre le traitement |
+| Action                | Icône | Description                               |
+| --------------------- | ----- | ----------------------------------------- |
+| **Modifier**          | ✏️    | Mettre à jour les informations du dossier |
+| **Attacher**          | 📎    | Joindre des documents justificatifs       |
+| **Assigner**          | 👤    | Affecter le dossier à un agent            |
+| **Bloquer/Débloquer** | 🚫    | Suspendre ou reprendre le traitement      |
 
 #### f) Bon à savoir (alerte orange)
 
 **Message important :**
+
 > Chaque dossier suit automatiquement la chaîne de dépense : **Note → Engagement → Liquidation → Ordonnancement → Règlement**. Les étapes se débloquent au fur et à mesure de la validation des précédentes.
 
 **Traduction :**
+
 - Vous ne pouvez PAS faire l'étape 7 (Liquidation) avant d'avoir terminé l'étape 6 (Engagement)
 - C'est comme un jeu vidéo : il faut débloquer les niveaux dans l'ordre !
 
@@ -247,26 +260,31 @@ La page **"Recherche Dossier"** est le **point d'entrée principal** de SYGFP. C
 **À quoi ça sert :**
 
 #### 📊 Total
+
 - **Nombre total de dossiers** dans le système
 - Tous statuts confondus
 - Exemple : 150 dossiers
 
 #### ⏱️ En cours
+
 - Dossiers **en traitement actif**
 - Quelqu'un travaille dessus actuellement
 - Exemple : 45 en cours
 
 #### ✅ Terminés
+
 - Dossiers **complètement clôturés**
 - Le règlement a été effectué
 - Exemple : 85 terminés
 
 #### ⏸️ Suspendus
+
 - Dossiers **en pause**
 - Bloqués temporairement (problème, document manquant, etc.)
 - Exemple : 20 suspendus
 
 #### 💰 Montant total
+
 - **Somme totale** de tous les dossiers
 - Affiché en format compact (ex: 2.5M = 2,500,000 F)
 - Exemple : 150M F CFA
@@ -297,6 +315,7 @@ Total: 150 dossiers
 #### a) Barre de recherche simple
 
 **Comment l'utiliser :**
+
 1. Cliquez dans la barre
 2. Tapez n'importe quoi :
    - **Numéro** : DOS-2026-001
@@ -308,6 +327,7 @@ Total: 150 dossiers
 4. Les résultats s'affichent en bas
 
 **Astuce :**
+
 > La recherche est **intelligente** : vous pouvez taper juste "ordi" et ça trouvera tous les dossiers qui contiennent "ordinateur", "ordinateurs", "ordination", etc.
 
 #### b) Filtres avancés (bouton "Filtres")
@@ -331,16 +351,16 @@ Total: 150 dossiers
 
 **Filtres disponibles :**
 
-| Filtre | Options | Exemple |
-|--------|---------|---------|
-| **Type de dossier** | AEF, SEF, Marché | "Je veux voir uniquement les dossiers AEF" |
-| **Statut** | En cours, Terminé, Suspendu, Brouillon | "Je veux voir uniquement les dossiers terminés" |
-| **Direction** | DSI, DAAF, DMG, etc. | "Je veux voir uniquement les dossiers de la DSI" |
-| **Demandeur** | Liste des agents | "Je veux voir uniquement mes dossiers" |
-| **Période** | 2026, 2025, 2024... | "Je veux voir uniquement les dossiers de 2025" |
-| **Étape actuelle** | Note SEF, Engagement, Liquidation, etc. | "Je veux voir uniquement les dossiers en Liquidation" |
-| **Montant min** | Chiffre | "Je veux voir uniquement les dossiers > 100,000 F" |
-| **Montant max** | Chiffre | "Je veux voir uniquement les dossiers < 1,000,000 F" |
+| Filtre              | Options                                 | Exemple                                               |
+| ------------------- | --------------------------------------- | ----------------------------------------------------- |
+| **Type de dossier** | AEF, SEF, Marché                        | "Je veux voir uniquement les dossiers AEF"            |
+| **Statut**          | En cours, Terminé, Suspendu, Brouillon  | "Je veux voir uniquement les dossiers terminés"       |
+| **Direction**       | DSI, DAAF, DMG, etc.                    | "Je veux voir uniquement les dossiers de la DSI"      |
+| **Demandeur**       | Liste des agents                        | "Je veux voir uniquement mes dossiers"                |
+| **Période**         | 2026, 2025, 2024...                     | "Je veux voir uniquement les dossiers de 2025"        |
+| **Étape actuelle**  | Note SEF, Engagement, Liquidation, etc. | "Je veux voir uniquement les dossiers en Liquidation" |
+| **Montant min**     | Chiffre                                 | "Je veux voir uniquement les dossiers > 100,000 F"    |
+| **Montant max**     | Chiffre                                 | "Je veux voir uniquement les dossiers < 1,000,000 F"  |
 
 **Comment utiliser les filtres :**
 
@@ -364,19 +384,20 @@ Total: 150 dossiers
 ```
 
 **À quoi ça sert :**
+
 - **Filtrer rapidement** par statut
 - **Un seul clic** au lieu de passer par les filtres avancés
 
 **Les badges expliqués :**
 
-| Badge | Couleur | Signification | Quand l'utiliser |
-|-------|---------|---------------|------------------|
-| **Tous** | Bleu foncé | Tous les dossiers | Voir l'ensemble |
-| **En cours** | Bleu clair | Dossiers en traitement | Voir ce qui avance |
-| **À valider** | Orange | Dossiers en attente de validation | **Important !** Voir ce qui attend votre action |
-| **Terminés** | Vert | Dossiers clôturés | Voir l'historique |
-| **Différés** | Violet | Dossiers reportés | Voir ce qui attend |
-| **Rejetés** | Rouge | Dossiers refusés | Voir les problèmes |
+| Badge         | Couleur    | Signification                     | Quand l'utiliser                                |
+| ------------- | ---------- | --------------------------------- | ----------------------------------------------- |
+| **Tous**      | Bleu foncé | Tous les dossiers                 | Voir l'ensemble                                 |
+| **En cours**  | Bleu clair | Dossiers en traitement            | Voir ce qui avance                              |
+| **À valider** | Orange     | Dossiers en attente de validation | **Important !** Voir ce qui attend votre action |
+| **Terminés**  | Vert       | Dossiers clôturés                 | Voir l'historique                               |
+| **Différés**  | Violet     | Dossiers reportés                 | Voir ce qui attend                              |
+| **Rejetés**   | Rouge      | Dossiers refusés                  | Voir les problèmes                              |
 
 **Comment les utiliser :**
 
@@ -387,6 +408,7 @@ Total: 150 dossiers
 5. **Pour tout réafficher** : cliquer sur "Tous"
 
 **Astuce :**
+
 > Le badge **"À valider"** est le plus important ! C'est là que vous voyez les dossiers qui attendent **VOTRE** action.
 
 ---
@@ -425,28 +447,28 @@ Total: 150 dossiers
 
 #### Les colonnes du tableau :
 
-| Colonne | Contenu | Exemple |
-|---------|---------|---------|
-| **Numéro** | Code unique du dossier | DOS-2026-001 |
-| **Objet** | Description courte | "Achat 10 ordinateurs" |
-| **Direction** | Qui a demandé | DSI, DAAF, DMG... |
-| **Montant** | Coût estimé | 5,000,000 F CFA |
-| **Statut** | État actuel | En cours, Terminé, Suspendu |
-| **Actions** | Boutons d'action | 👁️✏️📎🔒 |
+| Colonne       | Contenu                | Exemple                     |
+| ------------- | ---------------------- | --------------------------- |
+| **Numéro**    | Code unique du dossier | DOS-2026-001                |
+| **Objet**     | Description courte     | "Achat 10 ordinateurs"      |
+| **Direction** | Qui a demandé          | DSI, DAAF, DMG...           |
+| **Montant**   | Coût estimé            | 5,000,000 F CFA             |
+| **Statut**    | État actuel            | En cours, Terminé, Suspendu |
+| **Actions**   | Boutons d'action       | 👁️✏️📎🔒                    |
 
 #### Les actions disponibles :
 
 **Icônes et signification :**
 
-| Icône | Action | Quand l'utiliser |
-|-------|--------|------------------|
-| 👁️ **Œil** | Voir les détails | Consulter toutes les infos du dossier |
-| ✏️ **Crayon** | Modifier | Changer l'objet, le montant, la direction, etc. |
-| 📎 **Trombone** | Attacher | Joindre un document (facture, devis, etc.) |
-| 👤 **Personne** | Assigner | Affecter le dossier à quelqu'un d'autre |
-| 🔒 **Cadenas** | Bloquer | Suspendre le dossier (problème, manque doc, etc.) |
-| 🔓 **Cadenas ouvert** | Débloquer | Reprendre un dossier suspendu |
-| 📜 **Parchemin** | Historique | Voir qui a fait quoi et quand |
+| Icône                 | Action           | Quand l'utiliser                                  |
+| --------------------- | ---------------- | ------------------------------------------------- |
+| 👁️ **Œil**            | Voir les détails | Consulter toutes les infos du dossier             |
+| ✏️ **Crayon**         | Modifier         | Changer l'objet, le montant, la direction, etc.   |
+| 📎 **Trombone**       | Attacher         | Joindre un document (facture, devis, etc.)        |
+| 👤 **Personne**       | Assigner         | Affecter le dossier à quelqu'un d'autre           |
+| 🔒 **Cadenas**        | Bloquer          | Suspendre le dossier (problème, manque doc, etc.) |
+| 🔓 **Cadenas ouvert** | Débloquer        | Reprendre un dossier suspendu                     |
+| 📜 **Parchemin**      | Historique       | Voir qui a fait quoi et quand                     |
 
 ---
 
@@ -463,6 +485,7 @@ Total: 150 dossiers
 ```
 
 **À quoi ça sert :**
+
 - **Naviguer entre les pages** de résultats
 - **Changer le nombre d'éléments** par page
 
@@ -493,6 +516,7 @@ Total: 150 dossiers
 1. **Cliquer sur "+ Nouveau dossier"** (bouton bleu en haut à droite)
 
 2. **Un formulaire s'ouvre** avec les champs :
+
    ```
    ┌────────────────────────────────────────────┐
    │  Créer un nouveau dossier                  │
@@ -535,6 +559,7 @@ Total: 150 dossiers
 ### Cas 2 : Je cherche un dossier dont je connais le numéro
 
 **Situation :**
+
 > Mon collègue me dit : "Regarde le dossier DOS-2026-025, il y a un problème"
 
 **Étapes :**
@@ -558,6 +583,7 @@ Total: 150 dossiers
 ### Cas 3 : Je veux voir tous mes dossiers en attente de validation
 
 **Situation :**
+
 > Je suis validateur. Je veux voir tout ce qui attend mon action.
 
 **Étapes :**
@@ -578,6 +604,7 @@ Total: 150 dossiers
 ### Cas 4 : Je veux voir tous les dossiers de la DSI
 
 **Situation :**
+
 > Je suis chef de la DSI. Je veux voir tout ce qui concerne mon service.
 
 **Étapes :**
@@ -592,8 +619,8 @@ Total: 150 dossiers
 
 5. **Optionnel** : Combiner avec d'autres filtres
    - Direction = DSI
-   - + Statut = En cours
-   - + Période = 2026
+   - - Statut = En cours
+   - - Période = 2026
    - = Tous les dossiers DSI en cours en 2026
 
 ---
@@ -601,6 +628,7 @@ Total: 150 dossiers
 ### Cas 5 : Je veux bloquer un dossier problématique
 
 **Situation :**
+
 > Le fournisseur du dossier DOS-2026-030 ne répond plus. Je veux suspendre ce dossier.
 
 **Étapes :**
@@ -610,6 +638,7 @@ Total: 150 dossiers
 2. **Cliquer sur l'icône 🔒** (cadenas)
 
 3. **Un dialog s'ouvre** :
+
    ```
    ┌────────────────────────────────────────────┐
    │  Bloquer le dossier                        │
@@ -678,13 +707,14 @@ Total: 150 dossiers
 
 ### Q2 : Quelle est la différence entre AEF, SEF et Marché ?
 
-| Type | Pour quoi | Exemples |
-|------|-----------|----------|
-| **AEF** | Achats de biens | Ordinateurs, mobilier, fournitures |
-| **SEF** | Prestations de services | Consultants, formations, études |
-| **Marché** | Marchés publics | Gros contrats > 10M F, travaux |
+| Type       | Pour quoi               | Exemples                           |
+| ---------- | ----------------------- | ---------------------------------- |
+| **AEF**    | Achats de biens         | Ordinateurs, mobilier, fournitures |
+| **SEF**    | Prestations de services | Consultants, formations, études    |
+| **Marché** | Marchés publics         | Gros contrats > 10M F, travaux     |
 
 **Règle simple :**
+
 - **Objet tangible** (on peut le toucher) → AEF
 - **Prestation** (quelqu'un fait quelque chose pour nous) → SEF
 - **Gros contrat** (> seuil des marchés publics) → Marché
@@ -696,11 +726,13 @@ Total: 150 dossiers
 **Non.** On ne supprime **JAMAIS** un dossier.
 
 **Pourquoi ?**
+
 - Traçabilité légale
 - Audit
 - Historique
 
 **Si vous avez créé un dossier par erreur :**
+
 1. Le **bloquer** avec le motif "Créé par erreur"
 2. Le laisser en statut "Brouillon"
 3. Ne plus y toucher
@@ -712,11 +744,13 @@ Total: 150 dossiers
 **Tous les dossiers sont conservés indéfiniment.**
 
 **Pourquoi ?**
+
 - Obligation légale (10 ans minimum)
 - Contrôles financiers
 - Audits
 
 **Comment ne plus voir les vieux dossiers ?**
+
 - Utiliser le **filtre "Période"** : sélectionner uniquement 2026
 - Ou utiliser le filtre "Statut" : exclure les "Terminés"
 
@@ -725,19 +759,21 @@ Total: 150 dossiers
 ### Q5 : Que signifie "Optionnel" dans la chaîne de dépense ?
 
 **Message :**
+
 > "Les étapes se débloquent progressivement - Optionnel → selon le montant"
 
 **Explication :**
 
 Certaines étapes sont **optionnelles** selon le montant :
 
-| Montant | Étapes obligatoires | Étapes optionnelles |
-|---------|---------------------|---------------------|
-| < 100K F | Note → Engagement → Liquidation → Règlement | Marché (optionnel) |
-| 100K - 1M F | Note → Expression → Engagement → Liquidation → Règlement | Marché (optionnel) |
-| > 1M F | **Toutes les étapes obligatoires** | Aucune |
+| Montant     | Étapes obligatoires                                      | Étapes optionnelles |
+| ----------- | -------------------------------------------------------- | ------------------- |
+| < 100K F    | Note → Engagement → Liquidation → Règlement              | Marché (optionnel)  |
+| 100K - 1M F | Note → Expression → Engagement → Liquidation → Règlement | Marché (optionnel)  |
+| > 1M F      | **Toutes les étapes obligatoires**                       | Aucune              |
 
 **Règle simple :**
+
 - **Petit montant** : Chaîne simplifiée
 - **Gros montant** : Chaîne complète (9 étapes)
 
@@ -748,6 +784,7 @@ Certaines étapes sont **optionnelles** selon le montant :
 ### Problème 1 : "Erreur de chargement"
 
 **Message d'erreur :**
+
 > "Failed to load resource: the server responded with a status of 500"
 
 **Solutions :**
@@ -868,4 +905,4 @@ Certaines étapes sont **optionnelles** selon le montant :
 
 **Document créé le :** 5 février 2026
 **Version :** 1.0
-**Auteur :** Équipe SYGFP - ARTI Gabon
+**Auteur :** Équipe SYGFP - ARTI Côte d'Ivoire

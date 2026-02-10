@@ -5,15 +5,15 @@
  * Elle affiche les informations de vérification d'une note validée
  */
 
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   CheckCircle2,
   XCircle,
@@ -23,8 +23,8 @@ import {
   Building2,
   User,
   Shield,
-} from "lucide-react";
-import logoArti from "@/assets/logo-arti.jpg";
+} from 'lucide-react';
+import logoArti from '@/assets/logo-arti.jpg';
 
 interface VerificationResult {
   reference: string | null;
@@ -41,18 +41,18 @@ export default function VerificationNoteDG() {
   const { token } = useParams<{ token: string }>();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["verify-note-dg", token],
+    queryKey: ['verify-note-dg', token],
     queryFn: async (): Promise<VerificationResult | null> => {
       if (!token) return null;
 
       // RPC function may not be in types yet
       // @ts-expect-error - RPC function not in generated types
-      const { data, error } = await supabase.rpc("verify_note_dg_by_token", {
+      const { data, error } = await supabase.rpc('verify_note_dg_by_token', {
         p_token: token,
       });
 
       if (error) {
-        console.error("Verification error:", error);
+        console.error('Verification error:', error);
         throw error;
       }
 
@@ -81,12 +81,8 @@ export default function VerificationNoteDG() {
           <div className="flex justify-center mb-4">
             <img src={logoArti} alt="ARTI" className="h-16 w-auto" />
           </div>
-          <CardTitle className="text-xl text-primary">
-            Vérification de Document
-          </CardTitle>
-          <CardDescription>
-            Autorité de Régulation des Télécommunications de Côte d'Ivoire
-          </CardDescription>
+          <CardTitle className="text-xl text-primary">Vérification de Document</CardTitle>
+          <CardDescription>Autorité de Régulation du Transport Intérieur</CardDescription>
         </CardHeader>
 
         <Separator />
@@ -110,9 +106,7 @@ export default function VerificationNoteDG() {
                   <AlertTriangle className="h-12 w-12 text-destructive" />
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-destructive">
-                Erreur de vérification
-              </h3>
+              <h3 className="text-lg font-semibold text-destructive">Erreur de vérification</h3>
               <p className="text-sm text-muted-foreground">
                 Une erreur s'est produite lors de la vérification du document.
                 <br />
@@ -129,9 +123,7 @@ export default function VerificationNoteDG() {
                   <XCircle className="h-12 w-12 text-warning" />
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-warning">
-                Document non trouvé
-              </h3>
+              <h3 className="text-lg font-semibold text-warning">Document non trouvé</h3>
               <p className="text-sm text-muted-foreground">
                 Le QR Code scanné ne correspond à aucun document enregistré dans notre système.
                 <br />
@@ -165,24 +157,24 @@ export default function VerificationNoteDG() {
               <div className="text-center">
                 <h3
                   className={`text-lg font-semibold ${
-                    isAuthenticated ? "text-success" : "text-warning"
+                    isAuthenticated ? 'text-success' : 'text-warning'
                   }`}
                 >
-                  {isAuthenticated ? "Document Authentifié" : "Document Non Validé"}
+                  {isAuthenticated ? 'Document Authentifié' : 'Document Non Validé'}
                 </h3>
                 <Badge
                   variant="outline"
                   className={
                     isAuthenticated
-                      ? "bg-success/10 text-success mt-2"
-                      : "bg-warning/10 text-warning mt-2"
+                      ? 'bg-success/10 text-success mt-2'
+                      : 'bg-warning/10 text-warning mt-2'
                   }
                 >
-                  {data.statut === "dg_valide"
-                    ? "Validé par le DG"
-                    : data.statut === "diffusee"
-                    ? "Diffusé"
-                    : data.statut?.toUpperCase() || "INCONNU"}
+                  {data.statut === 'dg_valide'
+                    ? 'Validé par le DG'
+                    : data.statut === 'diffusee'
+                      ? 'Diffusé'
+                      : data.statut?.toUpperCase() || 'INCONNU'}
                 </Badge>
               </div>
 
@@ -196,7 +188,7 @@ export default function VerificationNoteDG() {
                   <div>
                     <p className="text-sm font-medium">Référence</p>
                     <p className="text-sm text-muted-foreground font-mono">
-                      {data.reference || "-"}
+                      {data.reference || '-'}
                     </p>
                   </div>
                 </div>
@@ -206,7 +198,7 @@ export default function VerificationNoteDG() {
                   <Shield className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <p className="text-sm font-medium">Objet</p>
-                    <p className="text-sm text-muted-foreground">{data.objet || "-"}</p>
+                    <p className="text-sm text-muted-foreground">{data.objet || '-'}</p>
                   </div>
                 </div>
 
@@ -217,8 +209,8 @@ export default function VerificationNoteDG() {
                     <p className="text-sm font-medium">Date du document</p>
                     <p className="text-sm text-muted-foreground">
                       {data.date_note
-                        ? format(new Date(data.date_note), "dd MMMM yyyy", { locale: fr })
-                        : "-"}
+                        ? format(new Date(data.date_note), 'dd MMMM yyyy', { locale: fr })
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -229,7 +221,7 @@ export default function VerificationNoteDG() {
                   <div>
                     <p className="text-sm font-medium">Direction</p>
                     <p className="text-sm text-muted-foreground">
-                      {data.direction_name || "Non spécifiée"}
+                      {data.direction_name || 'Non spécifiée'}
                     </p>
                   </div>
                 </div>
@@ -243,12 +235,12 @@ export default function VerificationNoteDG() {
                       <div>
                         <p className="text-sm font-medium text-success">Validé par</p>
                         <p className="text-sm text-muted-foreground">
-                          {data.validated_by_name || "Direction Générale"}
+                          {data.validated_by_name || 'Direction Générale'}
                         </p>
                         {data.validated_at && (
                           <p className="text-xs text-muted-foreground">
-                            Le{" "}
-                            {format(new Date(data.validated_at), "dd/MM/yyyy à HH:mm", {
+                            Le{' '}
+                            {format(new Date(data.validated_at), 'dd/MM/yyyy à HH:mm', {
                               locale: fr,
                             })}
                           </p>

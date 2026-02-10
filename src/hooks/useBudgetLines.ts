@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 export interface BudgetLineWithRelations {
   id: string;
@@ -33,8 +33,13 @@ export interface BudgetLineWithRelations {
   total_engage: number | null;
   total_liquide: number | null;
   total_ordonnance: number | null;
+  dotation_modifiee: number | null;
+  disponible_calcule: number | null;
+  montant_reserve: number | null;
   total_paye: number | null;
   is_active: boolean | null;
+  deactivated_at: string | null;
+  deactivation_reason: string | null;
   parent_id: string | null;
   created_at: string;
   updated_at: string;
@@ -66,7 +71,10 @@ export interface BudgetLineFilters {
 }
 
 // Helper to get display code (V2 priority over V1)
-export function getDisplayBudgetCode(line: BudgetLineWithRelations): { code: string; version: string } {
+export function getDisplayBudgetCode(line: BudgetLineWithRelations): {
+  code: string;
+  version: string;
+} {
   if (line.code_version === 'V2' && line.code_budgetaire_v2) {
     return { code: line.code_budgetaire_v2, version: 'V2' };
   }
@@ -80,12 +88,17 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
 
-  const { data: budgetLines, isLoading, error } = useQuery({
-    queryKey: ["budget-lines", exercice, filters],
+  const {
+    data: budgetLines,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['budget-lines', exercice, filters],
     queryFn: async () => {
       let query = supabase
-        .from("budget_lines")
-        .select(`
+        .from('budget_lines')
+        .select(
+          `
           *,
           direction:directions(label, code),
           objectif_strategique:objectifs_strategiques(libelle, code),
@@ -96,42 +109,46 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
           nomenclature_nbe(libelle, code),
           plan_comptable_sysco(libelle, code),
           ref_nve(code_nve, libelle)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("code");
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('is_active', true)
+        .order('code');
 
       if (filters?.direction_id) {
-        query = query.eq("direction_id", filters.direction_id);
+        query = query.eq('direction_id', filters.direction_id);
       }
       if (filters?.os_id) {
-        query = query.eq("os_id", filters.os_id);
+        query = query.eq('os_id', filters.os_id);
       }
       if (filters?.mission_id) {
-        query = query.eq("mission_id", filters.mission_id);
+        query = query.eq('mission_id', filters.mission_id);
       }
       if (filters?.action_id) {
-        query = query.eq("action_id", filters.action_id);
+        query = query.eq('action_id', filters.action_id);
       }
       if (filters?.activite_id) {
-        query = query.eq("activite_id", filters.activite_id);
+        query = query.eq('activite_id', filters.activite_id);
       }
       if (filters?.sous_activite_id) {
-        query = query.eq("sous_activite_id", filters.sous_activite_id);
+        query = query.eq('sous_activite_id', filters.sous_activite_id);
       }
       if (filters?.statut) {
-        query = query.eq("statut", filters.statut);
+        query = query.eq('statut', filters.statut);
       }
       if (filters?.statut_execution) {
-        query = query.eq("statut_execution", filters.statut_execution);
+        query = query.eq('statut_execution', filters.statut_execution);
       }
       if (filters?.nve_id) {
-        query = query.eq("nve_id", filters.nve_id);
+        query = query.eq('nve_id', filters.nve_id);
       }
       if (filters?.level) {
-        query = query.eq("level", filters.level);
+        query = query.eq('level', filters.level);
       }
       if (filters?.keyword) {
-        query = query.or(`label.ilike.%${filters.keyword}%,code.ilike.%${filters.keyword}%,code_budgetaire.ilike.%${filters.keyword}%`);
+        query = query.or(
+          `label.ilike.%${filters.keyword}%,code.ilike.%${filters.keyword}%,code_budgetaire.ilike.%${filters.keyword}%`
+        );
       }
 
       const { data, error } = await query;
@@ -144,10 +161,10 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   // Get engagements sum for a budget line
   const getEngagements = async (budgetLineId: string) => {
     const { data, error } = await supabase
-      .from("budget_engagements")
-      .select("montant")
-      .eq("budget_line_id", budgetLineId)
-      .eq("exercice", exercice || new Date().getFullYear());
+      .from('budget_engagements')
+      .select('montant')
+      .eq('budget_line_id', budgetLineId)
+      .eq('exercice', exercice || new Date().getFullYear());
 
     if (error) throw error;
     return data?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
@@ -156,11 +173,19 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   // Create budget line
   const createMutation = useMutation({
     mutationFn: async (data: Partial<BudgetLineWithRelations>) => {
+      const dotationInitiale = data.dotation_initiale || 0;
       const insertData = {
-        code: data.code || "",
-        label: data.label || "",
-        level: data.level || "ligne",
-        dotation_initiale: data.dotation_initiale || 0,
+        code: data.code || '',
+        label: data.label || '',
+        level: data.level || 'ligne',
+        dotation_initiale: dotationInitiale,
+        dotation_modifiee: dotationInitiale,
+        disponible_calcule: dotationInitiale,
+        total_engage: 0,
+        total_liquide: 0,
+        total_ordonnance: 0,
+        total_paye: 0,
+        is_active: true,
         direction_id: data.direction_id,
         os_id: data.os_id,
         mission_id: data.mission_id,
@@ -176,7 +201,7 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       };
 
       const { error, data: created } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .insert(insertData)
         .select()
         .single();
@@ -185,29 +210,37 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       return created;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Ligne budgétaire créée");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Ligne budgétaire créée');
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Update budget line with history
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data, reason }: { id: string; data: Partial<BudgetLineWithRelations>; reason?: string }) => {
+    mutationFn: async ({
+      id,
+      data,
+      reason,
+    }: {
+      id: string;
+      data: Partial<BudgetLineWithRelations>;
+      reason?: string;
+    }) => {
       // Get current values for history
       const { data: current } = await supabase
-        .from("budget_lines")
-        .select("*")
-        .eq("id", id)
+        .from('budget_lines')
+        .select('*')
+        .eq('id', id)
         .single();
 
       // Update the line
       const { error, data: updated } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update(data)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -220,11 +253,11 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
         );
 
         for (const [fieldName, newValue] of changes) {
-          await supabase.from("budget_line_history").insert({
+          await supabase.from('budget_line_history').insert({
             budget_line_id: id,
             field_name: fieldName,
-            old_value: String(current[fieldName as keyof typeof current] ?? ""),
-            new_value: String(newValue ?? ""),
+            old_value: String(current[fieldName as keyof typeof current] ?? ''),
+            new_value: String(newValue ?? ''),
             change_reason: reason,
           });
         }
@@ -233,11 +266,11 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
       return updated;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Ligne budgétaire modifiée");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Ligne budgétaire modifiée');
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -245,18 +278,18 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
-          statut: "soumis",
+          statut: 'soumis',
           submitted_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Soumis pour validation");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Soumis pour validation');
     },
   });
 
@@ -264,18 +297,18 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
-          statut: "valide",
+          statut: 'valide',
           validated_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Ligne validée");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Ligne validée');
     },
   });
 
@@ -283,30 +316,36 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
-          statut: "rejete",
+          statut: 'rejete',
           rejection_reason: reason,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Ligne rejetée");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Ligne rejetée');
     },
   });
 
-  // Delete
+  // Soft delete (deactivate) via RPC
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("budget_lines").delete().eq("id", id);
+    mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
+      const { error } = await supabase.rpc('deactivate_budget_line', {
+        p_budget_line_id: id,
+        p_reason: reason || 'Désactivation manuelle',
+      });
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Ligne supprimée");
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Ligne budgétaire désactivée');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -323,17 +362,17 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   const regenerateCodesMutation = useMutation({
     mutationFn: async (lineIds: string[]) => {
       const { data, error } = await supabase.rpc('regenerate_budget_codes_v2', {
-        p_line_ids: lineIds
+        p_line_ids: lineIds,
       });
       if (error) throw error;
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
       toast.success(`${data?.length || 0} code(s) V2 régénéré(s)`);
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -348,7 +387,7 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
     submitBudgetLine: submitMutation.mutate,
     validateBudgetLine: validateMutation.mutate,
     rejectBudgetLine: rejectMutation.mutate,
-    deleteBudgetLine: deleteMutation.mutate,
+    deleteBudgetLine: (id: string) => deleteMutation.mutate({ id }),
     regenerateCodesV2: regenerateCodesMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
@@ -361,19 +400,21 @@ export function useCreditTransfers() {
   const queryClient = useQueryClient();
 
   const { data: transfers, isLoading } = useQuery({
-    queryKey: ["credit-transfers", exercice],
+    queryKey: ['credit-transfers', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("credit_transfers")
-        .select(`
+        .from('credit_transfers')
+        .select(
+          `
           *,
           from_line:budget_lines!credit_transfers_from_budget_line_id_fkey(code, label),
           to_line:budget_lines!credit_transfers_to_budget_line_id_fkey(code, label),
           requested_by_profile:profiles!credit_transfers_requested_by_fkey(full_name),
           approved_by_profile:profiles!credit_transfers_approved_by_fkey(full_name)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("requested_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('requested_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -389,11 +430,11 @@ export function useCreditTransfers() {
       motif: string;
     }) => {
       const { error, data: created } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .insert({
           ...data,
           exercice: exercice || new Date().getFullYear(),
-          status: "en_attente",
+          status: 'en_attente',
         })
         .select()
         .single();
@@ -402,12 +443,12 @@ export function useCreditTransfers() {
       return created;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["credit-transfers"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Demande de virement créée");
+      queryClient.invalidateQueries({ queryKey: ['credit-transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Demande de virement créée');
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -415,81 +456,81 @@ export function useCreditTransfers() {
     mutationFn: async (id: string) => {
       // Get transfer details
       const { data: transfer } = await supabase
-        .from("credit_transfers")
-        .select("*")
-        .eq("id", id)
+        .from('credit_transfers')
+        .select('*')
+        .eq('id', id)
         .single();
 
-      if (!transfer) throw new Error("Virement non trouvé");
+      if (!transfer) throw new Error('Virement non trouvé');
 
       // Update budget lines
       const { data: fromLine } = await supabase
-        .from("budget_lines")
-        .select("dotation_initiale")
-        .eq("id", transfer.from_budget_line_id)
+        .from('budget_lines')
+        .select('dotation_initiale')
+        .eq('id', transfer.from_budget_line_id)
         .single();
 
       const { data: toLine } = await supabase
-        .from("budget_lines")
-        .select("dotation_initiale")
-        .eq("id", transfer.to_budget_line_id)
+        .from('budget_lines')
+        .select('dotation_initiale')
+        .eq('id', transfer.to_budget_line_id)
         .single();
 
-      if (!fromLine || !toLine) throw new Error("Lignes budgétaires non trouvées");
+      if (!fromLine || !toLine) throw new Error('Lignes budgétaires non trouvées');
 
       // Check available balance
       if (fromLine.dotation_initiale < transfer.amount) {
-        throw new Error("Solde insuffisant sur la ligne source");
+        throw new Error('Solde insuffisant sur la ligne source');
       }
 
       // Update from line
       await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({ dotation_initiale: fromLine.dotation_initiale - transfer.amount })
-        .eq("id", transfer.from_budget_line_id);
+        .eq('id', transfer.from_budget_line_id);
 
       // Update to line
       await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({ dotation_initiale: toLine.dotation_initiale + transfer.amount })
-        .eq("id", transfer.to_budget_line_id);
+        .eq('id', transfer.to_budget_line_id);
 
       // Update transfer status
       const { error } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .update({
-          status: "approuve",
+          status: 'approuve',
           approved_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["credit-transfers"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Virement approuvé");
+      queryClient.invalidateQueries({ queryKey: ['credit-transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Virement approuvé');
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   const rejectTransfer = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .update({
-          status: "rejete",
+          status: 'rejete',
           rejection_reason: reason,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["credit-transfers"] });
-      toast.success("Virement rejeté");
+      queryClient.invalidateQueries({ queryKey: ['credit-transfers'] });
+      toast.success('Virement rejeté');
     },
   });
 

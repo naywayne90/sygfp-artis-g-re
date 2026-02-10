@@ -207,8 +207,8 @@ async function generatePage1(
   doc.text('Union - Discipline - Travail', pageWidth / 2, yPos + 10, { align: 'center' });
   doc.setFontSize(fonts.small + 1);
   doc.setTextColor(...colors.primary);
-  doc.text('AUTORITÉ DE RÉGULATION DES', pageWidth / 2, yPos + 18, { align: 'center' });
-  doc.text("TÉLÉCOMMUNICATIONS DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 23, { align: 'center' });
+  doc.text('AUTORITÉ DE RÉGULATION DU', pageWidth / 2, yPos + 18, { align: 'center' });
+  doc.text('TRANSPORT INTÉRIEUR', pageWidth / 2, yPos + 23, { align: 'center' });
 
   yPos += 35;
 

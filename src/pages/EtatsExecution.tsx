@@ -1,17 +1,18 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useEtatsExecution, EtatFilters } from "@/hooks/useEtatsExecution";
-import { EtatFilters as EtatFiltersComponent } from "@/components/etats/EtatFilters";
-import { SuiviBudgetaire } from "@/components/etats/SuiviBudgetaire";
-import { EtatParDirection } from "@/components/etats/EtatParDirection";
-import { EtatGenerique } from "@/components/etats/EtatGenerique";
-import { EtatParEtape } from "@/components/etats/EtatParEtape";
-import { BarChart3 } from "lucide-react";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useEtatsExecution, EtatFilters } from '@/hooks/useEtatsExecution';
+import { EtatFilters as EtatFiltersComponent } from '@/components/etats/EtatFilters';
+import { SuiviBudgetaire } from '@/components/etats/SuiviBudgetaire';
+import { EtatParDirection } from '@/components/etats/EtatParDirection';
+import { EtatGenerique } from '@/components/etats/EtatGenerique';
+import { EtatParEtape } from '@/components/etats/EtatParEtape';
+import { BarChart3 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export default function EtatsExecution() {
   const [filters, setFilters] = useState<EtatFilters>({});
-  
+
   const {
     summary,
     etapesStats,
@@ -47,17 +48,12 @@ export default function EtatsExecution() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-primary" />
-            <h1 className="page-title">États d'Exécution Budgétaire</h1>
-          </div>
-          <p className="page-description">
-            Suivi et analyse de l'exécution du budget - Exercice {exercice}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="États d'Exécution"
+        description="Rapports et analyses d'exécution budgétaire"
+        icon={BarChart3}
+        backUrl="/"
+      />
 
       {/* Filters */}
       <EtatFiltersComponent

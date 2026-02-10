@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,13 +85,13 @@ export default function MonProfil() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title flex items-center gap-2">
-          <User className="h-6 w-6" />
-          Mon profil
-        </h1>
-        <p className="page-description">Informations de votre compte, rôles et permissions</p>
-      </div>
+      <PageHeader
+        title="Mon Profil"
+        description="Informations de votre compte, rôles et permissions"
+        icon={User}
+        backUrl="/"
+        showBackButton={true}
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Infos utilisateur */}

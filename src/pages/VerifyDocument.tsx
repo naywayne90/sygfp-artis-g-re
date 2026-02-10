@@ -20,11 +20,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useVerifyQRCode } from '@/hooks/useQRCode';
-import {
-  formatValidationDate,
-  DOCUMENT_TYPE_LABELS,
-  type DocumentType,
-} from '@/lib/qrcode-utils';
+import { formatValidationDate, DOCUMENT_TYPE_LABELS, type DocumentType } from '@/lib/qrcode-utils';
 
 export default function VerifyDocument() {
   const { hash } = useParams<{ hash: string }>();
@@ -54,7 +50,7 @@ export default function VerifyDocument() {
               <div>
                 <h1 className="font-bold text-lg text-blue-900">ARTI</h1>
                 <p className="text-xs text-gray-500">
-                  Autorité de Régulation des Télécommunications
+                  Autorité de Régulation du Transport Intérieur
                 </p>
               </div>
             </div>
@@ -73,9 +69,7 @@ export default function VerifyDocument() {
               <ShieldCheck className="h-6 w-6 text-blue-600" />
               Vérification de document
             </CardTitle>
-            <CardDescription>
-              Résultat de la vérification d'authenticité
-            </CardDescription>
+            <CardDescription>Résultat de la vérification d'authenticité</CardDescription>
           </CardHeader>
 
           <CardContent className="pt-6">
@@ -95,9 +89,7 @@ export default function VerifyDocument() {
                   <div className="rounded-full bg-green-100 p-4">
                     <CheckCircle className="h-12 w-12 text-green-600" />
                   </div>
-                  <h2 className="text-xl font-semibold text-green-700">
-                    Document authentique
-                  </h2>
+                  <h2 className="text-xl font-semibold text-green-700">Document authentique</h2>
                   <p className="text-sm text-muted-foreground text-center">
                     Ce document a été vérifié et correspond aux enregistrements du système SYGFP.
                   </p>
@@ -105,9 +97,7 @@ export default function VerifyDocument() {
 
                 {/* Détails du document */}
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <h3 className="font-semibold text-gray-700 mb-3">
-                    Informations du document
-                  </h3>
+                  <h3 className="font-semibold text-gray-700 mb-3">Informations du document</h3>
 
                   <div className="grid gap-3">
                     <InfoRow
@@ -154,11 +144,10 @@ export default function VerifyDocument() {
                   <div className="rounded-full bg-red-100 p-4">
                     <XCircle className="h-12 w-12 text-red-600" />
                   </div>
-                  <h2 className="text-xl font-semibold text-red-700">
-                    Document non trouvé
-                  </h2>
+                  <h2 className="text-xl font-semibold text-red-700">Document non trouvé</h2>
                   <p className="text-sm text-muted-foreground text-center max-w-md">
-                    {error || 'Ce document ne peut pas être vérifié. Il peut s\'agir d\'un document invalide ou d\'un QR code altéré.'}
+                    {error ||
+                      "Ce document ne peut pas être vérifié. Il peut s'agir d'un document invalide ou d'un QR code altéré."}
                   </p>
                 </div>
 
@@ -169,8 +158,8 @@ export default function VerifyDocument() {
                     <div className="text-sm text-amber-800">
                       <p className="font-medium">Attention</p>
                       <p className="mt-1">
-                        Si vous pensez qu'il s'agit d'une erreur, veuillez contacter
-                        l'émetteur du document ou le service informatique de l'ARTI.
+                        Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'émetteur du
+                        document ou le service informatique de l'ARTI.
                       </p>
                     </div>
                   </div>

@@ -1,0 +1,46 @@
+-- =============================================================================
+-- Migration: DAAF Cross-Direction SELECT Visibility - AUDIT
+-- =============================================================================
+-- Date: 2026-02-09
+-- Resultat de l'audit: AUCUNE modification necessaire
+--
+-- Le DAAF (Directeur des Affaires Administratives et Financieres) a deja
+-- acces aux donnees de TOUTES les directions via les politiques RLS existantes.
+--
+-- AUDIT DES POLITIQUES RLS:
+-- -----------------------------------------------------------------------
+-- Table                  | Politique                    | Acces DAAF
+-- -----------------------------------------------------------------------
+-- notes_sef              | notes_sef_select_policy       | Via is_notes_sef_validator() qui inclut DAAF
+-- budget_engagements     | Everyone can view engagements | true (ouvert a tous)
+-- budget_liquidations    | Everyone can view liquidations| true (ouvert a tous)
+-- ordonnancements        | Everyone can view ordonnance  | true (ouvert a tous)
+-- expressions_besoin     | Users can view if DG/Admin/DAAF | has_role(DAAF) explicite
+-- marches                | Everyone can view marches     | true (ouvert a tous)
+-- imputations            | Lecture imputations authentif | auth.uid() IS NOT NULL
+-- -----------------------------------------------------------------------
+--
+-- FONCTIONS HELPER EXISTANTES:
+-- - has_role(user_id, role) : verifie dans user_roles
+-- - is_notes_sef_admin(user_id) : ADMIN ou profil Admin
+-- - is_notes_sef_validator(user_id) : ADMIN, DG, DAAF, Validateur, Directeur
+-- - has_profil_fonctionnel(user_id, profil) : verifie profil_fonctionnel
+-- - get_user_direction(user_id) : retourne direction_id
+-- - get_user_exercice_actif(user_id) : retourne exercice actif
+--
+-- TABLES INEXISTANTES (pas de migration necessaire):
+-- - notes_aef : table n'existe pas
+-- - budget_imputations : table n'existe pas (utilise 'imputations')
+--
+-- ROLES APP DISPONIBLES:
+-- ADMIN, DG, DAAF, DGPEC, SDMG, CB, OPERATEUR, TRESORIER, INVITE,
+-- BUDGET_PLANNER, BUDGET_VALIDATOR, EXPENSE_REQUESTER, EXPENSE_VALIDATOR,
+-- AUDITOR, DAF
+--
+-- Le role DAAF du user daaf@arti.ci est bien 'DAAF' (app_role)
+-- =============================================================================
+
+-- Migration vide - aucune modification necessaire
+-- Les politiques RLS existantes assurent deja la visibilite cross-direction
+-- pour le role DAAF.
+SELECT 'DAAF cross-direction visibility: already OK - no changes needed' AS status;

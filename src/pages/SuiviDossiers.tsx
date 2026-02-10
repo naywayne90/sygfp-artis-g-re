@@ -31,7 +31,9 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  ClipboardList,
 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useDossiers, type Dossier } from '@/hooks/useDossiers';
 import { ETAPE_LABELS } from '@/hooks/useDossierDetails';
 
@@ -106,15 +108,12 @@ export default function SuiviDossiers() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title flex items-center gap-2">
-          <FolderOpen className="h-6 w-6" />
-          Suivi des Dossiers
-        </h1>
-        <p className="page-description">
-          Vue unifiee de tous les dossiers et leur progression dans la chaine de depense
-        </p>
-      </div>
+      <PageHeader
+        title="Suivi des Dossiers"
+        description="Vue unifiée des dossiers et leur progression"
+        icon={ClipboardList}
+        backUrl="/"
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-5">

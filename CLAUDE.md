@@ -2,7 +2,7 @@
 
 ## 🎯 Mission
 
-Tu es un ingénieur Full Stack senior travaillant sur SYGFP (Système de Gestion Financière et de Planification) pour ARTI Gabon.
+Tu es un ingénieur Full Stack senior travaillant sur SYGFP (Système de Gestion des Finances Publiques) pour ARTI Côte d'Ivoire (Autorité de Régulation du Transport Intérieur).
 
 ## 📋 Workflow obligatoire pour CHAQUE tâche
 
@@ -143,14 +143,15 @@ npm run verify       # Vérifier types + lint + tests
 
 ### Accès rapide aux credentials
 
-| Type | Fichier source |
-|------|----------------|
-| Variables frontend | `.env` |
+| Type               | Fichier source                |
+| ------------------ | ----------------------------- |
+| Variables frontend | `.env`                        |
 | Permissions Claude | `.claude/settings.local.json` |
-| Guide complet | `docs/CREDENTIALS_GUIDE.md` |
-| Template | `.env.example` |
+| Guide complet      | `docs/CREDENTIALS_GUIDE.md`   |
+| Template           | `.env.example`                |
 
 ### Supabase
+
 ```
 Project ID: tjagvgqthlibdpvztvaf
 URL: https://tjagvgqthlibdpvztvaf.supabase.co
@@ -158,19 +159,22 @@ Dashboard: https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf
 ```
 
 ### GitHub
+
 ```
 Repo: naywayne90/sygfp-artis-g-re
 URL: https://github.com/naywayne90/sygfp-artis-g-re
 ```
 
 ### Utilisateurs de test
-| Email | Password | Rôle |
-|-------|----------|------|
-| dg@arti.ci | Test2026! | DG/Validateur |
-| daaf@arti.ci | Test2026! | DAAF/Validateur |
+
+| Email             | Password  | Rôle             |
+| ----------------- | --------- | ---------------- |
+| dg@arti.ci        | Test2026! | DG/Validateur    |
+| daaf@arti.ci      | Test2026! | DAAF/Validateur  |
 | agent.dsi@arti.ci | Test2026! | DSI/Opérationnel |
 
 ### MCP Servers disponibles
+
 - `supabase` → Requêtes PostgREST
 - `playwright` → Tests browser
 - `filesystem` → Accès fichiers
@@ -179,10 +183,10 @@ URL: https://github.com/naywayne90/sygfp-artis-g-re
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md) | Clés, tokens, accès |
-| [ARCHITECTURE_TECHNIQUE.md](docs/ARCHITECTURE_TECHNIQUE.md) | Structure projet |
-| [GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md) | Base de données |
-| [GUIDE_CODE_SPLITTING.md](docs/GUIDE_CODE_SPLITTING.md) | Optimisation |
-| [RELEASE_NOTES_v2.md](docs/RELEASE_NOTES_v2.md) | Notes de version |
+| Document                                                    | Description         |
+| ----------------------------------------------------------- | ------------------- |
+| [CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md)           | Clés, tokens, accès |
+| [ARCHITECTURE_TECHNIQUE.md](docs/ARCHITECTURE_TECHNIQUE.md) | Structure projet    |
+| [GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md)                 | Base de données     |
+| [GUIDE_CODE_SPLITTING.md](docs/GUIDE_CODE_SPLITTING.md)     | Optimisation        |
+| [RELEASE_NOTES_v2.md](docs/RELEASE_NOTES_v2.md)             | Notes de version    |

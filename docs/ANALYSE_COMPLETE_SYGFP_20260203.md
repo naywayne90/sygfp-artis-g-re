@@ -3,7 +3,7 @@
 **Date:** 3 Février 2026
 **Version:** 1.0
 **Projet:** SYGFP - Système de Gestion des Finances Publiques
-**Client:** ARTI Gabon (Autorité de Régulation des Télécommunications et des TIC)
+**Client:** ARTI Côte d'Ivoire (Autorité de Régulation du Transport Intérieur)
 
 ---
 
@@ -28,21 +28,21 @@
 
 ### 1.1 Description du projet
 
-SYGFP est un système complet de gestion des finances publiques développé pour l'ARTI Gabon. Il couvre l'ensemble du cycle budgétaire, de la planification à l'exécution, en passant par la validation multi-niveaux et le contrôle.
+SYGFP est un système complet de gestion des finances publiques développé pour l'ARTI Côte d'Ivoire. Il couvre l'ensemble du cycle budgétaire, de la planification à l'exécution, en passant par la validation multi-niveaux et le contrôle.
 
 ### 1.2 Statistiques du projet
 
-| Métrique | Valeur |
-|----------|--------|
-| **Fichiers TypeScript/TSX** | 658 |
-| **Composants React** | 365 |
-| **Pages** | 98 |
-| **Hooks personnalisés** | 130+ |
-| **Migrations SQL** | 151 |
-| **Tables de base de données** | 65+ |
-| **Edge Functions** | 4 |
-| **Tests E2E** | 73 |
-| **Tests unitaires** | 33+ |
+| Métrique                      | Valeur |
+| ----------------------------- | ------ |
+| **Fichiers TypeScript/TSX**   | 658    |
+| **Composants React**          | 365    |
+| **Pages**                     | 98     |
+| **Hooks personnalisés**       | 130+   |
+| **Migrations SQL**            | 151    |
+| **Tables de base de données** | 65+    |
+| **Edge Functions**            | 4      |
+| **Tests E2E**                 | 73     |
+| **Tests unitaires**           | 33+    |
 
 ### 1.3 Fonctionnalités principales
 
@@ -63,27 +63,29 @@ SYGFP est un système complet de gestion des finances publiques développé pour
 ### 2.1 Stack technologique
 
 #### Frontend
-| Technologie | Version | Rôle |
-|-------------|---------|------|
-| React | 18.x | Framework UI |
-| TypeScript | 5.x | Typage statique |
-| Vite | 5.x | Bundler/Dev server |
-| Tailwind CSS | 3.x | Styling |
-| shadcn/ui | Latest | Composants UI (Radix) |
-| React Query | 5.x | State management serveur |
-| React Hook Form | 7.x | Gestion formulaires |
-| Zod | 3.x | Validation schémas |
-| Vitest | 4.x | Tests unitaires |
-| Playwright | 1.58 | Tests E2E |
+
+| Technologie     | Version | Rôle                     |
+| --------------- | ------- | ------------------------ |
+| React           | 18.x    | Framework UI             |
+| TypeScript      | 5.x     | Typage statique          |
+| Vite            | 5.x     | Bundler/Dev server       |
+| Tailwind CSS    | 3.x     | Styling                  |
+| shadcn/ui       | Latest  | Composants UI (Radix)    |
+| React Query     | 5.x     | State management serveur |
+| React Hook Form | 7.x     | Gestion formulaires      |
+| Zod             | 3.x     | Validation schémas       |
+| Vitest          | 4.x     | Tests unitaires          |
+| Playwright      | 1.58    | Tests E2E                |
 
 #### Backend
-| Technologie | Rôle |
-|-------------|------|
-| Supabase | BaaS (PostgreSQL + Auth + Storage) |
-| PostgreSQL | Base de données |
-| Row-Level Security | Sécurité données |
-| Edge Functions | Logique serveur (Deno) |
-| Cloudflare R2 | Stockage fichiers |
+
+| Technologie        | Rôle                               |
+| ------------------ | ---------------------------------- |
+| Supabase           | BaaS (PostgreSQL + Auth + Storage) |
+| PostgreSQL         | Base de données                    |
+| Row-Level Security | Sécurité données                   |
+| Edge Functions     | Logique serveur (Deno)             |
+| Cloudflare R2      | Stockage fichiers                  |
 
 ### 2.2 Architecture globale
 
@@ -147,27 +149,28 @@ Types:         2   (0.3%)
 
 ### 3.2 Modules de composants (Top 15)
 
-| Rang | Module | Fichiers | Description |
-|------|--------|----------|-------------|
-| 1 | **UI** | 49 | Composants shadcn/ui (button, dialog, form) |
-| 2 | **Budget** | 23 | Gestion budgétaire, imputations, virements |
-| 3 | **Notes SEF** | 20 | Notes SEF (Sans Effet Financier) |
-| 4 | **Dashboard** | 17 | Tableaux de bord multi-rôles |
-| 5 | **Admin** | 15 | Panels administrateur |
-| 6 | **Workflow** | 14 | Chaîne de dépense, tâches |
-| 7 | **Dossier** | 14 | Gestion dossiers, GED |
-| 8 | **Shared** | 12 | Composants partagés |
-| 9 | **Ordonnancement** | 11 | Ordonnancement, paiements |
-| 10 | **Liquidation** | 11 | Liquidation de dépenses |
-| 11 | **Engagement** | 11 | Engagements budgétaires |
-| 12 | **Prestataires** | 10 | Gestion fournisseurs |
-| 13 | **Marches** | 10 | Marchés publics |
-| 14 | **Imputation** | 10 | Imputation budgétaire |
-| 15 | **Planification** | 9 | Planification budgétaire |
+| Rang | Module             | Fichiers | Description                                 |
+| ---- | ------------------ | -------- | ------------------------------------------- |
+| 1    | **UI**             | 49       | Composants shadcn/ui (button, dialog, form) |
+| 2    | **Budget**         | 23       | Gestion budgétaire, imputations, virements  |
+| 3    | **Notes SEF**      | 20       | Notes SEF (Sans Effet Financier)            |
+| 4    | **Dashboard**      | 17       | Tableaux de bord multi-rôles                |
+| 5    | **Admin**          | 15       | Panels administrateur                       |
+| 6    | **Workflow**       | 14       | Chaîne de dépense, tâches                   |
+| 7    | **Dossier**        | 14       | Gestion dossiers, GED                       |
+| 8    | **Shared**         | 12       | Composants partagés                         |
+| 9    | **Ordonnancement** | 11       | Ordonnancement, paiements                   |
+| 10   | **Liquidation**    | 11       | Liquidation de dépenses                     |
+| 11   | **Engagement**     | 11       | Engagements budgétaires                     |
+| 12   | **Prestataires**   | 10       | Gestion fournisseurs                        |
+| 13   | **Marches**        | 10       | Marchés publics                             |
+| 14   | **Imputation**     | 10       | Imputation budgétaire                       |
+| 15   | **Planification**  | 9        | Planification budgétaire                    |
 
 ### 3.3 Structure des pages
 
 #### Pages racine (49 pages)
+
 ```
 /src/pages/
 ├── Dashboard.tsx
@@ -190,18 +193,18 @@ Types:         2   (0.3%)
 
 #### Sous-dossiers des pages
 
-| Sous-dossier | Pages | Description |
-|--------------|-------|-------------|
-| **admin/** | 23 | Gestion rôles, utilisateurs, exercices |
-| **execution/** | 7 | Dashboard exécution (DG, Direction) |
-| **planification/** | 12 | Budget, structure, imports |
-| **tresorerie/** | 5 | Mouvements, approvisionnements |
-| **programmatique/** | 4 | Chargement budget |
-| **gestion-taches/** | 4 | États exécution, tâches |
-| **contractualisation/** | 5 | Contrats, prestataires |
-| **dg/** | 2 | Notes à valider (DG) |
-| **recettes/** | 1 | Déclaration recettes |
-| **auth/** | 1 | LoginPage |
+| Sous-dossier            | Pages | Description                            |
+| ----------------------- | ----- | -------------------------------------- |
+| **admin/**              | 23    | Gestion rôles, utilisateurs, exercices |
+| **execution/**          | 7     | Dashboard exécution (DG, Direction)    |
+| **planification/**      | 12    | Budget, structure, imports             |
+| **tresorerie/**         | 5     | Mouvements, approvisionnements         |
+| **programmatique/**     | 4     | Chargement budget                      |
+| **gestion-taches/**     | 4     | États exécution, tâches                |
+| **contractualisation/** | 5     | Contrats, prestataires                 |
+| **dg/**                 | 2     | Notes à valider (DG)                   |
+| **recettes/**           | 1     | Déclaration recettes                   |
+| **auth/**               | 1     | LoginPage                              |
 
 ---
 
@@ -210,6 +213,7 @@ Types:         2   (0.3%)
 ### 4.1 Tables principales (65+ tables)
 
 #### Bloc Utilisateurs & Sécurité
+
 ```sql
 profiles                    -- Utilisateurs avec profils & hiérarchie
 user_roles                  -- Rôles par utilisateur
@@ -219,6 +223,7 @@ notification_preferences    -- Préférences notifications
 ```
 
 #### Bloc Chaîne de Dépense
+
 ```sql
 notes_sef                   -- Étape 1: Accord de Principe
 notes_dg                    -- Étape 2: Accord d'Engagement (AEF)
@@ -232,6 +237,7 @@ reglements                  -- Étape 9: Règlements
 ```
 
 #### Bloc Référentiels & Budget
+
 ```sql
 exercices_budgetaires       -- Exercices budgétaires
 budget_lines                -- Lignes budgétaires
@@ -249,6 +255,7 @@ funding_sources             -- Sources de financement
 ```
 
 #### Bloc Workflows
+
 ```sql
 wf_definitions              -- Définitions workflows
 wf_steps                    -- Étapes workflows
@@ -257,6 +264,7 @@ wf_step_history             -- Historique étapes
 ```
 
 #### Bloc Pièces Jointes
+
 ```sql
 pieces_jointes              -- Pièces jointes numérotées (max 3)
 config_pieces_obligatoires  -- Configuration PJ obligatoires
@@ -265,16 +273,17 @@ documents_generes           -- Documents générés avec QR code
 
 ### 4.2 Edge Functions
 
-| Fonction | Rôle | Dépendances |
-|----------|------|-------------|
-| **send-notification-email** | Envoi emails HTML | Resend API |
-| **create-user** | Création utilisateurs | Supabase Auth Admin |
-| **r2-storage** | Gestion fichiers R2 | AWS S3 SDK |
-| **generate-export** | Export CSV/Excel/PDF | - |
+| Fonction                    | Rôle                  | Dépendances         |
+| --------------------------- | --------------------- | ------------------- |
+| **send-notification-email** | Envoi emails HTML     | Resend API          |
+| **create-user**             | Création utilisateurs | Supabase Auth Admin |
+| **r2-storage**              | Gestion fichiers R2   | AWS S3 SDK          |
+| **generate-export**         | Export CSV/Excel/PDF  | -                   |
 
 ### 4.3 Fonctions SQL principales
 
 #### Fonctions RBAC
+
 ```sql
 is_admin()                  -- Vérif admin
 is_dg()                     -- Vérif DG
@@ -285,6 +294,7 @@ get_user_direction_id()     -- Direction utilisateur
 ```
 
 #### Fonctions Workflow
+
 ```sql
 start_workflow(entity_type, entity_id)
 get_workflow_status(entity_type, entity_id)
@@ -293,6 +303,7 @@ get_pending_workflows(user_id)
 ```
 
 #### Fonctions Pièces Jointes
+
 ```sql
 validate_pieces_jointes(type, id, require_pj1)
 get_pieces_jointes(type, id)
@@ -303,10 +314,12 @@ delete_piece_jointe(type, id, numero)
 ### 4.4 Politiques RLS
 
 **Architecture:**
+
 - RBAC basé sur `profil_fonctionnel` + `role_hierarchique`
 - Scopage par `direction_id` et `exercice_id`
 
 **Exemple Notes SEF:**
+
 ```sql
 -- SELECT: DG voit tout, autres voient leur direction
 SELECT: is_dg() OR direction_id = get_user_direction_id() OR created_by = auth.uid()
@@ -325,6 +338,7 @@ UPDATE: (created_by = auth.uid() AND statut = 'brouillon') OR is_dg()
 ### 5.1 Deux hiérarchies parallèles
 
 #### Hiérarchie des rôles (5 niveaux)
+
 ```
 Niveau 1: Agent
 Niveau 2: Chef de Service
@@ -334,6 +348,7 @@ Niveau 5: DG (Direction Générale)
 ```
 
 #### Profils fonctionnels (5 profils)
+
 ```
 Admin        → Accès complet, gestion système
 Validateur   → Validation des entités
@@ -344,37 +359,37 @@ Auditeur     → Lecture seule, audit
 
 ### 5.2 Rôles applicatifs (20+)
 
-| Rôle | Description | Permissions clés |
-|------|-------------|------------------|
-| **DG** | Direction Générale | validate_note_sef, sign_ordonnancement, read_all |
-| **DAAF** | Dir. Admin & Finances | create_engagement, validate_liquidation |
-| **CB** | Contrôleur Budgétaire | impute, validate_engagement, approve_virement |
-| **TRESORERIE** | Trésorier | execute_reglement, manage_tresorerie |
-| **DIRECTEUR** | Directeur | validate_note_aef, view_direction |
-| **OPERATEUR** | Opérateur | create, submit, view_own |
-| **AUDITEUR** | Auditeur | view_all, export (read-only) |
-| **ADMIN** | Administrateur | bypass_all, manage_users |
+| Rôle           | Description           | Permissions clés                                 |
+| -------------- | --------------------- | ------------------------------------------------ |
+| **DG**         | Direction Générale    | validate_note_sef, sign_ordonnancement, read_all |
+| **DAAF**       | Dir. Admin & Finances | create_engagement, validate_liquidation          |
+| **CB**         | Contrôleur Budgétaire | impute, validate_engagement, approve_virement    |
+| **TRESORERIE** | Trésorier             | execute_reglement, manage_tresorerie             |
+| **DIRECTEUR**  | Directeur             | validate_note_aef, view_direction                |
+| **OPERATEUR**  | Opérateur             | create, submit, view_own                         |
+| **AUDITEUR**   | Auditeur              | view_all, export (read-only)                     |
+| **ADMIN**      | Administrateur        | bypass_all, manage_users                         |
 
 ### 5.3 Matrice de validation
 
-| Étape | Validateurs | Rôle requis |
-|-------|-------------|-------------|
-| NOTE_SEF | DG, ADMIN | DG |
-| NOTE_AEF | DIRECTEUR, DG, ADMIN | DIRECTEUR |
-| IMPUTATION | CB, ADMIN | CB |
-| ENGAGEMENT | CB, ADMIN | CB |
-| LIQUIDATION | DAAF, CB, ADMIN | DAAF |
-| ORDONNANCEMENT | DG, ADMIN | DG |
-| REGLEMENT | TRESORERIE, ADMIN | TRESORERIE |
+| Étape          | Validateurs          | Rôle requis |
+| -------------- | -------------------- | ----------- |
+| NOTE_SEF       | DG, ADMIN            | DG          |
+| NOTE_AEF       | DIRECTEUR, DG, ADMIN | DIRECTEUR   |
+| IMPUTATION     | CB, ADMIN            | CB          |
+| ENGAGEMENT     | CB, ADMIN            | CB          |
+| LIQUIDATION    | DAAF, CB, ADMIN      | DAAF        |
+| ORDONNANCEMENT | DG, ADMIN            | DG          |
+| REGLEMENT      | TRESORERIE, ADMIN    | TRESORERIE  |
 
 ### 5.4 Scopes de visibilité
 
-| Scope | Description | Rôles |
-|-------|-------------|-------|
-| **own** | Ses propres créations | Agent |
-| **service** | Son service | Chef de Service |
-| **direction** | Sa direction | Directeur, Sous-Directeur |
-| **all** | Tout | DG, Admin, Auditeur |
+| Scope         | Description           | Rôles                     |
+| ------------- | --------------------- | ------------------------- |
+| **own**       | Ses propres créations | Agent                     |
+| **service**   | Son service           | Chef de Service           |
+| **direction** | Sa direction          | Directeur, Sous-Directeur |
+| **all**       | Tout                  | DG, Admin, Auditeur       |
 
 ### 5.5 Matrice d'accès aux routes
 
@@ -417,17 +432,17 @@ Auditeur     → Lecture seule, audit
 
 ### 6.2 Détail des étapes
 
-| # | Étape | Table | Description | Validateur |
-|---|-------|-------|-------------|------------|
-| 1 | **Note SEF** | notes_sef | Accord de Principe (Sans Effet Financier) | DG |
-| 2 | **Note AEF** | notes_dg | Autorisation d'Engagement Financier | Directeur/DG |
-| 3 | **Imputation** | note_imputations | Imputation budgétaire sur lignes | CB |
-| 4 | **Expression Besoin** | expression_besoin | Formalisation du besoin | Directeur |
-| 5 | **Passation Marché** | marches | Procédure si montant > seuil | DG/Commission |
-| 6 | **Engagement** | budget_engagements | Réservation des crédits | CB |
-| 7 | **Liquidation** | budget_liquidations | Constatation service fait | DAAF |
-| 8 | **Ordonnancement** | ordonnancements | Ordre de paiement | DG |
-| 9 | **Règlement** | reglements | Paiement effectif | Trésorier |
+| #   | Étape                 | Table               | Description                               | Validateur    |
+| --- | --------------------- | ------------------- | ----------------------------------------- | ------------- |
+| 1   | **Note SEF**          | notes_sef           | Accord de Principe (Sans Effet Financier) | DG            |
+| 2   | **Note AEF**          | notes_dg            | Autorisation d'Engagement Financier       | Directeur/DG  |
+| 3   | **Imputation**        | note_imputations    | Imputation budgétaire sur lignes          | CB            |
+| 4   | **Expression Besoin** | expression_besoin   | Formalisation du besoin                   | Directeur     |
+| 5   | **Passation Marché**  | marches             | Procédure si montant > seuil              | DG/Commission |
+| 6   | **Engagement**        | budget_engagements  | Réservation des crédits                   | CB            |
+| 7   | **Liquidation**       | budget_liquidations | Constatation service fait                 | DAAF          |
+| 8   | **Ordonnancement**    | ordonnancements     | Ordre de paiement                         | DG            |
+| 9   | **Règlement**         | reglements          | Paiement effectif                         | Trésorier     |
 
 ### 6.3 Seuils et règles
 
@@ -440,14 +455,14 @@ Auditeur     → Lecture seule, audit
 
 ### 6.4 Statuts par étape
 
-| Étape | Statuts possibles |
-|-------|-------------------|
-| Notes SEF/AEF | brouillon, soumis, validé, rejeté, différé |
-| Imputation | en_attente, imputé, rejeté, différé |
-| Engagement | brouillon, soumis, engagé, rejeté |
-| Liquidation | en_attente, liquidé, rejeté |
-| Ordonnancement | en_attente, visé, à_signer, signé, rejeté |
-| Règlement | en_cours, payé, refusé, annulé |
+| Étape          | Statuts possibles                          |
+| -------------- | ------------------------------------------ |
+| Notes SEF/AEF  | brouillon, soumis, validé, rejeté, différé |
+| Imputation     | en_attente, imputé, rejeté, différé        |
+| Engagement     | brouillon, soumis, engagé, rejeté          |
+| Liquidation    | en_attente, liquidé, rejeté                |
+| Ordonnancement | en_attente, visé, à_signer, signé, rejeté  |
+| Règlement      | en_cours, payé, refusé, annulé             |
 
 ---
 
@@ -492,12 +507,12 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 
 ### 7.5 Actions possibles
 
-| Action | Description | Motif requis |
-|--------|-------------|--------------|
-| **valide** | Accepte l'étape, passage à la suivante | Non |
-| **rejete** | Rejette le workflow | Oui |
-| **differe** | Met en attente avec condition | Oui |
-| **annule** | Annule le workflow | Oui |
+| Action      | Description                            | Motif requis |
+| ----------- | -------------------------------------- | ------------ |
+| **valide**  | Accepte l'étape, passage à la suivante | Non          |
+| **rejete**  | Rejette le workflow                    | Oui          |
+| **differe** | Met en attente avec condition          | Oui          |
+| **annule**  | Annule le workflow                     | Oui          |
 
 ### 7.6 Statuts d'instance
 
@@ -514,6 +529,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.1 Module Notes SEF (20 composants)
 
 **Composants principaux:**
+
 - `NotesSEFList.tsx` - Liste avec filtres et pagination
 - `NotesSEFForm.tsx` - Formulaire création/édition
 - `NotesSEFDetail.tsx` - Vue détaillée
@@ -524,6 +540,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 - `NotesSEFTabs.tsx` - Navigation par statut
 
 **Hooks associés:**
+
 - `useNotesSEF()` - CRUD + validation
 - `useNotesSEFList()` - Liste avec filtres
 - `useNotesSEFCounts()` - Compteurs par statut
@@ -531,6 +548,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.2 Module Budget (23 composants)
 
 **Fonctionnalités:**
+
 - Gestion des lignes budgétaires
 - Versioning des modifications
 - Virements de crédits
@@ -538,6 +556,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 - Import/Export Excel
 
 **Hooks associés:**
+
 - `useBudgetLines()` - Lignes budgétaires
 - `useBudgetAvailability()` - Disponibilité
 - `useBudgetAlerts()` - Alertes
@@ -546,6 +565,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.3 Module Dashboard (17 composants)
 
 **Dashboards par rôle:**
+
 - Dashboard DG
 - Dashboard Directeur
 - Dashboard CB
@@ -553,6 +573,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 - Dashboard Trésorerie
 
 **Widgets:**
+
 - Statistiques générales
 - KPIs de paiement
 - Tâches en attente
@@ -562,6 +583,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.4 Module Workflow (14 composants)
 
 **Composants:**
+
 - `WorkflowTimeline.tsx` - Timeline des étapes
 - `WorkflowActions.tsx` - Actions (valider/rejeter/différer)
 - `WorkflowStatus.tsx` - Statut actuel
@@ -571,6 +593,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.5 Module Pièces Jointes (9 composants)
 
 **Fonctionnalités:**
+
 - Upload avec progression
 - Preview des fichiers
 - Validation type MIME
@@ -578,6 +601,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 - Max 10 MB par fichier
 
 **Composants:**
+
 - `FileUploadZone.tsx` - Zone de drop
 - `FileProgress.tsx` - Barre de progression
 - `FilePreview.tsx` - Aperçu fichier
@@ -586,6 +610,7 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 ### 8.6 Module QR Code (4 composants)
 
 **Fonctionnalités:**
+
 - Génération QR avec hash SHA256
 - Encodage base64 URL-safe
 - Page de vérification publique
@@ -597,52 +622,56 @@ Le système utilise les tables `wf_definitions`, `wf_steps`, `wf_instances`, `wf
 
 ### 9.1 Catégories principales
 
-| Catégorie | Nombre | Description |
-|-----------|--------|-------------|
-| Authentification & Permissions | 8 | RBAC, délégations |
-| Workflows & Validation | 9 | Étapes, transitions |
-| Chaîne de Dépense | 20 | 9 étapes + helpers |
-| Budget & Finances | 18 | Lignes, virements, trésorerie |
-| Données & Référentiels | 16 | Directions, paramètres |
-| Dashboard & Alertes | 13 | Stats, KPIs, notifications |
-| Import/Export & Utilitaires | 46 | Excel, PDF, fichiers, audit |
-| **TOTAL** | **130+** | |
+| Catégorie                      | Nombre   | Description                   |
+| ------------------------------ | -------- | ----------------------------- |
+| Authentification & Permissions | 8        | RBAC, délégations             |
+| Workflows & Validation         | 9        | Étapes, transitions           |
+| Chaîne de Dépense              | 20       | 9 étapes + helpers            |
+| Budget & Finances              | 18       | Lignes, virements, trésorerie |
+| Données & Référentiels         | 16       | Directions, paramètres        |
+| Dashboard & Alertes            | 13       | Stats, KPIs, notifications    |
+| Import/Export & Utilitaires    | 46       | Excel, PDF, fichiers, audit   |
+| **TOTAL**                      | **130+** |                               |
 
 ### 9.2 Hooks critiques
 
 #### Authentification
+
 ```typescript
-useRBAC()              // Hook maître RBAC
-usePermissions()       // Permissions détaillées
-useRoleValidation()    // Validation avec séparation des fonctions
-useDelegations()       // Délégations de signature
+useRBAC(); // Hook maître RBAC
+usePermissions(); // Permissions détaillées
+useRoleValidation(); // Validation avec séparation des fonctions
+useDelegations(); // Délégations de signature
 ```
 
 #### Workflows
+
 ```typescript
-useValidation()        // Validation générique (valider/rejeter/différer)
-useWorkflowDossier()   // Gestion workflow complet
-useWorkflowTasks()     // Tâches assignées
-usePendingTasks()      // Tâches en attente
+useValidation(); // Validation générique (valider/rejeter/différer)
+useWorkflowDossier(); // Gestion workflow complet
+useWorkflowTasks(); // Tâches assignées
+usePendingTasks(); // Tâches en attente
 ```
 
 #### Chaîne de dépense
+
 ```typescript
-useNotesSEF()          // Étape 1
-useNotesAEF()          // Étape 2
-useImputations()       // Étape 3
-useEngagements()       // Étape 6
-useLiquidations()      // Étape 7
-useOrdonnancements()   // Étape 8
-useReglements()        // Étape 9
+useNotesSEF(); // Étape 1
+useNotesAEF(); // Étape 2
+useImputations(); // Étape 3
+useEngagements(); // Étape 6
+useLiquidations(); // Étape 7
+useOrdonnancements(); // Étape 8
+useReglements(); // Étape 9
 ```
 
 #### Export/Import
+
 ```typescript
-useExportExcel()       // Export Excel
-useExportNoteSEFPdf()  // Export PDF avec QR
-useFileUpload()        // Upload fichiers
-useARTIImport()        // Import données ARTI
+useExportExcel(); // Export Excel
+useExportNoteSEFPdf(); // Export PDF avec QR
+useFileUpload(); // Upload fichiers
+useARTIImport(); // Import données ARTI
 ```
 
 ---
@@ -651,34 +680,38 @@ useARTIImport()        // Import données ARTI
 
 ### 10.1 Services (11 fichiers)
 
-| Service | Rôle |
-|---------|------|
-| `pdf-service.ts` | Génération PDF |
-| `export-service.ts` | Export Excel/CSV/PDF |
-| `storage-service.ts` | Gestion stockage R2 |
-| `notification-service.ts` | Notifications |
-| `audit-service.ts` | Audit trail |
+| Service                   | Rôle                 |
+| ------------------------- | -------------------- |
+| `pdf-service.ts`          | Génération PDF       |
+| `export-service.ts`       | Export Excel/CSV/PDF |
+| `storage-service.ts`      | Gestion stockage R2  |
+| `notification-service.ts` | Notifications        |
+| `audit-service.ts`        | Audit trail          |
 
 ### 10.2 Utilitaires lib/ (40 fichiers)
 
 #### RBAC (4 fichiers)
+
 - `types.ts` - Types RBAC
 - `permissions.ts` - Matrice permissions
 - `config.ts` - Configuration
 - `helpers.ts` - Fonctions utilitaires
 
 #### Workflow (5 fichiers)
+
 - `engine.ts` - Moteur workflow
 - `transitions.ts` - Règles transitions
 - `statuts.ts` - Gestion statuts
 - `validators.ts` - Validateurs
 
 #### Export (3 fichiers)
+
 - `export-service.ts` - Service export
 - `export-templates.ts` - Templates
 - `formatters.ts` - Formatage données
 
 #### Validations (4 fichiers)
+
 - `schemas.ts` - Schémas Zod
 - `rules.ts` - Règles validation
 - `messages.ts` - Messages erreur
@@ -687,13 +720,13 @@ useARTIImport()        // Import données ARTI
 
 ```typescript
 // Fonctions principales
-generateHash(data)           // Hash SHA256
-encodePayload(data, checksum) // Encodage base64 URL-safe
-decodePayload(encoded)       // Décodage
-generateVerifyUrl(data)      // URL vérification
-verifyDocument(encoded)      // Vérification
-formatValidationDate(date)   // Format français
-truncateHash(hash)           // Troncature affichage
+generateHash(data); // Hash SHA256
+encodePayload(data, checksum); // Encodage base64 URL-safe
+decodePayload(encoded); // Décodage
+generateVerifyUrl(data); // URL vérification
+verifyDocument(encoded); // Vérification
+formatValidationDate(date); // Format français
+truncateHash(hash); // Troncature affichage
 ```
 
 ---
@@ -702,19 +735,21 @@ truncateHash(hash)           // Troncature affichage
 
 ### 11.1 Tests E2E (Playwright)
 
-| Catégorie | Fichiers | Tests |
-|-----------|----------|-------|
-| Notes SEF | 3 | 25+ |
-| Documents/QR | 4 | 37 |
-| Example | 1 | 2 |
-| **TOTAL** | **8** | **73** |
+| Catégorie    | Fichiers | Tests  |
+| ------------ | -------- | ------ |
+| Notes SEF    | 3        | 25+    |
+| Documents/QR | 4        | 37     |
+| Example      | 1        | 2      |
+| **TOTAL**    | **8**    | **73** |
 
 #### Tests Notes SEF
+
 - `creation.spec.ts` - Création de notes
 - `validation.spec.ts` - Workflow validation
 - `exports.spec.ts` - Exports PDF/Excel/CSV
 
 #### Tests Documents
+
 - `qrcode.spec.ts` - Génération QR codes
 - `pdf-export.spec.ts` - Export PDF
 - `excel-export.spec.ts` - Export Excel/CSV
@@ -722,9 +757,9 @@ truncateHash(hash)           // Troncature affichage
 
 ### 11.2 Tests unitaires (Vitest)
 
-| Fichier | Tests |
-|---------|-------|
-| `qrcode-utils.test.ts` | 33 |
+| Fichier                | Tests |
+| ---------------------- | ----- |
+| `qrcode-utils.test.ts` | 33    |
 
 ### 11.3 Commandes de test
 
@@ -763,14 +798,14 @@ Autres: text/plain, text/csv, application/zip
 
 ### 12.3 Limites système
 
-| Limite | Valeur |
-|--------|--------|
-| Pièces jointes par entité | 3 max |
-| Taille fichier | 10 MB max |
-| Taille totale par entité | 25 MB max |
-| Longueur hash QR | 64 caractères (SHA256) |
-| Délai validation Note SEF | 72h |
-| Seuil marché obligatoire | 5 000 000 FCFA |
+| Limite                    | Valeur                 |
+| ------------------------- | ---------------------- |
+| Pièces jointes par entité | 3 max                  |
+| Taille fichier            | 10 MB max              |
+| Taille totale par entité  | 25 MB max              |
+| Longueur hash QR          | 64 caractères (SHA256) |
+| Délai validation Note SEF | 72h                    |
+| Seuil marché obligatoire  | 5 000 000 FCFA         |
 
 ### 12.4 Commandes utiles
 
@@ -819,6 +854,7 @@ SYGFP est un système complet et robuste de gestion des finances publiques, couv
 - **73 tests E2E** + tests unitaires
 
 Le système est conçu pour être:
+
 - **Sécurisé** via RLS et RBAC
 - **Auditable** via historique complet
 - **Scalable** via architecture modulaire
@@ -828,4 +864,4 @@ Le système est conçu pour être:
 
 **Document généré le:** 3 Février 2026
 **Auteur:** Claude Code (Anthropic)
-**Projet:** SYGFP - ARTI Gabon
+**Projet:** SYGFP - ARTI Côte d'Ivoire

@@ -298,7 +298,8 @@ async function fetchBudgetStats(exercice: number) {
   const { data: lignes } = await supabase
     .from('budget_lines')
     .select('dotation_initiale, total_engage, total_liquide, total_ordonnance, total_paye')
-    .eq('exercice', exercice);
+    .eq('exercice', exercice)
+    .eq('is_active', true);
 
   const items = lignes || [];
 

@@ -100,7 +100,7 @@ export default function Dashboard() {
   }
 
   // 4. DAF / SDCT → Dashboard DAF
-  if (hasAnyRole(['DAF', 'SDCT'])) {
+  if (hasAnyRole(['DAF', 'DAAF', 'SDCT'])) {
     return <DashboardDAF />;
   }
 

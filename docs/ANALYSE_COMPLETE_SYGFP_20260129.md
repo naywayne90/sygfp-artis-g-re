@@ -2,7 +2,7 @@
 
 **Date**: 29 janvier 2026
 **Projet**: SYGFP (Système de Gestion Financière et de Planification)
-**Organisation**: ARTI Gabon
+**Organisation**: ARTI Côte d'Ivoire
 **Version analysée**: Commit b6c56b8 (main)
 
 ---
@@ -1746,7 +1746,7 @@ npm run test:e2e:ui    # Playwright avec interface
 
 ## Conclusion
 
-Le projet SYGFP est un système de gestion financière complet et robuste pour ARTI Gabon, comprenant:
+Le projet SYGFP est un système de gestion financière complet et robuste pour ARTI Côte d'Ivoire, comprenant:
 
 - **9 étapes** dans la chaîne de dépenses avec workflow intégré
 - **Gestion budgétaire** avec hiérarchie programmatique (OS → Actions → Activités → Tâches)

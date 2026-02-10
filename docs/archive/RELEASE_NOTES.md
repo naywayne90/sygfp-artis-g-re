@@ -2,7 +2,7 @@
 
 ## Version 1.0.0 - Janvier 2026
 
-**Système de Gestion des Finances Publiques - ARTI Gabon**
+**Système de Gestion des Finances Publiques - ARTI Côte d'Ivoire**
 
 ---
 
@@ -10,17 +10,17 @@
 
 ### Chaîne de Dépense Complète
 
-| Étape | Fonctionnalité | Statut |
-|-------|---------------|--------|
-| 1. Note SEF | Création, validation DG, workflow | Implémenté |
-| 2. Note AEF | Liaison automatique avec SEF, validation directeur | Implémenté |
-| 3. Imputation | Multi-lignes budgétaires, contrôle disponibilité | Implémenté |
-| 4. Expression Besoin | Formulaire avec pièces jointes | Implémenté |
-| 5. Passation Marché | Workflow simplifié ou complet | Implémenté |
-| 6. Engagement | Création, documents PJ, validation CB | Implémenté |
-| 7. Liquidation | Service fait, pièces justificatives | Implémenté |
-| 8. Ordonnancement | Signature DG avec QR code | Implémenté |
-| 9. Règlement | Exécution trésorerie, avis de crédit | Implémenté |
+| Étape                | Fonctionnalité                                     | Statut     |
+| -------------------- | -------------------------------------------------- | ---------- |
+| 1. Note SEF          | Création, validation DG, workflow                  | Implémenté |
+| 2. Note AEF          | Liaison automatique avec SEF, validation directeur | Implémenté |
+| 3. Imputation        | Multi-lignes budgétaires, contrôle disponibilité   | Implémenté |
+| 4. Expression Besoin | Formulaire avec pièces jointes                     | Implémenté |
+| 5. Passation Marché  | Workflow simplifié ou complet                      | Implémenté |
+| 6. Engagement        | Création, documents PJ, validation CB              | Implémenté |
+| 7. Liquidation       | Service fait, pièces justificatives                | Implémenté |
+| 8. Ordonnancement    | Signature DG avec QR code                          | Implémenté |
+| 9. Règlement         | Exécution trésorerie, avis de crédit               | Implémenté |
 
 ### Traçabilité et Audit
 
@@ -84,6 +84,7 @@
 ## Test en 10 Minutes
 
 ### Prérequis
+
 - Node.js 18+
 - Compte Supabase configuré
 - Variables d'environnement définies
@@ -91,6 +92,7 @@
 ### Étapes
 
 1. **Cloner et installer**
+
    ```bash
    git clone <repo>
    cd sygfp-artis-g-re
@@ -98,11 +100,13 @@
    ```
 
 2. **Appliquer les migrations**
+
    ```bash
    npx supabase db push
    ```
 
 3. **Lancer en développement**
+
    ```bash
    npm run dev
    ```
@@ -122,27 +126,27 @@
 
 La migration `20260119100000_seed_demo_data.sql` crée :
 
-| Élément | Détail |
-|---------|--------|
-| Exercice | 2026 (ouvert) |
-| Ligne budgétaire | DEMO-2026-001 (100M FCFA) |
-| Tiers | DEMO-001, DEMO-002 |
-| Dossier 1 | DEMO-SEF-001 (brouillon) |
-| Dossier 2 | DEMO-SEF-002 + DEMO-AEF-002 (validés) |
-| Dossier 3 | DEMO-SEF-003 → DEMO-REG-003 (workflow complet) |
+| Élément          | Détail                                         |
+| ---------------- | ---------------------------------------------- |
+| Exercice         | 2026 (ouvert)                                  |
+| Ligne budgétaire | DEMO-2026-001 (100M FCFA)                      |
+| Tiers            | DEMO-001, DEMO-002                             |
+| Dossier 1        | DEMO-SEF-001 (brouillon)                       |
+| Dossier 2        | DEMO-SEF-002 + DEMO-AEF-002 (validés)          |
+| Dossier 3        | DEMO-SEF-003 → DEMO-REG-003 (workflow complet) |
 
 ---
 
 ## Checklist Non-Régression
 
-| Critère | Statut |
-|---------|--------|
-| Aucun doublon de route | 50 routes uniques |
-| Aucun doublon de module | 69 modules uniques |
-| TypeScript build | `npm run build` OK |
-| Audit logs partout | Double système actif |
-| Messages erreurs clairs | Sonner toasts |
-| RLS actif | 18 tables protégées |
+| Critère                 | Statut               |
+| ----------------------- | -------------------- |
+| Aucun doublon de route  | 50 routes uniques    |
+| Aucun doublon de module | 69 modules uniques   |
+| TypeScript build        | `npm run build` OK   |
+| Audit logs partout      | Double système actif |
+| Messages erreurs clairs | Sonner toasts        |
+| RLS actif               | 18 tables protégées  |
 
 ---
 
@@ -182,12 +186,12 @@ La migration `20260119100000_seed_demo_data.sql` crée :
 
 **Format** : `ARTI{MM}{YY}{XXXXXX}`
 
-| Composant | Description |
-|-----------|-------------|
-| `ARTI` | Préfixe fixe |
-| `MM` | Mois (01-12) |
-| `YY` | Année (26 pour 2026) |
-| `XXXXXX` | Numéro séquentiel (6 chiffres) |
+| Composant | Description                    |
+| --------- | ------------------------------ |
+| `ARTI`    | Préfixe fixe                   |
+| `MM`      | Mois (01-12)                   |
+| `YY`      | Année (26 pour 2026)           |
+| `XXXXXX`  | Numéro séquentiel (6 chiffres) |
 
 **Exemple** : `ARTI012600001`
 
@@ -212,13 +216,14 @@ Les modules sont définis dans `src/config/modules.registry.ts` :
 
 - **Développement** : Claude Code (Anthropic)
 - **Architecture** : SYGFP Team
-- **Client** : ARTI Gabon
+- **Client** : ARTI Côte d'Ivoire
 
 ---
 
 ## Changelog
 
 ### v1.0.0 (Janvier 2026)
+
 - Implémentation complète de la chaîne de dépense (Prompts 1-25)
 - Système de traçabilité avec QR codes
 - Tests de non-régression automatisés (15 étapes)
@@ -227,4 +232,4 @@ Les modules sont définis dans `src/config/modules.registry.ts` :
 
 ---
 
-*Généré automatiquement - SYGFP v1.0.0*
+_Généré automatiquement - SYGFP v1.0.0_

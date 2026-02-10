@@ -237,8 +237,8 @@ async function generatePage1(
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.primary);
   doc.setFont('helvetica', 'bold');
-  doc.text('AUTORITÉ DE RÉGULATION DES', pageWidth / 2, yPos + 15, { align: 'center' });
-  doc.text("TÉLÉCOMMUNICATIONS DE CÔTE D'IVOIRE", pageWidth / 2, yPos + 19, { align: 'center' });
+  doc.text('AUTORITÉ DE RÉGULATION DU', pageWidth / 2, yPos + 15, { align: 'center' });
+  doc.text('TRANSPORT INTÉRIEUR', pageWidth / 2, yPos + 19, { align: 'center' });
 
   yPos += 28;
 

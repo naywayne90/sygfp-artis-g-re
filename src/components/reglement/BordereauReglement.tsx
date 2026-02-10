@@ -154,8 +154,8 @@ async function generateBordereauPdf(
   doc.setFontSize(fonts.small);
   doc.setTextColor(...colors.primary);
   doc.setFont('helvetica', 'bold');
-  doc.text('AUTORITE DE REGULATION DES', pageWidth / 2, yPos + 14, { align: 'center' });
-  doc.text("TELECOMMUNICATIONS DE COTE D'IVOIRE", pageWidth / 2, yPos + 18, { align: 'center' });
+  doc.text('AUTORITE DE REGULATION DU', pageWidth / 2, yPos + 14, { align: 'center' });
+  doc.text('TRANSPORT INTERIEUR', pageWidth / 2, yPos + 18, { align: 'center' });
 
   yPos += 24;
 

@@ -7,7 +7,7 @@
 
 ## 1. Vue d'ensemble
 
-SYGFP est une application web de gestion financière publique pour l'**ARTI** (Autorité de Régulation des Télécommunications de Côte d'Ivoire). Elle implémente la **chaîne de la dépense publique** en 9 étapes, de l'expression du besoin jusqu'au paiement effectif.
+SYGFP est une application web de gestion financière publique pour l'**ARTI** (Autorité de Régulation du Transport Intérieur). Elle implémente la **chaîne de la dépense publique** en 9 étapes, de l'expression du besoin jusqu'au paiement effectif.
 
 ### 1.1 Objectifs métier
 
@@ -19,15 +19,15 @@ SYGFP est une application web de gestion financière publique pour l'**ARTI** (A
 
 ### 1.2 Périmètre fonctionnel
 
-| Domaine | Description |
-|---------|-------------|
-| **Chaîne de dépense** | 9 étapes du workflow de dépense |
-| **Planification** | Budget, activités, virements |
-| **Contractualisation** | Prestataires, contrats, marchés |
-| **Trésorerie** | Comptes bancaires, opérations |
-| **Approvisionnement** | Stocks, articles, mouvements |
-| **Recettes** | Déclaration et suivi des recettes |
-| **Administration** | Utilisateurs, rôles, paramètres |
+| Domaine                | Description                       |
+| ---------------------- | --------------------------------- |
+| **Chaîne de dépense**  | 9 étapes du workflow de dépense   |
+| **Planification**      | Budget, activités, virements      |
+| **Contractualisation** | Prestataires, contrats, marchés   |
+| **Trésorerie**         | Comptes bancaires, opérations     |
+| **Approvisionnement**  | Stocks, articles, mouvements      |
+| **Recettes**           | Déclaration et suivi des recettes |
+| **Administration**     | Utilisateurs, rôles, paramètres   |
 
 ---
 
@@ -35,38 +35,38 @@ SYGFP est une application web de gestion financière publique pour l'**ARTI** (A
 
 ### 2.1 Frontend
 
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| **React** | 18.3.x | Framework UI |
-| **Vite** | 5.x | Build tool |
-| **TypeScript** | 5.x | Typage statique |
-| **Tailwind CSS** | 3.x | Styles utilitaires |
-| **shadcn/ui** | latest | Composants UI |
-| **TanStack Query** | 5.x | Gestion état serveur |
-| **React Router** | 6.x | Routing |
-| **React Hook Form** | 7.x | Formulaires |
-| **Zod** | 3.x | Validation schéma |
-| **Recharts** | 2.x | Graphiques |
-| **Lucide React** | 0.462.x | Icônes |
+| Technologie         | Version | Usage                |
+| ------------------- | ------- | -------------------- |
+| **React**           | 18.3.x  | Framework UI         |
+| **Vite**            | 5.x     | Build tool           |
+| **TypeScript**      | 5.x     | Typage statique      |
+| **Tailwind CSS**    | 3.x     | Styles utilitaires   |
+| **shadcn/ui**       | latest  | Composants UI        |
+| **TanStack Query**  | 5.x     | Gestion état serveur |
+| **React Router**    | 6.x     | Routing              |
+| **React Hook Form** | 7.x     | Formulaires          |
+| **Zod**             | 3.x     | Validation schéma    |
+| **Recharts**        | 2.x     | Graphiques           |
+| **Lucide React**    | 0.462.x | Icônes               |
 
 ### 2.2 Backend (Supabase / Lovable Cloud)
 
-| Service | Usage |
-|---------|-------|
-| **PostgreSQL** | Base de données principale |
-| **Auth** | Authentification (email/password) |
-| **Storage** | Stockage fichiers (pièces jointes) |
-| **Edge Functions** | Logique métier serveur (Deno) |
-| **Realtime** | Notifications temps réel |
-| **Row Level Security** | Sécurité données par rôle |
+| Service                | Usage                              |
+| ---------------------- | ---------------------------------- |
+| **PostgreSQL**         | Base de données principale         |
+| **Auth**               | Authentification (email/password)  |
+| **Storage**            | Stockage fichiers (pièces jointes) |
+| **Edge Functions**     | Logique métier serveur (Deno)      |
+| **Realtime**           | Notifications temps réel           |
+| **Row Level Security** | Sécurité données par rôle          |
 
 ### 2.3 Outils développement
 
-| Outil | Usage |
-|-------|-------|
-| **ESLint** | Linting code |
+| Outil        | Usage                  |
+| ------------ | ---------------------- |
+| **ESLint**   | Linting code           |
 | **Prettier** | Formatage (via ESLint) |
-| **Sonner** | Notifications toast |
+| **Sonner**   | Notifications toast    |
 
 ---
 
@@ -202,17 +202,17 @@ sygfp/
 
 ### 4.2 Tableau détaillé
 
-| # | Étape | Table principale | Validateur | Route |
-|---|-------|-----------------|------------|-------|
-| 1 | Note SEF | `notes_sef` | DG | `/notes-sef` |
-| 2 | Note AEF | `notes_dg` | Directeur/DG | `/notes-aef` |
-| 3 | Imputation | `notes_imputees_disponibles` | CB | `/execution/imputation` |
-| 4 | Expression Besoin | `expressions_besoin` | Directeur | `/execution/expression-besoin` |
-| 5 | Marché | `marches` | Commission/DG | `/marches` |
-| 6 | Engagement | `budget_engagements` | CB | `/engagements` |
-| 7 | Liquidation | `budget_liquidations` | DAAF | `/liquidations` |
-| 8 | Ordonnancement | `ordonnancements` | DG (signature) | `/ordonnancements` |
-| 9 | Règlement | `reglements` | Trésorerie | `/reglements` |
+| #   | Étape             | Table principale             | Validateur     | Route                          |
+| --- | ----------------- | ---------------------------- | -------------- | ------------------------------ |
+| 1   | Note SEF          | `notes_sef`                  | DG             | `/notes-sef`                   |
+| 2   | Note AEF          | `notes_dg`                   | Directeur/DG   | `/notes-aef`                   |
+| 3   | Imputation        | `notes_imputees_disponibles` | CB             | `/execution/imputation`        |
+| 4   | Expression Besoin | `expressions_besoin`         | Directeur      | `/execution/expression-besoin` |
+| 5   | Marché            | `marches`                    | Commission/DG  | `/marches`                     |
+| 6   | Engagement        | `budget_engagements`         | CB             | `/engagements`                 |
+| 7   | Liquidation       | `budget_liquidations`        | DAAF           | `/liquidations`                |
+| 8   | Ordonnancement    | `ordonnancements`            | DG (signature) | `/ordonnancements`             |
+| 9   | Règlement         | `reglements`                 | Trésorerie     | `/reglements`                  |
 
 ### 4.3 Flux de données
 
@@ -244,36 +244,36 @@ sygfp/
 
 ### 5.1 Fichiers
 
-| Type | Convention | Exemple |
-|------|------------|---------|
-| **Pages** | PascalCase | `NotesSEF.tsx`, `Dashboard.tsx` |
-| **Composants** | PascalCase | `NoteSEFForm.tsx`, `BudgetLineTable.tsx` |
-| **Hooks** | camelCase avec `use` | `useNotesSEF.ts`, `usePermissions.ts` |
-| **Utilitaires** | camelCase | `utils.ts`, `helpers.ts` |
-| **Types** | camelCase ou index | `types.ts` |
-| **Contextes** | PascalCase | `ExerciceContext.tsx` |
+| Type            | Convention           | Exemple                                  |
+| --------------- | -------------------- | ---------------------------------------- |
+| **Pages**       | PascalCase           | `NotesSEF.tsx`, `Dashboard.tsx`          |
+| **Composants**  | PascalCase           | `NoteSEFForm.tsx`, `BudgetLineTable.tsx` |
+| **Hooks**       | camelCase avec `use` | `useNotesSEF.ts`, `usePermissions.ts`    |
+| **Utilitaires** | camelCase            | `utils.ts`, `helpers.ts`                 |
+| **Types**       | camelCase ou index   | `types.ts`                               |
+| **Contextes**   | PascalCase           | `ExerciceContext.tsx`                    |
 
 ### 5.2 Base de données
 
-| Type | Convention | Exemple |
-|------|------------|---------|
-| **Tables** | snake_case pluriel | `notes_sef`, `budget_lines` |
-| **Colonnes** | snake_case | `created_at`, `budget_line_id` |
-| **FK** | `{table_singulier}_id` | `direction_id`, `engagement_id` |
-| **Fonctions** | snake_case + verbe | `generate_sef_reference()` |
-| **Triggers** | `trigger_{action}_{table}` | `trigger_validate_notes_sef` |
-| **Policies** | Description courte | `notes_sef_select_policy` |
-| **Index** | `idx_{table}_{colonnes}` | `idx_notes_sef_exercice_statut` |
+| Type          | Convention                 | Exemple                         |
+| ------------- | -------------------------- | ------------------------------- |
+| **Tables**    | snake_case pluriel         | `notes_sef`, `budget_lines`     |
+| **Colonnes**  | snake_case                 | `created_at`, `budget_line_id`  |
+| **FK**        | `{table_singulier}_id`     | `direction_id`, `engagement_id` |
+| **Fonctions** | snake_case + verbe         | `generate_sef_reference()`      |
+| **Triggers**  | `trigger_{action}_{table}` | `trigger_validate_notes_sef`    |
+| **Policies**  | Description courte         | `notes_sef_select_policy`       |
+| **Index**     | `idx_{table}_{colonnes}`   | `idx_notes_sef_exercice_statut` |
 
 ### 5.3 Code TypeScript
 
-| Type | Convention | Exemple |
-|------|------------|---------|
-| **Interfaces** | PascalCase + I (optionnel) | `NoteSEF`, `BudgetLine` |
-| **Types** | PascalCase | `UserRole`, `WorkflowStatus` |
-| **Constantes** | UPPER_SNAKE_CASE | `DEFAULT_PAGE_SIZE`, `STATUT_VALIDE` |
-| **Fonctions** | camelCase | `validateNoteSEF()`, `formatMontant()` |
-| **Composants** | PascalCase | `NoteSEFList`, `BudgetFilters` |
+| Type           | Convention                 | Exemple                                |
+| -------------- | -------------------------- | -------------------------------------- |
+| **Interfaces** | PascalCase + I (optionnel) | `NoteSEF`, `BudgetLine`                |
+| **Types**      | PascalCase                 | `UserRole`, `WorkflowStatus`           |
+| **Constantes** | UPPER_SNAKE_CASE           | `DEFAULT_PAGE_SIZE`, `STATUT_VALIDE`   |
+| **Fonctions**  | camelCase                  | `validateNoteSEF()`, `formatMontant()` |
+| **Composants** | PascalCase                 | `NoteSEFList`, `BudgetFilters`         |
 
 ---
 
@@ -319,7 +319,7 @@ sygfp/
 // hooks/use{Entity}.ts
 export function use{Entity}() {
   const { exercice } = useExercice();
-  
+
   // Lecture
   const { data, isLoading } = useQuery({
     queryKey: ["{entity}", exercice],
@@ -333,12 +333,12 @@ export function use{Entity}() {
     },
     enabled: !!exercice,
   });
-  
+
   // Mutations
   const createMutation = useMutation({ ... });
   const updateMutation = useMutation({ ... });
   const deleteMutation = useMutation({ ... });
-  
+
   return { data, isLoading, create, update, delete };
 }
 ```
@@ -350,9 +350,9 @@ export function use{Entity}() {
 export function {Entity}List() {
   const { data, isLoading } = use{Entity}List();
   const [filters, setFilters] = useState<Filters>({});
-  
+
   if (isLoading) return <Skeleton />;
-  
+
   return (
     <div>
       <{Entity}Filters value={filters} onChange={setFilters} />
@@ -377,17 +377,17 @@ export function {Entity}List() {
 export function {Entity}ValidateDialog({ item, open, onOpenChange }) {
   const { validate } = use{Entity}();
   const { canValidate{Entity} } = usePermissions();
-  
+
   const handleValidate = async () => {
     await validate(item.id);
     onOpenChange(false);
     toast.success("{Entity} validé(e)");
   };
-  
+
   if (!canValidate{Entity}()) {
     return <Alert>Vous n'avez pas les droits</Alert>;
   }
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -443,14 +443,14 @@ Utiliser le bouton "Publish" dans l'interface Lovable pour publier.
 
 ## 10. Ressources
 
-| Document | Description |
-|----------|-------------|
-| `docs/DATABASE_GUIDE.md` | Schéma base de données |
-| `docs/SECURITY_GUIDE.md` | RBAC et RLS |
+| Document                     | Description            |
+| ---------------------------- | ---------------------- |
+| `docs/DATABASE_GUIDE.md`     | Schéma base de données |
+| `docs/SECURITY_GUIDE.md`     | RBAC et RLS            |
 | `docs/CODIFICATION_GUIDE.md` | Règles de codification |
-| `docs/DEVELOPER_GUIDE.md` | Guide développeur |
-| `docs/PROJECT_STATUS.md` | État du projet |
+| `docs/DEVELOPER_GUIDE.md`    | Guide développeur      |
+| `docs/PROJECT_STATUS.md`     | État du projet         |
 
 ---
 
-*Documentation générée le 2026-01-15*
+_Documentation générée le 2026-01-15_

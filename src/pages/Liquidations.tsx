@@ -39,6 +39,7 @@ import {
   Flame,
   User,
 } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import { useLiquidations, Liquidation, VALIDATION_STEPS } from '@/hooks/useLiquidations';
 import { useUrgentLiquidations } from '@/hooks/useUrgentLiquidations';
@@ -201,30 +202,28 @@ export default function Liquidations() {
       <ModuleHelp {...MODULE_HELP_CONFIG.liquidations} />
 
       {/* Page Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Liquidations</h1>
-          <p className="page-description">
-            Gestion des liquidations après constatation du service fait
-          </p>
-          {liquidationViaDelegation && (
-            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
-              <User className="h-3 w-3 mr-1" />
-              Validation par délégation
-              {liquidationDelegatorInfo ? ` du ${liquidationDelegatorInfo.role}` : ''}
-            </Badge>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <BudgetChainExportButton step="liquidation" />
-          <PermissionGuard permission="liquidation.create" showDelegationBadge>
-            <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4" />
-              Nouvelle liquidation
-            </Button>
-          </PermissionGuard>
-        </div>
-      </div>
+      <PageHeader
+        title="Liquidations"
+        description="Constatation du service fait"
+        icon={Receipt}
+        stepNumber={7}
+        backUrl="/"
+      >
+        <BudgetChainExportButton step="liquidation" />
+        <PermissionGuard permission="liquidation.create" showDelegationBadge>
+          <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4" />
+            Nouvelle liquidation
+          </Button>
+        </PermissionGuard>
+      </PageHeader>
+      {liquidationViaDelegation && (
+        <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
+          <User className="h-3 w-3 mr-1" />
+          Validation par délégation
+          {liquidationDelegatorInfo ? ` du ${liquidationDelegatorInfo.role}` : ''}
+        </Badge>
+      )}
 
       {/* Search */}
       <Card>

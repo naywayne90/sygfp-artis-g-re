@@ -3,19 +3,19 @@
 **Date:** 3 Février 2026
 **Version:** 1.0.0
 **Projet:** SYGFP - Système de Gestion des Finances Publiques
-**Client:** ARTI Gabon
+**Client:** ARTI Côte d'Ivoire
 
 ---
 
 ## RÉSUMÉ EXÉCUTIF
 
-| Métrique | Valeur | Statut |
-|----------|--------|--------|
-| Tests E2E | 130 tests | ✅ Créés |
-| Tests unitaires | 37 tests | ✅ Passent |
-| TypeScript (typecheck) | 0 erreur | ✅ OK |
-| ESLint | 89 erreurs préexistantes | ⚠️ À corriger |
-| Build | 25 erreurs TS | ⚠️ Types Supabase à régénérer |
+| Métrique               | Valeur                   | Statut                        |
+| ---------------------- | ------------------------ | ----------------------------- |
+| Tests E2E              | 130 tests                | ✅ Créés                      |
+| Tests unitaires        | 37 tests                 | ✅ Passent                    |
+| TypeScript (typecheck) | 0 erreur                 | ✅ OK                         |
+| ESLint                 | 89 erreurs préexistantes | ⚠️ À corriger                 |
+| Build                  | 25 erreurs TS            | ⚠️ Types Supabase à régénérer |
 
 ---
 
@@ -38,21 +38,21 @@ Répartition par module:
 
 ### 1.2 Fichiers de tests créés
 
-| Dossier | Fichier | Tests | Description |
-|---------|---------|-------|-------------|
-| `e2e/dashboard/` | kpis.spec.ts | 10 | Affichage KPIs par rôle |
-| `e2e/dashboard/` | charts.spec.ts | 12 | Graphiques et filtres |
-| `e2e/notifications/` | notifications.spec.ts | 13 | Cloche, marquage lu |
-| `e2e/notes/` | type-note.spec.ts | 7 | NSEF vs NAEF |
-| `e2e/notes/` | team-notes.spec.ts | 9 | Notes de l'équipe |
-| `e2e/workflow/` | validation-cycle.spec.ts | 6 | Cycle complet |
-| `e2e/documents/` | qrcode.spec.ts | 7 | Génération QR |
-| `e2e/documents/` | pdf-export.spec.ts | 6 | Export PDF |
-| `e2e/documents/` | excel-export.spec.ts | 11 | Export Excel/CSV |
-| `e2e/documents/` | verify-page.spec.ts | 13 | Page vérification publique |
-| `e2e/notes-sef/` | creation.spec.ts | 8 | Création notes |
-| `e2e/notes-sef/` | validation.spec.ts | 10 | Workflow validation |
-| `e2e/notes-sef/` | exports.spec.ts | 8 | Exports notes |
+| Dossier              | Fichier                  | Tests | Description                |
+| -------------------- | ------------------------ | ----- | -------------------------- |
+| `e2e/dashboard/`     | kpis.spec.ts             | 10    | Affichage KPIs par rôle    |
+| `e2e/dashboard/`     | charts.spec.ts           | 12    | Graphiques et filtres      |
+| `e2e/notifications/` | notifications.spec.ts    | 13    | Cloche, marquage lu        |
+| `e2e/notes/`         | type-note.spec.ts        | 7     | NSEF vs NAEF               |
+| `e2e/notes/`         | team-notes.spec.ts       | 9     | Notes de l'équipe          |
+| `e2e/workflow/`      | validation-cycle.spec.ts | 6     | Cycle complet              |
+| `e2e/documents/`     | qrcode.spec.ts           | 7     | Génération QR              |
+| `e2e/documents/`     | pdf-export.spec.ts       | 6     | Export PDF                 |
+| `e2e/documents/`     | excel-export.spec.ts     | 11    | Export Excel/CSV           |
+| `e2e/documents/`     | verify-page.spec.ts      | 13    | Page vérification publique |
+| `e2e/notes-sef/`     | creation.spec.ts         | 8     | Création notes             |
+| `e2e/notes-sef/`     | validation.spec.ts       | 10    | Workflow validation        |
+| `e2e/notes-sef/`     | exports.spec.ts          | 8     | Exports notes              |
 
 ### 1.3 Fixtures et helpers
 
@@ -77,16 +77,16 @@ Total: 37 tests passent en 1.93s
 
 ### 2.2 Couverture QR Code
 
-| Fonction testée | Tests |
-|-----------------|-------|
-| generateHash() | 3 |
-| encodePayload() | 3 |
-| decodePayload() | 5 |
-| generateVerifyUrl() | 3 |
-| verifyDocument() | 4 |
-| formatValidationDate() | 3 |
-| truncateHash() | 4 |
-| Types TypeScript | 3 |
+| Fonction testée        | Tests |
+| ---------------------- | ----- |
+| generateHash()         | 3     |
+| encodePayload()        | 3     |
+| decodePayload()        | 5     |
+| generateVerifyUrl()    | 3     |
+| verifyDocument()       | 4     |
+| formatValidationDate() | 3     |
+| truncateHash()         | 4     |
+| Types TypeScript       | 3     |
 
 ---
 
@@ -109,8 +109,9 @@ npm run build
 **Cause:** Les types Supabase générés ne sont pas synchronisés avec les nouvelles fonctions RPC et tables.
 
 **Fichiers affectés:**
+
 - `src/hooks/useInterim.ts` - Table "interims" non déclarée
-- `src/hooks/useWorkflowAdmin.ts` - Fonctions RPC wf_admin_* non déclarées
+- `src/hooks/useWorkflowAdmin.ts` - Fonctions RPC wf*admin*\* non déclarées
 - `src/hooks/useWorkflowEngine.ts` - Fonctions RPC workflow non déclarées
 
 ### 3.3 Solution
@@ -129,20 +130,20 @@ npm run build
 
 ### 4.1 Obligatoires
 
-| # | Action | Commande | Statut |
-|---|--------|----------|--------|
-| 1 | Régénérer types Supabase | `npx supabase gen types typescript` | ⏳ À faire |
-| 2 | Corriger erreurs ESLint | `npm run lint:fix` | ⏳ À faire |
-| 3 | Build sans erreur | `npm run build` | ⏳ Après #1 |
-| 4 | Tests E2E | `npx playwright test` | ⏳ Après #3 |
+| #   | Action                   | Commande                            | Statut      |
+| --- | ------------------------ | ----------------------------------- | ----------- |
+| 1   | Régénérer types Supabase | `npx supabase gen types typescript` | ⏳ À faire  |
+| 2   | Corriger erreurs ESLint  | `npm run lint:fix`                  | ⏳ À faire  |
+| 3   | Build sans erreur        | `npm run build`                     | ⏳ Après #1 |
+| 4   | Tests E2E                | `npx playwright test`               | ⏳ Après #3 |
 
 ### 4.2 Recommandées
 
-| # | Action | Description |
-|---|--------|-------------|
-| 5 | Vérifier variables env | Documenter les variables requises |
-| 6 | Tester en staging | Déployer sur environnement de test |
-| 7 | Backup base | Sauvegarder avant migration |
+| #   | Action                 | Description                        |
+| --- | ---------------------- | ---------------------------------- |
+| 5   | Vérifier variables env | Documenter les variables requises  |
+| 6   | Tester en staging      | Déployer sur environnement de test |
+| 7   | Backup base            | Sauvegarder avant migration        |
 
 ---
 
@@ -271,13 +272,13 @@ Total: 130 tests E2E
 
 ### État actuel
 
-| Composant | Statut | Action |
-|-----------|--------|--------|
-| Code frontend | ✅ Complet | - |
-| Tests E2E | ✅ 130 tests | - |
-| Tests unitaires | ✅ 37 passent | - |
-| TypeScript | ⚠️ Build échoue | Régénérer types |
-| Documentation | ✅ À jour | - |
+| Composant       | Statut          | Action          |
+| --------------- | --------------- | --------------- |
+| Code frontend   | ✅ Complet      | -               |
+| Tests E2E       | ✅ 130 tests    | -               |
+| Tests unitaires | ✅ 37 passent   | -               |
+| TypeScript      | ⚠️ Build échoue | Régénérer types |
+| Documentation   | ✅ À jour       | -               |
 
 ### Recommandation
 
@@ -296,4 +297,4 @@ Une fois les types régénérés et le build fonctionnel:
 
 **Document généré le:** 3 Février 2026
 **Auteur:** Claude Code (Anthropic)
-**Projet:** SYGFP - ARTI Gabon
+**Projet:** SYGFP - ARTI Côte d'Ivoire

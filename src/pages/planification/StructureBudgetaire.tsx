@@ -1,19 +1,34 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useBudgetLines, BudgetLineWithRelations, BudgetLineFilters } from "@/hooks/useBudgetLines";
-import { useBaseReferentiels } from "@/hooks/useBaseReferentiels";
-import { BudgetLineTable } from "@/components/budget/BudgetLineTable";
-import { BudgetTreeView } from "@/components/budget/BudgetTreeView";
-import { BudgetLineForm } from "@/components/budget/BudgetLineForm";
-import { BudgetFilters } from "@/components/budget/BudgetFilters";
-import { BudgetLineHistory } from "@/components/budget/BudgetLineHistory";
-import { BudgetFormulas } from "@/components/budget/BudgetFormulas";
-import { EmptyStateNoData } from "@/components/shared/EmptyState";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useBudgetLines, BudgetLineWithRelations, BudgetLineFilters } from '@/hooks/useBudgetLines';
+import { useBaseReferentiels } from '@/hooks/useBaseReferentiels';
+import { BudgetLineTable } from '@/components/budget/BudgetLineTable';
+import { BudgetTreeView } from '@/components/budget/BudgetTreeView';
+import { BudgetLineForm } from '@/components/budget/BudgetLineForm';
+import { BudgetFilters } from '@/components/budget/BudgetFilters';
+import { BudgetLineHistory } from '@/components/budget/BudgetLineHistory';
+import { BudgetFormulas } from '@/components/budget/BudgetFormulas';
+import { EmptyStateNoData } from '@/components/shared/EmptyState';
+import { PageHeader } from '@/components/shared/PageHeader';
+import {
+  exportToCSV,
+  exportToExcel,
+  exportToPDF,
+  type ExportColumn,
+  type ExportOptions,
+  formatters,
+} from '@/lib/export/export-service';
 import {
   Wallet,
   Plus,
@@ -27,27 +42,33 @@ import {
   Download,
   FileSpreadsheet,
   AlertTriangle,
-} from "lucide-react";
-import { toast } from "sonner";
+  ChevronDown,
+  FileText,
+  Sheet,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + " FCFA";
+  return (
+    new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + ' FCFA'
+  );
 };
 
 export default function StructureBudgetaire() {
   const { exercice } = useExercice();
-  const [activeTab, setActiveTab] = useState("lignes");
+  const [activeTab, setActiveTab] = useState('lignes');
   const [filters, setFilters] = useState<BudgetLineFilters>({});
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [editingLine, setEditingLine] = useState<BudgetLineWithRelations | null>(null);
-  const [selectedLineForHistory, setSelectedLineForHistory] = useState<BudgetLineWithRelations | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "tree">("table");
+  const [selectedLineForHistory, setSelectedLineForHistory] =
+    useState<BudgetLineWithRelations | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
 
   const {
     budgetLines,
@@ -66,9 +87,9 @@ export default function StructureBudgetaire() {
   const { directions, objectifsStrategiques, missions } = useBaseReferentiels();
 
   // Stats
-  const validatedLines = budgetLines?.filter((l) => l.statut === "valide").length || 0;
-  const pendingLines = budgetLines?.filter((l) => l.statut === "soumis").length || 0;
-  const draftLines = budgetLines?.filter((l) => !l.statut || l.statut === "brouillon").length || 0;
+  const validatedLines = budgetLines?.filter((l) => l.statut === 'valide').length || 0;
+  const pendingLines = budgetLines?.filter((l) => l.statut === 'soumis').length || 0;
+  const draftLines = budgetLines?.filter((l) => !l.statut || l.statut === 'brouillon').length || 0;
 
   const handleFormSubmit = (data: Partial<BudgetLineWithRelations>) => {
     if (editingLine) {
@@ -90,52 +111,114 @@ export default function StructureBudgetaire() {
     setShowHistory(true);
   };
 
-  const handleExport = () => {
+  // --- Export columns definition ---
+  const exportColumns: ExportColumn[] = [
+    { key: 'code', label: 'Code Imputation', type: 'text', width: 22 },
+    { key: 'label', label: 'Libellé', type: 'text', width: 40 },
+    { key: 'level', label: 'Niveau', type: 'text', width: 12 },
+    { key: 'direction.code', label: 'Dir. Code', type: 'text', width: 8 },
+    { key: 'direction.label', label: 'Direction', type: 'text', width: 25 },
+    { key: 'objectif_strategique.code', label: 'OS Code', type: 'text', width: 8 },
+    { key: 'objectif_strategique.libelle', label: 'Objectif Stratégique', type: 'text', width: 30 },
+    { key: 'source_financement', label: 'Source Financement', type: 'text', width: 18 },
+    { key: 'dotation_initiale', label: 'Dotation Initiale', type: 'currency', width: 18 },
+    { key: 'dotation_modifiee', label: 'Dotation Modifiée', type: 'currency', width: 18 },
+    { key: 'total_engage', label: 'Engagé', type: 'currency', width: 15 },
+    { key: 'total_liquide', label: 'Liquidé', type: 'currency', width: 15 },
+    { key: 'total_ordonnance', label: 'Ordonnancé', type: 'currency', width: 15 },
+    { key: 'total_paye', label: 'Payé', type: 'currency', width: 15 },
+    { key: 'disponible_calcule', label: 'Disponible', type: 'currency', width: 15 },
+    {
+      key: 'statut',
+      label: 'Statut',
+      type: 'text',
+      width: 12,
+      format: (v) => formatters.status(v),
+    },
+  ];
+
+  const getExportOptions = (): ExportOptions => ({
+    title: 'Structure Budgétaire',
+    subtitle: `Exercice ${exercice} - ${totals.count} ligne(s)`,
+    filename: `structure_budgetaire_${exercice}`,
+    exercice: exercice || undefined,
+    showTotals: true,
+    totalColumns: [
+      'dotation_initiale',
+      'dotation_modifiee',
+      'total_engage',
+      'total_liquide',
+      'total_ordonnance',
+      'total_paye',
+      'disponible_calcule',
+    ],
+    orientation: 'landscape',
+  });
+
+  const handleExportCSV = () => {
     if (!budgetLines || budgetLines.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
-
-    const headers = ["code", "label", "level", "dotation_initiale", "direction", "os", "statut"].join(";");
-    const rows = budgetLines.map((line) =>
-      [
-        line.code,
-        line.label,
-        line.level,
-        line.dotation_initiale,
-        line.direction?.code || "",
-        line.objectif_strategique?.code || "",
-        line.statut || "brouillon",
-      ].join(";")
+    const result = exportToCSV(
+      budgetLines as unknown as Record<string, unknown>[],
+      exportColumns,
+      getExportOptions()
     );
+    if (result.success) {
+      toast.success(`Export CSV de ${result.rowCount} lignes réussi`);
+    } else {
+      toast.error(result.error || "Erreur lors de l'export CSV");
+    }
+  };
 
-    const content = [headers, ...rows].join("\n");
-    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `structure_budgetaire_${exercice}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    toast.success(`Export de ${budgetLines.length} lignes réussi`);
+  const handleExportExcel = () => {
+    if (!budgetLines || budgetLines.length === 0) {
+      toast.error('Aucune donnée à exporter');
+      return;
+    }
+    const result = exportToExcel(
+      budgetLines as unknown as Record<string, unknown>[],
+      exportColumns,
+      getExportOptions()
+    );
+    if (result.success) {
+      toast.success(`Export Excel de ${result.rowCount} lignes réussi`);
+    } else {
+      toast.error(result.error || "Erreur lors de l'export Excel");
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (!budgetLines || budgetLines.length === 0) {
+      toast.error('Aucune donnée à exporter');
+      return;
+    }
+    const result = exportToPDF(
+      budgetLines as unknown as Record<string, unknown>[],
+      exportColumns,
+      getExportOptions()
+    );
+    if (result.success) {
+      toast.success(`Export PDF de ${result.rowCount} lignes préparé`);
+    } else {
+      toast.error(result.error || "Erreur lors de l'export PDF");
+    }
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Wallet className="h-6 w-6 text-primary" />
-            <h1 className="page-title">Structure Budgétaire</h1>
-          </div>
-          <p className="page-description">
-            Gestion des lignes budgétaires et référentiels - Exercice {exercice}
-          </p>
-        </div>
+      <PageHeader
+        title="Structure Budgétaire"
+        description="Organisation et nomenclature du budget"
+        icon={Wallet}
+        backUrl="/"
+      >
         <Badge variant="outline" className="text-lg px-4 py-2">
           Exercice {exercice}
         </Badge>
-      </div>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-5">
@@ -226,10 +309,29 @@ export default function StructureBudgetaire() {
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle ligne
               </Button>
-              <Button variant="outline" onClick={handleExport}>
-                <Download className="mr-2 h-4 w-4" />
-                Exporter CSV
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Exporter
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={handleExportCSV}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Export CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportExcel}>
+                    <Sheet className="mr-2 h-4 w-4" />
+                    Export Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="flex gap-2 items-center">
               <div className="relative">
@@ -243,16 +345,16 @@ export default function StructureBudgetaire() {
               </div>
               <div className="flex gap-1 border rounded-md p-1">
                 <Button
-                  variant={viewMode === "table" ? "secondary" : "ghost"}
+                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode("table")}
+                  onClick={() => setViewMode('table')}
                 >
                   <List className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === "tree" ? "secondary" : "ghost"}
+                  variant={viewMode === 'tree' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode("tree")}
+                  onClick={() => setViewMode('tree')}
                 >
                   <TreePine className="h-4 w-4" />
                 </Button>
@@ -283,7 +385,7 @@ export default function StructureBudgetaire() {
                   actionLabel="Nouvelle ligne"
                   onAction={() => setShowForm(true)}
                 />
-              ) : viewMode === "tree" ? (
+              ) : viewMode === 'tree' ? (
                 <BudgetTreeView
                   lines={budgetLines}
                   onEdit={handleEdit}
@@ -326,7 +428,9 @@ export default function StructureBudgetaire() {
                     <div key={os.id} className="p-4 border rounded-lg bg-muted/30">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{os.code}</Badge>
-                        <Badge variant="default" className="bg-green-500">Actif</Badge>
+                        <Badge variant="default" className="bg-green-500">
+                          Actif
+                        </Badge>
                       </div>
                       <p className="mt-2 font-medium">{os.libelle}</p>
                     </div>
@@ -355,7 +459,9 @@ export default function StructureBudgetaire() {
                     <div key={dir.id} className="p-4 border rounded-lg bg-muted/30">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{dir.code}</Badge>
-                        {dir.sigle && <span className="text-sm text-muted-foreground">{dir.sigle}</span>}
+                        {dir.sigle && (
+                          <span className="text-sm text-muted-foreground">{dir.sigle}</span>
+                        )}
                       </div>
                       <p className="mt-2 font-medium">{dir.label}</p>
                     </div>
@@ -373,9 +479,7 @@ export default function StructureBudgetaire() {
           <Card>
             <CardHeader>
               <CardTitle>Missions</CardTitle>
-              <CardDescription>
-                Référentiel des missions budgétaires
-              </CardDescription>
+              <CardDescription>Référentiel des missions budgétaires</CardDescription>
             </CardHeader>
             <CardContent>
               {missions && missions.length > 0 ? (
@@ -384,7 +488,9 @@ export default function StructureBudgetaire() {
                     <div key={mission.id} className="p-4 border rounded-lg bg-muted/30">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{mission.code}</Badge>
-                        <Badge variant="default" className="bg-green-500">Actif</Badge>
+                        <Badge variant="default" className="bg-green-500">
+                          Actif
+                        </Badge>
                       </div>
                       <p className="mt-2 font-medium">{mission.libelle}</p>
                     </div>

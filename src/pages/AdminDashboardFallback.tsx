@@ -54,7 +54,12 @@ const DASHBOARD_TABS = [
   { id: 'general', label: 'Vue générale', icon: TrendingUp, roles: [] },
   { id: 'kpi', label: 'KPIs', icon: BarChart3, roles: [] },
   { id: 'dg', label: 'DG', icon: User, roles: ['DG', 'ADMIN'] },
-  { id: 'daf', label: 'DAF/SDCT', icon: Building2, roles: ['DAF', 'SDCT', 'CB', 'SAF', 'ADMIN'] },
+  {
+    id: 'daf',
+    label: 'DAF/SDCT',
+    icon: Building2,
+    roles: ['DAF', 'DAAF', 'SDCT', 'CB', 'SAF', 'ADMIN'],
+  },
   { id: 'sdpm', label: 'SDPM', icon: ShoppingCart, roles: ['SDPM', 'ADMIN'] },
   {
     id: 'tresorerie',
@@ -80,7 +85,7 @@ export function AdminDashboardFallback() {
 
   const getDefaultTab = () => {
     if (hasAnyRole(['DG'])) return 'dg';
-    if (hasAnyRole(['DAF', 'SDCT', 'CB', 'SAF'])) return 'daf';
+    if (hasAnyRole(['DAF', 'DAAF', 'SDCT', 'CB', 'SAF'])) return 'daf';
     if (hasAnyRole(['SDPM'])) return 'sdpm';
     if (hasAnyRole(['TRESORERIE', 'COMPTABILITE'])) return 'tresorerie';
     return 'general';

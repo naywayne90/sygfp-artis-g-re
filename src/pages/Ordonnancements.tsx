@@ -45,7 +45,7 @@ import { useExercice } from '@/contexts/ExerciceContext';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
 import { useCanValidateOrdonnancement } from '@/hooks/useDelegations';
 import { usePermissionCheck } from '@/components/auth/PermissionGuard';
-import { ExerciceSubtitle } from '@/components/exercice/ExerciceSubtitle';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
@@ -115,41 +115,39 @@ export default function Ordonnancements() {
       <ModuleHelp {...MODULE_HELP_CONFIG.ordonnancements} />
 
       {/* Page Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <ExerciceSubtitle
-            title="Ordonnancements"
-            description="Ordres de paiement et mandats à transmettre au Trésor"
-          />
-          {ordonnancementViaDelegation && (
-            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
-              <User className="h-3 w-3 mr-1" />
-              Validation par délégation
-              {ordonnancementDelegatorInfo ? ` du ${ordonnancementDelegatorInfo.role}` : ''}
-            </Badge>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <BudgetChainExportButton step="ordonnancement" />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button className="gap-2" onClick={() => setShowForm(true)} disabled={!canWrite}>
-                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    Nouvel ordonnancement
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <PageHeader
+        title="Ordonnancements"
+        description="Ordres de paiement"
+        icon={FileCheck}
+        stepNumber={8}
+        backUrl="/"
+      >
+        {ordonnancementViaDelegation && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <User className="h-3 w-3 mr-1" />
+            Validation par délégation
+            {ordonnancementDelegatorInfo ? ` du ${ordonnancementDelegatorInfo.role}` : ''}
+          </Badge>
+        )}
+        <BudgetChainExportButton step="ordonnancement" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button className="gap-2" onClick={() => setShowForm(true)} disabled={!canWrite}>
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvel ordonnancement
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-5">

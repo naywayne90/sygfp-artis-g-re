@@ -141,14 +141,14 @@ export const TABLE_STYLES = {
 // ============================================================================
 
 export const ORG_INFO = {
-  country: 'RÉPUBLIQUE GABONAISE',
-  motto: 'Union - Travail - Justice',
-  name: "AUTORITÉ DE RÉGULATION DU TRANSPORT INTÉRIEUR",
+  country: "RÉPUBLIQUE DE CÔTE D'IVOIRE",
+  motto: 'Union - Discipline - Travail',
+  name: 'AUTORITÉ DE RÉGULATION DU TRANSPORT INTÉRIEUR',
   shortName: 'ARTI',
   system: 'SYGFP',
   systemFull: 'Système de Gestion des Finances Publiques',
-  website: 'sygfp.arti.ga',
-  verifyUrl: 'https://sygfp.arti.ga/verify',
+  website: 'sygfp.arti.ci',
+  verifyUrl: 'https://sygfp.arti.ci/verify',
 } as const;
 
 // ============================================================================
@@ -161,7 +161,8 @@ export const PDF_TEXTS = {
   // Footer de génération
   generatedBy: 'Document généré par SYGFP',
   // Note de sécurité
-  securityNote: 'Ce document est authentifié électroniquement. Toute falsification est passible de poursuites.',
+  securityNote:
+    'Ce document est authentifié électroniquement. Toute falsification est passible de poursuites.',
   // Scan QR
   scanQR: "Scannez ce QR Code pour vérifier l'authenticité du document",
 } as const;
@@ -196,11 +197,7 @@ export function hexToRgb(hex: string): PDFColor {
   if (!result) {
     return [0, 0, 0];
   }
-  return [
-    parseInt(result[1], 16),
-    parseInt(result[2], 16),
-    parseInt(result[3], 16),
-  ];
+  return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
 }
 
 /**

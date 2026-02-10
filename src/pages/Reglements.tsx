@@ -59,7 +59,7 @@ import { BudgetChainExportButton } from '@/components/export/BudgetChainExportBu
 import { useReglements, MODES_PAIEMENT, type ReglementWithRelations } from '@/hooks/useReglements';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
-import { ExerciceSubtitle } from '@/components/exercice/ExerciceSubtitle';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ReglementForm } from '@/components/reglement/ReglementForm';
 import { ReglementList } from '@/components/reglement/ReglementList';
@@ -262,37 +262,37 @@ export default function Reglements() {
       <ModuleHelp {...MODULE_HELP_CONFIG.reglements} />
 
       {/* Page Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle
-          title="Règlements"
-          description="Enregistrement des paiements effectués (étape 4)"
-        />
-        <div className="flex gap-2">
-          <BordereauReglement reglements={reglements} exercice={String(exercice ?? '')} />
-          <BudgetChainExportButton step="reglement" />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    className="gap-2"
-                    onClick={() => setShowCreateDialog(true)}
-                    disabled={!canWrite || ordonnancementsValides.length === 0}
-                  >
-                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    Enregistrer un règlement
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <PageHeader
+        title="Règlements"
+        description="Paiements effectués"
+        icon={Wallet}
+        stepNumber={9}
+        backUrl="/"
+      >
+        <BordereauReglement reglements={reglements} exercice={String(exercice ?? '')} />
+        <BudgetChainExportButton step="reglement" />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  className="gap-2"
+                  onClick={() => setShowCreateDialog(true)}
+                  disabled={!canWrite || ordonnancementsValides.length === 0}
+                >
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Enregistrer un règlement
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* Filters */}
       <Card>

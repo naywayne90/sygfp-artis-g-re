@@ -2,7 +2,7 @@
 
 ## Vue d'ensemble
 
-SYGFP (Système de Gestion Financière et de Planification) est une application web moderne pour ARTI Gabon, construite avec une stack React/TypeScript et Supabase. La migration depuis SQL Server est 100% accomplie (fevrier 2026).
+SYGFP (Système de Gestion Financière et de Planification) est une application web moderne pour ARTI Côte d'Ivoire, construite avec une stack React/TypeScript et Supabase. La migration depuis SQL Server est 100% accomplie (fevrier 2026).
 
 ## Stack Technique
 

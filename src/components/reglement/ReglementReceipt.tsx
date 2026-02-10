@@ -68,11 +68,11 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
             }}
           >
             <div style={{ textAlign: 'left', fontSize: '0.75rem', lineHeight: 1.4 }}>
-              <div style={{ fontWeight: 'bold' }}>REPUBLIQUE GABONAISE</div>
-              <div>Union - Travail - Justice</div>
+              <div style={{ fontWeight: 'bold' }}>REPUBLIQUE DE COTE D'IVOIRE</div>
+              <div>Union - Discipline - Travail</div>
               <div style={{ marginTop: '0.5rem', fontWeight: 'bold' }}>AUTORITE DE REGULATION</div>
-              <div style={{ fontWeight: 'bold' }}>DES TRANSPORTS ET DES</div>
-              <div style={{ fontWeight: 'bold' }}>INFRASTRUCTURES (ARTI)</div>
+              <div style={{ fontWeight: 'bold' }}>DU TRANSPORT</div>
+              <div style={{ fontWeight: 'bold' }}>INTERIEUR (ARTI)</div>
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>
@@ -495,8 +495,8 @@ const ReglementReceiptContent = forwardRef<HTMLDivElement, ReglementReceiptConte
             color: '#6b7280',
           }}
         >
-          ARTI - Autorite de Regulation des Transports et des Infrastructures | SYGFP - Systeme de
-          Gestion Financiere et de Planification
+          ARTI - Autorite de Regulation du Transport Interieur | SYGFP - Systeme de Gestion des
+          Finances Publiques
           <br />
           Document genere le {format(new Date(), "dd/MM/yyyy 'a' HH:mm", { locale: fr })} | Ref:{' '}
           {reglement.numero}

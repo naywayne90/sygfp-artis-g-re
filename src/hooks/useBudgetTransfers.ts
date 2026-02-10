@@ -1,7 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface BudgetTransfer {
   id: string;
@@ -45,6 +49,29 @@ export interface BudgetTransferFilters {
   direction_id?: string;
 }
 
+export interface CreateTransferData {
+  type_transfer: 'virement' | 'ajustement';
+  from_budget_line_id?: string | null;
+  to_budget_line_id: string;
+  amount: number;
+  motif: string;
+  justification_renforcee?: string;
+}
+
+export interface TransferStats {
+  pending: number;
+  validated: number;
+  executed: number;
+  rejected: number;
+  cancelled: number;
+  executedThisMonth: number;
+  totalExecutedAmount: number;
+  totalPendingAmount: number;
+  totalAmount: number;
+  virementsCount: number;
+  ajustementsCount: number;
+}
+
 export interface BudgetHistory {
   id: string;
   budget_line_id: string;
@@ -62,31 +89,41 @@ export interface BudgetHistory {
   created_by_profile?: { full_name: string } | null;
 }
 
+// ============================================================================
+// Main Hook
+// ============================================================================
+
 export function useBudgetTransfers(filters?: BudgetTransferFilters) {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
 
   // Fetch all transfers
-  const { data: transfers, isLoading } = useQuery({
-    queryKey: ["budget-transfers", exercice, filters],
+  const {
+    data: transfers,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['budget-transfers', exercice, filters],
     queryFn: async () => {
       let query = supabase
-        .from("credit_transfers")
-        .select(`
+        .from('credit_transfers')
+        .select(
+          `
           *,
           from_line:budget_lines!credit_transfers_from_budget_line_id_fkey(code, label, dotation_initiale),
           to_line:budget_lines!credit_transfers_to_budget_line_id_fkey(code, label, dotation_initiale),
           requested_by_profile:profiles!credit_transfers_requested_by_fkey(full_name),
           approved_by_profile:profiles!credit_transfers_approved_by_fkey(full_name)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("requested_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('requested_at', { ascending: false });
 
       if (filters?.status) {
-        query = query.eq("status", filters.status);
+        query = query.eq('status', filters.status);
       }
       if (filters?.type_transfer) {
-        query = query.eq("type_transfer", filters.type_transfer);
+        query = query.eq('type_transfer', filters.type_transfer);
       }
 
       const { data, error } = await query;
@@ -96,55 +133,59 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     enabled: !!exercice,
   });
 
-  // Stats for dashboard
-  const stats = {
-    pending: transfers?.filter(t => t.status === "en_attente" || t.status === "soumis").length || 0,
-    validated: transfers?.filter(t => t.status === "approuve" || t.status === "valide").length || 0,
-    executed: transfers?.filter(t => t.status === "execute").length || 0,
-    executedThisMonth: transfers?.filter(t => {
-      if (t.status !== "execute" || !t.executed_at) return false;
-      const execDate = new Date(t.executed_at);
-      const now = new Date();
-      return execDate.getMonth() === now.getMonth() && execDate.getFullYear() === now.getFullYear();
-    }).length || 0,
-    totalExecutedAmount: transfers?.filter(t => t.status === "execute")
-      .reduce((sum, t) => sum + t.amount, 0) || 0,
+  // Computed stats
+  const stats: TransferStats = {
+    pending:
+      transfers?.filter((t) => ['en_attente', 'soumis'].includes(t.status || '')).length || 0,
+    validated:
+      transfers?.filter((t) => ['approuve', 'valide'].includes(t.status || '')).length || 0,
+    executed: transfers?.filter((t) => t.status === 'execute').length || 0,
+    rejected: transfers?.filter((t) => t.status === 'rejete').length || 0,
+    cancelled: transfers?.filter((t) => t.status === 'annule').length || 0,
+    executedThisMonth:
+      transfers?.filter((t) => {
+        if (t.status !== 'execute' || !t.executed_at) return false;
+        const execDate = new Date(t.executed_at);
+        const now = new Date();
+        return (
+          execDate.getMonth() === now.getMonth() && execDate.getFullYear() === now.getFullYear()
+        );
+      }).length || 0,
+    totalExecutedAmount:
+      transfers?.filter((t) => t.status === 'execute').reduce((sum, t) => sum + t.amount, 0) || 0,
+    totalPendingAmount:
+      transfers
+        ?.filter((t) => ['en_attente', 'soumis', 'valide', 'approuve'].includes(t.status || ''))
+        .reduce((sum, t) => sum + t.amount, 0) || 0,
+    totalAmount: transfers?.reduce((sum, t) => sum + t.amount, 0) || 0,
+    virementsCount: transfers?.filter((t) => t.type_transfer === 'virement').length || 0,
+    ajustementsCount: transfers?.filter((t) => t.type_transfer === 'ajustement').length || 0,
   };
 
   // Create transfer
   const createMutation = useMutation({
-    mutationFn: async (data: {
-      type_transfer: "virement" | "ajustement";
-      from_budget_line_id?: string | null;
-      to_budget_line_id: string;
-      amount: number;
-      motif: string;
-      justification_renforcee?: string;
-    }) => {
-      // Si c'est un virement (pas un ajustement), vérifier le disponible de la source
-      if (data.type_transfer === "virement" && data.from_budget_line_id) {
-        // Récupérer la ligne source avec dotation et engagements
+    mutationFn: async (data: CreateTransferData) => {
+      // Virement: verify source availability
+      if (data.type_transfer === 'virement' && data.from_budget_line_id) {
         const { data: fromLine } = await supabase
-          .from("budget_lines")
-          .select("dotation_initiale, total_engage")
-          .eq("id", data.from_budget_line_id)
+          .from('budget_lines')
+          .select('dotation_initiale, dotation_modifiee, total_engage')
+          .eq('id', data.from_budget_line_id)
           .single();
 
-        // Récupérer les virements déjà effectués depuis cette ligne
         const { data: virementsEmis } = await supabase
-          .from("credit_transfers")
-          .select("amount")
-          .eq("from_budget_line_id", data.from_budget_line_id)
-          .eq("status", "execute");
+          .from('credit_transfers')
+          .select('amount')
+          .eq('from_budget_line_id', data.from_budget_line_id)
+          .eq('status', 'execute');
 
-        // Récupérer les virements reçus par cette ligne
         const { data: virementsRecus } = await supabase
-          .from("credit_transfers")
-          .select("amount")
-          .eq("to_budget_line_id", data.from_budget_line_id)
-          .eq("status", "execute");
+          .from('credit_transfers')
+          .select('amount')
+          .eq('to_budget_line_id', data.from_budget_line_id)
+          .eq('status', 'execute');
 
-        const dotation = fromLine?.dotation_initiale || 0;
+        const dotation = fromLine?.dotation_modifiee || fromLine?.dotation_initiale || 0;
         const engaged = fromLine?.total_engage || 0;
         const emis = virementsEmis?.reduce((s, v) => s + v.amount, 0) || 0;
         const recus = virementsRecus?.reduce((s, v) => s + v.amount, 0) || 0;
@@ -152,19 +193,20 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
 
         if (disponible < data.amount) {
           throw new Error(
-            `Virement impossible : ${new Intl.NumberFormat("fr-FR").format(disponible)} FCFA disponibles, ${new Intl.NumberFormat("fr-FR").format(data.amount)} FCFA demandés`
+            `Solde insuffisant : ${new Intl.NumberFormat('fr-FR').format(disponible)} FCFA disponibles, ${new Intl.NumberFormat('fr-FR').format(data.amount)} FCFA demandés`
           );
         }
       }
 
       // Generate code
-      const { data: code } = await supabase.rpc("generate_transfer_code", {
+      const { data: code, error: codeError } = await supabase.rpc('generate_transfer_code', {
         p_exercice: exercice || new Date().getFullYear(),
         p_type: data.type_transfer,
       });
+      if (codeError) throw codeError;
 
       const { error, data: created } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .insert({
           code,
           type_transfer: data.type_transfer,
@@ -174,18 +216,17 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
           motif: data.motif,
           justification_renforcee: data.justification_renforcee,
           exercice: exercice || new Date().getFullYear(),
-          status: "brouillon",
+          status: 'brouillon',
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Log audit
-      await supabase.from("audit_logs").insert({
-        entity_type: "credit_transfer",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'credit_transfer',
         entity_id: created.id,
-        action: "transfer_created",
+        action: 'transfer_created',
         new_values: { code, type: data.type_transfer, amount: data.amount },
         exercice: exercice || new Date().getFullYear(),
       });
@@ -193,11 +234,13 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
       return created;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success(`${data.type_transfer === "ajustement" ? "Ajustement" : "Virement"} créé: ${data.code}`);
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      toast.success(
+        `${data.type_transfer === 'ajustement' ? 'Ajustement' : 'Virement'} créé : ${data.code}`
+      );
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 
@@ -205,22 +248,24 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("credit_transfers")
-        .update({ status: "soumis" })
-        .eq("id", id);
-
+        .from('credit_transfers')
+        .update({ status: 'soumis' })
+        .eq('id', id);
       if (error) throw error;
 
-      await supabase.from("audit_logs").insert({
-        entity_type: "credit_transfer",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'credit_transfer',
         entity_id: id,
-        action: "transfer_submitted",
+        action: 'transfer_submitted',
         exercice: exercice || new Date().getFullYear(),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success("Demande soumise pour validation");
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      toast.success('Demande soumise pour validation');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur lors de la soumission : ' + error.message);
     },
   });
 
@@ -228,25 +273,27 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .update({
-          status: "valide",
+          status: 'valide',
           approved_at: new Date().toISOString(),
         })
-        .eq("id", id);
-
+        .eq('id', id);
       if (error) throw error;
 
-      await supabase.from("audit_logs").insert({
-        entity_type: "credit_transfer",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'credit_transfer',
         entity_id: id,
-        action: "transfer_validated",
+        action: 'transfer_validated',
         exercice: exercice || new Date().getFullYear(),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success("Virement validé");
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      toast.success('Virement validé avec succès');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur de validation : ' + error.message);
     },
   });
 
@@ -254,49 +301,50 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .update({
-          status: "rejete",
+          status: 'rejete',
           rejection_reason: reason,
         })
-        .eq("id", id);
-
+        .eq('id', id);
       if (error) throw error;
 
-      await supabase.from("audit_logs").insert({
-        entity_type: "credit_transfer",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'credit_transfer',
         entity_id: id,
-        action: "transfer_rejected",
+        action: 'transfer_rejected',
         new_values: { reason },
         exercice: exercice || new Date().getFullYear(),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success("Virement rejeté");
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      toast.success('Virement rejeté');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur : ' + error.message);
     },
   });
 
   // Execute
   const executeMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data: result, error } = await supabase.rpc("execute_credit_transfer", {
+      const { data: result, error } = await supabase.rpc('execute_credit_transfer', {
         p_transfer_id: id,
       });
-
       if (error) throw error;
       const res = result as { success: boolean; error?: string; code?: string };
-      if (!res?.success) throw new Error(res?.error || "Erreur d'exécution");
-
+      if (!res?.success) throw new Error(res?.error || "Erreur d'exécution inconnue");
       return res;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      toast.success("Virement exécuté avec succès");
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-movements-journal'] });
+      toast.success('Virement exécuté avec succès - les montants ont été transférés');
     },
-    onError: (error: any) => {
-      toast.error("Erreur: " + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur d'exécution : " + error.message);
     },
   });
 
@@ -304,56 +352,36 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
   const cancelMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
-        .from("credit_transfers")
+        .from('credit_transfers')
         .update({
-          status: "annule",
+          status: 'annule',
           cancelled_at: new Date().toISOString(),
           cancel_reason: reason,
         })
-        .eq("id", id);
-
+        .eq('id', id);
       if (error) throw error;
 
-      await supabase.from("audit_logs").insert({
-        entity_type: "credit_transfer",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'credit_transfer',
         entity_id: id,
-        action: "transfer_cancelled",
+        action: 'transfer_cancelled',
         new_values: { reason },
         exercice: exercice || new Date().getFullYear(),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success("Virement annulé");
+      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      toast.success('Virement annulé');
     },
-  });
-
-  // Update draft
-  const updateMutation = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<BudgetTransfer>;
-    }) => {
-      const { error } = await supabase
-        .from("credit_transfers")
-        .update(data)
-        .eq("id", id)
-        .eq("status", "brouillon"); // Only allow updating drafts
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["budget-transfers"] });
-      toast.success("Modification enregistrée");
+    onError: (error: Error) => {
+      toast.error('Erreur : ' + error.message);
     },
   });
 
   return {
     transfers,
     isLoading,
+    error,
     stats,
     createTransfer: createMutation.mutate,
     submitTransfer: submitMutation.mutate,
@@ -361,26 +389,33 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     rejectTransfer: rejectMutation.mutate,
     executeTransfer: executeMutation.mutate,
     cancelTransfer: cancelMutation.mutate,
-    updateTransfer: updateMutation.mutate,
     isCreating: createMutation.isPending,
+    isSubmitting: submitMutation.isPending,
+    isValidating: validateMutation.isPending,
     isExecuting: executeMutation.isPending,
+    isRejecting: rejectMutation.isPending,
+    isCancelling: cancelMutation.isPending,
   };
 }
 
-// Hook to get budget history for a specific line
+// ============================================================================
+// Budget History Hook
+// ============================================================================
+
 export function useBudgetHistory(budgetLineId?: string) {
   const { data: history, isLoading } = useQuery({
-    queryKey: ["budget-history", budgetLineId],
+    queryKey: ['budget-history', budgetLineId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("budget_history")
-        .select(`
+        .from('budget_history')
+        .select(
+          `
           *,
           created_by_profile:profiles!budget_history_created_by_fkey(full_name)
-        `)
-        .eq("budget_line_id", budgetLineId!)
-        .order("created_at", { ascending: false });
-
+        `
+        )
+        .eq('budget_line_id', budgetLineId as string)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data as BudgetHistory[];
     },
@@ -390,29 +425,24 @@ export function useBudgetHistory(budgetLineId?: string) {
   return { history, isLoading };
 }
 
-// Hook to calculate available balance
+// ============================================================================
+// Budget Line Available Hook
+// ============================================================================
+
 export function useBudgetLineAvailable(budgetLineId?: string) {
   const { exercice } = useExercice();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["budget-line-available", budgetLineId, exercice],
+    queryKey: ['budget-line-available', budgetLineId, exercice],
     queryFn: async () => {
-      // Get line info
       const { data: line } = await supabase
-        .from("budget_lines")
-        .select("dotation_initiale")
-        .eq("id", budgetLineId!)
+        .from('budget_lines')
+        .select('dotation_initiale, dotation_modifiee, total_engage')
+        .eq('id', budgetLineId as string)
         .single();
 
-      // Get engaged amount
-      const { data: engagements } = await supabase
-        .from("budget_engagements")
-        .select("montant")
-        .eq("budget_line_id", budgetLineId!)
-        .in("statut", ["valide", "en_cours"]);
-
-      const dotation = line?.dotation_initiale || 0;
-      const engaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const dotation = line?.dotation_modifiee || line?.dotation_initiale || 0;
+      const engaged = line?.total_engage || 0;
       const disponible = dotation - engaged;
 
       return { dotation, engaged, disponible };

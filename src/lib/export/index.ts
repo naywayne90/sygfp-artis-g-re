@@ -3,5 +3,6 @@
  * Centralise les exports pour faciliter l'import
  */
 
-export * from "./export-service";
-export * from "./export-templates";
+export * from './export-branding';
+export * from './export-service';
+export * from './export-templates';

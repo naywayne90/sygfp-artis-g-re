@@ -3,27 +3,25 @@
  * Intègre NotificationCenter avec onglets par catégorie et filtres avancés
  */
 
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NotificationPreferences } from "@/components/notifications/NotificationPreferences";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { useNotificationsEnhanced } from "@/hooks/useNotificationsEnhanced";
-import { Bell, Settings } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NotificationPreferences } from '@/components/notifications/NotificationPreferences';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { useNotificationsEnhanced } from '@/hooks/useNotificationsEnhanced';
+import { Bell, Settings } from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export default function Notifications() {
   const { unreadCount } = useNotificationsEnhanced();
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="page-header">
-        <h1 className="page-title flex items-center gap-2">
-          <Bell className="h-6 w-6" />
-          Notifications
-        </h1>
-        <p className="page-description">
-          Centre de notifications et préférences
-        </p>
-      </div>
+      <PageHeader
+        title="Notifications"
+        description="Centre de notifications"
+        icon={Bell}
+        backUrl="/"
+      />
 
       <Tabs defaultValue="notifications" className="space-y-4">
         <TabsList>

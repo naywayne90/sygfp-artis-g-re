@@ -53,6 +53,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 type Profile = {
   id: string;
@@ -284,12 +285,12 @@ export default function GestionUtilisateurs() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Gestion des Utilisateurs</h1>
-        <p className="text-muted-foreground mt-1">
-          Gérez les profils utilisateurs, leurs rôles et leurs droits d'accès.
-        </p>
-      </div>
+      <PageHeader
+        title="Gestion des Utilisateurs"
+        description="Administration des comptes utilisateurs"
+        icon={Users}
+        backUrl="/"
+      />
 
       {/* Section d'aide explicative */}
       <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
