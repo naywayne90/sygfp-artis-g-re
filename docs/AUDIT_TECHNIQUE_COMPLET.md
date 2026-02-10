@@ -31,29 +31,30 @@
 
 ### Metriques cles
 
-| Metrique            | Valeur                                              |
-| ------------------- | --------------------------------------------------- |
-| Pages               | 104                                                 |
-| Composants React    | 383 (46 modules)                                    |
-| Hooks personnalises | 143                                                 |
-| Migrations SQL      | 151+                                                |
-| Edge Functions      | 12                                                  |
-| Fonctions RPC       | 186                                                 |
-| Vues DB             | 33                                                  |
-| Services            | 12                                                  |
-| Modules lib/        | 13                                                  |
-| Contexts React      | 2                                                   |
-| Routes              | 67 (54 fonctionnelles, 10 partielles, 3 squelettes) |
-| Feature Flags       | 9 (5 actives, 4 desactivees)                        |
-| Paniers Workflow    | 18 (7 roles)                                        |
-| Tables DB           | ~50+                                                |
-| Buckets Storage     | 2                                                   |
+| Metrique            | Valeur                                                       |
+| ------------------- | ------------------------------------------------------------ |
+| Pages               | 114                                                          |
+| Composants React    | 395 (50 modules)                                             |
+| Hooks personnalises | 154                                                          |
+| Migrations SQL      | 185                                                          |
+| Edge Functions      | 12                                                           |
+| Fonctions RPC       | 186                                                          |
+| Vues DB             | 33                                                           |
+| Services            | 14                                                           |
+| Modules lib/        | 13                                                           |
+| Contexts React      | 2                                                            |
+| Routes              | 112 (dont ~90 fonctionnelles, ~15 partielles, ~7 squelettes) |
+| Feature Flags       | 9 (5 actives, 4 desactivees)                                 |
+| Paniers Workflow    | 18 (7 roles)                                                 |
+| Tables DB           | ~50+                                                         |
+| Types fichiers      | 3 (custom) + types Supabase auto-generes                     |
+| Buckets Storage     | 2                                                            |
 
 ### Etat general
 
 Le SYGFP est une application **mature et fonctionnelle** couvrant l'integralite de la chaine de depense publique en 9 etapes. L'architecture est solide (React 18 + TypeScript + Supabase), avec un systeme RBAC complet, des controles budgetaires automatises et une tracabilite audit exhaustive.
 
-**7 gaps de securite/fonctionnalite** ont ete identifies, dont 1 critique (filtrage par direction dans le workflow).
+**7 gaps initialement identifies**, dont 3 deja corriges/resolus (Gap 1 corrige par migration, Gap 5 et Gap 7 deja implementes). **4 gaps restent ouverts** (delegations, interims, notifications, DashboardHR).
 
 ---
 
@@ -79,17 +80,17 @@ Le SYGFP est une application **mature et fonctionnelle** couvrant l'integralite 
 
 ```
 src/
-  components/    383 composants dans 46 modules
-  pages/         104 pages
-  hooks/         143 hooks personnalises
+  components/    395 composants dans 50 modules
+  pages/         114 pages
+  hooks/         154 hooks personnalises
   lib/           13 modules (rbac, workflow, pdf, excel, export, validations, config, errors...)
   contexts/      2 contexts (Exercice, RBAC)
-  services/      12 services (attachments, PDF, storage factory)
-  types/         2 fichiers custom + types Supabase auto-generes (460 Ko)
+  services/      14 services (attachments, PDF, storage factory, migrations...)
+  types/         3 fichiers custom + types Supabase auto-generes (460 Ko)
   integrations/  Client Supabase + types
 
 supabase/
-  migrations/    151+ fichiers SQL
+  migrations/    185 fichiers SQL
   functions/     12 Edge Functions
 ```
 
@@ -237,7 +238,7 @@ supabase/
 | Suivi             | dossier_etapes (type_etape, statut, montant par etape)                 |
 | Propagation       | dossier_ref propage sur toutes les tables de la chaine                 |
 | Champs financiers | montant_estime → montant_engage → montant_liquide → montant_ordonnance |
-| Gap               | Pas de page DossierDetails unifiee                                     |
+| Page              | DossierDetails.tsx (timeline 9 etapes, historique, pieces jointes)     |
 
 ---
 
@@ -513,7 +514,7 @@ StorageFactory (singleton)
 ### Contraintes upload
 
 - **Taille max** : 10 Mo par fichier
-- **Types autorises** : PDF, PNG, JPG, GIF, WebP, DOC/DOCX, XLS/XLSX, PPT/PPTX, TXT, CSV, ZIP, RAR
+- **Types autorises** (17 MIME) : PDF, PNG, JPG, GIF, WebP, DOC/DOCX, XLS/XLSX, PPT/PPTX, TXT, CSV, ZIP, RAR
 - **12 types d'entites** : notes_sef, notes_dg, imputations, expressions_besoin, passations_marche, engagements, liquidations, ordonnancements, reglements, marches, contrats, dossiers
 
 ### GED (Gestion Electronique de Documents)
@@ -693,25 +694,26 @@ DossierSearchDialog avec filtres (direction, statut, etape, type, dates, montant
 
 ## 14. GAPS IDENTIFIES
 
-### Gap 1 : Workflow sans filtrage par direction (CRITIQUE)
+> **Note de verification** : Ce rapport a ete verifie par 6 agents independants le 10 fevrier 2026.
+> Sur 7 gaps initialement identifies, 3 ont ete corriges/resolus. 4 restent ouverts.
 
-**Probleme** : `canUserAct()` dans useWorkflowEngine.ts verifie le role_hierarchique et profilFonctionnel mais PAS la direction_id. Tout DIRECTEUR peut valider tout engagement, meme d'une autre direction.
+### Gap 1 : Workflow sans filtrage par direction ~~(CRITIQUE)~~ → CORRIGE
 
-**Impact** : Securite critique - violation du principe de responsabilite par direction.
+**Statut** : ✅ CORRIGE (migration 20260207130000_workflow_direction_check.sql)
 
-**Solution existante non utilisee** : `check_data_permission()` verifie correctement la direction mais n'est JAMAIS appelee par advance_workflow().
+**Probleme initial** : `canUserAct()` dans useWorkflowEngine.ts ne verifiait pas la direction_id.
 
-**Effort estime** : 4-6h
+**Correction appliquee** : La migration 20260207130000 a ajoute un appel a `check_data_permission()` dans `advance_workflow()` (ligne 136). Le filtrage par direction est maintenant effectif cote backend.
 
-### Gap 2 : Delegations absentes du workflow engine (HAUTE)
+### Gap 2 : Delegations partiellement absentes du workflow (HAUTE) — OUVERT
 
-**Probleme** : Seul ValidationNotesSEF.tsx integre les delegations via useCanValidateSEF(). Les pages Engagements.tsx, Liquidations.tsx, Ordonnancements.tsx n'importent pas useDelegations.
+**Probleme** : Les pages Engagements.tsx, Liquidations.tsx, Ordonnancements.tsx **importent bien** les hooks de delegation (useCanValidateEngagement, useCanValidateLiquidation, useCanValidateOrdonnancement) cote frontend. **Cependant**, le backend workflow engine (`advance_workflow()`) ne verifie PAS les delegations actives avant d'autoriser une transition.
 
-**Impact** : Un delegataire du DG ne peut pas valider les engagements/liquidations/ordonnancements via l'interface.
+**Impact** : La verification des delegations est frontend-only, contournable par appel direct a l'API.
 
 **Effort estime** : 3-4h
 
-### Gap 3 : Interims deconnectes du RBAC (HAUTE)
+### Gap 3 : Interims deconnectes du RBAC (HAUTE) — OUVERT
 
 **Probleme** : La fonction `can_validate_as_interim()` existe en DB mais n'est JAMAIS appelee dans le code frontend ou le workflow engine. Le module Interims (497 lignes) a un CRUD complet mais ne modifie pas les permissions effectives.
 
@@ -719,29 +721,29 @@ DossierSearchDialog avec filtres (direction, statut, etape, type, dates, montant
 
 **Effort estime** : 3-4h
 
-### Gap 4 : Notifications ignorent delegations/interims (MOYENNE)
+### Gap 4 : Notifications ignorent delegations/interims (MOYENNE) — OUVERT
 
 **Probleme** : Les triggers de notification envoient aux utilisateurs par role (ex: tous les DG) sans considerer les delegations/interims actifs. Un delegataire ne recoit pas les notifications de validation.
 
 **Effort estime** : 2-3h
 
-### Gap 5 : "P.I." absent des PDFs (MOYENNE)
+### Gap 5 : "P.I." absent des PDFs ~~(MOYENNE)~~ → RESOLU
 
-**Probleme** : Les PDFs de Notes SEF/AEF affichent le nom du validateur et la signature "Le Directeur General" mais ne mentionnent jamais "par interim" ou "par delegation" meme quand c'est le cas.
+**Statut** : ✅ DEJA IMPLEMENTE
 
-**Effort estime** : 1-2h
+**Verification** : `noteSEFPdfService.ts` contient deja l'interface `SignataireInterimInfo` avec les champs `isInterim`, `titulaireNom`, `isDelegation`, `delegateurNom`. La mention "P.I." et "Par delegation" est geree aux lignes 453, 456, 520, 562 du service PDF.
 
-### Gap 6 : DashboardHR 75% mocke (BASSE)
+### Gap 6 : DashboardHR ~62.5% mocke (BASSE) — OUVERT
 
-**Probleme** : DashboardHR.tsx (mappe a DGPECRP) contient un commentaire explicite "Donnees simulees pour le dashboard RH (a remplacer par vraies donnees)". 75% des donnees sont hardcodees (hrStats constant), seuls les KPIs viennent de Supabase.
+**Probleme** : DashboardHR.tsx (mappe a DGPECRP) contient un commentaire explicite "Donnees simulees pour le dashboard RH (a remplacer par vraies donnees)". ~62.5% des donnees sont hardcodees (5 metriques sur 8 desactivees avec tooltip "Module SIRH requis"). Les hooks `useHRDashboardData()` et `useDirectionDashboard()` fournissent des donnees reelles pour le reste.
 
 **Effort estime** : 4-6h
 
-### Gap 7 : Pas de page DossierDetails unifiee (BASSE)
+### Gap 7 : Pas de page DossierDetails unifiee ~~(BASSE)~~ → RESOLU
 
-**Probleme** : Le systeme dossier (dossiers + dossier_etapes) tracke parfaitement la progression des 9 etapes en DB, mais il n'existe aucune page frontend affichant cette vue unifiee.
+**Statut** : ✅ DEJA IMPLEMENTE
 
-**Effort estime** : 6-8h
+**Verification** : `DossierDetails.tsx` existe avec une timeline complete des 9 etapes (constante ETAPES_CHAINE lignes 69-79), un affichage du statut par etape (lignes 327-418), et une section historique detaillee (lignes 420-449).
 
 ### Gaps supplementaires (mineurs)
 
@@ -758,52 +760,47 @@ DossierSearchDialog avec filtres (direction, statut, etape, type, dates, montant
 
 ## 15. RECOMMANDATIONS
 
-### Ordre de correction recommande
+### Ordre de correction recommande (4 gaps restants)
 
 ```
-Phase 1 (Critique) :
-  Gap 1 → Workflow direction filtering (4-6h)
-    Approche : Integrer check_data_permission() dans advance_workflow()
-              + ajouter direction_id a wf_instances
+Phase 1 (Haute) :
+  Gap 2 + Gap 3 → Delegations + Interims dans workflow backend (6-8h)
+    Approche : Ajouter verification delegations/interims dans advance_workflow()
+              cote backend (la verification frontend existe deja)
+              Appeler can_validate_as_interim() dans le workflow engine
 
-Phase 2 (Haute) :
-  Gap 2 + Gap 3 → Delegations + Interims dans workflow (6-8h)
-    Approche : Modifier canUserAct() pour verifier delegations et interims actifs
-              Propager useDelegations dans Engagements/Liquidations/Ordonnancements
+Phase 2 (Moyenne) :
+  Gap 4 → Notifications delegataires/interimaires (2-3h)
+    Approche : Modifier triggers notification pour inclure delegataires/interimaires actifs
 
-Phase 3 (Moyenne) :
-  Gap 4 + Gap 5 → Notifications + PDF P.I. (3-5h)
-    Approche : Modifier triggers notification pour inclure delegataires/interimaires
-              Ajouter mention "P.I." / "Par delegation" dans services PDF
-
-Phase 4 (Basse) :
+Phase 3 (Basse) :
   Gap 6 → DashboardHR donnees reelles (4-6h)
-  Gap 7 → Page DossierDetails unifiee (6-8h)
+    Approche : Connecter les 5 metriques desactivees a des vraies sources SIRH
+              ou creer des tables RH temporaires
   TypeScript types sync (1-2h)
 ```
 
-### Effort total estime : 24-35h
+### Effort total estime : 13-19h (reduit de 24-35h grace aux 3 gaps deja corriges)
 
-### Approche technique recommandee pour Gap 1
+### Gaps deja corriges (aucune action requise)
 
-**Option hybride B+A** :
-
-1. Reutiliser `check_data_permission()` existant (Option B)
-2. Ajouter `direction_id` a `wf_instances` pour tracking (Option A)
-3. Modifier `advance_workflow()` pour appeler check_data_permission() avant transition
-4. Modifier `canUserAct()` frontend pour verifier direction_id
+| Gap                         | Correction                                                                 | Date          |
+| --------------------------- | -------------------------------------------------------------------------- | ------------- |
+| Gap 1 (Direction filtering) | Migration 20260207130000 - check_data_permission() dans advance_workflow() | 7 fev 2026    |
+| Gap 5 (P.I. dans PDFs)      | SignataireInterimInfo dans noteSEFPdfService.ts                            | Deja en place |
+| Gap 7 (DossierDetails)      | DossierDetails.tsx avec timeline 9 etapes                                  | Deja en place |
 
 ### Metriques de validation
 
-Apres corrections :
+Apres corrections des 4 gaps restants :
 
-- [ ] Tout DIRECTEUR ne peut valider QUE les documents de sa direction
-- [ ] Un delegataire DG peut valider engagements/liquidations/ordonnancements
+- [x] ~~Tout DIRECTEUR ne peut valider QUE les documents de sa direction~~ (FAIT - Gap 1 corrige)
+- [ ] Un delegataire DG peut valider engagements/liquidations/ordonnancements **cote backend**
 - [ ] Un interimaire exerce les pouvoirs du titulaire
 - [ ] Les delegataires/interimaires recoivent les notifications
-- [ ] Les PDFs mentionnent "P.I." ou "Par delegation" si applicable
+- [x] ~~Les PDFs mentionnent "P.I." ou "Par delegation" si applicable~~ (FAIT - Gap 5 resolu)
 - [ ] DashboardHR affiche des donnees reelles
-- [ ] Une page DossierDetails montre les 9 etapes
+- [x] ~~Une page DossierDetails montre les 9 etapes~~ (FAIT - Gap 7 resolu)
 
 ---
 
@@ -843,3 +840,4 @@ v_activite_recente, v_alertes_direction, v_alertes_dmg, v_budget_disponibilite, 
 ---
 
 _Rapport genere le 7 fevrier 2026 par Claude Code apres 14 series d'analyse technique approfondie._
+_Verifie et corrige le 10 fevrier 2026 par 6 agents de verification independants (metriques, chaine de depense, RBAC, budget, modules metier, gaps)._

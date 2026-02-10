@@ -41,7 +41,12 @@ venv/
 test-results/
 playwright-report/
 .playwright/
+.playwright-mcp/
 coverage/
+test-screenshots/
+
+# Screenshots (testing artifacts - root level)
+*.png
 
 # Logs
 *.log
@@ -50,6 +55,22 @@ migration_output.log
 migration_v3_output.log
 migration_v3_complete.log
 migration_v3_final.log
+migration_finale_log.txt
+
+# Agent/session temp files
+agent-team*.txt
+snapshot-structure.md
+
+# Supabase temp
+supabase/.temp/
+
+# docs/capture temp files (keep .md only)
+docs/capture/*.png
+docs/capture/*.json
+docs/capture/*.py
+docs/capture/*.xlsx
+docs/capture/*.csv
+docs/capture/*.docx
 
 # Temp files
 nohup.out
