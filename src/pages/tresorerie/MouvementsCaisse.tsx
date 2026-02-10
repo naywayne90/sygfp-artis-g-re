@@ -3,19 +3,19 @@
  * Gestion des mouvements des caisses (entrées et sorties)
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -31,10 +31,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import {
-  Plus,
   Search,
   FileSpreadsheet,
   Filter,
@@ -43,38 +42,44 @@ import {
   CalendarIcon,
   ArrowDownCircle,
   ArrowUpCircle,
+  ArrowLeftRight,
   TrendingUp,
   TrendingDown,
   RefreshCw,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useMouvementsTresorerie, CreateMouvementData, MouvementSens } from "@/hooks/useMouvementsTresorerie";
-import { useCaisses } from "@/hooks/useCaisses";
-import { useFundingSources } from "@/hooks/useFundingSources";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import {
+  useMouvementsTresorerie,
+  CreateMouvementData,
+  MouvementSens,
+} from '@/hooks/useMouvementsTresorerie';
+import { useCaisses } from '@/hooks/useCaisses';
+import { useFundingSources } from '@/hooks/useFundingSources';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export default function MouvementsCaisse() {
-  const { selectedExercice, isReadOnly } = useExercice();
-  const [search, setSearch] = useState("");
-  const [sensFilter, setSensFilter] = useState<MouvementSens | "all">("all");
-  const [caisseFilter, setCaisseFilter] = useState<string>("all");
-  const [origineFilter, setOrigineFilter] = useState<string>("all");
+  const { selectedExercice: _selectedExercice, isReadOnly } = useExercice();
+  const [search, setSearch] = useState('');
+  const [sensFilter, setSensFilter] = useState<MouvementSens | 'all'>('all');
+  const [caisseFilter, setCaisseFilter] = useState<string>('all');
+  const [origineFilter, setOrigineFilter] = useState<string>('all');
   const [dateDebut, setDateDebut] = useState<Date | undefined>();
   const [dateFin, setDateFin] = useState<Date | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogSens, setDialogSens] = useState<MouvementSens>("ENTREE");
+  const [dialogSens, setDialogSens] = useState<MouvementSens>('ENTREE');
 
   // Form state
   const [formData, setFormData] = useState<Partial<CreateMouvementData>>({
-    type: "CASH",
-    sens: "ENTREE",
+    type: 'CASH',
+    sens: 'ENTREE',
     montant: 0,
-    date_operation: new Date().toISOString().split("T")[0],
-    libelle: "",
+    date_operation: new Date().toISOString().split('T')[0],
+    libelle: '',
   });
 
   // Hooks
@@ -90,12 +95,12 @@ export default function MouvementsCaisse() {
     getSensLabel,
     refetch,
   } = useMouvementsTresorerie({
-    type: "CASH",
-    sens: sensFilter !== "all" ? sensFilter : undefined,
-    caisse_id: caisseFilter !== "all" ? caisseFilter : undefined,
-    origine_fonds_id: origineFilter !== "all" ? origineFilter : undefined,
-    date_debut: dateDebut?.toISOString().split("T")[0],
-    date_fin: dateFin?.toISOString().split("T")[0],
+    type: 'CASH',
+    sens: sensFilter !== 'all' ? sensFilter : undefined,
+    caisse_id: caisseFilter !== 'all' ? caisseFilter : undefined,
+    origine_fonds_id: origineFilter !== 'all' ? origineFilter : undefined,
+    date_debut: dateDebut?.toISOString().split('T')[0],
+    date_fin: dateFin?.toISOString().split('T')[0],
     search,
   });
 
@@ -106,11 +111,11 @@ export default function MouvementsCaisse() {
   const openDialog = (sens: MouvementSens) => {
     setDialogSens(sens);
     setFormData({
-      type: "CASH",
+      type: 'CASH',
       sens,
       montant: 0,
-      date_operation: new Date().toISOString().split("T")[0],
-      libelle: "",
+      date_operation: new Date().toISOString().split('T')[0],
+      libelle: '',
     });
     setIsDialogOpen(true);
   };
@@ -128,18 +133,18 @@ export default function MouvementsCaisse() {
     }
 
     createMouvement({
-      type: "CASH",
+      type: 'CASH',
       sens: dialogSens,
       caisse_id: formData.caisse_id,
       montant: formData.montant,
-      date_operation: formData.date_operation || new Date().toISOString().split("T")[0],
+      date_operation: formData.date_operation || new Date().toISOString().split('T')[0],
       date_valeur: formData.date_valeur,
       libelle: formData.libelle,
       description: formData.description,
       origine_fonds_id: formData.origine_fonds_id,
       reference_piece: formData.reference_piece,
       reference_externe: formData.reference_externe,
-      statut: "valide",
+      statut: 'valide',
     });
 
     setIsDialogOpen(false);
@@ -148,11 +153,11 @@ export default function MouvementsCaisse() {
   // Statut badge
   const getStatutBadge = (statut: string) => {
     switch (statut) {
-      case "valide":
+      case 'valide':
         return <Badge className="bg-green-100 text-green-800">Validé</Badge>;
-      case "brouillon":
+      case 'brouillon':
         return <Badge variant="secondary">Brouillon</Badge>;
-      case "annule":
+      case 'annule':
         return <Badge variant="destructive">Annulé</Badge>;
       default:
         return <Badge variant="outline">{statut}</Badge>;
@@ -162,39 +167,37 @@ export default function MouvementsCaisse() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Wallet className="h-6 w-6 text-purple-600" />
-            Mouvements Caisse
-          </h1>
-          <p className="text-muted-foreground">
-            Entrées et sorties des caisses - Exercice {selectedExercice?.annee}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button variant="outline" onClick={exportToExcel}>
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Export Excel
-          </Button>
-          {!isReadOnly && (
-            <>
-              <Button variant="outline" className="text-green-600" onClick={() => openDialog("ENTREE")}>
-                <ArrowDownCircle className="h-4 w-4 mr-2" />
-                Entrée
-              </Button>
-              <Button variant="outline" className="text-red-600" onClick={() => openDialog("SORTIE")}>
-                <ArrowUpCircle className="h-4 w-4 mr-2" />
-                Sortie
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Mouvements Caisse"
+        description="Suivi des mouvements de la caisse"
+        icon={ArrowLeftRight}
+        backUrl="/tresorerie"
+      >
+        <Button variant="outline" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Actualiser
+        </Button>
+        <Button variant="outline" onClick={exportToExcel}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Export Excel
+        </Button>
+        {!isReadOnly && (
+          <>
+            <Button
+              variant="outline"
+              className="text-green-600"
+              onClick={() => openDialog('ENTREE')}
+            >
+              <ArrowDownCircle className="h-4 w-4 mr-2" />
+              Entrée
+            </Button>
+            <Button variant="outline" className="text-red-600" onClick={() => openDialog('SORTIE')}>
+              <ArrowUpCircle className="h-4 w-4 mr-2" />
+              Sortie
+            </Button>
+          </>
+        )}
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -238,13 +241,17 @@ export default function MouvementsCaisse() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Solde net
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Solde net</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={cn("text-2xl font-bold", stats.soldeNet >= 0 ? "text-green-600" : "text-red-600")}>
-              {stats.soldeNet >= 0 ? "+" : ""}{formatMontant(stats.soldeNet)}
+            <p
+              className={cn(
+                'text-2xl font-bold',
+                stats.soldeNet >= 0 ? 'text-green-600' : 'text-red-600'
+              )}
+            >
+              {stats.soldeNet >= 0 ? '+' : ''}
+              {formatMontant(stats.soldeNet)}
             </p>
           </CardContent>
         </Card>
@@ -270,7 +277,10 @@ export default function MouvementsCaisse() {
               />
             </div>
 
-            <Select value={sensFilter} onValueChange={(v) => setSensFilter(v as MouvementSens | "all")}>
+            <Select
+              value={sensFilter}
+              onValueChange={(v) => setSensFilter(v as MouvementSens | 'all')}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sens" />
               </SelectTrigger>
@@ -313,16 +323,11 @@ export default function MouvementsCaisse() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateDebut ? format(dateDebut, "dd/MM/yyyy") : "Date début"}
+                  {dateDebut ? format(dateDebut, 'dd/MM/yyyy') : 'Date début'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dateDebut}
-                  onSelect={setDateDebut}
-                  locale={fr}
-                />
+                <Calendar mode="single" selected={dateDebut} onSelect={setDateDebut} locale={fr} />
               </PopoverContent>
             </Popover>
 
@@ -330,16 +335,11 @@ export default function MouvementsCaisse() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFin ? format(dateFin, "dd/MM/yyyy") : "Date fin"}
+                  {dateFin ? format(dateFin, 'dd/MM/yyyy') : 'Date fin'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dateFin}
-                  onSelect={setDateFin}
-                  locale={fr}
-                />
+                <Calendar mode="single" selected={dateFin} onSelect={setDateFin} locale={fr} />
               </PopoverContent>
             </Popover>
           </div>
@@ -350,9 +350,7 @@ export default function MouvementsCaisse() {
       <Card>
         <CardHeader>
           <CardTitle>Liste des mouvements</CardTitle>
-          <CardDescription>
-            {mouvements?.length || 0} enregistrement(s)
-          </CardDescription>
+          <CardDescription>{mouvements?.length || 0} enregistrement(s)</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -386,11 +384,11 @@ export default function MouvementsCaisse() {
                     <TableRow key={mvt.id}>
                       <TableCell className="font-mono text-sm">{mvt.numero}</TableCell>
                       <TableCell>
-                        {format(new Date(mvt.date_operation), "dd/MM/yyyy", { locale: fr })}
+                        {format(new Date(mvt.date_operation), 'dd/MM/yyyy', { locale: fr })}
                       </TableCell>
                       <TableCell>
                         <Badge className={getSensColor(mvt.sens)}>
-                          {mvt.sens === "ENTREE" ? (
+                          {mvt.sens === 'ENTREE' ? (
                             <ArrowDownCircle className="h-3 w-3 mr-1" />
                           ) : (
                             <ArrowUpCircle className="h-3 w-3 mr-1" />
@@ -401,22 +399,23 @@ export default function MouvementsCaisse() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{mvt.caisse?.code}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {mvt.caisse?.libelle}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{mvt.caisse?.libelle}</p>
                         </div>
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate" title={mvt.libelle}>
                         {mvt.libelle}
                       </TableCell>
-                      <TableCell className={cn(
-                        "text-right font-medium",
-                        mvt.sens === "ENTREE" ? "text-green-600" : "text-red-600"
-                      )}>
-                        {mvt.sens === "ENTREE" ? "+" : "-"}{formatMontant(mvt.montant)}
+                      <TableCell
+                        className={cn(
+                          'text-right font-medium',
+                          mvt.sens === 'ENTREE' ? 'text-green-600' : 'text-red-600'
+                        )}
+                      >
+                        {mvt.sens === 'ENTREE' ? '+' : '-'}
+                        {formatMontant(mvt.montant)}
                       </TableCell>
                       <TableCell className="text-right text-sm">
-                        {mvt.solde_apres !== null ? formatMontant(mvt.solde_apres) : "-"}
+                        {mvt.solde_apres !== null ? formatMontant(mvt.solde_apres) : '-'}
                       </TableCell>
                       <TableCell>{getStatutBadge(mvt.statut)}</TableCell>
                     </TableRow>
@@ -433,7 +432,7 @@ export default function MouvementsCaisse() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {dialogSens === "ENTREE" ? (
+              {dialogSens === 'ENTREE' ? (
                 <>
                   <ArrowDownCircle className="h-5 w-5 text-green-600" />
                   Nouvelle entrée caisse
@@ -446,14 +445,15 @@ export default function MouvementsCaisse() {
               )}
             </DialogTitle>
             <DialogDescription>
-              Enregistrer {dialogSens === "ENTREE" ? "une entrée de fonds" : "une sortie de fonds"} dans une caisse
+              Enregistrer {dialogSens === 'ENTREE' ? 'une entrée de fonds' : 'une sortie de fonds'}{' '}
+              dans une caisse
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="caisse">Caisse *</Label>
               <Select
-                value={formData.caisse_id || ""}
+                value={formData.caisse_id || ''}
                 onValueChange={(v) => setFormData({ ...formData, caisse_id: v })}
               >
                 <SelectTrigger>
@@ -473,7 +473,7 @@ export default function MouvementsCaisse() {
               <Label htmlFor="libelle">Libellé *</Label>
               <Input
                 id="libelle"
-                value={formData.libelle || ""}
+                value={formData.libelle || ''}
                 onChange={(e) => setFormData({ ...formData, libelle: e.target.value })}
                 placeholder="Description du mouvement"
               />
@@ -485,7 +485,7 @@ export default function MouvementsCaisse() {
                 id="montant"
                 type="number"
                 min={0}
-                value={formData.montant || ""}
+                value={formData.montant || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, montant: parseFloat(e.target.value) || 0 })
                 }
@@ -501,24 +501,26 @@ export default function MouvementsCaisse() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "justify-start text-left font-normal",
-                        !formData.date_operation && "text-muted-foreground"
+                        'justify-start text-left font-normal',
+                        !formData.date_operation && 'text-muted-foreground'
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.date_operation
-                        ? format(new Date(formData.date_operation), "dd/MM/yyyy")
-                        : "Sélectionner"}
+                        ? format(new Date(formData.date_operation), 'dd/MM/yyyy')
+                        : 'Sélectionner'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
-                      selected={formData.date_operation ? new Date(formData.date_operation) : undefined}
+                      selected={
+                        formData.date_operation ? new Date(formData.date_operation) : undefined
+                      }
                       onSelect={(d) =>
                         setFormData({
                           ...formData,
-                          date_operation: d?.toISOString().split("T")[0],
+                          date_operation: d?.toISOString().split('T')[0],
                         })
                       }
                       locale={fr}
@@ -534,14 +536,14 @@ export default function MouvementsCaisse() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "justify-start text-left font-normal",
-                        !formData.date_valeur && "text-muted-foreground"
+                        'justify-start text-left font-normal',
+                        !formData.date_valeur && 'text-muted-foreground'
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.date_valeur
-                        ? format(new Date(formData.date_valeur), "dd/MM/yyyy")
-                        : "Sélectionner"}
+                        ? format(new Date(formData.date_valeur), 'dd/MM/yyyy')
+                        : 'Sélectionner'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -551,7 +553,7 @@ export default function MouvementsCaisse() {
                       onSelect={(d) =>
                         setFormData({
                           ...formData,
-                          date_valeur: d?.toISOString().split("T")[0],
+                          date_valeur: d?.toISOString().split('T')[0],
                         })
                       }
                       locale={fr}
@@ -561,13 +563,13 @@ export default function MouvementsCaisse() {
               </div>
             </div>
 
-            {dialogSens === "ENTREE" && (
+            {dialogSens === 'ENTREE' && (
               <div className="grid gap-2">
                 <Label>Origine des fonds</Label>
                 <Select
-                  value={formData.origine_fonds_id || "none"}
+                  value={formData.origine_fonds_id || 'none'}
                   onValueChange={(v) =>
-                    setFormData({ ...formData, origine_fonds_id: v === "none" ? undefined : v })
+                    setFormData({ ...formData, origine_fonds_id: v === 'none' ? undefined : v })
                   }
                 >
                   <SelectTrigger>
@@ -589,10 +591,8 @@ export default function MouvementsCaisse() {
               <Label htmlFor="reference">Référence pièce</Label>
               <Input
                 id="reference"
-                value={formData.reference_piece || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, reference_piece: e.target.value })
-                }
+                value={formData.reference_piece || ''}
+                onChange={(e) => setFormData({ ...formData, reference_piece: e.target.value })}
                 placeholder="Ex: Bon de caisse n°123"
               />
             </div>
@@ -601,10 +601,8 @@ export default function MouvementsCaisse() {
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={formData.description || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Détails du mouvement..."
                 rows={2}
               />
@@ -617,7 +615,11 @@ export default function MouvementsCaisse() {
             <Button
               onClick={handleSubmit}
               disabled={isCreating || !formData.caisse_id || !formData.montant || !formData.libelle}
-              className={dialogSens === "ENTREE" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+              className={
+                dialogSens === 'ENTREE'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-red-600 hover:bg-red-700'
+              }
             >
               {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Enregistrer

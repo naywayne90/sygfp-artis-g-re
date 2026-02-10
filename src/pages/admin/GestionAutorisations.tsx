@@ -1,18 +1,40 @@
-import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Save, Shield, Eye, Plus, Pencil, CheckCircle, XCircle, RotateCcw, Users, HelpCircle, Lock, Grid3X3, AlertTriangle, Layers } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { toast } from 'sonner';
+import {
+  Save,
+  Shield,
+  Eye,
+  Plus,
+  Pencil,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  Users,
+  HelpCircle,
+  Lock,
+  Grid3X3,
+  AlertTriangle,
+  Layers,
+} from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 type CustomRole = {
   id: string;
@@ -49,53 +71,51 @@ const ACTION_ICONS: Record<string, React.ReactNode> = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  budget: "Budget",
-  engagement: "Engagement",
-  liquidation: "Liquidation",
-  ordonnancement: "Ordonnancement",
-  reglement: "Règlement",
-  administration: "Administration",
-  export: "Export",
+  budget: 'Budget',
+  engagement: 'Engagement',
+  liquidation: 'Liquidation',
+  ordonnancement: 'Ordonnancement',
+  reglement: 'Règlement',
+  administration: 'Administration',
+  export: 'Export',
 };
 
 export default function GestionAutorisations() {
   const queryClient = useQueryClient();
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [hasChanges, setHasChanges] = useState(false);
   const [localPermissions, setLocalPermissions] = useState<Map<string, boolean>>(new Map());
 
   const { data: roles, isLoading: rolesLoading } = useQuery({
-    queryKey: ["custom-roles-active"],
+    queryKey: ['custom-roles-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("custom_roles")
-        .select("*")
-        .eq("is_active", true)
-        .order("label");
+        .from('custom_roles')
+        .select('*')
+        .eq('is_active', true)
+        .order('label');
       if (error) throw error;
       return data as CustomRole[];
     },
   });
 
   const { data: actions, isLoading: actionsLoading } = useQuery({
-    queryKey: ["permission-actions"],
+    queryKey: ['permission-actions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("permission_actions")
-        .select("*")
-        .eq("is_active", true)
-        .order("category, label");
+        .from('permission_actions')
+        .select('*')
+        .eq('is_active', true)
+        .order('category, label');
       if (error) throw error;
       return data as PermissionAction[];
     },
   });
 
   const { data: permissions, isLoading: permissionsLoading } = useQuery({
-    queryKey: ["role-permissions"],
+    queryKey: ['role-permissions'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("role_permissions")
-        .select("*");
+      const { data, error } = await supabase.from('role_permissions').select('*');
       if (error) throw error;
       return data as RolePermission[];
     },
@@ -111,22 +131,22 @@ export default function GestionAutorisations() {
   const groupedActions = useMemo(() => {
     if (!actions) return new Map<string, PermissionAction[]>();
     const groups = new Map<string, PermissionAction[]>();
-    
+
     actions.forEach((action) => {
-      const cat = action.category || "autre";
+      const cat = action.category || 'autre';
       if (!groups.has(cat)) {
         groups.set(cat, []);
       }
-      groups.get(cat)!.push(action);
+      groups.get(cat)?.push(action);
     });
-    
+
     return groups;
   }, [actions]);
 
   // Actions filtrées
   const filteredActions = useMemo(() => {
     if (!actions) return [];
-    if (selectedCategory === "all") return actions;
+    if (selectedCategory === 'all') return actions;
     return actions.filter((a) => a.category === selectedCategory);
   }, [actions, selectedCategory]);
 
@@ -134,11 +154,9 @@ export default function GestionAutorisations() {
   const isPermissionGranted = (roleCode: string, actionCode: string): boolean => {
     const key = `${roleCode}:${actionCode}`;
     if (localPermissions.has(key)) {
-      return localPermissions.get(key)!;
+      return localPermissions.get(key) ?? false;
     }
-    const perm = permissions?.find(
-      (p) => p.role_code === roleCode && p.action_code === actionCode
-    );
+    const perm = permissions?.find((p) => p.role_code === roleCode && p.action_code === actionCode);
     return perm?.is_granted ?? false;
   };
 
@@ -165,9 +183,9 @@ export default function GestionAutorisations() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const updates: { role_code: string; action_code: string; is_granted: boolean }[] = [];
-      
+
       localPermissions.forEach((isGranted, key) => {
-        const [roleCode, actionCode] = key.split(":");
+        const [roleCode, actionCode] = key.split(':');
         updates.push({ role_code: roleCode, action_code: actionCode, is_granted: isGranted });
       });
 
@@ -178,27 +196,25 @@ export default function GestionAutorisations() {
 
         if (existing) {
           const { error } = await supabase
-            .from("role_permissions")
+            .from('role_permissions')
             .update({ is_granted: update.is_granted })
-            .eq("id", existing.id);
+            .eq('id', existing.id);
           if (error) throw error;
         } else {
-          const { error } = await supabase
-            .from("role_permissions")
-            .insert(update);
+          const { error } = await supabase.from('role_permissions').insert(update);
           if (error) throw error;
         }
       }
     },
     onSuccess: () => {
-      toast.success("Autorisations enregistrées");
-      queryClient.invalidateQueries({ queryKey: ["role-permissions"] });
-      queryClient.invalidateQueries({ queryKey: ["user-permissions"] });
+      toast.success('Autorisations enregistrées');
+      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+      queryClient.invalidateQueries({ queryKey: ['user-permissions'] });
       setLocalPermissions(new Map());
       setHasChanges(false);
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -208,7 +224,7 @@ export default function GestionAutorisations() {
   const stats = useMemo(() => {
     if (!roles || !actions || !permissions) return { total: 0, granted: 0 };
     const total = roles.length * actions.length;
-    const granted = permissions.filter(p => p.is_granted).length;
+    const granted = permissions.filter((p) => p.is_granted).length;
     return { total, granted };
   }, [roles, actions, permissions]);
 
@@ -216,29 +232,26 @@ export default function GestionAutorisations() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Autorisations d'Accès</h1>
-          <p className="text-muted-foreground mt-1">
-            Matrice des permissions par rôle ({stats.granted} permissions actives sur {stats.total} possibles)
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {hasChanges && (
-            <Button variant="outline" onClick={resetChanges}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Annuler
-            </Button>
-          )}
-          <Button 
-            onClick={() => saveMutation.mutate()} 
-            disabled={!hasChanges || saveMutation.isPending}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {saveMutation.isPending ? "Enregistrement..." : "Enregistrer"}
+      <PageHeader
+        title="Autorisations"
+        description={`Gestion des permissions par rôle (${stats.granted} permissions actives sur ${stats.total} possibles)`}
+        icon={Lock}
+        backUrl="/"
+      >
+        {hasChanges && (
+          <Button variant="outline" onClick={resetChanges}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Annuler
           </Button>
-        </div>
-      </div>
+        )}
+        <Button
+          onClick={() => saveMutation.mutate()}
+          disabled={!hasChanges || saveMutation.isPending}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {saveMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+        </Button>
+      </PageHeader>
 
       {/* Section d'aide explicative */}
       <Collapsible open={helpOpen} onOpenChange={setHelpOpen}>
@@ -248,7 +261,7 @@ export default function GestionAutorisations() {
             <span className="text-lg font-semibold">Aide – Module Autorisations d'Accès</span>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm">
-                {helpOpen ? "Réduire" : "Afficher"}
+                {helpOpen ? 'Réduire' : 'Afficher'}
               </Button>
             </CollapsibleTrigger>
           </AlertTitle>
@@ -257,10 +270,11 @@ export default function GestionAutorisations() {
               {/* Introduction */}
               <div className="p-4 bg-background rounded-lg border">
                 <p className="text-sm leading-relaxed">
-                  Ce module permet de <strong>configurer les permissions</strong> accordées à chaque rôle 
-                  dans SYGFP via une matrice visuelle. Chaque ligne représente une action (voir, créer, 
-                  modifier, valider...) et chaque colonne un rôle. Cochez les cases pour accorder les 
-                  droits correspondants. Les modifications sont appliquées immédiatement après enregistrement.
+                  Ce module permet de <strong>configurer les permissions</strong> accordées à chaque
+                  rôle dans SYGFP via une matrice visuelle. Chaque ligne représente une action
+                  (voir, créer, modifier, valider...) et chaque colonne un rôle. Cochez les cases
+                  pour accorder les droits correspondants. Les modifications sont appliquées
+                  immédiatement après enregistrement.
                 </p>
               </div>
 
@@ -272,8 +286,8 @@ export default function GestionAutorisations() {
                     <span>Matrice Rôle × Permission</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    La matrice croise les <strong>rôles</strong> (en colonnes) avec les 
-                    <strong> actions</strong> (en lignes). Une case cochée signifie que le rôle 
+                    La matrice croise les <strong>rôles</strong> (en colonnes) avec les
+                    <strong> actions</strong> (en lignes). Une case cochée signifie que le rôle
                     dispose de cette permission.
                   </p>
                 </div>
@@ -284,9 +298,10 @@ export default function GestionAutorisations() {
                     <span>Catégories de Permissions</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Les permissions sont regroupées par module : <strong>Budget</strong>, 
-                    <strong> Engagement</strong>, <strong>Liquidation</strong>, <strong>Ordonnancement</strong>, 
-                    <strong> Règlement</strong>, <strong>Administration</strong>, <strong>Export</strong>.
+                    Les permissions sont regroupées par module : <strong>Budget</strong>,
+                    <strong> Engagement</strong>, <strong>Liquidation</strong>,{' '}
+                    <strong>Ordonnancement</strong>,<strong> Règlement</strong>,{' '}
+                    <strong>Administration</strong>, <strong>Export</strong>.
                   </p>
                 </div>
 
@@ -296,9 +311,9 @@ export default function GestionAutorisations() {
                     <span>Types de Rôles</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Les <strong>rôles système</strong> (ADMIN, CB, DAF...) ont un badge coloré plein. 
-                    Les <strong>rôles personnalisés</strong> ont un badge contour. Tous peuvent recevoir 
-                    des permissions.
+                    Les <strong>rôles système</strong> (ADMIN, CB, DAF...) ont un badge coloré
+                    plein. Les <strong>rôles personnalisés</strong> ont un badge contour. Tous
+                    peuvent recevoir des permissions.
                   </p>
                 </div>
 
@@ -308,8 +323,10 @@ export default function GestionAutorisations() {
                     <span>Modifications en Attente</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Les cases modifiées sont surlignées en <span className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">jaune</span>. 
-                    Cliquez sur "Enregistrer" pour appliquer les changements ou "Annuler" pour revenir en arrière.
+                    Les cases modifiées sont surlignées en{' '}
+                    <span className="bg-yellow-100 dark:bg-yellow-900/30 px-1 rounded">jaune</span>.
+                    Cliquez sur "Enregistrer" pour appliquer les changements ou "Annuler" pour
+                    revenir en arrière.
                   </p>
                 </div>
               </div>
@@ -320,27 +337,39 @@ export default function GestionAutorisations() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <Eye className="h-4 w-4 text-blue-500" />
-                    <span><strong>Voir</strong> – Consulter les données</span>
+                    <span>
+                      <strong>Voir</strong> – Consulter les données
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Plus className="h-4 w-4 text-green-500" />
-                    <span><strong>Créer</strong> – Ajouter de nouvelles entrées</span>
+                    <span>
+                      <strong>Créer</strong> – Ajouter de nouvelles entrées
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Pencil className="h-4 w-4 text-orange-500" />
-                    <span><strong>Modifier</strong> – Éditer les données</span>
+                    <span>
+                      <strong>Modifier</strong> – Éditer les données
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-emerald-500" />
-                    <span><strong>Valider</strong> – Approuver les étapes</span>
+                    <span>
+                      <strong>Valider</strong> – Approuver les étapes
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <XCircle className="h-4 w-4 text-red-500" />
-                    <span><strong>Rejeter</strong> – Refuser une validation</span>
+                    <span>
+                      <strong>Rejeter</strong> – Refuser une validation
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Pencil className="h-4 w-4 text-purple-500" />
-                    <span><strong>Signer</strong> – Apposer une signature</span>
+                    <span>
+                      <strong>Signer</strong> – Apposer une signature
+                    </span>
                   </div>
                 </div>
               </div>
@@ -352,8 +381,13 @@ export default function GestionAutorisations() {
                   Points d'attention
                 </h4>
                 <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1 ml-4 list-disc">
-                  <li>Le rôle <strong>ADMIN</strong> doit conserver toutes les permissions d'administration.</li>
-                  <li>Utilisez le filtre par module pour naviguer plus facilement dans la matrice.</li>
+                  <li>
+                    Le rôle <strong>ADMIN</strong> doit conserver toutes les permissions
+                    d'administration.
+                  </li>
+                  <li>
+                    Utilisez le filtre par module pour naviguer plus facilement dans la matrice.
+                  </li>
                   <li>Les modifications prennent effet immédiatement après enregistrement.</li>
                   <li>Toutes les modifications sont tracées dans le Journal d'Audit.</li>
                 </ul>
@@ -372,7 +406,8 @@ export default function GestionAutorisations() {
                 Matrice des Permissions
               </CardTitle>
               <CardDescription>
-                Cochez les cases pour accorder les permissions aux rôles. Les modifications en attente sont surlignées.
+                Cochez les cases pour accorder les permissions aux rôles. Les modifications en
+                attente sont surlignées.
               </CardDescription>
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -408,16 +443,21 @@ export default function GestionAutorisations() {
                           Action / Permission
                         </th>
                         {roles?.map((role) => (
-                          <th key={role.id} className="text-center p-3 font-medium bg-muted/50 min-w-[100px]">
+                          <th
+                            key={role.id}
+                            className="text-center p-3 font-medium bg-muted/50 min-w-[100px]"
+                          >
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Badge 
-                                  variant={role.is_system ? "default" : "outline"}
+                                <Badge
+                                  variant={role.is_system ? 'default' : 'outline'}
                                   className="cursor-help"
-                                  style={{ 
-                                    borderColor: role.color || undefined, 
-                                    color: role.is_system ? undefined : (role.color || undefined),
-                                    backgroundColor: role.is_system ? (role.color || undefined) : undefined
+                                  style={{
+                                    borderColor: role.color || undefined,
+                                    color: role.is_system ? undefined : role.color || undefined,
+                                    backgroundColor: role.is_system
+                                      ? role.color || undefined
+                                      : undefined,
                                   }}
                                 >
                                   {role.code}
@@ -425,7 +465,9 @@ export default function GestionAutorisations() {
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p className="font-medium">{role.label}</p>
-                                {role.is_system && <p className="text-xs text-muted-foreground">Rôle système</p>}
+                                {role.is_system && (
+                                  <p className="text-xs text-muted-foreground">Rôle système</p>
+                                )}
                               </TooltipContent>
                             </Tooltip>
                           </th>
@@ -433,71 +475,82 @@ export default function GestionAutorisations() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedCategory === "all" ? (
-                        // Afficher groupé par catégorie
-                        Array.from(groupedActions.entries()).map(([category, categoryActions]) => (
-                          <>
-                            <tr key={`header-${category}`} className="bg-muted/30">
-                              <td colSpan={(roles?.length || 0) + 1} className="p-2 font-semibold text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-4 w-4" />
-                                  {CATEGORY_LABELS[category] || category}
-                                </div>
-                              </td>
-                            </tr>
-                            {categoryActions.map((action) => (
-                              <tr key={action.id} className="border-b hover:bg-muted/20">
-                                <td className="p-3 sticky left-0 bg-background z-10">
-                                  <div className="flex items-center gap-2">
-                                    {ACTION_ICONS[action.code.split("_").pop() || ""] || <Eye className="h-3 w-3 text-muted-foreground" />}
-                                    <div>
-                                      <p className="font-medium text-sm">{action.label}</p>
-                                      <p className="text-xs text-muted-foreground">{action.code}</p>
-                                    </div>
-                                  </div>
-                                </td>
-                                {roles?.map((role) => (
-                                  <td 
-                                    key={role.id} 
-                                    className={`text-center p-3 ${isModified(role.code, action.code) ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
+                      {selectedCategory === 'all'
+                        ? // Afficher groupé par catégorie
+                          Array.from(groupedActions.entries()).map(
+                            ([category, categoryActions]) => (
+                              <>
+                                <tr key={`header-${category}`} className="bg-muted/30">
+                                  <td
+                                    colSpan={(roles?.length || 0) + 1}
+                                    className="p-2 font-semibold text-sm"
                                   >
-                                    <Checkbox
-                                      checked={isPermissionGranted(role.code, action.code)}
-                                      onCheckedChange={() => togglePermission(role.code, action.code)}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                      <Users className="h-4 w-4" />
+                                      {CATEGORY_LABELS[category] || category}
+                                    </div>
                                   </td>
+                                </tr>
+                                {categoryActions.map((action) => (
+                                  <tr key={action.id} className="border-b hover:bg-muted/20">
+                                    <td className="p-3 sticky left-0 bg-background z-10">
+                                      <div className="flex items-center gap-2">
+                                        {ACTION_ICONS[action.code.split('_').pop() || ''] || (
+                                          <Eye className="h-3 w-3 text-muted-foreground" />
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-sm">{action.label}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {action.code}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    {roles?.map((role) => (
+                                      <td
+                                        key={role.id}
+                                        className={`text-center p-3 ${isModified(role.code, action.code) ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
+                                      >
+                                        <Checkbox
+                                          checked={isPermissionGranted(role.code, action.code)}
+                                          onCheckedChange={() =>
+                                            togglePermission(role.code, action.code)
+                                          }
+                                        />
+                                      </td>
+                                    ))}
+                                  </tr>
                                 ))}
-                              </tr>
-                            ))}
-                          </>
-                        ))
-                      ) : (
-                        // Afficher les actions filtrées
-                        filteredActions?.map((action) => (
-                          <tr key={action.id} className="border-b hover:bg-muted/20">
-                            <td className="p-3 sticky left-0 bg-background z-10">
-                              <div className="flex items-center gap-2">
-                                {ACTION_ICONS[action.code.split("_").pop() || ""] || <Eye className="h-3 w-3 text-muted-foreground" />}
-                                <div>
-                                  <p className="font-medium text-sm">{action.label}</p>
-                                  <p className="text-xs text-muted-foreground">{action.code}</p>
+                              </>
+                            )
+                          )
+                        : // Afficher les actions filtrées
+                          filteredActions?.map((action) => (
+                            <tr key={action.id} className="border-b hover:bg-muted/20">
+                              <td className="p-3 sticky left-0 bg-background z-10">
+                                <div className="flex items-center gap-2">
+                                  {ACTION_ICONS[action.code.split('_').pop() || ''] || (
+                                    <Eye className="h-3 w-3 text-muted-foreground" />
+                                  )}
+                                  <div>
+                                    <p className="font-medium text-sm">{action.label}</p>
+                                    <p className="text-xs text-muted-foreground">{action.code}</p>
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            {roles?.map((role) => (
-                              <td 
-                                key={role.id} 
-                                className={`text-center p-3 ${isModified(role.code, action.code) ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
-                              >
-                                <Checkbox
-                                  checked={isPermissionGranted(role.code, action.code)}
-                                  onCheckedChange={() => togglePermission(role.code, action.code)}
-                                />
                               </td>
-                            ))}
-                          </tr>
-                        ))
-                      )}
+                              {roles?.map((role) => (
+                                <td
+                                  key={role.id}
+                                  className={`text-center p-3 ${isModified(role.code, action.code) ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}`}
+                                >
+                                  <Checkbox
+                                    checked={isPermissionGranted(role.code, action.code)}
+                                    onCheckedChange={() => togglePermission(role.code, action.code)}
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
                     </tbody>
                   </table>
                 </div>
@@ -515,7 +568,11 @@ export default function GestionAutorisations() {
                 <Button variant="ghost" size="sm" onClick={resetChanges}>
                   Annuler
                 </Button>
-                <Button size="sm" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                <Button
+                  size="sm"
+                  onClick={() => saveMutation.mutate()}
+                  disabled={saveMutation.isPending}
+                >
                   Enregistrer
                 </Button>
               </div>

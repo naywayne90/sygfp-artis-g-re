@@ -1,35 +1,40 @@
-import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useImputations, Imputation } from "@/hooks/useImputations";
-import { useImputation } from "@/hooks/useImputation";
-import { usePermissions } from "@/hooks/usePermissions";
-import { ImputationForm } from "@/components/imputation/ImputationForm";
-import { ImputationDetails } from "@/components/imputation/ImputationDetails";
-import { ImputationRejectDialog } from "@/components/imputation/ImputationRejectDialog";
-import { ImputationDeferDialog } from "@/components/imputation/ImputationDeferDialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useImputations, Imputation } from '@/hooks/useImputations';
+import { useImputation } from '@/hooks/useImputation';
+import { usePermissions } from '@/hooks/usePermissions';
+import { ImputationForm } from '@/components/imputation/ImputationForm';
+import { ImputationDetails } from '@/components/imputation/ImputationDetails';
+import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
+import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { 
-  CreditCard, 
-  CheckCircle2, 
-  Clock, 
+} from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  CreditCard,
+  CheckCircle2,
+  Clock,
   AlertCircle,
   FileText,
-  ArrowRight,
   Eye,
   Send,
   XCircle,
@@ -38,43 +43,53 @@ import {
   MoreHorizontal,
   FolderOpen,
   Loader2,
-  Plus,
   Tag,
   ShoppingCart,
-} from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
-import { BudgetFormulas } from "@/components/budget/BudgetFormulas";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+} from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { BudgetFormulas } from '@/components/budget/BudgetFormulas';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
-    valide: { label: "Validée", className: "bg-success/10 text-success border-success/20" },
-    rejete: { label: "Rejetée", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    differe: { label: "Différée", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
+    a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
+    valide: { label: 'Validée', className: 'bg-success/10 text-success border-success/20' },
+    rejete: {
+      label: 'Rejetée',
+      className: 'bg-destructive/10 text-destructive border-destructive/20',
+    },
+    differe: {
+      label: 'Différée',
+      className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    },
   };
   const variant = variants[status] || variants.brouillon;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
 export default function ImputationPage() {
-  const { exercice } = useExercice();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF", "SDPM"]);
+  const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF', 'SDPM']);
 
   // States
-  const [activeTab, setActiveTab] = useState("a_imputer");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState('a_imputer');
+  const [searchQuery, setSearchQuery] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [sourceAefNote, setSourceAefNote] = useState<any>(null);
-  const [isLoadingSource, setIsLoadingSource] = useState(false);
+  const [_isLoadingSource, _setIsLoadingSource] = useState(false);
   const [viewingImputation, setViewingImputation] = useState<Imputation | null>(null);
   const [rejectingImputation, setRejectingImputation] = useState<Imputation | null>(null);
   const [deferringImputation, setDeferringImputation] = useState<Imputation | null>(null);
@@ -95,36 +110,38 @@ export default function ImputationPage() {
 
   // Gérer le paramètre sourceAef depuis l'URL
   useEffect(() => {
-    const sourceAefId = searchParams.get("sourceAef");
+    const sourceAefId = searchParams.get('sourceAef');
     if (sourceAefId) {
       setIsLoadingSource(true);
       supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name)
-        `)
-        .eq("id", sourceAefId)
+        `
+        )
+        .eq('id', sourceAefId)
         .single()
         .then(({ data, error }) => {
           setIsLoadingSource(false);
           if (error) {
             toast({
-              title: "Erreur",
-              description: "Impossible de charger la note AEF source",
-              variant: "destructive",
+              title: 'Erreur',
+              description: 'Impossible de charger la note AEF source',
+              variant: 'destructive',
             });
-            searchParams.delete("sourceAef");
+            searchParams.delete('sourceAef');
             setSearchParams(searchParams, { replace: true });
           } else if (data) {
-            if (data.statut !== "a_imputer") {
+            if (data.statut !== 'a_imputer') {
               toast({
-                title: "Note non imputable",
+                title: 'Note non imputable',
                 description: `Cette note est en statut "${data.statut}" et ne peut pas être imputée.`,
-                variant: "destructive",
+                variant: 'destructive',
               });
-              searchParams.delete("sourceAef");
+              searchParams.delete('sourceAef');
               setSearchParams(searchParams, { replace: true });
             } else {
               setSourceAefNote(data);
@@ -136,16 +153,16 @@ export default function ImputationPage() {
 
   const handleCloseImputationDialog = () => {
     setSourceAefNote(null);
-    searchParams.delete("sourceAef");
+    searchParams.delete('sourceAef');
     setSearchParams(searchParams, { replace: true });
   };
 
   const handleImputationSuccess = () => {
     handleCloseImputationDialog();
-    setActiveTab("imputees");
+    setActiveTab('imputees');
     refetch();
     toast({
-      title: "Imputation créée",
+      title: 'Imputation créée',
       description: "L'imputation a été créée avec succès.",
     });
   };
@@ -169,16 +186,19 @@ export default function ImputationPage() {
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   // Filtrer les imputations par onglet
-  const imputationsByTab = useMemo(() => ({
-    a_valider: imputations.filter(i => i.statut === "a_valider"),
-    brouillons: imputations.filter(i => i.statut === "brouillon"),
-    imputees: imputations.filter(i => i.statut === "valide"),
-    differees: imputations.filter(i => i.statut === "differe"),
-    rejetees: imputations.filter(i => i.statut === "rejete"),
-  }), [imputations]);
+  const imputationsByTab = useMemo(
+    () => ({
+      a_valider: imputations.filter((i) => i.statut === 'a_valider'),
+      brouillons: imputations.filter((i) => i.statut === 'brouillon'),
+      imputees: imputations.filter((i) => i.statut === 'valide'),
+      differees: imputations.filter((i) => i.statut === 'differe'),
+      rejetees: imputations.filter((i) => i.statut === 'rejete'),
+    }),
+    [imputations]
+  );
 
   // Afficher les détails si une imputation est sélectionnée
   if (viewingImputation) {
@@ -209,17 +229,15 @@ export default function ImputationPage() {
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={2} />
 
-      <div className="page-header">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="page-title">Imputation Budgétaire</h1>
-            <p className="page-description">
-              Affectation des notes AEF validées aux lignes budgétaires - Exercice {exercice}
-            </p>
-          </div>
-          <ModuleHelp {...MODULE_HELP_CONFIG.imputation} />
-        </div>
-      </div>
+      <PageHeader
+        title="Imputation"
+        description="Imputation budgétaire"
+        icon={Tag}
+        stepNumber={3}
+        backUrl="/"
+      >
+        <ModuleHelp {...MODULE_HELP_CONFIG.imputation} />
+      </PageHeader>
 
       {/* Formules de référence */}
       <BudgetFormulas compact />
@@ -304,29 +322,37 @@ export default function ImputationPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="a_imputer" className="gap-2">
-            <Tag className="h-4 w-4" />
-            À imputer
-            <Badge variant="secondary" className="ml-1">{notesAImputer?.length || 0}</Badge>
+            <Tag className="h-4 w-4" />À imputer
+            <Badge variant="secondary" className="ml-1">
+              {notesAImputer?.length || 0}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="a_valider" className="gap-2">
-            <Clock className="h-4 w-4" />
-            À valider
-            <Badge variant="secondary" className="ml-1">{counts.a_valider}</Badge>
+            <Clock className="h-4 w-4" />À valider
+            <Badge variant="secondary" className="ml-1">
+              {counts.a_valider}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="imputees" className="gap-2">
             <CheckCircle2 className="h-4 w-4" />
             Validées
-            <Badge variant="secondary" className="ml-1">{counts.valide}</Badge>
+            <Badge variant="secondary" className="ml-1">
+              {counts.valide}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="differees" className="gap-2">
             <AlertCircle className="h-4 w-4" />
             Différées
-            <Badge variant="secondary" className="ml-1">{counts.differe}</Badge>
+            <Badge variant="secondary" className="ml-1">
+              {counts.differe}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="rejetees" className="gap-2">
             <XCircle className="h-4 w-4" />
             Rejetées
-            <Badge variant="secondary" className="ml-1">{counts.rejete}</Badge>
+            <Badge variant="secondary" className="ml-1">
+              {counts.rejete}
+            </Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -358,21 +384,38 @@ export default function ImputationPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {notesAImputer.map((note: any) => (
                         <TableRow key={note.id}>
-                          <TableCell className="font-mono text-sm">{note.numero || "-"}</TableCell>
+                          <TableCell className="font-mono text-sm">{note.numero || '-'}</TableCell>
                           <TableCell className="max-w-[200px] truncate">{note.objet}</TableCell>
-                          <TableCell>{note.direction?.sigle || note.direction?.label || "-"}</TableCell>
-                          <TableCell className="text-right font-medium">{formatMontant(note.montant_estime)}</TableCell>
                           <TableCell>
-                            {note.priorite === "urgente" && <Badge variant="destructive">Urgente</Badge>}
-                            {note.priorite === "haute" && <Badge className="bg-orange-500">Haute</Badge>}
-                            {note.priorite === "normale" && <Badge variant="secondary">Normale</Badge>}
-                            {(!note.priorite || note.priorite === "basse") && <Badge variant="outline">Basse</Badge>}
+                            {note.direction?.sigle || note.direction?.label || '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(note.montant_estime)}
+                          </TableCell>
+                          <TableCell>
+                            {note.priorite === 'urgente' && (
+                              <Badge variant="destructive">Urgente</Badge>
+                            )}
+                            {note.priorite === 'haute' && (
+                              <Badge className="bg-orange-500">Haute</Badge>
+                            )}
+                            {note.priorite === 'normale' && (
+                              <Badge variant="secondary">Normale</Badge>
+                            )}
+                            {(!note.priorite || note.priorite === 'basse') && (
+                              <Badge variant="outline">Basse</Badge>
+                            )}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => navigate(`/notes-aef/${note.id}`)}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(`/notes-aef/${note.id}`)}
+                              >
                                 <Eye className="h-4 w-4" />
                               </Button>
                               <Button size="sm" onClick={() => setSourceAefNote(note)}>
@@ -392,7 +435,7 @@ export default function ImputationPage() {
         </TabsContent>
 
         {/* Onglets imputations (a_valider, imputees, differees, rejetees) */}
-        {["a_valider", "imputees", "differees", "rejetees"].map((tab) => (
+        {['a_valider', 'imputees', 'differees', 'rejetees'].map((tab) => (
           <TabsContent key={tab} value={tab} className="mt-4">
             <Card>
               <CardContent className="pt-6">
@@ -423,14 +466,22 @@ export default function ImputationPage() {
                       <TableBody>
                         {imputationsByTab[tab as keyof typeof imputationsByTab].map((imp) => (
                           <TableRow key={imp.id}>
-                            <TableCell className="font-mono text-sm">{imp.reference || "-"}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {imp.reference || '-'}
+                            </TableCell>
                             <TableCell className="max-w-[200px] truncate">{imp.objet}</TableCell>
-                            <TableCell>{imp.direction?.sigle || imp.direction?.label || "-"}</TableCell>
-                            <TableCell className="font-mono text-xs">{imp.code_imputation || "-"}</TableCell>
-                            <TableCell className="text-right font-medium">{formatMontant(imp.montant)}</TableCell>
+                            <TableCell>
+                              {imp.direction?.sigle || imp.direction?.label || '-'}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {imp.code_imputation || '-'}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatMontant(imp.montant)}
+                            </TableCell>
                             <TableCell>{getStatusBadge(imp.statut)}</TableCell>
                             <TableCell>
-                              {format(new Date(imp.created_at), "dd MMM yyyy", { locale: fr })}
+                              {format(new Date(imp.created_at), 'dd MMM yyyy', { locale: fr })}
                             </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
@@ -444,22 +495,26 @@ export default function ImputationPage() {
                                     <Eye className="mr-2 h-4 w-4" />
                                     Voir détails
                                   </DropdownMenuItem>
-                                  
+
                                   {imp.dossier_id && (
-                                    <DropdownMenuItem onClick={() => handleGoToDossier(imp.dossier_id!)}>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        imp.dossier_id && handleGoToDossier(imp.dossier_id)
+                                      }
+                                    >
                                       <FolderOpen className="mr-2 h-4 w-4" />
                                       Voir le dossier
                                     </DropdownMenuItem>
                                   )}
 
-                                  {imp.statut === "brouillon" && (
+                                  {imp.statut === 'brouillon' && (
                                     <>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => submitImputation(imp.id)}>
                                         <Send className="mr-2 h-4 w-4" />
                                         Soumettre
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem 
+                                      <DropdownMenuItem
                                         onClick={() => deleteImputation(imp.id)}
                                         className="text-destructive"
                                       >
@@ -469,7 +524,7 @@ export default function ImputationPage() {
                                     </>
                                   )}
 
-                                  {imp.statut === "a_valider" && canValidate && (
+                                  {imp.statut === 'a_valider' && canValidate && (
                                     <>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => validateImputation(imp.id)}>
@@ -480,7 +535,7 @@ export default function ImputationPage() {
                                         <Clock className="mr-2 h-4 w-4" />
                                         Différer
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem 
+                                      <DropdownMenuItem
                                         onClick={() => setRejectingImputation(imp)}
                                         className="text-destructive"
                                       >
@@ -490,10 +545,16 @@ export default function ImputationPage() {
                                     </>
                                   )}
 
-                                  {imp.statut === "valide" && (
+                                  {imp.statut === 'valide' && (
                                     <>
                                       <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => navigate(`/execution/expression-besoin?sourceImputation=${imp.id}`)}>
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          navigate(
+                                            `/execution/expression-besoin?sourceImputation=${imp.id}`
+                                          )
+                                        }
+                                      >
                                         <ShoppingCart className="mr-2 h-4 w-4" />
                                         Créer expression de besoin
                                       </DropdownMenuItem>
@@ -515,7 +576,10 @@ export default function ImputationPage() {
       </Tabs>
 
       {/* Dialog d'imputation depuis AEF source */}
-      <Dialog open={!!sourceAefNote} onOpenChange={(open) => !open && handleCloseImputationDialog()}>
+      <Dialog
+        open={!!sourceAefNote}
+        onOpenChange={(open) => !open && handleCloseImputationDialog()}
+      >
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">

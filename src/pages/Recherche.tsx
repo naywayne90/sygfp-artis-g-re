@@ -1,47 +1,60 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, FolderOpen, FileText, TrendingUp, Clock, CheckCircle, Ban, Pause, Lock, AlertTriangle, HelpCircle, ChevronDown, ChevronUp, Search, Filter, Eye, Edit, Paperclip, UserPlus } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useDossiers, Dossier, DossierFilters } from "@/hooks/useDossiers";
-import { DossierSearch } from "@/components/dossier/DossierSearch";
-import { DossierList } from "@/components/dossier/DossierList";
-import { DossierQuickFilters } from "@/components/dossier/DossierQuickFilters";
-import { DossierForm } from "@/components/dossier/DossierForm";
-import { DossierDetailsEnhanced } from "@/components/dossier/DossierDetailsEnhanced";
-import { DossierStatusDialog } from "@/components/dossier/DossierStatusDialog";
-import { DossierAssignDialog } from "@/components/dossier/DossierAssignDialog";
-import { DossierAttachDialog } from "@/components/dossier/DossierAttachDialog";
-import { DossierBlockDialog } from "@/components/dossier/DossierBlockDialog";
-import { ChaineDepenseVisuel } from "@/components/workflow/ChaineDepenseVisuel";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Plus,
+  FolderOpen,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  Pause,
+  AlertTriangle,
+  HelpCircle,
+  Search,
+  Eye,
+  Edit,
+} from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { useDossiers, Dossier, DossierFilters } from '@/hooks/useDossiers';
+import { DossierSearch } from '@/components/dossier/DossierSearch';
+import { DossierList } from '@/components/dossier/DossierList';
+import { DossierQuickFilters } from '@/components/dossier/DossierQuickFilters';
+import { DossierForm } from '@/components/dossier/DossierForm';
+import { DossierDetailsEnhanced } from '@/components/dossier/DossierDetailsEnhanced';
+import { DossierStatusDialog } from '@/components/dossier/DossierStatusDialog';
+import { DossierAssignDialog } from '@/components/dossier/DossierAssignDialog';
+import { DossierAttachDialog } from '@/components/dossier/DossierAttachDialog';
+import { DossierBlockDialog } from '@/components/dossier/DossierBlockDialog';
+import { ChaineDepenseVisuel } from '@/components/workflow/ChaineDepenseVisuel';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Recherche() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { 
-    dossiers, 
-    loading, 
-    directions, 
+  const {
+    dossiers,
+    loading,
+    directions,
     beneficiaires,
     users,
     stats,
     pagination,
-    fetchDossiers, 
-    createDossier, 
+    fetchDossiers,
+    createDossier,
     updateDossier,
     updateDossierStatus,
     addDocument,
     bloquerDossier,
     debloquerDossier,
     getDossierById,
-    DEFAULT_FILTERS 
+    DEFAULT_FILTERS,
   } = useDossiers();
-  const { exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const { toast } = useToast();
-  
+
   const [filters, setFilters] = useState<Partial<DossierFilters>>(DEFAULT_FILTERS);
   const [showForm, setShowForm] = useState(false);
   const [selectedDossier, setSelectedDossier] = useState<Dossier | null>(null);
@@ -51,9 +64,9 @@ export default function Recherche() {
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showAttachDialog, setShowAttachDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
-  const [blockMode, setBlockMode] = useState<"block" | "unblock">("block");
-  const [sortField, setSortField] = useState<string>("updated_at");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [blockMode, setBlockMode] = useState<'block' | 'unblock'>('block');
+  const [sortField, setSortField] = useState<string>('updated_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [showHelp, setShowHelp] = useState(false);
 
   // Générer la liste des exercices disponibles
@@ -63,11 +76,12 @@ export default function Recherche() {
   // Fetch dossiers when filters change
   useEffect(() => {
     fetchDossiers(filters, pagination.page, pagination.pageSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   // Gérer le paramètre URL ?dossier=xxx pour ouvrir directement les détails
   useEffect(() => {
-    const dossierId = searchParams.get("dossier");
+    const dossierId = searchParams.get('dossier');
     if (dossierId) {
       // Récupérer le dossier et ouvrir les détails
       getDossierById(dossierId).then((dossier) => {
@@ -76,41 +90,53 @@ export default function Recherche() {
           setShowDetails(true);
         } else {
           toast({
-            title: "Dossier introuvable",
+            title: 'Dossier introuvable',
             description: "Le dossier demandé n'existe pas ou a été supprimé.",
-            variant: "destructive",
+            variant: 'destructive',
           });
         }
         // Nettoyer l'URL après chargement
         setSearchParams({}, { replace: true });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const handleFiltersChange = useCallback((newFilters: Partial<DossierFilters>) => {
     setFilters(newFilters);
   }, []);
 
-  const handlePageChange = useCallback((page: number) => {
-    fetchDossiers(filters, page, pagination.pageSize);
-  }, [filters, pagination.pageSize, fetchDossiers]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      fetchDossiers(filters, page, pagination.pageSize);
+    },
+    [filters, pagination.pageSize, fetchDossiers]
+  );
 
-  const handlePageSizeChange = useCallback((pageSize: number) => {
-    fetchDossiers(filters, 1, pageSize);
-  }, [filters, fetchDossiers]);
+  const handlePageSizeChange = useCallback(
+    (pageSize: number) => {
+      fetchDossiers(filters, 1, pageSize);
+    },
+    [filters, fetchDossiers]
+  );
 
-  const handleSort = useCallback((field: string) => {
-    const newDirection = sortField === field && sortDirection === "desc" ? "asc" : "desc";
-    setSortField(field);
-    setSortDirection(newDirection);
-    // In a real implementation, we would pass sort params to fetchDossiers
-  }, [sortField, sortDirection]);
+  const handleSort = useCallback(
+    (field: string) => {
+      const newDirection = sortField === field && sortDirection === 'desc' ? 'asc' : 'desc';
+      setSortField(field);
+      setSortDirection(newDirection);
+      // In a real implementation, we would pass sort params to fetchDossiers
+    },
+    [sortField, sortDirection]
+  );
 
   const handleReset = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
     fetchDossiers(DEFAULT_FILTERS, 1, pagination.pageSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDossiers, pagination.pageSize]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateDossier = async (data: any) => {
     const result = await createDossier(data);
     if (result) {
@@ -120,6 +146,7 @@ export default function Recherche() {
     return result;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpdateDossier = async (data: any) => {
     if (!editingDossier) return null;
     const result = await updateDossier(editingDossier.id, data);
@@ -160,17 +187,27 @@ export default function Recherche() {
     setShowAssignDialog(true);
   };
 
-  const handleConfirmStatusChange = async (dossierId: string, newStatus: string, comment?: string) => {
+  const handleConfirmStatusChange = async (
+    dossierId: string,
+    newStatus: string,
+    _comment?: string
+  ) => {
     await updateDossierStatus(dossierId, newStatus);
     fetchDossiers(filters);
   };
 
   const handleConfirmAssign = async (dossierId: string, userId: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await updateDossier(dossierId, { demandeur_id: userId } as any);
     fetchDossiers(filters);
   };
 
-  const handleConfirmAttach = async (dossierId: string, file: File, categorie: string, typeDocument: string) => {
+  const handleConfirmAttach = async (
+    dossierId: string,
+    file: File,
+    categorie: string,
+    typeDocument: string
+  ) => {
     await addDocument({
       dossier_id: dossierId,
       type_document: typeDocument,
@@ -180,23 +217,23 @@ export default function Recherche() {
       file_size: file.size,
       file_type: file.type,
     });
-    toast({ title: "Document ajouté avec succès" });
+    toast({ title: 'Document ajouté avec succès' });
   };
 
   const handleBlockDossier = (dossier: Dossier) => {
     setSelectedDossier(dossier);
-    setBlockMode("block");
+    setBlockMode('block');
     setShowBlockDialog(true);
   };
 
   const handleUnblockDossier = (dossier: Dossier) => {
     setSelectedDossier(dossier);
-    setBlockMode("unblock");
+    setBlockMode('unblock');
     setShowBlockDialog(true);
   };
 
   const handleConfirmBlock = async (dossierId: string, motif: string) => {
-    if (blockMode === "block") {
+    if (blockMode === 'block') {
       await bloquerDossier(dossierId, motif);
     } else {
       await debloquerDossier(dossierId, motif);
@@ -207,20 +244,20 @@ export default function Recherche() {
   const handleCreateStep = (type: string, dossierId: string) => {
     // Navigate to the appropriate creation page with dossier_id
     switch (type) {
-      case "note":
-        navigate("/notes-aef", { state: { dossierId } });
+      case 'note':
+        navigate('/notes-aef', { state: { dossierId } });
         break;
-      case "engagement":
-        navigate("/engagements", { state: { dossierId } });
+      case 'engagement':
+        navigate('/engagements', { state: { dossierId } });
         break;
-      case "liquidation":
-        navigate("/liquidations", { state: { dossierId } });
+      case 'liquidation':
+        navigate('/liquidations', { state: { dossierId } });
         break;
-      case "ordonnancement":
-        navigate("/ordonnancements", { state: { dossierId } });
+      case 'ordonnancement':
+        navigate('/ordonnancements', { state: { dossierId } });
         break;
-      case "reglement":
-        navigate("/reglements", { state: { dossierId } });
+      case 'reglement':
+        navigate('/reglements', { state: { dossierId } });
         break;
       default:
         break;
@@ -228,35 +265,33 @@ export default function Recherche() {
   };
 
   const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XOF',
       minimumFractionDigits: 0,
-      notation: "compact",
+      notation: 'compact',
     }).format(montant);
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Recherche Dossier</h1>
-          <p className="text-muted-foreground">
-            Point d'entrée principal - Exercice {exercice}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowHelp(!showHelp)}>
-            <HelpCircle className="h-4 w-4 mr-2" />
-            Aide
-          </Button>
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau dossier
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Recherche Dossier"
+        description="Recherche transversale de dossiers"
+        icon={Search}
+        backUrl="/"
+        showBackButton={true}
+      >
+        <Button variant="outline" onClick={() => setShowHelp(!showHelp)}>
+          <HelpCircle className="h-4 w-4 mr-2" />
+          Aide
+        </Button>
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau dossier
+        </Button>
+      </PageHeader>
 
       {/* Schéma visuel de la chaîne de dépense */}
       <ChaineDepenseVisuel />
@@ -267,8 +302,7 @@ export default function Recherche() {
           <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <HelpCircle className="h-5 w-5" />
-                À quoi sert ce module ?
+                <HelpCircle className="h-5 w-5" />À quoi sert ce module ?
               </CardTitle>
               <CardDescription className="text-blue-600 dark:text-blue-400">
                 Guide d'utilisation du module Recherche Dossier
@@ -278,9 +312,10 @@ export default function Recherche() {
               <div>
                 <h4 className="font-semibold text-foreground mb-2">📁 Qu'est-ce qu'un dossier ?</h4>
                 <p className="text-muted-foreground">
-                  Un <strong>dossier</strong> représente une opération de dépense complète dans SYGFP. Il regroupe 
-                  toutes les étapes de la chaîne de dépense : de l'expression de besoin jusqu'au règlement final.
-                  C'est le fil conducteur qui permet de suivre l'avancement d'une dépense de bout en bout.
+                  Un <strong>dossier</strong> représente une opération de dépense complète dans
+                  SYGFP. Il regroupe toutes les étapes de la chaîne de dépense : de l'expression de
+                  besoin jusqu'au règlement final. C'est le fil conducteur qui permet de suivre
+                  l'avancement d'une dépense de bout en bout.
                 </p>
               </div>
 
@@ -291,8 +326,12 @@ export default function Recherche() {
                     Rechercher un dossier
                   </h4>
                   <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
-                    <li>Utilisez la barre de recherche pour trouver par numéro, objet ou bénéficiaire</li>
-                    <li>Cliquez sur "Filtres" pour affiner par statut, direction, période ou montant</li>
+                    <li>
+                      Utilisez la barre de recherche pour trouver par numéro, objet ou bénéficiaire
+                    </li>
+                    <li>
+                      Cliquez sur "Filtres" pour affiner par statut, direction, période ou montant
+                    </li>
                     <li>Les KPIs en haut affichent les statistiques globales</li>
                   </ul>
                 </div>
@@ -303,17 +342,27 @@ export default function Recherche() {
                     Créer un nouveau dossier
                   </h4>
                   <p className="text-muted-foreground text-xs mb-2">
-                    <strong>Pourquoi créer un dossier ?</strong> Chaque dépense que l'ARTI souhaite effectuer 
-                    doit être formalisée dans un dossier. C'est le point de départ obligatoire qui permet de 
-                    tracer, valider et exécuter la dépense de manière structurée.
+                    <strong>Pourquoi créer un dossier ?</strong> Chaque dépense que l'ARTI souhaite
+                    effectuer doit être formalisée dans un dossier. C'est le point de départ
+                    obligatoire qui permet de tracer, valider et exécuter la dépense de manière
+                    structurée.
                   </p>
                   <ul className="text-muted-foreground space-y-1 ml-6 list-disc text-xs">
-                    <li><strong>AEF (Achat/Engagement/Facture)</strong> : Pour l'achat de biens, fournitures et équipements</li>
-                    <li><strong>SEF (Service/Engagement/Facture)</strong> : Pour les prestations de services (consultants, entretien...)</li>
-                    <li><strong>Marché</strong> : Pour les procédures de passation de marchés publics</li>
+                    <li>
+                      <strong>AEF (Achat/Engagement/Facture)</strong> : Pour l'achat de biens,
+                      fournitures et équipements
+                    </li>
+                    <li>
+                      <strong>SEF (Service/Engagement/Facture)</strong> : Pour les prestations de
+                      services (consultants, entretien...)
+                    </li>
+                    <li>
+                      <strong>Marché</strong> : Pour les procédures de passation de marchés publics
+                    </li>
                   </ul>
                   <p className="text-muted-foreground text-xs mt-2">
-                    Une fois créé, le dossier suivra automatiquement la chaîne de dépense avec toutes ses étapes de validation.
+                    Une fois créé, le dossier suivra automatiquement la chaîne de dépense avec
+                    toutes ses étapes de validation.
                   </p>
                 </div>
 
@@ -335,10 +384,18 @@ export default function Recherche() {
                     Actions possibles
                   </h4>
                   <ul className="text-muted-foreground space-y-1 ml-6 list-disc">
-                    <li><strong>Modifier</strong> : Mettre à jour les informations du dossier</li>
-                    <li><strong>Attacher</strong> : Joindre des documents justificatifs</li>
-                    <li><strong>Assigner</strong> : Affecter le dossier à un agent</li>
-                    <li><strong>Bloquer/Débloquer</strong> : Suspendre ou reprendre le traitement</li>
+                    <li>
+                      <strong>Modifier</strong> : Mettre à jour les informations du dossier
+                    </li>
+                    <li>
+                      <strong>Attacher</strong> : Joindre des documents justificatifs
+                    </li>
+                    <li>
+                      <strong>Assigner</strong> : Affecter le dossier à un agent
+                    </li>
+                    <li>
+                      <strong>Bloquer/Débloquer</strong> : Suspendre ou reprendre le traitement
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -349,8 +406,9 @@ export default function Recherche() {
                   Bon à savoir
                 </h4>
                 <p className="text-amber-600 dark:text-amber-400 text-sm">
-                  Chaque dossier suit automatiquement la chaîne de dépense : <strong>Note → Engagement → Liquidation → Ordonnancement → Règlement</strong>. 
-                  Les étapes se débloquent au fur et à mesure de la validation des précédentes.
+                  Chaque dossier suit automatiquement la chaîne de dépense :{' '}
+                  <strong>Note → Engagement → Liquidation → Ordonnancement → Règlement</strong>. Les
+                  étapes se débloquent au fur et à mesure de la validation des précédentes.
                 </p>
               </div>
             </CardContent>
@@ -432,7 +490,7 @@ export default function Recherche() {
 
       {/* Filtres rapides par statut */}
       <DossierQuickFilters
-        currentStatut={filters.statut || ""}
+        currentStatut={filters.statut || ''}
         onStatutChange={(statut) => handleFiltersChange({ ...filters, statut })}
         counts={{
           en_cours: stats.en_cours,
@@ -459,8 +517,13 @@ export default function Recherche() {
             onSort={handleSort}
             sortField={sortField}
             sortDirection={sortDirection}
-            hasFilters={!!filters.statut || !!filters.direction_id || !!filters.etape || !!filters.type_dossier}
-            searchTerm={filters.search || ""}
+            hasFilters={
+              !!filters.statut ||
+              !!filters.direction_id ||
+              !!filters.etape ||
+              !!filters.type_dossier
+            }
+            searchTerm={filters.search || ''}
             onReset={handleReset}
             onCreate={() => setShowForm(true)}
           />
@@ -468,11 +531,7 @@ export default function Recherche() {
       </Card>
 
       {/* Dialogs */}
-      <DossierForm
-        open={showForm}
-        onOpenChange={setShowForm}
-        onSubmit={handleCreateDossier}
-      />
+      <DossierForm open={showForm} onOpenChange={setShowForm} onSubmit={handleCreateDossier} />
 
       <DossierForm
         open={!!editingDossier}
@@ -487,11 +546,11 @@ export default function Recherche() {
         onOpenChange={setShowDetails}
         onCreateStep={handleCreateStep}
         onBlock={(id) => {
-          const d = dossiers.find(x => x.id === id);
+          const d = dossiers.find((x) => x.id === id);
           if (d) handleBlockDossier(d);
         }}
         onUnblock={(id) => {
-          const d = dossiers.find(x => x.id === id);
+          const d = dossiers.find((x) => x.id === id);
           if (d) handleUnblockDossier(d);
         }}
       />

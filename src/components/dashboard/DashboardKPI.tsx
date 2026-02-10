@@ -1,25 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   useDGDashboard,
   useDAFDashboard,
   useControleurDashboard,
-} from "@/hooks/useDashboardByRole";
-import { useDashboardAlerts } from "@/hooks/useDashboardAlerts";
-import { usePermissions } from "@/hooks/usePermissions";
+} from '@/hooks/useDashboardByRole';
+import { useDashboardAlerts } from '@/hooks/useDashboardAlerts';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   TrendingUp,
   Building2,
   AlertTriangle,
-  FolderOpen,
   CheckCircle2,
-  Clock,
   XCircle,
   Wallet,
   FileText,
@@ -33,14 +30,11 @@ import {
   AlertCircle,
   BarChart3,
   Settings,
-  Activity,
   Target,
   Gauge,
   PieChart,
-  LineChart,
-  TrendingDown,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const formatMontant = (montant: number): string => {
   if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
@@ -81,7 +75,7 @@ function DGSection() {
   const { data: stats, isLoading } = useDGDashboard();
   const { data: alerts } = useDashboardAlerts();
 
-  const criticalAlerts = alerts?.filter((a) => a.severity === "critical") || [];
+  const criticalAlerts = alerts?.filter((a) => a.severity === 'critical') || [];
 
   if (isLoading) {
     return (
@@ -107,14 +101,14 @@ function DGSection() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-destructive text-base">
               <AlertTriangle className="h-5 w-5" />
-              {criticalAlerts.length} Alerte{criticalAlerts.length > 1 ? "s" : ""} critique
-              {criticalAlerts.length > 1 ? "s" : ""}
+              {criticalAlerts.length} Alerte{criticalAlerts.length > 1 ? 's' : ''} critique
+              {criticalAlerts.length > 1 ? 's' : ''}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {criticalAlerts.slice(0, 4).map((alert) => (
-                <Link key={alert.id} to={alert.link || "#"} className="block">
+                <Link key={alert.id} to={alert.link || '#'} className="block">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-card border hover:border-destructive/30 transition-colors">
                     <div className="p-2 rounded-full bg-destructive/10">
                       <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -258,7 +252,8 @@ function DAFSection() {
   const { data: stats, isLoading } = useDAFDashboard();
   const { data: alerts } = useDashboardAlerts();
 
-  const warningAlerts = alerts?.filter((a) => a.severity === "warning" || a.severity === "critical") || [];
+  const warningAlerts =
+    alerts?.filter((a) => a.severity === 'warning' || a.severity === 'critical') || [];
 
   if (isLoading) {
     return (
@@ -322,7 +317,7 @@ function DAFSection() {
           </Card>
         </Link>
 
-        <Card className={stats?.depassementsBudgetaires ? "border-destructive/50" : ""}>
+        <Card className={stats?.depassementsBudgetaires ? 'border-destructive/50' : ''}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-destructive/10">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -416,10 +411,10 @@ function DAFSection() {
           <CardContent>
             <div className="space-y-2">
               {warningAlerts.slice(0, 4).map((alert) => (
-                <Link key={alert.id} to={alert.link || "#"} className="block">
+                <Link key={alert.id} to={alert.link || '#'} className="block">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-card border hover:bg-muted/50 transition-colors">
                     <Badge
-                      variant={alert.severity === "critical" ? "destructive" : "outline"}
+                      variant={alert.severity === 'critical' ? 'destructive' : 'outline'}
                       className="text-xs"
                     >
                       {alert.type}
@@ -461,7 +456,7 @@ function ControleurSection() {
     <div className="space-y-6">
       {/* KPIs principaux */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Card className={stats?.lignesCritiques ? "border-destructive/50" : ""}>
+        <Card className={stats?.lignesCritiques ? 'border-destructive/50' : ''}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -474,7 +469,7 @@ function ControleurSection() {
           </CardContent>
         </Card>
 
-        <Card className={stats?.lignesAlertes ? "border-warning/50" : ""}>
+        <Card className={stats?.lignesAlertes ? 'border-warning/50' : ''}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
@@ -500,7 +495,7 @@ function ControleurSection() {
           </CardContent>
         </Card>
 
-        <Card className={stats?.anomaliesDetectees ? "border-orange-500/50" : ""}>
+        <Card className={stats?.anomaliesDetectees ? 'border-orange-500/50' : ''}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Shield className="h-4 w-4" />
@@ -508,7 +503,9 @@ function ControleurSection() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-500">{stats?.anomaliesDetectees || 0}</div>
+            <div className="text-3xl font-bold text-orange-500">
+              {stats?.anomaliesDetectees || 0}
+            </div>
             <p className="text-xs text-muted-foreground">Détectées</p>
           </CardContent>
         </Card>
@@ -546,9 +543,7 @@ function ControleurSection() {
                       <Badge
                         variant="destructive"
                         className={
-                          ligne.tauxConsommation >= 100
-                            ? "bg-destructive"
-                            : "bg-destructive/80"
+                          ligne.tauxConsommation >= 100 ? 'bg-destructive' : 'bg-destructive/80'
                         }
                       >
                         {ligne.tauxConsommation.toFixed(0)}%
@@ -596,7 +591,7 @@ function ControleurSection() {
                 <p className="text-3xl font-bold">
                   {stats?.delaiMoyenEngagement !== null
                     ? `${stats.delaiMoyenEngagement.toFixed(1)} j`
-                    : "—"}
+                    : '—'}
                 </p>
                 <p className="text-xs text-muted-foreground">Création → Validation CB</p>
               </div>
@@ -605,7 +600,7 @@ function ControleurSection() {
                 <p className="text-3xl font-bold">
                   {stats?.delaiMoyenLiquidation !== null
                     ? `${stats.delaiMoyenLiquidation.toFixed(1)} j`
-                    : "—"}
+                    : '—'}
                 </p>
                 <p className="text-xs text-muted-foreground">Création → Validation DAF</p>
               </div>
@@ -639,29 +634,29 @@ function ControleurSection() {
                     <div
                       key={index}
                       className={`flex items-start gap-3 p-3 rounded-lg border ${
-                        anomalie.severity === "critical"
-                          ? "border-destructive/50 bg-destructive/5"
-                          : anomalie.severity === "warning"
-                          ? "border-warning/50 bg-warning/5"
-                          : "border-muted"
+                        anomalie.severity === 'critical'
+                          ? 'border-destructive/50 bg-destructive/5'
+                          : anomalie.severity === 'warning'
+                            ? 'border-warning/50 bg-warning/5'
+                            : 'border-muted'
                       }`}
                     >
                       <div
                         className={`p-1.5 rounded-full ${
-                          anomalie.severity === "critical"
-                            ? "bg-destructive/10"
-                            : anomalie.severity === "warning"
-                            ? "bg-warning/10"
-                            : "bg-muted"
+                          anomalie.severity === 'critical'
+                            ? 'bg-destructive/10'
+                            : anomalie.severity === 'warning'
+                              ? 'bg-warning/10'
+                              : 'bg-muted'
                         }`}
                       >
                         <AlertCircle
                           className={`h-4 w-4 ${
-                            anomalie.severity === "critical"
-                              ? "text-destructive"
-                              : anomalie.severity === "warning"
-                              ? "text-warning"
-                              : "text-muted-foreground"
+                            anomalie.severity === 'critical'
+                              ? 'text-destructive'
+                              : anomalie.severity === 'warning'
+                                ? 'text-warning'
+                                : 'text-muted-foreground'
                           }`}
                         />
                       </div>
@@ -669,11 +664,11 @@ function ControleurSection() {
                         <div className="flex items-center gap-2 mb-1">
                           <Badge
                             variant={
-                              anomalie.severity === "critical"
-                                ? "destructive"
-                                : anomalie.severity === "warning"
-                                ? "outline"
-                                : "secondary"
+                              anomalie.severity === 'critical'
+                                ? 'destructive'
+                                : anomalie.severity === 'warning'
+                                  ? 'outline'
+                                  : 'secondary'
                             }
                             className="text-xs"
                           >
@@ -742,39 +737,39 @@ export function DashboardKPI() {
   const { hasAnyRole } = usePermissions();
 
   // Detect primary role
-  const isDG = hasAnyRole(["DG"]);
-  const isDAF = hasAnyRole(["DAF", "SDCT", "SAF"]);
-  const isControleur = hasAnyRole(["CB", "DAAF"]);
+  const isDG = hasAnyRole(['DG']);
+  const isDAF = hasAnyRole(['DAF', 'DAAF', 'SDCT', 'SAF']);
+  const isControleur = hasAnyRole(['CB', 'DAAF']);
 
   // Determine visible sections
   const sections = [];
-  if (isDG) sections.push({ id: "dg", label: "Direction Générale", icon: TrendingUp });
-  if (isDAF) sections.push({ id: "daf", label: "DAF/SDCT", icon: Building2 });
-  if (isControleur) sections.push({ id: "controleur", label: "Contrôle Budgétaire", icon: Shield });
+  if (isDG) sections.push({ id: 'dg', label: 'Direction Générale', icon: TrendingUp });
+  if (isDAF) sections.push({ id: 'daf', label: 'DAF/SDCT', icon: Building2 });
+  if (isControleur) sections.push({ id: 'controleur', label: 'Contrôle Budgétaire', icon: Shield });
 
   // If user has no specific role, show all sections
   if (sections.length === 0) {
-    sections.push({ id: "dg", label: "Direction Générale", icon: TrendingUp });
-    sections.push({ id: "daf", label: "DAF/SDCT", icon: Building2 });
-    sections.push({ id: "controleur", label: "Contrôle Budgétaire", icon: Shield });
+    sections.push({ id: 'dg', label: 'Direction Générale', icon: TrendingUp });
+    sections.push({ id: 'daf', label: 'DAF/SDCT', icon: Building2 });
+    sections.push({ id: 'controleur', label: 'Contrôle Budgétaire', icon: Shield });
   }
 
   // Default to first available section
-  const defaultSection = sections[0]?.id || "dg";
+  const defaultSection = sections[0]?.id || 'dg';
 
   // If only one section, render directly without tabs
   if (sections.length === 1) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-4">
-          {sections[0].id === "dg" && <TrendingUp className="h-5 w-5 text-primary" />}
-          {sections[0].id === "daf" && <Building2 className="h-5 w-5 text-primary" />}
-          {sections[0].id === "controleur" && <Shield className="h-5 w-5 text-primary" />}
+          {sections[0].id === 'dg' && <TrendingUp className="h-5 w-5 text-primary" />}
+          {sections[0].id === 'daf' && <Building2 className="h-5 w-5 text-primary" />}
+          {sections[0].id === 'controleur' && <Shield className="h-5 w-5 text-primary" />}
           <h2 className="text-lg font-semibold">Dashboard KPI - {sections[0].label}</h2>
         </div>
-        {sections[0].id === "dg" && <DGSection />}
-        {sections[0].id === "daf" && <DAFSection />}
-        {sections[0].id === "controleur" && <ControleurSection />}
+        {sections[0].id === 'dg' && <DGSection />}
+        {sections[0].id === 'daf' && <DAFSection />}
+        {sections[0].id === 'controleur' && <ControleurSection />}
       </div>
     );
   }
@@ -783,7 +778,10 @@ export function DashboardKPI() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue={defaultSection} className="space-y-6">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${sections.length}, 1fr)` }}>
+        <TabsList
+          className="grid w-full"
+          style={{ gridTemplateColumns: `repeat(${sections.length}, 1fr)` }}
+        >
           {sections.map((section) => (
             <TabsTrigger key={section.id} value={section.id} className="gap-2">
               <section.icon className="h-4 w-4" />
@@ -792,19 +790,19 @@ export function DashboardKPI() {
           ))}
         </TabsList>
 
-        {sections.some((s) => s.id === "dg") && (
+        {sections.some((s) => s.id === 'dg') && (
           <TabsContent value="dg">
             <DGSection />
           </TabsContent>
         )}
 
-        {sections.some((s) => s.id === "daf") && (
+        {sections.some((s) => s.id === 'daf') && (
           <TabsContent value="daf">
             <DAFSection />
           </TabsContent>
         )}
 
-        {sections.some((s) => s.id === "controleur") && (
+        {sections.some((s) => s.id === 'controleur') && (
           <TabsContent value="controleur">
             <ControleurSection />
           </TabsContent>

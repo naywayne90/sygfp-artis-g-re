@@ -1,21 +1,21 @@
-// @ts-nocheck - Complex type instantiation
-import { useState, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
-import { useNoteAccessControl } from "@/hooks/useNoteAccessControl";
-import { usePermissions } from "@/hooks/usePermissions";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { 
-  ArrowLeft, 
-  Edit, 
-  Send, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import { useState, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useNotesAEF, NoteAEF } from '@/hooks/useNotesAEF';
+import { useNoteAccessControl } from '@/hooks/useNoteAccessControl';
+import { usePermissions } from '@/hooks/usePermissions';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import {
+  ArrowLeft,
+  Edit,
+  Send,
+  CheckCircle,
+  XCircle,
+  Clock,
   FileText,
+  FileEdit,
   DollarSign,
   Building2,
   Calendar,
@@ -30,20 +30,21 @@ import {
   Loader2,
   Upload,
   X,
-  FolderOpen
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { DecisionBlock } from "@/components/workflow/DecisionBlock";
-import { WorkflowTimeline } from "@/components/workflow/WorkflowTimeline";
-import { NoteAEFRejectDialog } from "@/components/notes-aef/NoteAEFRejectDialog";
-import { NoteAEFDeferDialog } from "@/components/notes-aef/NoteAEFDeferDialog";
-import { NoteAEFImputeDialog } from "@/components/notes-aef/NoteAEFImputeDialog";
+  FolderOpen,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { DecisionBlock } from '@/components/workflow/DecisionBlock';
+import { WorkflowTimeline } from '@/components/workflow/WorkflowTimeline';
+import { NoteAEFRejectDialog } from '@/components/notes-aef/NoteAEFRejectDialog';
+import { NoteAEFDeferDialog } from '@/components/notes-aef/NoteAEFDeferDialog';
+import { NoteAEFImputeDialog } from '@/components/notes-aef/NoteAEFImputeDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,7 +54,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 // Constants for file upload validation
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -66,43 +67,77 @@ const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
   'image/gif',
-  'image/webp'
+  'image/webp',
 ];
-const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
+const ALLOWED_EXTENSIONS = [
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+];
 
 // Helper functions
 const getStatusBadge = (statut: string | null) => {
-  const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
-    brouillon: { label: "Brouillon", variant: "outline" },
-    soumis: { label: "Soumis", variant: "secondary", className: "bg-blue-100 text-blue-700" },
-    a_valider: { label: "À valider", variant: "secondary", className: "bg-amber-100 text-amber-700" },
-    valide: { label: "Validé", variant: "default", className: "bg-green-600" },
-    a_imputer: { label: "À imputer", variant: "default", className: "bg-purple-600" },
-    impute: { label: "Imputé", variant: "default", className: "bg-emerald-600" },
-    rejete: { label: "Rejeté", variant: "destructive" },
-    differe: { label: "Différé", variant: "secondary", className: "bg-orange-100 text-orange-700" },
+  const statusConfig: Record<
+    string,
+    {
+      label: string;
+      variant: 'default' | 'secondary' | 'destructive' | 'outline';
+      className?: string;
+    }
+  > = {
+    brouillon: { label: 'Brouillon', variant: 'outline' },
+    soumis: { label: 'Soumis', variant: 'secondary', className: 'bg-blue-100 text-blue-700' },
+    a_valider: {
+      label: 'À valider',
+      variant: 'secondary',
+      className: 'bg-amber-100 text-amber-700',
+    },
+    valide: { label: 'Validé', variant: 'default', className: 'bg-green-600' },
+    a_imputer: { label: 'À imputer', variant: 'default', className: 'bg-purple-600' },
+    impute: { label: 'Imputé', variant: 'default', className: 'bg-emerald-600' },
+    rejete: { label: 'Rejeté', variant: 'destructive' },
+    differe: { label: 'Différé', variant: 'secondary', className: 'bg-orange-100 text-orange-700' },
   };
 
-  const config = statusConfig[statut || "brouillon"] || statusConfig.brouillon;
-  return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
+  const config = statusConfig[statut || 'brouillon'] || statusConfig.brouillon;
+  return (
+    <Badge variant={config.variant} className={config.className}>
+      {config.label}
+    </Badge>
+  );
 };
 
 const getOriginBadge = (note: NoteAEF) => {
   if (note.is_direct_aef || note.origin === 'DIRECT') {
-    return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">AEF Directe</Badge>;
+    return (
+      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
+        AEF Directe
+      </Badge>
+    );
   }
-  return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">Via Note SEF</Badge>;
+  return (
+    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+      Via Note SEF
+    </Badge>
+  );
 };
 
 const formatMontant = (montant: number | null) => {
-  if (montant === null || montant === undefined) return "0 FCFA";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  if (montant === null || montant === undefined) return '0 FCFA';
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 const formatDate = (dateStr: string | null) => {
-  if (!dateStr) return "-";
+  if (!dateStr) return '-';
   try {
-    return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: fr });
+    return format(new Date(dateStr), 'dd/MM/yyyy HH:mm', { locale: fr });
   } catch {
     return dateStr;
   }
@@ -133,10 +168,10 @@ export default function NoteAEFDetail() {
   const navigate = useNavigate();
   const { validateNote, rejectNote, deferNote, submitNote, deleteNote, imputeNote } = useNotesAEF();
   const { canValidateNoteAEF, canImpute } = usePermissions();
-  
+
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Dialogs state
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeferDialog, setShowDeferDialog] = useState(false);
@@ -146,13 +181,18 @@ export default function NoteAEFDetail() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Fetch note details
-  const { data: note, isLoading: noteLoading, refetch } = useQuery({
-    queryKey: ["note-aef-detail", id],
+  const {
+    data: note,
+    isLoading: noteLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['note-aef-detail', id],
     queryFn: async () => {
       if (!id) return null;
       const { data, error } = await supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
@@ -162,8 +202,9 @@ export default function NoteAEFDetail() {
           rejected_by_profile:profiles!notes_dg_rejected_by_fkey(id, first_name, last_name),
           budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
           note_sef:notes_sef(id, numero, objet, dossier_id)
-        `)
-        .eq("id", id)
+        `
+        )
+        .eq('id', id)
         .single();
 
       if (error) throw error;
@@ -174,20 +215,23 @@ export default function NoteAEFDetail() {
 
   // Fetch history (cast to any to handle table not in generated types)
   const { data: history = [] } = useQuery({
-    queryKey: ["note-aef-history", id],
+    queryKey: ['note-aef-history', id],
     queryFn: async () => {
       if (!id) return [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
-        .from("notes_aef_history")
-        .select(`
+        .from('notes_aef_history')
+        .select(
+          `
           *,
           performer:profiles(id, first_name, last_name)
-        `)
-        .eq("note_id", id)
-        .order("performed_at", { ascending: false });
+        `
+        )
+        .eq('note_id', id)
+        .order('performed_at', { ascending: false });
 
       if (error) {
-        console.error("Error fetching history:", error);
+        console.error('Error fetching history:', error);
         return [];
       }
       return data as HistoryEvent[];
@@ -197,19 +241,21 @@ export default function NoteAEFDetail() {
 
   // Fetch linked SEF note details if exists
   const { data: linkedNoteSEF } = useQuery({
-    queryKey: ["linked-note-sef", note?.note_sef_id],
+    queryKey: ['linked-note-sef', note?.note_sef_id],
     queryFn: async () => {
       if (!note?.note_sef_id) return null;
       const { data, error } = await supabase
-        .from("notes_sef")
-        .select(`
+        .from('notes_sef')
+        .select(
+          `
           id, numero, objet, statut, validated_at,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_sef_created_by_fkey(id, first_name, last_name)
-        `)
-        .eq("id", note.note_sef_id)
+        `
+        )
+        .eq('id', note.note_sef_id)
         .single();
-      
+
       if (error) return null;
       return data;
     },
@@ -218,17 +264,17 @@ export default function NoteAEFDetail() {
 
   // Fetch attachments
   const { data: attachments = [], isLoading: attachmentsLoading } = useQuery({
-    queryKey: ["note-aef-attachments", id],
+    queryKey: ['note-aef-attachments', id],
     queryFn: async () => {
       if (!id) return [];
       const { data, error } = await supabase
-        .from("note_attachments")
-        .select("*")
-        .eq("note_id", id)
-        .order("created_at", { ascending: false });
-      
+        .from('note_attachments')
+        .select('*')
+        .eq('note_id', id)
+        .order('created_at', { ascending: false });
+
       if (error) {
-        console.error("Error fetching attachments:", error);
+        console.error('Error fetching attachments:', error);
         return [];
       }
       return data || [];
@@ -245,10 +291,12 @@ export default function NoteAEFDetail() {
     setIsSubmitting(true);
     try {
       await submitNote(note.id);
-      toast.success("Note soumise pour validation");
+      toast.success('Note soumise pour validation');
       refetch();
-    } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la soumission");
+    } catch (error: unknown) {
+      toast.error(
+        (error instanceof Error ? error.message : null) || 'Erreur lors de la soumission'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -259,10 +307,12 @@ export default function NoteAEFDetail() {
     setIsSubmitting(true);
     try {
       await validateNote(note.id);
-      toast.success("Note validée avec succès");
+      toast.success('Note validée avec succès');
       refetch();
-    } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la validation");
+    } catch (error: unknown) {
+      toast.error(
+        (error instanceof Error ? error.message : null) || 'Erreur lors de la validation'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -273,10 +323,12 @@ export default function NoteAEFDetail() {
     setIsSubmitting(true);
     try {
       await deleteNote(note.id);
-      toast.success("Note supprimée");
-      navigate("/notes-aef");
-    } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la suppression");
+      toast.success('Note supprimée');
+      navigate('/notes-aef');
+    } catch (error: unknown) {
+      toast.error(
+        (error instanceof Error ? error.message : null) || 'Erreur lors de la suppression'
+      );
     } finally {
       setIsSubmitting(true);
       setShowDeleteDialog(false);
@@ -319,7 +371,7 @@ export default function NoteAEFDetail() {
           .from('note-attachments')
           .upload(filePath, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
           });
 
         if (uploadError) {
@@ -330,19 +382,19 @@ export default function NoteAEFDetail() {
         }
 
         // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
         // Insert metadata into note_attachments table
-        const { error: insertError } = await supabase
-          .from('note_attachments')
-          .insert({
-            note_id: note.id,
-            file_name: file.name,
-            file_path: filePath,
-            file_type: file.type || 'application/octet-stream',
-            file_size: file.size,
-            uploaded_by: user?.id
-          });
+        const { error: insertError } = await supabase.from('note_attachments').insert({
+          note_id: note.id,
+          file_name: file.name,
+          file_path: filePath,
+          file_type: file.type || 'application/octet-stream',
+          file_size: file.size,
+          uploaded_by: user?.id,
+        });
 
         if (insertError) {
           console.error('Insert error:', insertError);
@@ -380,9 +432,13 @@ export default function NoteAEFDetail() {
   };
 
   // Handle file delete
-  const handleDeleteFile = async (attachment: { id: string; file_path: string; file_name: string }) => {
+  const handleDeleteFile = async (attachment: {
+    id: string;
+    file_path: string;
+    file_name: string;
+  }) => {
     if (!note || note.statut !== 'brouillon') {
-      toast.error("Suppression possible uniquement pour les brouillons");
+      toast.error('Suppression possible uniquement pour les brouillons');
       return;
     }
 
@@ -408,7 +464,7 @@ export default function NoteAEFDetail() {
       queryClient.invalidateQueries({ queryKey: ['note-aef-attachments', id] });
     } catch (err) {
       console.error('Delete file error:', err);
-      toast.error("Erreur lors de la suppression");
+      toast.error('Erreur lors de la suppression');
     }
   };
 
@@ -423,34 +479,42 @@ export default function NoteAEFDetail() {
       window.open(data.signedUrl, '_blank');
     } catch (err) {
       console.error('Download error:', err);
-      toast.error("Impossible de télécharger le fichier");
+      toast.error('Impossible de télécharger le fichier');
     }
   };
 
   // Timeline icon helper
   const getTimelineIcon = (action: string) => {
     switch (action) {
-      case 'created': return <FileText className="h-4 w-4" />;
-      case 'submitted': return <Send className="h-4 w-4" />;
-      case 'validated': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'rejected': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'deferred': return <Clock className="h-4 w-4 text-orange-600" />;
-      case 'imputed': return <DollarSign className="h-4 w-4 text-blue-600" />;
-      case 'resubmitted': return <Send className="h-4 w-4 text-purple-600" />;
-      default: return <History className="h-4 w-4" />;
+      case 'created':
+        return <FileText className="h-4 w-4" />;
+      case 'submitted':
+        return <Send className="h-4 w-4" />;
+      case 'validated':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'rejected':
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'deferred':
+        return <Clock className="h-4 w-4 text-orange-600" />;
+      case 'imputed':
+        return <DollarSign className="h-4 w-4 text-blue-600" />;
+      case 'resubmitted':
+        return <Send className="h-4 w-4 text-purple-600" />;
+      default:
+        return <History className="h-4 w-4" />;
     }
   };
 
   const getActionLabel = (action: string) => {
     const labels: Record<string, string> = {
-      created: "Création",
-      submitted: "Soumission",
-      validated: "Validation DG",
-      rejected: "Rejet",
-      deferred: "Différé",
-      imputed: "Imputation",
-      resubmitted: "Re-soumission",
-      updated: "Modification",
+      created: 'Création',
+      submitted: 'Soumission',
+      validated: 'Validation DG',
+      rejected: 'Rejet',
+      deferred: 'Différé',
+      imputed: 'Imputation',
+      resubmitted: 'Re-soumission',
+      updated: 'Modification',
     };
     return labels[action] || action;
   };
@@ -486,12 +550,10 @@ export default function NoteAEFDetail() {
               <AlertTriangle className="h-5 w-5" />
               Note introuvable
             </CardTitle>
-            <CardDescription>
-              La note AEF demandée n'existe pas ou a été supprimée.
-            </CardDescription>
+            <CardDescription>La note AEF demandée n'existe pas ou a été supprimée.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" onClick={() => navigate("/notes-aef")}>
+            <Button variant="outline" onClick={() => navigate('/notes-aef')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour à la liste
             </Button>
@@ -511,12 +573,10 @@ export default function NoteAEFDetail() {
               <Shield className="h-5 w-5" />
               Accès refusé
             </CardTitle>
-            <CardDescription>
-              {accessControl.denyReason}
-            </CardDescription>
+            <CardDescription>{accessControl.denyReason}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" onClick={() => navigate("/notes-aef")}>
+            <Button variant="outline" onClick={() => navigate('/notes-aef')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Retour à la liste
             </Button>
@@ -529,23 +589,20 @@ export default function NoteAEFDetail() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/notes-aef")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{note.numero || "Note AEF"}</h1>
-              {getStatusBadge(note.statut)}
-              {getOriginBadge(note)}
-            </div>
-            <p className="text-muted-foreground">{note.objet}</p>
-          </div>
-        </div>
-        
-        {/* Actions */}
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        title={`Note AEF - ${note?.numero || ''}`}
+        description={note?.objet || 'Détail de la note'}
+        icon={FileEdit}
+        backUrl="/notes-aef"
+        breadcrumbs={[
+          { label: 'Chaîne de la Dépense' },
+          { label: 'Notes AEF', href: '/notes-aef' },
+          { label: note?.numero || 'Détail' },
+        ]}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          {getStatusBadge(note.statut)}
+          {getOriginBadge(note)}
           {accessControl.canEdit && (
             <Button variant="outline" onClick={() => navigate(`/notes-aef?edit=${note.id}`)}>
               <Edit className="h-4 w-4 mr-2" />
@@ -559,7 +616,12 @@ export default function NoteAEFDetail() {
             </Button>
           )}
           {accessControl.canValidate && canValidateNoteAEF() && (
-            <Button variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleValidate} disabled={isSubmitting}>
+            <Button
+              variant="default"
+              className="bg-green-600 hover:bg-green-700"
+              onClick={handleValidate}
+              disabled={isSubmitting}
+            >
               <CheckCircle className="h-4 w-4 mr-2" />
               Valider
             </Button>
@@ -571,13 +633,21 @@ export default function NoteAEFDetail() {
             </Button>
           )}
           {accessControl.canDefer && canValidateNoteAEF() && (
-            <Button variant="outline" className="text-orange-600 border-orange-600" onClick={() => setShowDeferDialog(true)}>
+            <Button
+              variant="outline"
+              className="text-orange-600 border-orange-600"
+              onClick={() => setShowDeferDialog(true)}
+            >
               <Clock className="h-4 w-4 mr-2" />
               Différer
             </Button>
           )}
           {accessControl.canImpute && canImpute() && (
-            <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowImputeDialog(true)}>
+            <Button
+              variant="default"
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => setShowImputeDialog(true)}
+            >
               <DollarSign className="h-4 w-4 mr-2" />
               Imputer
             </Button>
@@ -590,9 +660,11 @@ export default function NoteAEFDetail() {
           )}
           {/* Bouton Voir Dossier - récupère dossier_id depuis note ou SEF liée */}
           {(note.dossier_id || note.note_sef?.dossier_id) && (
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/recherche?dossier=${note.dossier_id || note.note_sef?.dossier_id}`)}
+            <Button
+              variant="outline"
+              onClick={() =>
+                navigate(`/recherche?dossier=${note.dossier_id || note.note_sef?.dossier_id}`)
+              }
               className="gap-2"
             >
               <FolderOpen className="h-4 w-4" />
@@ -600,12 +672,16 @@ export default function NoteAEFDetail() {
             </Button>
           )}
           {accessControl.canDelete && (
-            <Button variant="ghost" className="text-destructive" onClick={() => setShowDeleteDialog(true)}>
+            <Button
+              variant="ghost"
+              className="text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
@@ -675,7 +751,9 @@ export default function NoteAEFDetail() {
               </div>
               {note.contenu && (
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Description / Contenu</label>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Description / Contenu
+                  </label>
                   <p className="mt-1 whitespace-pre-wrap">{note.contenu}</p>
                 </div>
               )}
@@ -697,15 +775,15 @@ export default function NoteAEFDetail() {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Type de dépense</label>
-                <p className="mt-1 capitalize">{note.type_depense || "-"}</p>
+                <p className="mt-1 capitalize">{note.type_depense || '-'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Urgence</label>
-                <p className="mt-1 capitalize">{note.priorite || "Normale"}</p>
+                <p className="mt-1 capitalize">{note.priorite || 'Normale'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Direction</label>
-                <p className="mt-1">{note.direction?.label || note.direction?.sigle || "-"}</p>
+                <p className="mt-1">{note.direction?.label || note.direction?.sigle || '-'}</p>
               </div>
             </CardContent>
           </Card>
@@ -720,7 +798,7 @@ export default function NoteAEFDetail() {
           )}
 
           {/* Decision Block - Rejection */}
-          {note.statut === "rejete" && note.rejected_by_profile && (
+          {note.statut === 'rejete' && note.rejected_by_profile && (
             <DecisionBlock
               type="rejet"
               acteur={note.rejected_by_profile}
@@ -730,7 +808,7 @@ export default function NoteAEFDetail() {
           )}
 
           {/* Decision Block - Deferred */}
-          {note.statut === "differe" && note.differe_by_profile && (
+          {note.statut === 'differe' && note.differe_by_profile && (
             <DecisionBlock
               type="differe"
               acteur={note.differe_by_profile}
@@ -756,7 +834,9 @@ export default function NoteAEFDetail() {
               <CardTitle className="text-base flex items-center gap-2">
                 <Paperclip className="h-4 w-4" />
                 Pièces jointes
-                <Badge variant="secondary" className="ml-1">{attachments.length}</Badge>
+                <Badge variant="secondary" className="ml-1">
+                  {attachments.length}
+                </Badge>
               </CardTitle>
               {/* Upload button - only for brouillon and creator */}
               {note.statut === 'brouillon' && accessControl.canEdit && (
@@ -770,12 +850,7 @@ export default function NoteAEFDetail() {
                     onChange={handleFileUpload}
                     disabled={isUploading}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isUploading}
-                    className="gap-2"
-                  >
+                  <Button variant="outline" size="sm" disabled={isUploading} className="gap-2">
                     {isUploading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -798,7 +873,7 @@ export default function NoteAEFDetail() {
                   Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF • Max 10 MB
                 </p>
               )}
-              
+
               {attachmentsLoading ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -810,8 +885,8 @@ export default function NoteAEFDetail() {
               ) : (
                 <div className="space-y-2">
                   {attachments.map((att) => (
-                    <div 
-                      key={att.id} 
+                    <div
+                      key={att.id}
                       className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -865,7 +940,7 @@ export default function NoteAEFDetail() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Référence</span>
-                <span className="font-mono">{note.numero || "-"}</span>
+                <span className="font-mono">{note.numero || '-'}</span>
               </div>
               <Separator />
               <div className="flex justify-between">
@@ -881,9 +956,9 @@ export default function NoteAEFDetail() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Créé par</span>
                 <span>
-                  {note.created_by_profile 
-                    ? `${note.created_by_profile.first_name || ""} ${note.created_by_profile.last_name || ""}`.trim()
-                    : "-"}
+                  {note.created_by_profile
+                    ? `${note.created_by_profile.first_name || ''} ${note.created_by_profile.last_name || ''}`.trim()
+                    : '-'}
                 </span>
               </div>
               {note.submitted_at && (
@@ -904,11 +979,7 @@ export default function NoteAEFDetail() {
           </Card>
 
           {/* Progression du Workflow (nouveau système wf_*) */}
-          <WorkflowTimeline
-            entityType="note_aef"
-            entityId={note.id}
-            variant="vertical"
-          />
+          <WorkflowTimeline entityType="note_aef" entityId={note.id} variant="vertical" />
 
           {/* Timeline */}
           <Card>
@@ -1005,7 +1076,10 @@ export default function NoteAEFDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

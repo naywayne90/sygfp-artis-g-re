@@ -7,14 +7,14 @@
  * - Audit complet des actions
  */
 
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,22 +40,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   useNotesDirectionGenerale,
   NoteDirectionGenerale,
-} from "@/hooks/useNotesDirectionGenerale";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/hooks/useNotesDirectionGenerale';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   CheckCircle,
   XCircle,
+  FileCheck,
   FileText,
   Shield,
   Search,
@@ -66,20 +67,36 @@ import {
   FileSignature,
   ClipboardList,
   AlertTriangle,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Skeleton pour le chargement
 function TableRowSkeleton() {
   return (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-8" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-48" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-32" />
+      </TableCell>
     </TableRow>
   );
 }
@@ -91,21 +108,21 @@ export default function ValidationNotesDG() {
   const { logAction } = useAuditLog();
 
   // Autorisation : DG ou Admin uniquement
-  const canValidate = hasAnyRole(["Admin", "DG"]);
+  const canValidate = hasAnyRole(['Admin', 'DG']);
 
   // États des dialogs
   const [selectedNote, setSelectedNote] = useState<NoteDirectionGenerale | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [confirmValidateOpen, setConfirmValidateOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [rejectMotif, setRejectMotif] = useState("");
+  const [rejectMotif, setRejectMotif] = useState('');
   const [rejectError, setRejectError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Hook pour les notes
   const {
-    notes,
+    notes: _notes,
     notesByStatus,
     isLoading,
     refetch,
@@ -150,7 +167,7 @@ export default function ValidationNotesDG() {
 
   const handleRejectClick = (note: NoteDirectionGenerale) => {
     setSelectedNote(note);
-    setRejectMotif("");
+    setRejectMotif('');
     setRejectError(null);
     setRejectDialogOpen(true);
   };
@@ -164,11 +181,11 @@ export default function ValidationNotesDG() {
 
       // Log audit
       await logAction({
-        entityType: "note_direction_generale",
+        entityType: 'note_direction_generale',
         entityId: selectedNote.id,
-        action: "validate",
-        oldValues: { statut: "soumise_dg" },
-        newValues: { statut: "dg_valide" },
+        action: 'validate',
+        oldValues: { statut: 'soumise_dg' },
+        newValues: { statut: 'dg_valide' },
         metadata: {
           reference: selectedNote.reference,
           objet: selectedNote.objet,
@@ -179,7 +196,7 @@ export default function ValidationNotesDG() {
       setSelectedNote(null);
       refetch();
     } catch (error) {
-      console.error("Erreur validation:", error);
+      console.error('Erreur validation:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -189,7 +206,7 @@ export default function ValidationNotesDG() {
     if (!selectedNote) return;
 
     if (!rejectMotif.trim()) {
-      setRejectError("Le motif de rejet est obligatoire");
+      setRejectError('Le motif de rejet est obligatoire');
       return;
     }
 
@@ -199,11 +216,11 @@ export default function ValidationNotesDG() {
 
       // Log audit
       await logAction({
-        entityType: "note_direction_generale",
+        entityType: 'note_direction_generale',
         entityId: selectedNote.id,
-        action: "reject",
-        oldValues: { statut: "soumise_dg" },
-        newValues: { statut: "dg_rejetee", motif_rejet: rejectMotif },
+        action: 'reject',
+        oldValues: { statut: 'soumise_dg' },
+        newValues: { statut: 'dg_rejetee', motif_rejet: rejectMotif },
         justification: rejectMotif,
         metadata: {
           reference: selectedNote.reference,
@@ -213,10 +230,10 @@ export default function ValidationNotesDG() {
 
       setRejectDialogOpen(false);
       setSelectedNote(null);
-      setRejectMotif("");
+      setRejectMotif('');
       refetch();
     } catch (error) {
-      console.error("Erreur rejet:", error);
+      console.error('Erreur rejet:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -231,7 +248,7 @@ export default function ValidationNotesDG() {
         <p className="text-sm text-muted-foreground">
           Seuls les utilisateurs DG ou Admin peuvent accéder à cette page
         </p>
-        <Button variant="outline" onClick={() => navigate("/notes-dg")}>
+        <Button variant="outline" onClick={() => navigate('/notes-dg')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour aux Notes DG
         </Button>
@@ -250,21 +267,17 @@ export default function ValidationNotesDG() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/notes-dg")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <ExerciceSubtitle
-            title="Validation Notes DG"
-            description="Notes en attente de validation par le Directeur Général"
-          />
-        </div>
+      <PageHeader
+        title="Validation Notes DG"
+        description="Notes de la Direction Générale à valider"
+        icon={FileCheck}
+        backUrl="/notes-dg"
+      >
         <Badge variant="outline" className="gap-2 px-3 py-1.5">
           <ClipboardList className="h-4 w-4" />
           {notesAValider.length} note(s) à valider
         </Badge>
-      </div>
+      </PageHeader>
 
       {/* Statistiques */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -273,7 +286,9 @@ export default function ValidationNotesDG() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">À valider</p>
-                <p className="text-2xl font-bold text-blue-600">{notesByStatus.soumise_dg.length}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {notesByStatus.soumise_dg.length}
+                </p>
               </div>
               <FileSignature className="h-8 w-8 text-blue-500/50" />
             </div>
@@ -285,9 +300,13 @@ export default function ValidationNotesDG() {
               <div>
                 <p className="text-sm text-muted-foreground">Validées aujourd'hui</p>
                 <p className="text-2xl font-bold text-success">
-                  {notesByStatus.dg_valide.filter(
-                    (n) => n.signed_at && new Date(n.signed_at).toDateString() === new Date().toDateString()
-                  ).length}
+                  {
+                    notesByStatus.dg_valide.filter(
+                      (n) =>
+                        n.signed_at &&
+                        new Date(n.signed_at).toDateString() === new Date().toDateString()
+                    ).length
+                  }
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
@@ -300,9 +319,13 @@ export default function ValidationNotesDG() {
               <div>
                 <p className="text-sm text-muted-foreground">Rejetées ce mois</p>
                 <p className="text-2xl font-bold text-destructive">
-                  {notesByStatus.dg_rejetee.filter(
-                    (n) => n.rejected_at && new Date(n.rejected_at).getMonth() === new Date().getMonth()
-                  ).length}
+                  {
+                    notesByStatus.dg_rejetee.filter(
+                      (n) =>
+                        n.rejected_at &&
+                        new Date(n.rejected_at).getMonth() === new Date().getMonth()
+                    ).length
+                  }
                 </p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
@@ -333,9 +356,7 @@ export default function ValidationNotesDG() {
             <FileText className="h-5 w-5" />
             Notes à valider
           </CardTitle>
-          <CardDescription>
-            {filteredNotes.length} note(s) en attente de décision
-          </CardDescription>
+          <CardDescription>{filteredNotes.length} note(s) en attente de décision</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -364,12 +385,12 @@ export default function ValidationNotesDG() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <CheckCircle className="h-12 w-12 text-success/50 mb-4" />
               <p className="text-lg font-medium text-muted-foreground">
-                {searchTerm ? "Aucune note correspondante" : "Aucune note en attente"}
+                {searchTerm ? 'Aucune note correspondante' : 'Aucune note en attente'}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
                 {searchTerm
-                  ? "Modifiez vos critères de recherche"
-                  : "Toutes les notes ont été traitées"}
+                  ? 'Modifiez vos critères de recherche'
+                  : 'Toutes les notes ont été traitées'}
               </p>
             </div>
           ) : (
@@ -390,14 +411,12 @@ export default function ValidationNotesDG() {
                 <TableBody>
                   {sortedNotes.map((note, index) => (
                     <TableRow key={note.id} className="hover:bg-muted/50">
-                      <TableCell className="font-mono text-sm">
-                        {index + 1}
-                      </TableCell>
+                      <TableCell className="font-mono text-sm">{index + 1}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">
-                            {note.direction?.sigle || note.direction?.label || "-"}
+                            {note.direction?.sigle || note.direction?.label || '-'}
                           </span>
                         </div>
                       </TableCell>
@@ -406,23 +425,27 @@ export default function ValidationNotesDG() {
                           {note.objet}
                         </span>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {note.reference || "-"}
-                      </TableCell>
+                      <TableCell className="font-mono text-sm">{note.reference || '-'}</TableCell>
                       <TableCell className="max-w-[150px]">
-                        <span className="line-clamp-2 text-sm text-muted-foreground" title={note.recommandations || ""}>
-                          {note.recommandations || "-"}
+                        <span
+                          className="line-clamp-2 text-sm text-muted-foreground"
+                          title={note.recommandations || ''}
+                        >
+                          {note.recommandations || '-'}
                         </span>
                       </TableCell>
                       <TableCell className="max-w-[150px]">
-                        <span className="line-clamp-2 text-sm text-muted-foreground" title={note.expose || ""}>
-                          {note.expose || "-"}
+                        <span
+                          className="line-clamp-2 text-sm text-muted-foreground"
+                          title={note.expose || ''}
+                        >
+                          {note.expose || '-'}
                         </span>
                       </TableCell>
                       <TableCell>
                         {note.date_note
-                          ? format(new Date(note.date_note), "dd/MM/yyyy", { locale: fr })
-                          : "-"}
+                          ? format(new Date(note.date_note), 'dd/MM/yyyy', { locale: fr })
+                          : '-'}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">
@@ -469,13 +492,13 @@ export default function ValidationNotesDG() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileSignature className="h-5 w-5" />
-              {selectedNote?.reference || "Détails de la note"}
+              {selectedNote?.reference || 'Détails de la note'}
             </DialogTitle>
             <DialogDescription>
-              Note soumise le{" "}
+              Note soumise le{' '}
               {selectedNote?.created_at
-                ? format(new Date(selectedNote.created_at), "dd MMMM yyyy à HH:mm", { locale: fr })
-                : "-"}
+                ? format(new Date(selectedNote.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr })
+                : '-'}
             </DialogDescription>
           </DialogHeader>
 
@@ -488,15 +511,15 @@ export default function ValidationNotesDG() {
                     <p className="font-medium">
                       {selectedNote.direction?.sigle
                         ? `${selectedNote.direction.sigle} - ${selectedNote.direction.label}`
-                        : selectedNote.direction?.label || "-"}
+                        : selectedNote.direction?.label || '-'}
                     </p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground text-xs">Date</Label>
                     <p className="font-medium">
                       {selectedNote.date_note
-                        ? format(new Date(selectedNote.date_note), "dd MMMM yyyy", { locale: fr })
-                        : "-"}
+                        ? format(new Date(selectedNote.date_note), 'dd MMMM yyyy', { locale: fr })
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -585,8 +608,7 @@ export default function ValidationNotesDG() {
               Confirmer la validation
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Vous êtes sur le point de valider la note{" "}
-              <strong>{selectedNote?.reference}</strong>.
+              Vous êtes sur le point de valider la note <strong>{selectedNote?.reference}</strong>.
               <br />
               <br />
               Cette action est définitive. La note pourra ensuite être diffusée aux destinataires.
@@ -619,8 +641,7 @@ export default function ValidationNotesDG() {
               Rejeter la note
             </DialogTitle>
             <DialogDescription>
-              Vous êtes sur le point de rejeter la note{" "}
-              <strong>{selectedNote?.reference}</strong>.
+              Vous êtes sur le point de rejeter la note <strong>{selectedNote?.reference}</strong>.
               <br />
               Veuillez indiquer le motif du rejet.
             </DialogDescription>
@@ -638,7 +659,7 @@ export default function ValidationNotesDG() {
                 }}
                 placeholder="Indiquez les raisons du rejet et les corrections attendues..."
                 rows={4}
-                className={rejectError ? "border-destructive" : ""}
+                className={rejectError ? 'border-destructive' : ''}
               />
               {rejectError && <p className="text-sm text-destructive">{rejectError}</p>}
             </div>
@@ -646,7 +667,8 @@ export default function ValidationNotesDG() {
             <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-md">
               <AlertTriangle className="h-4 w-4 text-warning mt-0.5" />
               <p className="text-sm text-warning">
-                La note sera renvoyée au créateur pour correction. Elle pourra être modifiée puis resoumise.
+                La note sera renvoyée au créateur pour correction. Elle pourra être modifiée puis
+                resoumise.
               </p>
             </div>
           </div>

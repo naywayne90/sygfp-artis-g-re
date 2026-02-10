@@ -1,27 +1,41 @@
-import { useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { usePermissions } from "./usePermissions";
-import { useAuditLog } from "./useAuditLog";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { usePermissions } from './usePermissions';
+import { useAuditLog } from './useAuditLog';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 // Roles allowed to import when budget is validated
-const IMPORT_OVERRIDE_ROLES = ["ADMIN", "admin", "DG", "dg", "DAF", "daf"];
+const IMPORT_OVERRIDE_ROLES = ['ADMIN', 'admin', 'DG', 'dg', 'DAF', 'daf', 'DAAF', 'daaf'];
 
 // Roles allowed to import/export budget data
 const IMPORT_ALLOWED_ROLES = [
-  "ADMIN", "admin", 
-  "DG", "dg", 
-  "DAF", "daf",
-  "SDPM", "sdpm",
-  "BUDGET", "budget",
-  "CONTROLEUR", "controleur",
+  'ADMIN',
+  'admin',
+  'DG',
+  'dg',
+  'DAF',
+  'daf',
+  'DAAF',
+  'daaf',
+  'SDMG',
+  'sdmg',
+  'SDPM',
+  'sdpm',
+  'CB',
+  'cb',
+  'BUDGET',
+  'budget',
+  'CONTROLEUR',
+  'controleur',
 ];
 
 const EXPORT_ALLOWED_ROLES = [
   ...IMPORT_ALLOWED_ROLES,
-  "TRESORERIE", "tresorerie",
-  "COMPTABLE", "comptable",
+  'TRESORERIE',
+  'tresorerie',
+  'COMPTABLE',
+  'comptable',
 ];
 
 interface BudgetValidationStatus {
@@ -33,12 +47,12 @@ interface BudgetValidationStatus {
 
 export function useImportSecurity() {
   const { exercice, exerciceInfo } = useExercice();
-  const { hasAnyRole, isAdmin, userId, userRoles } = usePermissions();
+  const { hasAnyRole, isAdmin, userId: _userId, userRoles } = usePermissions();
   const { logAction } = useAuditLog();
 
   // Check if budget version is validated for current exercice
   const { data: budgetValidation, isLoading: isCheckingValidation } = useQuery({
-    queryKey: ["budget-validation-status", exercice],
+    queryKey: ['budget-validation-status', exercice],
     queryFn: async (): Promise<BudgetValidationStatus> => {
       if (!exercice) {
         return { isValidated: false, validatedAt: null, validatedBy: null, validatorName: null };
@@ -46,15 +60,17 @@ export function useImportSecurity() {
 
       // Check budget_versions for validated status
       const { data, error } = await supabase
-        .from("budget_versions")
-        .select(`
+        .from('budget_versions')
+        .select(
+          `
           status,
           validated_at,
           validated_by
-        `)
-        .eq("exercice", exercice)
-        .eq("status", "validated")
-        .order("validated_at", { ascending: false })
+        `
+        )
+        .eq('exercice', exercice)
+        .eq('status', 'validated')
+        .order('validated_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -66,9 +82,9 @@ export function useImportSecurity() {
       let validatorName = null;
       if (data.validated_by) {
         const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", data.validated_by)
+          .from('profiles')
+          .select('full_name')
+          .eq('id', data.validated_by)
           .single();
         validatorName = profile?.full_name || null;
       }
@@ -89,7 +105,7 @@ export function useImportSecurity() {
     if (isAdmin || hasAnyRole(IMPORT_OVERRIDE_ROLES)) {
       return true;
     }
-    
+
     // Check if user has import role
     if (!hasAnyRole(IMPORT_ALLOWED_ROLES)) {
       return false;
@@ -121,13 +137,13 @@ export function useImportSecurity() {
     }
 
     if (budgetValidation?.isValidated && !hasAnyRole(IMPORT_OVERRIDE_ROLES) && !isAdmin) {
-      const validatedDate = budgetValidation.validatedAt 
-        ? new Date(budgetValidation.validatedAt).toLocaleDateString("fr-FR")
-        : "";
-      return `Le budget de l'exercice ${exercice} a été validé${validatedDate ? ` le ${validatedDate}` : ""}${budgetValidation.validatorName ? ` par ${budgetValidation.validatorName}` : ""}. Seuls les profils Admin/DG peuvent importer après validation.`;
+      const validatedDate = budgetValidation.validatedAt
+        ? new Date(budgetValidation.validatedAt).toLocaleDateString('fr-FR')
+        : '';
+      return `Le budget de l'exercice ${exercice} a été validé${validatedDate ? ` le ${validatedDate}` : ''}${budgetValidation.validatorName ? ` par ${budgetValidation.validatorName}` : ''}. Seuls les profils Admin/DG peuvent importer après validation.`;
     }
 
-    if (exerciceInfo?.statut === "cloture") {
+    if (exerciceInfo?.statut === 'cloture') {
       return `L'exercice ${exercice} est clôturé. Aucun import n'est possible.`;
     }
 
@@ -135,72 +151,86 @@ export function useImportSecurity() {
   }, [hasAnyRole, isAdmin, budgetValidation, exercice, exerciceInfo]);
 
   // Log import action to audit
-  const logImportAction = useCallback(async (
-    runId: string,
-    filename: string,
-    action: "start" | "success" | "error",
-    stats?: { 
-      totalRows?: number; 
-      insertedRows?: number; 
-      updatedRows?: number; 
-      errorRows?: number;
-      justification?: string;
-    }
-  ) => {
-    const actionType = action === "start" ? "create" : action === "success" ? "validate" : "reject";
-    
-    await logAction({
-      entityType: "import_budget",
-      entityId: runId,
-      action: actionType,
-      newValues: {
-        filename,
-        action,
-        exercice,
-        ...stats,
-        timestamp: new Date().toISOString(),
-        user_roles: userRoles,
-        budget_was_validated: budgetValidation?.isValidated || false,
-      },
-    });
+  const logImportAction = useCallback(
+    async (
+      runId: string,
+      filename: string,
+      action: 'start' | 'success' | 'error',
+      stats?: {
+        totalRows?: number;
+        insertedRows?: number;
+        updatedRows?: number;
+        errorRows?: number;
+        justification?: string;
+      }
+    ) => {
+      const actionType =
+        action === 'start' ? 'create' : action === 'success' ? 'validate' : 'reject';
 
-    // Also log to import_logs table if it exists
-    try {
-      await supabase.from("import_logs").insert({
-        run_id: runId,
-        event_type: action === "start" ? "IMPORT_STARTED" : action === "success" ? "IMPORT_COMPLETED" : "IMPORT_FAILED",
-        message: action === "start" 
-          ? `Import démarré: ${filename}`
-          : action === "success"
-          ? `Import réussi: ${stats?.insertedRows || 0} créées, ${stats?.updatedRows || 0} mises à jour`
-          : `Import échoué: ${stats?.errorRows || 0} erreurs`,
-        details: stats,
+      await logAction({
+        entityType: 'import_budget',
+        entityId: runId,
+        action: actionType,
+        newValues: {
+          filename,
+          action,
+          exercice,
+          ...stats,
+          timestamp: new Date().toISOString(),
+          user_roles: userRoles,
+          budget_was_validated: budgetValidation?.isValidated || false,
+        },
       });
-    } catch (err) {
-      // Table might not exist, ignore
-      console.warn("Could not log to import_logs:", err);
-    }
-  }, [logAction, exercice, userRoles, budgetValidation]);
+
+      // Also log to import_logs table if it exists
+      try {
+        await supabase.from('import_logs').insert({
+          run_id: runId,
+          event_type:
+            action === 'start'
+              ? 'IMPORT_STARTED'
+              : action === 'success'
+                ? 'IMPORT_COMPLETED'
+                : 'IMPORT_FAILED',
+          message:
+            action === 'start'
+              ? `Import démarré: ${filename}`
+              : action === 'success'
+                ? `Import réussi: ${stats?.insertedRows || 0} créées, ${stats?.updatedRows || 0} mises à jour`
+                : `Import échoué: ${stats?.errorRows || 0} erreurs`,
+          details: stats,
+        });
+      } catch (err) {
+        // Table might not exist, ignore
+        console.warn('Could not log to import_logs:', err);
+      }
+    },
+    [logAction, exercice, userRoles, budgetValidation]
+  );
 
   // Request import with justification (for validated budgets)
-  const requestImportOverride = useCallback(async (justification: string): Promise<boolean> => {
-    if (!canImport) return false;
-    
-    // Log the override request
-    await logAction({
-      entityType: "import_budget_override",
-      entityId: null as any,
-      action: "create",
-      newValues: {
-        exercice,
-        justification,
-        budget_validated_at: budgetValidation?.validatedAt,
-        timestamp: new Date().toISOString(),
-      },
-    });
+  const requestImportOverride = useCallback(
+    async (justification: string): Promise<boolean> => {
+      if (!canImport) return false;
 
-    return true;
-  }, [canImport, logAction, exercice, budgetValidation]);
+      // Log the override request
+      await logAction({
+        entityType: 'import_budget_override',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        entityId: null as any,
+        action: 'create',
+        newValues: {
+          exercice,
+          justification,
+          budget_validated_at: budgetValidation?.validatedAt,
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      return true;
+    },
+    [canImport, logAction, exercice, budgetValidation]
+  );
 
   return {
     // Permissions
@@ -208,15 +238,15 @@ export function useImportSecurity() {
     canExport,
     isBudgetLockedForUser,
     isCheckingValidation,
-    
+
     // Budget validation status
     budgetValidation,
-    
+
     // Helper functions
     getImportBlockReason,
     logImportAction,
     requestImportOverride,
-    
+
     // Role checks
     hasImportOverrideRole: hasAnyRole(IMPORT_OVERRIDE_ROLES) || isAdmin,
     userRoles,

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -19,23 +19,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
-import { useNotesAEFList } from "@/hooks/useNotesAEFList";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useNotesAEF, NoteAEF } from '@/hooks/useNotesAEF';
+import { useNotesAEFList } from '@/hooks/useNotesAEFList';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   CheckCircle,
   XCircle,
   Clock,
   AlertTriangle,
+  FileCheck,
   FileText,
   Search,
   CreditCard,
@@ -45,24 +46,24 @@ import {
   UserCheck,
   ArrowRight,
   ExternalLink,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ValidationNotesAEF() {
   const navigate = useNavigate();
   const { exercice } = useExercice();
-  const { hasAnyRole, isAdmin } = usePermissions();
-  const canValidateDAAF = hasAnyRole(["ADMIN", "DAAF"]);
-  const canValidateDG = hasAnyRole(["ADMIN", "DG"]);
+  const { hasAnyRole, isAdmin: _isAdmin } = usePermissions();
+  const canValidateDAAF = hasAnyRole(['ADMIN', 'DAAF']);
+  const canValidateDG = hasAnyRole(['ADMIN', 'DG']);
   const canValidate = canValidateDAAF || canValidateDG;
 
   // Hook pour les mutations
-  const { validateNote, rejectNote, deferNote, refetch: refetchMutations } = useNotesAEF();
+  const { validateNote, rejectNote, deferNote, refetch: _refetchMutations } = useNotesAEF();
 
   // Hook pour la liste avec filtres
   const {
     notes,
-    counts,
+    counts: _counts,
     isLoading,
     error,
     searchQuery,
@@ -72,28 +73,26 @@ export default function ValidationNotesAEF() {
 
   // État local pour les dialogs
   const [selectedNote, setSelectedNote] = useState<NoteAEF | null>(null);
-  const [actionType, setActionType] = useState<"validate" | "reject" | "defer" | null>(null);
-  const [motif, setMotif] = useState("");
-  const [deadlineCorrection, setDeadlineCorrection] = useState("");
+  const [actionType, setActionType] = useState<'validate' | 'reject' | 'defer' | null>(null);
+  const [motif, setMotif] = useState('');
+  const [deadlineCorrection, setDeadlineCorrection] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Filtrer les notes à valider (soumis ou a_valider)
-  const notesToValidate = notes.filter((n) => 
-    n.statut === "soumis" || n.statut === "a_valider"
-  );
-  const notesDeferees = notes.filter((n) => n.statut === "differe");
-  const notesToImpute = notes.filter((n) => n.statut === "a_imputer");
+  const notesToValidate = notes.filter((n) => n.statut === 'soumis' || n.statut === 'a_valider');
+  const notesDeferees = notes.filter((n) => n.statut === 'differe');
+  const notesToImpute = notes.filter((n) => n.statut === 'a_imputer');
 
   // Statistiques urgentes
-  const urgentNotes = notesToValidate.filter((n) => 
-    n.priorite === "urgente" || n.priorite === "haute"
+  const urgentNotes = notesToValidate.filter(
+    (n) => n.priorite === 'urgente' || n.priorite === 'haute'
   );
 
-  const handleAction = (note: NoteAEF, action: "validate" | "reject" | "defer") => {
+  const handleAction = (note: NoteAEF, action: 'validate' | 'reject' | 'defer') => {
     setSelectedNote(note);
     setActionType(action);
-    setMotif("");
-    setDeadlineCorrection("");
+    setMotif('');
+    setDeadlineCorrection('');
   };
 
   const handleConfirm = async () => {
@@ -102,18 +101,18 @@ export default function ValidationNotesAEF() {
     setIsProcessing(true);
     try {
       switch (actionType) {
-        case "validate":
+        case 'validate':
           await validateNote(selectedNote.id);
           break;
-        case "reject":
+        case 'reject':
           if (!motif.trim()) {
-            throw new Error("Le motif de rejet est obligatoire");
+            throw new Error('Le motif de rejet est obligatoire');
           }
           await rejectNote({ noteId: selectedNote.id, motif });
           break;
-        case "defer":
+        case 'defer':
           if (!motif.trim()) {
-            throw new Error("Le motif de report est obligatoire");
+            throw new Error('Le motif de report est obligatoire');
           }
           await deferNote({
             noteId: selectedNote.id,
@@ -125,7 +124,7 @@ export default function ValidationNotesAEF() {
       setSelectedNote(null);
       setActionType(null);
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur lors de l'action:", error);
     } finally {
       setIsProcessing(false);
@@ -156,7 +155,7 @@ export default function ValidationNotesAEF() {
         <p className="text-muted-foreground text-center max-w-md">
           Seuls les rôles DAAF et DG peuvent accéder à l'espace de validation des Notes AEF.
         </p>
-        <Button variant="outline" onClick={() => navigate("/notes-aef")}>
+        <Button variant="outline" onClick={() => navigate('/notes-aef')}>
           Retour aux Notes AEF
         </Button>
       </div>
@@ -165,55 +164,62 @@ export default function ValidationNotesAEF() {
 
   const getUrgenceBadge = (urgence: string | null) => {
     const variants: Record<string, { label: string; className: string }> = {
-      basse: { label: "Basse", className: "bg-muted text-muted-foreground" },
-      normale: { label: "Normale", className: "bg-secondary text-secondary-foreground" },
-      haute: { label: "Haute", className: "bg-warning text-warning-foreground" },
-      urgente: { label: "Urgente", className: "bg-destructive text-destructive-foreground" },
+      basse: { label: 'Basse', className: 'bg-muted text-muted-foreground' },
+      normale: { label: 'Normale', className: 'bg-secondary text-secondary-foreground' },
+      haute: { label: 'Haute', className: 'bg-warning text-warning-foreground' },
+      urgente: { label: 'Urgente', className: 'bg-destructive text-destructive-foreground' },
     };
-    const variant = variants[urgence || "normale"] || variants.normale;
+    const variant = variants[urgence || 'normale'] || variants.normale;
     return <Badge className={variant.className}>{variant.label}</Badge>;
   };
 
   const formatMontant = (montant: number | null) => {
-    if (!montant) return "—";
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    if (!montant) return '—';
+    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
   const getOriginBadge = (note: NoteAEF) => {
     const isDirectAEF = note.is_direct_aef || note.origin === 'DIRECT';
     if (isDirectAEF) {
-      return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">Direct DG</Badge>;
+      return (
+        <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">
+          Direct DG
+        </Badge>
+      );
     }
-    return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">Via SEF</Badge>;
+    return (
+      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs">
+        Via SEF
+      </Badge>
+    );
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle
-          title="Validation Notes AEF"
-          description="Espace de validation DAAF / DG"
-        />
-        <div className="flex items-center gap-2">
-          {canValidateDAAF && (
-            <Badge variant="outline" className="gap-1 bg-blue-50 text-blue-700 border-blue-200">
-              <UserCheck className="h-3 w-3" />
-              DAAF
-            </Badge>
-          )}
-          {canValidateDG && (
-            <Badge variant="outline" className="gap-1 bg-success/10 text-success border-success/20">
-              <ShieldCheck className="h-3 w-3" />
-              DG
-            </Badge>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Validation Notes AEF"
+        description="File d'attente des notes AEF à valider"
+        icon={FileCheck}
+        backUrl="/notes-aef"
+      >
+        {canValidateDAAF && (
+          <Badge variant="outline" className="gap-1 bg-blue-50 text-blue-700 border-blue-200">
+            <UserCheck className="h-3 w-3" />
+            DAAF
+          </Badge>
+        )}
+        {canValidateDG && (
+          <Badge variant="outline" className="gap-1 bg-success/10 text-success border-success/20">
+            <ShieldCheck className="h-3 w-3" />
+            DG
+          </Badge>
+        )}
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className={urgentNotes.length > 0 ? "border-destructive/50" : ""}>
+        <Card className={urgentNotes.length > 0 ? 'border-destructive/50' : ''}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -278,16 +284,14 @@ export default function ValidationNotesAEF() {
       <Tabs defaultValue="a_valider">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="a_valider" className="gap-2">
-            <Send className="h-4 w-4" />
-            À valider ({notesToValidate.length})
+            <Send className="h-4 w-4" />À valider ({notesToValidate.length})
           </TabsTrigger>
           <TabsTrigger value="differees" className="gap-2">
             <Clock className="h-4 w-4" />
             Différées ({notesDeferees.length})
           </TabsTrigger>
           <TabsTrigger value="a_imputer" className="gap-2">
-            <CreditCard className="h-4 w-4" />
-            À imputer ({notesToImpute.length})
+            <CreditCard className="h-4 w-4" />À imputer ({notesToImpute.length})
           </TabsTrigger>
         </TabsList>
 
@@ -298,9 +302,7 @@ export default function ValidationNotesAEF() {
                 <FileText className="h-5 w-5" />
                 Notes AEF en attente de validation
               </CardTitle>
-              <CardDescription>
-                Validez, différez ou rejetez les notes soumises
-              </CardDescription>
+              <CardDescription>Validez, différez ou rejetez les notes soumises</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -347,7 +349,7 @@ export default function ValidationNotesAEF() {
                             onClick={() => handleGoToDetail(note.id)}
                             className="font-mono text-sm text-primary hover:underline flex items-center gap-1"
                           >
-                            {note.reference_pivot || note.numero || "—"}
+                            {note.reference_pivot || note.numero || '—'}
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         </TableCell>
@@ -355,7 +357,7 @@ export default function ValidationNotesAEF() {
                           {note.objet}
                         </TableCell>
                         <TableCell>
-                          {note.direction?.sigle || note.direction?.label || "—"}
+                          {note.direction?.sigle || note.direction?.label || '—'}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatMontant(note.montant_estime)}
@@ -363,14 +365,14 @@ export default function ValidationNotesAEF() {
                         <TableCell>{getUrgenceBadge(note.priorite)}</TableCell>
                         <TableCell>{getOriginBadge(note)}</TableCell>
                         <TableCell className="hidden lg:table-cell text-muted-foreground">
-                          {format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
+                          {format(new Date(note.created_at), 'dd MMM yyyy', { locale: fr })}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 justify-end">
                             <Button
                               size="sm"
                               variant="default"
-                              onClick={() => handleAction(note, "validate")}
+                              onClick={() => handleAction(note, 'validate')}
                               className="gap-1"
                             >
                               <CheckCircle className="h-3 w-3" />
@@ -379,7 +381,7 @@ export default function ValidationNotesAEF() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleAction(note, "defer")}
+                              onClick={() => handleAction(note, 'defer')}
                               className="gap-1 text-orange-600 border-orange-200 hover:bg-orange-50"
                             >
                               <Clock className="h-3 w-3" />
@@ -387,7 +389,7 @@ export default function ValidationNotesAEF() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleAction(note, "reject")}
+                              onClick={() => handleAction(note, 'reject')}
                               className="gap-1 text-destructive border-destructive/20 hover:bg-destructive/10"
                             >
                               <XCircle className="h-3 w-3" />
@@ -410,9 +412,7 @@ export default function ValidationNotesAEF() {
                 <Clock className="h-5 w-5 text-orange-600" />
                 Notes différées
               </CardTitle>
-              <CardDescription>
-                Notes en attente de conditions de reprise
-              </CardDescription>
+              <CardDescription>Notes en attente de conditions de reprise</CardDescription>
             </CardHeader>
             <CardContent>
               {notesDeferees.length === 0 ? (
@@ -443,7 +443,7 @@ export default function ValidationNotesAEF() {
                             onClick={() => handleGoToDetail(note.id)}
                             className="font-mono text-sm text-primary hover:underline flex items-center gap-1"
                           >
-                            {note.reference_pivot || note.numero || "—"}
+                            {note.reference_pivot || note.numero || '—'}
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         </TableCell>
@@ -451,26 +451,30 @@ export default function ValidationNotesAEF() {
                           {note.objet}
                         </TableCell>
                         <TableCell>
-                          {note.direction?.sigle || note.direction?.label || "—"}
+                          {note.direction?.sigle || note.direction?.label || '—'}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatMontant(note.montant_estime)}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate text-orange-700">
-                          {(note as any).motif_differe || "—"}
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          {(note as any).motif_differe || '—'}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-muted-foreground">
-                          {(note as any).date_differe 
-                            ? format(new Date((note as any).date_differe), "dd MMM yyyy", { locale: fr })
-                            : "—"
-                          }
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          {(note as any).date_differe
+                            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              format(new Date((note as any).date_differe), 'dd MMM yyyy', {
+                                locale: fr,
+                              })
+                            : '—'}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 justify-end">
                             <Button
                               size="sm"
                               variant="default"
-                              onClick={() => handleAction(note, "validate")}
+                              onClick={() => handleAction(note, 'validate')}
                               className="gap-1"
                             >
                               <CheckCircle className="h-3 w-3" />
@@ -494,9 +498,7 @@ export default function ValidationNotesAEF() {
                 <CreditCard className="h-5 w-5 text-success" />
                 Notes validées à imputer
               </CardTitle>
-              <CardDescription>
-                Notes validées en attente d'imputation budgétaire
-              </CardDescription>
+              <CardDescription>Notes validées en attente d'imputation budgétaire</CardDescription>
             </CardHeader>
             <CardContent>
               {notesToImpute.length === 0 ? (
@@ -527,7 +529,7 @@ export default function ValidationNotesAEF() {
                             onClick={() => handleGoToDetail(note.id)}
                             className="font-mono text-sm text-primary hover:underline flex items-center gap-1"
                           >
-                            {note.reference_pivot || note.numero || "—"}
+                            {note.reference_pivot || note.numero || '—'}
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         </TableCell>
@@ -535,7 +537,7 @@ export default function ValidationNotesAEF() {
                           {note.objet}
                         </TableCell>
                         <TableCell>
-                          {note.direction?.sigle || note.direction?.label || "—"}
+                          {note.direction?.sigle || note.direction?.label || '—'}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatMontant(note.montant_estime)}
@@ -546,10 +548,9 @@ export default function ValidationNotesAEF() {
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-muted-foreground">
-                          {note.validated_at 
-                            ? format(new Date(note.validated_at), "dd MMM yyyy", { locale: fr })
-                            : "—"
-                          }
+                          {note.validated_at
+                            ? format(new Date(note.validated_at), 'dd MMM yyyy', { locale: fr })
+                            : '—'}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -573,26 +574,29 @@ export default function ValidationNotesAEF() {
       </Tabs>
 
       {/* Dialog de confirmation */}
-      <Dialog open={!!selectedNote && !!actionType} onOpenChange={() => {
-        setSelectedNote(null);
-        setActionType(null);
-      }}>
+      <Dialog
+        open={!!selectedNote && !!actionType}
+        onOpenChange={() => {
+          setSelectedNote(null);
+          setActionType(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {actionType === "validate" && (
+              {actionType === 'validate' && (
                 <>
                   <CheckCircle className="h-5 w-5 text-success" />
                   Valider la note AEF
                 </>
               )}
-              {actionType === "reject" && (
+              {actionType === 'reject' && (
                 <>
                   <XCircle className="h-5 w-5 text-destructive" />
                   Rejeter la note AEF
                 </>
               )}
-              {actionType === "defer" && (
+              {actionType === 'defer' && (
                 <>
                   <Clock className="h-5 w-5 text-orange-600" />
                   Différer la note AEF
@@ -600,18 +604,22 @@ export default function ValidationNotesAEF() {
               )}
             </DialogTitle>
             <DialogDescription>
-              Note : <strong className="font-mono">{selectedNote?.reference_pivot || selectedNote?.numero}</strong>
+              Note :{' '}
+              <strong className="font-mono">
+                {selectedNote?.reference_pivot || selectedNote?.numero}
+              </strong>
               <br />
               Objet : {selectedNote?.objet}
             </DialogDescription>
           </DialogHeader>
 
-          {actionType === "validate" ? (
+          {actionType === 'validate' ? (
             <div className="py-4">
               <Alert className="border-success/20 bg-success/5">
                 <CheckCircle className="h-4 w-4 text-success" />
                 <AlertDescription>
-                  En validant cette note, elle sera disponible pour <strong>imputation budgétaire</strong>.
+                  En validant cette note, elle sera disponible pour{' '}
+                  <strong>imputation budgétaire</strong>.
                 </AlertDescription>
               </Alert>
             </div>
@@ -619,23 +627,23 @@ export default function ValidationNotesAEF() {
             <div className="space-y-4 py-4">
               <div>
                 <Label htmlFor="motif">
-                  {actionType === "reject" ? "Motif de rejet *" : "Motif de report *"}
+                  {actionType === 'reject' ? 'Motif de rejet *' : 'Motif de report *'}
                 </Label>
                 <Textarea
                   id="motif"
                   value={motif}
                   onChange={(e) => setMotif(e.target.value)}
                   placeholder={
-                    actionType === "reject"
-                      ? "Expliquez la raison du rejet..."
-                      : "Expliquez les conditions de reprise..."
+                    actionType === 'reject'
+                      ? 'Expliquez la raison du rejet...'
+                      : 'Expliquez les conditions de reprise...'
                   }
                   rows={3}
-                  className={!motif.trim() ? "border-destructive" : ""}
+                  className={!motif.trim() ? 'border-destructive' : ''}
                 />
               </div>
 
-              {actionType === "defer" && (
+              {actionType === 'defer' && (
                 <div>
                   <Label htmlFor="deadline">Date limite de correction (optionnelle)</Label>
                   <Input
@@ -661,13 +669,13 @@ export default function ValidationNotesAEF() {
             </Button>
             <Button
               onClick={handleConfirm}
-              disabled={isProcessing || (actionType !== "validate" && !motif.trim())}
-              variant={actionType === "reject" ? "destructive" : "default"}
+              disabled={isProcessing || (actionType !== 'validate' && !motif.trim())}
+              variant={actionType === 'reject' ? 'destructive' : 'default'}
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {actionType === "validate" && "Confirmer la validation"}
-              {actionType === "reject" && "Confirmer le rejet"}
-              {actionType === "defer" && "Confirmer le report"}
+              {actionType === 'validate' && 'Confirmer la validation'}
+              {actionType === 'reject' && 'Confirmer le rejet'}
+              {actionType === 'defer' && 'Confirmer le report'}
             </Button>
           </DialogFooter>
         </DialogContent>

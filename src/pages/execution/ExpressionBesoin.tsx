@@ -1,19 +1,30 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useExpressionsBesoin } from "@/hooks/useExpressionsBesoin";
-import { ExpressionBesoinForm } from "@/components/expression-besoin/ExpressionBesoinForm";
-import { ExpressionBesoinFromImputationForm, ImputationValidee } from "@/components/expression-besoin/ExpressionBesoinFromImputationForm";
-import { ExpressionBesoinList } from "@/components/expression-besoin/ExpressionBesoinList";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import { ExpressionBesoinForm } from '@/components/expression-besoin/ExpressionBesoinForm';
+import {
+  ExpressionBesoinFromImputationForm,
+  ImputationValidee,
+} from '@/components/expression-besoin/ExpressionBesoinFromImputationForm';
+import { ExpressionBesoinList } from '@/components/expression-besoin/ExpressionBesoinList';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  Briefcase,
   FileText,
   Clock,
   CheckCircle2,
@@ -27,18 +38,19 @@ import {
   Eye,
   ShoppingCart,
   FileSignature,
-} from "lucide-react";
-import { BudgetChainExportButton } from "@/components/export/BudgetChainExportButton";
+} from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 
 export default function ExpressionBesoin() {
-  const { exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -55,30 +67,32 @@ export default function ExpressionBesoin() {
 
   const [showForm, setShowForm] = useState(false);
   const [showImputationForm, setShowImputationForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("a_traiter");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('a_traiter');
   const [sourceImputation, setSourceImputation] = useState<ImputationValidee | null>(null);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
 
   // Gérer le paramètre sourceImputation depuis l'URL
   useEffect(() => {
-    const sourceImputationId = searchParams.get("sourceImputation");
+    const sourceImputationId = searchParams.get('sourceImputation');
     if (sourceImputationId) {
       setIsLoadingSource(true);
       supabase
-        .from("imputations")
-        .select(`
+        .from('imputations')
+        .select(
+          `
           id, reference, objet, montant, code_imputation, direction_id, dossier_id,
           direction:directions(id, label, sigle),
           budget_line:budget_lines(id, code, label)
-        `)
-        .eq("id", sourceImputationId)
+        `
+        )
+        .eq('id', sourceImputationId)
         .single()
         .then(({ data, error }) => {
           setIsLoadingSource(false);
           if (error) {
             toast.error("Impossible de charger l'imputation source");
-            searchParams.delete("sourceImputation");
+            searchParams.delete('sourceImputation');
             setSearchParams(searchParams, { replace: true });
           } else if (data) {
             setSourceImputation(data as unknown as ImputationValidee);
@@ -91,7 +105,7 @@ export default function ExpressionBesoin() {
   const handleCloseImputationForm = () => {
     setShowImputationForm(false);
     setSourceImputation(null);
-    searchParams.delete("sourceImputation");
+    searchParams.delete('sourceImputation');
     setSearchParams(searchParams, { replace: true });
   };
 
@@ -104,25 +118,25 @@ export default function ExpressionBesoin() {
 
   const getFilteredByTab = () => {
     switch (activeTab) {
-      case "brouillons":
-        return filteredExpressions.filter((e) => e.statut === "brouillon");
-      case "a_valider":
-        return filteredExpressions.filter((e) => e.statut === "soumis");
-      case "validees":
-        return filteredExpressions.filter((e) => e.statut === "validé");
-      case "rejetees":
-        return filteredExpressions.filter((e) => e.statut === "rejeté");
-      case "differees":
-        return filteredExpressions.filter((e) => e.statut === "différé");
-      case "satisfaites":
-        return filteredExpressions.filter((e) => e.statut === "satisfaite");
+      case 'brouillons':
+        return filteredExpressions.filter((e) => e.statut === 'brouillon');
+      case 'a_valider':
+        return filteredExpressions.filter((e) => e.statut === 'soumis');
+      case 'validees':
+        return filteredExpressions.filter((e) => e.statut === 'validé');
+      case 'rejetees':
+        return filteredExpressions.filter((e) => e.statut === 'rejeté');
+      case 'differees':
+        return filteredExpressions.filter((e) => e.statut === 'différé');
+      case 'satisfaites':
+        return filteredExpressions.filter((e) => e.statut === 'satisfaite');
       default:
         return filteredExpressions;
     }
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   if (isLoading || isLoadingSource) {
     return (
@@ -134,33 +148,29 @@ export default function ExpressionBesoin() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="page-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="page-title">Expressions de Besoin</h1>
-          <p className="page-description">
-            Gestion des demandes d'acquisition depuis les imputations validées - Exercice {exercice}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <BudgetChainExportButton step="expression" />
-          <Button variant="outline" onClick={() => setShowForm(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Depuis marché
-          </Button>
-          <Button onClick={() => setShowImputationForm(true)}>
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Nouvelle EB
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Expressions de Besoin"
+        description="Formalisation des besoins"
+        icon={Briefcase}
+        stepNumber={4}
+        backUrl="/"
+      >
+        <BudgetChainExportButton step="expression" />
+        <Button variant="outline" onClick={() => setShowForm(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Depuis marché
+        </Button>
+        <Button onClick={() => setShowImputationForm(true)}>
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Nouvelle EB
+        </Button>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              À traiter
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">À traiter</CardTitle>
             <Tag className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
@@ -171,9 +181,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Brouillons
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Brouillons</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -184,9 +192,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              À valider
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">À valider</CardTitle>
             <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
@@ -197,9 +203,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Validées
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Validées</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
@@ -210,9 +214,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Satisfaites
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Satisfaites</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
@@ -223,9 +225,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rejetées
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Rejetées</CardTitle>
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
@@ -236,9 +236,7 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Différées
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Différées</CardTitle>
             <PauseCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -259,8 +257,12 @@ export default function ExpressionBesoin() {
                   Imputation budgétaire requise
                 </h4>
                 <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                  Pour créer une Expression de Besoin, vous devez d'abord disposer d'au moins une imputation validée.
-                  Rendez-vous sur la page <a href="/execution/imputation" className="underline font-medium">Imputation</a> pour imputer une Note AEF validée.
+                  Pour créer une Expression de Besoin, vous devez d'abord disposer d'au moins une
+                  imputation validée. Rendez-vous sur la page{' '}
+                  <a href="/execution/imputation" className="underline font-medium">
+                    Imputation
+                  </a>{' '}
+                  pour imputer une Note AEF validée.
                 </p>
               </div>
             </div>
@@ -274,9 +276,7 @@ export default function ExpressionBesoin() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <CardTitle>Expressions de besoin</CardTitle>
-              <CardDescription>
-                Créer des EB depuis les imputations validées
-              </CardDescription>
+              <CardDescription>Créer des EB depuis les imputations validées</CardDescription>
             </div>
             <div className="relative w-full md:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -293,31 +293,22 @@ export default function ExpressionBesoin() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4 flex flex-wrap gap-1">
               <TabsTrigger value="a_traiter" className="gap-1">
-                <Tag className="h-3 w-3" />
-                À traiter
-                <Badge variant="secondary" className="ml-1 text-xs">{imputationsValidees.length}</Badge>
+                <Tag className="h-3 w-3" />À traiter
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {imputationsValidees.length}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="brouillons">
                 Brouillons ({expressionsBrouillon?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="a_valider">
-                À valider ({expressionsAValider.length})
-              </TabsTrigger>
-              <TabsTrigger value="validees">
-                Validées ({expressionsValidees.length})
-              </TabsTrigger>
+              <TabsTrigger value="a_valider">À valider ({expressionsAValider.length})</TabsTrigger>
+              <TabsTrigger value="validees">Validées ({expressionsValidees.length})</TabsTrigger>
               <TabsTrigger value="satisfaites">
                 Satisfaites ({expressionsSatisfaites?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="rejetees">
-                Rejetées ({expressionsRejetees.length})
-              </TabsTrigger>
-              <TabsTrigger value="differees">
-                Différées ({expressionsDifferees.length})
-              </TabsTrigger>
-              <TabsTrigger value="toutes">
-                Toutes ({expressions.length})
-              </TabsTrigger>
+              <TabsTrigger value="rejetees">Rejetées ({expressionsRejetees.length})</TabsTrigger>
+              <TabsTrigger value="differees">Différées ({expressionsDifferees.length})</TabsTrigger>
+              <TabsTrigger value="toutes">Toutes ({expressions.length})</TabsTrigger>
             </TabsList>
 
             {/* Onglet Imputations à traiter */}
@@ -341,23 +332,30 @@ export default function ExpressionBesoin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {imputationsValidees.map((imp: any) => (
                         <TableRow key={imp.id}>
-                          <TableCell className="font-mono text-sm">{imp.reference || "-"}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {imp.reference || '-'}
+                          </TableCell>
                           <TableCell className="max-w-[250px] truncate">{imp.objet}</TableCell>
-                          <TableCell>{imp.direction?.sigle || imp.direction?.label || "-"}</TableCell>
-                          <TableCell className="text-right font-medium">{formatMontant(imp.montant)}</TableCell>
+                          <TableCell>
+                            {imp.direction?.sigle || imp.direction?.label || '-'}
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(imp.montant)}
+                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => navigate(`/execution/imputation?view=${imp.id}`)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 onClick={() => {
                                   setSourceImputation(imp);
                                   setShowImputationForm(true);
@@ -397,12 +395,15 @@ export default function ExpressionBesoin() {
                         </TableCell>
                       </TableRow>
                     ) : (
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       expressionsValidees.map((eb: any) => (
                         <TableRow key={eb.id}>
-                          <TableCell className="font-mono text-sm">{eb.numero || "-"}</TableCell>
+                          <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
                           <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
-                          <TableCell>{eb.direction?.sigle || eb.direction?.label || "-"}</TableCell>
-                          <TableCell className="text-right font-medium">{formatMontant(eb.montant_estime)}</TableCell>
+                          <TableCell>{eb.direction?.sigle || eb.direction?.label || '-'}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(eb.montant_estime)}
+                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -411,12 +412,18 @@ export default function ExpressionBesoin() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => navigate(`/execution/expression-besoin?view=${eb.id}`)}>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigate(`/execution/expression-besoin?view=${eb.id}`)
+                                  }
+                                >
                                   <Eye className="mr-2 h-4 w-4" />
                                   Voir détails
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => navigate(`/execution/passation-marche?sourceEB=${eb.id}`)}
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigate(`/execution/passation-marche?sourceEB=${eb.id}`)
+                                  }
                                   className="text-primary"
                                 >
                                   <FileSignature className="mr-2 h-4 w-4" />
@@ -434,11 +441,13 @@ export default function ExpressionBesoin() {
             </TabsContent>
 
             {/* Autres onglets */}
-            {["toutes", "brouillons", "a_valider", "satisfaites", "rejetees", "differees"].map((tab) => (
-              <TabsContent key={tab} value={tab}>
-                <ExpressionBesoinList expressions={getFilteredByTab()} />
-              </TabsContent>
-            ))}
+            {['toutes', 'brouillons', 'a_valider', 'satisfaites', 'rejetees', 'differees'].map(
+              (tab) => (
+                <TabsContent key={tab} value={tab}>
+                  <ExpressionBesoinList expressions={getFilteredByTab()} />
+                </TabsContent>
+              )
+            )}
           </Tabs>
         </CardContent>
       </Card>
@@ -452,7 +461,7 @@ export default function ExpressionBesoin() {
         onOpenChange={handleCloseImputationForm}
         sourceImputation={sourceImputation}
         imputationsValidees={imputationsValidees}
-        onSuccess={() => setActiveTab("toutes")}
+        onSuccess={() => setActiveTab('toutes')}
       />
     </div>
   );

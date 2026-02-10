@@ -1,23 +1,23 @@
-import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NoteSEFForm } from "@/components/notes-sef/NoteSEFForm";
-import { NoteSEFList } from "@/components/notes-sef/NoteSEFList";
-import { NoteSEFPreviewDrawer } from "@/components/notes-sef/NoteSEFPreviewDrawer";
-import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
-import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
-import { useNotesSEF, NoteSEF } from "@/hooks/useNotesSEF";
-import { useNotesSEFList } from "@/hooks/useNotesSEFList";
-import { useNotesSEFExport } from "@/hooks/useNotesSEFExport";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
-import { NotesFiltersBar, type FiltersState } from "@/components/shared/NotesFiltersBar";
-import { NotesPagination } from "@/components/shared/NotesPagination";
+import { useState, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NoteSEFForm } from '@/components/notes-sef/NoteSEFForm';
+import { NoteSEFList } from '@/components/notes-sef/NoteSEFList';
+import { NoteSEFPreviewDrawer } from '@/components/notes-sef/NoteSEFPreviewDrawer';
+import { NoteSEFRejectDialog } from '@/components/notes-sef/NoteSEFRejectDialog';
+import { NoteSEFDeferDialog } from '@/components/notes-sef/NoteSEFDeferDialog';
+import { useNotesSEF, NoteSEF } from '@/hooks/useNotesSEF';
+import { useNotesSEFList } from '@/hooks/useNotesSEFList';
+import { useNotesSEFExport } from '@/hooks/useNotesSEFExport';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { NotesFiltersBar } from '@/components/shared/NotesFiltersBar';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   Plus,
   Lock,
@@ -31,21 +31,21 @@ import {
   Loader2,
   FileSpreadsheet,
   Printer,
-} from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
   const { exportNotesSEF, exportNotesSEFPDF, isExporting, exportProgress } = useNotesSEFExport();
-  
+
   // Nouveau hook pour la liste paginée avec filtres avancés
   const {
     notes: filteredNotes,
@@ -66,14 +66,8 @@ export default function NotesSEF() {
   } = useNotesSEFList({ pageSize: 20 });
 
   // Hook existant pour les mutations
-  const {
-    submitNote,
-    validateNote,
-    rejectNote,
-    deferNote,
-    resubmitNote,
-    deleteNote,
-  } = useNotesSEF();
+  const { submitNote, validateNote, rejectNote, deferNote, resubmitNote, deleteNote } =
+    useNotesSEF();
 
   // État local pour les dialogs
   const [formOpen, setFormOpen] = useState(false);
@@ -82,7 +76,7 @@ export default function NotesSEF() {
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
 
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+  const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
 
   // Compteurs dérivés
   const brouillonsCount = counts.brouillon;
@@ -179,76 +173,68 @@ export default function NotesSEF() {
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
       <WorkflowStepIndicator currentStep={1} />
-      
+
       {/* Aide contextuelle */}
       <ModuleHelp {...MODULE_HELP_CONFIG.notes_sef} />
 
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle 
-          title="Notes SEF" 
-          description="Gestion des Notes Sans Effet Financier" 
-        />
-        <div className="flex items-center gap-2">
-          {canValidate && (
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = "/notes-sef/validation"}
-              className="gap-2"
-            >
-              <CheckCircle className="h-4 w-4" />
-              Espace validation ({aValiderCount})
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                disabled={isExporting}
-                className="gap-2"
-              >
-                {isExporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-                {isExporting ? (exportProgress || "Export...") : "Exporter"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleExportExcel} disabled={isExporting}>
-                <FileSpreadsheet className="h-4 w-4 mr-2" />
-                Exporter en Excel
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
-                <Printer className="h-4 w-4 mr-2" />
-                Exporter en PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button 
-                    onClick={() => setFormOpen(true)} 
-                    className="gap-2"
-                    disabled={!canWrite}
-                  >
-                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    Nouvelle note SEF
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
+      <PageHeader
+        title="Notes SEF"
+        description="Gestion des Notes Sans Effet Financier"
+        icon={FileText}
+        stepNumber={1}
+        backUrl="/"
+      >
+        {canValidate && (
+          <Button
+            variant="outline"
+            onClick={() => (window.location.href = '/notes-sef/validation')}
+            className="gap-2"
+          >
+            <CheckCircle className="h-4 w-4" />
+            Espace validation ({aValiderCount})
+          </Button>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" disabled={isExporting} className="gap-2">
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
               )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+              {isExporting ? exportProgress || 'Export...' : 'Exporter'}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportExcel} disabled={isExporting}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Exporter en Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
+              <Printer className="h-4 w-4 mr-2" />
+              Exporter en PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvelle note SEF
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* KPIs - Compteurs serveur-side */}
       <div className="grid gap-4 md:grid-cols-6">
@@ -268,9 +254,7 @@ export default function NotesSEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Brouillons</p>
-                <p className="text-2xl font-bold text-muted-foreground">
-                  {brouillonsCount}
-                </p>
+                <p className="text-2xl font-bold text-muted-foreground">{brouillonsCount}</p>
               </div>
               <Edit className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -281,9 +265,7 @@ export default function NotesSEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">À valider</p>
-                <p className="text-2xl font-bold text-warning">
-                  {aValiderCount}
-                </p>
+                <p className="text-2xl font-bold text-warning">{aValiderCount}</p>
               </div>
               <Send className="h-8 w-8 text-warning/50" />
             </div>
@@ -294,9 +276,7 @@ export default function NotesSEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Validées</p>
-                <p className="text-2xl font-bold text-success">
-                  {counts.valide}
-                </p>
+                <p className="text-2xl font-bold text-success">{counts.valide}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
             </div>
@@ -307,9 +287,7 @@ export default function NotesSEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Différées</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {counts.differe}
-                </p>
+                <p className="text-2xl font-bold text-orange-600">{counts.differe}</p>
               </div>
               <Clock className="h-8 w-8 text-orange-500/50" />
             </div>
@@ -320,9 +298,7 @@ export default function NotesSEF() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Rejetées</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {counts.rejete}
-                </p>
+                <p className="text-2xl font-bold text-destructive">{counts.rejete}</p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
@@ -349,21 +325,11 @@ export default function NotesSEF() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
-          <TabsTrigger value="brouillons">
-            Brouillons ({brouillonsCount})
-          </TabsTrigger>
-          <TabsTrigger value="a_valider">
-            À valider ({aValiderCount})
-          </TabsTrigger>
-          <TabsTrigger value="validees">
-            Validées ({counts.valide})
-          </TabsTrigger>
-          <TabsTrigger value="differees">
-            Différées ({counts.differe})
-          </TabsTrigger>
-          <TabsTrigger value="rejetees">
-            Rejetées ({counts.rejete})
-          </TabsTrigger>
+          <TabsTrigger value="brouillons">Brouillons ({brouillonsCount})</TabsTrigger>
+          <TabsTrigger value="a_valider">À valider ({aValiderCount})</TabsTrigger>
+          <TabsTrigger value="validees">Validées ({counts.valide})</TabsTrigger>
+          <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
+          <TabsTrigger value="rejetees">Rejetées ({counts.rejete})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="toutes">
@@ -477,11 +443,7 @@ export default function NotesSEF() {
       )}
 
       {/* Dialogs */}
-      <NoteSEFForm
-        open={formOpen}
-        onOpenChange={handleCloseForm}
-        note={editingNote}
-      />
+      <NoteSEFForm open={formOpen} onOpenChange={handleCloseForm} note={editingNote} />
 
       <NoteSEFRejectDialog
         open={!!rejectingNote}

@@ -1,20 +1,33 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { 
-  Search, 
-  Plus, 
-  Building2, 
-  CheckCircle2, 
-  AlertCircle, 
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
+  Search,
+  Plus,
+  Building2,
+  CheckCircle2,
+  AlertCircle,
   Users,
   Eye,
   FileCheck,
@@ -26,43 +39,50 @@ import {
   FileText,
   History,
   User,
-  Upload
-} from "lucide-react";
-import { usePrestataires, usePrestaireRequests } from "@/hooks/usePrestataires";
-import { useSupplierExpiredDocuments } from "@/hooks/useSupplierDocuments";
-import { useSecteursActivite } from "@/hooks/useSecteursActivite";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
-import { toast } from "sonner";
+  Upload,
+} from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { usePrestataires, usePrestaireRequests } from '@/hooks/usePrestataires';
+import { useSupplierExpiredDocuments } from '@/hooks/useSupplierDocuments';
+import { useSecteursActivite } from '@/hooks/useSecteursActivite';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 // Sub-components for the details dialog tabs
-import { SupplierIdentityTab } from "@/components/prestataires/SupplierIdentityTab";
-import { SupplierBankTab } from "@/components/prestataires/SupplierBankTab";
-import { SupplierDocumentsTab } from "@/components/prestataires/SupplierDocumentsTab";
-import { SupplierHistoryTab } from "@/components/prestataires/SupplierHistoryTab";
-import { SupplierQualificationDialog } from "@/components/prestataires/SupplierQualificationDialog";
-import { PrestatairesImportDialog } from "@/components/prestataires/PrestatairesImportDialog";
-import { PrestatairesExportButton } from "@/components/prestataires/PrestatairesExportButton";
+import { SupplierIdentityTab } from '@/components/prestataires/SupplierIdentityTab';
+import { SupplierBankTab } from '@/components/prestataires/SupplierBankTab';
+import { SupplierDocumentsTab } from '@/components/prestataires/SupplierDocumentsTab';
+import { SupplierHistoryTab } from '@/components/prestataires/SupplierHistoryTab';
+import { PrestatairesImportDialog } from '@/components/prestataires/PrestatairesImportDialog';
+import { PrestatairesExportButton } from '@/components/prestataires/PrestatairesExportButton';
 
 export default function Prestataires() {
-  const { exercice } = useExercice();
-  const { prestataires, prestatairesActifs, isLoading, stats, suspendSupplier, activateSupplier } = usePrestataires();
+  const { exercice: _exercice } = useExercice();
+  const {
+    prestataires,
+    prestatairesActifs: _prestatairesActifs,
+    isLoading,
+    stats,
+    suspendSupplier,
+    activateSupplier,
+  } = usePrestataires();
   const { stats: requestStats } = usePrestaireRequests();
   const { secteurs } = useSecteursActivite();
 
-  const [search, setSearch] = useState("");
-  const [selectedTab, setSelectedTab] = useState("actifs");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [search, setSearch] = useState('');
+  const [selectedTab, setSelectedTab] = useState('actifs');
+  const [_statusFilter, _setStatusFilter] = useState<string>('all');
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [selectedPrestataire, setSelectedPrestataire] = useState<typeof prestataires[0] | null>(null);
-  const [detailsTab, setDetailsTab] = useState("identite");
-  
+  const [selectedPrestataire, setSelectedPrestataire] = useState<(typeof prestataires)[0] | null>(
+    null
+  );
+  const [detailsTab, setDetailsTab] = useState('identite');
+
   // Suspend dialog
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
-  const [suspendMotif, setSuspendMotif] = useState("");
-  
+  const [suspendMotif, setSuspendMotif] = useState('');
+
   // Import dialog
   const [showImportDialog, setShowImportDialog] = useState(false);
 
@@ -70,28 +90,31 @@ export default function Prestataires() {
   const { stats: docStats } = useSupplierExpiredDocuments();
 
   // Filtrer
-  const filteredPrestataires = prestataires.filter(p => {
-    const matchSearch = 
+  const filteredPrestataires = prestataires.filter((p) => {
+    const matchSearch =
       p.raison_sociale.toLowerCase().includes(search.toLowerCase()) ||
       p.code.toLowerCase().includes(search.toLowerCase()) ||
       p.email?.toLowerCase().includes(search.toLowerCase()) ||
       p.ninea?.toLowerCase().includes(search.toLowerCase());
-    
-    if (selectedTab === "actifs") {
-      return matchSearch && p.statut === "ACTIF";
-    } else if (selectedTab === "suspendus") {
-      return matchSearch && p.statut === "SUSPENDU";
-    } else if (selectedTab === "inactifs") {
-      return matchSearch && (p.statut === "INACTIF" || p.statut === "NOUVEAU" || p.statut === "EN_QUALIFICATION");
+
+    if (selectedTab === 'actifs') {
+      return matchSearch && p.statut === 'ACTIF';
+    } else if (selectedTab === 'suspendus') {
+      return matchSearch && p.statut === 'SUSPENDU';
+    } else if (selectedTab === 'inactifs') {
+      return (
+        matchSearch &&
+        (p.statut === 'INACTIF' || p.statut === 'NOUVEAU' || p.statut === 'EN_QUALIFICATION')
+      );
     }
     return matchSearch;
   });
 
   // Obtenir le libellé du secteur
   const getSecteurLibelle = (id: string | null) => {
-    if (!id) return "-";
-    const secteur = secteurs.find(s => s.id === id);
-    return secteur ? secteur.libelle : "-";
+    if (!id) return '-';
+    const secteur = secteurs.find((s) => s.id === id);
+    return secteur ? secteur.libelle : '-';
   };
 
   const getStatusBadge = (statut: string | null) => {
@@ -99,13 +122,17 @@ export default function Prestataires() {
     const statutUpper = statut?.toUpperCase();
 
     switch (statutUpper) {
-      case "ACTIF":
+      case 'ACTIF':
         return <Badge className="bg-green-600">Actif</Badge>;
-      case "SUSPENDU":
+      case 'SUSPENDU':
         return <Badge variant="destructive">Suspendu</Badge>;
-      case "EN_QUALIFICATION":
-        return <Badge variant="outline" className="text-blue-600 border-blue-600">En qualification</Badge>;
-      case "NOUVEAU":
+      case 'EN_QUALIFICATION':
+        return (
+          <Badge variant="outline" className="text-blue-600 border-blue-600">
+            En qualification
+          </Badge>
+        );
+      case 'NOUVEAU':
         return <Badge variant="outline">Nouveau</Badge>;
       default:
         return <Badge variant="secondary">Inactif</Badge>;
@@ -116,7 +143,7 @@ export default function Prestataires() {
     if (!selectedPrestataire || !suspendMotif.trim()) return;
     suspendSupplier({ id: selectedPrestataire.id, motif: suspendMotif });
     setShowSuspendDialog(false);
-    setSuspendMotif("");
+    setSuspendMotif('');
     setShowDetailsDialog(false);
   };
 
@@ -133,12 +160,12 @@ export default function Prestataires() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="page-header">
-        <h1 className="page-title">Gestion des Prestataires</h1>
-        <p className="page-description">
-          Répertoire des fournisseurs et prestataires - Exercice {exercice}
-        </p>
-      </div>
+      <PageHeader
+        title="Prestataires"
+        description="Gestion des fournisseurs et prestataires"
+        icon={Building2}
+        backUrl="/"
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -157,9 +184,7 @@ export default function Prestataires() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Actifs
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Actifs</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -177,7 +202,9 @@ export default function Prestataires() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{docStats.expired}</div>
-            <p className="text-xs text-muted-foreground">Documents à renouveler: {docStats.toRenew}</p>
+            <p className="text-xs text-muted-foreground">
+              Documents à renouveler: {docStats.toRenew}
+            </p>
           </CardContent>
         </Card>
 
@@ -196,9 +223,7 @@ export default function Prestataires() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Suspendus
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Suspendus</CardTitle>
             <AlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -220,7 +245,7 @@ export default function Prestataires() {
           />
         </div>
         <div className="flex gap-2">
-          <PrestatairesExportButton 
+          <PrestatairesExportButton
             prestataires={filteredPrestataires}
             filters={{ search, statut: selectedTab }}
           />
@@ -248,18 +273,10 @@ export default function Prestataires() {
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <CardHeader className="pb-0">
             <TabsList>
-              <TabsTrigger value="actifs">
-                Actifs ({stats.actifs})
-              </TabsTrigger>
-              <TabsTrigger value="suspendus">
-                Suspendus ({stats.suspendus})
-              </TabsTrigger>
-              <TabsTrigger value="inactifs">
-                Autres ({stats.inactifs})
-              </TabsTrigger>
-              <TabsTrigger value="all">
-                Tous ({stats.total})
-              </TabsTrigger>
+              <TabsTrigger value="actifs">Actifs ({stats.actifs})</TabsTrigger>
+              <TabsTrigger value="suspendus">Suspendus ({stats.suspendus})</TabsTrigger>
+              <TabsTrigger value="inactifs">Autres ({stats.inactifs})</TabsTrigger>
+              <TabsTrigger value="all">Tous ({stats.total})</TabsTrigger>
             </TabsList>
           </CardHeader>
           <CardContent className="pt-4">
@@ -299,7 +316,7 @@ export default function Prestataires() {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => copyToClipboard(prestataire.code, "Code")}
+                            onClick={() => copyToClipboard(prestataire.code, 'Code')}
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -316,11 +333,15 @@ export default function Prestataires() {
                       <TableCell>
                         <div className="text-sm">
                           {prestataire.email && <div>{prestataire.email}</div>}
-                          {prestataire.telephone && <div className="text-muted-foreground">{prestataire.telephone}</div>}
+                          {prestataire.telephone && (
+                            <div className="text-muted-foreground">{prestataire.telephone}</div>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{getSecteurLibelle(prestataire.secteur_principal_id)}</TableCell>
-                      <TableCell className="font-mono text-sm">{prestataire.ninea || "-"}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {prestataire.ninea || '-'}
+                      </TableCell>
                       <TableCell>{getStatusBadge(prestataire.statut)}</TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -328,7 +349,7 @@ export default function Prestataires() {
                           size="sm"
                           onClick={() => {
                             setSelectedPrestataire(prestataire);
-                            setDetailsTab("identite");
+                            setDetailsTab('identite');
                             setShowDetailsDialog(true);
                           }}
                         >
@@ -359,14 +380,14 @@ export default function Prestataires() {
                   variant="ghost"
                   size="icon"
                   className="h-5 w-5"
-                  onClick={() => copyToClipboard(selectedPrestataire.code, "Code")}
+                  onClick={() => copyToClipboard(selectedPrestataire.code, 'Code')}
                 >
                   <Copy className="h-3 w-3" />
                 </Button>
               </DialogDescription>
             )}
           </DialogHeader>
-          
+
           {selectedPrestataire && (
             <Tabs value={detailsTab} onValueChange={setDetailsTab}>
               <TabsList className="grid w-full grid-cols-5">
@@ -393,8 +414,8 @@ export default function Prestataires() {
               </TabsList>
 
               <TabsContent value="identite" className="mt-4">
-                <SupplierIdentityTab 
-                  prestataire={selectedPrestataire} 
+                <SupplierIdentityTab
+                  prestataire={selectedPrestataire}
                   getSecteurLibelle={getSecteurLibelle}
                 />
               </TabsContent>
@@ -406,33 +427,39 @@ export default function Prestataires() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Nom</p>
-                        <p>{selectedPrestataire.contact_nom || "-"}</p>
+                        <p>{selectedPrestataire.contact_nom || '-'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Fonction</p>
-                        <p>{selectedPrestataire.contact_fonction || "-"}</p>
+                        <p>{selectedPrestataire.contact_fonction || '-'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Téléphone</p>
-                        <p>{selectedPrestataire.contact_telephone || selectedPrestataire.telephone || "-"}</p>
+                        <p>
+                          {selectedPrestataire.contact_telephone ||
+                            selectedPrestataire.telephone ||
+                            '-'}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Email</p>
-                        <p>{selectedPrestataire.contact_email || selectedPrestataire.email || "-"}</p>
+                        <p>
+                          {selectedPrestataire.contact_email || selectedPrestataire.email || '-'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="border-t pt-4">
                     <h4 className="font-medium mb-3">Adresse</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
                         <p className="text-sm text-muted-foreground">Adresse</p>
-                        <p>{selectedPrestataire.adresse || "-"}</p>
+                        <p>{selectedPrestataire.adresse || '-'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Ville</p>
-                        <p>{selectedPrestataire.ville || "-"}</p>
+                        <p>{selectedPrestataire.ville || '-'}</p>
                       </div>
                     </div>
                   </div>
@@ -448,8 +475,8 @@ export default function Prestataires() {
               </TabsContent>
 
               <TabsContent value="historique" className="mt-4">
-                <SupplierHistoryTab 
-                  supplierId={selectedPrestataire.id} 
+                <SupplierHistoryTab
+                  supplierId={selectedPrestataire.id}
                   supplierName={selectedPrestataire.raison_sociale}
                 />
               </TabsContent>
@@ -457,20 +484,14 @@ export default function Prestataires() {
           )}
 
           <DialogFooter className="mt-6">
-            {selectedPrestataire?.statut === "ACTIF" && (
-              <Button
-                variant="destructive"
-                onClick={() => setShowSuspendDialog(true)}
-              >
+            {selectedPrestataire?.statut === 'ACTIF' && (
+              <Button variant="destructive" onClick={() => setShowSuspendDialog(true)}>
                 <Ban className="h-4 w-4 mr-2" />
                 Suspendre
               </Button>
             )}
-            {selectedPrestataire?.statut === "SUSPENDU" && (
-              <Button
-                variant="default"
-                onClick={handleActivate}
-              >
+            {selectedPrestataire?.statut === 'SUSPENDU' && (
+              <Button variant="default" onClick={handleActivate}>
                 <Power className="h-4 w-4 mr-2" />
                 Réactiver
               </Button>
@@ -503,11 +524,7 @@ export default function Prestataires() {
             <Button variant="outline" onClick={() => setShowSuspendDialog(false)}>
               Annuler
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleSuspend}
-              disabled={!suspendMotif.trim()}
-            >
+            <Button variant="destructive" onClick={handleSuspend} disabled={!suspendMotif.trim()}>
               Confirmer la suspension
             </Button>
           </DialogFooter>
@@ -515,10 +532,7 @@ export default function Prestataires() {
       </Dialog>
 
       {/* Import Dialog */}
-      <PrestatairesImportDialog
-        open={showImportDialog}
-        onOpenChange={setShowImportDialog}
-      />
+      <PrestatairesImportDialog open={showImportDialog} onOpenChange={setShowImportDialog} />
     </div>
   );
 }

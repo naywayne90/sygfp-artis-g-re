@@ -1,15 +1,27 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useAlerts, useDashboardAlertsAggregated, type Alert } from "@/hooks/useAlerts";
-import { 
-  AlertTriangle, 
-  AlertCircle, 
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useAlerts, useDashboardAlertsAggregated, type Alert } from '@/hooks/useAlerts';
+import {
+  AlertTriangle,
+  AlertCircle,
   Search,
   CheckCircle,
   Clock,
@@ -22,69 +34,86 @@ import {
   ArrowRight,
   Filter,
   Bell,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { format, formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { formatDistanceToNow } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const getAlertIcon = (type: string) => {
   switch (type) {
-    case "depassement":
-    case "budget_depassement":
+    case 'depassement':
+    case 'budget_depassement':
       return TrendingUp;
-    case "retard":
-    case "retard_paiement":
+    case 'retard':
+    case 'retard_paiement':
       return Clock;
-    case "echeance":
-    case "contrat_echeance":
+    case 'echeance':
+    case 'contrat_echeance':
       return Calendar;
-    case "piece_manquante":
-    case "document_manquant":
+    case 'piece_manquante':
+    case 'document_manquant':
       return FileWarning;
-    case "document_expire":
+    case 'document_expire':
       return FileX;
-    case "virement_attente":
+    case 'virement_attente':
       return Banknote;
-    case "prestataire_expire":
+    case 'prestataire_expire':
       return Users;
-    case "seuil":
-    case "budget_seuil":
+    case 'seuil':
+    case 'budget_seuil':
       return AlertCircle;
     default:
       return AlertTriangle;
   }
 };
 
-const getAlertColor = (severity: "critical" | "warning" | "info") => {
+const getAlertColor = (severity: 'critical' | 'warning' | 'info') => {
   switch (severity) {
-    case "critical":
-      return "bg-destructive/10 text-destructive border-destructive/20";
-    case "warning":
-      return "bg-warning/10 text-warning border-warning/20";
-    case "info":
-      return "bg-primary/10 text-primary border-primary/20";
+    case 'critical':
+      return 'bg-destructive/10 text-destructive border-destructive/20';
+    case 'warning':
+      return 'bg-warning/10 text-warning border-warning/20';
+    case 'info':
+      return 'bg-primary/10 text-primary border-primary/20';
   }
 };
 
-const getSeverityBadge = (severity: "critical" | "warning" | "info") => {
+const getSeverityBadge = (severity: 'critical' | 'warning' | 'info') => {
   switch (severity) {
-    case "critical":
+    case 'critical':
       return <Badge variant="destructive">Critique</Badge>;
-    case "warning":
-      return <Badge variant="outline" className="border-warning text-warning">Attention</Badge>;
-    case "info":
+    case 'warning':
+      return (
+        <Badge variant="outline" className="border-warning text-warning">
+          Attention
+        </Badge>
+      );
+    case 'info':
       return <Badge variant="secondary">Info</Badge>;
   }
 };
 
 const getStatusBadge = (status: string) => {
   switch (status) {
-    case "open":
-      return <Badge variant="outline" className="border-destructive/50 text-destructive">Ouverte</Badge>;
-    case "acknowledged":
-      return <Badge variant="outline" className="border-warning/50 text-warning">Prise en compte</Badge>;
-    case "resolved":
-      return <Badge variant="outline" className="border-success/50 text-success">Résolue</Badge>;
+    case 'open':
+      return (
+        <Badge variant="outline" className="border-destructive/50 text-destructive">
+          Ouverte
+        </Badge>
+      );
+    case 'acknowledged':
+      return (
+        <Badge variant="outline" className="border-warning/50 text-warning">
+          Prise en compte
+        </Badge>
+      );
+    case 'resolved':
+      return (
+        <Badge variant="outline" className="border-success/50 text-success">
+          Résolue
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -92,20 +121,20 @@ const getStatusBadge = (status: string) => {
 
 const getAlertLink = (alert: Alert): string | undefined => {
   switch (alert.entity_table) {
-    case "budget_lines":
+    case 'budget_lines':
       return `/planification/budget`;
-    case "budget_engagements":
+    case 'budget_engagements':
       return `/engagements`;
-    case "budget_liquidations":
+    case 'budget_liquidations':
       return `/liquidations`;
-    case "ordonnancements":
+    case 'ordonnancements':
       return `/ordonnancements`;
-    case "credit_transfers":
+    case 'credit_transfers':
       return `/planification/virements`;
-    case "supplier_documents":
-    case "prestataires":
+    case 'supplier_documents':
+    case 'prestataires':
       return `/contractualisation/prestataires`;
-    case "contrats":
+    case 'contrats':
       return `/contractualisation/contrats`;
     default:
       return undefined;
@@ -113,40 +142,43 @@ const getAlertLink = (alert: Alert): string | undefined => {
 };
 
 export default function Alertes() {
-  const [search, setSearch] = useState("");
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("open");
+  const [search, setSearch] = useState('');
+  const [severityFilter, setSeverityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('open');
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
-  const [resolveComment, setResolveComment] = useState("");
+  const [resolveComment, setResolveComment] = useState('');
 
   const { data: alerts, isLoading } = useDashboardAlertsAggregated();
   const { resolveAlert, acknowledgeAlert, isResolving, stats } = useAlerts();
 
   // Filter alerts
-  const filteredAlerts = alerts?.filter((alert) => {
-    if (search) {
-      const searchLower = search.toLowerCase();
-      if (!alert.title.toLowerCase().includes(searchLower) &&
-          !alert.description?.toLowerCase().includes(searchLower)) {
+  const filteredAlerts =
+    alerts?.filter((alert) => {
+      if (search) {
+        const searchLower = search.toLowerCase();
+        if (
+          !alert.title.toLowerCase().includes(searchLower) &&
+          !alert.description?.toLowerCase().includes(searchLower)
+        ) {
+          return false;
+        }
+      }
+      if (severityFilter !== 'all' && alert.severity !== severityFilter) {
         return false;
       }
-    }
-    if (severityFilter !== "all" && alert.severity !== severityFilter) {
-      return false;
-    }
-    if (statusFilter !== "all" && alert.status !== statusFilter) {
-      return false;
-    }
-    return true;
-  }) || [];
+      if (statusFilter !== 'all' && alert.status !== statusFilter) {
+        return false;
+      }
+      return true;
+    }) || [];
 
   const handleResolve = () => {
     if (selectedAlert) {
       resolveAlert({ alertId: selectedAlert.id, comment: resolveComment });
       setResolveDialogOpen(false);
       setSelectedAlert(null);
-      setResolveComment("");
+      setResolveComment('');
     }
   };
 
@@ -158,19 +190,16 @@ export default function Alertes() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title flex items-center gap-2">
-          <Bell className="h-6 w-6" />
-          Centre d'alertes
-        </h1>
-        <p className="page-description">
-          Suivi des alertes et anomalies détectées dans le système
-        </p>
-      </div>
+      <PageHeader
+        title="Alertes"
+        description="Alertes et notifications importantes"
+        icon={AlertTriangle}
+        backUrl="/"
+      />
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className={stats.critical > 0 ? "border-destructive/50" : ""}>
+        <Card className={stats.critical > 0 ? 'border-destructive/50' : ''}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-destructive/10">
@@ -183,7 +212,7 @@ export default function Alertes() {
             </div>
           </CardContent>
         </Card>
-        <Card className={stats.warning > 0 ? "border-warning/50" : ""}>
+        <Card className={stats.warning > 0 ? 'border-warning/50' : ''}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-lg bg-warning/10">
@@ -276,9 +305,11 @@ export default function Alertes() {
         <CardContent>
           {isLoading ? (
             <div className="space-y-3">
-              {Array(5).fill(0).map((_, i) => (
-                <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
-              ))}
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
+                ))}
             </div>
           ) : filteredAlerts.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
@@ -290,7 +321,7 @@ export default function Alertes() {
               {filteredAlerts.map((alert) => {
                 const Icon = getAlertIcon(alert.type);
                 const link = getAlertLink(alert);
-                
+
                 return (
                   <div
                     key={alert.id}
@@ -310,14 +341,13 @@ export default function Alertes() {
                       )}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>
-                          {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true, locale: fr })}
+                          {formatDistanceToNow(new Date(alert.created_at), {
+                            addSuffix: true,
+                            locale: fr,
+                          })}
                         </span>
-                        {alert.owner_role && (
-                          <span>Responsable : {alert.owner_role}</span>
-                        )}
-                        {alert.module && (
-                          <span>Module : {alert.module}</span>
-                        )}
+                        {alert.owner_role && <span>Responsable : {alert.owner_role}</span>}
+                        {alert.module && <span>Module : {alert.module}</span>}
                       </div>
                       {alert.resolution_comment && (
                         <div className="mt-2 p-2 bg-success/5 rounded text-sm">
@@ -334,7 +364,7 @@ export default function Alertes() {
                           </Button>
                         </Link>
                       )}
-                      {alert.status === "open" && !alert.auto_generated && (
+                      {alert.status === 'open' && !alert.auto_generated && (
                         <>
                           <Button
                             variant="outline"
@@ -352,7 +382,7 @@ export default function Alertes() {
                           </Button>
                         </>
                       )}
-                      {alert.status === "acknowledged" && !alert.auto_generated && (
+                      {alert.status === 'acknowledged' && !alert.auto_generated && (
                         <Button
                           variant="default"
                           size="sm"
@@ -377,9 +407,7 @@ export default function Alertes() {
             <DialogTitle>Résoudre l'alerte</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              {selectedAlert?.title}
-            </p>
+            <p className="text-sm text-muted-foreground">{selectedAlert?.title}</p>
             <Textarea
               placeholder="Commentaire de résolution (optionnel)..."
               value={resolveComment}
@@ -392,7 +420,7 @@ export default function Alertes() {
               Annuler
             </Button>
             <Button onClick={handleResolve} disabled={isResolving}>
-              {isResolving ? "Résolution..." : "Marquer comme résolu"}
+              {isResolving ? 'Résolution...' : 'Marquer comme résolu'}
             </Button>
           </DialogFooter>
         </DialogContent>

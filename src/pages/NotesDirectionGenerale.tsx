@@ -3,30 +3,31 @@
  * Gestion des notes officielles du Directeur Général avec système d'imputation
  */
 
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   NoteDGList,
   NoteDGForm,
   NoteDGDetails,
   NoteDGRejectDialog,
-} from "@/components/notes-dg-officielles";
+} from '@/components/notes-dg-officielles';
 import {
   useNotesDirectionGenerale,
   NoteDirectionGenerale,
-} from "@/hooks/useNotesDirectionGenerale";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
+} from '@/hooks/useNotesDirectionGenerale';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   Plus,
   Lock,
   FileText,
+  FileSignature,
   Send,
   CheckCircle,
   XCircle,
@@ -34,20 +35,15 @@ import {
   Edit,
   Search,
   ShieldCheck,
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function NotesDirectionGenerale() {
   const navigate = useNavigate();
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["Admin", "DG"]);
+  const canValidate = hasAnyRole(['Admin', 'DG']);
 
   const {
     notes,
@@ -67,8 +63,8 @@ export default function NotesDirectionGenerale() {
   const [editingNote, setEditingNote] = useState<NoteDirectionGenerale | null>(null);
   const [viewingNote, setViewingNote] = useState<NoteDirectionGenerale | null>(null);
   const [rejectingNote, setRejectingNote] = useState<NoteDirectionGenerale | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("toutes");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('toutes');
 
   // Compteurs
   const counts = {
@@ -87,19 +83,19 @@ export default function NotesDirectionGenerale() {
 
     // Filtrer par onglet
     switch (activeTab) {
-      case "brouillons":
+      case 'brouillons':
         notesToFilter = notesByStatus.brouillon;
         break;
-      case "soumises":
+      case 'soumises':
         notesToFilter = notesByStatus.soumise_dg;
         break;
-      case "validees":
+      case 'validees':
         notesToFilter = notesByStatus.dg_valide;
         break;
-      case "rejetees":
+      case 'rejetees':
         notesToFilter = notesByStatus.dg_rejetee;
         break;
-      case "diffusees":
+      case 'diffusees':
         notesToFilter = notesByStatus.diffusee;
         break;
       default:
@@ -175,49 +171,40 @@ export default function NotesDirectionGenerale() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle
-          title="Notes Direction Générale"
-          description="Notes officielles du DG avec système d'imputation"
-        />
-        <div className="flex items-center gap-2">
-          {canValidate && counts.soumise_dg > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => navigate("/notes-dg/validation")}
-              className="gap-2"
-            >
-              <ShieldCheck className="h-4 w-4" />
-              Espace validation ({counts.soumise_dg})
-            </Button>
-          )}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    onClick={() => setFormOpen(true)}
-                    className="gap-2"
-                    disabled={!canWrite}
-                  >
-                    {!canWrite ? (
-                      <Lock className="h-4 w-4" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                    Nouvelle note DG
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <PageHeader
+        title="Notes DG"
+        description="Notes officielles du Directeur Général"
+        icon={FileSignature}
+        backUrl="/"
+      >
+        {canValidate && counts.soumise_dg > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => navigate('/notes-dg/validation')}
+            className="gap-2"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Espace validation ({counts.soumise_dg})
+          </Button>
+        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvelle note DG
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-6">
@@ -237,9 +224,7 @@ export default function NotesDirectionGenerale() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Brouillons</p>
-                <p className="text-2xl font-bold text-muted-foreground">
-                  {counts.brouillon}
-                </p>
+                <p className="text-2xl font-bold text-muted-foreground">{counts.brouillon}</p>
               </div>
               <Edit className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -250,9 +235,7 @@ export default function NotesDirectionGenerale() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Soumises</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {counts.soumise_dg}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{counts.soumise_dg}</p>
               </div>
               <Send className="h-8 w-8 text-blue-500/50" />
             </div>
@@ -263,9 +246,7 @@ export default function NotesDirectionGenerale() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Validées</p>
-                <p className="text-2xl font-bold text-success">
-                  {counts.dg_valide}
-                </p>
+                <p className="text-2xl font-bold text-success">{counts.dg_valide}</p>
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
             </div>
@@ -276,9 +257,7 @@ export default function NotesDirectionGenerale() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Rejetées</p>
-                <p className="text-2xl font-bold text-destructive">
-                  {counts.dg_rejetee}
-                </p>
+                <p className="text-2xl font-bold text-destructive">{counts.dg_rejetee}</p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
@@ -289,9 +268,7 @@ export default function NotesDirectionGenerale() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Diffusées</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {counts.diffusee}
-                </p>
+                <p className="text-2xl font-bold text-purple-600">{counts.diffusee}</p>
               </div>
               <Share2 className="h-8 w-8 text-purple-500/50" />
             </div>
@@ -417,11 +394,7 @@ export default function NotesDirectionGenerale() {
       </Tabs>
 
       {/* Dialogs */}
-      <NoteDGForm
-        open={formOpen}
-        onOpenChange={handleCloseForm}
-        note={editingNote}
-      />
+      <NoteDGForm open={formOpen} onOpenChange={handleCloseForm} note={editingNote} />
 
       <NoteDGDetails
         open={!!viewingNote}

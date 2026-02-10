@@ -3,19 +3,19 @@
  * Gestion des approvisionnements des comptes bancaires
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -32,8 +32,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import {
   Plus,
   Search,
@@ -44,31 +44,35 @@ import {
   CalendarIcon,
   Banknote,
   RefreshCw,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useApprovisionnementsTresorerie, CreateApprovisionnementData } from "@/hooks/useApprovisionnementsTresorerie";
-import { useCompteBancaires } from "@/hooks/useCompteBancaires";
-import { useFundingSources } from "@/hooks/useFundingSources";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import {
+  useApprovisionnementsTresorerie,
+  CreateApprovisionnementData,
+} from '@/hooks/useApprovisionnementsTresorerie';
+import { useCompteBancaires } from '@/hooks/useCompteBancaires';
+import { useFundingSources } from '@/hooks/useFundingSources';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export default function ApprovisionnementsBanque() {
-  const { selectedExercice, isReadOnly } = useExercice();
-  const [search, setSearch] = useState("");
-  const [compteFilter, setCompteFilter] = useState<string>("all");
-  const [origineFilter, setOrigineFilter] = useState<string>("all");
+  const { selectedExercice: _selectedExercice, isReadOnly } = useExercice();
+  const [search, setSearch] = useState('');
+  const [compteFilter, setCompteFilter] = useState<string>('all');
+  const [origineFilter, setOrigineFilter] = useState<string>('all');
   const [dateDebut, setDateDebut] = useState<Date | undefined>();
   const [dateFin, setDateFin] = useState<Date | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<Partial<CreateApprovisionnementData>>({
-    type: "BANK",
+    type: 'BANK',
     montant: 0,
-    date_operation: new Date().toISOString().split("T")[0],
+    date_operation: new Date().toISOString().split('T')[0],
   });
 
   // Hooks
@@ -82,11 +86,11 @@ export default function ApprovisionnementsBanque() {
     formatMontant,
     refetch,
   } = useApprovisionnementsTresorerie({
-    type: "BANK",
-    compte_bancaire_id: compteFilter !== "all" ? compteFilter : undefined,
-    origine_fonds_id: origineFilter !== "all" ? origineFilter : undefined,
-    date_debut: dateDebut?.toISOString().split("T")[0],
-    date_fin: dateFin?.toISOString().split("T")[0],
+    type: 'BANK',
+    compte_bancaire_id: compteFilter !== 'all' ? compteFilter : undefined,
+    origine_fonds_id: origineFilter !== 'all' ? origineFilter : undefined,
+    date_debut: dateDebut?.toISOString().split('T')[0],
+    date_fin: dateFin?.toISOString().split('T')[0],
     search,
   });
 
@@ -103,33 +107,33 @@ export default function ApprovisionnementsBanque() {
     }
 
     createApprovisionnement({
-      type: "BANK",
+      type: 'BANK',
       compte_bancaire_id: formData.compte_bancaire_id,
       montant: formData.montant,
-      date_operation: formData.date_operation || new Date().toISOString().split("T")[0],
+      date_operation: formData.date_operation || new Date().toISOString().split('T')[0],
       date_valeur: formData.date_valeur,
       origine_fonds_id: formData.origine_fonds_id,
       reference_piece: formData.reference_piece,
       description: formData.description,
-      statut: "valide",
+      statut: 'valide',
     });
 
     setIsDialogOpen(false);
     setFormData({
-      type: "BANK",
+      type: 'BANK',
       montant: 0,
-      date_operation: new Date().toISOString().split("T")[0],
+      date_operation: new Date().toISOString().split('T')[0],
     });
   };
 
   // Statut badge
   const getStatutBadge = (statut: string) => {
     switch (statut) {
-      case "valide":
+      case 'valide':
         return <Badge className="bg-green-100 text-green-800">Validé</Badge>;
-      case "brouillon":
+      case 'brouillon':
         return <Badge variant="secondary">Brouillon</Badge>;
-      case "annule":
+      case 'annule':
         return <Badge variant="destructive">Annulé</Badge>;
       default:
         return <Badge variant="outline">{statut}</Badge>;
@@ -139,206 +143,200 @@ export default function ApprovisionnementsBanque() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-blue-600" />
-            Approvisionnements Banque
-          </h1>
-          <p className="text-muted-foreground">
-            Gestion des approvisionnements des comptes bancaires - Exercice {selectedExercice?.annee}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
-          <Button variant="outline" onClick={exportToExcel}>
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Export Excel
-          </Button>
-          {!isReadOnly && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouvel approvisionnement
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Nouvel approvisionnement bancaire</DialogTitle>
-                  <DialogDescription>
-                    Enregistrer une entrée de fonds sur un compte bancaire
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
+      <PageHeader
+        title="Approvisionnements Banque"
+        description="Gestion des approvisionnements du compte bancaire"
+        icon={Building2}
+        backUrl="/tresorerie"
+      >
+        <Button variant="outline" onClick={() => refetch()}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Actualiser
+        </Button>
+        <Button variant="outline" onClick={exportToExcel}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Export Excel
+        </Button>
+        {!isReadOnly && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouvel approvisionnement
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Nouvel approvisionnement bancaire</DialogTitle>
+                <DialogDescription>
+                  Enregistrer une entrée de fonds sur un compte bancaire
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="compte">Compte bancaire *</Label>
+                  <Select
+                    value={formData.compte_bancaire_id || ''}
+                    onValueChange={(v) => setFormData({ ...formData, compte_bancaire_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un compte" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {comptesActifs?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.code} - {c.libelle} ({c.banque})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="montant">Montant (FCFA) *</Label>
+                  <Input
+                    id="montant"
+                    type="number"
+                    min={0}
+                    value={formData.montant || ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, montant: parseFloat(e.target.value) || 0 })
+                    }
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="compte">Compte bancaire *</Label>
-                    <Select
-                      value={formData.compte_bancaire_id || ""}
-                      onValueChange={(v) => setFormData({ ...formData, compte_bancaire_id: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un compte" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {comptesActifs?.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.code} - {c.libelle} ({c.banque})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Date opération *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'justify-start text-left font-normal',
+                            !formData.date_operation && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.date_operation
+                            ? format(new Date(formData.date_operation), 'dd/MM/yyyy')
+                            : 'Sélectionner'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            formData.date_operation ? new Date(formData.date_operation) : undefined
+                          }
+                          onSelect={(d) =>
+                            setFormData({
+                              ...formData,
+                              date_operation: d?.toISOString().split('T')[0],
+                            })
+                          }
+                          locale={fr}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="montant">Montant (FCFA) *</Label>
-                    <Input
-                      id="montant"
-                      type="number"
-                      min={0}
-                      value={formData.montant || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, montant: parseFloat(e.target.value) || 0 })
-                      }
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>Date opération *</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "justify-start text-left font-normal",
-                              !formData.date_operation && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {formData.date_operation
-                              ? format(new Date(formData.date_operation), "dd/MM/yyyy")
-                              : "Sélectionner"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={formData.date_operation ? new Date(formData.date_operation) : undefined}
-                            onSelect={(d) =>
-                              setFormData({
-                                ...formData,
-                                date_operation: d?.toISOString().split("T")[0],
-                              })
-                            }
-                            locale={fr}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label>Date valeur</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "justify-start text-left font-normal",
-                              !formData.date_valeur && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {formData.date_valeur
-                              ? format(new Date(formData.date_valeur), "dd/MM/yyyy")
-                              : "Sélectionner"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={formData.date_valeur ? new Date(formData.date_valeur) : undefined}
-                            onSelect={(d) =>
-                              setFormData({
-                                ...formData,
-                                date_valeur: d?.toISOString().split("T")[0],
-                              })
-                            }
-                            locale={fr}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label>Origine des fonds</Label>
-                    <Select
-                      value={formData.origine_fonds_id || "none"}
-                      onValueChange={(v) =>
-                        setFormData({ ...formData, origine_fonds_id: v === "none" ? undefined : v })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une origine" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">-- Aucune --</SelectItem>
-                        {activeSources?.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.code} - {s.libelle}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="reference">Référence pièce</Label>
-                    <Input
-                      id="reference"
-                      value={formData.reference_piece || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, reference_piece: e.target.value })
-                      }
-                      placeholder="Ex: Chèque n°123456"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                      placeholder="Détails de l'approvisionnement..."
-                      rows={2}
-                    />
+                    <Label>Date valeur</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'justify-start text-left font-normal',
+                            !formData.date_valeur && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.date_valeur
+                            ? format(new Date(formData.date_valeur), 'dd/MM/yyyy')
+                            : 'Sélectionner'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            formData.date_valeur ? new Date(formData.date_valeur) : undefined
+                          }
+                          onSelect={(d) =>
+                            setFormData({
+                              ...formData,
+                              date_valeur: d?.toISOString().split('T')[0],
+                            })
+                          }
+                          locale={fr}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Annuler
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isCreating || !formData.compte_bancaire_id || !formData.montant}
+
+                <div className="grid gap-2">
+                  <Label>Origine des fonds</Label>
+                  <Select
+                    value={formData.origine_fonds_id || 'none'}
+                    onValueChange={(v) =>
+                      setFormData({ ...formData, origine_fonds_id: v === 'none' ? undefined : v })
+                    }
                   >
-                    {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Enregistrer
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une origine" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">-- Aucune --</SelectItem>
+                      {activeSources?.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.code} - {s.libelle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="reference">Référence pièce</Label>
+                  <Input
+                    id="reference"
+                    value={formData.reference_piece || ''}
+                    onChange={(e) => setFormData({ ...formData, reference_piece: e.target.value })}
+                    placeholder="Ex: Chèque n°123456"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Détails de l'approvisionnement..."
+                    rows={2}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isCreating || !formData.compte_bancaire_id || !formData.montant}
+                >
+                  {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Enregistrer
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -359,9 +357,7 @@ export default function ApprovisionnementsBanque() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">
-              {formatMontant(stats.montantTotal)}
-            </p>
+            <p className="text-2xl font-bold text-green-600">{formatMontant(stats.montantTotal)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -428,16 +424,11 @@ export default function ApprovisionnementsBanque() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateDebut ? format(dateDebut, "dd/MM/yyyy") : "Date début"}
+                  {dateDebut ? format(dateDebut, 'dd/MM/yyyy') : 'Date début'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dateDebut}
-                  onSelect={setDateDebut}
-                  locale={fr}
-                />
+                <Calendar mode="single" selected={dateDebut} onSelect={setDateDebut} locale={fr} />
               </PopoverContent>
             </Popover>
 
@@ -445,16 +436,11 @@ export default function ApprovisionnementsBanque() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFin ? format(dateFin, "dd/MM/yyyy") : "Date fin"}
+                  {dateFin ? format(dateFin, 'dd/MM/yyyy') : 'Date fin'}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={dateFin}
-                  onSelect={setDateFin}
-                  locale={fr}
-                />
+                <Calendar mode="single" selected={dateFin} onSelect={setDateFin} locale={fr} />
               </PopoverContent>
             </Popover>
           </div>
@@ -465,9 +451,7 @@ export default function ApprovisionnementsBanque() {
       <Card>
         <CardHeader>
           <CardTitle>Liste des approvisionnements</CardTitle>
-          <CardDescription>
-            {approvisionnements?.length || 0} enregistrement(s)
-          </CardDescription>
+          <CardDescription>{approvisionnements?.length || 0} enregistrement(s)</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -500,7 +484,7 @@ export default function ApprovisionnementsBanque() {
                     <TableRow key={appro.id}>
                       <TableCell className="font-mono text-sm">{appro.numero}</TableCell>
                       <TableCell>
-                        {format(new Date(appro.date_operation), "dd/MM/yyyy", { locale: fr })}
+                        {format(new Date(appro.date_operation), 'dd/MM/yyyy', { locale: fr })}
                       </TableCell>
                       <TableCell>
                         <div>
@@ -511,13 +495,13 @@ export default function ApprovisionnementsBanque() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {appro.origine_fonds?.libelle || appro.origine_fonds_code || "-"}
+                        {appro.origine_fonds?.libelle || appro.origine_fonds_code || '-'}
                       </TableCell>
                       <TableCell className="text-right font-medium text-green-600">
                         +{formatMontant(appro.montant)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {appro.reference_piece || "-"}
+                        {appro.reference_piece || '-'}
                       </TableCell>
                       <TableCell>{getStatutBadge(appro.statut)}</TableCell>
                     </TableRow>

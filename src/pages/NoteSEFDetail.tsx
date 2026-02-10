@@ -1,38 +1,38 @@
 /**
  * Page détail d'une Note SEF
  * Route: /notes-sef/:id
- * 
+ *
  * - Affiche tous les champs de la note
  * - Pièces jointes avec téléchargement (URL signée)
  * - Historique (timeline)
  * - Édition si brouillon et créateur/admin
  */
 
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { useNotesSEF, NoteSEF, NoteSEFHistory } from "@/hooks/useNotesSEF";
-import { useNotesSEFAudit } from "@/hooks/useNotesSEFAudit";
-import { notesSefService } from "@/lib/notes-sef/notesSefService";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { PrintButton } from "@/components/export/PrintButton";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { WorkflowTimeline } from "@/components/workflow/WorkflowTimeline";
-import { NoteSEFRejectDialog } from "@/components/notes-sef/NoteSEFRejectDialog";
-import { NoteSEFDeferDialog } from "@/components/notes-sef/NoteSEFDeferDialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { useNotesSEF, NoteSEF, NoteSEFHistory } from '@/hooks/useNotesSEF';
+import { useNotesSEFAudit } from '@/hooks/useNotesSEFAudit';
+import { notesSefService } from '@/lib/notes-sef/notesSefService';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { PrintButton } from '@/components/export/PrintButton';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { WorkflowTimeline } from '@/components/workflow/WorkflowTimeline';
+import { NoteSEFRejectDialog } from '@/components/notes-sef/NoteSEFRejectDialog';
+import { NoteSEFDeferDialog } from '@/components/notes-sef/NoteSEFDeferDialog';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   ArrowLeft,
   FileText,
@@ -58,9 +58,10 @@ import {
   MessageSquare,
   FilePlus,
   Shield,
-} from "lucide-react";
-import { DecisionBlock } from "@/components/workflow/DecisionBlock";
-import { useNoteAccessControl } from "@/hooks/useNoteAccessControl";
+} from 'lucide-react';
+import { DecisionBlock } from '@/components/workflow/DecisionBlock';
+import { useNoteAccessControl } from '@/hooks/useNoteAccessControl';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 // ============================================
 // TYPES
@@ -90,14 +91,38 @@ interface NoteSEFExtended extends NoteSEF {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground", icon: <Edit className="h-3 w-3" /> },
-    soumis: { label: "Soumis", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: <Send className="h-3 w-3" /> },
-    a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20", icon: <Clock className="h-3 w-3" /> },
-    valide: { label: "Validé", className: "bg-success/10 text-success border-success/20", icon: <CheckCircle className="h-3 w-3" /> },
-    rejete: { label: "Rejeté", className: "bg-destructive/10 text-destructive border-destructive/20", icon: <XCircle className="h-3 w-3" /> },
-    differe: { label: "Différé", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", icon: <Clock className="h-3 w-3" /> },
+    brouillon: {
+      label: 'Brouillon',
+      className: 'bg-muted text-muted-foreground',
+      icon: <Edit className="h-3 w-3" />,
+    },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      icon: <Send className="h-3 w-3" />,
+    },
+    a_valider: {
+      label: 'À valider',
+      className: 'bg-warning/10 text-warning border-warning/20',
+      icon: <Clock className="h-3 w-3" />,
+    },
+    valide: {
+      label: 'Validé',
+      className: 'bg-success/10 text-success border-success/20',
+      icon: <CheckCircle className="h-3 w-3" />,
+    },
+    rejete: {
+      label: 'Rejeté',
+      className: 'bg-destructive/10 text-destructive border-destructive/20',
+      icon: <XCircle className="h-3 w-3" />,
+    },
+    differe: {
+      label: 'Différé',
+      className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      icon: <Clock className="h-3 w-3" />,
+    },
   };
-  const variant = variants[status || "brouillon"] || variants.brouillon;
+  const variant = variants[status || 'brouillon'] || variants.brouillon;
   return (
     <Badge variant="outline" className={`${variant.className} flex items-center gap-1.5`}>
       {variant.icon}
@@ -108,17 +133,17 @@ const getStatusBadge = (status: string | null) => {
 
 const getUrgenceBadge = (urgence: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    basse: { label: "Basse", className: "bg-muted text-muted-foreground" },
-    normale: { label: "Normale", className: "bg-secondary text-secondary-foreground" },
-    haute: { label: "Haute", className: "bg-warning text-warning-foreground" },
-    urgente: { label: "Urgente", className: "bg-destructive text-destructive-foreground" },
+    basse: { label: 'Basse', className: 'bg-muted text-muted-foreground' },
+    normale: { label: 'Normale', className: 'bg-secondary text-secondary-foreground' },
+    haute: { label: 'Haute', className: 'bg-warning text-warning-foreground' },
+    urgente: { label: 'Urgente', className: 'bg-destructive text-destructive-foreground' },
   };
-  const variant = variants[urgence || "normale"] || variants.normale;
+  const variant = variants[urgence || 'normale'] || variants.normale;
   return <Badge className={variant.className}>{variant.label}</Badge>;
 };
 
 const formatFileSize = (bytes: number | null) => {
-  if (!bytes) return "—";
+  if (!bytes) return '—';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -131,29 +156,35 @@ const getActionDescription = (
   commentaire?: string | null
 ): { title: string; detail?: string } => {
   const actorName = performer
-    ? `${performer.first_name || ""} ${performer.last_name || ""}`.trim() || "Utilisateur"
-    : "Système";
+    ? `${performer.first_name || ''} ${performer.last_name || ''}`.trim() || 'Utilisateur'
+    : 'Système';
 
   const descriptions: Record<string, { title: string; detail?: string }> = {
     création: { title: `${actorName} a créé le brouillon` },
     creation: { title: `${actorName} a créé le brouillon` },
     soumission: { title: `${actorName} a soumis la note pour validation` },
     resoumission: { title: `${actorName} a re-soumis la note` },
-    validation: { title: `${actorName} a validé la note`, detail: "Dossier créé automatiquement" },
-    rejet: { title: `${actorName} a rejeté la note`, detail: commentaire ? `Motif: ${commentaire}` : undefined },
+    validation: { title: `${actorName} a validé la note`, detail: 'Dossier créé automatiquement' },
+    rejet: {
+      title: `${actorName} a rejeté la note`,
+      detail: commentaire ? `Motif: ${commentaire}` : undefined,
+    },
     report: { title: `${actorName} a différé la note`, detail: commentaire || undefined },
     modification: { title: `${actorName} a modifié la note` },
-    ajout_piece: { 
+    ajout_piece: {
       title: `${actorName} a ajouté une pièce jointe`,
-      detail: commentaire?.replace(/^(Pièce jointe|Fichier ajouté):\s*/i, "") || undefined
+      detail: commentaire?.replace(/^(Pièce jointe|Fichier ajouté):\s*/i, '') || undefined,
     },
-    suppression_piece: { 
+    suppression_piece: {
       title: `${actorName} a supprimé une pièce jointe`,
-      detail: commentaire?.replace(/^(Fichier supprimé|Suppression):\s*/i, "") || undefined
+      detail: commentaire?.replace(/^(Fichier supprimé|Suppression):\s*/i, '') || undefined,
     },
-    reference_generated: { title: "Référence générée", detail: commentaire?.replace("Référence générée: ", "") },
+    reference_generated: {
+      title: 'Référence générée',
+      detail: commentaire?.replace('Référence générée: ', ''),
+    },
     upload_echec: { title: "Échec de l'upload", detail: commentaire || undefined },
-    "passage à valider": { title: `${actorName} a transmis la note au DG` },
+    'passage à valider': { title: `${actorName} a transmis la note au DG` },
     passage_a_valider: { title: `${actorName} a transmis la note au DG` },
   };
 
@@ -161,18 +192,18 @@ const getActionDescription = (
 };
 
 // Legacy label pour rétrocompatibilité
-const getActionLabel = (action: string) => {
+const _getActionLabel = (action: string) => {
   const labels: Record<string, string> = {
-    création: "Création du brouillon",
-    creation: "Création du brouillon",
-    soumission: "Soumis pour validation",
-    validation: "Validé",
-    rejet: "Rejeté",
-    report: "Différé",
-    modification: "Modifié",
-    ajout_piece: "Pièce jointe ajoutée",
-    suppression_piece: "Pièce jointe supprimée",
-    upload_echec: "Échec upload",
+    création: 'Création du brouillon',
+    creation: 'Création du brouillon',
+    soumission: 'Soumis pour validation',
+    validation: 'Validé',
+    rejet: 'Rejeté',
+    report: 'Différé',
+    modification: 'Modifié',
+    ajout_piece: 'Pièce jointe ajoutée',
+    suppression_piece: 'Pièce jointe supprimée',
+    upload_echec: 'Échec upload',
   };
   return labels[action] || action;
 };
@@ -191,7 +222,7 @@ const getActionIcon = (action: string) => {
     suppression_piece: <Trash2 className="h-4 w-4 text-muted-foreground" />,
     upload_echec: <AlertTriangle className="h-4 w-4 text-destructive" />,
     reference_generated: <FileText className="h-4 w-4 text-primary" />,
-    "passage à valider": <Send className="h-4 w-4 text-warning" />,
+    'passage à valider': <Send className="h-4 w-4 text-warning" />,
     passage_a_valider: <Send className="h-4 w-4 text-warning" />,
   };
   return icons[action] || <History className="h-4 w-4" />;
@@ -207,10 +238,11 @@ export default function NoteSEFDetail() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { fetchHistory, submitNote, validateNote, rejectNote, deferNote, resubmitNote } = useNotesSEF();
+  const { fetchHistory, submitNote, validateNote, rejectNote, deferNote, resubmitNote } =
+    useNotesSEF();
   const { logAjoutPiece, logSuppressionPiece, logModification } = useNotesSEFAudit();
-  const { exercice } = useExercice();
-  
+  const { exercice: _exercice } = useExercice();
+
   // État local
   const [isEditing, setIsEditing] = useState(false);
   const [editedFields, setEditedFields] = useState<Partial<NoteSEF>>({});
@@ -228,7 +260,11 @@ export default function NoteSEFDetail() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Query pour la note
-  const { data: note, isLoading: loadingNote, error } = useQuery({
+  const {
+    data: note,
+    isLoading: loadingNote,
+    error,
+  } = useQuery({
     queryKey: ['note-sef-detail', id],
     queryFn: async () => {
       if (!id) return null;
@@ -241,25 +277,25 @@ export default function NoteSEFDetail() {
 
   // Contrôle d'accès centralisé
   const accessControl = useNoteAccessControl(note, 'SEF');
-  const { 
-    canView, 
-    canEdit: canModify, 
-    canSubmit, 
-    canValidate, 
-    canReject, 
-    canDefer, 
+  const {
+    canView,
+    canEdit: canModify,
+    canSubmit,
+    canValidate,
+    canReject: _canReject,
+    canDefer: _canDefer,
     canResubmit,
-    isCreator,
+    isCreator: _isCreator,
     isDG,
-    isAdmin,
+    isAdmin: _isAdmin,
     isLoading: accessLoading,
-    denyReason
+    denyReason,
   } = accessControl;
 
   // Raccourcis pour validation DG
-  const canValidateNote = canValidate && note?.statut === "soumis";
-  const canValidateDeferredNote = isDG && note?.statut === "differe";
-  const isApproved = note?.statut === "valide";
+  const canValidateNote = canValidate && note?.statut === 'soumis';
+  const canValidateDeferredNote = isDG && note?.statut === 'differe';
+  const isApproved = note?.statut === 'valide';
 
   // Charger historique et pièces jointes
   useEffect(() => {
@@ -274,8 +310,9 @@ export default function NoteSEFDetail() {
       // Pièces jointes
       fetchAttachments();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note?.id]);
-  const isRejected = note?.statut === "rejete";
+  const isRejected = note?.statut === 'rejete';
 
   // Navigation retour
   const handleBack = () => {
@@ -293,14 +330,14 @@ export default function NoteSEFDetail() {
     setLoadingAttachments(true);
     try {
       const { data, error } = await supabase
-        .from("notes_sef_pieces")
-        .select("*")
-        .eq("note_id", note.id)
-        .order("created_at", { ascending: false });
+        .from('notes_sef_pieces')
+        .select('*')
+        .eq('note_id', note.id)
+        .order('created_at', { ascending: false });
       if (error) throw error;
       setAttachments(data || []);
     } catch (error) {
-      console.error("Error fetching attachments:", error);
+      console.error('Error fetching attachments:', error);
     } finally {
       setLoadingAttachments(false);
     }
@@ -310,19 +347,19 @@ export default function NoteSEFDetail() {
   const handleDownloadFile = async (attachment: Attachment) => {
     try {
       const { data, error } = await supabase.storage
-        .from("notes-sef")
+        .from('notes-sef')
         .createSignedUrl(attachment.fichier_url, 60);
 
       if (error) {
         // Fallback: essayer avec l'ancien bucket
         const { data: fallbackData, error: fallbackError } = await supabase.storage
-          .from("notes_sef_pieces")
+          .from('notes_sef_pieces')
           .download(attachment.fichier_url);
-        
+
         if (fallbackError) throw fallbackError;
-        
+
         const url = URL.createObjectURL(fallbackData);
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = url;
         link.download = attachment.nom;
         document.body.appendChild(link);
@@ -335,11 +372,11 @@ export default function NoteSEFDetail() {
       // Ouvrir l'URL signée dans un nouvel onglet
       window.open(data.signedUrl, '_blank');
     } catch (error) {
-      console.error("Download error:", error);
+      console.error('Download error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de télécharger le fichier",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de télécharger le fichier',
+        variant: 'destructive',
       });
     }
   };
@@ -351,38 +388,62 @@ export default function NoteSEFDetail() {
 
     setUploadingFile(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       for (const file of Array.from(files)) {
         if (file.size > 10 * 1024 * 1024) {
           toast({
-            title: "Fichier trop volumineux",
+            title: 'Fichier trop volumineux',
             description: `${file.name} dépasse 10MB`,
-            variant: "destructive",
+            variant: 'destructive',
           });
           continue;
         }
 
         // Validate file extension
         const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-        const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
-        const BLOCKED_EXTENSIONS = ['exe', 'bat', 'cmd', 'sh', 'ps1', 'vbs', 'js', 'msi', 'dll', 'scr'];
-        
+        const ALLOWED_EXTENSIONS = [
+          'pdf',
+          'doc',
+          'docx',
+          'xls',
+          'xlsx',
+          'jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'webp',
+        ];
+        const BLOCKED_EXTENSIONS = [
+          'exe',
+          'bat',
+          'cmd',
+          'sh',
+          'ps1',
+          'vbs',
+          'js',
+          'msi',
+          'dll',
+          'scr',
+        ];
+
         if (BLOCKED_EXTENSIONS.includes(fileExtension)) {
           toast({
-            title: "Type de fichier interdit",
+            title: 'Type de fichier interdit',
             description: `${file.name} n'est pas autorisé (fichier exécutable)`,
-            variant: "destructive",
+            variant: 'destructive',
           });
           continue;
         }
-        
+
         if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
           toast({
-            title: "Type de fichier non supporté",
+            title: 'Type de fichier non supporté',
             description: `${file.name}: utilisez PDF, DOCX, XLSX ou images`,
-            variant: "destructive",
+            variant: 'destructive',
           });
           continue;
         }
@@ -393,19 +454,19 @@ export default function NoteSEFDetail() {
         const filePath = `${note.exercice}/SEF/${note.id}/${timestamp}_${safeFileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("notes-sef")
+          .from('notes-sef')
           .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
         if (uploadError) {
           toast({
-            title: "Erreur upload",
+            title: 'Erreur upload',
             description: `Impossible d'uploader ${file.name}`,
-            variant: "destructive",
+            variant: 'destructive',
           });
           continue;
         }
 
-        await supabase.from("notes_sef_pieces").insert({
+        await supabase.from('notes_sef_pieces').insert({
           note_id: note.id,
           nom: file.name,
           fichier_url: filePath,
@@ -418,48 +479,50 @@ export default function NoteSEFDetail() {
         await logAjoutPiece(note.id, file.name);
       }
 
-      toast({ title: "Fichier(s) ajouté(s)" });
+      toast({ title: 'Fichier(s) ajouté(s)' });
       fetchAttachments();
-      
+
       // Refresh history
       fetchHistory(note.id).then(setHistory);
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error('Upload error:', error);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible d'ajouter le fichier",
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setUploadingFile(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   // Supprimer un fichier
   const handleDeleteFile = async (attachment: Attachment) => {
-    if (!confirm("Supprimer ce fichier ?")) return;
+    if (!confirm('Supprimer ce fichier ?')) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      await supabase.storage.from("notes-sef").remove([attachment.fichier_url]);
-      await supabase.from("notes_sef_pieces").delete().eq("id", attachment.id);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      await supabase.storage.from('notes-sef').remove([attachment.fichier_url]);
+      await supabase.from('notes_sef_pieces').delete().eq('id', attachment.id);
 
       if (user && note) {
         // Log via hook (écrit dans history + audit_logs)
         await logSuppressionPiece(note.id, attachment.nom);
       }
 
-      toast({ title: "Fichier supprimé" });
+      toast({ title: 'Fichier supprimé' });
       fetchAttachments();
       if (note) fetchHistory(note.id).then(setHistory);
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error('Delete error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le fichier",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de supprimer le fichier',
+        variant: 'destructive',
       });
     }
   };
@@ -488,11 +551,13 @@ export default function NoteSEFDetail() {
     setSavingChanges(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const { error } = await supabase
-        .from("notes_sef")
+        .from('notes_sef')
         .update({
           objet: editedFields.objet,
           description: editedFields.description,
@@ -500,25 +565,24 @@ export default function NoteSEFDetail() {
           commentaire: editedFields.commentaire,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", note.id);
+        .eq('id', note.id);
 
       if (error) throw error;
 
       // Log via hook (écrit dans history + audit_logs)
-      await logModification(note.id, note.statut, { 
-        fields: Object.keys(editedFields) 
-      } as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await logModification(note.id, note.statut, { fields: Object.keys(editedFields) } as any);
 
-      toast({ title: "Modifications enregistrées" });
+      toast({ title: 'Modifications enregistrées' });
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
       fetchHistory(note.id).then(setHistory);
     } catch (error) {
-      console.error("Save error:", error);
+      console.error('Save error:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder',
+        variant: 'destructive',
       });
     } finally {
       setSavingChanges(false);
@@ -531,7 +595,7 @@ export default function NoteSEFDetail() {
     try {
       await submitNote(note.id);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    } catch (error) {
+    } catch {
       // Toast déjà géré dans le hook
     }
   };
@@ -543,8 +607,8 @@ export default function NoteSEFDetail() {
     try {
       await validateNote(note.id);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-      toast({ title: "Note validée avec succès ✓" });
-    } catch (error) {
+      toast({ title: 'Note validée avec succès ✓' });
+    } catch {
       // Toast déjà géré dans le hook
     } finally {
       setValidating(false);
@@ -557,18 +621,23 @@ export default function NoteSEFDetail() {
       await rejectNote({ noteId, motif });
       setRejectingNote(null);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    } catch (error) {
+    } catch {
       // Toast déjà géré dans le hook
     }
   };
 
   // Différer (via dialog) - DG seulement
-  const handleDefer = async (data: { noteId: string; motif: string; condition?: string; dateReprise?: string }) => {
+  const handleDefer = async (data: {
+    noteId: string;
+    motif: string;
+    condition?: string;
+    dateReprise?: string;
+  }) => {
     try {
       await deferNote(data);
       setDeferringNote(null);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-    } catch (error) {
+    } catch {
       // Toast déjà géré dans le hook
     }
   };
@@ -580,8 +649,8 @@ export default function NoteSEFDetail() {
     try {
       await resubmitNote(note.id);
       queryClient.invalidateQueries({ queryKey: ['note-sef-detail', id] });
-      toast({ title: "Note re-soumise pour validation ✓" });
-    } catch (error) {
+      toast({ title: 'Note re-soumise pour validation ✓' });
+    } catch {
       // Toast déjà géré dans le hook
     } finally {
       setResubmitting(false);
@@ -657,7 +726,8 @@ export default function NoteSEFDetail() {
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-destructive">Accès refusé</h2>
                 <p className="text-muted-foreground max-w-md mx-auto">
-                  {denyReason || "Vous n'avez pas les autorisations nécessaires pour consulter cette note."}
+                  {denyReason ||
+                    "Vous n'avez pas les autorisations nécessaires pour consulter cette note."}
                 </p>
               </div>
               <Button variant="outline" onClick={handleBack} className="mt-4">
@@ -675,28 +745,21 @@ export default function NoteSEFDetail() {
       <WorkflowStepIndicator currentStep={1} />
 
       {/* Header avec navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-          <Separator orientation="vertical" className="h-6" />
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-primary" />
-            <div>
-              <h1 className="text-xl font-bold font-mono">
-                {note.reference_pivot || note.numero || "Nouvelle note"}
-              </h1>
-              <p className="text-sm text-muted-foreground">Exercice {note.exercice}</p>
-            </div>
-          </div>
-          {getStatusBadge(note.statut)}
-        </div>
-        <div className="flex items-center gap-2">
-          <PrintButton entityType="note_sef" entityId={note.id} label="Imprimer" />
-        </div>
-      </div>
+      <PageHeader
+        title={`Note SEF - ${note.reference_pivot || note.numero || 'Nouvelle note'}`}
+        description={note.objet || `Exercice ${note.exercice}`}
+        icon={FileText}
+        backUrl="/notes-sef"
+        onBack={handleBack}
+        breadcrumbs={[
+          { label: 'Chaine de la Depense' },
+          { label: 'Notes SEF', href: '/notes-sef' },
+          { label: note.reference_pivot || note.numero || 'Detail' },
+        ]}
+      >
+        {getStatusBadge(note.statut)}
+        <PrintButton entityType="note_sef" entityId={note.id} label="Imprimer" />
+      </PageHeader>
 
       {/* Actions bar pour brouillon */}
       {(canModify || canSubmit) && !isEditing && (
@@ -737,7 +800,11 @@ export default function NoteSEFDetail() {
                 disabled={validating}
                 className="gap-2 bg-success hover:bg-success/90"
               >
-                {validating ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                {validating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
                 Valider
               </Button>
 
@@ -779,10 +846,9 @@ export default function NoteSEFDetail() {
                 <div>
                   <p className="font-medium text-success">Note validée</p>
                   <p className="text-sm text-muted-foreground">
-                    {note.dossier_id 
+                    {note.dossier_id
                       ? `Dossier créé automatiquement. Vous pouvez créer la Note AEF associée.`
-                      : "Vous pouvez maintenant créer la Note AEF associée"
-                    }
+                      : 'Vous pouvez maintenant créer la Note AEF associée'}
                   </p>
                 </div>
               </div>
@@ -807,31 +873,32 @@ export default function NoteSEFDetail() {
       {isRejected && note.rejection_reason && (
         <DecisionBlock
           type="rejet"
-          acteur={note.rejected_by_profile || { first_name: "DG", last_name: "" }}
+          acteur={note.rejected_by_profile || { first_name: 'DG', last_name: '' }}
           date={note.rejected_at || note.updated_at}
           commentaire={note.rejection_reason}
         />
       )}
 
       {/* Bloc Décision DG - Différé + bouton re-soumettre */}
-      {note?.statut === "differe" && (
+      {note?.statut === 'differe' && (
         <>
           <DecisionBlock
             type="differe"
-            acteur={note.differe_by_profile || { first_name: "DG", last_name: "" }}
+            acteur={note.differe_by_profile || { first_name: 'DG', last_name: '' }}
             date={note.differe_at || note.updated_at}
             commentaire={note.differe_motif}
             condition={note.differe_condition}
             dateReprise={note.differe_date_reprise}
           />
-          
+
           {/* Bouton Re-soumettre pour le créateur */}
           {canResubmit && !isEditing && (
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="py-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Vous pouvez modifier et re-soumettre cette note après avoir rempli les conditions.
+                    Vous pouvez modifier et re-soumettre cette note après avoir rempli les
+                    conditions.
                   </p>
                   <Button
                     variant="default"
@@ -840,7 +907,11 @@ export default function NoteSEFDetail() {
                     disabled={resubmitting}
                     className="gap-2"
                   >
-                    {resubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {resubmitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                     Re-soumettre
                   </Button>
                 </div>
@@ -861,8 +932,17 @@ export default function NoteSEFDetail() {
                   <X className="h-4 w-4" />
                   Annuler
                 </Button>
-                <Button size="sm" onClick={handleSaveEdit} disabled={savingChanges} className="gap-2">
-                  {savingChanges ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                <Button
+                  size="sm"
+                  onClick={handleSaveEdit}
+                  disabled={savingChanges}
+                  className="gap-2"
+                >
+                  {savingChanges ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
                   Enregistrer
                 </Button>
               </div>
@@ -893,7 +973,7 @@ export default function NoteSEFDetail() {
                 <Label className="text-muted-foreground text-xs uppercase">Objet</Label>
                 {isEditing ? (
                   <Input
-                    value={editedFields.objet || ""}
+                    value={editedFields.objet || ''}
                     onChange={(e) => setEditedFields({ ...editedFields, objet: e.target.value })}
                     className="mt-1"
                   />
@@ -907,13 +987,15 @@ export default function NoteSEFDetail() {
                 <Label className="text-muted-foreground text-xs uppercase">Description</Label>
                 {isEditing ? (
                   <Textarea
-                    value={editedFields.description || ""}
-                    onChange={(e) => setEditedFields({ ...editedFields, description: e.target.value })}
+                    value={editedFields.description || ''}
+                    onChange={(e) =>
+                      setEditedFields({ ...editedFields, description: e.target.value })
+                    }
                     className="mt-1"
                     rows={3}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap mt-1">{note.description || "—"}</p>
+                  <p className="whitespace-pre-wrap mt-1">{note.description || '—'}</p>
                 )}
               </div>
 
@@ -922,13 +1004,15 @@ export default function NoteSEFDetail() {
                 <Label className="text-muted-foreground text-xs uppercase">Justification</Label>
                 {isEditing ? (
                   <Textarea
-                    value={editedFields.justification || ""}
-                    onChange={(e) => setEditedFields({ ...editedFields, justification: e.target.value })}
+                    value={editedFields.justification || ''}
+                    onChange={(e) =>
+                      setEditedFields({ ...editedFields, justification: e.target.value })
+                    }
                     className="mt-1 bg-background"
                     rows={3}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap mt-1">{note.justification || "—"}</p>
+                  <p className="whitespace-pre-wrap mt-1">{note.justification || '—'}</p>
                 )}
               </div>
 
@@ -940,7 +1024,9 @@ export default function NoteSEFDetail() {
                   <Building2 className="h-4 w-4 text-muted-foreground mt-1" />
                   <div>
                     <p className="text-xs text-muted-foreground uppercase">Direction</p>
-                    <p className="font-medium">{note.direction?.label || note.direction?.sigle || "—"}</p>
+                    <p className="font-medium">
+                      {note.direction?.label || note.direction?.sigle || '—'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
@@ -949,8 +1035,9 @@ export default function NoteSEFDetail() {
                     <p className="text-xs text-muted-foreground uppercase">Demandeur</p>
                     <p className="font-medium">
                       {note.demandeur
-                        ? `${note.demandeur.first_name || ""} ${note.demandeur.last_name || ""}`.trim() || "—"
-                        : "—"}
+                        ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim() ||
+                          '—'
+                        : '—'}
                     </p>
                   </div>
                 </div>
@@ -960,8 +1047,8 @@ export default function NoteSEFDetail() {
                     <p className="text-xs text-muted-foreground uppercase">Date souhaitée</p>
                     <p className="font-medium">
                       {note.date_souhaitee
-                        ? format(new Date(note.date_souhaitee), "dd MMM yyyy", { locale: fr })
-                        : "—"}
+                        ? format(new Date(note.date_souhaitee), 'dd MMM yyyy', { locale: fr })
+                        : '—'}
                     </p>
                   </div>
                 </div>
@@ -978,8 +1065,8 @@ export default function NoteSEFDetail() {
                       <p className="font-medium">
                         {note.beneficiaire?.raison_sociale ||
                           (note.beneficiaire_interne
-                            ? `${note.beneficiaire_interne.first_name || ""} ${note.beneficiaire_interne.last_name || ""}`.trim()
-                            : "—")}
+                            ? `${note.beneficiaire_interne.first_name || ''} ${note.beneficiaire_interne.last_name || ''}`.trim()
+                            : '—')}
                       </p>
                     </div>
                   </div>
@@ -991,13 +1078,15 @@ export default function NoteSEFDetail() {
                 <Label className="text-muted-foreground text-xs uppercase">Commentaire</Label>
                 {isEditing ? (
                   <Textarea
-                    value={editedFields.commentaire || ""}
-                    onChange={(e) => setEditedFields({ ...editedFields, commentaire: e.target.value })}
+                    value={editedFields.commentaire || ''}
+                    onChange={(e) =>
+                      setEditedFields({ ...editedFields, commentaire: e.target.value })
+                    }
                     className="mt-1"
                     rows={2}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap mt-1">{note.commentaire || "—"}</p>
+                  <p className="whitespace-pre-wrap mt-1">{note.commentaire || '—'}</p>
                 )}
               </div>
 
@@ -1010,7 +1099,12 @@ export default function NoteSEFDetail() {
                       <FolderOpen className="h-5 w-5 text-success" />
                       <span className="font-medium">Dossier créé</span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleGoToDossier} className="gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGoToDossier}
+                      className="gap-2"
+                    >
                       <ExternalLink className="h-4 w-4" />
                       Voir le dossier
                     </Button>
@@ -1045,7 +1139,11 @@ export default function NoteSEFDetail() {
                       disabled={uploadingFile}
                       className="gap-2"
                     >
-                      {uploadingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      {uploadingFile ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
                       Ajouter
                     </Button>
                   </div>
@@ -1071,8 +1169,8 @@ export default function NoteSEFDetail() {
                         <div className="min-w-0">
                           <p className="font-medium truncate">{att.nom}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatFileSize(att.taille)} •{" "}
-                            {format(new Date(att.uploaded_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                            {formatFileSize(att.taille)} •{' '}
+                            {format(new Date(att.uploaded_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                           </p>
                         </div>
                       </div>
@@ -1097,11 +1195,7 @@ export default function NoteSEFDetail() {
         {/* Colonne latérale - Historique */}
         <div className="space-y-6">
           {/* Progression du Workflow (nouveau système wf_*) */}
-          <WorkflowTimeline
-            entityType="note_sef"
-            entityId={note.id}
-            variant="vertical"
-          />
+          <WorkflowTimeline entityType="note_sef" entityId={note.id} variant="vertical" />
 
           <Card>
             <CardHeader>
@@ -1123,11 +1217,11 @@ export default function NoteSEFDetail() {
                   <div className="space-y-3">
                     {history.map((entry, index) => {
                       const { title, detail } = getActionDescription(
-                        entry.action, 
-                        entry.performer, 
+                        entry.action,
+                        entry.performer,
                         entry.commentaire
                       );
-                      
+
                       return (
                         <div key={entry.id} className="relative flex gap-3">
                           {/* Timeline line */}
@@ -1148,7 +1242,9 @@ export default function NoteSEFDetail() {
                             )}
                             <p className="text-xs text-muted-foreground/70 mt-1.5 flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {format(new Date(entry.performed_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                              {format(new Date(entry.performed_at), "dd MMM yyyy 'à' HH:mm", {
+                                locale: fr,
+                              })}
                             </p>
                           </div>
                         </div>
@@ -1168,11 +1264,11 @@ export default function NoteSEFDetail() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Créé le</span>
-                <span>{format(new Date(note.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}</span>
+                <span>{format(new Date(note.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Modifié le</span>
-                <span>{format(new Date(note.updated_at), "dd/MM/yyyy HH:mm", { locale: fr })}</span>
+                <span>{format(new Date(note.updated_at), 'dd/MM/yyyy HH:mm', { locale: fr })}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">ID</span>

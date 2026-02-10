@@ -1,20 +1,20 @@
 /**
  * Page de validation des Notes SEF - Espace DG
- * 
+ *
  * Vue dédiée pour les validateurs (DG/DAAF/ADMIN) avec :
  * - Liste des notes à valider
  * - Actions rapides (Valider/Différer/Rejeter)
  * - Filtres par urgence
  */
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -30,23 +30,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useNotesSEFList } from "@/hooks/useNotesSEFList";
-import { useNotesSEF } from "@/hooks/useNotesSEF";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useCanValidateSEF } from "@/hooks/useDelegations";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useNotesSEFList } from '@/hooks/useNotesSEFList';
+import { useNotesSEF } from '@/hooks/useNotesSEF';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useCanValidateSEF } from '@/hooks/useDelegations';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import {
   CheckCircle,
   XCircle,
   Clock,
+  FileCheck,
   FileText,
   AlertTriangle,
   Shield,
@@ -56,31 +57,49 @@ import {
   Eye,
   Building2,
   User,
-} from "lucide-react";
-import type { NoteSEFEntity } from "@/lib/notes-sef/types";
+} from 'lucide-react';
+import type { NoteSEFEntity } from '@/lib/notes-sef/types';
 
 // Badge de statut
-function getStatusBadge(status: string | null) {
+function _getStatusBadge(status: string | null) {
   const variants: Record<string, { label: string; className: string }> = {
-    soumis: { label: "Soumis", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-    a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
-    differe: { label: "Différé", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
+    a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
+    differe: {
+      label: 'Différé',
+      className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    },
   };
-  const variant = variants[status || "soumis"] || variants.soumis;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  const variant = variants[status || 'soumis'] || variants.soumis;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 }
 
 // Badge d'urgence
 function getUrgenceBadge(urgence: string | null) {
   const variants: Record<string, { label: string; className: string; icon?: React.ReactNode }> = {
-    basse: { label: "Basse", className: "bg-muted text-muted-foreground" },
-    normale: { label: "Normale", className: "bg-secondary text-secondary-foreground" },
-    haute: { label: "Haute", className: "bg-warning text-warning-foreground", icon: <AlertTriangle className="h-3 w-3" /> },
-    urgente: { label: "Urgente", className: "bg-destructive text-destructive-foreground", icon: <AlertTriangle className="h-3 w-3" /> },
+    basse: { label: 'Basse', className: 'bg-muted text-muted-foreground' },
+    normale: { label: 'Normale', className: 'bg-secondary text-secondary-foreground' },
+    haute: {
+      label: 'Haute',
+      className: 'bg-warning text-warning-foreground',
+      icon: <AlertTriangle className="h-3 w-3" />,
+    },
+    urgente: {
+      label: 'Urgente',
+      className: 'bg-destructive text-destructive-foreground',
+      icon: <AlertTriangle className="h-3 w-3" />,
+    },
   };
-  const variant = variants[urgence || "normale"] || variants.normale;
+  const variant = variants[urgence || 'normale'] || variants.normale;
   return (
-    <Badge className={cn(variant.className, "gap-1")}>
+    <Badge className={cn(variant.className, 'gap-1')}>
       {variant.icon}
       {variant.label}
     </Badge>
@@ -91,44 +110,58 @@ function getUrgenceBadge(urgence: string | null) {
 function TableRowSkeleton() {
   return (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-48" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-16" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-32" />
+      </TableCell>
     </TableRow>
   );
 }
 
 export default function ValidationNotesSEF() {
   const navigate = useNavigate();
-  const { exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const { hasAnyRole } = usePermissions();
-  const { canValidate: canValidateSEF, viaDelegation, isLoading: delegationLoading } = useCanValidateSEF();
+  const {
+    canValidate: canValidateSEF,
+    viaDelegation,
+    isLoading: _delegationLoading,
+  } = useCanValidateSEF();
 
   // Autorisation : rôle direct OU délégation active
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]) || canValidateSEF;
+  const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']) || canValidateSEF;
 
   // États des dialogs
   const [selectedNote, setSelectedNote] = useState<NoteSEFEntity | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [deferDialogOpen, setDeferDialogOpen] = useState(false);
-  const [rejectMotif, setRejectMotif] = useState("");
-  const [deferMotif, setDeferMotif] = useState("");
-  const [deferCondition, setDeferCondition] = useState("");
+  const [rejectMotif, setRejectMotif] = useState('');
+  const [deferMotif, setDeferMotif] = useState('');
+  const [deferCondition, setDeferCondition] = useState('');
   const [deferDateReprise, setDeferDateReprise] = useState<Date | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Hook pour la liste (filtrée sur les notes à valider)
-  const {
-    notes,
-    isLoading,
-    refetch,
-  } = useNotesSEFList({
+  const { notes, isLoading, refetch } = useNotesSEFList({
     pageSize: 100,
-    initialTab: "a_valider",
+    initialTab: 'a_valider',
   });
 
   // Hook pour les mutations
@@ -140,24 +173,25 @@ export default function ValidationNotesSEF() {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
     return (
-      (note.reference_pivot || "").toLowerCase().includes(search) ||
-      (note.objet || "").toLowerCase().includes(search) ||
-      ((note.direction as any)?.sigle || "").toLowerCase().includes(search)
+      (note.reference_pivot || '').toLowerCase().includes(search) ||
+      (note.objet || '').toLowerCase().includes(search) ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((note.direction as any)?.sigle || '').toLowerCase().includes(search)
     );
   });
 
   // Trier par urgence puis par date de création
   const sortedNotes = [...filteredNotes].sort((a, b) => {
     const urgenceOrder: Record<string, number> = { urgente: 0, haute: 1, normale: 2, basse: 3 };
-    const urgA = urgenceOrder[a.urgence || "normale"] ?? 2;
-    const urgB = urgenceOrder[b.urgence || "normale"] ?? 2;
+    const urgA = urgenceOrder[a.urgence || 'normale'] ?? 2;
+    const urgB = urgenceOrder[b.urgence || 'normale'] ?? 2;
     if (urgA !== urgB) return urgA - urgB;
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   // Compteurs par urgence
-  const urgentCount = filteredNotes.filter((n) => n.urgence === "urgente").length;
-  const hauteCount = filteredNotes.filter((n) => n.urgence === "haute").length;
+  const urgentCount = filteredNotes.filter((n) => n.urgence === 'urgente').length;
+  const hauteCount = filteredNotes.filter((n) => n.urgence === 'haute').length;
 
   // Actions
   const handleValidate = async (note: NoteSEFEntity) => {
@@ -176,7 +210,7 @@ export default function ValidationNotesSEF() {
     try {
       await rejectNote({ noteId: selectedNote.id, motif: rejectMotif });
       setRejectDialogOpen(false);
-      setRejectMotif("");
+      setRejectMotif('');
       setSelectedNote(null);
       refetch();
     } finally {
@@ -192,11 +226,11 @@ export default function ValidationNotesSEF() {
         noteId: selectedNote.id,
         motif: deferMotif,
         condition: deferCondition || undefined,
-        dateReprise: deferDateReprise ? format(deferDateReprise, "yyyy-MM-dd") : undefined,
+        dateReprise: deferDateReprise ? format(deferDateReprise, 'yyyy-MM-dd') : undefined,
       });
       setDeferDialogOpen(false);
-      setDeferMotif("");
-      setDeferCondition("");
+      setDeferMotif('');
+      setDeferCondition('');
       setDeferDateReprise(null);
       setSelectedNote(null);
       refetch();
@@ -217,7 +251,7 @@ export default function ValidationNotesSEF() {
               Cette page est réservée aux validateurs (DG, DAAF, Admin)
             </p>
           </div>
-          <Button variant="outline" onClick={() => navigate("/notes-sef")}>
+          <Button variant="outline" onClick={() => navigate('/notes-sef')}>
             Retour aux Notes SEF
           </Button>
         </div>
@@ -228,25 +262,19 @@ export default function ValidationNotesSEF() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <ExerciceSubtitle
-            title="Validation Notes SEF"
-            description="Espace de validation pour les décideurs"
-          />
-          {viaDelegation && (
-            <Badge variant="outline" className="mt-2 bg-amber-50 text-amber-700 border-amber-200">
-              <User className="h-3 w-3 mr-1" />
-              Validation par délégation du DG
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate("/notes-sef")}>
-            Retour à la liste
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Validation Notes SEF"
+        description="File d'attente des notes SEF à valider"
+        icon={FileCheck}
+        backUrl="/notes-sef"
+      >
+        {viaDelegation && (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <User className="h-3 w-3 mr-1" />
+            Validation par délégation du DG
+          </Badge>
+        )}
+      </PageHeader>
 
       {/* KPIs d'alerte */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -261,7 +289,7 @@ export default function ValidationNotesSEF() {
             </div>
           </CardContent>
         </Card>
-        <Card className={urgentCount > 0 ? "border-destructive" : ""}>
+        <Card className={urgentCount > 0 ? 'border-destructive' : ''}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -272,7 +300,7 @@ export default function ValidationNotesSEF() {
             </div>
           </CardContent>
         </Card>
-        <Card className={hauteCount > 0 ? "border-warning" : ""}>
+        <Card className={hauteCount > 0 ? 'border-warning' : ''}>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
@@ -374,13 +402,13 @@ export default function ValidationNotesSEF() {
                   <TableRow
                     key={note.id}
                     className={cn(
-                      "group",
-                      note.urgence === "urgente" && "bg-destructive/5",
-                      note.urgence === "haute" && "bg-warning/5"
+                      'group',
+                      note.urgence === 'urgente' && 'bg-destructive/5',
+                      note.urgence === 'haute' && 'bg-warning/5'
                     )}
                   >
                     <TableCell className="font-mono font-medium text-primary">
-                      {note.reference_pivot || note.numero || "—"}
+                      {note.reference_pivot || note.numero || '—'}
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate" title={note.objet}>
                       {note.objet}
@@ -388,24 +416,28 @@ export default function ValidationNotesSEF() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-3 w-3 text-muted-foreground" />
-                        {(note.direction as any)?.sigle || "—"}
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {(note.direction as any)?.sigle || '—'}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <User className="h-3 w-3 text-muted-foreground" />
                         <span className="truncate max-w-[120px]">
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                           {(note.demandeur as any)
-                            ? `${(note.demandeur as any).first_name || ""} ${(note.demandeur as any).last_name || ""}`.trim() || "—"
-                            : "—"}
+                            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              `${(note.demandeur as any).first_name || ''} ${(note.demandeur as any).last_name || ''}`.trim() ||
+                              '—'
+                            : '—'}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>{getUrgenceBadge(note.urgence)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {note.submitted_at
-                        ? format(new Date(note.submitted_at), "dd MMM yyyy", { locale: fr })
-                        : format(new Date(note.created_at), "dd MMM yyyy", { locale: fr })}
+                        ? format(new Date(note.submitted_at), 'dd MMM yyyy', { locale: fr })
+                        : format(new Date(note.created_at), 'dd MMM yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100">
@@ -475,7 +507,7 @@ export default function ValidationNotesSEF() {
               Rejeter la note
             </DialogTitle>
             <DialogDescription>
-              Vous allez rejeter la note{" "}
+              Vous allez rejeter la note{' '}
               <span className="font-mono font-medium">
                 {selectedNote?.reference_pivot || selectedNote?.numero}
               </span>
@@ -522,7 +554,7 @@ export default function ValidationNotesSEF() {
               Différer la note
             </DialogTitle>
             <DialogDescription>
-              Vous allez différer la note{" "}
+              Vous allez différer la note{' '}
               <span className="font-mono font-medium">
                 {selectedNote?.reference_pivot || selectedNote?.numero}
               </span>
@@ -544,9 +576,7 @@ export default function ValidationNotesSEF() {
               />
             </div>
             <div>
-              <Label htmlFor="defer-condition">
-                Condition de reprise (optionnel)
-              </Label>
+              <Label htmlFor="defer-condition">Condition de reprise (optionnel)</Label>
               <Textarea
                 id="defer-condition"
                 value={deferCondition}
@@ -563,14 +593,14 @@ export default function ValidationNotesSEF() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-full justify-start text-left font-normal mt-2",
-                      !deferDateReprise && "text-muted-foreground"
+                      'w-full justify-start text-left font-normal mt-2',
+                      !deferDateReprise && 'text-muted-foreground'
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {deferDateReprise
-                      ? format(deferDateReprise, "dd MMMM yyyy", { locale: fr })
-                      : "Sélectionner une date"}
+                      ? format(deferDateReprise, 'dd MMMM yyyy', { locale: fr })
+                      : 'Sélectionner une date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

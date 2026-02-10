@@ -1,25 +1,25 @@
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NoteAEFForm } from "@/components/notes-aef/NoteAEFForm";
-import { NoteAEFList } from "@/components/notes-aef/NoteAEFList";
-import { NoteAEFDetails } from "@/components/notes-aef/NoteAEFDetails";
-import { NoteAEFRejectDialog } from "@/components/notes-aef/NoteAEFRejectDialog";
-import { NoteAEFDeferDialog } from "@/components/notes-aef/NoteAEFDeferDialog";
-import { NoteAEFImputeDialog } from "@/components/notes-aef/NoteAEFImputeDialog";
-import { useNotesAEF, NoteAEF } from "@/hooks/useNotesAEF";
-import { useNotesAEFList } from "@/hooks/useNotesAEFList";
-import { useNotesAEFExport } from "@/hooks/useNotesAEFExport";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
-import { NotesFiltersBar } from "@/components/shared/NotesFiltersBar";
-import { NotesPagination } from "@/components/shared/NotesPagination";
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { NoteAEFForm } from '@/components/notes-aef/NoteAEFForm';
+import { NoteAEFList } from '@/components/notes-aef/NoteAEFList';
+import { NoteAEFDetails } from '@/components/notes-aef/NoteAEFDetails';
+import { NoteAEFRejectDialog } from '@/components/notes-aef/NoteAEFRejectDialog';
+import { NoteAEFDeferDialog } from '@/components/notes-aef/NoteAEFDeferDialog';
+import { NoteAEFImputeDialog } from '@/components/notes-aef/NoteAEFImputeDialog';
+import { useNotesAEF, NoteAEF } from '@/hooks/useNotesAEF';
+import { useNotesAEFList } from '@/hooks/useNotesAEFList';
+import { useNotesAEFExport } from '@/hooks/useNotesAEFExport';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { NotesFiltersBar } from '@/components/shared/NotesFiltersBar';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   Plus,
   Lock,
@@ -31,10 +31,10 @@ import {
   CreditCard,
   Loader2,
   Download,
-  ShieldCheck,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+  FileEdit,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function NotesAEF() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,14 +65,7 @@ export default function NotesAEF() {
   } = useNotesAEFList({ pageSize: 20 });
 
   // Hook existant pour les mutations
-  const {
-    submitNote,
-    validateNote,
-    rejectNote,
-    deferNote,
-    imputeNote,
-    deleteNote,
-  } = useNotesAEF();
+  const { submitNote, validateNote, rejectNote, deferNote, imputeNote, deleteNote } = useNotesAEF();
 
   // État local pour les dialogs
   const [formOpen, setFormOpen] = useState(false);
@@ -85,23 +78,20 @@ export default function NotesAEF() {
   // ID de la note SEF pour pré-remplissage (depuis URL ?prefill=...)
   const [prefillNoteSEFId, setPrefillNoteSEFId] = useState<string | null>(null);
 
-  const canValidate = hasAnyRole(["ADMIN", "DG", "DAAF"]);
+  const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
 
   // Handler pour l'export Excel
   const handleExportExcel = async () => {
-    await exportNotesAEF(
-      { search: searchQuery || undefined },
-      activeTab
-    );
+    await exportNotesAEF({ search: searchQuery || undefined }, activeTab);
   };
 
   // Gérer le prefill depuis l'URL
   useEffect(() => {
-    const prefillId = searchParams.get("prefill");
+    const prefillId = searchParams.get('prefill');
     if (prefillId) {
       setPrefillNoteSEFId(prefillId);
       setFormOpen(true);
-      searchParams.delete("prefill");
+      searchParams.delete('prefill');
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
@@ -174,82 +164,78 @@ export default function NotesAEF() {
       <ModuleHelp {...MODULE_HELP_CONFIG.notes_aef} />
 
       {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <ExerciceSubtitle
-          title="Notes AEF"
-          description="Gestion des Notes Avec Effet Financier"
-        />
-        <div className="flex items-center gap-2">
-          {/* Lien vers espace validation */}
-          {hasAnyRole(["ADMIN", "DG", "DAAF"]) && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.href = "/notes-aef/validation"}
-                    className="gap-2"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    Validation
-                    {(counts.soumis + counts.a_valider) > 0 && (
-                      <Badge variant="destructive" className="ml-1">
-                        {counts.soumis + counts.a_valider}
-                      </Badge>
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Espace de validation DAAF/DG</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+      <PageHeader
+        title="Notes AEF"
+        description="Gestion des Notes Avec Effet Financier"
+        icon={FileEdit}
+        stepNumber={2}
+        backUrl="/"
+      >
+        {/* Lien vers espace validation */}
+        {hasAnyRole(['ADMIN', 'DG', 'DAAF']) && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  onClick={handleExportExcel}
-                  disabled={isExporting}
+                  onClick={() => (window.location.href = '/notes-aef/validation')}
                   className="gap-2"
                 >
-                  {isExporting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
+                  <CheckCircle className="h-4 w-4" />
+                  Validation
+                  {counts.soumis + counts.a_valider > 0 && (
+                    <Badge variant="destructive" className="ml-1">
+                      {counts.soumis + counts.a_valider}
+                    </Badge>
                   )}
-                  {isExporting ? (exportProgress || "Export...") : "Exporter Excel"}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Exporter les notes de l'onglet actuel en Excel</p>
+                <p>Espace de validation DAAF/DG</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    onClick={() => setFormOpen(true)}
-                    className="gap-2"
-                    disabled={!canWrite}
-                  >
-                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    Nouvelle note AEF
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+        )}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                onClick={handleExportExcel}
+                disabled={isExporting}
+                className="gap-2"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {isExporting ? exportProgress || 'Export...' : 'Exporter Excel'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Exporter les notes de l'onglet actuel en Excel</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouvelle note AEF
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-6">

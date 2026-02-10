@@ -1,34 +1,25 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
-import { ExerciceSubtitle } from "@/components/exercice/ExerciceSubtitle";
-import { useMarches, Marche } from "@/hooks/useMarches";
-import { MarcheForm } from "@/components/marches/MarcheForm";
-import { MarcheList } from "@/components/marches/MarcheList";
-import { MarcheDetails } from "@/components/marches/MarcheDetails";
-import { MarcheRejectDialog } from "@/components/marches/MarcheRejectDialog";
-import { MarcheDeferDialog } from "@/components/marches/MarcheDeferDialog";
-import { MarcheValidateDialog } from "@/components/marches/MarcheValidateDialog";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
-import { ModuleHelp, MODULE_HELP_CONFIG } from "@/components/help/ModuleHelp";
-import { 
-  Plus, 
-  ShoppingCart, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle,
-  Lock
-} from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { useMarches, Marche } from '@/hooks/useMarches';
+import { MarcheForm } from '@/components/marches/MarcheForm';
+import { MarcheList } from '@/components/marches/MarcheList';
+import { MarcheDetails } from '@/components/marches/MarcheDetails';
+import { MarcheRejectDialog } from '@/components/marches/MarcheRejectDialog';
+import { MarcheDeferDialog } from '@/components/marches/MarcheDeferDialog';
+import { MarcheValidateDialog } from '@/components/marches/MarcheValidateDialog';
+import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { Plus, ShoppingCart, Clock, CheckCircle2, XCircle, AlertCircle, Lock } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Marches() {
-  const { exercice } = useExercice();
+  const { exercice: _exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const {
     allMarches,
@@ -40,7 +31,7 @@ export default function Marches() {
     refetchMarches,
   } = useMarches();
 
-  const [activeTab, setActiveTab] = useState("tous");
+  const [activeTab, setActiveTab] = useState('tous');
   const [showForm, setShowForm] = useState(false);
   const [selectedMarche, setSelectedMarche] = useState<Marche | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -48,8 +39,8 @@ export default function Marches() {
   const [showDefer, setShowDefer] = useState(false);
   const [showValidate, setShowValidate] = useState(false);
 
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  const _formatMontant = (montant: number) =>
+    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   const handleRefresh = () => {
     refetchMarches();
@@ -57,41 +48,32 @@ export default function Marches() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Indicateur de workflow */}
-      <WorkflowStepIndicator currentStep={4} />
-
-      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex-1">
-          <ExerciceSubtitle 
-            title="Passation de Marchés (SDPM)" 
-            description="Gestion des marchés et workflow de validation" 
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <ModuleHelp {...MODULE_HELP_CONFIG.marches} />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button 
-                    onClick={() => setShowForm(true)} 
-                    className="gap-2"
-                    disabled={!canWrite}
-                  >
-                    {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    Nouveau marché
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canWrite && (
-                <TooltipContent>
-                  <p>{getDisabledMessage()}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <PageHeader
+        title="Passation de Marchés"
+        description="Gestion des marchés publics"
+        icon={ShoppingCart}
+        stepNumber={5}
+        backUrl="/"
+      >
+        <ModuleHelp {...MODULE_HELP_CONFIG.marches} />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button onClick={() => setShowForm(true)} className="gap-2" disabled={!canWrite}>
+                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                  Nouveau marché
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {!canWrite && (
+              <TooltipContent>
+                <p>{getDisabledMessage()}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-5">
@@ -145,11 +127,36 @@ export default function Marches() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="tous">Tous <Badge variant="secondary" className="ml-1">{allMarches.length}</Badge></TabsTrigger>
-          <TabsTrigger value="a_valider">À valider <Badge variant="secondary" className="ml-1">{marchesAValider.length}</Badge></TabsTrigger>
-          <TabsTrigger value="valides">Validés <Badge variant="secondary" className="ml-1">{marchesValides.length}</Badge></TabsTrigger>
-          <TabsTrigger value="rejetes">Rejetés <Badge variant="secondary" className="ml-1">{marchesRejetes.length}</Badge></TabsTrigger>
-          <TabsTrigger value="differes">Différés <Badge variant="secondary" className="ml-1">{marchesDifferes.length}</Badge></TabsTrigger>
+          <TabsTrigger value="tous">
+            Tous{' '}
+            <Badge variant="secondary" className="ml-1">
+              {allMarches.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="a_valider">
+            À valider{' '}
+            <Badge variant="secondary" className="ml-1">
+              {marchesAValider.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="valides">
+            Validés{' '}
+            <Badge variant="secondary" className="ml-1">
+              {marchesValides.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="rejetes">
+            Rejetés{' '}
+            <Badge variant="secondary" className="ml-1">
+              {marchesRejetes.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger value="differes">
+            Différés{' '}
+            <Badge variant="secondary" className="ml-1">
+              {marchesDifferes.length}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tous" className="mt-4">
@@ -157,10 +164,22 @@ export default function Marches() {
             marches={allMarches}
             title="Tous les marchés"
             isLoading={loadingAll}
-            onView={(m) => { setSelectedMarche(m); setShowDetails(true); }}
-            onValidate={(m) => { setSelectedMarche(m); setShowValidate(true); }}
-            onReject={(m) => { setSelectedMarche(m); setShowReject(true); }}
-            onDefer={(m) => { setSelectedMarche(m); setShowDefer(true); }}
+            onView={(m) => {
+              setSelectedMarche(m);
+              setShowDetails(true);
+            }}
+            onValidate={(m) => {
+              setSelectedMarche(m);
+              setShowValidate(true);
+            }}
+            onReject={(m) => {
+              setSelectedMarche(m);
+              setShowReject(true);
+            }}
+            onDefer={(m) => {
+              setSelectedMarche(m);
+              setShowDefer(true);
+            }}
           />
         </TabsContent>
 
@@ -169,10 +188,22 @@ export default function Marches() {
             marches={marchesAValider}
             title="Marchés à valider"
             description="Marchés en attente de validation dans le workflow"
-            onView={(m) => { setSelectedMarche(m); setShowDetails(true); }}
-            onValidate={(m) => { setSelectedMarche(m); setShowValidate(true); }}
-            onReject={(m) => { setSelectedMarche(m); setShowReject(true); }}
-            onDefer={(m) => { setSelectedMarche(m); setShowDefer(true); }}
+            onView={(m) => {
+              setSelectedMarche(m);
+              setShowDetails(true);
+            }}
+            onValidate={(m) => {
+              setSelectedMarche(m);
+              setShowValidate(true);
+            }}
+            onReject={(m) => {
+              setSelectedMarche(m);
+              setShowReject(true);
+            }}
+            onDefer={(m) => {
+              setSelectedMarche(m);
+              setShowDefer(true);
+            }}
           />
         </TabsContent>
 
@@ -182,7 +213,10 @@ export default function Marches() {
             title="Marchés validés"
             description="Marchés ayant complété le workflow de validation"
             showActions={false}
-            onView={(m) => { setSelectedMarche(m); setShowDetails(true); }}
+            onView={(m) => {
+              setSelectedMarche(m);
+              setShowDetails(true);
+            }}
           />
         </TabsContent>
 
@@ -192,7 +226,10 @@ export default function Marches() {
             title="Marchés rejetés"
             description="Marchés rejetés avec motif obligatoire"
             showActions={false}
-            onView={(m) => { setSelectedMarche(m); setShowDetails(true); }}
+            onView={(m) => {
+              setSelectedMarche(m);
+              setShowDetails(true);
+            }}
           />
         </TabsContent>
 
@@ -201,8 +238,13 @@ export default function Marches() {
             marches={marchesDifferes}
             title="Marchés différés"
             description="Marchés mis en attente avec motif"
-            onView={(m) => { setSelectedMarche(m); setShowDetails(true); }}
-            onResume={(m) => { /* resume */ }}
+            onView={(m) => {
+              setSelectedMarche(m);
+              setShowDetails(true);
+            }}
+            onResume={(_m) => {
+              /* resume */
+            }}
           />
         </TabsContent>
       </Tabs>
@@ -214,7 +256,10 @@ export default function Marches() {
             <DialogTitle>Nouveau marché</DialogTitle>
           </DialogHeader>
           <MarcheForm
-            onSuccess={() => { setShowForm(false); handleRefresh(); }}
+            onSuccess={() => {
+              setShowForm(false);
+              handleRefresh();
+            }}
             onCancel={() => setShowForm(false)}
           />
         </DialogContent>
