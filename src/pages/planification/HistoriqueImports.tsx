@@ -15,19 +15,16 @@ import {
   RefreshCw, 
   CheckCircle2, 
   XCircle, 
-  AlertTriangle,
   Clock,
   Loader2,
   Filter,
   History,
   RotateCcw,
-  Info,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useImportJobs, ImportJob, ImportRow } from "@/hooks/useImportJobs";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
 import logoArti from "@/assets/logo-arti.jpg";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -41,7 +38,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
 };
 
 export default function HistoriqueImports() {
-  const { exercice } = useExercice();
+  const { _exercice } = useExercice();
   const { fetchAllJobs, fetchImportRows, exportErrors, retryImport } = useImportJobs();
   
   const [jobs, setJobs] = useState<ImportJob[]>([]);

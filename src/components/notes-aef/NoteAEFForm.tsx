@@ -33,8 +33,6 @@ import {
   CheckCircle,
   Upload,
   Save,
-  Send,
-  Copy,
   Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -309,7 +307,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         const fileName = `${noteId}/${Date.now()}_${uploadFile.file.name}`;
         
         // Mise à jour du progress
-        setUploadedFiles(prev => prev.map((f, idx) => 
+        setUploadedFiles(prev => prev.map((f, _idx) => 
           f === uploadFile ? { ...f, progress: 50 } : f
         ));
 

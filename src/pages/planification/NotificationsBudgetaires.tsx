@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -105,8 +105,8 @@ export default function NotificationsBudgetaires() {
     notifications,
     stats,
     isLoading,
-    createNotification,
-    updateNotification,
+    _createNotification,
+    _updateNotification,
     submitNotification,
     validateNotification,
     rejectNotification,
@@ -115,8 +115,8 @@ export default function NotificationsBudgetaires() {
     getStatutColor,
     formatMontant,
     exportToCSV,
-    isSubmitting,
-    isValidating,
+    _isSubmitting,
+    _isValidating,
     isRejecting,
     isDeleting,
   } = useBudgetNotifications({

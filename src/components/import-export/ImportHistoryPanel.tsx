@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   FileSpreadsheet, 
   Eye, 
@@ -13,12 +12,10 @@ import {
   RefreshCw, 
   CheckCircle2, 
   XCircle, 
-  AlertTriangle,
   Clock,
   Loader2,
   History,
   Terminal,
-  RotateCcw,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -59,7 +56,7 @@ interface ImportHistoryPanelProps {
   exercice: number;
 }
 
-export function ImportHistoryPanel({ exercice }: ImportHistoryPanelProps) {
+export function ImportHistoryPanel({ _exercice }: ImportHistoryPanelProps) {
   const [runs, setRuns] = useState<ImportRun[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRun, setSelectedRun] = useState<ImportRun | null>(null);

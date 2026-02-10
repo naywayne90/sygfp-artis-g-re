@@ -104,6 +104,55 @@ export interface Avenant {
   created_at: string;
 }
 
+// Standalone hooks for parameterized queries (must be called at top level)
+export function useContratLots(marcheId: string | null) {
+  return useQuery({
+    queryKey: ["marche-lots", marcheId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("marche_lots" as any)
+        .select("*")
+        .eq("marche_id", marcheId!)
+        .order("numero_lot");
+      if (error) throw error;
+      return (data || []) as unknown as MarcheLot[];
+    },
+    enabled: !!marcheId,
+  });
+}
+
+export function useContratSoumissions(lotId: string | null) {
+  return useQuery({
+    queryKey: ["soumissions", lotId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("soumissions" as any)
+        .select("*")
+        .eq("lot_id", lotId!)
+        .order("classement", { ascending: true });
+      if (error) throw error;
+      return (data || []) as unknown as Soumission[];
+    },
+    enabled: !!lotId,
+  });
+}
+
+export function useContratAvenants(contratId: string | null) {
+  return useQuery({
+    queryKey: ["avenants", contratId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("avenants" as any)
+        .select("*")
+        .eq("contrat_id", contratId!)
+        .order("numero_avenant");
+      if (error) throw error;
+      return (data || []) as unknown as Avenant[];
+    },
+    enabled: !!contratId,
+  });
+}
+
 export function useContrats() {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
@@ -122,51 +171,6 @@ export function useContrats() {
       return (data || []) as unknown as Contrat[];
     },
     enabled: !!exercice,
-  });
-
-  // Lots par marché
-  const getLots = (marcheId: string) => useQuery({
-    queryKey: ["marche-lots", marcheId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("marche_lots" as any)
-        .select("*")
-        .eq("marche_id", marcheId)
-        .order("numero_lot");
-      if (error) throw error;
-      return (data || []) as unknown as MarcheLot[];
-    },
-    enabled: !!marcheId,
-  });
-
-  // Soumissions par lot
-  const getSoumissions = (lotId: string) => useQuery({
-    queryKey: ["soumissions", lotId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("soumissions" as any)
-        .select("*")
-        .eq("lot_id", lotId)
-        .order("classement", { ascending: true });
-      if (error) throw error;
-      return (data || []) as unknown as Soumission[];
-    },
-    enabled: !!lotId,
-  });
-
-  // Avenants par contrat
-  const getAvenants = (contratId: string) => useQuery({
-    queryKey: ["avenants", contratId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("avenants" as any)
-        .select("*")
-        .eq("contrat_id", contratId)
-        .order("numero_avenant");
-      if (error) throw error;
-      return (data || []) as unknown as Avenant[];
-    },
-    enabled: !!contratId,
   });
 
   // Créer contrat
@@ -381,9 +385,6 @@ export function useContrats() {
 
   return {
     contrats,
-    getLots,
-    getSoumissions,
-    getAvenants,
     createContrat,
     updateContrat,
     createLot,

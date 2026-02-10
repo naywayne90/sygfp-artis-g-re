@@ -103,7 +103,7 @@ const FIELD_LABELS: Record<string, string> = {
 // ============================================
 
 export function useBudgetLineVersions(budgetLineId?: string) {
-  const { exercice } = useExercice();
+  const { _exercice } = useExercice();
   const queryClient = useQueryClient();
 
   // ============================================

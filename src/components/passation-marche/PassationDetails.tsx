@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PassationChecklist } from "./PassationChecklist";
 import { PassationTimeline } from "./PassationTimeline";
 import { DossierStepTimeline } from "@/components/shared/DossierStepTimeline";
@@ -23,7 +22,6 @@ import {
   CheckCircle2,
   XCircle,
   Send,
-  FolderOpen,
   Building2,
   AlertTriangle,
   ClipboardList,

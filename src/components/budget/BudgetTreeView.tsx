@@ -94,7 +94,7 @@ const getLevelColor = (level: string) => {
   }
 };
 
-const getLevelIndent = (level: string) => {
+const _getLevelIndent = (level: string) => {
   switch (level) {
     case "chapitre":
       return 0;

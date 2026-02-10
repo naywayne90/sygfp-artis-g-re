@@ -24,7 +24,6 @@ import {
   Clock,
   User,
   Calendar,
-  ArrowRight,
   Users,
   Calculator,
   CreditCard,
@@ -33,7 +32,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Engagement, VALIDATION_STEPS, useEngagements } from "@/hooks/useEngagements";
-import { supabase } from "@/integrations/supabase/client";
 
 interface TimelineStep {
   key: string;

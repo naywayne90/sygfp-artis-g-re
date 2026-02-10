@@ -25,7 +25,6 @@ import {
 import {
   NoteDirectionGenerale,
   NoteDGStatut,
-  STATUTS_NOTE_DG,
 } from "@/hooks/useNotesDirectionGenerale";
 import { usePermissions } from "@/hooks/usePermissions";
 import { format } from "date-fns";
@@ -169,7 +168,7 @@ export function NoteDGList({
                   <TableHead className="hidden xl:table-cell">Avis</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="hidden 2xl:table-cell">Créé le</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead className="w-[50px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -233,7 +232,7 @@ export function NoteDGList({
                 <TableHead className="hidden xl:table-cell">Avis</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden 2xl:table-cell">Créé le</TableHead>
-                {showActions && <TableHead className="w-[50px]"></TableHead>}
+                {showActions && <TableHead className="w-[50px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>

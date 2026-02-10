@@ -77,7 +77,7 @@ export interface ApplyResult {
  * Hook pour calculer et gérer le diff d'un import
  */
 export function useRoadmapDiff(importBatchId: string | null, directionId?: string) {
-  const { exerciceId } = useExercice();
+  const { _exerciceId } = useExercice();
   const queryClient = useQueryClient();
   const { log } = useAuditLog();
 
@@ -169,7 +169,7 @@ export function useRoadmapDiff(importBatchId: string | null, directionId?: strin
       changeId: string;
       isSelected: boolean;
     }) => {
-      const { data, error } = await supabase.rpc("toggle_change_selection", {
+      const { _data, error } = await supabase.rpc("toggle_change_selection", {
         p_change_id: changeId,
         p_is_selected: isSelected,
       });

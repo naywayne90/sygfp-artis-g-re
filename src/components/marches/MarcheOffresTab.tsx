@@ -21,8 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { 
   Users, 
   Plus, 
@@ -30,7 +28,6 @@ import {
   Star, 
   Loader2, 
   Trophy,
-  Building2
 } from "lucide-react";
 import { useMarcheOffres, CreateOffreData } from "@/hooks/useMarcheOffres";
 import { useMarches } from "@/hooks/useMarches";

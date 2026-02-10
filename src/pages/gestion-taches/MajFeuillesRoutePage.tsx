@@ -111,7 +111,7 @@ export default function MajFeuillesRoutePage() {
   const { data: feuilles, isLoading, refetch } = useQuery({
     queryKey: ["feuilles-route-maj", exerciceId, selectedDirection, selectedMission],
     queryFn: async () => {
-      let query = supabase
+      const query = supabase
         .from("activites")
         .select(`
           id,

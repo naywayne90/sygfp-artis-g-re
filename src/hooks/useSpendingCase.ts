@@ -284,7 +284,7 @@ export function useSpendingCase({ dossierRef, dossierId, enabled = true }: UseSp
     if (!spendingCase) return [];
 
     const available: SpendingStage[] = [];
-    const currentOrder = STAGE_ORDER[spendingCase.currentStage];
+    const _currentOrder = STAGE_ORDER[spendingCase.currentStage];
 
     // Next stage is always a candidate if current is complete
     if (isStageComplete(spendingCase, spendingCase.currentStage)) {

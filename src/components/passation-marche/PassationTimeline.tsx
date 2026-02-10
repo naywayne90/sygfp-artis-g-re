@@ -29,7 +29,7 @@ import {
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { PassationMarche, STATUTS } from "@/hooks/usePassationsMarche";
+import { PassationMarche } from "@/hooks/usePassationsMarche";
 
 interface TimelineStep {
   key: string;

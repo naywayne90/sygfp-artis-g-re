@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Liquidation, VALIDATION_STEPS, DOCUMENTS_REQUIS } from "@/hooks/useLiquidations";
-import { LiquidationChecklist } from "./LiquidationChecklist";
 import { ServiceFaitForm } from "./ServiceFaitForm";
 import { ControleSdctForm } from "./ControleSdctForm";
 import { ValidationDgForm } from "./ValidationDgForm";
@@ -17,22 +16,17 @@ import { fr } from "date-fns/locale";
 import {
   Building,
   Calendar,
-  FileText,
   Receipt,
   CheckCircle,
   XCircle,
   Clock,
   AlertCircle,
-  Download,
-  FileCheck,
   FolderOpen,
-  ClipboardCheck,
   Shield,
   History,
   Crown,
   GitBranch,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface LiquidationDetailsProps {
@@ -61,7 +55,7 @@ const getStatusBadge = (statut: string | null) => {
 export function LiquidationDetails({ liquidation, onRefresh }: LiquidationDetailsProps) {
   const queryClient = useQueryClient();
   
-  const getDocLabel = (code: string) => {
+  const _getDocLabel = (code: string) => {
     return DOCUMENTS_REQUIS.find(d => d.code === code)?.label || code;
   };
 

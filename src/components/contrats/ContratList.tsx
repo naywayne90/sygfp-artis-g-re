@@ -31,13 +31,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useContrats, TYPES_CONTRAT, STATUTS_CONTRAT, Contrat } from "@/hooks/useContrats";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Eye, Edit, FileSignature, Download } from "lucide-react";
+import { Plus, Eye, FileSignature, Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ContratDetails } from "./ContratDetails";
 
 export function ContratList() {
-  const { contrats, createContrat, updateContrat } = useContrats();
+  const { contrats, createContrat, _updateContrat } = useContrats();
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedContrat, setSelectedContrat] = useState<Contrat | null>(null);
@@ -334,7 +334,7 @@ export function ContratList() {
                   <TableHead className="text-right">Montant</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead>Échéance</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>

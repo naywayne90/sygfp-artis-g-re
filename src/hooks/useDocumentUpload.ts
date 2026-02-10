@@ -112,7 +112,7 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (key: string) => {
-      const { data, error } = await storage.delete(key);
+      const { _data, error } = await storage.delete(key);
       
       if (error) {
         throw new Error(error);

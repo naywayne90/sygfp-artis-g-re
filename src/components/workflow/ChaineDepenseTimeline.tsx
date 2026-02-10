@@ -95,7 +95,7 @@ export function ChaineDepenseTimeline({
   };
 
   // Find active step index
-  const activeStepIndex = ETAPES.findIndex(e => e.key === currentEtape);
+  const _activeStepIndex = ETAPES.findIndex(e => e.key === currentEtape);
 
   return (
     <Card>

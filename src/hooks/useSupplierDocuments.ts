@@ -310,7 +310,7 @@ export function useSupplierFinancials(supplierId?: string) {
   const { data, isLoading } = useQuery({
     queryKey: ["supplier-financials", supplierId],
     queryFn: async () => {
-      const [engagements, liquidations, ordonnancements] = await Promise.all([
+      const [engagements, _liquidations, ordonnancements] = await Promise.all([
         supabase
           .from("budget_engagements")
           .select("id, numero, montant, date_engagement, statut")

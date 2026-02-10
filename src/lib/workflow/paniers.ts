@@ -4,7 +4,6 @@
  * Chaque rôle a un ensemble de "paniers" représentant les actions en attente.
  */
 
-import { StatutWorkflow } from './statuts';
 
 // ===== Types =====
 

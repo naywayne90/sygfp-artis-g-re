@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSDPMDashboard } from "@/hooks/useDashboardByRole";
@@ -8,7 +7,6 @@ import {
   FileText, 
   Clock, 
   Users, 
-  CheckCircle2,
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";

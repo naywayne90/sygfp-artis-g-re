@@ -19,8 +19,6 @@ import {
   CREATE_PERMISSIONS,
   VALIDATION_PERMISSIONS,
   EXPORT_PERMISSIONS,
-  BYPASS_ROLES,
-  BYPASS_PROFILS,
   PERMISSION_MESSAGES,
   ROLE_HIERARCHY_LEVELS,
 } from "@/lib/rbac/config";
@@ -80,7 +78,7 @@ interface RBACContext {
 // ============================================
 
 export function useRBAC(): RBACContext {
-  const { exercice, isUserAdmin: exerciceAdmin } = useExercice();
+  const { _exercice, isUserAdmin: exerciceAdmin } = useExercice();
 
   // Récupérer l'utilisateur authentifié
   const { data: authUser, isLoading: isLoadingAuth } = useQuery({
@@ -224,7 +222,7 @@ export function useRBAC(): RBACContext {
     return allowedProfils.includes(profilFonctionnel);
   };
 
-  const canRead = (module: ModuleCode): boolean => {
+  const canRead = (_module: ModuleCode): boolean => {
     // Tous les utilisateurs authentifiés peuvent lire (RLS filtre)
     if (isAuthenticated) return true;
     return false;

@@ -41,7 +41,7 @@ interface EngagementListProps {
   showActions?: boolean;
 }
 
-const getStatusBadge = (statut: string | null, workflowStatus: string | null) => {
+const getStatusBadge = (statut: string | null, _workflowStatus: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
     brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground border-muted" },
     soumis: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
@@ -97,7 +97,7 @@ export function EngagementList({
           <TableHead className="text-right">Montant</TableHead>
           <TableHead className="hidden md:table-cell">Ligne budg.</TableHead>
           <TableHead>Statut</TableHead>
-          {showActions && <TableHead className="w-[50px]"></TableHead>}
+          {showActions && <TableHead className="w-[50px]" />}
         </TableRow>
       </TableHeader>
       <TableBody>

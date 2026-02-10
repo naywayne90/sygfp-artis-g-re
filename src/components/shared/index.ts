@@ -15,5 +15,11 @@ export {
 export { DossierStepTimeline, ETAPES_CHAINE_DEPENSE } from './DossierStepTimeline';
 export { FundingSourceSelect, FundingSourceLabel } from './FundingSourceSelect';
 
+// Workflow dialogs
+export { GenericDeferDialog, type DeferDialogData } from './GenericDeferDialog';
+export { GenericRejectDialog } from './GenericRejectDialog';
+export { GenericValidateDialog } from './GenericValidateDialog';
+export { ErrorBoundary } from './ErrorBoundary';
+
 // Export components
 export { ExportButtons } from '../etats/ExportButtons';

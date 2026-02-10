@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { useTresorerie, useTresorerieDashboard } from "@/hooks/useTresorerie";
 import { Calendar, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -75,7 +74,7 @@ export function PlanTresorerie() {
                   <TableCell className="text-right font-mono">
                     {formatMontant(stats.data?.soldeTotal || 0)}
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell />
                 </TableRow>
               </TableBody>
             </Table>

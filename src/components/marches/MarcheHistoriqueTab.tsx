@@ -88,7 +88,7 @@ export function MarcheHistoriqueTab({ marcheId }: MarcheHistoriqueTabProps) {
               <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
               
               <div className="space-y-6">
-                {historique.map((entry, index) => (
+                {historique.map((entry, _index) => (
                   <div key={entry.id} className="relative pl-10">
                     {/* Timeline dot */}
                     <div className="absolute left-0 w-8 h-8 rounded-full bg-background border-2 border-border flex items-center justify-center">

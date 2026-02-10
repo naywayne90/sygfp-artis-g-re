@@ -1,12 +1,38 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "https://esm.sh/@aws-sdk/client-s3@3.670.0";
 import { getSignedUrl } from "https://esm.sh/@aws-sdk/s3-request-presigner@3.670.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+// Roles allowed to upload/delete files
+const WRITE_ROLES = ["ADMIN", "DAAF", "CB", "SAF", "OPERATIONNEL"];
+
+async function getAuthenticatedUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return null;
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  if (error || !user) return null;
+
+  // Get user profile for role check
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("profil_fonctionnel, direction_id")
+    .eq("id", user.id)
+    .single();
+
+  return { user, profile };
+}
 
 // Initialize S3 client for R2
 const getR2Client = () => {
@@ -46,8 +72,30 @@ serve(async (req: Request) => {
   }
 
   try {
+    // Authenticate user
+    const authResult = await getAuthenticatedUser(req);
+    if (!authResult) {
+      return new Response(
+        JSON.stringify({ error: "Non autorisé - authentification requise" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { profile } = authResult;
+    const userRole = (profile?.profil_fonctionnel || "").toUpperCase();
+
     const body: RequestBody = await req.json();
     const { action, key, contentType, prefix, expiresIn = 3600 } = body;
+
+    // Write operations require specific roles
+    if (["getUploadUrl", "deleteObject"].includes(action)) {
+      if (!WRITE_ROLES.includes(userRole)) {
+        return new Response(
+          JSON.stringify({ error: "Permissions insuffisantes pour cette opération" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
 
     const client = getR2Client();
 

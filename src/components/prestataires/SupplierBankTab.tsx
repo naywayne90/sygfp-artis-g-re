@@ -13,7 +13,7 @@ interface SupplierBankTabProps {
 }
 
 export function SupplierBankTab({ supplierId }: SupplierBankTabProps) {
-  const { accounts: bankAccounts = [], isLoading, primaryAccount, addAccount, setAsPrimary, deleteAccount } = useSupplierBankAccounts(supplierId);
+  const { accounts: bankAccounts = [], isLoading, _primaryAccount, addAccount, setAsPrimary, deleteAccount } = useSupplierBankAccounts(supplierId);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({

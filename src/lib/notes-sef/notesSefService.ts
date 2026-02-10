@@ -23,8 +23,6 @@ import type {
   ServiceResult,
   PaginatedResult,
 } from './types';
-import { NoteSEFStatut, NOTES_SEF_CONFIG } from './constants';
-import { calculateCounts } from './helpers';
 
 // ============================================
 // TYPES POUR LA PAGINATION
@@ -346,7 +344,7 @@ export const notesSefService = {
       });
 
       // 4. Upload des pièces jointes si présentes
-      let attachmentResults = { success: 0, failed: 0 };
+      const attachmentResults = { success: 0, failed: 0 };
       
       if (attachments && attachments.length > 0) {
         for (const file of attachments) {
@@ -426,7 +424,7 @@ export const notesSefService = {
    * @placeholder Géré par useNotesSEF.updateNote
    */
   async update(dto: UpdateNoteSEFDTO): Promise<ServiceResult<NoteSEFEntity>> {
-    console.log('[notesSefService] update called', dto);
+    console.warn('[notesSefService] update called', dto);
     return { success: false, error: 'Utiliser useNotesSEF().updateNote à la place' };
   },
 
@@ -439,7 +437,7 @@ export const notesSefService = {
    * @placeholder Géré par useNotesSEF.submitNote
    */
   async submit(noteId: string): Promise<ServiceResult<NoteSEFEntity>> {
-    console.log('[notesSefService] submit called', noteId);
+    console.warn('[notesSefService] submit called', noteId);
     return { success: false, error: 'Utiliser useNotesSEF().submitNote à la place' };
   },
 
@@ -448,7 +446,7 @@ export const notesSefService = {
    * @placeholder Géré par useNotesSEF.validateNote
    */
   async approve(noteId: string): Promise<ServiceResult<NoteSEFEntity>> {
-    console.log('[notesSefService] approve called', noteId);
+    console.warn('[notesSefService] approve called', noteId);
     return { success: false, error: 'Utiliser useNotesSEF().validateNote à la place' };
   },
 
@@ -457,7 +455,7 @@ export const notesSefService = {
    * @placeholder Géré par useNotesSEF.rejectNote
    */
   async reject(dto: RejectNoteSEFDTO): Promise<ServiceResult<NoteSEFEntity>> {
-    console.log('[notesSefService] reject called', dto);
+    console.warn('[notesSefService] reject called', dto);
     return { success: false, error: 'Utiliser useNotesSEF().rejectNote à la place' };
   },
 
@@ -466,7 +464,7 @@ export const notesSefService = {
    * @placeholder Géré par useNotesSEF.deferNote
    */
   async defer(dto: DeferNoteSEFDTO): Promise<ServiceResult<NoteSEFEntity>> {
-    console.log('[notesSefService] defer called', dto);
+    console.warn('[notesSefService] defer called', dto);
     return { success: false, error: 'Utiliser useNotesSEF().deferNote à la place' };
   },
 
@@ -500,7 +498,7 @@ export const notesSefService = {
    * @placeholder Géré par NoteSEFForm et NoteSEFDetails
    */
   async uploadAttachment(dto: AddAttachmentDTO): Promise<ServiceResult<NoteSEFPiece>> {
-    console.log('[notesSefService] uploadAttachment called', dto);
+    console.warn('[notesSefService] uploadAttachment called', dto);
     return { success: false, error: 'Upload géré par les composants UI' };
   },
 
@@ -555,7 +553,7 @@ export const notesSefService = {
    * @placeholder Géré par useExport
    */
   async exportToExcel(filters: NoteSEFFilters): Promise<ServiceResult<Blob>> {
-    console.log('[notesSefService] exportToExcel called', filters);
+    console.warn('[notesSefService] exportToExcel called', filters);
     return { success: false, error: 'Utiliser useExport() à la place' };
   },
 };

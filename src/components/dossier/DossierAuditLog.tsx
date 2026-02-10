@@ -263,7 +263,7 @@ export function DossierAuditLog({
                 <TableHead className="w-[120px]">Action</TableHead>
                 <TableHead className="w-[100px]">Entité</TableHead>
                 <TableHead>Détails</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
+                <TableHead className="w-[60px]" />
               </TableRow>
             </TableHeader>
             <TableBody>

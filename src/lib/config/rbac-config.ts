@@ -556,7 +556,7 @@ export function getRLSRules(entityType: keyof typeof RLS_POLICIES) {
 export function canAccessEntity(
   roleCode: string,
   entityType: keyof typeof RLS_POLICIES,
-  userContext: { userId?: string; directionId?: string; serviceId?: string }
+  _userContext: { userId?: string; directionId?: string; serviceId?: string }
 ): { canAccess: boolean; scope: string; readOnly?: boolean } {
   const rules = RLS_POLICIES[entityType];
   if (!rules) return { canAccess: false, scope: 'none' };
@@ -823,6 +823,189 @@ export const ROUTE_ACCESS_MATRIX: Record<string, {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
     description: 'Contrats'
   },
+  '/contractualisation/comptabilite-matiere': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
+    description: 'Comptabilité matière'
+  },
+
+  // Chaîne de dépense - Notes DG
+  '/notes-dg': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'AUDITEUR'],
+    description: 'Notes Direction Générale'
+  },
+  '/notes-dg/validation': {
+    allowedProfiles: ['ADMIN', 'DG'],
+    description: 'Validation des Notes DG'
+  },
+  '/dg/notes-a-valider': {
+    allowedProfiles: ['ADMIN', 'DG'],
+    description: 'Notes en attente de validation DG'
+  },
+
+  // Exécution - Dashboards
+  '/execution/dashboard': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Dashboard exécution budgétaire'
+  },
+  '/execution/dashboard-dg': {
+    allowedProfiles: ['ADMIN', 'DG'],
+    description: 'Dashboard Directeur Général'
+  },
+  '/execution/dashboard-direction': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
+    description: 'Dashboard par direction',
+    requiresDirection: true
+  },
+
+  // Planification - Routes manquantes
+  '/planification/physique': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'AUDITEUR'],
+    description: 'Planification physique'
+  },
+  '/planification/plan-travail': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
+    description: 'Plan de travail'
+  },
+  '/planification/documentation-import': {
+    allowedProfiles: ['ADMIN', 'DAAF'],
+    description: 'Documentation import budget'
+  },
+  '/planification/historique-imports': {
+    allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
+    description: 'Historique des imports'
+  },
+  '/planification/aide-import': {
+    allowedProfiles: ['ADMIN', 'DAAF'],
+    description: 'Aide import budget'
+  },
+  '/planification/execution-physique': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'OPERATEUR'],
+    description: 'Exécution physique des tâches'
+  },
+  '/planification/maj-feuilles-route': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
+    description: 'Mise à jour des feuilles de route'
+  },
+
+  // Gestion des tâches
+  '/gestion-taches/etat-execution': {
+    allowedProfiles: ['all'],
+    description: 'État d\'exécution des tâches'
+  },
+  '/gestion-taches/taches-realisees': {
+    allowedProfiles: ['all'],
+    description: 'Tâches réalisées'
+  },
+  '/gestion-taches/taches-differees': {
+    allowedProfiles: ['all'],
+    description: 'Tâches différées'
+  },
+
+  // Approvisionnement
+  '/approvisionnement': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'OPERATEUR'],
+    description: 'Gestion approvisionnement'
+  },
+
+  // Trésorerie - Sous-routes
+  '/tresorerie/approvisionnements/banque': {
+    allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Approvisionnements bancaires'
+  },
+  '/tresorerie/approvisionnements/caisse': {
+    allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Approvisionnements caisse'
+  },
+  '/tresorerie/mouvements/banque': {
+    allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Mouvements bancaires'
+  },
+  '/tresorerie/mouvements/caisse': {
+    allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Mouvements de caisse'
+  },
+
+  // Recettes
+  '/recettes': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'TRESORERIE', 'AUDITEUR'],
+    description: 'Déclaration et suivi des recettes'
+  },
+
+  // Programmatique
+  '/programmatique/charger-budget': {
+    allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
+    description: 'Chargement du budget programmatique'
+  },
+  '/programmatique/mise-a-jour': {
+    allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
+    description: 'Mise à jour du budget programmatique'
+  },
+  '/programmatique/liste-budget': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
+    description: 'Liste des budgets programmatiques'
+  },
+  '/programmatique/reamenagement': {
+    allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
+    description: 'Réaménagement budgétaire'
+  },
+
+  // Administration - Routes manquantes
+  '/admin/architecture': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Architecture SYGFP'
+  },
+  '/admin/dictionnaire': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Dictionnaire des variables'
+  },
+  '/admin/codification': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Référentiel de codification'
+  },
+  '/admin/secteurs-activite': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Secteurs d\'activité'
+  },
+  '/admin/documentation': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Documentation des modules'
+  },
+  '/admin/raci': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Matrice RACI'
+  },
+  '/admin/checklist-production': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Checklist de production'
+  },
+  '/admin/liens-lambda': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Liens et fonctions Lambda'
+  },
+  '/admin/parametres-exercice': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Paramètres de l\'exercice'
+  },
+  '/admin/doublons': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Gestion des doublons'
+  },
+  '/admin/compteurs-references': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Compteurs et références'
+  },
+  '/admin/import-budget': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Import budget administrateur'
+  },
+  '/admin/anomalies': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Gestion des anomalies'
+  },
+  '/admin/test-non-regression': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Tests de non-régression'
+  },
 };
 
 // ============================================
@@ -839,7 +1022,7 @@ export function canAccessRoute(
 ): boolean {
   // Trouver la règle la plus spécifique
   const rule = findRouteRule(route);
-  if (!rule) return true; // Route non définie = accès par défaut
+  if (!rule) return false; // Route non définie = accès refusé par défaut (sécurité)
 
   // Vérifier le profil fonctionnel
   if (rule.allowedProfiles.includes('all')) return true;

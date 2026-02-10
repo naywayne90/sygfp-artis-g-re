@@ -51,7 +51,6 @@ import {
   Trash2,
   Edit,
   Copy,
-  GripVertical,
   Calculator,
   Loader2,
   Package,
@@ -351,7 +350,7 @@ export function LignesEstimativesEditor({
                   <TableHead className="text-center w-[80px]">Qté</TableHead>
                   <TableHead className="text-right w-[120px]">P.U.</TableHead>
                   <TableHead className="text-right w-[130px]">Montant</TableHead>
-                  {!readonly && <TableHead className="w-[100px]"></TableHead>}
+                  {!readonly && <TableHead className="w-[100px]" />}
                 </TableRow>
               </TableHeader>
               <TableBody>

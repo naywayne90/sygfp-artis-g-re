@@ -6,8 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { 
   ClipboardCheck, RefreshCw, PlayCircle, CheckCircle2, 
   Circle, AlertCircle, FileText

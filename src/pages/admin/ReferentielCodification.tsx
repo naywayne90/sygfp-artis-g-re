@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const CODE_TYPES = [
+const _CODE_TYPES = [
   "LIGNE_BUDGETAIRE", "PRESTATAIRE", "CONTRAT", "MARCHE", "NOTE_AEF", "NOTE_SEF",
   "ENGAGEMENT", "LIQUIDATION", "ORDONNANCEMENT", "REGLEMENT", "VIREMENT", 
   "DOSSIER", "EXPRESSION_BESOIN"

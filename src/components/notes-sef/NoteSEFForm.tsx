@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,12 +25,10 @@ import {
   User, 
   CalendarIcon, 
   Upload, 
-  X, 
   FileText,
   AlertCircle,
   Save,
   Send,
-  Info
 } from "lucide-react";
 import { FileList, validateFile, type UploadedFile } from "./FilePreview";
 import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
@@ -47,7 +44,7 @@ interface NoteSEFFormProps {
 export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = true }: NoteSEFFormProps) {
   const { exercice } = useExercice();
   const { createNote, updateNote, submitNote, directions, profiles, beneficiaires, isCreating, isUpdating, isSubmitting } = useNotesSEF();
-  const { isAdmin, hasAnyRole, userId } = usePermissions();
+  const { isAdmin, hasAnyRole, _userId } = usePermissions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Le demandeur peut être changé par les gestionnaires (ADMIN, DG, DAAF) ou si création par un autre
@@ -235,7 +232,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
   }, []);
 
   // Mettre à jour un champ avec validation temps réel
-  const updateField = useCallback((field: string, value: any) => {
+  const _updateField = useCallback((field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Valider si le champ a été touché
@@ -249,7 +246,7 @@ export function NoteSEFForm({ open, onOpenChange, note, allowSubmitOnCreate = tr
   }, [touched, validateField]);
 
   // Marquer un champ comme touché (on blur)
-  const handleBlur = useCallback((field: string) => {
+  const _handleBlur = useCallback((field: string) => {
     setTouched(prev => ({ ...prev, [field]: true }));
     const value = formData[field as keyof typeof formData];
     const error = validateField(field, value);

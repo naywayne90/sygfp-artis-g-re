@@ -1,8 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { useDAFDashboard } from "@/hooks/useDashboardByRole";
 import { useDashboardAlerts } from "@/hooks/useDashboardAlerts";
 import { 

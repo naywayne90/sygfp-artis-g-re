@@ -590,6 +590,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check export permissions based on user profile
+    const EXPORT_ROLES = ["ADMIN", "DAAF", "CB", "DG", "AUDITEUR", "SAF"];
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("profil_fonctionnel, direction_id")
+      .eq("id", user.id)
+      .single();
+
+    const userRole = (userProfile?.profil_fonctionnel || "").toUpperCase();
+    if (!EXPORT_ROLES.includes(userRole)) {
+      return new Response(JSON.stringify({ error: "Permissions insuffisantes pour l'export" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body: ExportRequest = await req.json();
     console.log("Export request:", { userId: user.id, type: body.type, entity: body.entity_type });
 
@@ -619,6 +635,11 @@ Deno.serve(async (req) => {
           `)
           .eq("exercice", body.exercice)
           .order("code");
+
+        // Non-admin users can only export data from their own direction
+        if (!["ADMIN", "DG", "AUDITEUR"].includes(userRole) && userProfile?.direction_id) {
+          query = query.eq("direction_id", userProfile.direction_id);
+        }
 
         // Apply filters
         if (body.filters?.direction_id) {

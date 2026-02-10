@@ -4,7 +4,7 @@ import { useTaches, type Tache, type TacheFormData } from "@/hooks/useTaches";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, FileSpreadsheet } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import { isPast } from "date-fns";
 
 import { PhysiqueDashboard } from "@/components/planification/PhysiqueDashboard";

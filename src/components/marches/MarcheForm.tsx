@@ -15,7 +15,6 @@ import {
   Save, 
   Target, 
   CreditCard,
-  Calendar,
   Banknote,
   AlertTriangle,
   Search
@@ -27,7 +26,6 @@ import {
   MarcheFormData,
   Prestataire 
 } from "@/hooks/useMarches";
-import { supabase } from "@/integrations/supabase/client";
 
 interface NoteImputation {
   id: string;

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { useContrats, STATUTS_CONTRAT } from "@/hooks/useContrats";
+import { useContrats } from "@/hooks/useContrats";
 import { FileSignature, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ContratList } from "@/components/contrats/ContratList";
 

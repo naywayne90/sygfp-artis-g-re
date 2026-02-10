@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useBudgetLines, BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
 import { useBudgetTransfers, useBudgetLineAvailable } from "@/hooks/useBudgetTransfers";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +48,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeftRight,
-  Search,
   Plus,
   Check,
   X,
@@ -56,7 +55,6 @@ import {
   Eye,
   Clock,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   Send,
   ChevronDown,
@@ -77,7 +75,7 @@ export default function Reamenagement() {
   const [selectedTransfer, setSelectedTransfer] = useState<any>(null);
 
   const { budgetLines } = useBudgetLines();
-  const { transfers, isLoading, stats, createTransfer, submitTransfer, validateTransfer, rejectTransfer, executeTransfer, cancelTransfer, isCreating, isExecuting } = useBudgetTransfers({
+  const { transfers, isLoading, stats, createTransfer, submitTransfer, validateTransfer, rejectTransfer, executeTransfer, _cancelTransfer, isCreating, isExecuting } = useBudgetTransfers({
     status: statusFilter !== "all" ? statusFilter : undefined,
     type_transfer: "virement",
   });
@@ -490,7 +488,7 @@ function CreateReamenagementDialog({
   const [destOpen, setDestOpen] = useState(false);
 
   // Get available balance for source line
-  const { dotation, engaged, disponible, isLoading: loadingAvailable } = useBudgetLineAvailable(sourceLineId || undefined);
+  const { dotation, engaged, disponible, isLoading: _loadingAvailable } = useBudgetLineAvailable(sourceLineId || undefined);
 
   const sourceLine = budgetLines.find((l) => l.id === sourceLineId);
   const destLine = budgetLines.find((l) => l.id === destLineId);

@@ -223,9 +223,9 @@ export function RecentActivitiesPanel({
           {Object.entries(limitedGroups).map(([group, activities]) => (
             <div key={group}>
               <h4 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide flex items-center gap-2">
-                <span className="h-px flex-1 bg-border"></span>
+                <span className="h-px flex-1 bg-border" />
                 {group}
-                <span className="h-px flex-1 bg-border"></span>
+                <span className="h-px flex-1 bg-border" />
               </h4>
               <div className="space-y-2">
                 {activities.map((activity) => (
@@ -241,7 +241,7 @@ export function RecentActivitiesPanel({
 }
 
 function ActivityItem({ activity }: { activity: EnhancedActivity }) {
-  const initials = activity.userName 
+  const _initials = activity.userName 
     ? activity.userName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
     : "??";
 

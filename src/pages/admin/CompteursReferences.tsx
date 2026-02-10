@@ -49,7 +49,6 @@ import {
   ShoppingCart,
   Briefcase,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 
 import { toast } from "sonner";
@@ -99,8 +98,8 @@ export default function CompteursReferences() {
   // Reset counter mutation
   const resetMutation = useMutation({
     mutationFn: async ({ docType, newNumber }: { docType: DocType; newNumber: number }) => {
-      // This would update the counter - for now just log
-      console.log("Reset counter:", docType, newNumber);
+      // TODO: implement counter reset via RPC
+      void docType; void newNumber;
       toast.info("Cette fonctionnalité sera disponible prochainement");
     },
     onSuccess: () => {

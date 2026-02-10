@@ -16,11 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -54,9 +49,7 @@ import {
   TrendingUp,
   TrendingDown,
   FileText,
-  CheckCircle2,
   Clock,
-  ArrowUpDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -444,7 +437,7 @@ export default function MiseAJourBudget() {
                   </div>
                 ) : versions && versions.length > 0 ? (
                   <div className="space-y-4">
-                    {versions.map((version: any, index: number) => (
+                    {versions.map((version: any, _index: number) => (
                       <div
                         key={version.id}
                         className="border rounded-lg p-4 space-y-2"

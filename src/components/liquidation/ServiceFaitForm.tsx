@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -20,11 +19,6 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   AlertDialog,
@@ -44,7 +38,6 @@ import {
   Loader2,
   Shield,
   ClipboardCheck,
-  User,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -93,7 +86,7 @@ export function ServiceFaitForm({
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { logAction } = useAuditLog();
-  const { hasAnyRole, userRoles } = usePermissions();
+  const { hasAnyRole, _userRoles } = usePermissions();
 
   // Rôles autorisés pour certifier le service fait
   const canCertify = hasAnyRole(["ADMIN", "SDCT", "DAAF", "DIRECTION"]) && !readOnly;
@@ -109,7 +102,7 @@ export function ServiceFaitForm({
     },
   });
 
-  const onSubmit = async (data: ServiceFaitFormData) => {
+  const onSubmit = async (_data: ServiceFaitFormData) => {
     if (!canCertify) {
       toast.error("Vous n'avez pas les droits pour certifier le service fait");
       return;

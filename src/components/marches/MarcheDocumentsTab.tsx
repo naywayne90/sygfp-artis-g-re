@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FileText, Plus, Trash2, Download, Upload, Loader2 } from "lucide-react";
+import { FileText, Plus, Trash2, Loader2 } from "lucide-react";
 import { useMarcheDocuments, TYPES_DOCUMENTS_MARCHE } from "@/hooks/useMarcheDocuments";
 
 interface MarcheDocumentsTabProps {

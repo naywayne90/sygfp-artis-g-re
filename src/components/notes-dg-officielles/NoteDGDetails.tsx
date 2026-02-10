@@ -37,9 +37,7 @@ import {
 import {
   NoteDirectionGenerale,
   NoteDGStatut,
-  STATUTS_NOTE_DG,
   INSTRUCTION_TYPES,
-  PRIORITES,
   useNoteDGImputations,
   InstructionType,
   ImputationPriorite,
@@ -115,7 +113,7 @@ export function NoteDGDetails({
 
   const {
     imputations,
-    isLoading: imputationsLoading,
+    isLoading: _imputationsLoading,
     deleteImputation,
     acknowledgeReceipt,
   } = useNoteDGImputations(note?.id || null);
@@ -269,7 +267,7 @@ export function NoteDGDetails({
                         <TableHead>Priorité</TableHead>
                         <TableHead>Délai</TableHead>
                         <TableHead>Accusé</TableHead>
-                        {canEdit && <TableHead className="w-[50px]"></TableHead>}
+                        {canEdit && <TableHead className="w-[50px]" />}
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -175,7 +175,7 @@ export function ReceptionList() {
                   <TableHead>N° BL</TableHead>
                   <TableHead>Articles</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>

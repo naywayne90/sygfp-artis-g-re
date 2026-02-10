@@ -15,17 +15,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "@/components/ui/table";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
   Tooltip,
@@ -39,7 +30,6 @@ import {
   Edit2,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
   ChevronDown,
   ChevronRight,
   ArrowRight,
@@ -47,10 +37,9 @@ import {
   History,
   Check,
   X,
-  Info,
   FileWarning,
 } from "lucide-react";
-import { useRoadmapDiff, PendingChange, DiffField, ChangeType } from "@/hooks/useRoadmapDiff";
+import { useRoadmapDiff, useRoadmapVersionHistory, PendingChange, DiffField, ChangeType } from "@/hooks/useRoadmapDiff";
 
 // Configuration des types de changement
 const CHANGE_TYPE_CONFIG: Record<
@@ -507,9 +496,7 @@ interface VersionHistoryProps {
 }
 
 export function RoadmapVersionHistory({ directionId }: VersionHistoryProps) {
-  const { data: snapshots, isLoading } = require("@/hooks/useRoadmapDiff").useRoadmapVersionHistory(
-    directionId
-  );
+  const { data: snapshots, isLoading } = useRoadmapVersionHistory(directionId);
 
   if (isLoading) {
     return (

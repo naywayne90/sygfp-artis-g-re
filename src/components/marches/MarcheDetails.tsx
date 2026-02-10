@@ -1,21 +1,18 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { 
   ShoppingCart, 
   Building2, 
-  Target, 
   CreditCard, 
   FileText,
   CheckCircle2,
   Clock,
   XCircle,
   AlertCircle,
-  User,
   Users,
   History
 } from "lucide-react";

@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { EngagementChecklist } from "@/components/engagement/EngagementChecklist";
-import { useEngagementDocuments } from "@/hooks/useEngagementDocuments";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { ExportButtons } from "@/components/etats/ExportButtons";
 import { ExportColumn } from "@/lib/export";

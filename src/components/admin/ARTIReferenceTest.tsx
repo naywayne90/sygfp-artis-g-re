@@ -233,7 +233,7 @@ export default function ARTIReferenceTest() {
                   <TableHead>Étape</TableHead>
                   <TableHead>Mois/Année</TableHead>
                   <TableHead>N°</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>

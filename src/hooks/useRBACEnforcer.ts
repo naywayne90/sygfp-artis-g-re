@@ -9,10 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
   canAccessRoute,
-  findRouteRule,
   routeRequiresDirectionFilter,
   getAccessibleRoutes,
-  PROFILS_FONCTIONNELS,
   ROLES_HIERARCHIQUES,
   VALIDATION_MATRIX,
   canRoleValidate
@@ -203,7 +201,7 @@ export function useRBACEnforcer(): RBACEnforcerResult {
   }, [user.profilFonctionnel, user.userId, isAdmin, isAuditeur, isCB, isDAF]);
 
   // Vérifier si peut supprimer
-  const canDelete = useCallback((entityType: string): boolean => {
+  const canDelete = useCallback((_entityType: string): boolean => {
     if (isAdmin) return true;
     return false; // Suppression réservée aux admins par défaut
   }, [isAdmin]);

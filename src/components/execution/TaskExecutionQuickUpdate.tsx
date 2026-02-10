@@ -422,7 +422,7 @@ export function TaskExecutionBadge({
   }
 
   if (compact) {
-    const config = TASK_STATUS_CONFIG[execution.status as TaskStatus];
+    const _config = TASK_STATUS_CONFIG[execution.status as TaskStatus];
     return (
       <div className="flex items-center gap-1">
         <div

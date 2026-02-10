@@ -82,7 +82,7 @@ export function AttachmentSection({
     isImage,
     isPdf,
     getFileIcon,
-    getAcceptedExtensions,
+    _getAcceptedExtensions,
   } = useAttachments(attachmentOptions);
 
   // Handlers

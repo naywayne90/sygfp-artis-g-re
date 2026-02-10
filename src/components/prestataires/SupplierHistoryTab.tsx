@@ -5,9 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { 
   FileSignature, 
   CreditCard, 
-  Receipt, 
   FileCheck, 
-  Wallet,
   Clock,
   CheckCircle2,
   XCircle,

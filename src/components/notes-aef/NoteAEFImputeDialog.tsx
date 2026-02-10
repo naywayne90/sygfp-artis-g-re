@@ -25,7 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { NoteAEF, useNotesAEF } from "@/hooks/useNotesAEF";
+import { NoteAEF } from "@/hooks/useNotesAEF";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -38,7 +38,6 @@ import {
   CheckCircle2, 
   Calculator,
   Building,
-  Target,
   Filter,
   Info,
   TrendingUp,
@@ -389,7 +388,7 @@ export function NoteAEFImputeDialog({
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-muted/50">
-                          <TableHead className="w-10"></TableHead>
+                          <TableHead className="w-10" />
                           <TableHead>Code</TableHead>
                           <TableHead>Libellé</TableHead>
                           <TableHead>Dir.</TableHead>

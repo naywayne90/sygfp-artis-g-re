@@ -1,6 +1,6 @@
-import { Check, Clock, AlertCircle, Circle, XCircle, Pause } from "lucide-react";
+import { Check, Clock, Circle, XCircle, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useWorkflowDossier, WorkflowProgress as WorkflowProgressType } from "@/hooks/useWorkflowDossier";
+import { useWorkflowDossier } from "@/hooks/useWorkflowDossier";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -86,7 +86,7 @@ export function WorkflowProgress({ dossierId, compact = false, className }: Work
     return (
       <TooltipProvider>
         <div className={cn("flex items-center gap-1", className)}>
-          {progress.map((step, index) => {
+          {progress.map((step, _index) => {
             const config = STATUS_CONFIG[step.statut as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
             const Icon = config.icon;
 
@@ -125,7 +125,7 @@ export function WorkflowProgress({ dossierId, compact = false, className }: Work
         
         {/* Étapes */}
         <div className="relative flex justify-between">
-          {progress.map((step, index) => {
+          {progress.map((step, _index) => {
             const config = STATUS_CONFIG[step.statut as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
             const Icon = config.icon;
             const isCompleted = step.statut === "valide";

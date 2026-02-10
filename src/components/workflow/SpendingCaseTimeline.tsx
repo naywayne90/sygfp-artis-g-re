@@ -56,7 +56,6 @@ import {
   SpendingStepData,
   SPENDING_STAGES,
   STAGE_CONFIG,
-  STAGE_ORDER,
   StepStatus,
   getSpendingProgress,
 } from "@/types/spending-case";
@@ -165,8 +164,8 @@ export function SpendingCaseTimeline({
     spendingCase: loadedCase,
     isLoading,
     getAvailableTransitions,
-    transition,
-    isTransitioning,
+    _transition,
+    _isTransitioning,
   } = useSpendingCase({
     dossierRef,
     dossierId,
@@ -509,12 +508,14 @@ function StageDetailDialog({
   onOpenChange,
   onNavigate,
 }: StageDetailDialogProps) {
+  // Hooks must be called unconditionally before any early return
+  const { canValidate, _userRole, requiredRole } = useStagePermission(stage ?? "note_sef");
+
   if (!stage) return null;
 
   const config = STAGE_CONFIG[stage];
   const visual = STAGE_VISUAL_CONFIG[stage];
   const stepData = spendingCase.timeline.steps.find((s) => s.stage === stage);
-  const { canValidate, userRole, requiredRole } = useStagePermission(stage);
   const Icon = visual.icon;
 
   return (

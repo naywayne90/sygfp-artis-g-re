@@ -5,7 +5,6 @@ import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -162,10 +161,10 @@ export function ControleSdctForm({
       const seuilDg = 50000000; // 50M FCFA - seuil validation DG
       const needsDgValidation = liquidation.montant >= seuilDg;
 
-      let newStatut = isValidation
+      const newStatut = isValidation
         ? (needsDgValidation ? "en_validation_dg" : "valide")
         : "rejete";
-      let newStep = isValidation
+      const newStep = isValidation
         ? (needsDgValidation ? (liquidation.current_step || 1) + 1 : 99)
         : liquidation.current_step;
 

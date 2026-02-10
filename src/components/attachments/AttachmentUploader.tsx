@@ -9,7 +9,7 @@
  */
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, FileText, Image, AlertCircle, Loader2, CheckCircle } from "lucide-react";
+import { Upload, X, FileText, AlertCircle, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";

@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       .eq("id", caller.id)
       .single();
 
-    if (callerProfile?.profil_fonctionnel !== "Admin") {
+    if (callerProfile?.profil_fonctionnel?.toUpperCase() !== "ADMIN") {
       console.error("[create-user] User is not admin:", caller.id);
       return new Response(
         JSON.stringify({ error: "Seuls les administrateurs peuvent créer des utilisateurs" }),

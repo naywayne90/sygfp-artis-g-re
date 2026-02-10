@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +40,6 @@ import {
   useRoadmapSubmissionDetail,
   computeActivityDiff,
   SubmissionStatus,
-  SubmissionActivity,
 } from "@/hooks/useRoadmapSubmissions";
 
 // Configuration des statuts

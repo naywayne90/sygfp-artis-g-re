@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,13 +20,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLiquidations, DOCUMENTS_REQUIS, LiquidationAvailability } from "@/hooks/useLiquidations";
-import { Upload, AlertCircle, CheckCircle, X, FileText, Eye, FileImage, Lock, AlertTriangle, Loader2 } from "lucide-react";
+import { Upload, AlertCircle, CheckCircle, X, FileText, Eye, FileImage, Lock, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   engagement_id: z.string().min(1, "Engagement requis"),
   montant: z.number().min(0.01, "Montant requis"),
   montant_ht: z.number().optional(),
   tva_taux: z.number().optional(),
+  airsi_taux: z.number().min(0).max(100).optional(),
+  airsi_montant: z.number().min(0).optional(),
+  retenue_source_taux: z.number().min(0).max(100).optional(),
+  retenue_source_montant: z.number().min(0).optional(),
+  net_a_payer: z.number().min(0).optional(),
   reference_facture: z.string().optional(),
   observation: z.string().optional(),
   service_fait_date: z.string().min(1, "Date service fait requise"),
@@ -89,6 +94,11 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
       montant: 0,
       montant_ht: 0,
       tva_taux: 18,
+      airsi_taux: 0,
+      airsi_montant: 0,
+      retenue_source_taux: 0,
+      retenue_source_montant: 0,
+      net_a_payer: 0,
       reference_facture: "",
       observation: "",
       service_fait_date: new Date().toISOString().split("T")[0],
@@ -99,14 +109,30 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
   const montant = form.watch("montant");
   const montantHT = form.watch("montant_ht");
   const tvaTaux = form.watch("tva_taux");
+  const airsiTaux = form.watch("airsi_taux");
+  const retenueSourceTaux = form.watch("retenue_source_taux");
 
-  // Calculate TVA and net
+  // Calculate TVA and montant TTC
   useEffect(() => {
     if (montantHT && tvaTaux) {
       const tvaAmount = (montantHT * tvaTaux) / 100;
       form.setValue("montant", montantHT + tvaAmount);
     }
   }, [montantHT, tvaTaux, form]);
+
+  // Calculate AIRSI, Retenue Source, and Net a Payer
+  // Round retentions first, then derive net by subtraction to guarantee:
+  // montantTTC === airsi_montant + retenue_source_montant + net_a_payer
+  useEffect(() => {
+    const montantTTC = montant || 0;
+    const airsiAmount = Math.round(montantTTC * ((airsiTaux || 0) / 100));
+    const retenueSourceAmount = Math.round(montantTTC * ((retenueSourceTaux || 0) / 100));
+    const netAPayer = montantTTC - airsiAmount - retenueSourceAmount;
+
+    form.setValue("airsi_montant", airsiAmount);
+    form.setValue("retenue_source_montant", retenueSourceAmount);
+    form.setValue("net_a_payer", netAPayer);
+  }, [montant, airsiTaux, retenueSourceTaux, form]);
 
   // Calculate availability when engagement or amount changes
   useEffect(() => {
@@ -232,6 +258,11 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
       montant_ht: data.montant_ht,
       tva_taux: data.tva_taux,
       tva_montant: (data.montant_ht || 0) * ((data.tva_taux || 0) / 100),
+      airsi_taux: data.airsi_taux,
+      airsi_montant: data.airsi_montant,
+      retenue_source_taux: data.retenue_source_taux,
+      retenue_source_montant: data.retenue_source_montant,
+      net_a_payer: data.net_a_payer,
       reference_facture: data.reference_facture,
       observation: data.observation,
       service_fait_date: data.service_fait_date,
@@ -458,6 +489,124 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
+
+        {/* Retenues fiscales */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Retenues fiscales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="airsi_taux"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Taux AIRSI (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="airsi_montant"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Montant AIRSI</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        readOnly
+                        className="bg-muted"
+                        {...field}
+                        value={field.value || 0}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="retenue_source_taux"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Taux Retenue a la Source (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="retenue_source_montant"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Montant Retenue a la Source</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        readOnly
+                        className="bg-muted"
+                        {...field}
+                        value={field.value || 0}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Net a payer */}
+            <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <FormField
+                control={form.control}
+                name="net_a_payer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Net a Payer</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        readOnly
+                        className="bg-muted text-lg font-bold"
+                        {...field}
+                        value={field.value || 0}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Montant TTC ({formatMontant(montant || 0)}) - AIRSI ({formatMontant(form.getValues("airsi_montant") || 0)}) - Retenue Source ({formatMontant(form.getValues("retenue_source_montant") || 0)})
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 

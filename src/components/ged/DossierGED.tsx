@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,8 +25,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDocumentUpload, extractFilename } from "@/hooks/useDocumentUpload";
 import { useDocumentPermissions } from "@/hooks/useDocumentPermissions";
-import { useDocumentCompleteness, type DocumentStatus } from "@/hooks/useDocumentCompleteness";
-import { getDocumentTypeLabel, getDocumentTypesList } from "@/services/storage/namingService";
+import { useDocumentCompleteness } from "@/hooks/useDocumentCompleteness";
 import { DocumentPreview } from "./DocumentPreview";
 import { DocumentChecklist } from "./DocumentChecklist";
 

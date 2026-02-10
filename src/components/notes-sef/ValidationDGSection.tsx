@@ -54,7 +54,7 @@ interface ValidationDGSectionProps {
 export function ValidationDGSection({
   noteSefId,
   noteStatut,
-  showActions = false,
+  _showActions = false,
 }: ValidationDGSectionProps) {
   const { data: validation, isLoading, error, refetch } = useValidationDGByNoteId(noteSefId);
   const createValidation = useCreateValidationDG();

@@ -35,7 +35,6 @@ import {
   Plus,
   FileText,
   CreditCard,
-  AlertCircle,
   Receipt,
 } from "lucide-react";
 import { ReglementForm } from "./ReglementForm";

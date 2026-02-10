@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
 import {
   Collapsible,
   CollapsibleContent,
@@ -125,8 +124,8 @@ export function NoteSEFDetails({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { hasAnyRole } = usePermissions();
-  const { fetchHistory, submitNote, validateNote } = useNotesSEF();
-  const { exportPdf, isExporting: isExportingPdf, progress: exportProgress } = useExportNoteSEFPdf();
+  const { fetchHistory, _submitNote, _validateNote } = useNotesSEF();
+  const { exportPdf, isExporting: isExportingPdf, progress: _exportProgress } = useExportNoteSEFPdf();
   
   const [history, setHistory] = useState<NoteSEFHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -966,7 +965,7 @@ export function NoteSEFDetails({
                     <div className="absolute left-2.5 top-3 bottom-3 w-px bg-border" />
                     
                     <div className="space-y-4">
-                      {history.map((entry, index) => (
+                      {history.map((entry, _index) => (
                         <div key={entry.id} className="flex gap-4 relative">
                           {/* Timeline dot */}
                           <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center z-10 ${

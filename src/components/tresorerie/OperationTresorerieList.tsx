@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useTresorerie, TYPES_OPERATION, CompteBancaire } from "@/hooks/useTresorerie";
+import { useTresorerie, TYPES_OPERATION } from "@/hooks/useTresorerie";
 import { Plus, ArrowUpRight, ArrowDownRight, ArrowLeftRight, CheckCircle, Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -298,7 +297,7 @@ export function OperationTresorerieList() {
                 <TableHead className="text-right">Montant</TableHead>
                 <TableHead className="text-right">Solde après</TableHead>
                 <TableHead>Rapproché</TableHead>
-                <TableHead></TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -425,7 +425,7 @@ export function PassationMarcheForm({
                                 <TableHead className="w-16">N°</TableHead>
                                 <TableHead>Désignation</TableHead>
                                 <TableHead className="text-right">Montant estimé</TableHead>
-                                <TableHead className="w-12"></TableHead>
+                                <TableHead className="w-12" />
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -550,7 +550,7 @@ export function PassationMarcheForm({
                         <TableHead className="text-right">Offre (FCFA)</TableHead>
                         <TableHead className="text-center">Note Tech.</TableHead>
                         <TableHead className="text-center">Note Fin.</TableHead>
-                        <TableHead></TableHead>
+                        <TableHead />
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -24,7 +24,6 @@ import {
   User,
   Calendar,
   ArrowRight,
-  AlertCircle,
   Users,
 } from "lucide-react";
 import { format } from "date-fns";

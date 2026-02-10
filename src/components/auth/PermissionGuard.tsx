@@ -144,8 +144,8 @@ type PermissionGuardProps =
 
 export function PermissionGuard(props: PermissionGuardProps) {
   const {
-    children,
-    fallback = null,
+    _children,
+    _fallback = null,
   } = props;
 
   // Detect if using legacy mode
@@ -470,7 +470,7 @@ export function DirectorOrAbove({
 
 // Hook helper pour utiliser les permissions dans la logique (legacy)
 export function usePermissionCheck() {
-  const { hasPermission, hasAnyPermission, hasAllPermissions, isViaDelegation, isLoading, isAdmin } = usePermissions();
+  const { hasPermission, hasAnyPermission, _hasAllPermissions, isViaDelegation, isLoading, isAdmin } = usePermissions();
   const rbac = useRBAC();
 
   const canPerform = (permission: string): boolean => {

@@ -65,7 +65,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { LiquidationChecklist } from "@/components/liquidation/LiquidationChecklist";
-import { useLiquidationDocuments } from "@/hooks/useLiquidationDocuments";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { ExportButtons } from "@/components/etats/ExportButtons";
 import { ExportColumn } from "@/lib/export";

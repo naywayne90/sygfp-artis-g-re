@@ -165,7 +165,7 @@ export function ExpressionBesoinFromImputationForm({
         .map(({ article, quantite, unite }) => ({ article, quantite, unite }));
 
       // Créer l'expression de besoin
-      const { data, error } = await supabase
+      const { _data, error } = await supabase
         .from("expressions_besoin")
         .insert({
           imputation_id: selectedImputation.id,
@@ -400,7 +400,7 @@ export function ExpressionBesoinFromImputationForm({
                           <TableHead className="w-[50%]">Article / Désignation</TableHead>
                           <TableHead className="w-[20%]">Quantité</TableHead>
                           <TableHead className="w-[25%]">Unité</TableHead>
-                          <TableHead className="w-[5%]"></TableHead>
+                          <TableHead className="w-[5%]" />
                         </TableRow>
                       </TableHeader>
                       <TableBody>

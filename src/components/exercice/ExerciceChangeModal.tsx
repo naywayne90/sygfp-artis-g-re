@@ -27,8 +27,6 @@ import {
   Receipt,
   Banknote
 } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { ExerciceInitWizard } from "./ExerciceInitWizard";
 import { formatMontantCompact } from "@/lib/config/sygfp-constants";
 

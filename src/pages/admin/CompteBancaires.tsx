@@ -9,7 +9,7 @@
  * - Activer/Désactiver (pas de suppression)
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -396,7 +396,7 @@ export default function CompteBancaires() {
                       <TableHead>Type</TableHead>
                       <TableHead className="text-right">Solde actuel</TableHead>
                       <TableHead>Statut</TableHead>
-                      <TableHead className="w-[80px]"></TableHead>
+                      <TableHead className="w-[80px]" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>

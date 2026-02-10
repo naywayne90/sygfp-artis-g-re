@@ -11,8 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { 
   Search, 
   MoreHorizontal, 
@@ -72,7 +70,7 @@ export function MarcheList({
       case "differe":
         return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Différé</Badge>;
       case "en_attente":
-      default:
+      default: {
         const step = VALIDATION_STEPS.find(s => s.order === marche.current_validation_step);
         return (
           <Badge variant="outline" className="gap-1">
@@ -80,6 +78,7 @@ export function MarcheList({
             Étape {marche.current_validation_step || 1}: {step?.label || "En attente"}
           </Badge>
         );
+      }
     }
   };
 

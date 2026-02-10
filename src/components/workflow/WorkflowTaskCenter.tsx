@@ -33,7 +33,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow, format, isPast, isToday } from "date-fns";
+import { formatDistanceToNow, isPast, isToday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 

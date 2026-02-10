@@ -8,14 +8,12 @@
  * - Export de l'historique
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -31,17 +29,9 @@ import {
   Download,
   Search,
   CheckCircle2,
-  XCircle,
-  Clock,
-  FileText,
-  ArrowRight,
   QrCode,
-  User,
-  Calendar,
-  Fingerprint,
 } from "lucide-react";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { ValidationProof, DossierHistoryTimeline } from "./ValidationProof";

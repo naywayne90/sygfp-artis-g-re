@@ -1,13 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { 
   FolderOpen, 
   Clock, 
-  TrendingUp, 
   Wallet,
   Building2,
   Target,
@@ -26,7 +24,7 @@ const formatMontant = (montant: number): string => {
 
 export function KPICards() {
   const { exercice } = useExercice();
-  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: _stats, isLoading: statsLoading } = useDashboardStats();
 
   // Dossiers par statut
   const { data: dossierStats } = useQuery({

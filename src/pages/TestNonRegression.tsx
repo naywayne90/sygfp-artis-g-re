@@ -202,8 +202,8 @@ export default function TestNonRegression() {
     // Reset all steps
     setSteps((prev) => prev.map((s) => ({ ...s, status: "pending" as const, error: undefined, duration: undefined })));
 
-    const startTime = Date.now();
-    let currentData = { ...testData, reference };
+    const _startTime = Date.now();
+    const currentData = { ...testData, reference };
 
     try {
       // Step 1: Create Note SEF
@@ -634,7 +634,7 @@ export default function TestNonRegression() {
         if (!user.user) throw new Error("Utilisateur non connecté");
 
         // Test 2: Vérifier que la requête est filtrée par exercice
-        const { data: notesAutreExercice, error: rlsError } = await supabase
+        const { data: notesAutreExercice, error: _rlsError } = await supabase
           .from("notes_sef")
           .select("id, exercice_id")
           .neq("exercice_id", exerciceId)
@@ -652,7 +652,7 @@ export default function TestNonRegression() {
         const hasProfileAccess = profiles && profiles.length > 0;
 
         // Test 4: Vérifier l'audit log (table lecture seule pour non-admin)
-        const { data: auditLogs, error: auditError } = await supabase
+        const { data: _auditLogs, error: auditError } = await supabase
           .from("audit_logs")
           .select("id")
           .limit(1);

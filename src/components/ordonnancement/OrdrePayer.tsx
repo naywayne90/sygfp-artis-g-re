@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Printer, Download } from "lucide-react";
+import { Printer } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { MODES_PAIEMENT } from "@/hooks/useOrdonnancements";
@@ -242,12 +242,12 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
             <div className="grid grid-cols-2 gap-8 mt-12">
               <div className="text-center">
                 <p className="font-semibold mb-2">Le Directeur Administratif et Financier</p>
-                <div className="h-20 border-b border-black mb-2"></div>
+                <div className="h-20 border-b border-black mb-2" />
                 <p className="text-sm">Date: ____/____/________</p>
               </div>
               <div className="text-center">
                 <p className="font-semibold mb-2">Le Directeur Général</p>
-                <div className="h-20 border-b border-black mb-2"></div>
+                <div className="h-20 border-b border-black mb-2" />
                 <p className="text-sm">Date: ____/____/________</p>
               </div>
             </div>

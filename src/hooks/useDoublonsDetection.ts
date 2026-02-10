@@ -257,9 +257,7 @@ export function useDoublonsDetection() {
 
   const markAsVerified = useMutation({
     mutationFn: async (groupId: string) => {
-      // In a real app, you'd save this to a doublons_verifies table
-      // For now, just log it
-      console.log("Marked as verified:", groupId);
+      // TODO: save to a doublons_verifies table
       toast.success("Groupe marqué comme vérifié");
       return groupId;
     },
@@ -270,7 +268,7 @@ export function useDoublonsDetection() {
 
   const ignoreGroup = useMutation({
     mutationFn: async (groupId: string) => {
-      console.log("Ignored:", groupId);
+      // TODO: persist ignored groups
       toast.info("Groupe ignoré");
       return groupId;
     },

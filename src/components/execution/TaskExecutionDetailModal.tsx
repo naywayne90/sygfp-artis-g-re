@@ -28,11 +28,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,20 +43,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "@/components/ui/table";
 import {
-  Calendar,
   User,
   Building2,
   Target,
   FileText,
-  Clock,
   CheckCircle2,
   AlertTriangle,
   Play,
@@ -119,7 +110,7 @@ export function TaskExecutionDetailModal({
   mode = "sheet"
 }: TaskExecutionDetailModalProps) {
   const { isReadOnly } = useExercice();
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { task, contributors, proofs, history, isLoading, refetch } = useTaskExecutionDetail(taskId);
@@ -635,7 +626,7 @@ export function TaskExecutionDetailModal({
                 <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-muted" />
 
                 <div className="space-y-4">
-                  {history.map((entry, index) => {
+                  {history.map((entry, _index) => {
                     const config = HISTORY_ACTION_CONFIG[entry.action] || HISTORY_ACTION_CONFIG.updated;
                     return (
                       <div key={entry.id} className="relative pl-10">

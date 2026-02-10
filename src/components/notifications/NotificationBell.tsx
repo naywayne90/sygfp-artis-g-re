@@ -5,20 +5,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import { 
   Bell, 
-  Check, 
   CheckCheck, 
   X, 
   ExternalLink, 
   FileText, 
-  CreditCard,
-  Receipt,
   FileCheck,
   AlertTriangle,
   Clock,
   User,
   Banknote,
 } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -205,7 +202,7 @@ export function NotificationBell() {
                               {notification.title}
                             </p>
                             {!notification.is_read && (
-                              <span className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1.5 animate-pulse"></span>
+                              <span className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1.5 animate-pulse" />
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

@@ -16,7 +16,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
@@ -59,9 +58,7 @@ import {
   ArrowRight,
   RefreshCcw,
   Trash2,
-  Download,
   History,
-  Eye,
   SkipForward,
   Plus,
   Loader2,
@@ -119,7 +116,7 @@ export function FeuilleRouteImport() {
   const {
     calculateDiff,
     isCalculating,
-    stats: diffStats,
+    stats: _diffStats,
   } = useRoadmapDiff(currentBatchId, selectedDirection || undefined);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

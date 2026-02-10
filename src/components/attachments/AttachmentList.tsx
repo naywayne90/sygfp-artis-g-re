@@ -14,7 +14,6 @@ import {
   Image,
   Download,
   Trash2,
-  ExternalLink,
   File,
   Table,
   Presentation,
@@ -53,7 +52,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAttachments } from "@/hooks/useAttachments";
-import { AttachmentService, type AttachmentMetadata, type AttachmentStep } from "@/services/attachmentService";
+import { type AttachmentMetadata, type AttachmentStep } from "@/services/attachmentService";
 import { AttachmentPreviewDialog } from "./AttachmentPreviewDialog";
 
 interface AttachmentListProps {

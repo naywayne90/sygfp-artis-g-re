@@ -5,7 +5,6 @@ import { useDashboardAlerts, type DashboardAlert } from "@/hooks/useDashboardAle
 import { 
   AlertTriangle, 
   AlertCircle, 
-  Info, 
   X,
   ArrowRight,
   Clock,

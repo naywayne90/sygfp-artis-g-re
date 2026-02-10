@@ -8,7 +8,7 @@
  * - Timeline des validations
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -240,7 +240,7 @@ export function ValidationProof({
     return (
       <TooltipProvider>
         <div className={cn("flex items-center gap-2 flex-wrap", className)}>
-          {sortedSignatures.map((sig, index) => (
+          {sortedSignatures.map((sig, _index) => (
             <Tooltip key={sig.hash}>
               <TooltipTrigger asChild>
                 <Dialog>

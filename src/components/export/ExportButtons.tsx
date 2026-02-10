@@ -4,7 +4,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,7 +34,7 @@ export function ExportButtons({
   entityType = "budget_lines",
   showReferentielsOption = true,
 }: ExportButtonsProps) {
-  const { isExporting, exportBudgetLines, exportToCSV } = useExport();
+  const { isExporting, exportBudgetLines, _exportToCSV } = useExport();
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [includeReferentiels, setIncludeReferentiels] = useState(true);
 

@@ -146,7 +146,7 @@ export function BudgetLineForm({
     },
   });
 
-  const { data: planComptable } = useQuery({
+  const { data: _planComptable } = useQuery({
     queryKey: ["plan-comptable-active"],
     queryFn: async () => {
       const { data } = await supabase

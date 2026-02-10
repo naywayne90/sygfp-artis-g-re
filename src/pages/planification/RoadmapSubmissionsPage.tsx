@@ -26,7 +26,6 @@ import {
   Search,
   Building2,
   FileSpreadsheet,
-  AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -71,7 +70,7 @@ const STATUS_CONFIG: Record<
 };
 
 export default function RoadmapSubmissionsPage() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   // Filtres
   const [directionFilter, setDirectionFilter] = useState<string>("all");

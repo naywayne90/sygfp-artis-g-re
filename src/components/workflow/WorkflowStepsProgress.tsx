@@ -3,7 +3,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { Check, Circle, AlertCircle } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
 import { WORKFLOW_STEPS, type WorkflowStep, isValidatedStatus, type Statut } from "@/lib/workflow/workflowEngine";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

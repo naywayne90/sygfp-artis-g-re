@@ -201,7 +201,7 @@ export function NoteSEFList({
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
-                {showActions && <TableHead className="w-[50px]"></TableHead>}
+                {showActions && <TableHead className="w-[50px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -246,7 +246,7 @@ export function NoteSEFList({
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden 2xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden xl:table-cell">Créée le</TableHead>
-                {showActions && <TableHead className="w-[50px]"></TableHead>}
+                {showActions && <TableHead className="w-[50px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>

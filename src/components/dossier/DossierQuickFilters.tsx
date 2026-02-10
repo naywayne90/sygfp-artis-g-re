@@ -5,10 +5,8 @@ import {
   ListFilter, 
   Clock, 
   CheckCircle, 
-  AlertCircle, 
   Pause, 
   XCircle,
-  Inbox,
   AlertTriangle
 } from "lucide-react";
 

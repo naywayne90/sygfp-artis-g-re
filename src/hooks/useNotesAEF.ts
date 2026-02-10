@@ -3,11 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuditLog } from "@/hooks/useAuditLog";
-import { useARTIReference } from "@/hooks/useARTIReference";
 import { 
   NoteAEFStatut, 
   isValidTransitionAEF, 
-  NoteAEFAuditAction,
   getAvailableTransitionsAEF 
 } from "@/lib/notes-aef/constants";
 
@@ -265,7 +263,7 @@ export function useNotesAEF() {
 
       let referencePivot: string | null = null;
       let origin: 'FROM_SEF' | 'DIRECT' = 'DIRECT';
-      let noteSefId: string | null = noteData.note_sef_id || null;
+      const noteSefId: string | null = noteData.note_sef_id || null;
 
       // RÈGLE MÉTIER: Si liée à une Note SEF existante, copier sa référence
       if (noteData.note_sef_id && !noteData.is_direct_aef) {
@@ -566,7 +564,7 @@ export function useNotesAEF() {
 
         if (hasDGRole) {
           // CAS DG: Auto-créer une SEF shadow pour corriger les données legacy/incohérentes
-          console.log("[SUBMIT] DG detected with missing SEF link - creating shadow SEF");
+          // DG detected with missing SEF link - creating shadow SEF
 
           // Générer la référence ARTI (étape 0 = SEF)
           const { data: referencePivot, error: refError } = await supabase.rpc(

@@ -136,7 +136,7 @@ export function ArticleList() {
                 <TableHead className="text-right">Stock</TableHead>
                 <TableHead className="text-right">Seuil mini</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead></TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>

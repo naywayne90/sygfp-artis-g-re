@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
-import { fr } from "date-fns/locale";
+import { format, subMonths } from "date-fns";
 import {
   Card,
   CardContent,
@@ -38,16 +37,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   Legend,
   PieChart,
   Pie,
   Cell,
 } from "recharts";
 import {
-  TrendingUp,
-  TrendingDown,
   FileText,
   CreditCard,
   Receipt,
@@ -55,9 +50,7 @@ import {
   Banknote,
   Clock,
   CheckCircle,
-  AlertTriangle,
   Filter,
-  Download,
   RefreshCw,
 } from "lucide-react";
 import { useExercice } from "@/contexts/ExerciceContext";
@@ -138,7 +131,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
           break;
         case "q4":
           dateStart = `${exercice}-10-01`;
-          dateEnd = `${exercice}-12-31`;
+          _dateEnd = `${exercice}-12-31`;
           break;
         case "last3":
           dateStart = format(subMonths(now, 3), "yyyy-MM-dd");
@@ -147,7 +140,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
           dateStart = format(subMonths(now, 6), "yyyy-MM-dd");
           break;
         default: // ytd
-          dateStart = `${exercice}-01-01`;
+          _dateStart = `${exercice}-01-01`;
       }
 
       // Fetch all data in parallel

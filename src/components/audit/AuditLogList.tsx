@@ -29,7 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuditJournal, ENTITY_TYPES, ACTION_TYPES, AuditLogEntry, AuditFilters } from "@/hooks/useAuditJournal";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, Eye, Filter, X } from "lucide-react";
+import { Download, Eye, X } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -238,7 +238,7 @@ export function AuditLogList() {
                     <TableHead>Action</TableHead>
                     <TableHead>Entité</TableHead>
                     <TableHead>ID Entité</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>

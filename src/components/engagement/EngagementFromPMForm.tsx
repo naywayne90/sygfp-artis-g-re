@@ -332,8 +332,8 @@ export function EngagementFromPMForm({
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Dotation initiale</span>
-                        <p className="font-medium">{formatMontant(availability.dotation_initiale)}</p>
+                        <span className="text-muted-foreground">Dotation actuelle</span>
+                        <p className="font-medium">{formatMontant(availability.dotation_actuelle)}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Engagements antérieurs</span>
@@ -354,10 +354,10 @@ export function EngagementFromPMForm({
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
                         <span>Taux d'engagement après opération</span>
-                        <span>{((availability.cumul / availability.dotation_initiale) * 100).toFixed(1)}%</span>
+                        <span>{availability.dotation_actuelle > 0 ? ((availability.cumul / availability.dotation_actuelle) * 100).toFixed(1) : "0.0"}%</span>
                       </div>
                       <Progress
-                        value={(availability.cumul / availability.dotation_initiale) * 100}
+                        value={availability.dotation_actuelle > 0 ? (availability.cumul / availability.dotation_actuelle) * 100 : 0}
                         className="h-2"
                       />
                     </div>

@@ -7,9 +7,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2, FileText, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
-import { useSupplierDocuments, useRequiredDocumentTypes, SupplierDocument } from "@/hooks/useSupplierDocuments";
+import { useSupplierDocuments, useRequiredDocumentTypes } from "@/hooks/useSupplierDocuments";
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 interface SupplierDocumentsTabProps {
   supplierId: string;

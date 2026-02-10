@@ -10,7 +10,7 @@ interface TopOSWidgetProps {
   engagements: Record<string, number>;
 }
 
-const formatCurrency = (amount: number) => {
+const _formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("fr-FR", {
     style: "decimal",
     minimumFractionDigits: 0,
@@ -75,7 +75,7 @@ export function TopOSWidget({ lines, engagements }: TopOSWidgetProps) {
       .slice(0, 5);
   }, [lines, engagements]);
 
-  const maxDotation = topOS.length > 0 ? topOS[0].dotation : 1;
+  const _maxDotation = topOS.length > 0 ? topOS[0].dotation : 1;
 
   if (topOS.length === 0) {
     return (

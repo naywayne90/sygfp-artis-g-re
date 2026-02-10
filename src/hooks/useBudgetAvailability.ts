@@ -216,7 +216,7 @@ export function useBudgetSummary() {
 export async function checkEngagementPossible(
   budgetLineId: string,
   montant: number,
-  exercice: number
+  _exercice: number
 ): Promise<{ possible: boolean; disponible: number; dotation_actuelle: number; message: string }> {
   // Récupérer la ligne
   const { data: line } = await supabase

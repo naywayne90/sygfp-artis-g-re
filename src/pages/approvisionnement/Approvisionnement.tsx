@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { Package, Truck, ClipboardCheck, Warehouse, ArrowRightLeft, FileText, AlertTriangle } from "lucide-react";
+import { Package, Truck, ClipboardCheck, ArrowRightLeft, FileText, AlertTriangle } from "lucide-react";
 import { useApprovisionnement } from "@/hooks/useApprovisionnement";
 import { ArticleList } from "@/components/approvisionnement/ArticleList";
 import { MouvementList } from "@/components/approvisionnement/MouvementList";
@@ -11,7 +11,7 @@ import { InventaireList } from "@/components/approvisionnement/InventaireList";
 
 export default function Approvisionnement() {
   const { exercice } = useExercice();
-  const { stats, loadingArticles } = useApprovisionnement();
+  const { stats, _loadingArticles } = useApprovisionnement();
 
   return (
     <div className="space-y-6 animate-fade-in">

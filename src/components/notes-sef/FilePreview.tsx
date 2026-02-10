@@ -9,11 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  X, 
   FileText, 
   Image as ImageIcon, 
   File, 
-  Download, 
   Eye, 
   Trash2,
   AlertCircle,

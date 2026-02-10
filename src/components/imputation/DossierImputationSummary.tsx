@@ -10,8 +10,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { 
   CreditCard, 
   TrendingUp, 
-  TrendingDown,
-  AlertTriangle,
   CheckCircle2,
   Banknote,
   Lock,

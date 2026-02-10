@@ -17,7 +17,6 @@ import {
   Upload,
   Edit,
   Eye,
-  Filter,
   RefreshCw,
   ChevronDown,
   ChevronUp,
@@ -236,7 +235,7 @@ export function DossierTimeline({
     }
   };
 
-  const getTableFromType = (type: string): string | null => {
+  const _getTableFromType = (type: string): string | null => {
     const tables: Record<string, string> = {
       engagement: "budget_engagements",
       liquidation: "budget_liquidations",
@@ -393,7 +392,7 @@ export function DossierTimeline({
                 {/* Ligne verticale */}
                 <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border" />
 
-                {events.map((event, index) => {
+                {events.map((event, _index) => {
                   const Icon = getEventIcon(event.action);
                   const color = getEventColor(event.action, event.status);
                   const changes = formatChanges(event.oldValues, event.newValues);

@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -342,7 +341,7 @@ export function OrdonnancementDetails({
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {validations.map((validation, index) => {
+                        {validations.map((validation, _index) => {
                           const stepInfo = VALIDATION_STEPS.find(
                             (s) => s.order === validation.step_order
                           );

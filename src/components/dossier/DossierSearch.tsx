@@ -15,11 +15,7 @@ import {
   ChevronUp, 
   Calendar, 
   Star, 
-  StarOff,
   Save,
-  Trash2,
-  History,
-  Loader2
 } from "lucide-react";
 import { DossierFilters } from "@/hooks/useDossiers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -27,7 +23,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -90,7 +86,7 @@ export function DossierSearch({
   users,
   exercices 
 }: DossierSearchProps) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -224,7 +220,7 @@ export function DossierSearch({
     toast.success("Filtre supprimé");
   };
 
-  const handleSetDefaultFilter = (filterId: string) => {
+  const _handleSetDefaultFilter = (filterId: string) => {
     const updated = savedFilters.map(f => ({
       ...f,
       is_default: f.id === filterId,

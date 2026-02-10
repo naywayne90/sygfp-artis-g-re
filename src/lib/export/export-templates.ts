@@ -3,7 +3,7 @@
  * Chaque module peut avoir plusieurs templates d'export
  */
 
-import { ExportColumn, ExportTemplate, formatters } from "./export-service";
+import { ExportTemplate, formatters } from "./export-service";
 
 // ============================================================================
 // Templates Notes SEF

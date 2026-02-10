@@ -15,10 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   FileText,
-  Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Upload,
   Download,
   Trash2,
@@ -115,7 +112,7 @@ export function DossierDetailsEnhanced({
   const [loading, setLoading] = useState(false);
   const { getDossierEtapes, getDossierDocuments, deleteDocument } = useDossiers();
   const { exportDossierComplet, isExporting } = useExportDossierComplet();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
 
   useEffect(() => {
     if (dossier && open) {
@@ -375,7 +372,7 @@ export function DossierDetailsEnhanced({
                 <CardContent>
                   {loading ? (
                     <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
                     </div>
                   ) : etapes.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-4">Aucune activité</p>
@@ -488,7 +485,7 @@ export function DossierDetailsEnhanced({
 
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
                     </div>
                   ) : etapes.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">Aucune étape enregistrée</p>
@@ -583,7 +580,7 @@ export function DossierDetailsEnhanced({
 
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : documents.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">

@@ -37,7 +37,6 @@ import {
   Bookmark,
   RotateCcw,
 } from "lucide-react";
-import { format } from "date-fns";
 import { useDossiers, DossierFilters } from "@/hooks/useDossiers";
 import { useSavedViews, SavedViewFilters } from "@/hooks/useSavedViews";
 import { useExercice } from "@/contexts/ExerciceContext";

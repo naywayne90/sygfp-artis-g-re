@@ -141,7 +141,7 @@ export function InventaireList() {
                   <TableHead className="text-right">Articles</TableHead>
                   <TableHead className="text-right">Écarts</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>

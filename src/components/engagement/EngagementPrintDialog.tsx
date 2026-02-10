@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Printer, Download } from "lucide-react";
+import { Printer } from "lucide-react";
 import { PieceEngagement } from "./PieceEngagement";
 import { Engagement } from "@/hooks/useEngagements";
 import { ScrollArea } from "@/components/ui/scroll-area";

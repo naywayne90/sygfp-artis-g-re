@@ -8,8 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, Loader2, Calculator, Link2, Lock, ShoppingCart } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Calculator, Link2, Lock } from "lucide-react";
 import { useEngagements, BudgetAvailability } from "@/hooks/useEngagements";
 import { useBudgetLines } from "@/hooks/useBudgetLines";
 import { useLambdaLinks } from "@/hooks/useLambdaLinks";
@@ -26,14 +25,14 @@ interface EngagementFormProps {
 export function EngagementForm({ open, onOpenChange, dossierId }: EngagementFormProps) {
   const { expressionsValidees, createEngagement, calculateAvailability, isCreating } = useEngagements();
   const { budgetLines } = useBudgetLines();
-  const { createLink, linkTypes } = useLambdaLinks();
+  const { _createLink, linkTypes } = useLambdaLinks();
   const { exercice } = useExercice();
   
   // Fetch marchés validés
   const { data: marchesValides = [] } = useQuery({
     queryKey: ["marches-valides-for-engagement", exercice],
     queryFn: async () => {
-      // @ts-ignore - Supabase type instantiation issue workaround
+      // @ts-expect-error Supabase type instantiation issue workaround
       const { data, error } = await supabase
         .from("marches")
         .select(`
@@ -68,7 +67,7 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
   const selectedMarche = marchesValides.find(m => m.id === selectedMarcheId);
 
   // Filtrer les marchés selon le dossier de l'expression sélectionnée
-  const filteredMarches = marchesValides.filter(m => {
+  const _filteredMarches = marchesValides.filter(m => {
     if (!selectedExpression?.dossier_id) return true;
     return m.dossier_id === selectedExpression.dossier_id || !m.dossier_id;
   });
@@ -287,8 +286,8 @@ export function EngagementForm({ open, onOpenChange, dossierId }: EngagementForm
                     {availability && (
                       <div className="grid grid-cols-5 gap-2 text-sm">
                         <div className="text-center p-2 bg-muted rounded">
-                          <div className="text-muted-foreground text-xs">(A) Dotation</div>
-                          <div className="font-medium">{formatMontant(availability.dotation_initiale)}</div>
+                          <div className="text-muted-foreground text-xs">(A) Dotation actuelle</div>
+                          <div className="font-medium">{formatMontant(availability.dotation_actuelle)}</div>
                         </div>
                         <div className="text-center p-2 bg-muted rounded">
                           <div className="text-muted-foreground text-xs">(B) Eng. antérieurs</div>

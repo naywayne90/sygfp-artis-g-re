@@ -126,7 +126,7 @@ export function useMarches() {
   const fetchMarches = async (filters?: { statut?: string; validation_status?: string }): Promise<Marche[]> => {
     const currentYear = exercice || new Date().getFullYear();
     
-    // @ts-ignore - Supabase type instantiation issue workaround
+    // @ts-expect-error Supabase type instantiation issue workaround
     const { data, error } = await supabase
       .from("marches")
       .select("*")

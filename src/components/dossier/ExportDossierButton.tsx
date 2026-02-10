@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,7 +17,7 @@ interface ExportDossierButtonProps {
 
 export function ExportDossierButton({
   dossierId,
-  dossierNumero,
+  _dossierNumero,
   variant = "outline",
   size = "default",
 }: ExportDossierButtonProps) {

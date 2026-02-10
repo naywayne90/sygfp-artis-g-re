@@ -17,7 +17,7 @@ import {
   ExportOptions,
   ExportResult,
 } from "@/lib/export";
-import { getExportTemplate, getModuleTemplates, ExportTemplate } from "@/lib/export";
+import { getExportTemplate, getModuleTemplates } from "@/lib/export";
 
 interface UseStandardExportOptions {
   module: string;

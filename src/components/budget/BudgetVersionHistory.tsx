@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,9 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   History, 
   CheckCircle, 
-  Clock, 
   FileText,
-  Download
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";

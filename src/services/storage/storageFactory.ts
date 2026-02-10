@@ -50,7 +50,7 @@ export function getStorageProvider(): IStorageProvider {
   if (!storageInstance) {
     const type = getConfiguredProvider();
     storageInstance = createProvider(type);
-    console.log(`[Storage] Using provider: ${type}`);
+    // Storage provider initialized: type
   }
   return storageInstance;
 }

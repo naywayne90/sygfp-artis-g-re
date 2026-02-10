@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import * as XLSX from "xlsx";
 
 // Text normalization for column matching (remove accents, lowercase, trim)

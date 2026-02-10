@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Activity, CheckCircle2, AlertTriangle, Target, Building2 } from "lucide-react";
+import { ClipboardList, Activity, CheckCircle2, AlertTriangle, Target } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { type Tache } from "@/hooks/useTaches";

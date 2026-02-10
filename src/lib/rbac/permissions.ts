@@ -4,7 +4,6 @@
  */
 
 import { ETAPES_CHAINE_DEPENSE, type EtapeChaineType } from "@/lib/config/sygfp-constants";
-import { VALIDATION_MATRIX, type ValidationType } from "@/lib/config/rbac-config";
 
 // ============================================
 // TYPES

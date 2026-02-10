@@ -4,7 +4,7 @@
  * Types partagés pour le module Notes SEF
  */
 
-import { NoteSEFStatutType, NoteSEFUrgenceType, BeneficiaireTypeValue, NoteSEFAuditActionType } from './constants';
+import { NoteSEFStatutType, NoteSEFUrgenceType, NoteSEFAuditActionType } from './constants';
 
 // ============================================
 // ENTITÉS PRINCIPALES

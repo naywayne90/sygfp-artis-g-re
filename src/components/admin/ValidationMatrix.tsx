@@ -11,7 +11,6 @@ import {
   Wallet,
   ShoppingCart,
   CheckCircle,
-  Info
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

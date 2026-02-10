@@ -12,7 +12,7 @@ import { Download } from "lucide-react";
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d", "#ffc658", "#ff7c7c"];
 
 export function EtatRecettes() {
-  const { recettes, stats } = useRecettes();
+  const { recettes, _stats } = useRecettes();
   const [dateDebut, setDateDebut] = useState(() => {
     const d = new Date();
     d.setMonth(0, 1);

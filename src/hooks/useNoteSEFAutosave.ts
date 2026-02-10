@@ -9,7 +9,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
 
 interface AutosaveData {
   objet?: string;
@@ -47,7 +46,7 @@ export function useNoteSEFAutosave(options: UseNoteSEFAutosaveOptions = {}) {
     onSaveError,
   } = options;
 
-  const { exercice } = useExercice();
+  const { _exercice } = useExercice();
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);

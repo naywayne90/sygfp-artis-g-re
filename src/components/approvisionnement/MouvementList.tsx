@@ -34,12 +34,11 @@ import {
   ArrowDownCircle,
   ArrowRightLeft,
   Settings2,
-  Download,
   FileDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { MouvementStock, TYPES_MOUVEMENTS, useApprovisionnement } from "@/hooks/useApprovisionnement";
+import { TYPES_MOUVEMENTS, useApprovisionnement } from "@/hooks/useApprovisionnement";
 
 const getTypeIcon = (type: string) => {
   switch (type) {

@@ -80,7 +80,7 @@ export function useNotesSEF() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { logAction } = useAuditLog();
-  const { logSoumission, logValidation, logRejet, logReport, logAjoutPiece, logSuppressionPiece } = useNotesSEFAudit();
+  const { logSoumission, logValidation, logRejet, logReport, _logAjoutPiece, _logSuppressionPiece } = useNotesSEFAudit();
 
   // Fetch all notes SEF for current exercice
   const { data: notes = [], isLoading, refetch } = useQuery({

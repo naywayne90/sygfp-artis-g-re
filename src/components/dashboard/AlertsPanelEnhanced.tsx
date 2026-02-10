@@ -5,7 +5,6 @@ import { useAlerts, useDashboardAlertsAggregated, type Alert } from "@/hooks/use
 import { 
   AlertTriangle, 
   AlertCircle, 
-  Info, 
   ArrowRight,
   Clock,
   FileWarning,
@@ -17,7 +16,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const getAlertIcon = (type: string) => {
   switch (type) {

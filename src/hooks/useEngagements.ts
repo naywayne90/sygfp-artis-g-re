@@ -65,6 +65,9 @@ export interface Engagement {
 
 export interface BudgetAvailability {
   dotation_initiale: number;
+  virements_recus: number;
+  virements_emis: number;
+  dotation_actuelle: number;
   engagements_anterieurs: number;
   engagement_actuel: number;
   cumul: number;
@@ -182,6 +185,7 @@ export function useEngagements() {
   });
 
   // Calculate budget availability
+  // Formula: Disponible = Dotation_initiale + Virements_recus - Virements_emis - Engages
   const calculateAvailability = async (
     budgetLineId: string,
     currentAmount: number,
@@ -198,13 +202,39 @@ export function useEngagements() {
 
     const dotation_initiale = line?.dotation_initiale || 0;
 
-    // Get previous engagements
+    // Get executed credit transfers received (virements recus)
+    const { data: recus, error: recusError } = await supabase
+      .from("credit_transfers")
+      .select("amount")
+      .eq("to_budget_line_id", budgetLineId)
+      .eq("status", "execute");
+
+    if (recusError) throw recusError;
+
+    const virements_recus = recus?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+
+    // Get executed credit transfers sent (virements emis)
+    const { data: emis, error: emisError } = await supabase
+      .from("credit_transfers")
+      .select("amount")
+      .eq("from_budget_line_id", budgetLineId)
+      .eq("status", "execute");
+
+    if (emisError) throw emisError;
+
+    const virements_emis = emis?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+
+    // Dotation actuelle = initiale + recus - emis
+    const dotation_actuelle = dotation_initiale + virements_recus - virements_emis;
+
+    // Get previous engagements (exclude annule AND rejete from cumul)
     let query = supabase
       .from("budget_engagements")
       .select("id, montant")
       .eq("budget_line_id", budgetLineId)
       .eq("exercice", exercice || new Date().getFullYear())
-      .neq("statut", "annule");
+      .neq("statut", "annule")
+      .neq("statut", "rejete");
 
     if (excludeEngagementId) {
       query = query.neq("id", excludeEngagementId);
@@ -215,10 +245,13 @@ export function useEngagements() {
 
     const engagements_anterieurs = prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
     const cumul = engagements_anterieurs + currentAmount;
-    const disponible = dotation_initiale - cumul;
+    const disponible = dotation_actuelle - cumul;
 
     return {
       dotation_initiale,
+      virements_recus,
+      virements_emis,
+      dotation_actuelle,
       engagements_anterieurs,
       engagement_actuel: currentAmount,
       cumul,
@@ -336,19 +369,9 @@ export function useEngagements() {
           .eq("id", dossierId);
       }
 
-      // Mettre à jour le total engagé de la ligne budgétaire
-      const { data: currentLine } = await supabase
-        .from("budget_lines")
-        .select("total_engage")
-        .eq("id", data.budget_line_id)
-        .single();
-
-      await supabase
-        .from("budget_lines")
-        .update({
-          total_engage: (currentLine?.total_engage || 0) + data.montant,
-        })
-        .eq("id", data.budget_line_id);
+      // NOTE: total_engage is NOT updated here at creation (brouillon).
+      // It is updated by the SQL trigger fn_update_engagement_rate
+      // only when the engagement reaches statut='valide' after workflow validation.
 
       await logAction({
         entityType: "engagement",

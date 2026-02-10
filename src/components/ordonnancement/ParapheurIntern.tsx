@@ -3,8 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -184,7 +182,7 @@ export function ParapheurIntern({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {signatures.map((sig, index) => (
+            {signatures.map((sig, _index) => (
               <div
                 key={sig.id}
                 className={`

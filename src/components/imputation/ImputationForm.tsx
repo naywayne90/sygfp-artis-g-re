@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CreditCard,
   Loader2,
@@ -23,14 +21,12 @@ import {
   FileText,
   Banknote,
   XCircle,
-  Info,
   Shield,
   History
 } from "lucide-react";
 import { useImputation, BudgetAvailability, ImputationData } from "@/hooks/useImputation";
 import { useNavigate } from "react-router-dom";
 import { ImputationSummaryCard } from "./ImputationSummaryCard";
-import { BudgetLineSelector, SelectedBudgetLine } from "./BudgetLineSelector";
 import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
 
 interface Note {

@@ -245,7 +245,7 @@ export function CompteBancaireList() {
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Solde actuel</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead></TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>

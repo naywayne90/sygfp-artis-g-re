@@ -285,7 +285,7 @@ export default function LiensLambda() {
                     <TableRow>
                       <TableHead>Statut</TableHead>
                       <TableHead>Source</TableHead>
-                      <TableHead></TableHead>
+                      <TableHead />
                       <TableHead>Cible</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Dernière sync</TableHead>

@@ -35,7 +35,7 @@ interface UseDocumentCompletenessOptions {
 }
 
 export function useDocumentCompleteness(options: UseDocumentCompletenessOptions) {
-  const { dossierId, etape, entityType, entityId } = options;
+  const { dossierId, etape, _entityType, entityId } = options;
 
   // Fetch documents from dossier_documents table
   const documentsQuery = useQuery({

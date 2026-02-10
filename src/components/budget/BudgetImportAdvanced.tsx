@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -214,7 +214,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     const seenCodes = new Set<string>();
 
     // Fetch reference data
-    const [directions, objectifs, missions, actions, activites, nbe, sysco, existingLines] = await Promise.all([
+    const [directions, objectifs, _missions, _actions, _activites, _nbe, _sysco, existingLines] = await Promise.all([
       supabase.from("directions").select("id, code"),
       supabase.from("objectifs_strategiques").select("id, code"),
       supabase.from("missions").select("id, code"),

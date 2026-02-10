@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   AlertCircle,
   AlertOctagon,
-  TrendingUp,
   ArrowRight,
   RefreshCw,
   CheckCircle,
@@ -85,8 +84,8 @@ export function BudgetAlertsWidget({
     unacknowledgedCount,
     checkAlerts,
     acknowledgeAlert,
-    NIVEAU_COLORS,
-    NIVEAU_LABELS,
+    _NIVEAU_COLORS,
+    _NIVEAU_LABELS,
   } = useBudgetAlerts();
 
   const { summary, isLoading: isLoadingSummary } = useBudgetSummary();

@@ -564,7 +564,7 @@ export function useActivitesWithoutExecution(directionId?: string) {
     queryKey: ["activites-without-execution", exerciceId, directionId],
     queryFn: async () => {
       // Récupérer les activités qui n'ont pas encore d'exécution pour cet exercice
-      let query = supabase
+      const query = supabase
         .from("activites")
         .select(
           `

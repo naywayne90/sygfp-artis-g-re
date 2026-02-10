@@ -38,7 +38,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Search,
-  Filter,
   ChevronDown,
   ChevronRight,
   List,
@@ -80,7 +79,7 @@ export default function ListeBudget() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const { directions } = useDirections();
-  const { budgetLines, isLoading, totals } = useBudgetLines({
+  const { budgetLines, isLoading, _totals } = useBudgetLines({
     direction_id: directionFilter !== "all" ? directionFilter : undefined,
     statut: statutFilter !== "all" ? statutFilter : undefined,
     keyword: searchTerm || undefined,
@@ -336,7 +335,7 @@ export default function ListeBudget() {
                     <TableHead className="text-right">Disponible</TableHead>
                     <TableHead className="text-center">Conso.</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>

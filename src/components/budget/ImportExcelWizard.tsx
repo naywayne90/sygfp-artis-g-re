@@ -68,7 +68,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
   } = useImportJobs();
 
   const { parseARTIExcel, executeARTIImport } = useARTIImport();
-  const { importAllReferentiels, refreshDropdowns, isSyncing, detectReferenceSheets } = useReferentielSync();
+  const { importAllReferentiels, refreshDropdowns, _isSyncing, _detectReferenceSheets } = useReferentielSync();
   
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -207,7 +207,7 @@ export function ImportExcelWizard({ open, onOpenChange, onImportComplete }: Impo
 
       // Step 2: Filter rows based on mode and execute import
       let rowsToImport: ARTIParsedRow[];
-      let importOptions: { replaceAmountOnly?: boolean } = {};
+      const importOptions: { replaceAmountOnly?: boolean } = {};
       
       if (safeMode && !replaceAmount) {
         // SAFE mode: Only new lines

@@ -133,7 +133,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
             <TableHead>Urgence</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Date</TableHead>
-            {showActions && <TableHead className="w-[50px]"></TableHead>}
+            {showActions && <TableHead className="w-[50px]" />}
           </TableRow>
         </TableHeader>
         <TableBody>

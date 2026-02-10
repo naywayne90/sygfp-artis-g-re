@@ -21,7 +21,6 @@ import {
   Calendar,
   Banknote,
   PartyPopper,
-  Hash
 } from "lucide-react";
 import { Dossier, DossierEtape, DossierDocument, useDossiers } from "@/hooks/useDossiers";
 import { format } from "date-fns";
@@ -29,9 +28,7 @@ import { fr } from "date-fns/locale";
 
 // Import du stepper unifié et des constantes
 import { ChaineDepenseStepper } from "@/components/workflow/ChaineDepenseStepper";
-import { ETAPES_CONFIG, formatMontant as formatMontantUtil, getStatutBadge } from "@/lib/config/sygfp-constants";
-import { StatutBadge } from "@/components/shared/StatutBadge";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { ETAPES_CONFIG, formatMontant as formatMontantUtil } from "@/lib/config/sygfp-constants";
 import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
 
 interface DossierDetailsProps {
@@ -323,7 +320,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
             <TabsContent value="timeline" className="space-y-4">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : etapes.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
@@ -332,7 +329,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
               ) : (
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-                  {etapes.map((etape, index) => (
+                  {etapes.map((etape, _index) => (
                     <div key={etape.id} className="relative pl-10 pb-6">
                       <div className="absolute left-2 w-5 h-5 rounded-full bg-background border-2 border-primary flex items-center justify-center">
                         {STATUT_ICONS[etape.statut] || <Clock className="h-3 w-3" />}
@@ -379,7 +376,7 @@ export function DossierDetails({ dossier, open, onOpenChange }: DossierDetailsPr
 
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : documents.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">

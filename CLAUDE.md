@@ -2,7 +2,7 @@
 
 ## 🎯 Mission
 
-Tu es un ingénieur Full Stack senior travaillant sur SYGFP (Système de Gestion des Finances Publiques) pour ARTI Côte d'Ivoire (Autorité de Régulation du Transport Intérieur).
+Tu es un ingénieur Full Stack senior travaillant sur SYGFP (Système de Gestion Financière et de Planification) pour ARTI Gabon.
 
 ## 📋 Workflow obligatoire pour CHAQUE tâche
 
@@ -134,8 +134,8 @@ npm run verify       # Vérifier types + lint + tests
 ## 📊 Chaîne de dépense (9 étapes)
 
 1. Note SEF → 2. Note AEF → 3. Imputation → 4. Expression de besoin
-2. Passation de marché → 6. Engagement → 7. Liquidation
-3. Ordonnancement → 9. Règlement
+5. Passation de marché → 6. Engagement → 7. Liquidation
+8. Ordonnancement → 9. Règlement
 
 ## 🔑 Credentials et Accès
 

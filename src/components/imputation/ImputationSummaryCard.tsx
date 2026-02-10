@@ -10,14 +10,10 @@ import {
   XCircle,
   Calculator,
   TrendingDown,
-  TrendingUp,
   Lock,
   Info,
-  ArrowRight,
   Wallet,
-  CreditCard,
   Banknote,
-  PiggyBank
 } from "lucide-react";
 
 export interface BudgetCalculation {
@@ -51,7 +47,7 @@ interface ImputationSummaryCardProps {
 }
 
 export function ImputationSummaryCard({
-  montantTotal,
+  _montantTotal,
   montantImpute,
   disponibleAvant,
   disponibleApres,
@@ -85,7 +81,7 @@ export function ImputationSummaryCard({
   // Calculs détaillés
   const calculatedDotationActuelle = dotationInitiale + virementsRecus - virementsEmis;
   const disponibleBrut = calculatedDotationActuelle - cumulEngage;
-  const calculatedDisponibleNet = disponibleBrut - montantReserve;
+  const _calculatedDisponibleNet = disponibleBrut - montantReserve;
 
   return (
     <TooltipProvider>

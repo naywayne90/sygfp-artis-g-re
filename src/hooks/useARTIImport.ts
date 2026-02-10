@@ -588,7 +588,7 @@ export function useARTIImport() {
         rawNbe
       );
 
-      let finalCode = imputationResult.code;
+      const finalCode = imputationResult.code;
       
       // 5. Valider imputation = 18 chiffres
       if (!finalCode || finalCode.length !== 18) {

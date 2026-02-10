@@ -209,7 +209,7 @@ export function DemandeAchatList() {
                   <TableHead>Urgence</TableHead>
                   <TableHead className="text-right">Montant</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead />
                 </TableRow>
               </TableHeader>
               <TableBody>

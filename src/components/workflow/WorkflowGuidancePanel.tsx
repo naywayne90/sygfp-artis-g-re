@@ -31,7 +31,7 @@ interface WorkflowBlockingPanelProps {
 
 export function WorkflowBlockingPanel({
   blocking,
-  step,
+  _step,
   className,
 }: WorkflowBlockingPanelProps) {
   if (!blocking) return null;

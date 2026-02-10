@@ -6,7 +6,7 @@
  * - PDF (via iframe)
  */
 
-import { Download, X, ExternalLink, ZoomIn, ZoomOut } from "lucide-react";
+import { Download, ExternalLink, ZoomIn, ZoomOut } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { AttachmentService, type AttachmentMetadata } from "@/services/attachmentService";
 

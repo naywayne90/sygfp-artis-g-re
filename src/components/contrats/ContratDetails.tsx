@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useContrats, TYPES_AVENANT, STATUTS_CONTRAT, Contrat, Avenant } from "@/hooks/useContrats";
+import { useContrats, useContratAvenants, TYPES_AVENANT, STATUTS_CONTRAT, Contrat, Avenant } from "@/hooks/useContrats";
 import { Plus, FileText, History } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -41,7 +41,8 @@ interface ContratDetailsProps {
 }
 
 export function ContratDetails({ open, onOpenChange, contrat, prestataireName }: ContratDetailsProps) {
-  const { getAvenants, createAvenant } = useContrats();
+  const { createAvenant } = useContrats();
+  const avenants = useContratAvenants(contrat?.id ?? null);
   const [avenantOpen, setAvenantOpen] = useState(false);
   const [avenantForm, setAvenantForm] = useState({
     objet: "",
@@ -53,8 +54,6 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
     date_signature: "",
     statut: "brouillon",
   });
-
-  const avenants = contrat ? getAvenants(contrat.id) : { data: [] };
 
   const resetAvenantForm = () => {
     setAvenantForm({

@@ -8,9 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "./usePermissions";
 import { 
   VALIDATION_MATRIX, 
-  VISIBILITY_RULES,
-  canRoleValidate,
-  getVisibilityLevel,
   type ValidationType 
 } from "@/lib/config/rbac-config";
 
@@ -154,14 +151,14 @@ export function useRoleBasedAccess() {
    */
   const getEntityAccess = (entity: EntityContext, entityType?: ValidationType): AccessResult => {
     const isOwner = entity.createdBy === userId;
-    const isSameDirection = entity.directionId === userContext?.directionId;
+    const _isSameDirection = entity.directionId === userContext?.directionId;
     const isDG = hasRole('DG');
     const isCB = hasAnyRole(['CB', 'DAAF']);
     const statut = entity.statut || 'brouillon';
     const visibilityLevel = getUserVisibilityLevel();
 
     // Accès par défaut
-    let access: AccessResult = {
+    const access: AccessResult = {
       canView: false,
       canCreate: true,
       canEdit: false,

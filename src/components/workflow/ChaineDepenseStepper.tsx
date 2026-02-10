@@ -4,7 +4,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { Check, Circle, AlertCircle, PauseCircle, XCircle, ChevronRight } from "lucide-react";
+import { Check, Circle, PauseCircle, XCircle, ChevronRight } from "lucide-react";
 import { ETAPES_ORDONNEES, ETAPES_CHAINE_DEPENSE, type EtapeChaineType } from "@/lib/config/sygfp-constants";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

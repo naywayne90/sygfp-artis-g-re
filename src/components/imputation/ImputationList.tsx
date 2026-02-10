@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, CreditCard, Eye, FileText, ArrowRight } from "lucide-react";
+import { Search, CreditCard, Eye, FileText } from "lucide-react";
 import { ImputationForm } from "./ImputationForm";
 import { useNavigate } from "react-router-dom";
 

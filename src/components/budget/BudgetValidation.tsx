@@ -9,7 +9,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
@@ -49,7 +48,7 @@ export function BudgetValidation({
 
   const allValidated = validatedLines === totalLines && totalLines > 0;
   const hasPending = pendingLines > 0;
-  const canValidateGlobal = totalLines > 0 && !hasPending;
+  const _canValidateGlobal = totalLines > 0 && !hasPending;
 
   const handleValidateAll = async () => {
     setIsValidating(true);

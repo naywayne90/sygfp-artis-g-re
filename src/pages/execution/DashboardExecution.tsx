@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +15,6 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  FileEdit,
   Activity,
   Target,
   BarChart3,
@@ -40,7 +38,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  LineChart,
   Line
 } from "recharts";
 import { useExecutionDashboard } from "@/hooks/useExecutionDashboard";
@@ -68,7 +65,7 @@ const formatMontantCompact = (value: number) => {
   return value.toString();
 };
 
-const PIE_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
+const _PIE_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#8b5cf6"];
 
 interface StepCardProps {
   title: string;

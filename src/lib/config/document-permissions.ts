@@ -3,7 +3,7 @@
  * Définit qui peut upload, voir et supprimer chaque type de document
  */
 
-import { DOCUMENT_TYPES, DocumentTypeCode } from "@/services/storage/namingService";
+import { DOCUMENT_TYPES } from "@/services/storage/namingService";
 
 export type DocumentPermission = 'upload' | 'view' | 'delete';
 

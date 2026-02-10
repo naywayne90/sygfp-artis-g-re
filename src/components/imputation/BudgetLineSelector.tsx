@@ -17,8 +17,6 @@ import {
   CheckCircle2,
   Info,
   X,
-  Plus,
-  Minus,
   Filter,
   ChevronDown,
   ChevronUp,
@@ -754,7 +752,7 @@ export function BudgetLineSelector({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-10" />
                   <TableHead>Code</TableHead>
                   <TableHead>Libellé</TableHead>
                   <TableHead className="text-right">Dotation actuelle</TableHead>
@@ -768,7 +766,7 @@ export function BudgetLineSelector({
                   const isSelected = isLineSelected(line.id);
                   const selectedLine = getSelectedLine(line.id);
                   const canReceive = canReceiveAmount(line, montantTotal);
-                  const isInsufficient = selectedLine && selectedLine.montant > line.disponible_net;
+                  const _isInsufficient = selectedLine && selectedLine.montant > line.disponible_net;
 
                   return (
                     <TableRow

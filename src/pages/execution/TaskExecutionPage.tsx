@@ -420,7 +420,7 @@ export default function TaskExecutionPage() {
                   <TableHead className="text-center">Avancement</TableHead>
                   <TableHead>Responsable</TableHead>
                   <TableHead>Dates</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead className="w-[50px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>

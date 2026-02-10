@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -24,15 +22,12 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ExternalLink,
-  AlertTriangle
 } from "lucide-react";
 import { Dossier } from "@/hooks/useDossiers";
 import { DossierEmptyState } from "./DossierEmptyState";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 interface DossierListProps {
   dossiers: Dossier[];
@@ -102,8 +97,8 @@ export function DossierList({
   onPageChange,
   onPageSizeChange,
   onSort,
-  sortField,
-  sortDirection,
+  _sortField,
+  _sortDirection,
   hasFilters = false,
   searchTerm = "",
   onReset,
@@ -146,7 +141,7 @@ export function DossierList({
                 <TableHead className="w-[120px]">Étape</TableHead>
                 <TableHead className="w-[100px]">Statut</TableHead>
                 <TableHead className="w-[100px]">Modifié</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead className="w-[50px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -201,7 +196,7 @@ export function DossierList({
               <TableHead className="w-[100px]">
                 <SortableHeader field="updated_at">Modifié</SortableHeader>
               </TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[50px]" />
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type {
   NoteAEFEntity,
   NoteAEFCounts,
-  NoteAEFFilters,
   PaginatedResult,
   ServiceResult,
   ListNotesAEFOptions,

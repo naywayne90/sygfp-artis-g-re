@@ -90,7 +90,7 @@ const getOriginBadge = (note: NoteAEF) => {
   return <Badge variant="outline" className="bg-muted text-muted-foreground text-xs">—</Badge>;
 };
 
-const getUrgenceBadge = (urgence: string | null) => {
+const _getUrgenceBadge = (urgence: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
     basse: { label: "Basse", className: "bg-muted text-muted-foreground" },
     normale: { label: "Normale", className: "bg-secondary text-secondary-foreground" },
@@ -214,7 +214,7 @@ export function NoteAEFList({
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden lg:table-cell">Date</TableHead>
-                {showActions && <TableHead className="w-[50px]"></TableHead>}
+                {showActions && <TableHead className="w-[50px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -254,7 +254,7 @@ export function NoteAEFList({
                 <TableHead>Statut</TableHead>
                 <TableHead className="hidden xl:table-cell text-center">PJ</TableHead>
                 <TableHead className="hidden lg:table-cell">Date</TableHead>
-                {showActions && <TableHead className="w-[50px]"></TableHead>}
+                {showActions && <TableHead className="w-[50px]" />}
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useEtapeDelais } from "@/hooks/useEtapeDelais";
 import { Clock, TrendingDown, TrendingUp, Timer } from "lucide-react";
 
@@ -11,10 +10,10 @@ export function DelaisKPICard() {
       <Card>
         <CardContent className="py-6">
           <div className="animate-pulse flex items-center gap-4">
-            <div className="h-12 w-12 bg-muted rounded-lg"></div>
+            <div className="h-12 w-12 bg-muted rounded-lg" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-muted rounded w-1/2"></div>
-              <div className="h-3 bg-muted rounded w-1/3"></div>
+              <div className="h-4 bg-muted rounded w-1/2" />
+              <div className="h-3 bg-muted rounded w-1/3" />
             </div>
           </div>
         </CardContent>

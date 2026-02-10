@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Lock, RefreshCw, Bell, User, Settings, LogOut, Menu, Search } from "lucide-react";
+import { Calendar, Lock, RefreshCw, User, Settings, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DossierSearchDialog } from "@/components/search";
@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useExercice } from "@/contexts/ExerciceContext";
+import { useRBAC } from "@/contexts/RBACContext";
 import { ExerciceChangeModal } from "@/components/exercice/ExerciceChangeModal";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useSidebarBadges } from "@/hooks/useSidebarBadges";
@@ -27,6 +28,7 @@ import logoArti from "@/assets/logo-arti.jpg";
 
 export function TopBar() {
   const { exercice, exerciceInfo, isReadOnly } = useExercice();
+  const { isAdmin, user } = useRBAC();
   const { data: badges } = useSidebarBadges();
   const navigate = useNavigate();
   const [showExerciceModal, setShowExerciceModal] = useState(false);
@@ -51,7 +53,7 @@ export function TopBar() {
       toast.error("Erreur lors de la déconnexion");
     } else {
       toast.success("Déconnexion réussie");
-      navigate("/");
+      navigate("/auth", { replace: true });
     }
   };
 
@@ -116,11 +118,11 @@ export function TopBar() {
             variant="ghost"
             size="sm"
             className="hidden sm:flex items-center gap-2 text-warning hover:text-warning"
-            onClick={() => navigate("/workflow-tasks")}
+            onClick={() => navigate("/taches")}
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-warning"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-warning" />
             </span>
             <span className="text-xs font-medium">
               {badges.totalATraiter} à traiter
@@ -181,25 +183,29 @@ export function TopBar() {
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                  U
+                  {user?.fullName
+                    ? user.fullName.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
+                    : "U"}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">Utilisateur</p>
-              <p className="text-xs text-muted-foreground">Invité</p>
+              <p className="text-sm font-medium">{user?.fullName || "Utilisateur"}</p>
+              <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/mon-profil")}>
               <User className="mr-2 h-4 w-4" />
               Mon profil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/parametres")}>
-              <Settings className="mr-2 h-4 w-4" />
-              Paramètres
-            </DropdownMenuItem>
+            {isAdmin && (
+              <DropdownMenuItem onClick={() => navigate("/admin/parametres")}>
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />

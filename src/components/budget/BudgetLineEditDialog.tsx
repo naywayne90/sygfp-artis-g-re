@@ -50,14 +50,13 @@ import {
   AlertTriangle,
   FileEdit,
   Eye,
-  History,
 } from "lucide-react";
 import { useBudgetLineVersions, ModificationData } from "@/hooks/useBudgetLineVersions";
 import { BudgetLineWithRelations } from "@/hooks/useBudgetLines";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { FundingSourceSelect, FundingSourceLabel } from "@/components/shared/FundingSourceSelect";
+import { FundingSourceSelect } from "@/components/shared/FundingSourceSelect";
 
 interface BudgetLineEditDialogProps {
   open: boolean;
@@ -417,7 +416,7 @@ export function BudgetLineEditDialog({
                   <TableRow>
                     <TableHead>Champ</TableHead>
                     <TableHead>Avant</TableHead>
-                    <TableHead className="w-10"></TableHead>
+                    <TableHead className="w-10" />
                     <TableHead>Après</TableHead>
                   </TableRow>
                 </TableHeader>

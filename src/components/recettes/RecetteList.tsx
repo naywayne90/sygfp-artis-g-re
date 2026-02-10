@@ -256,7 +256,7 @@ export function RecetteList() {
                 <TableHead>Catégorie</TableHead>
                 <TableHead className="text-right">Montant</TableHead>
                 <TableHead>Statut</TableHead>
-                <TableHead></TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>

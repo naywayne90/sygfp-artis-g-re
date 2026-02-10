@@ -67,7 +67,6 @@ import {
   Edit,
   Trash2,
   Users,
-  GripVertical,
   ArrowRight,
   AlertCircle,
   Loader2,
@@ -79,7 +78,7 @@ interface ImputationDGSectionProps {
   noteStatut: string | null;
 }
 
-export function ImputationDGSection({ noteSefId, noteStatut }: ImputationDGSectionProps) {
+export function ImputationDGSection({ noteSefId, _noteStatut }: ImputationDGSectionProps) {
   const { hasAnyRole } = usePermissions();
   const canEdit = hasAnyRole(["DG", "ADMIN"]);
 

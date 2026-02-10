@@ -7,7 +7,20 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ExerciceProvider } from '@/contexts/ExerciceContext';
 import { RBACProvider } from '@/contexts/RBACContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageLoader } from '@/components/shared/PageLoader';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { Loader2 } from 'lucide-react';
+
+// Loading spinner for Suspense fallback
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">Chargement...</p>
+      </div>
+    </div>
+  );
+}
 
 // ============================================
 // IMPORTS STATIQUES (Chemin Critique)
@@ -171,14 +184,16 @@ const queryClient = new QueryClient({
 });
 
 /**
- * Layout wrapper avec Suspense pour le lazy loading
+ * Layout wrapper avec Suspense + ErrorBoundary pour le lazy loading
  */
 function LayoutWrapper() {
   return (
     <AppLayout>
-      <Suspense fallback={<PageLoader />}>
-        <Outlet />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Outlet />
+        </Suspense>
+      </ErrorBoundary>
     </AppLayout>
   );
 }
@@ -187,7 +202,7 @@ function LayoutWrapper() {
  * Wrapper Suspense pour les routes sans layout
  */
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader variant="spinner" />}>{children}</Suspense>;
+  return <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>;
 }
 
 // ============================================
