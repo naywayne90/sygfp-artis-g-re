@@ -1,7 +1,7 @@
 # AUDIT TECHNIQUE COMPLET - SYGFP
 
 **Projet** : SYGFP (Systeme de Gestion Financiere et de Planification)
-**Organisation** : ARTI Côte d'Ivoire (Autorite de Regulation des Transports Interurbains)
+**Organisation** : ARTI Côte d'Ivoire (Autorité de Régulation du Transport Intérieur)
 **Date** : 7 fevrier 2026
 **Auditeur** : Claude Code (14 series d'analyse approfondie)
 
