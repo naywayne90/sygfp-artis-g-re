@@ -19,13 +19,16 @@ export function useBudgetLineAudit(budgetLineId: string | null) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('audit_logs')
-        .select('id, action, details, created_at, user_id, profiles:user_id(full_name)')
+        .select('id, action, created_at, user_id, profiles:user_id(full_name)')
         .eq('entity_type', 'budget_line')
         .eq('entity_id', budgetLineId!)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((log): BudgetLineAuditEntry => {
+
+      type AuditRow = (typeof data)[number] & { details?: unknown };
+      return (data || []).map((row): BudgetLineAuditEntry => {
+        const log = row as AuditRow;
         const profile = log.profiles as unknown as { full_name: string } | null;
         return {
           id: `audit-${log.id}`,
@@ -34,7 +37,8 @@ export function useBudgetLineAudit(budgetLineId: string | null) {
           action: log.action || 'modification',
           field: null,
           oldValue: null,
-          newValue: typeof log.details === 'string' ? log.details : JSON.stringify(log.details),
+          newValue:
+            typeof log.details === 'string' ? log.details : JSON.stringify(log.details ?? null),
           source: 'audit_log',
         };
       });

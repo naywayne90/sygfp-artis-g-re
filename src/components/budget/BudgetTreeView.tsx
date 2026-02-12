@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -8,13 +8,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   MoreHorizontal,
   Edit,
@@ -28,11 +28,11 @@ import {
   ChevronDown,
   FolderTree,
   FileEdit,
-  RotateCcw
-} from "lucide-react";
-import { BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+  RotateCcw,
+} from 'lucide-react';
+import { BudgetLineWithRelations, getDisplayBudgetCode } from '@/hooks/useBudgetLines';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 interface BudgetTreeViewProps {
   lines: BudgetLineWithRelations[];
@@ -43,24 +43,36 @@ interface BudgetTreeViewProps {
   onReject: (id: string, reason: string) => void;
   onDelete: (id: string) => void;
   onViewHistory: (line: BudgetLineWithRelations) => void;
+  onViewDetail?: (line: BudgetLineWithRelations) => void;
+  onExportLine?: (line: BudgetLineWithRelations) => void;
   onEditWithVersioning?: (line: BudgetLineWithRelations) => void;
   onViewVersionHistory?: (line: BudgetLineWithRelations) => void;
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + " FCFA";
+  return (
+    new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + ' FCFA'
+  );
 };
 
 const getVersionBadge = (version: string) => {
   switch (version) {
-    case "V2":
-      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1 border-primary text-primary">V2</Badge>;
-    case "V1":
-      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1">V1</Badge>;
+    case 'V2':
+      return (
+        <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1 border-primary text-primary">
+          V2
+        </Badge>
+      );
+    case 'V1':
+      return (
+        <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1">
+          V1
+        </Badge>
+      );
     default:
       return null;
   }
@@ -68,13 +80,21 @@ const getVersionBadge = (version: string) => {
 
 const getStatusBadge = (status: string | null) => {
   switch (status) {
-    case "brouillon":
+    case 'brouillon':
       return <Badge variant="secondary">Brouillon</Badge>;
-    case "soumis":
-      return <Badge variant="default" className="bg-blue-500">Soumis</Badge>;
-    case "valide":
-      return <Badge variant="default" className="bg-green-500">Validé</Badge>;
-    case "rejete":
+    case 'soumis':
+      return (
+        <Badge variant="default" className="bg-blue-500">
+          Soumis
+        </Badge>
+      );
+    case 'valide':
+      return (
+        <Badge variant="default" className="bg-green-500">
+          Validé
+        </Badge>
+      );
+    case 'rejete':
       return <Badge variant="destructive">Rejeté</Badge>;
     default:
       return <Badge variant="secondary">Brouillon</Badge>;
@@ -83,26 +103,26 @@ const getStatusBadge = (status: string | null) => {
 
 const getLevelColor = (level: string) => {
   switch (level) {
-    case "chapitre":
-      return "bg-primary/10 font-semibold";
-    case "article":
-      return "bg-secondary/10";
-    case "paragraphe":
-      return "bg-muted/50";
+    case 'chapitre':
+      return 'bg-primary/10 font-semibold';
+    case 'article':
+      return 'bg-secondary/10';
+    case 'paragraphe':
+      return 'bg-muted/50';
     default:
-      return "";
+      return '';
   }
 };
 
 const _getLevelIndent = (level: string) => {
   switch (level) {
-    case "chapitre":
+    case 'chapitre':
       return 0;
-    case "article":
+    case 'article':
       return 1;
-    case "paragraphe":
+    case 'paragraphe':
       return 2;
-    case "ligne":
+    case 'ligne':
       return 3;
     default:
       return 0;
@@ -135,17 +155,19 @@ export function BudgetTreeView({
     const fetchEngagements = async () => {
       if (!lines.length || !exercice) return;
 
-      const lineIds = lines.map(l => l.id);
+      const lineIds = lines.map((l) => l.id);
       const { data } = await supabase
-        .from("budget_engagements")
-        .select("budget_line_id, montant")
-        .in("budget_line_id", lineIds)
-        .eq("exercice", exercice)
-        .eq("statut", "valide");
+        .from('budget_engagements')
+        .select('budget_line_id, montant')
+        .in('budget_line_id', lineIds)
+        .eq('exercice', exercice)
+        .eq('statut', 'valide');
 
       const engMap: Record<string, number> = {};
-      lineIds.forEach(id => { engMap[id] = 0; });
-      data?.forEach(e => {
+      lineIds.forEach((id) => {
+        engMap[id] = 0;
+      });
+      data?.forEach((e) => {
         if (e.budget_line_id) {
           engMap[e.budget_line_id] = (engMap[e.budget_line_id] || 0) + (e.montant || 0);
         }
@@ -162,15 +184,17 @@ export function BudgetTreeView({
     const roots: TreeNode[] = [];
 
     // First pass: create nodes
-    lines.forEach(line => {
+    lines.forEach((line) => {
       nodeMap.set(line.id, { ...line, children: [], depth: 0 });
     });
 
     // Second pass: build tree
-    lines.forEach(line => {
-      const node = nodeMap.get(line.id)!;
+    lines.forEach((line) => {
+      const node = nodeMap.get(line.id);
+      if (!node) return;
       if (line.parent_id && nodeMap.has(line.parent_id)) {
-        const parent = nodeMap.get(line.parent_id)!;
+        const parent = nodeMap.get(line.parent_id);
+        if (!parent) return;
         node.depth = parent.depth + 1;
         parent.children.push(node);
       } else {
@@ -181,32 +205,37 @@ export function BudgetTreeView({
     // Sort children by code
     const sortNodes = (nodes: TreeNode[]) => {
       nodes.sort((a, b) => a.code.localeCompare(b.code));
-      nodes.forEach(node => sortNodes(node.children));
+      nodes.forEach((node) => sortNodes(node.children));
     };
     sortNodes(roots);
 
     return roots;
   }, [lines]);
 
-  // Flatten tree for display with visibility based on expansion state
-  const flattenTree = (nodes: TreeNode[], depth = 0, parentExpanded = true): (TreeNode & { visible: boolean })[] => {
-    let result: (TreeNode & { visible: boolean })[] = [];
-    nodes.forEach(node => {
-      result.push({ ...node, depth, visible: parentExpanded });
-      if (node.children.length > 0) {
-        const isExpanded = expandedNodes.has(node.id);
-        result = result.concat(flattenTree(node.children, depth + 1, parentExpanded && isExpanded));
-      }
-    });
-    return result;
-  };
-
   const flattenedData = useMemo(() => {
-    return flattenTree(treeData).filter(n => n.visible);
+    // Flatten tree for display with visibility based on expansion state
+    const flattenTree = (
+      nodes: TreeNode[],
+      depth = 0,
+      parentExpanded = true
+    ): (TreeNode & { visible: boolean })[] => {
+      let result: (TreeNode & { visible: boolean })[] = [];
+      nodes.forEach((node) => {
+        result.push({ ...node, depth, visible: parentExpanded });
+        if (node.children.length > 0) {
+          const isExpanded = expandedNodes.has(node.id);
+          result = result.concat(
+            flattenTree(node.children, depth + 1, parentExpanded && isExpanded)
+          );
+        }
+      });
+      return result;
+    };
+    return flattenTree(treeData).filter((n) => n.visible);
   }, [treeData, expandedNodes]);
 
   const toggleExpand = (id: string) => {
-    setExpandedNodes(prev => {
+    setExpandedNodes((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -218,7 +247,9 @@ export function BudgetTreeView({
   };
 
   const expandAll = () => {
-    const allIds = new Set(lines.filter(l => lines.some(c => c.parent_id === l.id)).map(l => l.id));
+    const allIds = new Set(
+      lines.filter((l) => lines.some((c) => c.parent_id === l.id)).map((l) => l.id)
+    );
     setExpandedNodes(allIds);
   };
 
@@ -276,20 +307,21 @@ export function BudgetTreeView({
               </TableRow>
             ) : (
               flattenedData.map((line) => {
-                const hasChildren = lines.some(l => l.parent_id === line.id);
+                const hasChildren = lines.some((l) => l.parent_id === line.id);
                 const isExpanded = expandedNodes.has(line.id);
-                const dotation = hasChildren ? getAggregatedTotal(line as TreeNode) : line.dotation_initiale;
-                const engaged = hasChildren ? getAggregatedEngaged(line as TreeNode) : (engagements[line.id] || 0);
+                const dotation = hasChildren
+                  ? getAggregatedTotal(line as TreeNode)
+                  : line.dotation_initiale;
+                const engaged = hasChildren
+                  ? getAggregatedEngaged(line as TreeNode)
+                  : engagements[line.id] || 0;
                 const available = dotation - engaged;
                 const displayCode = getDisplayBudgetCode(line);
 
                 return (
-                  <TableRow 
-                    key={line.id} 
-                    className={getLevelColor(line.level)}
-                  >
+                  <TableRow key={line.id} className={getLevelColor(line.level)}>
                     <TableCell className="font-mono text-sm">
-                      <div 
+                      <div
                         className="flex items-center cursor-pointer"
                         style={{ paddingLeft: `${line.depth * 20}px` }}
                         onClick={() => hasChildren && toggleExpand(line.id)}
@@ -315,16 +347,16 @@ export function BudgetTreeView({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>
-                      {line.direction?.code || "-"}
-                    </TableCell>
+                    <TableCell>{line.direction?.code || '-'}</TableCell>
                     <TableCell className="text-right font-mono">
                       {formatCurrency(dotation)}
                     </TableCell>
                     <TableCell className="text-right font-mono text-orange-600">
                       {formatCurrency(engaged)}
                     </TableCell>
-                    <TableCell className={`text-right font-mono ${available < 0 ? "text-red-600" : "text-green-600"}`}>
+                    <TableCell
+                      className={`text-right font-mono ${available < 0 ? 'text-red-600' : 'text-green-600'}`}
+                    >
                       {formatCurrency(available)}
                     </TableCell>
                     <TableCell>{getStatusBadge(line.statut)}</TableCell>
@@ -360,21 +392,21 @@ export function BudgetTreeView({
                               Historique versions
                             </DropdownMenuItem>
                           )}
-                          {line.statut === "brouillon" && (
+                          {line.statut === 'brouillon' && (
                             <DropdownMenuItem onClick={() => onSubmit(line.id)}>
                               <Send className="mr-2 h-4 w-4" />
                               Soumettre
                             </DropdownMenuItem>
                           )}
-                          {line.statut === "soumis" && (
+                          {line.statut === 'soumis' && (
                             <>
                               <DropdownMenuItem onClick={() => onValidate(line.id)}>
                                 <Check className="mr-2 h-4 w-4 text-green-600" />
                                 Valider
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => {
-                                  const reason = prompt("Motif du rejet:");
+                                  const reason = prompt('Motif du rejet:');
                                   if (reason) onReject(line.id, reason);
                                 }}
                               >
@@ -383,10 +415,10 @@ export function BudgetTreeView({
                               </DropdownMenuItem>
                             </>
                           )}
-                          {line.statut === "brouillon" && (
-                            <DropdownMenuItem 
+                          {line.statut === 'brouillon' && (
+                            <DropdownMenuItem
                               onClick={() => {
-                                if (confirm("Supprimer cette ligne ?")) onDelete(line.id);
+                                if (confirm('Supprimer cette ligne ?')) onDelete(line.id);
                               }}
                               className="text-red-600"
                             >

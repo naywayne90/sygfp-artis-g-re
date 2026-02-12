@@ -1,5 +1,32 @@
 # CHANGELOG - Module Notes SEF
 
+## [2026-02-12] Corrections bugs, TypeScript et erreurs console (7 fixes)
+
+### Corrections de bugs critiques
+
+| #   | Fichier                  | Type                 | Description                                                                  |
+| --- | ------------------------ | -------------------- | ---------------------------------------------------------------------------- |
+| 1   | `LinkedNAEFList.tsx`     | Bug critique         | Requête NAEF liées pointait sur `notes_sef` au lieu de `notes_dg`            |
+| 2   | `useNotesAEFExport.ts`   | Bug                  | Filtre export "À imputer" utilisait `'valide'` au lieu de `'a_imputer'`      |
+| 3   | `NotesSEFListV2.tsx`     | ESLint               | Suppression `@ts-nocheck` inutile                                            |
+| 4   | `useNoteSEFAutosave.ts`  | ESLint + dead code   | Suppression `@ts-nocheck` + import/variable `_exercice` inexistants          |
+| 5   | `useExportNoteSEFPdf.ts` | ESLint               | Suppression `@ts-nocheck` inutile                                            |
+| 6   | `NoteSEFForm.tsx`        | Bug runtime HTTP 400 | Colonne `est_active` inexistante → `est_actif` sur `objectifs_strategiques`  |
+| 7   | `TopBar.tsx`             | Bug runtime HTTP 404 | Requête `saved_views` (table inexistante) au chargement → rendu conditionnel |
+
+### Validation
+
+| Critère                         | Résultat                      |
+| ------------------------------- | ----------------------------- |
+| `npx tsc --noEmit`              | 0 erreurs                     |
+| `npx vite build`                | Succès                        |
+| `npx vitest run`                | 275 tests passés (5 fichiers) |
+| `npx eslint` (7 fichiers)       | 0 erreurs                     |
+| `/notes-sef` console            | 0 erreurs                     |
+| `/notes-sef/validation` console | 0 erreurs, 6 notes à valider  |
+
+---
+
 ## [2026-02-13] Optimisations exports, sécurité et performance
 
 ### Panneau de détail NoteSEFDetailSheet (4 onglets)

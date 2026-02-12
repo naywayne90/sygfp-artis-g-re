@@ -189,26 +189,62 @@ export default function NoteAEFDetail() {
     queryKey: ['note-aef-detail', id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from('notes_dg')
-        .select(
-          `
-          *,
-          direction:directions(id, label, sigle),
-          created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
-          validated_by_profile:profiles!notes_dg_validated_by_fkey(id, first_name, last_name),
-          imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          differe_by_profile:profiles!notes_dg_differe_by_fkey(id, first_name, last_name),
-          rejected_by_profile:profiles!notes_dg_rejected_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
-          note_sef:notes_sef(id, numero, objet, dossier_id)
-        `
-        )
-        .eq('id', id)
-        .single();
+      // Select with explicit columns to avoid "Type instantiation too deep"
+      const { data, error } = await supabase.from('notes_dg').select('*').eq('id', id).single();
 
       if (error) throw error;
-      return data as unknown as NoteAEFExtended;
+
+      // Fetch related data separately to avoid deep type instantiation
+      const [dirRes, sefRes, blRes] = await Promise.all([
+        data.direction_id
+          ? supabase
+              .from('directions')
+              .select('id, label, sigle')
+              .eq('id', data.direction_id)
+              .single()
+          : { data: null },
+        data.note_sef_id
+          ? supabase
+              .from('notes_sef')
+              .select('id, numero, objet, dossier_id')
+              .eq('id', data.note_sef_id)
+              .single()
+          : { data: null },
+        data.budget_line_id
+          ? supabase
+              .from('budget_lines')
+              .select('id, code, label, dotation_initiale')
+              .eq('id', data.budget_line_id)
+              .single()
+          : { data: null },
+      ]);
+
+      const profileFields = 'id, first_name, last_name';
+      const profileIds = [
+        data.created_by,
+        data.validated_by,
+        data.imputed_by,
+        data.differe_by,
+        data.rejected_by,
+      ].filter(Boolean) as string[];
+      const { data: profiles } =
+        profileIds.length > 0
+          ? await supabase.from('profiles').select(profileFields).in('id', profileIds)
+          : { data: [] as { id: string; first_name: string | null; last_name: string | null }[] };
+
+      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+      return {
+        ...data,
+        direction: dirRes.data,
+        note_sef: sefRes.data,
+        budget_line: blRes.data,
+        created_by_profile: profileMap.get(data.created_by) ?? null,
+        validated_by_profile: profileMap.get(data.validated_by ?? '') ?? null,
+        imputed_by_profile: profileMap.get(data.imputed_by ?? '') ?? null,
+        differe_by_profile: profileMap.get(data.differe_by ?? '') ?? null,
+        rejected_by_profile: profileMap.get(data.rejected_by ?? '') ?? null,
+      } as NoteAEFExtended;
     },
     enabled: !!id,
   });

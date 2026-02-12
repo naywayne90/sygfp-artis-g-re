@@ -19,18 +19,57 @@ interface ELOPTotals {
   totalPaye: number;
 }
 
+// Helper for tables not yet in generated Supabase types.
+// Uses 'directions' (shallow FK depth) as type placeholder to avoid deep instantiation.
+function fromTable(table: string) {
+  return supabase.from(table as 'directions');
+}
+
+interface EngRow {
+  id: string;
+  numero_engagement: string | null;
+  objet: string | null;
+  montant: number | null;
+  statut: string | null;
+  date_engagement: string | null;
+}
+
+interface LiqRow {
+  id: string;
+  numero_liquidation: string | null;
+  reference_facture: string | null;
+  montant_liquide: number | null;
+  statut: string | null;
+  date_liquidation: string | null;
+}
+
+interface OrdRow {
+  id: string;
+  numero_ordonnancement: string | null;
+  montant_ordonnance: number | null;
+  statut: string | null;
+  date_ordonnancement: string | null;
+}
+
+interface RegRow {
+  id: string;
+  numero_reglement: string | null;
+  montant_regle: number | null;
+  statut: string | null;
+  date_reglement: string | null;
+}
+
 export function useBudgetLineELOP(budgetLineId: string | null) {
   const { data: engagements, isLoading: loadingE } = useQuery({
     queryKey: ['budget-line-engagements', budgetLineId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('budget_engagements')
-        .select('id, numero_engagement, objet, montant, statut, date_engagement')
-        .eq('budget_line_id', budgetLineId!)
-        .order('date_engagement', { ascending: false });
+      const { data, error } = await fromTable('budget_engagements')
+        .select('*')
+        .eq('budget_line_id' as 'id', budgetLineId!);
 
       if (error) throw error;
-      return (data || []).map(
+      const rows = (data || []) as unknown as EngRow[];
+      return rows.map(
         (e): ELOPRecord => ({
           id: e.id,
           numero: e.numero_engagement,
@@ -49,16 +88,13 @@ export function useBudgetLineELOP(budgetLineId: string | null) {
   const { data: liquidations, isLoading: loadingL } = useQuery({
     queryKey: ['budget-line-liquidations', budgetLineId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('budget_liquidations')
-        .select(
-          'id, numero_liquidation, reference_facture, montant_liquide, statut, date_liquidation'
-        )
-        .eq('budget_line_id', budgetLineId!)
-        .order('date_liquidation', { ascending: false });
+      const { data, error } = await fromTable('budget_liquidations')
+        .select('*')
+        .eq('budget_line_id' as 'id', budgetLineId!);
 
       if (error) throw error;
-      return (data || []).map(
+      const rows = (data || []) as unknown as LiqRow[];
+      return rows.map(
         (l): ELOPRecord => ({
           id: l.id,
           numero: l.numero_liquidation,
@@ -77,14 +113,13 @@ export function useBudgetLineELOP(budgetLineId: string | null) {
   const { data: ordonnancements, isLoading: loadingO } = useQuery({
     queryKey: ['budget-line-ordonnancements', budgetLineId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('budget_ordonnancements')
-        .select('id, numero_ordonnancement, montant_ordonnance, statut, date_ordonnancement')
-        .eq('budget_line_id', budgetLineId!)
-        .order('date_ordonnancement', { ascending: false });
+      const { data, error } = await fromTable('budget_ordonnancements')
+        .select('*')
+        .eq('budget_line_id' as 'id', budgetLineId!);
 
       if (error) throw error;
-      return (data || []).map(
+      const rows = (data || []) as unknown as OrdRow[];
+      return rows.map(
         (o): ELOPRecord => ({
           id: o.id,
           numero: o.numero_ordonnancement,
@@ -103,14 +138,13 @@ export function useBudgetLineELOP(budgetLineId: string | null) {
   const { data: reglements, isLoading: loadingR } = useQuery({
     queryKey: ['budget-line-reglements', budgetLineId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('budget_reglements')
-        .select('id, numero_reglement, montant_regle, statut, date_reglement')
-        .eq('budget_line_id', budgetLineId!)
-        .order('date_reglement', { ascending: false });
+      const { data, error } = await fromTable('budget_reglements')
+        .select('*')
+        .eq('budget_line_id' as 'id', budgetLineId!);
 
       if (error) throw error;
-      return (data || []).map(
+      const rows = (data || []) as unknown as RegRow[];
+      return rows.map(
         (r): ELOPRecord => ({
           id: r.id,
           numero: r.numero_reglement,

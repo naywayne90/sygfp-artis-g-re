@@ -330,8 +330,8 @@ export function useNotesSEF() {
 
       // Soumission atomique via RPC: génère la référence + met à jour le statut
       const { data: reference, error: rpcError } = await supabase.rpc(
-        'submit_note_sef_with_reference',
-        { p_note_id: noteId }
+        'submit_note_sef_with_reference' as 'acknowledge_budget_alert',
+        { p_note_id: noteId } as never
       );
 
       if (rpcError) throw new Error(rpcError.message);
@@ -356,7 +356,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ['notes-sef-list'] });
       queryClient.invalidateQueries({ queryKey: ['notes-sef-counts'] });
       toast({
-        title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} soumise`,
+        title: `Note ${data.reference_pivot || data.numero} soumise`,
         description: 'Les validateurs ont été notifiés',
       });
     },
@@ -594,7 +594,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ['notes-sef'] });
       queryClient.invalidateQueries({ queryKey: ['notes-sef-list'] });
       queryClient.invalidateQueries({ queryKey: ['notes-sef-counts'] });
-      toast({ title: `Note ${data.dossier_ref || data.reference_pivot || data.numero} rejetée` });
+      toast({ title: `Note ${data.reference_pivot || data.numero} rejetée` });
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur de rejet', description: error.message, variant: 'destructive' });

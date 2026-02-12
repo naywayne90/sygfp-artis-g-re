@@ -37,6 +37,15 @@ export interface BudgetLineWithRelations {
   disponible_calcule: number | null;
   montant_reserve: number | null;
   total_paye: number | null;
+  // Computed view columns (from budget execution views)
+  calc_total_engage?: number;
+  calc_total_liquide?: number;
+  calc_total_ordonnance?: number;
+  calc_total_paye?: number;
+  calc_dotation_actuelle?: number;
+  calc_disponible?: number;
+  calc_virements_recus?: number;
+  calc_virements_emis?: number;
   is_active: boolean | null;
   deactivated_at: string | null;
   deactivation_reason: string | null;
@@ -334,10 +343,10 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
   // Soft delete (deactivate) via RPC
   const deleteMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
-      const { error } = await (supabase.rpc as any)('deactivate_budget_line', {
-        p_budget_line_id: id,
-        p_reason: reason || 'Désactivation manuelle',
-      });
+      const { error } = await supabase.rpc(
+        'deactivate_budget_line' as 'acknowledge_budget_alert',
+        { p_budget_line_id: id, p_reason: reason || 'Désactivation manuelle' } as never
+      );
       if (error) throw error;
     },
     onSuccess: () => {

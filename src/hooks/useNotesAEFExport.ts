@@ -52,11 +52,43 @@ const TAB_FILE_LABELS: Record<string, string> = {
 const TAB_STATUT_FILTERS: Record<string, string | string[] | undefined> = {
   toutes: undefined,
   a_valider: ['soumis', 'a_valider'],
-  a_imputer: 'valide',
+  a_imputer: 'a_imputer',
   imputees: 'impute',
   differees: 'differe',
   rejetees: 'rejete',
 };
+
+// Type explicite pour éviter "Type instantiation is excessively deep"
+interface ExportNoteAEF {
+  id: string;
+  numero: string | null;
+  reference_pivot: string | null;
+  exercice: number | null;
+  statut: string;
+  objet: string | null;
+  justification: string | null;
+  priorite: string | null;
+  montant_estime: number | null;
+  type_depense: string | null;
+  is_direct_aef: boolean | null;
+  rejection_reason: string | null;
+  motif_differe: string | null;
+  deadline_correction: string | null;
+  date_differe: string | null;
+  created_at: string | null;
+  submitted_at: string | null;
+  validated_at: string | null;
+  imputed_at: string | null;
+  rejected_at: string | null;
+  direction: { id: string; label: string; sigle: string } | null;
+  note_sef: { id: string; numero: string; reference_pivot: string | null } | null;
+  budget_line: { id: string; code: string; label: string } | null;
+  created_by_profile: { id: string; first_name: string | null; last_name: string | null } | null;
+  validated_by_profile: { id: string; first_name: string | null; last_name: string | null } | null;
+  imputed_by_profile: { id: string; first_name: string | null; last_name: string | null } | null;
+  rejected_by_profile: { id: string; first_name: string | null; last_name: string | null } | null;
+  differe_by_profile: { id: string; first_name: string | null; last_name: string | null } | null;
+}
 
 /**
  * Formate un montant en FCFA avec séparateurs de milliers
@@ -109,41 +141,10 @@ export function useNotesAEFExport() {
           userDirectionId = profile?.direction_id || null;
         }
 
-        // 2. Construire la requête avec les filtres
+        // 2. Construire la requête avec les filtres (select('*') pour éviter deep type instantiation)
         let query = supabase
           .from('notes_dg')
-          .select(
-            `
-            id,
-            numero,
-            reference_pivot,
-            exercice,
-            statut,
-            objet,
-            justification,
-            priorite,
-            montant_estime,
-            type_depense,
-            is_direct_aef,
-            rejection_reason,
-            motif_differe,
-            deadline_correction,
-            date_differe,
-            created_at,
-            submitted_at,
-            validated_at,
-            imputed_at,
-            rejected_at,
-            direction:directions(id, label, sigle),
-            note_sef:notes_sef(id, numero, reference_pivot),
-            budget_line:budget_lines(id, code, label),
-            created_by_profile:profiles!created_by(id, first_name, last_name),
-            validated_by_profile:profiles!validated_by(id, first_name, last_name),
-            imputed_by_profile:profiles!imputed_by(id, first_name, last_name),
-            rejected_by_profile:profiles!rejected_by(id, first_name, last_name),
-            differe_by_profile:profiles!differe_by(id, first_name, last_name)
-          `
-          )
+          .select('*')
           .eq('exercice', exercice)
           .order('created_at', { ascending: false })
           .limit(MAX_EXPORT_ROWS);
@@ -174,9 +175,64 @@ export function useNotesAEFExport() {
         }
 
         setExportProgress('Chargement des notes...');
-        const { data: notes, error } = await query;
-
+        const { data: rawNotes, error } = await query;
         if (error) throw error;
+        if (!rawNotes || rawNotes.length === 0) {
+          // Handle early - no notes case uses headers-only export (see below)
+        }
+
+        // 3. Fetch related data in bulk to avoid deep type instantiation
+        const directionIds = [
+          ...new Set((rawNotes || []).map((n) => n.direction_id).filter(Boolean)),
+        ] as string[];
+        const sefIds = [
+          ...new Set((rawNotes || []).map((n) => n.note_sef_id).filter(Boolean)),
+        ] as string[];
+        const blIds = [
+          ...new Set((rawNotes || []).map((n) => n.budget_line_id).filter(Boolean)),
+        ] as string[];
+        const profileIds = [
+          ...new Set(
+            (rawNotes || []).flatMap((n) =>
+              [n.created_by, n.validated_by, n.imputed_by, n.rejected_by, n.differe_by].filter(
+                Boolean
+              )
+            )
+          ),
+        ] as string[];
+
+        const [dirRes, sefRes, blRes, profRes] = await Promise.all([
+          directionIds.length > 0
+            ? supabase.from('directions').select('id, label, sigle').in('id', directionIds)
+            : { data: [] as { id: string; label: string; sigle: string }[] },
+          sefIds.length > 0
+            ? supabase.from('notes_sef').select('id, numero, reference_pivot').in('id', sefIds)
+            : { data: [] as { id: string; numero: string; reference_pivot: string | null }[] },
+          blIds.length > 0
+            ? supabase.from('budget_lines').select('id, code, label').in('id', blIds)
+            : { data: [] as { id: string; code: string; label: string }[] },
+          profileIds.length > 0
+            ? supabase.from('profiles').select('id, first_name, last_name').in('id', profileIds)
+            : { data: [] as { id: string; first_name: string | null; last_name: string | null }[] },
+        ]);
+
+        const dirMap = new Map((dirRes.data || []).map((d) => [d.id, d]));
+        const sefMap = new Map((sefRes.data || []).map((s) => [s.id, s]));
+        const blMap = new Map((blRes.data || []).map((b) => [b.id, b]));
+        const profMap = new Map((profRes.data || []).map((p) => [p.id, p]));
+
+        // Merge into ExportNoteAEF shape
+        const notes: ExportNoteAEF[] = (rawNotes || []).map((n) => ({
+          ...n,
+          direction: n.direction_id ? (dirMap.get(n.direction_id) ?? null) : null,
+          note_sef: n.note_sef_id ? (sefMap.get(n.note_sef_id) ?? null) : null,
+          budget_line: n.budget_line_id ? (blMap.get(n.budget_line_id) ?? null) : null,
+          created_by_profile: n.created_by ? (profMap.get(n.created_by) ?? null) : null,
+          validated_by_profile: n.validated_by ? (profMap.get(n.validated_by) ?? null) : null,
+          imputed_by_profile: n.imputed_by ? (profMap.get(n.imputed_by) ?? null) : null,
+          rejected_by_profile: n.rejected_by ? (profMap.get(n.rejected_by) ?? null) : null,
+          differe_by_profile: n.differe_by ? (profMap.get(n.differe_by) ?? null) : null,
+        }));
 
         // Générer le nom de fichier avec format standardisé
         const fileStatutLabel = TAB_FILE_LABELS[tabLabel] || 'toutes';

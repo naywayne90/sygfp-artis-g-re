@@ -67,11 +67,7 @@ const STATUS_LABELS: Record<string, string> = {
 // COMPOSANT
 // ============================================================================
 
-export function LinkedNAEFList({
-  nsefId,
-  compact = false,
-  className,
-}: LinkedNAEFListProps) {
+export function LinkedNAEFList({ nsefId, compact = false, className }: LinkedNAEFListProps) {
   // Requête pour récupérer les NAEF liées
   const {
     data: linkedNAEF,
@@ -80,22 +76,11 @@ export function LinkedNAEFList({
   } = useQuery({
     queryKey: ['linked-naef', nsefId],
     queryFn: async (): Promise<LinkedNAEF[]> => {
-      // Récupère les notes avec montant estimé (NAEF) liées au même dossier
-      const { data: parentNote } = await supabase
-        .from('notes_sef')
-        .select('dossier_id')
-        .eq('id', nsefId)
-        .single();
-
-      if (!parentNote?.dossier_id) return [];
-
+      // Récupère les Notes AEF (table notes_dg) liées à cette Note SEF
       const { data, error } = await supabase
-        .from('notes_sef')
+        .from('notes_dg')
         .select('id, numero, reference_pivot, objet, statut, montant_estime, created_at')
-        .eq('dossier_id', parentNote.dossier_id)
-        .not('montant_estime', 'is', null)
-        .gt('montant_estime', 0)
-        .neq('id', nsefId)
+        .eq('note_sef_id', nsefId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -105,8 +90,7 @@ export function LinkedNAEFList({
   });
 
   // Calculer le total des montants
-  const totalMontant =
-    linkedNAEF?.reduce((sum, naef) => sum + (naef.montant_estime || 0), 0) || 0;
+  const totalMontant = linkedNAEF?.reduce((sum, naef) => sum + (naef.montant_estime || 0), 0) || 0;
 
   // Obtenir la référence affichable
   const getReference = (naef: LinkedNAEF): string => {
@@ -159,9 +143,7 @@ export function LinkedNAEFList({
         <CardContent className="py-4 text-center text-gray-500 text-sm">
           <Link2 className="h-8 w-8 mx-auto mb-2 text-gray-300" />
           Aucune NAEF rattachée à cette NSEF.
-          <p className="text-xs mt-1">
-            Les NAEF peuvent être rattachées lors de leur création.
-          </p>
+          <p className="text-xs mt-1">Les NAEF peuvent être rattachées lors de leur création.</p>
         </CardContent>
       </Card>
     );
@@ -176,9 +158,7 @@ export function LinkedNAEFList({
             <Link2 className="h-3 w-3 text-green-600" />
             {linkedNAEF.length} NAEF rattachée(s)
           </span>
-          <span className="font-semibold text-blue-600">
-            {formatCurrency(totalMontant)}
-          </span>
+          <span className="font-semibold text-blue-600">{formatCurrency(totalMontant)}</span>
         </div>
       </div>
     );
@@ -226,12 +206,8 @@ export function LinkedNAEFList({
         {/* Total */}
         {linkedNAEF.length > 0 && (
           <div className="mt-3 pt-3 border-t flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-600">
-              Total des NAEF :
-            </span>
-            <span className="text-lg font-bold text-blue-600">
-              {formatCurrency(totalMontant)}
-            </span>
+            <span className="text-sm font-medium text-gray-600">Total des NAEF :</span>
+            <span className="text-lg font-bold text-blue-600">{formatCurrency(totalMontant)}</span>
           </div>
         )}
       </CardContent>

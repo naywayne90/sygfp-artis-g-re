@@ -14,6 +14,19 @@ export interface ValidationPermissionResult {
   onBehalfOfName: string | null;
 }
 
+interface RpcRow {
+  is_allowed?: boolean;
+  validation_mode?: string;
+  on_behalf_of_id?: string;
+  on_behalf_of_name?: string;
+}
+
+// Helper for RPC functions not yet in generated Supabase types
+async function callRpc(name: string, params: Record<string, string>) {
+  const { data, error } = await supabase.rpc(name as 'acknowledge_budget_alert', params as never);
+  return { data: data as unknown as RpcRow[] | RpcRow | null, error };
+}
+
 /**
  * Appelle la RPC `check_validation_permission` pour vérifier
  * si un utilisateur peut valider un module avec un rôle donné.
@@ -27,7 +40,7 @@ export async function checkValidationPermission(
   module: string,
   requiredRole: string
 ): Promise<ValidationPermissionResult> {
-  const { data, error } = await supabase.rpc('check_validation_permission', {
+  const { data, error } = await callRpc('check_validation_permission', {
     p_user_id: userId,
     p_module: module,
     p_required_role: requiredRole,
@@ -57,7 +70,7 @@ export async function checkValidationPermission(
 
   return {
     isAllowed: row.is_allowed ?? false,
-    validationMode: row.validation_mode as ValidationPermissionResult['validationMode'],
+    validationMode: (row.validation_mode as ValidationPermissionResult['validationMode']) ?? null,
     onBehalfOfId: row.on_behalf_of_id ?? null,
     onBehalfOfName: row.on_behalf_of_name ?? null,
   };

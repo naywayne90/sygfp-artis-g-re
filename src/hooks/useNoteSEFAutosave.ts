@@ -1,14 +1,12 @@
-// @ts-nocheck
 /**
  * Hook pour l'autosave des Notes SEF en brouillon
- * 
+ *
  * Sauvegarde automatique avec debounce (3s) quand le formulaire change.
  * Ne s'applique qu'aux notes en statut "brouillon".
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AutosaveData {
   objet?: string;
@@ -46,7 +44,6 @@ export function useNoteSEFAutosave(options: UseNoteSEFAutosaveOptions = {}) {
     onSaveError,
   } = options;
 
-  const { _exercice } = useExercice();
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -56,60 +53,66 @@ export function useNoteSEFAutosave(options: UseNoteSEFAutosaveOptions = {}) {
   /**
    * Effectue la sauvegarde
    */
-  const performSave = useCallback(async (data: AutosaveData) => {
-    if (!noteId || !data) return;
+  const performSave = useCallback(
+    async (data: AutosaveData) => {
+      if (!noteId || !data) return;
 
-    try {
-      setIsSaving(true);
-      onSaveStart?.();
+      try {
+        setIsSaving(true);
+        onSaveStart?.();
 
-      const { error } = await supabase
-        .from("notes_sef")
-        .update({
-          ...data,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", noteId)
-        .eq("statut", "brouillon"); // Ne sauvegarder que les brouillons
+        const { error } = await supabase
+          .from('notes_sef')
+          .update({
+            ...data,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', noteId)
+          .eq('statut', 'brouillon'); // Ne sauvegarder que les brouillons
 
-      if (error) {
-        throw new Error(error.message);
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        setLastSaved(new Date());
+        setHasUnsavedChanges(false);
+        pendingDataRef.current = null;
+        onSaveSuccess?.();
+      } catch (error) {
+        console.error('Autosave error:', error);
+        onSaveError?.(error instanceof Error ? error : new Error('Erreur de sauvegarde'));
+      } finally {
+        setIsSaving(false);
       }
-
-      setLastSaved(new Date());
-      setHasUnsavedChanges(false);
-      pendingDataRef.current = null;
-      onSaveSuccess?.();
-    } catch (error) {
-      console.error("Autosave error:", error);
-      onSaveError?.(error instanceof Error ? error : new Error("Erreur de sauvegarde"));
-    } finally {
-      setIsSaving(false);
-    }
-  }, [noteId, onSaveStart, onSaveSuccess, onSaveError]);
+    },
+    [noteId, onSaveStart, onSaveSuccess, onSaveError]
+  );
 
   /**
    * Planifie une sauvegarde avec debounce
    */
-  const scheduleSave = useCallback((data: AutosaveData) => {
-    if (!enabled || !noteId) return;
+  const scheduleSave = useCallback(
+    (data: AutosaveData) => {
+      if (!enabled || !noteId) return;
 
-    // Stocker les données en attente
-    pendingDataRef.current = data;
-    setHasUnsavedChanges(true);
+      // Stocker les données en attente
+      pendingDataRef.current = data;
+      setHasUnsavedChanges(true);
 
-    // Annuler le timeout précédent
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Programmer la nouvelle sauvegarde
-    timeoutRef.current = setTimeout(() => {
-      if (pendingDataRef.current) {
-        performSave(pendingDataRef.current);
+      // Annuler le timeout précédent
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }, debounceMs);
-  }, [enabled, noteId, debounceMs, performSave]);
+
+      // Programmer la nouvelle sauvegarde
+      timeoutRef.current = setTimeout(() => {
+        if (pendingDataRef.current) {
+          performSave(pendingDataRef.current);
+        }
+      }, debounceMs);
+    },
+    [enabled, noteId, debounceMs, performSave]
+  );
 
   /**
    * Force une sauvegarde immédiate
@@ -150,13 +153,13 @@ export function useNoteSEFAutosave(options: UseNoteSEFAutosaveOptions = {}) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges && pendingDataRef.current) {
         e.preventDefault();
-        e.returnValue = "Vous avez des modifications non sauvegardées.";
+        e.returnValue = 'Vous avez des modifications non sauvegardées.';
         return e.returnValue;
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   return {

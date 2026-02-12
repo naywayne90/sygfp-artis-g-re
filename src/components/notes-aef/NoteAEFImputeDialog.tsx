@@ -3,7 +3,7 @@
  * Sélection de ligne budgétaire avec contrôles de disponibilité
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,31 +11,44 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { NoteAEF } from "@/hooks/useNotesAEF";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { ARTIReferenceBadge } from "@/components/shared/ARTIReferenceBadge";
-import { 
-  CreditCard, 
-  Loader2, 
-  Search, 
-  AlertTriangle, 
-  CheckCircle2, 
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { NoteAEF } from '@/hooks/useNotesAEF';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { ARTIReferenceBadge } from '@/components/shared/ARTIReferenceBadge';
+import {
+  CreditCard,
+  Loader2,
+  Search,
+  AlertTriangle,
+  CheckCircle2,
   Calculator,
   Building,
   Filter,
@@ -43,9 +56,9 @@ import {
   TrendingUp,
   TrendingDown,
   Lock,
-  Unlock
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  Unlock,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface NoteAEFImputeDialogProps {
   open: boolean;
@@ -77,28 +90,29 @@ export function NoteAEFImputeDialog({
   onConfirm,
 }: NoteAEFImputeDialogProps) {
   const { exercice } = useExercice();
-  const [selectedBudgetLine, setSelectedBudgetLine] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBudgetLine, setSelectedBudgetLine] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Filtres avancés
   const [filters, setFilters] = useState({
-    directionId: "",
-    osId: "",
+    directionId: '',
+    osId: '',
     onlySufficient: false,
   });
-  
+
   // Forcer l'imputation si insuffisant
   const [forceImputation, setForceImputation] = useState(false);
-  const [justification, setJustification] = useState("");
+  const [justification, setJustification] = useState('');
 
   // Charger les lignes budgétaires avec disponibilité
   const { data: budgetLines = [], isLoading: loadingBudgetLines } = useQuery({
-    queryKey: ["budget-lines-imputation", exercice],
+    queryKey: ['budget-lines-imputation', exercice],
     queryFn: async () => {
       const { data: lines, error } = await supabase
-        .from("budget_lines")
-        .select(`
+        .from('budget_lines')
+        .select(
+          `
           id,
           code,
           label,
@@ -110,20 +124,22 @@ export function NoteAEFImputeDialog({
           os:objectifs_strategiques(code, libelle),
           nbe:nomenclature_nbe(code, libelle),
           sysco:plan_comptable_sysco(code, libelle)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .eq("is_active", true)
-        .order("code");
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('is_active', true)
+        .order('code');
 
       if (error) throw error;
 
       // Calculer disponibilités
-      const enriched: BudgetLineWithAvailability[] = (lines || []).map(line => {
+      const enriched: BudgetLineWithAvailability[] = (lines || []).map((line) => {
         const dotation_actuelle = (line.dotation_modifiee ?? line.dotation_initiale) || 0;
         const total_engage = line.total_engage || 0;
         const montant_reserve = line.montant_reserve || 0;
         const disponible_net = dotation_actuelle - total_engage - montant_reserve;
-        const taux_engagement = dotation_actuelle > 0 ? (total_engage / dotation_actuelle) * 100 : 0;
+        const taux_engagement =
+          dotation_actuelle > 0 ? (total_engage / dotation_actuelle) * 100 : 0;
 
         return {
           id: line.id,
@@ -135,10 +151,10 @@ export function NoteAEFImputeDialog({
           montant_reserve,
           disponible_net,
           taux_engagement,
-          direction: line.direction as any,
-          os: line.os as any,
-          nbe: line.nbe as any,
-          sysco: line.sysco as any,
+          direction: line.direction as BudgetLineWithAvailability['direction'],
+          os: line.os as BudgetLineWithAvailability['os'],
+          nbe: line.nbe as BudgetLineWithAvailability['nbe'],
+          sysco: line.sysco as BudgetLineWithAvailability['sysco'],
         };
       });
 
@@ -149,17 +165,25 @@ export function NoteAEFImputeDialog({
 
   // Charger les directions et OS pour filtres
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions-filter"],
+    queryKey: ['directions-filter'],
     queryFn: async () => {
-      const { data } = await supabase.from("directions").select("id, sigle, label").eq("est_active", true).order("label");
+      const { data } = await supabase
+        .from('directions')
+        .select('id, sigle, label')
+        .eq('est_active', true)
+        .order('label');
       return data || [];
     },
   });
 
   const { data: objectifsStrategiques = [] } = useQuery({
-    queryKey: ["os-filter"],
+    queryKey: ['os-filter'],
     queryFn: async () => {
-      const { data } = await supabase.from("objectifs_strategiques").select("id, code, libelle").eq("est_actif", true).order("code");
+      const { data } = await supabase
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .eq('est_actif', true)
+        .order('code');
       return data || [];
     },
   });
@@ -167,60 +191,60 @@ export function NoteAEFImputeDialog({
   // Filtrer les lignes
   const filteredLines = useMemo(() => {
     let result = budgetLines;
-    
+
     // Recherche texte
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(line => 
-        line.code.toLowerCase().includes(q) ||
-        line.label.toLowerCase().includes(q)
+      result = result.filter(
+        (line) => line.code.toLowerCase().includes(q) || line.label.toLowerCase().includes(q)
       );
     }
-    
+
     // Filtre direction
     if (filters.directionId) {
-      result = result.filter(line => {
+      result = result.filter((line) => {
         // On compare par sigle car la FK est potentiellement différente
-        const dir = directions.find(d => d.id === filters.directionId);
+        const dir = directions.find((d) => d.id === filters.directionId);
         return dir && line.direction?.sigle === dir.sigle;
       });
     }
-    
+
     // Filtre OS
     if (filters.osId) {
-      const os = objectifsStrategiques.find(o => o.id === filters.osId);
+      const os = objectifsStrategiques.find((o) => o.id === filters.osId);
       if (os) {
-        result = result.filter(line => line.os?.code === os.code);
+        result = result.filter((line) => line.os?.code === os.code);
       }
     }
-    
+
     // Seulement lignes avec disponible suffisant
     if (filters.onlySufficient && note?.montant_estime) {
-      result = result.filter(line => line.disponible_net >= (note.montant_estime || 0));
+      result = result.filter((line) => line.disponible_net >= (note.montant_estime || 0));
     }
-    
+
     return result;
   }, [budgetLines, searchQuery, filters, directions, objectifsStrategiques, note?.montant_estime]);
 
   // Ligne sélectionnée
-  const selectedLine = budgetLines.find(l => l.id === selectedBudgetLine);
-  
+  const selectedLine = budgetLines.find((l) => l.id === selectedBudgetLine);
+
   // Calculs pour la ligne sélectionnée
   const montantNote = note?.montant_estime || 0;
   const isInsufficient = selectedLine ? montantNote > selectedLine.disponible_net : false;
   const disponibleApres = selectedLine ? selectedLine.disponible_net - montantNote : 0;
-  const tauxApres = selectedLine && selectedLine.dotation_actuelle > 0
-    ? ((selectedLine.total_engage + montantNote) / selectedLine.dotation_actuelle) * 100
-    : 0;
+  const tauxApres =
+    selectedLine && selectedLine.dotation_actuelle > 0
+      ? ((selectedLine.total_engage + montantNote) / selectedLine.dotation_actuelle) * 100
+      : 0;
 
   // Reset état à l'ouverture
   useEffect(() => {
     if (open) {
-      setSelectedBudgetLine("");
-      setSearchQuery("");
+      setSelectedBudgetLine('');
+      setSearchQuery('');
       setForceImputation(false);
-      setJustification("");
-      setFilters({ directionId: note?.direction_id || "", osId: "", onlySufficient: false });
+      setJustification('');
+      setFilters({ directionId: note?.direction_id || '', osId: '', onlySufficient: false });
     }
   }, [open, note?.direction_id]);
 
@@ -239,7 +263,7 @@ export function NoteAEFImputeDialog({
   };
 
   const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   if (!note) return null;
 
@@ -271,17 +295,17 @@ export function NoteAEFImputeDialog({
                   </div>
                   <div>
                     <span className="text-muted-foreground">Direction:</span>
-                    <p className="font-medium">{note.direction?.sigle || note.direction?.label || "-"}</p>
+                    <p className="font-medium">
+                      {note.direction?.sigle || note.direction?.label || '-'}
+                    </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Type dépense:</span>
-                    <p className="font-medium capitalize">{note.type_depense || "-"}</p>
+                    <p className="font-medium capitalize">{note.type_depense || '-'}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Montant à imputer:</span>
-                    <p className="font-bold text-primary text-lg">
-                      {formatMontant(montantNote)}
-                    </p>
+                    <p className="font-bold text-primary text-lg">{formatMontant(montantNote)}</p>
                   </div>
                 </div>
               </CardContent>
@@ -311,14 +335,16 @@ export function NoteAEFImputeDialog({
                   <div>
                     <Select
                       value={filters.directionId}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, directionId: v }))}
+                      onValueChange={(v) =>
+                        setFilters((prev) => ({ ...prev, directionId: v === '__all__' ? '' : v }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Direction" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Toutes</SelectItem>
-                        {directions.map(d => (
+                        <SelectItem value="__all__">Toutes</SelectItem>
+                        {directions.map((d) => (
                           <SelectItem key={d.id} value={d.id}>
                             {d.sigle || d.label}
                           </SelectItem>
@@ -329,14 +355,16 @@ export function NoteAEFImputeDialog({
                   <div>
                     <Select
                       value={filters.osId}
-                      onValueChange={(v) => setFilters(prev => ({ ...prev, osId: v }))}
+                      onValueChange={(v) =>
+                        setFilters((prev) => ({ ...prev, osId: v === '__all__' ? '' : v }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Obj. Stratégique" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Tous</SelectItem>
-                        {objectifsStrategiques.map(os => (
+                        <SelectItem value="__all__">Tous</SelectItem>
+                        {objectifsStrategiques.map((os) => (
                           <SelectItem key={os.id} value={os.id}>
                             {os.code} - {os.libelle}
                           </SelectItem>
@@ -349,10 +377,13 @@ export function NoteAEFImputeDialog({
                   <Checkbox
                     id="onlySufficient"
                     checked={filters.onlySufficient}
-                    onCheckedChange={(c) => setFilters(prev => ({ ...prev, onlySufficient: !!c }))}
+                    onCheckedChange={(c) =>
+                      setFilters((prev) => ({ ...prev, onlySufficient: !!c }))
+                    }
                   />
                   <Label htmlFor="onlySufficient" className="text-sm cursor-pointer">
-                    Afficher uniquement les lignes avec disponible suffisant ({formatMontant(montantNote)})
+                    Afficher uniquement les lignes avec disponible suffisant (
+                    {formatMontant(montantNote)})
                   </Label>
                 </div>
               </CardContent>
@@ -402,14 +433,14 @@ export function NoteAEFImputeDialog({
                         {filteredLines.map((line) => {
                           const isSelected = selectedBudgetLine === line.id;
                           const canReceive = line.disponible_net >= montantNote;
-                          
+
                           return (
                             <TableRow
                               key={line.id}
                               className={cn(
-                                "cursor-pointer transition-colors",
-                                isSelected ? "bg-primary/10" : "hover:bg-muted/50",
-                                !canReceive && !isSelected ? "opacity-60" : ""
+                                'cursor-pointer transition-colors',
+                                isSelected ? 'bg-primary/10' : 'hover:bg-muted/50',
+                                !canReceive && !isSelected ? 'opacity-60' : ''
                               )}
                               onClick={() => setSelectedBudgetLine(line.id)}
                             >
@@ -422,15 +453,13 @@ export function NoteAEFImputeDialog({
                                   className="h-4 w-4"
                                 />
                               </TableCell>
-                              <TableCell className="font-mono text-xs">
-                                {line.code}
-                              </TableCell>
+                              <TableCell className="font-mono text-xs">{line.code}</TableCell>
                               <TableCell className="max-w-[200px] truncate text-sm">
                                 {line.label}
                               </TableCell>
                               <TableCell>
                                 <Badge variant="outline" className="text-xs">
-                                  {line.direction?.sigle || "-"}
+                                  {line.direction?.sigle || '-'}
                                 </Badge>
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
@@ -439,12 +468,16 @@ export function NoteAEFImputeDialog({
                               <TableCell className="text-right font-mono text-sm text-orange-600">
                                 {formatMontant(line.total_engage)}
                               </TableCell>
-                              <TableCell className={cn(
-                                "text-right font-mono text-sm font-medium",
-                                line.disponible_net < 0 ? "text-destructive" :
-                                line.disponible_net < montantNote ? "text-orange-600" :
-                                "text-green-600"
-                              )}>
+                              <TableCell
+                                className={cn(
+                                  'text-right font-mono text-sm font-medium',
+                                  line.disponible_net < 0
+                                    ? 'text-destructive'
+                                    : line.disponible_net < montantNote
+                                      ? 'text-orange-600'
+                                      : 'text-green-600'
+                                )}
+                              >
                                 {formatMontant(line.disponible_net)}
                               </TableCell>
                               <TableCell>
@@ -470,14 +503,16 @@ export function NoteAEFImputeDialog({
 
             {/* Récapitulatif budgétaire */}
             {selectedLine && (
-              <Card className={cn(
-                "border-2 transition-colors",
-                isInsufficient && !forceImputation 
-                  ? "border-destructive bg-destructive/5" 
-                  : isInsufficient && forceImputation
-                    ? "border-orange-500 bg-orange-500/5"
-                    : "border-green-500 bg-green-500/5"
-              )}>
+              <Card
+                className={cn(
+                  'border-2 transition-colors',
+                  isInsufficient && !forceImputation
+                    ? 'border-destructive bg-destructive/5'
+                    : isInsufficient && forceImputation
+                      ? 'border-orange-500 bg-orange-500/5'
+                      : 'border-green-500 bg-green-500/5'
+                )}
+              >
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Calculator className="h-5 w-5" />
@@ -495,7 +530,10 @@ export function NoteAEFImputeDialog({
                       </Badge>
                     )}
                     {isInsufficient && forceImputation && (
-                      <Badge variant="outline" className="text-orange-600 border-orange-600 ml-auto">
+                      <Badge
+                        variant="outline"
+                        className="text-orange-600 border-orange-600 ml-auto"
+                      >
                         <Unlock className="h-3 w-3 mr-1" />
                         Forcé
                       </Badge>
@@ -530,21 +568,31 @@ export function NoteAEFImputeDialog({
                     </div>
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Engagé</p>
-                      <p className="font-bold text-orange-600">{formatMontant(selectedLine.total_engage)}</p>
+                      <p className="font-bold text-orange-600">
+                        {formatMontant(selectedLine.total_engage)}
+                      </p>
                     </div>
                     <div className="bg-muted/50 rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Réservé</p>
-                      <p className="font-bold text-amber-600">{formatMontant(selectedLine.montant_reserve)}</p>
+                      <p className="font-bold text-amber-600">
+                        {formatMontant(selectedLine.montant_reserve)}
+                      </p>
                     </div>
-                    <div className={cn(
-                      "rounded-lg p-2",
-                      selectedLine.disponible_net >= montantNote ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
-                    )}>
+                    <div
+                      className={cn(
+                        'rounded-lg p-2',
+                        selectedLine.disponible_net >= montantNote
+                          ? 'bg-green-100 dark:bg-green-900/20'
+                          : 'bg-red-100 dark:bg-red-900/20'
+                      )}
+                    >
                       <p className="text-xs text-muted-foreground">Disponible net</p>
-                      <p className={cn(
-                        "font-bold",
-                        selectedLine.disponible_net >= 0 ? "text-green-600" : "text-destructive"
-                      )}>
+                      <p
+                        className={cn(
+                          'font-bold',
+                          selectedLine.disponible_net >= 0 ? 'text-green-600' : 'text-destructive'
+                        )}
+                      >
                         {formatMontant(selectedLine.disponible_net)}
                       </p>
                     </div>
@@ -552,12 +600,21 @@ export function NoteAEFImputeDialog({
                       <p className="text-xs text-muted-foreground">À imputer</p>
                       <p className="font-bold text-primary">{formatMontant(montantNote)}</p>
                     </div>
-                    <div className={cn(
-                      "rounded-lg p-2",
-                      disponibleApres >= 0 ? "bg-green-100 dark:bg-green-900/20" : "bg-red-100 dark:bg-red-900/20"
-                    )}>
+                    <div
+                      className={cn(
+                        'rounded-lg p-2',
+                        disponibleApres >= 0
+                          ? 'bg-green-100 dark:bg-green-900/20'
+                          : 'bg-red-100 dark:bg-red-900/20'
+                      )}
+                    >
                       <p className="text-xs text-muted-foreground">Dispo. après</p>
-                      <p className={cn("font-bold", disponibleApres >= 0 ? "text-green-600" : "text-destructive")}>
+                      <p
+                        className={cn(
+                          'font-bold',
+                          disponibleApres >= 0 ? 'text-green-600' : 'text-destructive'
+                        )}
+                      >
                         {formatMontant(disponibleApres)}
                       </p>
                     </div>
@@ -565,33 +622,43 @@ export function NoteAEFImputeDialog({
 
                   {/* Taux d'engagement */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground">Taux d'engagement après imputation:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Taux d'engagement après imputation:
+                    </span>
                     <Progress value={Math.min(tauxApres, 100)} className="flex-1 h-2" />
-                    <span className={cn(
-                      "text-sm font-medium",
-                      tauxApres > 100 ? "text-destructive" : tauxApres > 80 ? "text-orange-600" : ""
-                    )}>
+                    <span
+                      className={cn(
+                        'text-sm font-medium',
+                        tauxApres > 100
+                          ? 'text-destructive'
+                          : tauxApres > 80
+                            ? 'text-orange-600'
+                            : ''
+                      )}
+                    >
                       {tauxApres.toFixed(1)}%
                     </span>
                     {tauxApres > 80 && tauxApres <= 100 && (
                       <TrendingUp className="h-4 w-4 text-orange-600" />
                     )}
-                    {tauxApres > 100 && (
-                      <TrendingDown className="h-4 w-4 text-destructive" />
-                    )}
+                    {tauxApres > 100 && <TrendingDown className="h-4 w-4 text-destructive" />}
                   </div>
 
                   {/* Alerte si insuffisant */}
                   {isInsufficient && (
-                    <Alert variant={forceImputation ? "default" : "destructive"}>
+                    <Alert variant={forceImputation ? 'default' : 'destructive'}>
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Disponible insuffisant</AlertTitle>
                       <AlertDescription className="space-y-3">
                         <p>
-                          Le montant à imputer ({formatMontant(montantNote)}) dépasse le disponible net de{" "}
-                          <strong>{formatMontant(Math.abs(selectedLine.disponible_net - montantNote))}</strong>.
+                          Le montant à imputer ({formatMontant(montantNote)}) dépasse le disponible
+                          net de{' '}
+                          <strong>
+                            {formatMontant(Math.abs(selectedLine.disponible_net - montantNote))}
+                          </strong>
+                          .
                         </p>
-                        
+
                         <div className="flex items-center gap-2 pt-2">
                           <Checkbox
                             id="forceImputation"
@@ -602,10 +669,12 @@ export function NoteAEFImputeDialog({
                             Forcer l'imputation avec justification
                           </Label>
                         </div>
-                        
+
                         {forceImputation && (
                           <div>
-                            <Label htmlFor="justification" className="text-xs">Justification obligatoire:</Label>
+                            <Label htmlFor="justification" className="text-xs">
+                              Justification obligatoire:
+                            </Label>
                             <Textarea
                               id="justification"
                               value={justification}
@@ -626,7 +695,8 @@ export function NoteAEFImputeDialog({
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <AlertTitle className="text-green-700">Imputation validée</AlertTitle>
                       <AlertDescription className="text-green-600/80">
-                        Le budget est suffisant. L'imputation créera une réservation et mettra à jour le dossier.
+                        Le budget est suffisant. L'imputation créera une réservation et mettra à
+                        jour le dossier.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -642,11 +712,11 @@ export function NoteAEFImputeDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleConfirm}
             disabled={
-              !selectedBudgetLine || 
-              isLoading || 
+              !selectedBudgetLine ||
+              isLoading ||
               (isInsufficient && !forceImputation) ||
               (isInsufficient && forceImputation && !justification.trim())
             }

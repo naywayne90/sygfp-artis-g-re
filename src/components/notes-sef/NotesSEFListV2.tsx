@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * NotesSEFListV2 - Nouvelle version de la liste des Notes SEF
  * Avec onglets, compteurs, filtres et exports
@@ -74,11 +73,7 @@ export function NotesSEFListV2({ className }: NotesSEFListV2Props) {
 
             <div className="flex items-center gap-2">
               {/* Exports */}
-              <NotesSEFExports
-                activeTab={activeTab}
-                filters={filters}
-                searchQuery={searchQuery}
-              />
+              <NotesSEFExports activeTab={activeTab} filters={filters} searchQuery={searchQuery} />
 
               {/* Créer une note */}
               <Button onClick={() => setShowCreateForm(true)}>

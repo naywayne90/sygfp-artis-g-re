@@ -771,13 +771,15 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                   <Label htmlFor="beneficiaire">Bénéficiaire / Prestataire</Label>
                   <Select
                     value={formData.beneficiaire_id}
-                    onValueChange={(value) => updateField('beneficiaire_id', value)}
+                    onValueChange={(value) =>
+                      updateField('beneficiaire_id', value === '__none__' ? '' : value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner un bénéficiaire (optionnel)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucun</SelectItem>
+                      <SelectItem value="__none__">Aucun</SelectItem>
                       {beneficiaires.map((b) => (
                         <SelectItem key={b.id} value={b.id}>
                           {b.raison_sociale}

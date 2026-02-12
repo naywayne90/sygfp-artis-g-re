@@ -215,10 +215,10 @@ export function useEngagements() {
 
     // Get executed credit transfers received (virements recus)
     const { data: recus, error: recusError } = await supabase
-      .from("credit_transfers")
-      .select("amount")
-      .eq("to_budget_line_id", budgetLineId)
-      .eq("status", "execute");
+      .from('credit_transfers')
+      .select('amount')
+      .eq('to_budget_line_id', budgetLineId)
+      .eq('status', 'execute');
 
     if (recusError) throw recusError;
 
@@ -226,10 +226,10 @@ export function useEngagements() {
 
     // Get executed credit transfers sent (virements emis)
     const { data: emis, error: emisError } = await supabase
-      .from("credit_transfers")
-      .select("amount")
-      .eq("from_budget_line_id", budgetLineId)
-      .eq("status", "execute");
+      .from('credit_transfers')
+      .select('amount')
+      .eq('from_budget_line_id', budgetLineId)
+      .eq('status', 'execute');
 
     if (emisError) throw emisError;
 
@@ -368,10 +368,10 @@ export function useEngagements() {
         await supabase.from('dossier_etapes').insert({
           dossier_id: dossierId,
           type_etape: 'engagement',
-          ref_id: engagement.id,
+          entity_id: engagement.id,
           montant: data.montant,
           statut: 'en_cours',
-        } as Record<string, unknown>);
+        });
 
         // Mettre à jour l'étape courante du dossier et le montant engagé
         await supabase

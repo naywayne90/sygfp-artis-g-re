@@ -119,7 +119,7 @@ export function NoteSEFForm({
       const { data: osData } = await (supabase as any)
         .from('objectifs_strategiques')
         .select('id, code, libelle')
-        .eq('est_active', true)
+        .eq('est_actif', true)
         .order('code');
       const { data: missionsData } = await (supabase as any)
         .from('missions')
@@ -502,25 +502,19 @@ export function NoteSEFForm({
           if (submitAfterSave) {
             try {
               await submitNote(result.id);
-              toast.success(
-                `Note ${result.dossier_ref || result.reference_pivot || result.numero} créée et soumise`,
-                { description: 'Les validateurs ont été notifiés' }
-              );
+              toast.success(`Note ${result.reference_pivot || result.numero} créée et soumise`, {
+                description: 'Les validateurs ont été notifiés',
+              });
             } catch {
               toast.error('Erreur lors de la soumission', {
                 description: 'La note a été créée en brouillon',
               });
             }
           } else {
-            toast.success(
-              `Brouillon créé : ${result.dossier_ref || result.reference_pivot || result.numero}`,
-              {
-                description:
-                  uploadedFiles.length > 0
-                    ? `${uploadedFiles.length} pièce(s) jointe(s)`
-                    : undefined,
-              }
-            );
+            toast.success(`Brouillon créé : ${result.reference_pivot || result.numero}`, {
+              description:
+                uploadedFiles.length > 0 ? `${uploadedFiles.length} pièce(s) jointe(s)` : undefined,
+            });
           }
 
           onOpenChange(false);

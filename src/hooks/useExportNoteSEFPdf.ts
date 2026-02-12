@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Hook pour exporter une Note SEF en PDF format officiel ARTI (PROMPT 30)
  *
@@ -6,13 +5,13 @@
  * et génère le PDF au format "ARTI_NOTE_DG_SYGFP".
  */
 
-import { useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { NoteSEF } from "@/hooks/useNotesSEF";
-import { NoteImputation, NoteImputationLigne } from "@/hooks/useNoteImputations";
-import { ValidationDG } from "@/hooks/useValidationDG";
-import { downloadNoteSEFPdf, generateNoteSEFPdf } from "@/services/noteSEFPdfService";
-import { toast } from "sonner";
+import { useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { NoteSEF } from '@/hooks/useNotesSEF';
+import { NoteImputation, NoteImputationLigne } from '@/hooks/useNoteImputations';
+import { ValidationDG } from '@/hooks/useValidationDG';
+import { downloadNoteSEFPdf, generateNoteSEFPdf } from '@/services/noteSEFPdfService';
+import { toast } from 'sonner';
 
 interface ExportState {
   isExporting: boolean;
@@ -33,7 +32,7 @@ interface UseExportNoteSEFPdfResult {
 export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
   const [state, setState] = useState<ExportState>({
     isExporting: false,
-    progress: "",
+    progress: '',
     error: null,
   });
 
@@ -45,50 +44,56 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
    * Charge les données complètes d'une note SEF
    */
   const loadNoteData = useCallback(async (noteId: string) => {
-    setProgress("Chargement de la note...");
+    setProgress('Chargement de la note...');
 
     // 1. Charger la note
     const { data: note, error: noteError } = await supabase
-      .from("notes_sef")
-      .select(`
+      .from('notes_sef')
+      .select(
+        `
         *,
         direction:directions(id, sigle, label),
         demandeur:profiles!notes_sef_demandeur_id_fkey(id, first_name, last_name, full_name),
         beneficiaire:prestataires(id, nom, raison_sociale)
-      `)
-      .eq("id", noteId)
+      `
+      )
+      .eq('id', noteId)
       .single();
 
     if (noteError) throw new Error(`Erreur chargement note: ${noteError.message}`);
-    if (!note) throw new Error("Note non trouvée");
+    if (!note) throw new Error('Note non trouvée');
 
-    setProgress("Chargement des imputations...");
+    setProgress('Chargement des imputations...');
 
     // 2. Charger l'imputation
     const { data: imputation } = await supabase
-      .from("note_imputations")
-      .select(`
+      .from('note_imputations')
+      .select(
+        `
         *,
         impute_par:profiles!note_imputations_impute_par_user_id_fkey(
           id,
           first_name,
           last_name
         )
-      `)
-      .eq("note_sef_id", noteId)
+      `
+      )
+      .eq('note_sef_id', noteId)
       .maybeSingle();
 
     let imputationWithLignes: NoteImputation | null = null;
     if (imputation) {
       // Charger les lignes d'imputation
       const { data: lignes } = await supabase
-        .from("note_imputation_lignes")
-        .select(`
+        .from('note_imputation_lignes')
+        .select(
+          `
           *,
           direction:directions(id, sigle, label)
-        `)
-        .eq("imputation_id", imputation.id)
-        .order("ordre", { ascending: true });
+        `
+        )
+        .eq('imputation_id', imputation.id)
+        .order('ordre', { ascending: true });
 
       imputationWithLignes = {
         ...imputation,
@@ -96,12 +101,13 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
       } as NoteImputation;
     }
 
-    setProgress("Chargement de la validation...");
+    setProgress('Chargement de la validation...');
 
     // 3. Charger la validation DG
     const { data: validation } = await supabase
-      .from("validation_dg")
-      .select(`
+      .from('validation_dg')
+      .select(
+        `
         *,
         validated_by:profiles!validation_dg_validated_by_user_id_fkey(
           id,
@@ -109,18 +115,19 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
           last_name,
           full_name
         )
-      `)
-      .eq("note_id", noteId)
-      .eq("note_type", "SEF")
+      `
+      )
+      .eq('note_id', noteId)
+      .eq('note_type', 'SEF')
       .maybeSingle();
 
-    setProgress("Comptage des pièces jointes...");
+    setProgress('Comptage des pièces jointes...');
 
     // 4. Compter les pièces jointes
     const { count: attachmentsCount } = await supabase
-      .from("notes_sef_attachments")
-      .select("*", { count: "exact", head: true })
-      .eq("note_id", noteId);
+      .from('notes_sef_attachments')
+      .select('*', { count: 'exact', head: true })
+      .eq('note_id', noteId);
 
     return {
       note: note as NoteSEF,
@@ -134,10 +141,13 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
    * Exporte une note SEF en PDF
    */
   const exportPdf = useCallback(
-    async (noteId: string, options: { download?: boolean } = { download: true }): Promise<Blob | null> => {
+    async (
+      noteId: string,
+      options: { download?: boolean } = { download: true }
+    ): Promise<Blob | null> => {
       setState({
         isExporting: true,
-        progress: "Préparation...",
+        progress: 'Préparation...',
         error: null,
       });
 
@@ -145,7 +155,7 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
         // Charger les données
         const { note, imputation, validation, attachmentsCount } = await loadNoteData(noteId);
 
-        setProgress("Génération du PDF...");
+        setProgress('Génération du PDF...');
 
         if (options.download) {
           // Télécharger directement
@@ -156,7 +166,7 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
             attachmentsCount,
           });
 
-          toast.success("PDF exporté avec succès");
+          toast.success('PDF exporté avec succès');
           return null;
         } else {
           // Retourner le blob
@@ -178,7 +188,7 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
         setState((prev) => ({
           ...prev,
           isExporting: false,
-          progress: "",
+          progress: '',
         }));
       }
     },
