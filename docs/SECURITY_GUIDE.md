@@ -1,7 +1,7 @@
 # Guide Sécurité SYGFP
 
-> **RBAC, RLS et Contrôle d'Accès**  
-> Version: 1.0 | Dernière mise à jour: 2026-01-15
+> **RBAC, RLS et Contrôle d'Accès**
+> Version: 2.0 | Dernière mise à jour: 2026-02-13
 
 ---
 
@@ -21,18 +21,18 @@ SYGFP implémente un modèle **RBAC** (Role-Based Access Control) avec :
 
 ### 2.1 Rôles système
 
-| Code | Libellé | Description |
-|------|---------|-------------|
-| `ADMIN` | Administrateur | Accès total, gestion système |
-| `DG` | Directeur Général | Validation finale, signature mandats |
-| `DAAF` | Directeur Administratif et Financier | Validation liquidations, supervision |
-| `CB` | Contrôleur Budgétaire | Imputation, validation engagements |
-| `DIRECTEUR` | Directeur de Direction | Validation notes direction |
-| `AGENT` | Agent | Saisie, consultation |
-| `TRESORERIE` | Trésorerie | Exécution règlements |
-| `AGENT_COMPTABLE` / `AC` | Agent Comptable | Comptabilité, règlements |
-| `COMMISSION_MARCHES` | Commission des Marchés | Validation marchés |
-| `GESTIONNAIRE` | Gestionnaire | Gestion opérationnelle |
+| Code                     | Libellé                              | Description                          |
+| ------------------------ | ------------------------------------ | ------------------------------------ |
+| `ADMIN`                  | Administrateur                       | Accès total, gestion système         |
+| `DG`                     | Directeur Général                    | Validation finale, signature mandats |
+| `DAAF`                   | Directeur Administratif et Financier | Validation liquidations, supervision |
+| `CB`                     | Contrôleur Budgétaire                | Imputation, validation engagements   |
+| `DIRECTEUR`              | Directeur de Direction               | Validation notes direction           |
+| `AGENT`                  | Agent                                | Saisie, consultation                 |
+| `TRESORERIE`             | Trésorerie                           | Exécution règlements                 |
+| `AGENT_COMPTABLE` / `AC` | Agent Comptable                      | Comptabilité, règlements             |
+| `COMMISSION_MARCHES`     | Commission des Marchés               | Validation marchés                   |
+| `GESTIONNAIRE`           | Gestionnaire                         | Gestion opérationnelle               |
 
 ### 2.2 Hiérarchie implicite
 
@@ -61,18 +61,18 @@ ADMIN (tout)
 
 ### 3.1 Qui valide quoi ?
 
-| Étape | Document | Créateur | Validateur | Rôles alternatifs |
-|-------|----------|----------|------------|-------------------|
-| 1 | Note SEF | Agent/Gestionnaire | **DG** | ADMIN |
-| 2 | Note AEF | Agent | **DIRECTEUR** | DG, ADMIN |
-| 3 | Imputation | - | **CB** | ADMIN |
-| 4 | Expression Besoin | Agent | **DIRECTEUR** | DG, ADMIN |
-| 5 | Marché | SDPM | **COMMISSION_MARCHES** | DG, ADMIN |
-| 6 | Engagement | CB | **CB** | ADMIN |
-| 7 | Liquidation | Agent | **DAAF** | CB, ADMIN |
-| 8 | Ordonnancement | DAAF | **DG** (signature) | ADMIN |
-| 9 | Règlement | DAAF | **TRESORERIE** | AC, ADMIN |
-| - | Virement crédit | Agent | **CB** | ADMIN |
+| Étape | Document          | Créateur           | Validateur             | Rôles alternatifs                 |
+| ----- | ----------------- | ------------------ | ---------------------- | --------------------------------- |
+| 1     | Note SEF          | Agent/Gestionnaire | **DG**                 | DAAF, ADMIN, delegue, interimaire |
+| 2     | Note AEF          | Agent              | **DIRECTEUR**          | DG, ADMIN                         |
+| 3     | Imputation        | -                  | **CB**                 | ADMIN                             |
+| 4     | Expression Besoin | Agent              | **DIRECTEUR**          | DG, ADMIN                         |
+| 5     | Marché            | SDPM               | **COMMISSION_MARCHES** | DG, ADMIN                         |
+| 6     | Engagement        | CB                 | **CB**                 | ADMIN                             |
+| 7     | Liquidation       | Agent              | **DAAF**               | CB, ADMIN                         |
+| 8     | Ordonnancement    | DAAF               | **DG** (signature)     | ADMIN                             |
+| 9     | Règlement         | DAAF               | **TRESORERIE**         | AC, ADMIN                         |
+| -     | Virement crédit   | Agent              | **CB**                 | ADMIN                             |
 
 ### 3.2 Représentation visuelle
 
@@ -113,14 +113,14 @@ ADMIN (tout)
 
 export function usePermissions() {
   // Récupère rôles et permissions de l'utilisateur courant
-  
+
   return {
     // Vérifications de base
     hasRole(roleCode: string): boolean,
     hasAnyRole(roleCodes: string[]): boolean,
     hasPermission(actionCode: string): boolean,
     isAdmin: boolean,
-    
+
     // Validations métier spécifiques
     canValidateNoteSEF(): boolean,     // DG, ADMIN
     canValidateNoteAEF(): boolean,     // DIRECTEUR, DG, ADMIN
@@ -131,7 +131,7 @@ export function usePermissions() {
     canExecuteReglement(): boolean,    // TRESORERIE, AC, ADMIN
     canValidateMarche(): boolean,      // COMMISSION, DG, ADMIN
     canApproveVirement(): boolean,     // CB, ADMIN
-    
+
     // Message d'erreur pour rôle insuffisant
     getRequiredRoleMessage(action: string): string,
   };
@@ -144,7 +144,7 @@ export function usePermissions() {
 // Exemple : Bouton de validation
 function ValidateButton({ noteId }) {
   const { canValidateNoteSEF, getRequiredRoleMessage } = usePermissions();
-  
+
   if (!canValidateNoteSEF()) {
     return (
       <Tooltip content={`Réservé au ${getRequiredRoleMessage('validate_note_sef')}`}>
@@ -152,7 +152,7 @@ function ValidateButton({ noteId }) {
       </Tooltip>
     );
   }
-  
+
   return <Button onClick={() => validate(noteId)}>Valider</Button>;
 }
 ```
@@ -170,28 +170,22 @@ interface PermissionGuardProps {
   children: React.ReactNode;
 }
 
-export function PermissionGuard({
-  permission,
-  role,
-  roles,
-  fallback = null,
-  children,
-}) {
+export function PermissionGuard({ permission, role, roles, fallback = null, children }) {
   const { hasPermission, hasRole, hasAnyRole } = usePermissions();
-  
+
   let hasAccess = false;
-  
+
   if (permission) hasAccess = hasPermission(permission);
   else if (role) hasAccess = hasRole(role);
   else if (roles) hasAccess = hasAnyRole(roles);
-  
+
   return hasAccess ? children : fallback;
 }
 
 // Usage
 <PermissionGuard role="DG" fallback={<AccessDenied />}>
   <ValidationPanel />
-</PermissionGuard>
+</PermissionGuard>;
 ```
 
 ---
@@ -306,15 +300,15 @@ Un utilisateur **ne peut pas valider** ce qu'il a **créé**.
 
 export function useSeparationOfDuties() {
   const { userId } = usePermissions();
-  
+
   const canValidate = (item: { created_by: string }) => {
     // Admin peut toujours valider
     if (isAdmin) return true;
-    
+
     // Créateur ne peut pas valider son propre document
     return item.created_by !== userId;
   };
-  
+
   return { canValidate };
 }
 ```
@@ -361,9 +355,9 @@ RETURNS TABLE(action_code text, via_delegation boolean) AS $$
   FROM user_roles ur
   JOIN role_permissions rp ON rp.role_code = ur.role
   WHERE ur.user_id = p_user_id AND ur.is_active = true
-  
+
   UNION
-  
+
   -- Permissions via délégation
   SELECT unnest(d.permissions), true
   FROM delegations d
@@ -378,9 +372,9 @@ $$ LANGUAGE sql SECURITY DEFINER;
 ```tsx
 function PermissionBadge({ permission }) {
   const { isViaDelegation } = usePermissions();
-  
+
   return (
-    <Badge variant={isViaDelegation(permission) ? "outline" : "default"}>
+    <Badge variant={isViaDelegation(permission) ? 'outline' : 'default'}>
       {permission}
       {isViaDelegation(permission) && <span> (délégué)</span>}
     </Badge>
@@ -394,18 +388,18 @@ function PermissionBadge({ permission }) {
 
 ### 8.1 Table `audit_logs`
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `id` | uuid | Identifiant |
-| `entity_type` | text | Type d'entité (table) |
-| `entity_id` | uuid | ID de l'entité |
-| `action` | text | Action (INSERT, UPDATE, DELETE, VALIDATE, REJECT) |
-| `old_values` | jsonb | Valeurs avant modification |
-| `new_values` | jsonb | Valeurs après modification |
-| `user_id` | uuid | Utilisateur ayant effectué l'action |
-| `ip_address` | text | Adresse IP |
-| `exercice` | integer | Exercice concerné |
-| `created_at` | timestamptz | Date/heure |
+| Colonne       | Type        | Description                                       |
+| ------------- | ----------- | ------------------------------------------------- |
+| `id`          | uuid        | Identifiant                                       |
+| `entity_type` | text        | Type d'entité (table)                             |
+| `entity_id`   | uuid        | ID de l'entité                                    |
+| `action`      | text        | Action (INSERT, UPDATE, DELETE, VALIDATE, REJECT) |
+| `old_values`  | jsonb       | Valeurs avant modification                        |
+| `new_values`  | jsonb       | Valeurs après modification                        |
+| `user_id`     | uuid        | Utilisateur ayant effectué l'action               |
+| `ip_address`  | text        | Adresse IP                                        |
+| `exercice`    | integer     | Exercice concerné                                 |
+| `created_at`  | timestamptz | Date/heure                                        |
 
 ### 8.2 Trigger d'audit automatique
 
@@ -473,7 +467,7 @@ VALUES ('CB', 'budget_reallocation_approve');
 ```typescript
 // 2. Dans usePermissions.ts
 const canApproveReallocation = (): boolean => {
-  return isAdmin || hasRole("CB") || hasPermission("budget_reallocation_approve");
+  return isAdmin || hasRole('CB') || hasPermission('budget_reallocation_approve');
 };
 ```
 
@@ -517,10 +511,60 @@ FOR UPDATE USING (
 
 ## 11. Documentation détaillée par module
 
-| Module | Documentation RLS |
-|--------|-------------------|
+| Module    | Documentation RLS                           |
+| --------- | ------------------------------------------- |
 | Notes SEF | [docs/RLS_NOTES_SEF.md](./RLS_NOTES_SEF.md) |
 
 ---
 
-*Documentation générée le 2026-01-15*
+## 12. Content-Security-Policy (CSP)
+
+Depuis le 13 fevrier 2026, l'application dispose d'un header CSP dans `index.html` :
+
+```html
+<meta
+  http-equiv="Content-Security-Policy"
+  content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com;
+  img-src 'self' data: blob: https://*.supabase.co;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co;
+  frame-src 'none';
+  object-src 'none';
+  base-uri 'self';
+"
+/>
+```
+
+| Directive     | Valeur         | Raison                                |
+| ------------- | -------------- | ------------------------------------- |
+| `frame-src`   | `'none'`       | Empeche l'embedding dans des iframes  |
+| `object-src`  | `'none'`       | Bloque les plugins Flash/Java         |
+| `connect-src` | Supabase + WSS | API REST et Realtime                  |
+| `img-src`     | `data: blob:`  | QR codes generes en base64, apercu PJ |
+
+## 13. Delegations et Interims dans le workflow (Gaps 2+3+4)
+
+Depuis le 12-13 fevrier 2026, le systeme supporte les delegations et interims :
+
+### Backend
+
+- `check_validation_permission()` verifie : role direct → delegation active → interim actif
+- `get_users_who_can_act_as_role(role, scope)` retourne tous les user_ids capables d'agir
+- Colonnes `validation_mode` et `validated_on_behalf_of` tracent le mode
+
+### Notifications
+
+- `notify_role()` utilise `get_users_who_can_act_as_role()` pour inclure delegues/interimaires
+- Le message de notification inclut le nom du validateur et son mode (direct/delegation/interim)
+
+### RLS DAAF
+
+- Policy `notes_sef_update_authorized` permet a la DAAF de modifier les notes `soumis` et `a_valider`
+- Utilise `user_roles` avec cast `::app_role` (pas de fonctions helper)
+
+---
+
+_Documentation mise a jour le 2026-02-13_

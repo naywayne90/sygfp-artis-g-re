@@ -1,7 +1,7 @@
 # Etat du Projet SYGFP
 
 > **Suivi de l'avancement et roadmap**
-> Version: 2.0 | Derniere mise a jour: 2026-02-06
+> Version: 2.1 | Derniere mise a jour: 2026-02-13
 
 ---
 
@@ -9,18 +9,18 @@
 
 | Metrique            | Valeur                     |
 | ------------------- | -------------------------- |
-| **Version**         | 1.0 RC                     |
+| **Version**         | 1.1 RC                     |
 | **Tables DB**       | ~150                       |
-| **Migrations**      | 173                        |
-| **Composants**      | 402 fichiers (46 modules)  |
-| **Hooks**           | 142                        |
-| **Pages**           | 104 fichiers (12 sections) |
+| **Migrations**      | 190+                       |
+| **Composants**      | 400+ fichiers (50 modules) |
+| **Hooks**           | 154                        |
+| **Pages**           | 114 fichiers (12 sections) |
 | **Lib/Utils**       | 40                         |
-| **Services**        | 12                         |
+| **Services**        | 14                         |
 | **Contextes**       | 2                          |
-| **Edge Functions**  | 4                          |
-| **Tests unitaires** | 22 fichiers                |
-| **Tests E2E**       | 22 fichiers                |
+| **Edge Functions**  | 12                         |
+| **Tests unitaires** | 275 (5 fichiers)           |
+| **Tests E2E**       | 24 fichiers                |
 | **Docs modules**    | 13 fiches                  |
 
 ---
@@ -50,7 +50,7 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 
 | #   | Module                | Frontend | Backend | RLS | Tests   | Doc | Status      |
 | --- | --------------------- | -------- | ------- | --- | ------- | --- | ----------- |
-| 1   | **Notes SEF**         | 100%     | 100%    | Oui | Partiel | Oui | Production  |
+| 1   | **Notes SEF**         | 100%     | 100%    | Oui | 275     | Oui | Production  |
 | 2   | **Notes AEF**         | 95%      | 95%     | Oui | Partiel | Oui | A finaliser |
 | 3   | **Imputation**        | 90%      | 90%     | Oui | Partiel | Oui | A finaliser |
 | 4   | **Expression Besoin** | 85%      | 85%     | Oui | Partiel | Oui | En cours    |
@@ -96,7 +96,7 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 | **Alertes Budgetaires** | 80%      | 80%     | En cours    |
 | **Dashboard**           | 90%      | 90%     | Production  |
 | **Dashboard DMG**       | 85%      | 85%     | A finaliser |
-| **Export Excel/PDF**    | 75%      | 75%     | Partiel     |
+| **Export Excel/PDF**    | 90%      | 90%     | Production  |
 
 ---
 
@@ -133,10 +133,17 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 - [x] Dashboard par role
 - [x] Migration SQL Server vers Supabase terminee
 - [x] Pieces jointes migrees vers Supabase Storage
+- [x] Delegations et interims dans le workflow backend (Gaps 2+3)
+- [x] Notifications avec delegations/interims (Gap 4)
+- [x] Content-Security-Policy (CSP) headers
+- [x] Panneau de detail Notes SEF (Sheet 4 onglets)
+- [x] Export Excel avec colonne Montant estime
+- [x] RLS DAAF peut modifier notes soumises
+- [x] Limite 3 PJ par note (trigger DB + frontend)
+- [x] Badge "Migre" pour notes importees
 
 ### 5.2 En cours
 
-- [ ] Notifications email (edge function prete, integration en cours)
 - [ ] Export PDF mandats/ordonnancements
 - [ ] Validation lots marches
 - [ ] Gestion avenants contrats
@@ -201,6 +208,20 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 ---
 
 ## 9. Historique des Versions
+
+### v1.1 RC (2026-02-13)
+
+- Gaps 2+3 resolus : delegations et interims dans le workflow backend
+- Gap 4 resolu : notifications avec delegations/interims
+- Panneau de detail Notes SEF (Sheet 4 onglets avec PJ, historique, AEF liee)
+- Export Excel enrichi (colonne Montant estime)
+- CSP headers de securite
+- RLS DAAF pour notes soumises/a_valider
+- Limite 3 PJ par note avec trigger DB
+- Badge "Migre" et flag is_migrated
+- Format reference ARTI00MMYYNNNN corrige
+- Index de performance ajoutes
+- 275 tests unitaires, 190+ migrations
 
 ### v1.0 RC (2026-02-06)
 
@@ -282,4 +303,4 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 
 ---
 
-_Derniere mise a jour: 2026-02-06_
+_Derniere mise a jour: 2026-02-13_

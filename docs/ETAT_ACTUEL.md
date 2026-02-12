@@ -42,8 +42,9 @@
 **Composants associés :**
 
 - `NoteSEFForm.tsx` - Formulaire création/édition
-- `NoteSEFList.tsx` - Tableau avec filtres
-- `NoteSEFDetails.tsx` - Affichage détaillé
+- `NoteSEFList.tsx` - Tableau avec filtres (clic ligne ouvre Sheet)
+- `NoteSEFDetailSheet.tsx` - Sheet latéral 4 onglets (Infos/Contenu/PJ/Historique)
+- `NoteSEFDetails.tsx` - Affichage détaillé (legacy)
 - `NoteSEFChecklist.tsx` - Checklist de validation
 - `NoteSEFDeferDialog.tsx` - Dialog de report
 - `NoteSEFRejectDialog.tsx` - Dialog de rejet
@@ -407,6 +408,22 @@
 | `setSearchQuery` | Filtre recherche              |
 | `setActiveTab`   | Filtre par statut             |
 | `setPage`        | Pagination                    |
+
+#### `useNoteSEFDetail.ts` (nouveau - 2026-02-13)
+
+| Fonction        | Description                       |
+| --------------- | --------------------------------- |
+| `pieces`        | Pièces jointes de la note (max 3) |
+| `history`       | Historique des modifications      |
+| `linkedNoteAEF` | Note AEF liée (via FK)            |
+| `isLoading`     | État de chargement des 3 requêtes |
+
+#### `useNotesSEFExport.ts`
+
+| Fonction      | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `exportExcel` | Export Excel 22 colonnes (dont Montant estimé) |
+| `exportPdf`   | Export PDF avec en-tête ARTI                   |
 
 ### 3.2 Notes AEF
 

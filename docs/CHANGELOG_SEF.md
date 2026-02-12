@@ -30,8 +30,10 @@
 ### RLS : DAAF peut modifier les notes soumises
 
 - **Migration** : `20260213_rls_daaf_update_soumis.sql`
-- Policy `notes_sef_update` étendue : DAAF peut UPDATE les notes `soumis` et `a_valider`
-- Préserve : Admin/DG tout, créateur brouillon uniquement
+- Policy `notes_sef_update_authorized` étendue : DAAF peut UPDATE les notes `soumis` et `a_valider`
+- Utilise `user_roles` avec `app_role` enum (schéma réel, pas `is_admin()`/`is_dg()`/`is_daaf()`)
+- Appliquée sur Supabase le 13/02/2026
+- Préserve : Admin/DG tout, créateur ses propres notes
 
 ---
 

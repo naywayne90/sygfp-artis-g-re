@@ -5,6 +5,7 @@
 Le code-splitting permet de diviser le bundle JavaScript en plusieurs fichiers chargés à la demande, réduisant le temps de chargement initial.
 
 **Résultats obtenus:**
+
 - Bundle initial: ~5 MB → ~425 KB (réduction de 90%)
 - Vendors séparés en chunks dédiés
 - Pages chargées uniquement quand visitées
@@ -21,40 +22,43 @@ export default defineConfig({
       output: {
         manualChunks: {
           // React core
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
 
           // Composants UI Radix
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-select",
+          'vendor-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-select',
             // ... autres composants Radix
           ],
 
           // State management
-          "vendor-query": ["@tanstack/react-query"],
+          'vendor-query': ['@tanstack/react-query'],
 
           // Formulaires
-          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
 
           // Graphiques
-          "vendor-charts": ["recharts"],
+          'vendor-charts': ['recharts'],
 
           // Export PDF
-          "vendor-pdf": ["jspdf", "jspdf-autotable"],
+          'vendor-pdf': ['jspdf', 'jspdf-autotable'],
 
           // Export Excel
-          "vendor-excel": ["xlsx"],
+          'vendor-excel': ['xlsx'],
 
           // Supabase
-          "vendor-supabase": ["@supabase/supabase-js"],
+          'vendor-supabase': ['@supabase/supabase-js'],
 
           // Date utilities
-          "vendor-date": ["date-fns"],
+          'vendor-date': ['date-fns'],
+
+          // QR Code
+          'vendor-qrcode': ['qrcode.react'],
 
           // Icons
-          "vendor-icons": ["lucide-react"],
+          'vendor-icons': ['lucide-react'],
         },
       },
     },
@@ -68,16 +72,16 @@ export default defineConfig({
 
 ```tsx
 // src/App.tsx
-import { lazy, Suspense } from "react";
-import { PageLoader } from "@/components/shared/PageLoader";
+import { lazy, Suspense } from 'react';
+import { PageLoader } from '@/components/shared/PageLoader';
 
 // Import statique (chemin critique)
-import Dashboard from "./pages/Dashboard";
-import LoginPage from "./pages/auth/LoginPage";
+import Dashboard from './pages/Dashboard';
+import LoginPage from './pages/auth/LoginPage';
 
 // Import lazy (chargé à la demande)
-const NotesSEF = lazy(() => import("./pages/NotesSEF"));
-const Engagements = lazy(() => import("./pages/Engagements"));
+const NotesSEF = lazy(() => import('./pages/NotesSEF'));
+const Engagements = lazy(() => import('./pages/Engagements'));
 
 function App() {
   return (
@@ -115,20 +119,17 @@ function LayoutWrapper() {
 ### src/components/shared/PageLoader.tsx
 
 ```tsx
-import { Loader2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface PageLoaderProps {
   message?: string;
-  variant?: "spinner" | "skeleton";
+  variant?: 'spinner' | 'skeleton';
 }
 
-export function PageLoader({
-  message = "Chargement...",
-  variant = "skeleton"
-}: PageLoaderProps) {
-  if (variant === "spinner") {
+export function PageLoader({ message = 'Chargement...', variant = 'skeleton' }: PageLoaderProps) {
+  if (variant === 'spinner') {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -205,9 +206,7 @@ by App.tsx but also statically imported by Dashboard.tsx
 
 ```tsx
 // Dans Dashboard.tsx
-const DashboardDirectionPage = lazy(
-  () => import("@/pages/execution/DashboardDirectionPage")
-);
+const DashboardDirectionPage = lazy(() => import('@/pages/execution/DashboardDirectionPage'));
 
 return (
   <Suspense fallback={<DashboardSkeleton />}>
@@ -225,7 +224,7 @@ Pour les pages fréquemment visitées après la page actuelle:
 <Link
   to="/notes-sef"
   onMouseEnter={() => {
-    import("./pages/NotesSEF");
+    import('./pages/NotesSEF');
   }}
 >
   Notes SEF
@@ -255,26 +254,29 @@ npm run build
 
 ## Chunks Générés
 
-| Chunk | Contenu | Taille |
-|-------|---------|--------|
-| `index.js` | Code applicatif principal | ~425 KB |
-| `vendor-react.js` | React, React Router | ~23 KB |
-| `vendor-ui.js` | Composants Radix UI | ~301 KB |
-| `vendor-query.js` | TanStack Query | ~39 KB |
-| `vendor-forms.js` | React Hook Form, Zod | ~80 KB |
-| `vendor-charts.js` | Recharts | ~421 KB |
-| `vendor-pdf.js` | jsPDF | ~420 KB |
-| `vendor-excel.js` | XLSX | ~424 KB |
-| `vendor-supabase.js` | Client Supabase | ~172 KB |
-| `[Page].js` | Chaque page lazy | Variable |
+| Chunk                | Contenu                   | Taille   |
+| -------------------- | ------------------------- | -------- |
+| `index.js`           | Code applicatif principal | ~425 KB  |
+| `vendor-react.js`    | React, React Router       | ~23 KB   |
+| `vendor-ui.js`       | Composants Radix UI       | ~301 KB  |
+| `vendor-query.js`    | TanStack Query            | ~39 KB   |
+| `vendor-forms.js`    | React Hook Form, Zod      | ~80 KB   |
+| `vendor-charts.js`   | Recharts                  | ~421 KB  |
+| `vendor-pdf.js`      | jsPDF                     | ~420 KB  |
+| `vendor-excel.js`    | XLSX                      | ~424 KB  |
+| `vendor-supabase.js` | Client Supabase           | ~172 KB  |
+| `vendor-qrcode.js`   | QR Code (qrcode.react)    | ~15 KB   |
+| `[Page].js`          | Chaque page lazy          | Variable |
 
 ## Métriques de Performance
 
 ### Avant Code-Splitting
+
 - Bundle unique: ~5 MB
 - Temps de chargement initial: ~8s (3G)
 
 ### Après Code-Splitting
+
 - Bundle initial: ~800 KB (vendors critiques)
 - Temps de chargement initial: ~2s (3G)
 - Pages additionnelles: ~50-100 KB chacune

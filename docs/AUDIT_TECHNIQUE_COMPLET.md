@@ -54,7 +54,7 @@
 
 Le SYGFP est une application **mature et fonctionnelle** couvrant l'integralite de la chaine de depense publique en 9 etapes. L'architecture est solide (React 18 + TypeScript + Supabase), avec un systeme RBAC complet, des controles budgetaires automatises et une tracabilite audit exhaustive.
 
-**7 gaps initialement identifies**, dont 3 deja corriges/resolus (Gap 1 corrige par migration, Gap 5 et Gap 7 deja implementes). **4 gaps restent ouverts** (delegations, interims, notifications, DashboardHR).
+**7 gaps initialement identifies**, dont **6 corriges/resolus** (Gap 1 par migration, Gap 5 et Gap 7 deja implementes, Gaps 2+3 resolus le 12 fev 2026, Gap 4 resolu le 13 fev 2026). **1 seul gap reste ouvert** (DashboardHR).
 
 ---
 
@@ -97,7 +97,7 @@ supabase/
 ### Optimisation performance
 
 - **Code splitting** : 50+ pages lazy-loaded via React.lazy()
-- **Vendor chunks** : 10 chunks manuels (react, radix, recharts, jspdf, xlsx, supabase, date-fns, lucide)
+- **Vendor chunks** : 11 chunks manuels (react, radix, recharts, jspdf, xlsx, supabase, date-fns, lucide, qrcode)
 - **Limite chunk** : 500 Ko
 - **Memoisation** : 569 instances useMemo/useCallback/React.memo
 - **Cache** : React Query avec staleTime configurable par hook
@@ -131,17 +131,17 @@ supabase/
 
 #### Etape 1 : Note SEF
 
-| Aspect      | Detail                                                                      |
-| ----------- | --------------------------------------------------------------------------- |
-| Table       | `notes_sef` (~25 colonnes)                                                  |
-| Reference   | ARTI + ETAPE(0) + MM + YY + NNNN (ex: ARTI0012600001)                       |
-| Champs cles | objet, expose, avis, recommandations, urgence (basse/normale/haute/urgente) |
-| Workflow    | brouillon → soumis → a_valider_dg → valide/rejete/differe                   |
-| Roles       | Agent cree, DAAF transmet, DG valide                                        |
-| Page        | NotesSEF.tsx, ValidationNotesSEF.tsx                                        |
-| Hooks       | useNotesSEF, useNotesSEFList, useNoteSEFAutosave                            |
-| PDF         | noteSEFPdfService.ts (696 lignes, QR code, logo ARTI)                       |
-| Trigger     | Auto-generation dossier_ref sur INSERT                                      |
+| Aspect      | Detail                                                                              |
+| ----------- | ----------------------------------------------------------------------------------- |
+| Table       | `notes_sef` (~25 colonnes)                                                          |
+| Reference   | ARTI + ETAPE(0) + MM + YY + NNNN (ex: ARTI0012600001)                               |
+| Champs cles | objet, expose, avis, recommandations, urgence (basse/normale/haute/urgente)         |
+| Workflow    | brouillon → soumis → a_valider_dg → valide/rejete/differe                           |
+| Roles       | Agent cree, DAAF transmet, DG valide                                                |
+| Page        | NotesSEF.tsx, ValidationNotesSEF.tsx                                                |
+| Hooks       | useNotesSEF, useNotesSEFList, useNoteSEFDetail, useNotesSEFExport, useNotesSEFAudit |
+| PDF         | noteSEFPdfService.ts (696 lignes, QR code, logo ARTI)                               |
+| Trigger     | Auto-generation dossier_ref sur INSERT                                              |
 
 #### Etape 2 : Note AEF (Notes DG)
 
@@ -705,27 +705,34 @@ DossierSearchDialog avec filtres (direction, statut, etape, type, dates, montant
 
 **Correction appliquee** : La migration 20260207130000 a ajoute un appel a `check_data_permission()` dans `advance_workflow()` (ligne 136). Le filtrage par direction est maintenant effectif cote backend.
 
-### Gap 2 : Delegations partiellement absentes du workflow (HAUTE) — OUVERT
+### Gap 2 : Delegations partiellement absentes du workflow ~~(HAUTE)~~ → CORRIGE
 
-**Probleme** : Les pages Engagements.tsx, Liquidations.tsx, Ordonnancements.tsx **importent bien** les hooks de delegation (useCanValidateEngagement, useCanValidateLiquidation, useCanValidateOrdonnancement) cote frontend. **Cependant**, le backend workflow engine (`advance_workflow()`) ne verifie PAS les delegations actives avant d'autoriser une transition.
+**Statut** : ✅ CORRIGE (migration 20260212_unified_validation_permission.sql + commit 29760c8)
 
-**Impact** : La verification des delegations est frontend-only, contournable par appel direct a l'API.
+**Probleme initial** : Le backend workflow engine ne verifiait pas les delegations actives.
 
-**Effort estime** : 3-4h
+**Correction appliquee** : `check_validation_permission()` verifie role direct + delegation active + interim actif. Colonnes `validation_mode` et `validated_on_behalf_of` ajoutees sur `notes_sef` pour tracer le mode de validation.
 
-### Gap 3 : Interims deconnectes du RBAC (HAUTE) — OUVERT
+### Gap 3 : Interims deconnectes du RBAC ~~(HAUTE)~~ → CORRIGE
 
-**Probleme** : La fonction `can_validate_as_interim()` existe en DB mais n'est JAMAIS appelee dans le code frontend ou le workflow engine. Le module Interims (497 lignes) a un CRUD complet mais ne modifie pas les permissions effectives.
+**Statut** : ✅ CORRIGE (migration 20260212_unified_validation_permission.sql + commit 29760c8)
 
-**Impact** : Les interimaires ne peuvent pas exercer les pouvoirs du titulaire.
+**Probleme initial** : `can_validate_as_interim()` existait mais n'etait jamais appelee.
 
-**Effort estime** : 3-4h
+**Correction appliquee** : Integre dans `check_validation_permission()` qui verifie role direct + delegation + interim. Le module Interims est maintenant connecte au RBAC effectif.
 
-### Gap 4 : Notifications ignorent delegations/interims (MOYENNE) — OUVERT
+### Gap 4 : Notifications ignorent delegations/interims ~~(MOYENNE)~~ → CORRIGE
 
-**Probleme** : Les triggers de notification envoient aux utilisateurs par role (ex: tous les DG) sans considerer les delegations/interims actifs. Un delegataire ne recoit pas les notifications de validation.
+**Statut** : ✅ CORRIGE (migration 20260213_fix_notifications_delegations.sql)
 
-**Effort estime** : 2-3h
+**Probleme initial** : Les triggers de notification envoyaient aux utilisateurs par role sans considerer les delegations/interims actifs.
+
+**Correction appliquee** :
+
+- Cree `get_users_who_can_act_as_role(role, scope)` → retourne user_ids via UNION (direct + delegation + interim)
+- Mis a jour `notify_role()` pour utiliser cette fonction (corrige TOUS les modules)
+- Mis a jour `notify_on_notes_sef_status_change()` avec nom du validateur et mode
+- Frontend `useNotesSEFAudit.ts` converti en no-ops (les triggers DB gerent tout)
 
 ### Gap 5 : "P.I." absent des PDFs ~~(MOYENNE)~~ → RESOLU
 
@@ -760,46 +767,37 @@ DossierSearchDialog avec filtres (direction, statut, etape, type, dates, montant
 
 ## 15. RECOMMANDATIONS
 
-### Ordre de correction recommande (4 gaps restants)
+### Ordre de correction recommande (1 gap restant)
 
 ```
-Phase 1 (Haute) :
-  Gap 2 + Gap 3 → Delegations + Interims dans workflow backend (6-8h)
-    Approche : Ajouter verification delegations/interims dans advance_workflow()
-              cote backend (la verification frontend existe deja)
-              Appeler can_validate_as_interim() dans le workflow engine
-
-Phase 2 (Moyenne) :
-  Gap 4 → Notifications delegataires/interimaires (2-3h)
-    Approche : Modifier triggers notification pour inclure delegataires/interimaires actifs
-
-Phase 3 (Basse) :
+Phase 1 (Basse) :
   Gap 6 → DashboardHR donnees reelles (4-6h)
     Approche : Connecter les 5 metriques desactivees a des vraies sources SIRH
               ou creer des tables RH temporaires
   TypeScript types sync (1-2h)
 ```
 
-### Effort total estime : 13-19h (reduit de 24-35h grace aux 3 gaps deja corriges)
+### Effort total estime : 5-8h (reduit de 24-35h grace aux 6 gaps corriges)
 
-### Gaps deja corriges (aucune action requise)
+### Gaps corriges (aucune action requise)
 
 | Gap                         | Correction                                                                 | Date          |
 | --------------------------- | -------------------------------------------------------------------------- | ------------- |
 | Gap 1 (Direction filtering) | Migration 20260207130000 - check_data_permission() dans advance_workflow() | 7 fev 2026    |
+| Gap 2 (Delegations backend) | Migration 20260212 - check_validation_permission() verifie delegations     | 12 fev 2026   |
+| Gap 3 (Interims RBAC)       | Migration 20260212 - check_validation_permission() verifie interims        | 12 fev 2026   |
+| Gap 4 (Notifications)       | Migration 20260213 - get_users_who_can_act_as_role() + notify_role()       | 13 fev 2026   |
 | Gap 5 (P.I. dans PDFs)      | SignataireInterimInfo dans noteSEFPdfService.ts                            | Deja en place |
 | Gap 7 (DossierDetails)      | DossierDetails.tsx avec timeline 9 etapes                                  | Deja en place |
 
 ### Metriques de validation
 
-Apres corrections des 4 gaps restants :
-
 - [x] ~~Tout DIRECTEUR ne peut valider QUE les documents de sa direction~~ (FAIT - Gap 1 corrige)
-- [ ] Un delegataire DG peut valider engagements/liquidations/ordonnancements **cote backend**
-- [ ] Un interimaire exerce les pouvoirs du titulaire
-- [ ] Les delegataires/interimaires recoivent les notifications
+- [x] ~~Un delegataire DG peut valider engagements/liquidations/ordonnancements cote backend~~ (FAIT - Gap 2 corrige)
+- [x] ~~Un interimaire exerce les pouvoirs du titulaire~~ (FAIT - Gap 3 corrige)
+- [x] ~~Les delegataires/interimaires recoivent les notifications~~ (FAIT - Gap 4 corrige)
 - [x] ~~Les PDFs mentionnent "P.I." ou "Par delegation" si applicable~~ (FAIT - Gap 5 resolu)
-- [ ] DashboardHR affiche des donnees reelles
+- [ ] DashboardHR affiche des donnees reelles (Gap 6 - BASSE)
 - [x] ~~Une page DossierDetails montre les 9 etapes~~ (FAIT - Gap 7 resolu)
 
 ---
@@ -841,3 +839,4 @@ v_activite_recente, v_alertes_direction, v_alertes_dmg, v_budget_disponibilite, 
 
 _Rapport genere le 7 fevrier 2026 par Claude Code apres 14 series d'analyse technique approfondie._
 _Verifie et corrige le 10 fevrier 2026 par 6 agents de verification independants (metriques, chaine de depense, RBAC, budget, modules metier, gaps)._
+_Mis a jour le 13 fevrier 2026 : Gaps 2, 3, 4 resolus — 6 gaps sur 7 corriges, 1 restant (DashboardHR)._

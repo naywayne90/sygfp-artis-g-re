@@ -25,6 +25,7 @@
 4. **Créer** la note
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note créée avec succès"
 - [ ] Référence pivot générée (format `ARTI/2026/XXX/0001`)
 - [ ] Note visible dans onglet "Toutes"
@@ -35,6 +36,7 @@
 6. **Ajouter** une pièce jointe (PDF ou image)
 
 ✅ **Vérifications** :
+
 - [ ] Upload réussi
 - [ ] PJ visible dans la liste
 - [ ] Téléchargement fonctionne (signed URL)
@@ -51,6 +53,7 @@
 4. **Sauvegarder**
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note mise à jour"
 - [ ] Urgence = "Urgent" visible
 - [ ] Timeline montre "Modifié"
@@ -65,6 +68,7 @@
 2. **Cliquer** "Soumettre pour validation"
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note soumise pour validation"
 - [ ] Statut = "Soumis"
 - [ ] Note visible dans onglet "À valider"
@@ -83,6 +87,7 @@
 3. **Ouvrir** la note soumise
 
 ✅ **Vérifications** :
+
 - [ ] Pas de boutons "Valider", "Rejeter", "Différer"
 - [ ] Lecture seule uniquement
 
@@ -100,6 +105,7 @@
 6. **Confirmer** la validation
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note validée"
 - [ ] Statut = "Validé"
 - [ ] Note disparaît de "À valider"
@@ -123,6 +129,7 @@
 4. **Confirmer**
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note rejetée"
 - [ ] Statut = "Rejeté"
 - [ ] Note dans onglet "Rejetées"
@@ -146,6 +153,7 @@
 4. **Confirmer**
 
 ✅ **Vérifications** :
+
 - [ ] Toast "Note différée"
 - [ ] Statut = "Différé"
 - [ ] Note dans onglet "Différées"
@@ -162,6 +170,7 @@
 4. **Vérifier** que les notes correspondantes apparaissent
 
 ✅ **Vérifications** :
+
 - [ ] Recherche par référence fonctionne
 - [ ] Recherche par objet fonctionne
 - [ ] Résultats filtrés en temps réel
@@ -175,6 +184,7 @@
 3. **Ouvrir** le fichier téléchargé
 
 ✅ **Vérifications** :
+
 - [ ] Fichier Excel généré
 - [ ] Nom contient "validees"
 - [ ] Colonnes présentes : Référence, Statut, Objet, Direction, etc.
@@ -196,6 +206,7 @@
 2. **Chercher** la note de Direction A
 
 ✅ **Vérifications** :
+
 - [ ] Notes brouillon de Direction A non visibles
 - [ ] Notes validées de Direction A visibles (si même exercice)
 - [ ] Impossible de modifier notes d'autres directions
@@ -204,34 +215,118 @@
 
 ## Résumé des vérifications
 
-| Test | Statut |
-|------|--------|
-| Création brouillon | ⬜ |
-| Ajout PJ | ⬜ |
-| Modification brouillon | ⬜ |
-| Soumission | ⬜ |
-| Restriction non-DG | ⬜ |
-| Validation DG | ⬜ |
-| Création dossier auto | ⬜ |
-| Rejet avec motif | ⬜ |
-| Différé avec motif | ⬜ |
-| Recherche référence | ⬜ |
-| Recherche objet | ⬜ |
-| Export Excel | ⬜ |
-| Isolation direction | ⬜ |
+| Test                   | Statut |
+| ---------------------- | ------ |
+| Création brouillon     | ⬜     |
+| Ajout PJ               | ⬜     |
+| Modification brouillon | ⬜     |
+| Soumission             | ⬜     |
+| Restriction non-DG     | ⬜     |
+| Validation DG          | ⬜     |
+| Création dossier auto  | ⬜     |
+| Rejet avec motif       | ⬜     |
+| Différé avec motif     | ⬜     |
+| Recherche référence    | ⬜     |
+| Recherche objet        | ⬜     |
+| Export Excel           | ⬜     |
+| Isolation direction    | ⬜     |
+
+---
+
+## Scénario 11 : Sheet détail (1 min)
+
+### En tant qu'Agent
+
+1. **Naviguer** vers `/notes-sef`
+2. **Cliquer** sur une ligne de note (pas le menu)
+3. **Vérifier** que le Sheet latéral s'ouvre
+
+✅ **Vérifications** :
+
+- [ ] Sheet ouvert avec 4 onglets
+- [ ] Tab "Informations" : référence, statut, direction, demandeur
+- [ ] Tab "Contenu" : exposé, avis, recommandations (si remplis)
+- [ ] Tab "Pièces jointes" : compteur X/3, bouton téléchargement
+- [ ] Tab "Historique" : timeline, chaîne de dépense
+- [ ] Cliquer note validée → QR code visible dans Tab 1
+- [ ] Menu dropdown "Ouvrir la page" → navigue vers page détail
+
+---
+
+## Scénario 12 : Limite pièces jointes (1 min)
+
+### En tant qu'Agent
+
+1. **Créer** une note brouillon
+2. **Ajouter** 3 pièces jointes
+3. **Essayer** d'ajouter une 4ème
+
+✅ **Vérifications** :
+
+- [ ] Compteur affiche "(3/3)"
+- [ ] Bouton upload désactivé à 3/3
+- [ ] Message d'erreur si tentative au-delà
+
+---
+
+## Scénario 13 : Export Excel avec Montant estimé (0.5 min)
+
+1. **Exporter** les notes en Excel
+2. **Ouvrir** le fichier
+
+✅ **Vérifications** :
+
+- [ ] Colonne "Montant estimé" présente
+- [ ] Format FR avec séparateur de milliers
+
+---
+
+## Scénario 14 : Badge Migré (0.5 min)
+
+1. **Naviguer** vers `/notes-sef`
+2. **Chercher** une note avec référence `MIG-*`
+
+✅ **Vérifications** :
+
+- [ ] Badge "Migré" visible dans la liste
+- [ ] Notes avec anciennes références marquées
+
+---
+
+## Résumé des vérifications (mis à jour)
+
+| Test                   | Statut |
+| ---------------------- | ------ |
+| Création brouillon     | ⬜     |
+| Ajout PJ               | ⬜     |
+| Modification brouillon | ⬜     |
+| Soumission             | ⬜     |
+| Restriction non-DG     | ⬜     |
+| Validation DG          | ⬜     |
+| Création dossier auto  | ⬜     |
+| Rejet avec motif       | ⬜     |
+| Différé avec motif     | ⬜     |
+| Recherche référence    | ⬜     |
+| Recherche objet        | ⬜     |
+| Export Excel           | ⬜     |
+| Isolation direction    | ⬜     |
+| Sheet détail 4 onglets | ⬜     |
+| Limite 3 PJ            | ⬜     |
+| Export Montant estimé  | ⬜     |
+| Badge Migré            | ⬜     |
 
 ---
 
 ## Problèmes courants
 
-| Symptôme | Cause probable | Solution |
-|----------|---------------|----------|
-| "Note non trouvée" | Exercice différent | Vérifier exercice sélectionné |
-| Boutons validation absents | Rôle incorrect | Vérifier rôle DG/ADMIN |
-| Export vide | Pas de données | Créer des notes dans l'onglet sélectionné |
-| PJ refusée | Taille > 5MB | Réduire taille fichier |
-| Erreur RLS | Permissions | Vérifier direction + rôle utilisateur |
+| Symptôme                   | Cause probable     | Solution                                  |
+| -------------------------- | ------------------ | ----------------------------------------- |
+| "Note non trouvée"         | Exercice différent | Vérifier exercice sélectionné             |
+| Boutons validation absents | Rôle incorrect     | Vérifier rôle DG/ADMIN                    |
+| Export vide                | Pas de données     | Créer des notes dans l'onglet sélectionné |
+| PJ refusée                 | Taille > 5MB       | Réduire taille fichier                    |
+| Erreur RLS                 | Permissions        | Vérifier direction + rôle utilisateur     |
 
 ---
 
-*Guide créé le 2026-01-15*
+_Guide créé le 2026-01-15, mis à jour le 2026-02-13_

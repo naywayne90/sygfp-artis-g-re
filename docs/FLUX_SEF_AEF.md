@@ -76,16 +76,19 @@ CREATE TRIGGER trg_create_dossier_on_sef_validation
 ## Parcours utilisateur
 
 ### 1. Agent/Gestionnaire
+
 - Crée une Note SEF (brouillon)
 - Remplit les informations
 - Soumet pour validation DG
 
 ### 2. Direction Générale (DG)
+
 - Visualise les notes à valider
 - **Valide** la note → dossier créé automatiquement
 - Ou **Rejette** / **Diffère** selon le cas
 
 ### 3. Agent/Gestionnaire (après validation)
+
 - Voit le message "Note validée - Dossier créé"
 - Clique sur "Créer Note AEF"
 - Le formulaire s'ouvre pré-rempli
@@ -93,20 +96,22 @@ CREATE TRIGGER trg_create_dossier_on_sef_validation
 
 ## Routes concernées
 
-| Route | Description |
-|-------|-------------|
-| `/notes-sef` | Liste des Notes SEF |
-| `/notes-sef/:id` | Détail d'une Note SEF |
-| `/notes-aef` | Liste des Notes AEF |
+| Route                     | Description              |
+| ------------------------- | ------------------------ |
+| `/notes-sef`              | Liste des Notes SEF      |
+| `/notes-sef/:id`          | Détail d'une Note SEF    |
+| `/notes-aef`              | Liste des Notes AEF      |
 | `/notes-aef?prefill=<id>` | Création AEF pré-remplie |
-| `/recherche?dossier=<id>` | Vue dossier complet |
+| `/recherche?dossier=<id>` | Vue dossier complet      |
 
 ## Sécurité
 
 - La création de dossier est automatique (trigger SECURITY DEFINER)
-- Seul le DG peut valider une note SEF
+- Le DG, ADMIN, DAAF, ou un délégué/intérimaire peut valider une note SEF
+- La validation via délégation/intérim est tracée (colonnes `validation_mode`, `validated_on_behalf_of`)
 - Les étapes de dossier respectent les RLS définies
 - L'audit log trace chaque action
+- CSP headers protègent contre XSS et injection
 
 ## Évolutions futures
 

@@ -1,3 +1,58 @@
+# Release Notes SYGFP v4.1 - 13/02/2026
+
+## Vue d'ensemble v4.1
+
+Version de consolidation securite et qualite. Resolution de 3 gaps critiques (delegations, interims, notifications), ajout du panneau de detail Notes SEF, optimisations exports et performance, renforcement securite CSP et RLS.
+
+### Nouvelles fonctionnalites (v4.1)
+
+| Fonctionnalite           | Description                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **NoteSEFDetailSheet**   | Sheet lateral 4 onglets (Infos/Contenu/PJ/Historique) avec QR code et lien AEF   |
+| **Export Excel enrichi** | Colonne "Montant estime" ajoutee (22 colonnes) avec formatage FR                 |
+| **CSP Headers**          | Content-Security-Policy meta tag (frame-src/object-src none)                     |
+| **RLS DAAF**             | DAAF peut modifier notes soumises/a_valider (policy notes_sef_update_authorized) |
+| **Limite 3 PJ**          | Trigger DB + frontend pour max 3 pieces jointes par note                         |
+| **Badge Migre**          | Detection notes importees (MIG-_, NNNN-YYYY-_) avec badge visuel                 |
+| **Compteur total**       | Affichage "190 note(s) trouvee(s) - Page 1/10"                                   |
+| **Flag is_migrated**     | Colonne et mise a jour automatique pour notes migrees                            |
+| **Vendor chunk QR**      | Code splitting isole pour qrcode.react                                           |
+
+### Gaps resolus (v4.1)
+
+| Gap       | Description                             | Migration                                    |
+| --------- | --------------------------------------- | -------------------------------------------- |
+| **Gap 2** | Delegations dans le workflow backend    | `20260212_unified_validation_permission.sql` |
+| **Gap 3** | Interims connectes au RBAC              | `20260212_unified_validation_permission.sql` |
+| **Gap 4** | Notifications avec delegations/interims | `20260213_fix_notifications_delegations.sql` |
+
+### Migrations ajoutees (v4.1)
+
+| Migration                                    | Description                               |
+| -------------------------------------------- | ----------------------------------------- |
+| `20260211_fix_reference_generator.sql`       | Format reference ARTI00MMYYNNNN           |
+| `20260211_budget_perf_indexes.sql`           | Index performance budget                  |
+| `20260211_notes_sef_missing_indexes.sql`     | Index manquants notes SEF                 |
+| `20260211_elop_auto_step*.sql`               | Triggers ELOP automatiques (4 migrations) |
+| `20260212_unified_validation_permission.sql` | Delegations + interims workflow           |
+| `20260213_fix_notifications_delegations.sql` | Notifications delegations                 |
+| `20260213_pj_limit_and_migrated_flag.sql`    | Limite 3 PJ + flag migrated               |
+| `20260213_rls_daaf_update_soumis.sql`        | RLS DAAF update soumis                    |
+
+### Etat des gaps
+
+| Gap                         | Statut            |
+| --------------------------- | ----------------- |
+| Gap 1 (Direction filtering) | ✅ Corrige (v4.0) |
+| Gap 2 (Delegations backend) | ✅ Corrige (v4.1) |
+| Gap 3 (Interims RBAC)       | ✅ Corrige (v4.1) |
+| Gap 4 (Notifications)       | ✅ Corrige (v4.1) |
+| Gap 5 (P.I. dans PDFs)      | ✅ Deja en place  |
+| Gap 6 (DashboardHR mocke)   | ⬜ Ouvert (BASSE) |
+| Gap 7 (DossierDetails)      | ✅ Deja en place  |
+
+---
+
 # Release Notes SYGFP v4.0 - 06/02/2026
 
 ## Vue d'ensemble

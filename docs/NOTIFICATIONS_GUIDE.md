@@ -46,6 +46,7 @@ Le système de notifications SYGFP permet d'alerter les utilisateurs en temps r�
 ## Tables de Base de Données
 
 ### 1. notifications
+
 Table principale des notifications utilisateurs.
 
 ```sql
@@ -64,6 +65,7 @@ CREATE TABLE notifications (
 ```
 
 ### 2. notification_templates
+
 Templates de messages par type d'événement.
 
 ```sql
@@ -80,6 +82,7 @@ CREATE TABLE notification_templates (
 ```
 
 **Variables disponibles dans les templates:**
+
 - `{{entity_numero}}` - Numéro du document
 - `{{entity_type}}` - Type de document
 - `{{user_name}}` - Nom de l'utilisateur
@@ -88,6 +91,7 @@ CREATE TABLE notification_templates (
 - `{{date}}` - Date formatée
 
 ### 3. notification_recipients
+
 Configuration des destinataires par type d'événement.
 
 ```sql
@@ -102,6 +106,7 @@ CREATE TABLE notification_recipients (
 ```
 
 ### 4. notification_preferences
+
 Préférences utilisateur pour les notifications.
 
 ```sql
@@ -116,6 +121,7 @@ CREATE TABLE notification_preferences (
 ```
 
 ### 5. notification_logs
+
 Historique des envois pour audit.
 
 ```sql
@@ -135,41 +141,44 @@ CREATE TABLE notification_logs (
 
 ### Types supportés
 
-| Type | Label | Description |
-|------|-------|-------------|
-| `validation` | Demande de validation | Document en attente de validation |
-| `rejet` | Rejet | Document rejeté |
-| `differe` | Différé | Document mis en attente |
-| `piece_manquante` | Pièce manquante | Document incomplet |
-| `alerte` | Alerte | Alerte système |
-| `info` | Information | Information générale |
-| `echeance` | Échéance | Date limite proche |
-| `budget_insuffisant` | Budget insuffisant | Dépassement budget |
-| `assignation` | Assignation | Tâche assignée |
-| `dossier_a_valider` | Dossier à valider | Nouveau dossier |
-| `roadmap_soumission` | Feuille de route soumise | Soumission roadmap |
-| `roadmap_validation` | Feuille de route validée | Validation roadmap |
-| `roadmap_rejet` | Feuille de route rejetée | Rejet roadmap |
-| `tache_bloquee` | Tâche bloquée | Tâche en blocage |
-| `tache_retard` | Tâche en retard | Retard détecté |
+| Type                 | Label                    | Description                       |
+| -------------------- | ------------------------ | --------------------------------- |
+| `validation`         | Demande de validation    | Document en attente de validation |
+| `rejet`              | Rejet                    | Document rejeté                   |
+| `differe`            | Différé                  | Document mis en attente           |
+| `piece_manquante`    | Pièce manquante          | Document incomplet                |
+| `alerte`             | Alerte                   | Alerte système                    |
+| `info`               | Information              | Information générale              |
+| `echeance`           | Échéance                 | Date limite proche                |
+| `budget_insuffisant` | Budget insuffisant       | Dépassement budget                |
+| `assignation`        | Assignation              | Tâche assignée                    |
+| `dossier_a_valider`  | Dossier à valider        | Nouveau dossier                   |
+| `roadmap_soumission` | Feuille de route soumise | Soumission roadmap                |
+| `roadmap_validation` | Feuille de route validée | Validation roadmap                |
+| `roadmap_rejet`      | Feuille de route rejetée | Rejet roadmap                     |
+| `tache_bloquee`      | Tâche bloquée            | Tâche en blocage                  |
+| `tache_retard`       | Tâche en retard          | Retard détecté                    |
 
 ### Ajouter un nouveau type
 
 1. Ajouter dans `TYPES_NOTIFICATION` (src/hooks/useNotifications.ts):
+
 ```typescript
 export const TYPES_NOTIFICATION = [
   // ... types existants
-  { value: "nouveau_type", label: "Mon nouveau type" },
+  { value: 'nouveau_type', label: 'Mon nouveau type' },
 ];
 ```
 
 2. Créer un template dans la base:
+
 ```sql
 INSERT INTO notification_templates (type_evenement, titre_template, message_template)
 VALUES ('nouveau_type', 'Titre: {{entity_numero}}', 'Message détaillé...');
 ```
 
 3. Configurer les destinataires:
+
 ```sql
 INSERT INTO notification_recipients (type_evenement, role_destinataire)
 VALUES ('nouveau_type', 'DAAF');
@@ -232,7 +241,10 @@ function MyComponent() {
 Hook pour l'administration des paramètres de notifications.
 
 ```typescript
-import { useNotificationTemplates, useNotificationRecipients } from '@/hooks/useNotificationSettings';
+import {
+  useNotificationTemplates,
+  useNotificationRecipients,
+} from '@/hooks/useNotificationSettings';
 
 function AdminNotifications() {
   const { templates, updateTemplate } = useNotificationTemplates();
@@ -247,33 +259,36 @@ function AdminNotifications() {
 ## Composants UI
 
 ### NotificationBell
+
 Icône cloche avec badge dans la TopBar.
 
 ```tsx
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 // Affiche la cloche avec le nombre de non lues
-<NotificationBell />
+<NotificationBell />;
 ```
 
 ### NotificationCenter
+
 Centre complet des notifications (page /notifications).
 
 ```tsx
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 // Page complète avec filtres, historique, actions en masse
-<NotificationCenter />
+<NotificationCenter />;
 ```
 
 ### NotificationDropdown
+
 Menu déroulant avec les dernières notifications.
 
 ```tsx
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 // Menu rapide pour voir les dernières notifications
-<NotificationDropdown />
+<NotificationDropdown />;
 ```
 
 ---
@@ -281,6 +296,7 @@ import { NotificationDropdown } from '@/components/notifications/NotificationDro
 ## Fonctions RPC PostgreSQL
 
 ### create_notification
+
 Créer une notification manuellement.
 
 ```sql
@@ -295,6 +311,7 @@ SELECT create_notification(
 ```
 
 ### mark_notification_read
+
 Marquer une notification comme lue.
 
 ```sql
@@ -302,6 +319,7 @@ SELECT mark_notification_read('uuid-notification');
 ```
 
 ### mark_all_notifications_read
+
 Marquer toutes les notifications de l'utilisateur comme lues.
 
 ```sql
@@ -309,6 +327,7 @@ SELECT mark_all_notifications_read();
 ```
 
 ### get_unread_notifications_count
+
 Obtenir le nombre de notifications non lues.
 
 ```sql
@@ -316,6 +335,7 @@ SELECT get_unread_notifications_count();
 ```
 
 ### cleanup_old_notifications
+
 Nettoyer les anciennes notifications (à planifier en cron).
 
 ```sql
@@ -328,6 +348,7 @@ SELECT cleanup_old_notifications();
 ## Triggers Automatiques
 
 ### Sur changement de statut Notes SEF
+
 ```sql
 CREATE TRIGGER trigger_notes_sef_notification
 AFTER UPDATE OF statut ON notes_sef
@@ -336,6 +357,7 @@ EXECUTE FUNCTION notify_on_notes_sef_status_change();
 ```
 
 ### Sur changement de statut Notes AEF
+
 ```sql
 CREATE TRIGGER trigger_notes_aef_notification
 AFTER UPDATE OF statut ON notes_aef
@@ -344,6 +366,7 @@ EXECUTE FUNCTION notify_on_notes_aef_status_change();
 ```
 
 ### Sur signature ordonnancement
+
 ```sql
 CREATE TRIGGER trigger_ordonnancement_signe
 AFTER UPDATE ON ordonnancements
@@ -357,6 +380,7 @@ EXECUTE FUNCTION trigger_notify_ordonnancement_signe();
 ## Configuration Administration
 
 ### Accès
+
 Route: `/admin/notifications`
 
 ### Onglets disponibles
@@ -382,6 +406,7 @@ Route: `/admin/notifications`
 ## Bonnes Pratiques
 
 ### 1. Éviter le spam
+
 ```typescript
 // Regrouper les notifications similaires
 const DEBOUNCE_MS = 5000;
@@ -389,21 +414,24 @@ const DEBOUNCE_MS = 5000;
 ```
 
 ### 2. Prioriser les notifications urgentes
+
 ```typescript
 // Marquer comme urgent
 await supabase.from('notifications').insert({
   // ...
-  metadata: { urgence: 'haute' }
+  metadata: { urgence: 'haute' },
 });
 ```
 
 ### 3. Nettoyer régulièrement
+
 ```sql
 -- Cron job quotidien
 SELECT cleanup_old_notifications();
 ```
 
 ### 4. Utiliser les templates
+
 ```typescript
 // Préférer les templates aux messages hardcodés
 const template = await getTemplate('validation');
@@ -415,17 +443,20 @@ const message = renderTemplate(template, { entity_numero: 'SEF-2026-00123' });
 ## Dépannage
 
 ### Notifications non reçues
+
 1. Vérifier que l'utilisateur a des préférences activées
 2. Vérifier que le template existe et est actif
 3. Vérifier les logs dans `notification_logs`
 4. Vérifier la connexion Realtime dans DevTools
 
 ### Erreurs d'envoi email
+
 1. Vérifier la clé RESEND_API_KEY dans les Edge Functions
 2. Consulter les logs de la fonction `send-notification-email`
 3. Vérifier que l'email utilisateur est valide
 
 ### Performance
+
 1. Indexer les colonnes fréquemment filtrées
 2. Limiter le nombre de notifications affichées (pagination)
 3. Utiliser `EXPLAIN ANALYZE` pour optimiser les requêtes
@@ -446,11 +477,36 @@ const { data, error } = await supabase.functions.invoke('send-notification-email
     title: 'Titre',
     message: 'Message',
     entity_type: 'note_sef',
-    entity_id: 'uuid'
-  }
+    entity_id: 'uuid',
+  },
 });
 ```
 
 ---
 
-**Dernière mise à jour:** 04/02/2026
+## Delegations et Interims (2026-02-13)
+
+Les notifications tiennent desormais compte des delegations et interims actifs :
+
+### Fonction `get_users_who_can_act_as_role(role, scope)`
+
+Retourne tous les `user_id` capables d'agir pour un role donne via :
+
+- Role direct (table `user_roles`)
+- Delegation active (table `delegations` avec date_debut/date_fin)
+- Interim actif (table `interims` avec date_debut/date_fin)
+
+### Impact sur les triggers
+
+- `notify_role()` utilise `get_users_who_can_act_as_role()` au lieu de requeter `user_roles` directement
+- `notify_on_notes_sef_status_change()` inclut le nom du validateur et son mode (direct/delegation/interim)
+- Tous les modules sont corriges : Notes AEF, Engagements, Ordonnancements, Feuilles de route, Taches
+
+### Frontend
+
+- `useNotesSEFAudit.ts` : `getValidators()` et `sendNotifications()` convertis en no-ops
+- Les triggers DB gerent integralement les notifications, pas besoin de logique frontend
+
+---
+
+**Derniere mise a jour:** 13/02/2026
