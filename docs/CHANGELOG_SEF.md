@@ -1,5 +1,40 @@
 # CHANGELOG - Module Notes SEF
 
+## [2026-02-13] Optimisations exports, sécurité et performance
+
+### Panneau de détail NoteSEFDetailSheet (4 onglets)
+
+- **Nouveau composant** : `NoteSEFDetailSheet.tsx` — Sheet latéral avec 4 onglets
+  - **Infos** : QR code (notes validées), identification, acteurs, budget, détails
+  - **Contenu** : Exposé, avis, recommandations, commentaire
+  - **Pièces jointes** : Compteur X/3, téléchargement, aperçu images
+  - **Historique** : Timeline, chaîne de dépense, note AEF liée
+- **Nouveau hook** : `useNoteSEFDetail.ts` — 3 requêtes React Query (PJ, historique, AEF)
+- **NoteSEFList.tsx** : Clic sur ligne ouvre le Sheet au lieu de naviguer
+- **NotesSEF.tsx** : Intégration du Sheet, remplacement du PreviewDrawer
+
+### Export Excel : colonne Montant estimé ajoutée
+
+- **`useNotesSEFExport.ts`** : Ajout de la colonne "Montant estimé" (22e colonne)
+- Champ `montant_estime` ajouté à la requête SELECT d'export
+- Formatage FR avec séparateur de milliers
+
+### Performance : vendor chunk QR Code
+
+- **`vite.config.ts`** : Ajout `vendor-qrcode: ["qrcode.react"]` pour isolation du chunk
+
+### Sécurité : Content-Security-Policy
+
+- **`index.html`** : Ajout meta CSP (default-src 'self', connect-src Supabase, frame-src 'none', object-src 'none')
+
+### RLS : DAAF peut modifier les notes soumises
+
+- **Migration** : `20260213_rls_daaf_update_soumis.sql`
+- Policy `notes_sef_update` étendue : DAAF peut UPDATE les notes `soumis` et `a_valider`
+- Préserve : Admin/DG tout, créateur brouillon uniquement
+
+---
+
 ## [2026-02-13] Corrections multi-agents (Prompt 4)
 
 ### Gap 4 : Notifications délégations et intérims

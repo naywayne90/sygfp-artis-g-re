@@ -84,6 +84,7 @@ const EXPORT_COLUMNS = [
   { key: 'Demandeur', width: 25 },
   { key: 'Urgence', width: 12 },
   { key: 'Date souhaitée', width: 14 },
+  { key: 'Montant estimé', width: 18 },
   { key: 'Justification', width: 40 },
   { key: 'Description', width: 40 },
   { key: 'Commentaire', width: 30 },
@@ -164,6 +165,7 @@ export function useNotesSEFExport() {
           commentaire,
           urgence,
           date_souhaitee,
+          montant_estime,
           beneficiaire_id,
           beneficiaire_interne_id,
           rejection_reason,
@@ -316,6 +318,9 @@ export function useNotesSEFExport() {
           Urgence: URGENCE_LABELS[note.urgence] || note.urgence || '',
           'Date souhaitée': note.date_souhaitee
             ? format(new Date(note.date_souhaitee), 'dd/MM/yyyy')
+            : '',
+          'Montant estimé': note.montant_estime
+            ? new Intl.NumberFormat('fr-FR', { style: 'decimal' }).format(note.montant_estime)
             : '',
           Justification: note.justification || '',
           Description: note.description || '',
