@@ -1,8 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { checkValidationPermission } from '@/hooks/useCheckValidationPermission';
 
 export interface Engagement {
   id: string;
@@ -76,10 +77,10 @@ export interface BudgetAvailability {
 }
 
 export const VALIDATION_STEPS = [
-  { order: 1, role: "SAF", label: "Service Administratif et Financier" },
-  { order: 2, role: "CB", label: "Contrôleur Budgétaire" },
-  { order: 3, role: "DAF", label: "Directeur Administratif et Financier" },
-  { order: 4, role: "DG", label: "Directeur Général" },
+  { order: 1, role: 'SAF', label: 'Service Administratif et Financier' },
+  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire' },
+  { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier' },
+  { order: 4, role: 'DG', label: 'Directeur Général' },
 ];
 
 export function useEngagements() {
@@ -88,12 +89,17 @@ export function useEngagements() {
   const { logAction } = useAuditLog();
 
   // Fetch all engagements
-  const { data: engagements = [], isLoading, error } = useQuery({
-    queryKey: ["engagements", exercice],
+  const {
+    data: engagements = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['engagements', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("budget_engagements")
-        .select(`
+        .from('budget_engagements')
+        .select(
+          `
           *,
           budget_line:budget_lines(
             id, code, label, dotation_initiale,
@@ -117,9 +123,10 @@ export function useEngagements() {
             prestataire:prestataires(id, raison_sociale)
           ),
           creator:profiles!budget_engagements_created_by_fkey(id, full_name)
-        `)
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as unknown as Engagement[];
@@ -129,30 +136,32 @@ export function useEngagements() {
 
   // Fetch validated passations de marché for creating engagements
   const { data: passationsValidees = [] } = useQuery({
-    queryKey: ["passations-validees-pour-engagement", exercice],
+    queryKey: ['passations-validees-pour-engagement', exercice],
     queryFn: async () => {
       const { data: pms, error } = await supabase
-        .from("passation_marche")
-        .select(`
+        .from('passation_marche')
+        .select(
+          `
           id, reference, mode_passation, montant_retenu, prestataire_retenu_id, dossier_id,
           expression_besoin:expressions_besoin(
             id, numero, objet, montant_estime, direction_id,
             direction:directions(id, label, sigle)
           ),
           prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(id, raison_sociale, adresse)
-        `)
-        .eq("statut", "valide")
-        .eq("exercice", exercice)
-        .order("validated_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'valide')
+        .eq('exercice', exercice)
+        .order('validated_at', { ascending: false });
 
       if (error) throw error;
 
       // Exclure celles déjà utilisées
       const { data: usedPMs } = await supabase
-        .from("budget_engagements")
-        .select("passation_marche_id")
-        .not("passation_marche_id", "is", null)
-        .eq("exercice", exercice);
+        .from('budget_engagements')
+        .select('passation_marche_id')
+        .not('passation_marche_id', 'is', null)
+        .eq('exercice', exercice);
 
       const usedIds = new Set(usedPMs?.map((e) => e.passation_marche_id) || []);
       return pms?.filter((pm) => !usedIds.has(pm.id)) || [];
@@ -162,21 +171,23 @@ export function useEngagements() {
 
   // Fetch validated expressions de besoin for creating engagements (legacy)
   const { data: expressionsValidees = [] } = useQuery({
-    queryKey: ["expressions-validees-pour-engagement", exercice],
+    queryKey: ['expressions-validees-pour-engagement', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expressions_besoin")
-        .select(`
+        .from('expressions_besoin')
+        .select(
+          `
           id, numero, objet, montant_estime, direction_id, dossier_id,
           direction:directions(id, label),
           marche:marches(
             id, numero, objet, montant, mode_passation,
             prestataire:prestataires(id, raison_sociale, adresse)
           )
-        `)
-        .eq("statut", "validé")
-        .eq("exercice", exercice)
-        .order("validated_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'validé')
+        .eq('exercice', exercice)
+        .order('validated_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -193,9 +204,9 @@ export function useEngagements() {
   ): Promise<BudgetAvailability> => {
     // Get budget line dotation
     const { data: line, error: lineError } = await supabase
-      .from("budget_lines")
-      .select("dotation_initiale")
-      .eq("id", budgetLineId)
+      .from('budget_lines')
+      .select('dotation_initiale')
+      .eq('id', budgetLineId)
       .single();
 
     if (lineError) throw lineError;
@@ -229,21 +240,22 @@ export function useEngagements() {
 
     // Get previous engagements (exclude annule AND rejete from cumul)
     let query = supabase
-      .from("budget_engagements")
-      .select("id, montant")
-      .eq("budget_line_id", budgetLineId)
-      .eq("exercice", exercice || new Date().getFullYear())
-      .neq("statut", "annule")
-      .neq("statut", "rejete");
+      .from('budget_engagements')
+      .select('id, montant')
+      .eq('budget_line_id', budgetLineId)
+      .eq('exercice', exercice || new Date().getFullYear())
+      .neq('statut', 'annule')
+      .neq('statut', 'rejete');
 
     if (excludeEngagementId) {
-      query = query.neq("id", excludeEngagementId);
+      query = query.neq('id', excludeEngagementId);
     }
 
     const { data: prevEngagements, error: engError } = await query;
     if (engError) throw engError;
 
-    const engagements_anterieurs = prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+    const engagements_anterieurs =
+      prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
     const cumul = engagements_anterieurs + currentAmount;
     const disponible = dotation_actuelle - cumul;
 
@@ -263,16 +275,16 @@ export function useEngagements() {
   // Generate engagement number using atomic sequence
   const generateNumero = async (): Promise<string> => {
     const year = exercice || new Date().getFullYear();
-    
-    const { data, error } = await supabase.rpc("get_next_sequence", {
-      p_doc_type: "ENG",
+
+    const { data, error } = await supabase.rpc('get_next_sequence', {
+      p_doc_type: 'ENG',
       p_exercice: year,
       p_direction_code: null,
-      p_scope: "global",
+      p_scope: 'global',
     });
 
     if (error) throw error;
-    if (!data || data.length === 0) throw new Error("Échec génération numéro");
+    if (!data || data.length === 0) throw new Error('Échec génération numéro');
 
     return data[0].full_code;
   };
@@ -290,14 +302,16 @@ export function useEngagements() {
       marche_id?: string;
       dossier_id?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier la disponibilité budgétaire avant création
       const availability = await calculateAvailability(data.budget_line_id, data.montant);
       if (!availability.is_sufficient) {
         throw new Error(
-          `Disponible insuffisant : ${new Intl.NumberFormat("fr-FR").format(availability.disponible)} FCFA disponibles, ${new Intl.NumberFormat("fr-FR").format(data.montant)} FCFA demandés`
+          `Disponible insuffisant : ${new Intl.NumberFormat('fr-FR').format(availability.disponible)} FCFA disponibles, ${new Intl.NumberFormat('fr-FR').format(data.montant)} FCFA demandés`
         );
       }
 
@@ -307,15 +321,15 @@ export function useEngagements() {
       let dossierId = data.dossier_id;
       if (!dossierId && data.expression_besoin_id) {
         const { data: expr } = await supabase
-          .from("expressions_besoin")
-          .select("dossier_id")
-          .eq("id", data.expression_besoin_id)
+          .from('expressions_besoin')
+          .select('dossier_id')
+          .eq('id', data.expression_besoin_id)
           .single();
         dossierId = expr?.dossier_id;
       }
 
       const { data: engagement, error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .insert({
           numero,
           objet: data.objet,
@@ -323,14 +337,14 @@ export function useEngagements() {
           montant_ht: data.montant_ht || null,
           tva: data.tva || null,
           fournisseur: data.fournisseur,
-          date_engagement: new Date().toISOString().split("T")[0],
+          date_engagement: new Date().toISOString().split('T')[0],
           budget_line_id: data.budget_line_id,
           expression_besoin_id: data.expression_besoin_id,
           marche_id: data.marche_id || null,
           dossier_id: dossierId || null,
           exercice,
-          statut: "brouillon",
-          workflow_status: "en_attente",
+          statut: 'brouillon',
+          workflow_status: 'en_attente',
           current_step: 0,
           created_by: user.id,
         })
@@ -341,32 +355,32 @@ export function useEngagements() {
 
       // Create initial validation steps
       for (const step of VALIDATION_STEPS) {
-        await supabase.from("engagement_validations").insert({
+        await supabase.from('engagement_validations').insert({
           engagement_id: engagement.id,
           step_order: step.order,
           role: step.role,
-          status: "en_attente",
+          status: 'en_attente',
         });
       }
 
       // Si lié à un dossier, créer une entrée dans dossier_etapes
       if (dossierId) {
-        await supabase.from("dossier_etapes").insert({
+        await supabase.from('dossier_etapes').insert({
           dossier_id: dossierId,
-          type_etape: "engagement",
+          type_etape: 'engagement',
           ref_id: engagement.id,
           montant: data.montant,
-          statut: "en_cours",
-        } as any);
+          statut: 'en_cours',
+        } as Record<string, unknown>);
 
         // Mettre à jour l'étape courante du dossier et le montant engagé
         await supabase
-          .from("dossiers")
-          .update({ 
-            etape_courante: "engagement",
+          .from('dossiers')
+          .update({
+            etape_courante: 'engagement',
             montant_engage: data.montant,
           })
-          .eq("id", dossierId);
+          .eq('id', dossierId);
       }
 
       // NOTE: total_engage is NOT updated here at creation (brouillon).
@@ -374,21 +388,21 @@ export function useEngagements() {
       // only when the engagement reaches statut='valide' after workflow validation.
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: engagement.id,
-        action: "create",
+        action: 'create',
         newValues: { numero, objet: data.objet, montant: data.montant },
       });
 
       return engagement;
     },
     onSuccess: (engagement) => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      queryClient.invalidateQueries({ queryKey: ["expressions-validees-pour-engagement"] });
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      queryClient.invalidateQueries({ queryKey: ['expressions-validees-pour-engagement'] });
       toast.success(`Engagement ${engagement.numero} créé`);
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -396,42 +410,44 @@ export function useEngagements() {
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
+          statut: 'soumis',
+          workflow_status: 'en_validation',
           current_step: 1,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "submit",
+        action: 'submit',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement soumis pour validation");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement soumis pour validation');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Validate engagement step
   const validateMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Get current engagement
       const { data: engagement, error: fetchError } = await supabase
-        .from("budget_engagements")
-        .select("current_step")
-        .eq("id", id)
+        .from('budget_engagements')
+        .select('current_step')
+        .eq('id', id)
         .single();
 
       if (fetchError) throw fetchError;
@@ -439,96 +455,122 @@ export function useEngagements() {
       const currentStep = engagement?.current_step || 1;
       const isLastStep = currentStep >= VALIDATION_STEPS.length;
 
-      // Update validation record
+      // Vérifier la permission via RPC unifiée pour le rôle de l'étape courante
+      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
+      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
+
+      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
+      if (!permCheck.isAllowed) {
+        throw new Error(
+          `Permission insuffisante pour l'étape ${requiredRole}. Vous devez avoir le rôle ${requiredRole}, une délégation active ou un intérim actif.`
+        );
+      }
+
+      // Update validation record with audit trail
       await supabase
-        .from("engagement_validations")
+        .from('engagement_validations')
         .update({
-          status: "valide",
+          status: 'valide',
           validated_by: user.id,
           validated_at: new Date().toISOString(),
           comments,
+          validation_mode: permCheck.validationMode,
+          validated_on_behalf_of: permCheck.onBehalfOfId,
         })
-        .eq("engagement_id", id)
-        .eq("step_order", currentStep);
+        .eq('engagement_id', id)
+        .eq('step_order', currentStep);
 
       // Update engagement
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
           current_step: isLastStep ? currentStep : currentStep + 1,
-          statut: isLastStep ? "valide" : "soumis",
-          workflow_status: isLastStep ? "termine" : "en_validation",
+          statut: isLastStep ? 'valide' : 'soumis',
+          workflow_status: isLastStep ? 'termine' : 'en_validation',
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "validate",
+        action: 'validate',
         newValues: { step: currentStep, comments },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Étape validée");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Étape validée');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Reject engagement
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Get current step
       const { data: engagement } = await supabase
-        .from("budget_engagements")
-        .select("current_step")
-        .eq("id", id)
+        .from('budget_engagements')
+        .select('current_step')
+        .eq('id', id)
         .single();
 
       const currentStep = engagement?.current_step || 1;
 
-      // Update validation record
+      // Vérifier la permission via RPC unifiée pour le rôle de l'étape courante
+      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
+      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
+
+      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
+      if (!permCheck.isAllowed) {
+        throw new Error(`Permission insuffisante pour rejeter à l'étape ${requiredRole}.`);
+      }
+
+      // Update validation record with audit trail
       await supabase
-        .from("engagement_validations")
+        .from('engagement_validations')
         .update({
-          status: "rejete",
+          status: 'rejete',
           validated_by: user.id,
           validated_at: new Date().toISOString(),
           comments: reason,
+          validation_mode: permCheck.validationMode,
+          validated_on_behalf_of: permCheck.onBehalfOfId,
         })
-        .eq("engagement_id", id)
-        .eq("step_order", currentStep);
+        .eq('engagement_id', id)
+        .eq('step_order', currentStep);
 
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
-          statut: "rejete",
-          workflow_status: "rejete",
+          statut: 'rejete',
+          workflow_status: 'rejete',
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "reject",
+        action: 'reject',
         newValues: { reason },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement rejeté");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement rejeté');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -543,36 +585,55 @@ export function useEngagements() {
       motif: string;
       dateReprise?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      // Get current step pour déterminer le rôle requis
+      const { data: engagement } = await supabase
+        .from('budget_engagements')
+        .select('current_step')
+        .eq('id', id)
+        .single();
+
+      const currentStep = engagement?.current_step || 1;
+      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
+      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
+
+      // Vérifier la permission via RPC unifiée
+      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
+      if (!permCheck.isAllowed) {
+        throw new Error(`Permission insuffisante pour différer à l'étape ${requiredRole}.`);
+      }
 
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
-          statut: "differe",
-          workflow_status: "differe",
+          statut: 'differe',
+          workflow_status: 'differe',
           motif_differe: motif,
           date_differe: new Date().toISOString(),
           deadline_correction: dateReprise || null,
           differe_by: user.id,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "defer",
+        action: 'defer',
         newValues: { motif, dateReprise },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement différé");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement différé');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -580,31 +641,31 @@ export function useEngagements() {
   const resumeMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
+          statut: 'soumis',
+          workflow_status: 'en_validation',
           date_differe: null,
           motif_differe: null,
           deadline_correction: null,
           differe_by: null,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "resume",
+        action: 'resume',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement repris");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement repris');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -619,50 +680,54 @@ export function useEngagements() {
       data: Partial<Engagement>;
       justification?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Get old values for audit
       const { data: oldEngagement } = await supabase
-        .from("budget_engagements")
-        .select("montant, fournisseur, budget_line_id")
-        .eq("id", id)
+        .from('budget_engagements')
+        .select('montant, fournisseur, budget_line_id')
+        .eq('id', id)
         .single();
 
       const { error } = await supabase
-        .from("budget_engagements")
-        .update(data as any)
-        .eq("id", id);
+        .from('budget_engagements')
+        .update(data as Record<string, unknown>)
+        .eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: id,
-        action: "update_locked_field",
+        action: 'update_locked_field',
         oldValues: oldEngagement,
         newValues: { ...data, justification },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement mis à jour");
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement mis à jour');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Get validation steps for an engagement
   const getValidationSteps = async (engagementId: string) => {
     const { data, error } = await supabase
-      .from("engagement_validations")
-      .select(`
+      .from('engagement_validations')
+      .select(
+        `
         *,
         validator:profiles!engagement_validations_validated_by_fkey(full_name)
-      `)
-      .eq("engagement_id", engagementId)
-      .order("step_order");
+      `
+      )
+      .eq('engagement_id', engagementId)
+      .order('step_order');
 
     if (error) throw error;
     return data;
@@ -670,11 +735,11 @@ export function useEngagements() {
 
   // Filter helpers
   const engagementsAValider = engagements.filter(
-    (e) => e.statut === "soumis" && e.workflow_status === "en_validation"
+    (e) => e.statut === 'soumis' && e.workflow_status === 'en_validation'
   );
-  const engagementsValides = engagements.filter((e) => e.statut === "valide");
-  const engagementsRejetes = engagements.filter((e) => e.statut === "rejete");
-  const engagementsDifferes = engagements.filter((e) => e.statut === "differe");
+  const engagementsValides = engagements.filter((e) => e.statut === 'valide');
+  const engagementsRejetes = engagements.filter((e) => e.statut === 'rejete');
+  const engagementsDifferes = engagements.filter((e) => e.statut === 'differe');
 
   return {
     engagements,

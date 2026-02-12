@@ -1,6 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { usePermissions } from "./usePermissions";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { usePermissions } from './usePermissions';
+import { useDelegations } from './useDelegations';
+import { useInterimPermissions } from './useInterimPermissions';
 
 interface NoteAccessParams {
   created_by?: string | null;
@@ -27,18 +29,28 @@ interface AccessControlResult {
   denyReason?: string;
 }
 
-export function useNoteAccessControl(note: NoteAccessParams | null, noteType: 'SEF' | 'AEF' = 'SEF'): AccessControlResult {
-  const { userId, hasRole: _hasRole, hasAnyRole, isAdmin: isAdminRole, isLoading: permissionsLoading } = usePermissions();
+export function useNoteAccessControl(
+  note: NoteAccessParams | null,
+  noteType: 'SEF' | 'AEF' = 'SEF'
+): AccessControlResult {
+  const {
+    userId,
+    hasAnyRole,
+    isAdmin: isAdminRole,
+    isLoading: permissionsLoading,
+  } = usePermissions();
+  const { hasDGDelegationForNotes, isLoading: delegationsLoading } = useDelegations();
+  const { interimWorkflowRoles, isLoading: interimLoading } = useInterimPermissions();
 
   // Récupérer le profil utilisateur avec sa direction
   const { data: userProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ["user-profile-direction", userId],
+    queryKey: ['user-profile-direction', userId],
     queryFn: async () => {
       if (!userId) return null;
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, direction_id, first_name, last_name")
-        .eq("id", userId)
+        .from('profiles')
+        .select('id, direction_id, first_name, last_name')
+        .eq('id', userId)
         .single();
       if (error) return null;
       return data;
@@ -47,19 +59,23 @@ export function useNoteAccessControl(note: NoteAccessParams | null, noteType: 'S
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const isLoading = permissionsLoading || profileLoading;
+  const isLoading = permissionsLoading || profileLoading || delegationsLoading || interimLoading;
 
   // Rôles
   const isAdmin = isAdminRole;
-  const isDG = hasAnyRole(["DG"]);
-  const isCB = hasAnyRole(["CB", "DAAF"]);
-  const _isDirecteur = hasAnyRole(["DIRECTEUR"]);
-  
+  const isDG = hasAnyRole(['DG']);
+  const isCB = hasAnyRole(['CB', 'DAAF']);
+
+  // Délégation et intérim pour le rôle DG
+  const hasDGDelegation = hasDGDelegationForNotes();
+  const hasInterimDG = interimWorkflowRoles.includes('DG');
+
   // Vérifications de base
   const isCreator = !!userId && note?.created_by === userId;
-  const isSameDirection = !!userProfile?.direction_id && 
-                          !!note?.direction_id && 
-                          userProfile.direction_id === note.direction_id;
+  const isSameDirection =
+    !!userProfile?.direction_id &&
+    !!note?.direction_id &&
+    userProfile.direction_id === note.direction_id;
 
   // Si pas de note, retourner des valeurs par défaut
   if (!note) {
@@ -79,11 +95,11 @@ export function useNoteAccessControl(note: NoteAccessParams | null, noteType: 'S
       isAdmin,
       isSameDirection: false,
       isLoading,
-      denyReason: "Note non disponible",
+      denyReason: 'Note non disponible',
     };
   }
 
-  const statut = note.statut || "brouillon";
+  const statut = note.statut || 'brouillon';
 
   // Droits de visualisation
   // - Admin/DG peuvent tout voir
@@ -92,38 +108,44 @@ export function useNoteAccessControl(note: NoteAccessParams | null, noteType: 'S
   const canView = isAdmin || isDG || isCB || isCreator || isSameDirection;
 
   // Droits d'édition (brouillon uniquement par créateur)
-  const canEdit = (isCreator || isAdmin) && statut === "brouillon";
+  const canEdit = (isCreator || isAdmin) && statut === 'brouillon';
 
   // Droits de suppression (brouillon uniquement par créateur ou admin)
-  const canDelete = (isCreator || isAdmin) && statut === "brouillon";
+  const canDelete = (isCreator || isAdmin) && statut === 'brouillon';
 
   // Droits de soumission (brouillon par créateur)
-  const canSubmit = (isCreator || isAdmin) && statut === "brouillon";
+  const canSubmit = (isCreator || isAdmin) && statut === 'brouillon';
 
-  // Droits de validation (DG/Admin pour notes soumises)
-  const canValidate = (isDG || isAdmin) && ["soumis", "a_valider"].includes(statut);
+  // Droits de validation (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
+  const canValidate =
+    (isDG || isAdmin || hasDGDelegation || hasInterimDG) &&
+    ['soumis', 'a_valider'].includes(statut);
 
-  // Droits de rejet (DG/Admin pour notes soumises)
-  const canReject = (isDG || isAdmin) && ["soumis", "a_valider"].includes(statut);
+  // Droits de rejet (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
+  const canReject =
+    (isDG || isAdmin || hasDGDelegation || hasInterimDG) &&
+    ['soumis', 'a_valider'].includes(statut);
 
-  // Droits de différé (DG/Admin pour notes soumises)
-  const canDefer = (isDG || isAdmin) && ["soumis", "a_valider"].includes(statut);
+  // Droits de différé (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
+  const canDefer =
+    (isDG || isAdmin || hasDGDelegation || hasInterimDG) &&
+    ['soumis', 'a_valider'].includes(statut);
 
   // Droits de re-soumission (créateur pour notes différées/rejetées)
-  const canResubmit = (isCreator || isAdmin) && ["differe", "rejete"].includes(statut);
+  const canResubmit = (isCreator || isAdmin) && ['differe', 'rejete'].includes(statut);
 
   // Droits d'imputation (CB/DAAF pour notes AEF validées/à imputer)
-  const canImpute = noteType === 'AEF' && 
-                    (isCB || isAdmin) && 
-                    ["valide", "a_imputer"].includes(statut);
+  const canImpute =
+    noteType === 'AEF' && (isCB || isAdmin) && ['valide', 'a_imputer'].includes(statut);
 
   // Raison du refus d'accès
   let denyReason: string | undefined;
   if (!canView) {
     if (!userId) {
-      denyReason = "Vous devez être connecté pour accéder à cette note";
+      denyReason = 'Vous devez être connecté pour accéder à cette note';
     } else {
-      denyReason = "Vous n'avez pas les droits pour accéder à cette note. Seuls le créateur, les membres de la direction concernée, ou les responsables (DG/CB) peuvent y accéder.";
+      denyReason =
+        "Vous n'avez pas les droits pour accéder à cette note. Seuls le créateur, les membres de la direction concernée, ou les responsables (DG/CB) peuvent y accéder.";
     }
   }
 
