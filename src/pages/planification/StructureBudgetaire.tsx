@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,8 +18,10 @@ import { BudgetTreeView } from '@/components/budget/BudgetTreeView';
 import { BudgetLineForm } from '@/components/budget/BudgetLineForm';
 import { BudgetFilters } from '@/components/budget/BudgetFilters';
 import { BudgetLineHistory } from '@/components/budget/BudgetLineHistory';
+import { BudgetLineDetailSheet } from '@/components/budget/BudgetLineDetailSheet';
 import { BudgetFormulas } from '@/components/budget/BudgetFormulas';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import { PageHeader } from '@/components/shared/PageHeader';
 import {
   exportToCSV,
@@ -45,6 +47,9 @@ import {
   ChevronDown,
   FileText,
   Sheet,
+  TrendingUp,
+  CreditCard,
+  PiggyBank,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -69,6 +74,11 @@ export default function StructureBudgetaire() {
   const [selectedLineForHistory, setSelectedLineForHistory] =
     useState<BudgetLineWithRelations | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'tree'>('table');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [detailSheetLine, setDetailSheetLine] = useState<BudgetLineWithRelations | null>(null);
+  const [detailSheetDefaultTab, setDetailSheetDefaultTab] = useState('informations');
 
   const {
     budgetLines,
@@ -86,10 +96,31 @@ export default function StructureBudgetaire() {
 
   const { directions, objectifsStrategiques, missions } = useBaseReferentiels();
 
+  // Reset page when filters or search change
+  useEffect(() => {
+    setPage(1);
+  }, [filters, searchTerm]);
+
+  // Pagination for table mode
+  const totalLines = budgetLines?.length || 0;
+  const totalPages = Math.ceil(totalLines / pageSize);
+  const paginatedLines = budgetLines?.slice((page - 1) * pageSize, page * pageSize) || [];
+
   // Stats
   const validatedLines = budgetLines?.filter((l) => l.statut === 'valide').length || 0;
   const pendingLines = budgetLines?.filter((l) => l.statut === 'soumis').length || 0;
   const draftLines = budgetLines?.filter((l) => !l.statut || l.statut === 'brouillon').length || 0;
+
+  // ELOP KPIs from calculated fields
+  const totalEngage =
+    budgetLines?.reduce((sum, l) => sum + (l.calc_total_engage ?? l.total_engage ?? 0), 0) || 0;
+  const totalPaye =
+    budgetLines?.reduce((sum, l) => sum + (l.calc_total_paye ?? l.total_paye ?? 0), 0) || 0;
+  const totalDisponible = (totals.dotation || 0) - totalEngage;
+
+  // Direction counts
+  const activeDirections = directions?.filter((d) => d.est_active).length || 0;
+  const inactiveDirections = (directions?.length || 0) - activeDirections;
 
   const handleFormSubmit = (data: Partial<BudgetLineWithRelations>) => {
     if (editingLine) {
@@ -109,6 +140,27 @@ export default function StructureBudgetaire() {
   const handleViewHistory = (line: BudgetLineWithRelations) => {
     setSelectedLineForHistory(line);
     setShowHistory(true);
+  };
+
+  const handleViewDetail = (line: BudgetLineWithRelations, tab?: string) => {
+    setDetailSheetLine(line);
+    setDetailSheetDefaultTab(tab || 'informations');
+    setDetailSheetOpen(true);
+  };
+
+  const handleExportLine = (line: BudgetLineWithRelations) => {
+    const result = exportToExcel([line] as unknown as Record<string, unknown>[], exportColumns, {
+      ...getExportOptions(),
+      title: `Ligne ${line.code}`,
+      subtitle: `${line.label} - Exercice ${exercice}`,
+      filename: `ligne_${line.code}_${exercice}`,
+      showTotals: false,
+    });
+    if (result.success) {
+      toast.success(`Export de la ligne ${line.code} réussi`);
+    } else {
+      toast.error(result.error || "Erreur lors de l'export");
+    }
   };
 
   // --- Export columns definition ---
@@ -279,6 +331,47 @@ export default function StructureBudgetaire() {
         </Card>
       </div>
 
+      {/* ELOP KPIs */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-orange-200 bg-orange-50/50 dark:bg-orange-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-orange-600" />
+              <div>
+                <p className="text-2xl font-bold text-orange-600">{formatCurrency(totalEngage)}</p>
+                <p className="text-sm text-muted-foreground">Engagé total</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalPaye)}</p>
+                <p className="text-sm text-muted-foreground">Payé total</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <PiggyBank className="h-5 w-5 text-emerald-600" />
+              <div>
+                <p
+                  className={`text-2xl font-bold ${totalDisponible < 0 ? 'text-red-600' : 'text-emerald-600'}`}
+                >
+                  {formatCurrency(totalDisponible)}
+                </p>
+                <p className="text-sm text-muted-foreground">Disponible total</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
@@ -293,6 +386,9 @@ export default function StructureBudgetaire() {
           <TabsTrigger value="directions" className="gap-2">
             <Building2 className="h-4 w-4" />
             Directions ({directions?.length || 0})
+            {inactiveDirections > 0 && (
+              <span className="text-xs text-muted-foreground">({activeDirections} actives)</span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="missions" className="gap-2">
             <Briefcase className="h-4 w-4" />
@@ -395,18 +491,39 @@ export default function StructureBudgetaire() {
                   onReject={(id, reason) => rejectBudgetLine({ id, reason })}
                   onDelete={deleteBudgetLine}
                   onViewHistory={handleViewHistory}
+                  onViewDetail={handleViewDetail}
+                  onExportLine={handleExportLine}
                 />
               ) : (
-                <BudgetLineTable
-                  lines={budgetLines}
-                  exercice={exercice || new Date().getFullYear()}
-                  onEdit={handleEdit}
-                  onSubmit={submitBudgetLine}
-                  onValidate={validateBudgetLine}
-                  onReject={(id, reason) => rejectBudgetLine({ id, reason })}
-                  onDelete={deleteBudgetLine}
-                  onViewHistory={handleViewHistory}
-                />
+                <>
+                  <BudgetLineTable
+                    lines={paginatedLines}
+                    onEdit={handleEdit}
+                    onSubmit={submitBudgetLine}
+                    onValidate={validateBudgetLine}
+                    onReject={(id, reason) => rejectBudgetLine({ id, reason })}
+                    onDelete={deleteBudgetLine}
+                    onViewHistory={handleViewHistory}
+                    onViewDetail={handleViewDetail}
+                    onExportLine={handleExportLine}
+                  />
+                  {totalPages > 1 && (
+                    <div className="mt-4">
+                      <NotesPagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={totalLines}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        onPageSizeChange={(size) => {
+                          setPageSize(size);
+                          setPage(1);
+                        }}
+                        pageSizeOptions={[25, 50, 100]}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -449,21 +566,42 @@ export default function StructureBudgetaire() {
             <CardHeader>
               <CardTitle>Directions</CardTitle>
               <CardDescription>
-                Référentiel des directions pour l'affectation des lignes budgétaires
+                {activeDirections} directions actives
+                {inactiveDirections > 0 && ` · ${inactiveDirections} inactives (legacy)`}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {directions && directions.length > 0 ? (
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {directions.map((dir) => (
-                    <div key={dir.id} className="p-4 border rounded-lg bg-muted/30">
+                    <div
+                      key={dir.id}
+                      className={`p-4 border rounded-lg ${
+                        dir.est_active ? 'bg-muted/30' : 'bg-muted/10 opacity-60 border-dashed'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{dir.code}</Badge>
-                        {dir.sigle && (
-                          <span className="text-sm text-muted-foreground">{dir.sigle}</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {dir.sigle && (
+                            <span className="text-sm text-muted-foreground">{dir.sigle}</span>
+                          )}
+                          {dir.est_active ? (
+                            <Badge variant="default" className="bg-green-500 text-xs">
+                              Actif
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              Inactif
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <p className="mt-2 font-medium">{dir.label}</p>
+                      <p
+                        className={`mt-2 font-medium ${!dir.est_active ? 'text-muted-foreground' : ''}`}
+                      >
+                        {dir.label}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -521,6 +659,14 @@ export default function StructureBudgetaire() {
         open={showHistory}
         onOpenChange={setShowHistory}
         budgetLine={selectedLineForHistory}
+      />
+
+      {/* Sheet: Detail */}
+      <BudgetLineDetailSheet
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        budgetLine={detailSheetLine}
+        defaultTab={detailSheetDefaultTab}
       />
     </div>
   );

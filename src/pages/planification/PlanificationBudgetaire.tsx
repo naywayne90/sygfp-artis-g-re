@@ -465,7 +465,6 @@ export default function PlanificationBudgetaire() {
               ) : (
                 <BudgetLineTable
                   lines={budgetLines || []}
-                  exercice={exercice || new Date().getFullYear()}
                   onEdit={handleEdit}
                   onSubmit={submitBudgetLine}
                   onValidate={validateBudgetLine}

@@ -58,10 +58,18 @@ import {
   MessageSquare,
   FilePlus,
   Shield,
+  Banknote,
+  BookOpen,
+  QrCode,
+  Target,
+  Compass,
 } from 'lucide-react';
 import { DecisionBlock } from '@/components/workflow/DecisionBlock';
 import { useNoteAccessControl } from '@/hooks/useNoteAccessControl';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
+import { formatMontant } from '@/lib/config/sygfp-constants';
+import { QRCodeCanvas } from 'qrcode.react';
 
 // ============================================
 // TYPES
@@ -258,6 +266,7 @@ export default function NoteSEFDetail() {
   const [resubmitting, setResubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const qrContainerRef = useRef<HTMLDivElement>(null);
 
   // Query pour la note
   const {
@@ -273,6 +282,33 @@ export default function NoteSEFDetail() {
       return result.data as unknown as NoteSEFExtended;
     },
     enabled: !!id,
+  });
+
+  // Query pour la note AEF liée (bidirectionnel)
+  const { data: linkedNoteAEF } = useQuery({
+    queryKey: ['linked-note-aef', note?.id, note?.note_aef_id],
+    queryFn: async () => {
+      if (!note) return null;
+      // 1. Si note_aef_id est renseigné côté SEF, chercher directement
+      if (note.note_aef_id) {
+        const { data, error } = await supabase
+          .from('notes_dg')
+          .select('id, numero, objet, statut')
+          .eq('id', note.note_aef_id)
+          .single();
+        if (!error && data) return data;
+      }
+      // 2. Sinon chercher la note AEF qui référence cette note SEF
+      const { data, error } = await supabase
+        .from('notes_dg')
+        .select('id, numero, objet, statut')
+        .eq('note_sef_id', note.id)
+        .limit(1)
+        .maybeSingle();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!note?.id,
   });
 
   // Contrôle d'accès centralisé
@@ -381,10 +417,34 @@ export default function NoteSEFDetail() {
     }
   };
 
+  const MAX_PJ = 3; // Exigence MBAYE : maximum 3 pièces jointes par note
+
   // Uploader un fichier
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0 || !note) return;
+
+    // Vérifier la limite de pièces jointes
+    const remainingSlots = MAX_PJ - attachments.length;
+    if (remainingSlots <= 0) {
+      toast({
+        title: 'Limite atteinte',
+        description: `Maximum ${MAX_PJ} pièces jointes autorisées (TDR, devis, etc.)`,
+        variant: 'destructive',
+      });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    if (files.length > remainingSlots) {
+      toast({
+        title: 'Trop de fichiers',
+        description: `Vous ne pouvez ajouter que ${remainingSlots} fichier(s) supplémentaire(s). Maximum ${MAX_PJ} pièces jointes.`,
+        variant: 'destructive',
+      });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setUploadingFile(true);
     try {
@@ -655,6 +715,21 @@ export default function NoteSEFDetail() {
     } finally {
       setResubmitting(false);
     }
+  };
+
+  // Télécharger QR code en PNG
+  const handleDownloadQR = () => {
+    const container = qrContainerRef.current;
+    if (!container) return;
+    const canvas = container.querySelector('canvas');
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `QR_${note?.reference_pivot || note?.numero || 'note'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Créer Note AEF (stub)
@@ -1111,17 +1186,157 @@ export default function NoteSEFDetail() {
                   </div>
                 </>
               )}
+
+              {/* Lien vers la Note AEF associée */}
+              {linkedNoteAEF && (
+                <>
+                  <Separator />
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <span className="font-medium">Note AEF associée</span>
+                        <p className="text-sm text-muted-foreground">
+                          {linkedNoteAEF.numero} — {linkedNoteAEF.objet}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/notes-aef/${linkedNoteAEF.id}`)}
+                      className="gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Voir la Note AEF
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
+
+          {/* Informations budgétaires */}
+          {(note.montant_estime ||
+            note.type_depense ||
+            note.objectif_strategique ||
+            note.mission) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Banknote className="h-5 w-5" />
+                  Informations budgétaires
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {note.montant_estime != null && (
+                    <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                      <p className="text-xs text-muted-foreground uppercase">Montant estimé</p>
+                      <p className="text-xl font-bold text-primary mt-1">
+                        {formatMontant(note.montant_estime)}
+                      </p>
+                    </div>
+                  )}
+                  {note.type_depense && (
+                    <div className="p-3 rounded-lg bg-muted/50">
+                      <p className="text-xs text-muted-foreground uppercase">Type de dépense</p>
+                      <p className="font-medium mt-1 capitalize">{note.type_depense}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {note.objectif_strategique && (
+                    <div className="flex items-start gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase">
+                          Objectif Stratégique
+                        </p>
+                        <p className="font-medium">
+                          <Badge variant="outline" className="mr-1">
+                            {note.objectif_strategique.code}
+                          </Badge>
+                          {note.objectif_strategique.libelle}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {note.mission && (
+                    <div className="flex items-start gap-2">
+                      <Compass className="h-4 w-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase">Mission</p>
+                        <p className="font-medium">
+                          <Badge variant="outline" className="mr-1">
+                            {note.mission.code}
+                          </Badge>
+                          {note.mission.libelle}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Contenu de la note */}
+          {(note.expose || note.avis || note.recommandations) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Contenu de la note
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {note.expose && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs uppercase">Exposé</Label>
+                    <div className="mt-1 p-3 rounded-lg bg-muted/30 whitespace-pre-wrap text-sm leading-relaxed">
+                      {note.expose}
+                    </div>
+                  </div>
+                )}
+                {note.avis && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs uppercase">Avis</Label>
+                    <div className="mt-1 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 whitespace-pre-wrap text-sm leading-relaxed">
+                      {note.avis}
+                    </div>
+                  </div>
+                )}
+                {note.recommandations && (
+                  <div>
+                    <Label className="text-muted-foreground text-xs uppercase">
+                      Recommandations
+                    </Label>
+                    <div className="mt-1 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 whitespace-pre-wrap text-sm leading-relaxed">
+                      {note.recommandations}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pièces jointes */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Paperclip className="h-5 w-5" />
-                  Pièces jointes
-                </CardTitle>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Paperclip className="h-5 w-5" />
+                    Pièces jointes
+                    <span className="text-sm font-normal text-muted-foreground">
+                      ({attachments.length}/{MAX_PJ})
+                    </span>
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    {MAX_PJ} fichiers max &bull; 10 Mo par fichier
+                  </CardDescription>
+                </div>
                 {canModify && (
                   <div>
                     <input
@@ -1136,7 +1351,7 @@ export default function NoteSEFDetail() {
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingFile}
+                      disabled={uploadingFile || attachments.length >= MAX_PJ}
                       className="gap-2"
                     >
                       {uploadingFile ? (
@@ -1144,7 +1359,7 @@ export default function NoteSEFDetail() {
                       ) : (
                         <Upload className="h-4 w-4" />
                       )}
-                      Ajouter
+                      {attachments.length >= MAX_PJ ? `${MAX_PJ}/${MAX_PJ}` : 'Ajouter'}
                     </Button>
                   </div>
                 )}
@@ -1256,6 +1471,53 @@ export default function NoteSEFDetail() {
             </CardContent>
           </Card>
 
+          {/* Chaîne de la dépense */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Compass className="h-4 w-4" />
+                Chaîne de la dépense
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChaineDepenseCompact
+                currentStep={1}
+                completedSteps={isApproved ? [1] : []}
+                size="sm"
+                showLabels
+              />
+            </CardContent>
+          </Card>
+
+          {/* QR Code pour notes validées */}
+          {isApproved && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  QR Code
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center gap-3">
+                <div ref={qrContainerRef} className="p-3 bg-white rounded-lg">
+                  <QRCodeCanvas
+                    value={`https://sygfp.arti.ci/notes-sef/${note.id}`}
+                    size={160}
+                    level="M"
+                    includeMargin
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Scannez pour accéder à la note
+                </p>
+                <Button variant="outline" size="sm" onClick={handleDownloadQR} className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Télécharger PNG
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Infos techniques */}
           <Card>
             <CardHeader>
@@ -1270,6 +1532,22 @@ export default function NoteSEFDetail() {
                 <span className="text-muted-foreground">Modifié le</span>
                 <span>{format(new Date(note.updated_at), 'dd/MM/yyyy HH:mm', { locale: fr })}</span>
               </div>
+              {note.validated_at && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Validé le</span>
+                  <span>
+                    {format(new Date(note.validated_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                  </span>
+                </div>
+              )}
+              {note.validated_by_profile && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Validé par</span>
+                  <span>
+                    {`${note.validated_by_profile.first_name || ''} ${note.validated_by_profile.last_name || ''}`.trim()}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">ID</span>
                 <span className="font-mono text-xs">{note.id.slice(0, 8)}...</span>

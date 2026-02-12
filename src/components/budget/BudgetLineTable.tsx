@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -8,23 +6,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Send, Check, X, Trash2, History, FileEdit, RotateCcw } from "lucide-react";
-import { BudgetLineWithRelations, getDisplayBudgetCode } from "@/hooks/useBudgetLines";
-import { supabase } from "@/integrations/supabase/client";
+} from '@/components/ui/table';
+import { BudgetLineWithRelations, getDisplayBudgetCode } from '@/hooks/useBudgetLines';
+import { BudgetLineActionsMenu } from './BudgetLineActionsMenu';
 
 const getVersionBadge = (version: string) => {
   switch (version) {
-    case "V2":
-      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1 border-primary text-primary">V2</Badge>;
-    case "V1":
-      return <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1">V1</Badge>;
+    case 'V2':
+      return (
+        <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1 border-primary text-primary">
+          V2
+        </Badge>
+      );
+    case 'V1':
+      return (
+        <Badge variant="outline" className="text-[10px] px-1 py-0 ml-1">
+          V1
+        </Badge>
+      );
     default:
       return null;
   }
@@ -40,32 +39,42 @@ interface BudgetLineTableProps {
   onViewHistory: (line: BudgetLineWithRelations) => void;
   onEditWithVersioning?: (line: BudgetLineWithRelations) => void;
   onViewVersionHistory?: (line: BudgetLineWithRelations) => void;
-  exercice: number;
+  onViewDetail?: (line: BudgetLineWithRelations, tab?: string) => void;
+  onExportLine?: (line: BudgetLineWithRelations) => void;
 }
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + " FCFA";
+  return (
+    new Intl.NumberFormat('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + ' FCFA'
+  );
 };
 
 const getStatusBadge = (status: string | null) => {
   switch (status) {
-    case "brouillon":
+    case 'brouillon':
       return <Badge variant="secondary">Brouillon</Badge>;
-    case "soumis":
-      return <Badge variant="default" className="bg-blue-500">Soumis</Badge>;
-    case "valide":
-      return <Badge variant="default" className="bg-green-500">Validé</Badge>;
-    case "rejete":
+    case 'soumis':
+      return (
+        <Badge variant="default" className="bg-blue-500">
+          Soumis
+        </Badge>
+      );
+    case 'valide':
+      return (
+        <Badge variant="default" className="bg-green-500">
+          Validé
+        </Badge>
+      );
+    case 'rejete':
       return <Badge variant="destructive">Rejeté</Badge>;
     default:
       return <Badge variant="secondary">Brouillon</Badge>;
   }
 };
-
 
 export function BudgetLineTable({
   lines,
@@ -77,132 +86,9 @@ export function BudgetLineTable({
   onViewHistory,
   onEditWithVersioning,
   onViewVersionHistory,
-  exercice,
+  onViewDetail,
+  onExportLine,
 }: BudgetLineTableProps) {
-  const [executionData, setExecutionData] = useState<Record<string, {
-    engage: number;
-    liquide: number;
-    ordonnance: number;
-    paye: number;
-    virements_recus: number;
-    virements_emis: number;
-    dotation_actuelle: number;
-    disponible: number;
-  }>>({});
-
-  useEffect(() => {
-    const fetchExecutionData = async () => {
-      if (lines.length === 0) return;
-
-      const lineIds = lines.map(l => l.id);
-
-      // Fetch engagements validés
-      const { data: engagements } = await supabase
-        .from("budget_engagements")
-        .select("budget_line_id, montant, statut")
-        .in("budget_line_id", lineIds)
-        .eq("exercice", exercice)
-        .eq("statut", "valide");
-
-      // Fetch liquidations validées
-      const { data: liquidations } = await supabase
-        .from("budget_liquidations")
-        .select("engagement:budget_engagements(budget_line_id), montant, statut")
-        .eq("exercice", exercice)
-        .eq("statut", "valide");
-
-      // Fetch ordonnancements validés
-      const { data: ordonnancements } = await supabase
-        .from("ordonnancements")
-        .select("liquidation:budget_liquidations(engagement:budget_engagements(budget_line_id)), montant, statut")
-        .eq("exercice", exercice)
-        .in("statut", ["valide", "signe"]);
-
-      // Fetch règlements payés
-      const { data: reglements } = await supabase
-        .from("reglements")
-        .select("ordonnancement:ordonnancements(liquidation:budget_liquidations(engagement:budget_engagements(budget_line_id))), montant, statut")
-        .eq("exercice", exercice)
-        .eq("statut", "paye");
-
-      // POINT 4: Fetch virements exécutés pour calculer dotation_actuelle
-      const { data: virements } = await supabase
-        .from("credit_transfers")
-        .select("from_budget_line_id, to_budget_line_id, amount")
-        .eq("exercice", exercice)
-        .eq("status", "execute");
-
-      const execMap: Record<string, { 
-        engage: number; liquide: number; ordonnance: number; paye: number;
-        virements_recus: number; virements_emis: number; dotation_actuelle: number; disponible: number;
-      }> = {};
-
-      // Initialize with line data
-      lines.forEach(line => {
-        execMap[line.id] = { 
-          engage: 0, liquide: 0, ordonnance: 0, paye: 0,
-          virements_recus: 0, virements_emis: 0, 
-          dotation_actuelle: line.dotation_initiale,
-          disponible: line.dotation_initiale 
-        };
-      });
-
-      // Calculate virements per line
-      virements?.forEach(v => {
-        if (v.from_budget_line_id && execMap[v.from_budget_line_id]) {
-          execMap[v.from_budget_line_id].virements_emis += v.amount || 0;
-        }
-        if (v.to_budget_line_id && execMap[v.to_budget_line_id]) {
-          execMap[v.to_budget_line_id].virements_recus += v.amount || 0;
-        }
-      });
-
-      // Sum engagements
-      engagements?.forEach(e => {
-        if (e.budget_line_id && execMap[e.budget_line_id]) {
-          execMap[e.budget_line_id].engage += e.montant || 0;
-        }
-      });
-
-      // Sum liquidations
-      liquidations?.forEach(l => {
-        const lineId = (l.engagement as any)?.budget_line_id;
-        if (lineId && execMap[lineId]) {
-          execMap[lineId].liquide += l.montant || 0;
-        }
-      });
-
-      // Sum ordonnancements
-      ordonnancements?.forEach(o => {
-        const lineId = (o.liquidation as any)?.engagement?.budget_line_id;
-        if (lineId && execMap[lineId]) {
-          execMap[lineId].ordonnance += o.montant || 0;
-        }
-      });
-
-      // Sum règlements
-      reglements?.forEach(r => {
-        const lineId = (r.ordonnancement as any)?.liquidation?.engagement?.budget_line_id;
-        if (lineId && execMap[lineId]) {
-          execMap[lineId].paye += r.montant || 0;
-        }
-      });
-
-      // POINT 4: Calculer dotation_actuelle et disponible pour chaque ligne
-      lines.forEach(line => {
-        if (execMap[line.id]) {
-          const { virements_recus, virements_emis, engage } = execMap[line.id];
-          execMap[line.id].dotation_actuelle = line.dotation_initiale + virements_recus - virements_emis;
-          execMap[line.id].disponible = execMap[line.id].dotation_actuelle - engage;
-        }
-      });
-
-      setExecutionData(execMap);
-    };
-
-    fetchExecutionData();
-  }, [lines, exercice]);
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -230,16 +116,18 @@ export function BudgetLineTable({
             </TableRow>
           ) : (
             lines.map((line) => {
-              const exec = executionData[line.id] || { 
-                engage: 0, liquide: 0, ordonnance: 0, paye: 0,
-                virements_recus: 0, virements_emis: 0,
-                dotation_actuelle: line.dotation_initiale,
-                disponible: line.dotation_initiale
-              };
               const displayCode = getDisplayBudgetCode(line);
-              const tauxExec = exec.dotation_actuelle > 0 
-                ? Math.round((exec.paye / exec.dotation_actuelle) * 100) 
-                : 0;
+              const engage = line.calc_total_engage ?? line.total_engage ?? 0;
+              const liquide = line.calc_total_liquide ?? line.total_liquide ?? 0;
+              const paye = line.calc_total_paye ?? line.total_paye ?? 0;
+              const virementsRecus = line.calc_virements_recus ?? 0;
+              const virementsEmis = line.calc_virements_emis ?? 0;
+              const dotationActuelle =
+                line.calc_dotation_actuelle ?? line.dotation_modifiee ?? line.dotation_initiale;
+              const disponible =
+                line.calc_disponible ?? line.disponible_calcule ?? dotationActuelle - engage;
+              const tauxExec =
+                dotationActuelle > 0 ? Math.round((paye / dotationActuelle) * 100) : 0;
 
               return (
                 <TableRow key={line.id}>
@@ -265,37 +153,41 @@ export function BudgetLineTable({
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
-                    {line.direction?.code || "-"}
-                  </TableCell>
+                  <TableCell>{line.direction?.code || '-'}</TableCell>
                   <TableCell className="text-right font-mono text-muted-foreground">
                     {formatCurrency(line.dotation_initiale)}
                   </TableCell>
-                  {/* POINT 4: Colonne Dotation Actuelle */}
                   <TableCell className="text-right font-mono font-medium">
-                    {formatCurrency(exec.dotation_actuelle)}
-                    {(exec.virements_recus > 0 || exec.virements_emis > 0) && (
+                    {formatCurrency(dotationActuelle)}
+                    {(virementsRecus > 0 || virementsEmis > 0) && (
                       <div className="text-xs text-muted-foreground">
-                        {exec.virements_recus > 0 && <span className="text-green-600">+{formatCurrency(exec.virements_recus).replace(' FCFA', '')}</span>}
-                        {exec.virements_emis > 0 && <span className="text-red-600 ml-1">-{formatCurrency(exec.virements_emis).replace(' FCFA', '')}</span>}
+                        {virementsRecus > 0 && (
+                          <span className="text-green-600">
+                            +{formatCurrency(virementsRecus).replace(' FCFA', '')}
+                          </span>
+                        )}
+                        {virementsEmis > 0 && (
+                          <span className="text-red-600 ml-1">
+                            -{formatCurrency(virementsEmis).replace(' FCFA', '')}
+                          </span>
+                        )}
                       </div>
                     )}
                   </TableCell>
                   <TableCell className="text-right font-mono text-orange-600">
-                    {formatCurrency(exec.engage)}
+                    {formatCurrency(engage)}
                   </TableCell>
                   <TableCell className="text-right font-mono text-blue-600">
-                    {formatCurrency(exec.liquide)}
+                    {formatCurrency(liquide)}
                   </TableCell>
                   <TableCell className="text-right font-mono text-green-600">
-                    {formatCurrency(exec.paye)}
+                    {formatCurrency(paye)}
                   </TableCell>
-                  {/* POINT 4: Colonne Disponible avec alerte si négatif */}
-                  <TableCell className={`text-right font-mono font-bold ${exec.disponible < 0 ? "text-red-600 bg-red-50 dark:bg-red-950/30" : "text-green-600"}`}>
-                    {formatCurrency(exec.disponible)}
-                    {exec.disponible < 0 && (
-                      <div className="text-xs">⚠️ Dépassement</div>
-                    )}
+                  <TableCell
+                    className={`text-right font-mono font-bold ${disponible < 0 ? 'text-red-600 bg-red-50 dark:bg-red-950/30' : 'text-green-600'}`}
+                  >
+                    {formatCurrency(disponible)}
+                    {disponible < 0 && <div className="text-xs">Dépassement</div>}
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
@@ -306,69 +198,19 @@ export function BudgetLineTable({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(line)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Modifier (formulaire)
-                        </DropdownMenuItem>
-                        {onEditWithVersioning && (
-                          <DropdownMenuItem onClick={() => onEditWithVersioning(line)}>
-                            <FileEdit className="mr-2 h-4 w-4 text-blue-600" />
-                            Modifier (avec versioning)
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem onClick={() => onViewHistory(line)}>
-                          <History className="mr-2 h-4 w-4" />
-                          Historique champs
-                        </DropdownMenuItem>
-                        {onViewVersionHistory && (
-                          <DropdownMenuItem onClick={() => onViewVersionHistory(line)}>
-                            <RotateCcw className="mr-2 h-4 w-4 text-purple-600" />
-                            Historique versions
-                          </DropdownMenuItem>
-                        )}
-                        {line.statut === "brouillon" && (
-                          <DropdownMenuItem onClick={() => onSubmit(line.id)}>
-                            <Send className="mr-2 h-4 w-4" />
-                            Soumettre
-                          </DropdownMenuItem>
-                        )}
-                        {line.statut === "soumis" && (
-                          <>
-                            <DropdownMenuItem onClick={() => onValidate(line.id)}>
-                              <Check className="mr-2 h-4 w-4 text-green-600" />
-                              Valider
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                const reason = prompt("Motif du rejet:");
-                                if (reason) onReject(line.id, reason);
-                              }}
-                            >
-                              <X className="mr-2 h-4 w-4 text-red-600" />
-                              Rejeter
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {line.statut === "brouillon" && (
-                          <DropdownMenuItem 
-                            onClick={() => {
-                              if (confirm("Supprimer cette ligne ?")) onDelete(line.id);
-                            }}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <BudgetLineActionsMenu
+                      line={line}
+                      onEdit={onEdit}
+                      onSubmit={onSubmit}
+                      onValidate={onValidate}
+                      onReject={onReject}
+                      onDelete={onDelete}
+                      onViewHistory={onViewHistory}
+                      onEditWithVersioning={onEditWithVersioning}
+                      onViewVersionHistory={onViewVersionHistory}
+                      onViewDetail={onViewDetail}
+                      onExportLine={onExportLine}
+                    />
                   </TableCell>
                 </TableRow>
               );

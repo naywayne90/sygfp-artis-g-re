@@ -26,7 +26,7 @@ export const NoteSEFStatut = {
   REJECTED: 'rejete',
 } as const;
 
-export type NoteSEFStatutType = typeof NoteSEFStatut[keyof typeof NoteSEFStatut];
+export type NoteSEFStatutType = (typeof NoteSEFStatut)[keyof typeof NoteSEFStatut];
 
 /**
  * Labels français pour les statuts
@@ -43,30 +43,33 @@ export const STATUT_LABELS: Record<NoteSEFStatutType, string> = {
 /**
  * Variantes de badge (couleurs) pour chaque statut
  */
-export const STATUT_BADGE_VARIANTS: Record<NoteSEFStatutType, { className: string; icon?: string }> = {
-  [NoteSEFStatut.DRAFT]: { 
-    className: 'bg-muted text-muted-foreground', 
-    icon: 'FileEdit' 
+export const STATUT_BADGE_VARIANTS: Record<
+  NoteSEFStatutType,
+  { className: string; icon?: string }
+> = {
+  [NoteSEFStatut.DRAFT]: {
+    className: 'bg-muted text-muted-foreground',
+    icon: 'FileEdit',
   },
-  [NoteSEFStatut.SUBMITTED]: { 
-    className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', 
-    icon: 'Send' 
+  [NoteSEFStatut.SUBMITTED]: {
+    className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    icon: 'Send',
   },
-  [NoteSEFStatut.PENDING_VALIDATION]: { 
-    className: 'bg-warning/10 text-warning border-warning/20', 
-    icon: 'Clock' 
+  [NoteSEFStatut.PENDING_VALIDATION]: {
+    className: 'bg-warning/10 text-warning border-warning/20',
+    icon: 'Clock',
   },
-  [NoteSEFStatut.APPROVED]: { 
-    className: 'bg-success/10 text-success border-success/20', 
-    icon: 'CheckCircle' 
+  [NoteSEFStatut.APPROVED]: {
+    className: 'bg-success/10 text-success border-success/20',
+    icon: 'CheckCircle',
   },
-  [NoteSEFStatut.DEFERRED]: { 
-    className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400', 
-    icon: 'PauseCircle' 
+  [NoteSEFStatut.DEFERRED]: {
+    className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    icon: 'PauseCircle',
   },
-  [NoteSEFStatut.REJECTED]: { 
-    className: 'bg-destructive/10 text-destructive border-destructive/20', 
-    icon: 'XCircle' 
+  [NoteSEFStatut.REJECTED]: {
+    className: 'bg-destructive/10 text-destructive border-destructive/20',
+    icon: 'XCircle',
   },
 };
 
@@ -89,7 +92,7 @@ export const NoteSEFUrgence = {
   URGENT: 'urgente',
 } as const;
 
-export type NoteSEFUrgenceType = typeof NoteSEFUrgence[keyof typeof NoteSEFUrgence];
+export type NoteSEFUrgenceType = (typeof NoteSEFUrgence)[keyof typeof NoteSEFUrgence];
 
 /**
  * Labels français pour les niveaux d'urgence
@@ -127,7 +130,7 @@ export const BeneficiaireType = {
   INTERNAL_AGENT: 'interne',
 } as const;
 
-export type BeneficiaireTypeValue = typeof BeneficiaireType[keyof typeof BeneficiaireType];
+export type BeneficiaireTypeValue = (typeof BeneficiaireType)[keyof typeof BeneficiaireType];
 
 /**
  * Labels français pour les types de bénéficiaire
@@ -158,7 +161,7 @@ export const NoteSEFAuditAction = {
   DELETE: 'suppression',
 } as const;
 
-export type NoteSEFAuditActionType = typeof NoteSEFAuditAction[keyof typeof NoteSEFAuditAction];
+export type NoteSEFAuditActionType = (typeof NoteSEFAuditAction)[keyof typeof NoteSEFAuditAction];
 
 /**
  * Labels pour les actions d'audit
@@ -185,7 +188,7 @@ export const AUDIT_ACTION_LABELS: Record<NoteSEFAuditActionType, string> = {
  */
 export const VALIDATOR_ROLES = ['ADMIN', 'DG', 'DAAF'] as const;
 
-export type ValidatorRole = typeof VALIDATOR_ROLES[number];
+export type ValidatorRole = (typeof VALIDATOR_ROLES)[number];
 
 // ============================================
 // TRANSITIONS DE STATUT AUTORISÉES
@@ -197,8 +200,17 @@ export type ValidatorRole = typeof VALIDATOR_ROLES[number];
  */
 export const STATUT_TRANSITIONS: Record<NoteSEFStatutType, NoteSEFStatutType[]> = {
   [NoteSEFStatut.DRAFT]: [NoteSEFStatut.SUBMITTED],
-  [NoteSEFStatut.SUBMITTED]: [NoteSEFStatut.PENDING_VALIDATION, NoteSEFStatut.APPROVED, NoteSEFStatut.REJECTED, NoteSEFStatut.DEFERRED],
-  [NoteSEFStatut.PENDING_VALIDATION]: [NoteSEFStatut.APPROVED, NoteSEFStatut.REJECTED, NoteSEFStatut.DEFERRED],
+  [NoteSEFStatut.SUBMITTED]: [
+    NoteSEFStatut.PENDING_VALIDATION,
+    NoteSEFStatut.APPROVED,
+    NoteSEFStatut.REJECTED,
+    NoteSEFStatut.DEFERRED,
+  ],
+  [NoteSEFStatut.PENDING_VALIDATION]: [
+    NoteSEFStatut.APPROVED,
+    NoteSEFStatut.REJECTED,
+    NoteSEFStatut.DEFERRED,
+  ],
   [NoteSEFStatut.DEFERRED]: [NoteSEFStatut.APPROVED, NoteSEFStatut.PENDING_VALIDATION], // Peut être reprise ou validée
   [NoteSEFStatut.APPROVED]: [], // État final
   [NoteSEFStatut.REJECTED]: [], // État final
@@ -222,21 +234,23 @@ export const NOTES_SEF_CONFIG = {
     'image/png',
     'image/gif',
   ],
-  /** Nombre max de pièces jointes par note */
-  MAX_ATTACHMENTS_PER_NOTE: 10,
-  /** 
-   * Référence pivot - format ARTI01YYNNNN
+  /** Nombre max de pièces jointes par note (exigence MBAYE) */
+  MAX_ATTACHMENTS_PER_NOTE: 3,
+  /**
+   * Référence pivot - format ARTI + XX(2) + MM(2) + YY(2) + NNNN(4) = 14 chars
    * - ARTI : préfixe organisme
-   * - 01 : code module Note SEF
+   * - XX : code étape (00 pour Note SEF)
+   * - MM : mois de création (01-12)
    * - YY : 2 derniers chiffres de l'exercice (ex: 2026 → 26)
-   * - NNNN : compteur séquentiel par exercice (0001, 0002, ...)
-   * Exemple : ARTI01260001 pour la 1ère note de l'exercice 2026
-   * 
-   * La génération est faite côté DB via trigger BEFORE INSERT
+   * - NNNN : compteur séquentiel par mois+année (0001, 0002, ...)
+   * Exemple : ARTI0002260001 pour la 1ère note SEF de février 2026
+   *
+   * La génération est faite côté DB via RPC submit_note_sef_with_reference
+   * au moment de la SOUMISSION (les brouillons n'ont pas de référence)
    */
   REFERENCE_PREFIX: 'ARTI',
-  /** Code module pour la séquence (table reference_sequences) */
-  MODULE_CODE: '01',
+  /** Code étape pour Note SEF (2 chiffres) */
+  MODULE_CODE: '00',
   /** Bucket Supabase Storage */
   STORAGE_BUCKET: 'notes-sef',
 } as const;
@@ -246,26 +260,45 @@ export const NOTES_SEF_CONFIG = {
 // ============================================
 
 /**
- * Parse une référence pivot ARTI01YYNNNN
- * @param ref - La référence à parser (ex: "ARTI01260001")
- * @returns Les composants de la référence ou null si format invalide
+ * Parse une référence pivot ARTI
+ * Gère les deux formats :
+ * - Nouveau (14 chars): ARTI + XX(2) + MM(2) + YY(2) + NNNN(4)
+ * - Legacy  (13 chars): ARTI + X(1)  + MM(2) + YY(2) + NNNN(4)
  */
 export function parseReferencePivot(ref: string): {
   prefix: string;
   moduleCode: string;
+  month: number;
   year: number;
   sequence: number;
 } | null {
-  // Format attendu : ARTI01YYNNNN (12 caractères)
-  const match = ref.match(/^(ARTI)(01)(\d{2})(\d{4})$/);
-  if (!match) return null;
-  
-  return {
-    prefix: match[1],
-    moduleCode: match[2],
-    year: 2000 + parseInt(match[3], 10),
-    sequence: parseInt(match[4], 10),
-  };
+  if (!ref || !ref.startsWith('ARTI')) return null;
+
+  // Nouveau format 14 chars: ARTI + XX(2) + MM(2) + YY(2) + NNNN(4)
+  const match14 = ref.match(/^(ARTI)(\d{2})(\d{2})(\d{2})(\d{4})$/);
+  if (match14) {
+    return {
+      prefix: match14[1],
+      moduleCode: match14[2],
+      month: parseInt(match14[3], 10),
+      year: 2000 + parseInt(match14[4], 10),
+      sequence: parseInt(match14[5], 10),
+    };
+  }
+
+  // Legacy format 13 chars: ARTI + X(1) + MM(2) + YY(2) + NNNN(4)
+  const match13 = ref.match(/^(ARTI)(\d{1})(\d{2})(\d{2})(\d{4})$/);
+  if (match13) {
+    return {
+      prefix: match13[1],
+      moduleCode: match13[2],
+      month: parseInt(match13[3], 10),
+      year: 2000 + parseInt(match13[4], 10),
+      sequence: parseInt(match13[5], 10),
+    };
+  }
+
+  return null;
 }
 
 /**

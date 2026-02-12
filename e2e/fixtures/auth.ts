@@ -39,11 +39,7 @@ export type TestUserKey = keyof typeof TEST_USERS;
 /**
  * Se connecter avec un utilisateur spécifique
  */
-export async function loginAs(
-  page: Page,
-  email: string,
-  password: string
-): Promise<void> {
+export async function loginAs(page: Page, email: string, password: string): Promise<void> {
   // Naviguer vers la page de login
   await page.goto('/auth');
 
@@ -57,20 +53,19 @@ export async function loginAs(
   // Soumettre
   await page.locator('button[type="submit"]').click();
 
-  // Attendre la redirection vers le dashboard (ou la page d'accueil)
-  await page.waitForURL('/', { timeout: 15000 });
+  // Attendre la redirection hors de /auth (peut aller vers / ou /select-exercice)
+  await page.waitForFunction(() => !window.location.pathname.startsWith('/auth'), {
+    timeout: 15000,
+  });
 
-  // Vérifier que la connexion a réussi (présence d'un élément du dashboard)
-  await expect(page.locator('[data-testid="user-menu"], .sidebar, nav')).toBeVisible({ timeout: 10000 });
+  // Vérifier que la connexion a réussi (présence du layout principal)
+  await expect(page.locator('main').first()).toBeVisible({ timeout: 10000 });
 }
 
 /**
  * Se connecter avec un utilisateur de test prédéfini
  */
-export async function loginAsUser(
-  page: Page,
-  userKey: TestUserKey
-): Promise<void> {
+export async function loginAsUser(page: Page, userKey: TestUserKey): Promise<void> {
   const user = TEST_USERS[userKey];
   await loginAs(page, user.email, user.password);
 }
@@ -97,7 +92,7 @@ export async function logout(page: Page): Promise<void> {
  */
 export async function isLoggedIn(page: Page): Promise<boolean> {
   try {
-    await page.waitForSelector('[data-testid="user-menu"], .sidebar, nav', { timeout: 5000 });
+    await page.waitForSelector('[data-sidebar="sidebar"], main', { timeout: 5000 });
     return true;
   } catch {
     return false;
@@ -141,11 +136,10 @@ export async function waitForPageLoad(page: Page): Promise<void> {
 /**
  * Sélectionner un exercice si nécessaire
  */
-export async function selectExercice(
-  page: Page,
-  annee?: number
-): Promise<void> {
-  const exerciceSelector = page.locator('[data-testid="exercice-selector"], [aria-label="Sélectionner un exercice"]');
+export async function selectExercice(page: Page, annee?: number): Promise<void> {
+  const exerciceSelector = page.locator(
+    '[data-testid="exercice-selector"], [aria-label="Sélectionner un exercice"]'
+  );
 
   if (await exerciceSelector.isVisible()) {
     await exerciceSelector.click();

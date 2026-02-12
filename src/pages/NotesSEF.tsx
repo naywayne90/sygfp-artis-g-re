@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NoteSEFForm } from '@/components/notes-sef/NoteSEFForm';
 import { NoteSEFList } from '@/components/notes-sef/NoteSEFList';
-import { NoteSEFPreviewDrawer } from '@/components/notes-sef/NoteSEFPreviewDrawer';
+import { NoteSEFDetailSheet } from '@/components/notes-sef/NoteSEFDetailSheet';
 import { NoteSEFRejectDialog } from '@/components/notes-sef/NoteSEFRejectDialog';
 import { NoteSEFDeferDialog } from '@/components/notes-sef/NoteSEFDeferDialog';
 import { useNotesSEF, NoteSEF } from '@/hooks/useNotesSEF';
@@ -13,6 +14,7 @@ import { useNotesSEFExport } from '@/hooks/useNotesSEFExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { useRBAC } from '@/contexts/RBACContext';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
@@ -44,6 +46,10 @@ export default function NotesSEF() {
   const { exercice } = useExercice();
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
+  const { canCreate: canCreateRBAC } = useRBAC();
+
+  // Vérification combinée : exercice ouvert ET profil autorisé à créer
+  const canCreateNoteSEF = canWrite && canCreateRBAC('note_sef');
   const { exportNotesSEF, exportNotesSEFPDF, isExporting, exportProgress } = useNotesSEFExport();
 
   // Nouveau hook pour la liste paginée avec filtres avancés
@@ -63,7 +69,7 @@ export default function NotesSEF() {
     setFilters,
     resetFilters,
     refetch,
-  } = useNotesSEFList({ pageSize: 20 });
+  } = useNotesSEFList({ pageSize: 50 });
 
   // Hook existant pour les mutations
   const { submitNote, validateNote, rejectNote, deferNote, resubmitNote, deleteNote } =
@@ -72,7 +78,8 @@ export default function NotesSEF() {
   // État local pour les dialogs
   const [formOpen, setFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<NoteSEF | null>(null);
-  const [previewNote, setPreviewNote] = useState<NoteSEF | null>(null); // Drawer aperçu rapide (Prompt 26)
+  const [selectedNote, setSelectedNote] = useState<NoteSEF | null>(null);
+  const navigate = useNavigate();
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
 
@@ -221,15 +228,23 @@ export default function NotesSEF() {
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
-                <Button onClick={() => setFormOpen(true)} className="gap-2" disabled={!canWrite}>
-                  {!canWrite ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                <Button
+                  onClick={() => setFormOpen(true)}
+                  className="gap-2"
+                  disabled={!canCreateNoteSEF}
+                >
+                  {!canCreateNoteSEF ? <Lock className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                   Nouvelle note SEF
                 </Button>
               </span>
             </TooltipTrigger>
-            {!canWrite && (
+            {!canCreateNoteSEF && (
               <TooltipContent>
-                <p>{getDisabledMessage()}</p>
+                <p>
+                  {!canWrite
+                    ? getDisabledMessage()
+                    : "Vous n'avez pas les droits pour créer une Note SEF"}
+                </p>
               </TooltipContent>
             )}
           </Tooltip>
@@ -336,15 +351,19 @@ export default function NotesSEF() {
           <NoteSEFList
             notes={filteredNotes as NoteSEF[]}
             title="Toutes les notes SEF"
-            description={`${filteredNotes.length} note(s) trouvée(s)`}
-            onView={(note) => setPreviewNote(note)}
+            description={
+              pagination.totalPages > 1
+                ? `${pagination.total} note(s) trouvée(s) \u2022 Page ${pagination.page}/${pagination.totalPages}`
+                : `${pagination.total} note(s) trouvée(s)`
+            }
+            onView={(note) => setSelectedNote(note)}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             onValidate={handleValidate}
             onReject={setRejectingNote}
             onDefer={setDeferringNote}
             onDelete={handleDelete}
-            onCreate={() => setFormOpen(true)}
+            onCreate={canCreateNoteSEF ? () => setFormOpen(true) : undefined}
             onRetry={refetch}
             isLoading={isLoading}
             error={listError}
@@ -356,11 +375,11 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Brouillons"
             description="Notes en cours de rédaction"
-            onView={(note) => setPreviewNote(note)}
+            onView={(note) => setSelectedNote(note)}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             onDelete={handleDelete}
-            onCreate={() => setFormOpen(true)}
+            onCreate={canCreateNoteSEF ? () => setFormOpen(true) : undefined}
             onRetry={refetch}
             isLoading={isLoading}
             error={listError}
@@ -373,11 +392,11 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes à valider"
             description="Notes en attente de validation"
-            onView={(note) => setPreviewNote(note)}
+            onView={(note) => setSelectedNote(note)}
             onValidate={canValidate ? handleValidate : undefined}
             onReject={canValidate ? setRejectingNote : undefined}
             onDefer={canValidate ? setDeferringNote : undefined}
-            onCreate={() => setFormOpen(true)}
+            onCreate={canCreateNoteSEF ? () => setFormOpen(true) : undefined}
             onRetry={refetch}
             isLoading={isLoading}
             error={listError}
@@ -390,7 +409,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes validées"
             description="Notes ayant été validées"
-            onView={(note) => setPreviewNote(note)}
+            onView={(note) => setSelectedNote(note)}
             showActions={true}
             onRetry={refetch}
             isLoading={isLoading}
@@ -404,7 +423,7 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes différées"
             description="Notes en attente de conditions de reprise"
-            onView={(note) => setPreviewNote(note)}
+            onView={(note) => setSelectedNote(note)}
             onValidate={canValidate ? handleValidate : undefined}
             onResume={handleResume}
             showActions={true}
@@ -420,7 +439,8 @@ export default function NotesSEF() {
             notes={filteredNotes as NoteSEF[]}
             title="Notes rejetées"
             description="Notes ayant été rejetées"
-            onView={(note) => setPreviewNote(note)}
+            onView={(note) => setSelectedNote(note)}
+            onResume={handleResume}
             showActions={true}
             onRetry={refetch}
             isLoading={isLoading}
@@ -459,12 +479,16 @@ export default function NotesSEF() {
         onConfirm={handleDefer}
       />
 
-      {/* Drawer aperçu rapide (Prompt 26) */}
-      <NoteSEFPreviewDrawer
-        open={!!previewNote}
-        onOpenChange={(open) => !open && setPreviewNote(null)}
-        note={previewNote}
+      {/* Sheet de détail (remplace le Drawer aperçu rapide) */}
+      <NoteSEFDetailSheet
+        open={!!selectedNote}
+        onOpenChange={(open) => !open && setSelectedNote(null)}
+        note={selectedNote}
         onEdit={handleEdit}
+        onNavigateToDetail={(note) => {
+          setSelectedNote(null);
+          navigate(`/notes-sef/${note.id}`);
+        }}
       />
     </div>
   );

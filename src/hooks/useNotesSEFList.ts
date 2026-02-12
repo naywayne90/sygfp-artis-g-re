@@ -42,17 +42,17 @@ export interface UseNotesSEFListReturn {
     total: number;
     totalPages: number;
   };
-  
+
   // State
   isLoading: boolean;
   isCountsLoading: boolean;
   error: string | null;
-  
+
   // Filters
   searchQuery: string;
   activeTab: string;
   filters: FiltersState;
-  
+
   // Actions
   setSearchQuery: (query: string) => void;
   setActiveTab: (tab: string) => void;
@@ -67,7 +67,7 @@ const defaultFilters: FiltersState = {
   directionId: null,
   urgence: null,
   dateFrom: null,
-  dateTo: null
+  dateTo: null,
 };
 
 /**
@@ -119,10 +119,7 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
   }, [activeTab]);
 
   // Query pour les compteurs (séparée pour éviter les recalculs)
-  const { 
-    data: countsResult, 
-    isLoading: isCountsLoading 
-  } = useQuery({
+  const { data: countsResult, isLoading: isCountsLoading } = useQuery({
     queryKey: ['notes-sef-counts', exercice],
     queryFn: async () => {
       if (!exercice) return null;
@@ -138,12 +135,12 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
     data: listResult,
     isLoading,
     error: queryError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['notes-sef-list', exercice, page, pageSize, debouncedSearch, statutFilter, filters],
     queryFn: async () => {
       if (!exercice) return null;
-      
+
       const options: ListNotesOptions = {
         exercice,
         page,
@@ -155,13 +152,13 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
         dateFrom: filters.dateFrom || undefined,
         dateTo: filters.dateTo || undefined,
         sortBy: 'updated_at',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
       };
-      
+
       return notesSefService.listPaginated(options);
     },
     enabled: !!exercice,
-    staleTime: 10000, // 10 secondes
+    staleTime: 30000, // 30 secondes
     refetchOnWindowFocus: true,
   });
 
@@ -188,11 +185,13 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
     total: 0,
     page: 1,
     pageSize,
-    totalPages: 0
+    totalPages: 0,
   };
 
   // Extraire les données
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const counts = countsResult?.success ? countsResult.data! : defaultCounts;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const paginatedData = listResult?.success ? listResult.data! : defaultPagination;
 
   return {
@@ -203,19 +202,19 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
       page: paginatedData.page,
       pageSize: paginatedData.pageSize,
       total: paginatedData.total,
-      totalPages: paginatedData.totalPages
+      totalPages: paginatedData.totalPages,
     },
-    
+
     // State
     isLoading,
     isCountsLoading,
     error: queryError ? (queryError as Error).message : null,
-    
+
     // Filters
     searchQuery,
     activeTab,
     filters,
-    
+
     // Actions
     setSearchQuery,
     setActiveTab,
@@ -226,6 +225,6 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
     refetch: () => {
       invalidateQueries();
       refetch();
-    }
+    },
   };
 }

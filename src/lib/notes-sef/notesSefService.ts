@@ -2,7 +2,7 @@
  * Notes SEF - Service d'accès aux données
  * =========================================
  * Couche d'abstraction pour les opérations CRUD et métier
- * 
+ *
  * NOTE: Ce service contient des placeholders pour une évolution future.
  * L'UI existante utilise actuellement useNotesSEF() qui fonctionne correctement.
  * Ce service sera progressivement intégré sans casser l'existant.
@@ -62,7 +62,8 @@ export const notesSefService = {
     try {
       let query = supabase
         .from('notes_sef')
-        .select(`
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           demandeur:profiles!demandeur_id(id, first_name, last_name),
@@ -70,7 +71,8 @@ export const notesSefService = {
           beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
           created_by_profile:profiles!created_by(id, first_name, last_name),
           dossier:dossiers!dossier_id(id, numero, statut_global)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (filters.exercice) {
@@ -104,7 +106,9 @@ export const notesSefService = {
    * Utilise la fonction RPC pour rechercher sur direction et demandeur
    * @param options Options de recherche et pagination
    */
-  async listPaginated(options: ListNotesOptions): Promise<ServiceResult<PaginatedResult<NoteSEFEntity>>> {
+  async listPaginated(
+    options: ListNotesOptions
+  ): Promise<ServiceResult<PaginatedResult<NoteSEFEntity>>> {
     try {
       const {
         exercice,
@@ -117,7 +121,7 @@ export const notesSefService = {
         dateFrom,
         dateTo,
         sortBy = 'updated_at',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
       } = options;
 
       const offset = (page - 1) * pageSize;
@@ -133,7 +137,7 @@ export const notesSefService = {
           p_direction_id: direction_id || null,
           p_urgence: urgence || null,
           p_date_from: dateFrom || null,
-          p_date_to: dateTo || null
+          p_date_to: dateTo || null,
         }
       );
       if (countError) throw countError;
@@ -142,27 +146,24 @@ export const notesSefService = {
       const totalPages = Math.ceil(total / pageSize);
 
       // 2. Récupérer les données via RPC v2 pour recherche étendue
-      const { data: rpcData, error: rpcError } = await supabase.rpc(
-        'search_notes_sef_v2',
-        {
-          p_exercice: exercice,
-          p_search: search?.trim() || null,
-          p_statut: statutArray,
-          p_direction_id: direction_id || null,
-          p_urgence: urgence || null,
-          p_date_from: dateFrom || null,
-          p_date_to: dateTo || null,
-          p_limit: pageSize,
-          p_offset: offset,
-          p_sort_by: sortBy,
-          p_sort_order: sortOrder
-        }
-      );
+      const { data: rpcData, error: rpcError } = await supabase.rpc('search_notes_sef_v2', {
+        p_exercice: exercice,
+        p_search: search?.trim() || null,
+        p_statut: statutArray,
+        p_direction_id: direction_id || null,
+        p_urgence: urgence || null,
+        p_date_from: dateFrom || null,
+        p_date_to: dateTo || null,
+        p_limit: pageSize,
+        p_offset: offset,
+        p_sort_by: sortBy,
+        p_sort_order: sortOrder,
+      });
       if (rpcError) throw rpcError;
 
       // 3. Enrichir avec les relations (direction, demandeur, etc.)
       const noteIds = (rpcData || []).map((n: { id: string }) => n.id);
-      
+
       if (noteIds.length === 0) {
         return {
           success: true,
@@ -171,14 +172,15 @@ export const notesSefService = {
             total: 0, // Si aucune donnée retournée, le total doit être 0
             page,
             pageSize,
-            totalPages: 0
-          }
+            totalPages: 0,
+          },
         };
       }
 
       const { data: enrichedData, error: enrichError } = await supabase
         .from('notes_sef')
-        .select(`
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           demandeur:profiles!demandeur_id(id, first_name, last_name),
@@ -187,22 +189,25 @@ export const notesSefService = {
           created_by_profile:profiles!created_by(id, first_name, last_name),
           dossier:dossiers!dossier_id(id, numero, statut_global),
           pieces:notes_sef_pieces(id)
-        `)
+        `
+        )
         .in('id', noteIds);
 
       if (enrichError) throw enrichError;
 
       // Préserver l'ordre du RPC et ajouter le comptage des pièces
-      const orderedData = noteIds.map((id: string) => {
-        const note = enrichedData?.find((n) => n.id === id);
-        if (note) {
-          return {
-            ...note,
-            pieces_count: Array.isArray(note.pieces) ? note.pieces.length : 0
-          };
-        }
-        return null;
-      }).filter(Boolean);
+      const orderedData = noteIds
+        .map((id: string) => {
+          const note = enrichedData?.find((n) => n.id === id);
+          if (note) {
+            return {
+              ...note,
+              pieces_count: Array.isArray(note.pieces) ? note.pieces.length : 0,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       return {
         success: true,
@@ -211,8 +216,8 @@ export const notesSefService = {
           total,
           page,
           pageSize,
-          totalPages
-        }
+          totalPages,
+        },
       };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -248,6 +253,7 @@ export const notesSefService = {
         if (statut === 'valide_auto') {
           counts.valide++;
         } else if (statut in counts) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (counts as any)[statut]++;
         }
       }
@@ -265,7 +271,8 @@ export const notesSefService = {
     try {
       const { data, error } = await supabase
         .from('notes_sef')
-        .select(`
+        .select(
+          `
           *,
           direction:directions(id, label, sigle, code),
           demandeur:profiles!demandeur_id(id, first_name, last_name, email),
@@ -273,10 +280,13 @@ export const notesSefService = {
           beneficiaire_interne:profiles!beneficiaire_interne_id(id, first_name, last_name),
           created_by_profile:profiles!notes_sef_created_by_fkey(id, first_name, last_name),
           dossier:dossiers!dossier_id(id, numero, statut_global),
+          objectif_strategique:objectifs_strategiques!os_id(id, code, libelle),
+          mission:missions!mission_id(id, code, libelle),
           validated_by_profile:profiles!notes_sef_validated_by_fkey(id, first_name, last_name),
           rejected_by_profile:profiles!notes_sef_rejected_by_fkey(id, first_name, last_name),
           differe_by_profile:profiles!notes_sef_differe_by_fkey(id, first_name, last_name)
-        `)
+        `
+        )
         .eq('id', id)
         .single();
 
@@ -299,18 +309,23 @@ export const notesSefService = {
    * @returns La note créée avec sa référence pivot générée
    */
   async createDraftWithAttachments(
-    dto: CreateNoteSEFDTO, 
+    dto: CreateNoteSEFDTO,
     exercice: number,
     attachments?: File[]
-  ): Promise<ServiceResult<NoteSEFEntity & { attachmentResults?: { success: number; failed: number } }>> {
+  ): Promise<
+    ServiceResult<NoteSEFEntity & { attachmentResults?: { success: number; failed: number } }>
+  > {
     try {
       // 1. Récupérer l'utilisateur
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
       if (authError || !user) {
         return { success: false, error: 'Non authentifié' };
       }
 
-      // 2. Créer la note (le trigger génère reference_pivot automatiquement)
+      // 2. Créer la note en brouillon (référence générée à la soumission via RPC)
       const { data: note, error: insertError } = await supabase
         .from('notes_sef')
         .insert({
@@ -345,7 +360,7 @@ export const notesSefService = {
 
       // 4. Upload des pièces jointes si présentes
       const attachmentResults = { success: 0, failed: 0 };
-      
+
       if (attachments && attachments.length > 0) {
         for (const file of attachments) {
           try {
@@ -362,7 +377,7 @@ export const notesSefService = {
             if (uploadError) {
               console.error('Upload error:', uploadError);
               attachmentResults.failed++;
-              
+
               // Log échec
               await supabase.from('notes_sef_history').insert({
                 note_id: note.id,
@@ -399,12 +414,12 @@ export const notesSefService = {
         }
       }
 
-      return { 
-        success: true, 
-        data: { 
-          ...note as unknown as NoteSEFEntity, 
-          attachmentResults 
-        } 
+      return {
+        success: true,
+        data: {
+          ...(note as unknown as NoteSEFEntity),
+          attachmentResults,
+        },
       };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -415,7 +430,10 @@ export const notesSefService = {
    * Créer une nouvelle note SEF (brouillon) - ALIAS pour compatibilité
    * @deprecated Utiliser createDraftWithAttachments pour le support des PJ
    */
-  async createDraft(dto: CreateNoteSEFDTO, exercice: number): Promise<ServiceResult<NoteSEFEntity>> {
+  async createDraft(
+    dto: CreateNoteSEFDTO,
+    exercice: number
+  ): Promise<ServiceResult<NoteSEFEntity>> {
     return this.createDraftWithAttachments(dto, exercice);
   },
 
@@ -479,10 +497,12 @@ export const notesSefService = {
     try {
       const { data, error } = await supabase
         .from('notes_sef_pieces')
-        .select(`
+        .select(
+          `
           *,
           uploader:profiles!uploaded_by(id, first_name, last_name)
-        `)
+        `
+        )
         .eq('note_id', noteId)
         .order('uploaded_at', { ascending: false });
 
@@ -507,10 +527,7 @@ export const notesSefService = {
    */
   async deleteAttachment(pieceId: string): Promise<ServiceResult<void>> {
     try {
-      const { error } = await supabase
-        .from('notes_sef_pieces')
-        .delete()
-        .eq('id', pieceId);
+      const { error } = await supabase.from('notes_sef_pieces').delete().eq('id', pieceId);
 
       if (error) throw error;
       return { success: true };
@@ -530,10 +547,12 @@ export const notesSefService = {
     try {
       const { data, error } = await supabase
         .from('notes_sef_history')
-        .select(`
+        .select(
+          `
           *,
           performer:profiles!performed_by(id, first_name, last_name)
-        `)
+        `
+        )
         .eq('note_id', noteId)
         .order('performed_at', { ascending: false });
 

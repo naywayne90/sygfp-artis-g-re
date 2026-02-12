@@ -207,10 +207,12 @@ export function RBACProvider({ children }: RBACProviderProps) {
     if (isAdmin) return true;
     if (isAuditeur) return false;
 
+    const profil = user.profilFonctionnel;
     switch (entityType) {
       case 'note_sef':
+        return profil === 'Operationnel' || profil === 'Validateur' || profil === 'OPERATEUR';
       case 'note_aef':
-        return true;
+        return profil === 'Validateur';
       case 'engagement':
         return isCB || isDAF;
       case 'liquidation':
