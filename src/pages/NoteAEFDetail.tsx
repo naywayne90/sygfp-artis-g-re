@@ -189,7 +189,8 @@ export default function NoteAEFDetail() {
     queryKey: ['note-aef-detail', id],
     queryFn: async () => {
       if (!id) return null;
-      const { data, error } = await (supabase.from as any)('notes_dg')
+      const { data, error } = await supabase
+        .from('notes_dg')
         .select(
           `
           *,
@@ -212,13 +213,12 @@ export default function NoteAEFDetail() {
     enabled: !!id,
   });
 
-  // Fetch history (cast to any to handle table not in generated types)
+  // Fetch history
   const { data: history = [] } = useQuery({
     queryKey: ['note-aef-history', id],
     queryFn: async () => {
       if (!id) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('notes_aef_history')
         .select(
           `
@@ -329,7 +329,7 @@ export default function NoteAEFDetail() {
         (error instanceof Error ? error.message : null) || 'Erreur lors de la suppression'
       );
     } finally {
-      setIsSubmitting(true);
+      setIsSubmitting(false);
       setShowDeleteDialog(false);
     }
   };
