@@ -13,6 +13,10 @@ import { ValidationDG } from '@/hooks/useValidationDG';
 import { downloadNoteSEFPdf, generateNoteSEFPdf } from '@/services/noteSEFPdfService';
 import { toast } from 'sonner';
 
+// Tables not yet in generated Supabase types - use untyped helper
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fromTable = (table: string) => (supabase as any).from(table);
+
 interface ExportState {
   isExporting: boolean;
   progress: string;
@@ -46,28 +50,52 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
   const loadNoteData = useCallback(async (noteId: string) => {
     setProgress('Chargement de la note...');
 
-    // 1. Charger la note
-    const { data: note, error: noteError } = await supabase
+    // 1. Charger la note (select('*') sans FK joins pour éviter "excessively deep")
+    const { data: noteRaw, error: noteError } = await supabase
       .from('notes_sef')
-      .select(
-        `
-        *,
-        direction:directions(id, sigle, label),
-        demandeur:profiles!notes_sef_demandeur_id_fkey(id, first_name, last_name, full_name),
-        beneficiaire:prestataires(id, nom, raison_sociale)
-      `
-      )
+      .select('*')
       .eq('id', noteId)
       .single();
 
     if (noteError) throw new Error(`Erreur chargement note: ${noteError.message}`);
-    if (!note) throw new Error('Note non trouvée');
+    if (!noteRaw) throw new Error('Note non trouvée');
+
+    // Charger les relations séparément
+    const [directionRes, demandeurRes, beneficiaireRes] = await Promise.all([
+      noteRaw.direction_id
+        ? supabase
+            .from('directions')
+            .select('id, sigle, label')
+            .eq('id', noteRaw.direction_id)
+            .single()
+        : { data: null },
+      noteRaw.demandeur_id
+        ? supabase
+            .from('profiles')
+            .select('id, first_name, last_name, full_name')
+            .eq('id', noteRaw.demandeur_id)
+            .single()
+        : { data: null },
+      noteRaw.beneficiaire_id
+        ? supabase
+            .from('prestataires')
+            .select('id, nom, raison_sociale')
+            .eq('id', noteRaw.beneficiaire_id)
+            .single()
+        : { data: null },
+    ]);
+
+    const note: NoteSEF = {
+      ...(noteRaw as unknown as NoteSEF),
+      direction: directionRes.data ?? undefined,
+      demandeur: demandeurRes.data ?? undefined,
+      beneficiaire: beneficiaireRes.data ?? undefined,
+    };
 
     setProgress('Chargement des imputations...');
 
-    // 2. Charger l'imputation
-    const { data: imputation } = await supabase
-      .from('note_imputations')
+    // 2. Charger l'imputation (table non générée dans les types Supabase)
+    const { data: imputation } = await fromTable('note_imputations')
       .select(
         `
         *,
@@ -84,8 +112,7 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
     let imputationWithLignes: NoteImputation | null = null;
     if (imputation) {
       // Charger les lignes d'imputation
-      const { data: lignes } = await supabase
-        .from('note_imputation_lignes')
+      const { data: lignes } = await fromTable('note_imputation_lignes')
         .select(
           `
           *,
@@ -103,9 +130,8 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
 
     setProgress('Chargement de la validation...');
 
-    // 3. Charger la validation DG
-    const { data: validation } = await supabase
-      .from('validation_dg')
+    // 3. Charger la validation DG (table non générée dans les types Supabase)
+    const { data: validation } = await fromTable('validation_dg')
       .select(
         `
         *,
@@ -130,7 +156,7 @@ export function useExportNoteSEFPdf(): UseExportNoteSEFPdfResult {
       .eq('note_id', noteId);
 
     return {
-      note: note as NoteSEF,
+      note,
       imputation: imputationWithLignes,
       validation: validation as ValidationDG | null,
       attachmentsCount: attachmentsCount || 0,

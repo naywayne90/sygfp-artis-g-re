@@ -20,7 +20,9 @@ export const notesAefService = {
   /**
    * Récupérer les notes AEF paginées avec recherche server-side
    */
-  async listPaginated(options: ListNotesAEFOptions): Promise<ServiceResult<PaginatedResult<NoteAEFEntity>>> {
+  async listPaginated(
+    options: ListNotesAEFOptions
+  ): Promise<ServiceResult<PaginatedResult<NoteAEFEntity>>> {
     try {
       const {
         exercice,
@@ -33,47 +35,41 @@ export const notesAefService = {
         dateFrom,
         dateTo,
         sortBy = 'updated_at',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
       } = options;
 
       const offset = (page - 1) * pageSize;
       const statutArray = statut ? (Array.isArray(statut) ? statut : [statut]) : null;
 
       // 1. Compter le total avec filtres
-      const { data: totalCount, error: countError } = await supabase.rpc(
-        'count_search_notes_aef',
-        {
-          p_exercice: exercice,
-          p_search: search?.trim() || null,
-          p_statut: statutArray,
-          p_direction_id: direction_id || null,
-          p_urgence: urgence || null,
-          p_date_from: dateFrom || null,
-          p_date_to: dateTo || null
-        }
-      );
+      const { data: totalCount, error: countError } = await supabase.rpc('count_search_notes_aef', {
+        p_exercice: exercice,
+        p_search: search?.trim() || null,
+        p_statut: statutArray,
+        p_direction_id: direction_id || null,
+        p_urgence: urgence || null,
+        p_date_from: dateFrom || null,
+        p_date_to: dateTo || null,
+      });
       if (countError) throw countError;
 
       const total = totalCount || 0;
       const totalPages = Math.ceil(total / pageSize);
 
       // 2. Récupérer les IDs via RPC
-      const { data: rpcData, error: rpcError } = await supabase.rpc(
-        'search_notes_aef',
-        {
-          p_exercice: exercice,
-          p_search: search?.trim() || null,
-          p_statut: statutArray,
-          p_direction_id: direction_id || null,
-          p_urgence: urgence || null,
-          p_date_from: dateFrom || null,
-          p_date_to: dateTo || null,
-          p_limit: pageSize,
-          p_offset: offset,
-          p_sort_by: sortBy,
-          p_sort_order: sortOrder
-        }
-      );
+      const { data: rpcData, error: rpcError } = await supabase.rpc('search_notes_aef', {
+        p_exercice: exercice,
+        p_search: search?.trim() || null,
+        p_statut: statutArray,
+        p_direction_id: direction_id || null,
+        p_urgence: urgence || null,
+        p_date_from: dateFrom || null,
+        p_date_to: dateTo || null,
+        p_limit: pageSize,
+        p_offset: offset,
+        p_sort_by: sortBy,
+        p_sort_order: sortOrder,
+      });
       if (rpcError) throw rpcError;
 
       const noteIds = (rpcData || []).map((n: { id: string }) => n.id);
@@ -81,14 +77,15 @@ export const notesAefService = {
       if (noteIds.length === 0) {
         return {
           success: true,
-          data: { data: [], total: 0, page, pageSize, totalPages: 0 }
+          data: { data: [], total: 0, page, pageSize, totalPages: 0 },
         };
       }
 
       // 3. Enrichir avec les relations (inclut reference_pivot de la note_sef)
       const { data: enrichedData, error: enrichError } = await supabase
         .from('notes_dg')
-        .select(`
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
@@ -96,22 +93,25 @@ export const notesAefService = {
           budget_line:budget_lines(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id),
           attachments:note_attachments(id)
-        `)
+        `
+        )
         .in('id', noteIds);
 
       if (enrichError) throw enrichError;
 
       // Préserver l'ordre du RPC et ajouter le comptage des pièces jointes
-      const orderedData = noteIds.map((id: string) => {
-        const note = enrichedData?.find((n) => n.id === id);
-        if (note) {
-          return {
-            ...note,
-            attachments_count: Array.isArray(note.attachments) ? note.attachments.length : 0
-          };
-        }
-        return null;
-      }).filter(Boolean);
+      const orderedData = noteIds
+        .map((id: string) => {
+          const note = enrichedData?.find((n) => n.id === id);
+          if (note) {
+            return {
+              ...note,
+              attachments_count: Array.isArray(note.attachments) ? note.attachments.length : 0,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
       return {
         success: true,
@@ -120,8 +120,8 @@ export const notesAefService = {
           total,
           page,
           pageSize,
-          totalPages
-        }
+          totalPages,
+        },
       };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -154,8 +154,8 @@ export const notesAefService = {
       for (const note of data || []) {
         counts.total++;
         const statut = note.statut || 'brouillon';
-        if (statut in counts) {
-          (counts as any)[statut]++;
+        if (statut in counts && statut !== 'total') {
+          counts[statut as keyof Omit<NoteAEFCounts, 'total'>]++;
         }
       }
 
@@ -172,14 +172,16 @@ export const notesAefService = {
     try {
       const { data, error } = await supabase
         .from('notes_dg')
-        .select(`
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
           budget_line:budget_lines(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
-        `)
+        `
+        )
         .eq('id', id)
         .single();
 

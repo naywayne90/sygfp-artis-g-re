@@ -1,13 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useToast } from "@/hooks/use-toast";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { 
-  NoteAEFStatut, 
-  isValidTransitionAEF, 
-  getAvailableTransitionsAEF 
-} from "@/lib/notes-aef/constants";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import {
+  NoteAEFStatut,
+  isValidTransitionAEF,
+  getAvailableTransitionsAEF,
+} from '@/lib/notes-aef/constants';
 
 export interface NoteAEF {
   id: string;
@@ -52,7 +52,13 @@ export interface NoteAEF {
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
-  note_sef?: { id: string; numero: string | null; reference_pivot: string | null; objet: string; dossier_id?: string | null };
+  note_sef?: {
+    id: string;
+    numero: string | null;
+    reference_pivot: string | null;
+    objet: string;
+    dossier_id?: string | null;
+  };
 }
 
 export interface BudgetValidationStatus {
@@ -77,23 +83,29 @@ export function useNotesAEF() {
   const { logAction } = useAuditLog();
 
   // Fetch all notes AEF for current exercice
-  const { data: notes = [], isLoading, refetch } = useQuery({
-    queryKey: ["notes-aef", exercice],
+  const {
+    data: notes = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['notes-aef', exercice],
     queryFn: async () => {
       let query = supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
           budget_line:budget_lines(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
-        `)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .order('created_at', { ascending: false });
 
       if (exercice) {
-        query = query.eq("exercice", exercice);
+        query = query.eq('exercice', exercice);
       }
 
       const { data, error } = await query;
@@ -105,13 +117,13 @@ export function useNotesAEF() {
 
   // Fetch directions
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions-active-aef"],
+    queryKey: ['directions-active-aef'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, code, label, sigle")
-        .eq("est_active", true)
-        .order("label");
+        .from('directions')
+        .select('id, code, label, sigle')
+        .eq('est_active', true)
+        .order('label');
       if (error) throw error;
       return data;
     },
@@ -119,22 +131,22 @@ export function useNotesAEF() {
 
   // POINT 2: Fetch validated Notes SEF for linking (includes reference_pivot)
   const { data: notesSEFValidees = [] } = useQuery({
-    queryKey: ["notes-sef-validees-for-aef", exercice],
+    queryKey: ['notes-sef-validees-for-aef', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("notes_sef")
-        .select("id, numero, reference_pivot, objet, direction_id, validated_at")
-        .eq("statut", "valide")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("validated_at", { ascending: false });
+        .from('notes_sef')
+        .select('id, numero, reference_pivot, objet, direction_id, validated_at')
+        .eq('statut', 'valide')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('validated_at', { ascending: false });
       if (error) throw error;
-      return data as { 
-        id: string; 
-        numero: string | null; 
+      return data as {
+        id: string;
+        numero: string | null;
         reference_pivot: string | null;
-        objet: string; 
-        direction_id: string | null; 
-        validated_at: string | null 
+        objet: string;
+        direction_id: string | null;
+        validated_at: string | null;
       }[];
     },
     enabled: !!exercice,
@@ -142,12 +154,12 @@ export function useNotesAEF() {
 
   // Fetch beneficiaires (prestataires)
   const { data: beneficiaires = [] } = useQuery({
-    queryKey: ["prestataires-for-notes"],
+    queryKey: ['prestataires-for-notes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("prestataires")
-        .select("id, raison_sociale")
-        .order("raison_sociale");
+        .from('prestataires')
+        .select('id, raison_sociale')
+        .order('raison_sociale');
       if (error) throw error;
       return data as { id: string; raison_sociale: string }[];
     },
@@ -155,16 +167,16 @@ export function useNotesAEF() {
 
   // Fetch budget lines for imputation
   const { data: budgetLines = [] } = useQuery({
-    queryKey: ["budget-lines-for-imputation", exercice],
+    queryKey: ['budget-lines-for-imputation', exercice],
     queryFn: async () => {
       let query = supabase
-        .from("budget_lines")
-        .select("id, code, label, dotation_initiale, dotation_modifiee, statut")
-        .eq("is_active", true)
-        .order("code");
+        .from('budget_lines')
+        .select('id, code, label, dotation_initiale, dotation_modifiee, statut')
+        .eq('is_active', true)
+        .order('code');
 
       if (exercice) {
-        query = query.eq("exercice", exercice);
+        query = query.eq('exercice', exercice);
       }
 
       const { data, error } = await query;
@@ -176,25 +188,35 @@ export function useNotesAEF() {
 
   // Check if budget is validated
   const { data: budgetValidationStatus } = useQuery({
-    queryKey: ["budget-validation-status", exercice],
+    queryKey: ['budget-validation-status', exercice],
     queryFn: async (): Promise<BudgetValidationStatus> => {
       if (!exercice) {
-        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucun exercice sélectionné" };
+        return {
+          isValidated: false,
+          totalLines: 0,
+          validatedLines: 0,
+          message: 'Aucun exercice sélectionné',
+        };
       }
 
       const { data: lines, error } = await supabase
-        .from("budget_lines")
-        .select("id, statut")
-        .eq("exercice", exercice)
-        .eq("is_active", true);
+        .from('budget_lines')
+        .select('id, statut')
+        .eq('exercice', exercice)
+        .eq('is_active', true);
 
       if (error) throw error;
 
       const total = lines?.length || 0;
-      const validated = lines?.filter(l => l.statut === "valide").length || 0;
+      const validated = lines?.filter((l) => l.statut === 'valide').length || 0;
 
       if (total === 0) {
-        return { isValidated: false, totalLines: 0, validatedLines: 0, message: "Aucune ligne budgétaire" };
+        return {
+          isValidated: false,
+          totalLines: 0,
+          validatedLines: 0,
+          message: 'Aucune ligne budgétaire',
+        };
       }
 
       const isValidated = validated > 0 && validated === total;
@@ -203,7 +225,7 @@ export function useNotesAEF() {
         isValidated,
         totalLines: total,
         validatedLines: validated,
-        message: isValidated ? "Budget validé" : `Budget non validé (${validated}/${total})`
+        message: isValidated ? 'Budget validé' : `Budget non validé (${validated}/${total})`,
       };
     },
     enabled: !!exercice,
@@ -212,26 +234,35 @@ export function useNotesAEF() {
   // (Removed duplicate queries - already defined above)
 
   // Check budget availability for a specific line
-  const checkBudgetAvailability = async (budgetLineId: string, montant: number): Promise<BudgetAvailabilityCheck> => {
+  const checkBudgetAvailability = async (
+    budgetLineId: string,
+    montant: number
+  ): Promise<BudgetAvailabilityCheck> => {
     // Get budget line dotation
     const { data: line, error: lineError } = await supabase
-      .from("budget_lines")
-      .select("id, dotation_initiale, dotation_modifiee")
-      .eq("id", budgetLineId)
+      .from('budget_lines')
+      .select('id, dotation_initiale, dotation_modifiee')
+      .eq('id', budgetLineId)
       .single();
 
     if (lineError || !line) {
-      return { isAvailable: false, dotation: 0, engaged: 0, disponible: 0, message: "Ligne budgétaire introuvable" };
+      return {
+        isAvailable: false,
+        dotation: 0,
+        engaged: 0,
+        disponible: 0,
+        message: 'Ligne budgétaire introuvable',
+      };
     }
 
     const dotation = line.dotation_modifiee || line.dotation_initiale || 0;
 
     // Get total engagements on this line
     const { data: engagements, error: engError } = await supabase
-      .from("budget_engagements")
-      .select("montant")
-      .eq("budget_line_id", budgetLineId)
-      .neq("statut", "annule");
+      .from('budget_engagements')
+      .select('montant')
+      .eq('budget_line_id', budgetLineId)
+      .neq('statut', 'annule');
 
     if (engError) throw engError;
 
@@ -244,22 +275,26 @@ export function useNotesAEF() {
       dotation,
       engaged: totalEngaged,
       disponible,
-      message: isAvailable 
-        ? `Disponible: ${disponible.toLocaleString("fr-FR")} FCFA` 
-        : `Insuffisant: ${disponible.toLocaleString("fr-FR")} FCFA disponibles`
+      message: isAvailable
+        ? `Disponible: ${disponible.toLocaleString('fr-FR')} FCFA`
+        : `Insuffisant: ${disponible.toLocaleString('fr-FR')} FCFA disponibles`,
     };
   };
 
   // Create note - La référence AEF = référence SEF liée (règle métier)
   const createMutation = useMutation({
-    mutationFn: async (noteData: Partial<NoteAEF> & { 
-      note_sef_id?: string | null;
-      is_direct_aef?: boolean;
-      type_depense?: string;
-      justification?: string;
-    }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+    mutationFn: async (
+      noteData: Partial<NoteAEF> & {
+        note_sef_id?: string | null;
+        is_direct_aef?: boolean;
+        type_depense?: string;
+        justification?: string;
+      }
+    ) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       let referencePivot: string | null = null;
       let origin: 'FROM_SEF' | 'DIRECT' = 'DIRECT';
@@ -268,17 +303,17 @@ export function useNotesAEF() {
       // RÈGLE MÉTIER: Si liée à une Note SEF existante, copier sa référence
       if (noteData.note_sef_id && !noteData.is_direct_aef) {
         const { data: noteSef, error: sefError } = await supabase
-          .from("notes_sef")
-          .select("id, numero, reference_pivot, statut")
-          .eq("id", noteData.note_sef_id)
+          .from('notes_sef')
+          .select('id, numero, reference_pivot, statut')
+          .eq('id', noteData.note_sef_id)
           .single();
 
         if (sefError || !noteSef) {
-          throw new Error("Note SEF introuvable");
+          throw new Error('Note SEF introuvable');
         }
 
-        if (noteSef.statut !== "valide") {
-          throw new Error("La Note SEF doit être validée pour créer une AEF");
+        if (noteSef.statut !== 'valide') {
+          throw new Error('La Note SEF doit être validée pour créer une AEF');
         }
 
         // La référence AEF = référence SEF (même code)
@@ -287,49 +322,51 @@ export function useNotesAEF() {
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
-        .insert([{
-          objet: noteData.objet!,
-          contenu: noteData.contenu,
-          direction_id: noteData.direction_id,
-          priorite: noteData.priorite || "normale",
-          montant_estime: noteData.montant_estime || 0,
-          type_depense: noteData.type_depense || "fonctionnement",
-          justification: noteData.justification,
-          note_sef_id: noteSefId,
-          is_direct_aef: noteData.is_direct_aef || false,
-          origin: origin,
-          reference_pivot: referencePivot, // Copie de la référence SEF
-          beneficiaire_id: noteData.beneficiaire_id,
-          ligne_budgetaire_id: noteData.ligne_budgetaire_id,
-          os_id: noteData.os_id,
-          action_id: noteData.action_id,
-          activite_id: noteData.activite_id,
-          exercice: exercice || new Date().getFullYear(),
-          created_by: user.id,
-          statut: "brouillon",
-        }])
+        .from('notes_dg')
+        .insert([
+          {
+            objet: noteData.objet ?? '',
+            contenu: noteData.contenu,
+            direction_id: noteData.direction_id,
+            priorite: noteData.priorite || 'normale',
+            montant_estime: noteData.montant_estime || 0,
+            type_depense: noteData.type_depense || 'fonctionnement',
+            justification: noteData.justification,
+            note_sef_id: noteSefId,
+            is_direct_aef: noteData.is_direct_aef || false,
+            origin: origin,
+            reference_pivot: referencePivot, // Copie de la référence SEF
+            beneficiaire_id: noteData.beneficiaire_id,
+            ligne_budgetaire_id: noteData.ligne_budgetaire_id,
+            os_id: noteData.os_id,
+            action_id: noteData.action_id,
+            activite_id: noteData.activite_id,
+            exercice: exercice || new Date().getFullYear(),
+            created_by: user.id,
+            statut: 'brouillon',
+          },
+        ])
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: data,
       });
 
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
       const refDisplay = data.reference_pivot || data.numero || data.id.substring(0, 8);
       toast({ title: `Note AEF ${refDisplay} créée avec succès` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -344,106 +381,110 @@ export function useNotesAEF() {
       type_depense?: string;
       justification: string; // Obligatoire pour AEF directe
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier que l'utilisateur est DG ou ADMIN
       const { data: userRoles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      
-      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
-        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent créer une AEF directe");
+        throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent créer une AEF directe');
       }
 
       // Validation
       if (!noteData.justification?.trim()) {
-        throw new Error("La justification est obligatoire pour une AEF directe DG");
+        throw new Error('La justification est obligatoire pour une AEF directe DG');
       }
 
       // 1. Générer la référence ARTI (étape 0 = SEF)
       const { data: referencePivot, error: refError } = await supabase.rpc(
-        "generate_arti_reference",
+        'generate_arti_reference',
         { p_etape: 0, p_date: new Date().toISOString() }
       );
 
       if (refError || !referencePivot) {
-        throw new Error("Erreur lors de la génération de la référence");
+        throw new Error('Erreur lors de la génération de la référence');
       }
 
       // 2. Créer la SEF shadow (auto-validée)
       const { data: shadowSef, error: sefError } = await supabase
-        .from("notes_sef")
-        .insert([{
-          objet: `[AEF DIRECTE] ${noteData.objet}`,
-          description: noteData.contenu || null,
-          justification: `AEF directe DG: ${noteData.justification}`,
-          direction_id: noteData.direction_id,
-          demandeur_id: user.id,
-          urgence: noteData.priorite || "normale",
-          exercice: exercice || new Date().getFullYear(),
-          created_by: user.id,
-          numero: referencePivot,
-          reference_pivot: referencePivot,
-          statut: "valide_auto", // Statut spécial: validée automatiquement
-          validated_by: user.id,
-          validated_at: new Date().toISOString(),
-          submitted_by: user.id,
-          submitted_at: new Date().toISOString(),
-          dg_validation_required: false, // Pas besoin de validation DG
-        }])
+        .from('notes_sef')
+        .insert([
+          {
+            objet: `[AEF DIRECTE] ${noteData.objet}`,
+            description: noteData.contenu || null,
+            justification: `AEF directe DG: ${noteData.justification}`,
+            direction_id: noteData.direction_id,
+            demandeur_id: user.id,
+            urgence: noteData.priorite || 'normale',
+            exercice: exercice || new Date().getFullYear(),
+            created_by: user.id,
+            numero: referencePivot,
+            reference_pivot: referencePivot,
+            statut: 'valide_auto', // Statut spécial: validée automatiquement
+            validated_by: user.id,
+            validated_at: new Date().toISOString(),
+            submitted_by: user.id,
+            submitted_at: new Date().toISOString(),
+            dg_validation_required: false, // Pas besoin de validation DG
+          },
+        ])
         .select()
         .single();
 
       if (sefError || !shadowSef) {
-        console.error("Erreur création SEF shadow:", sefError);
-        throw new Error("Erreur lors de la création de la Note SEF associée");
+        throw new Error('Erreur lors de la création de la Note SEF associée');
       }
 
       // Log création SEF shadow (utilise "create" avec métadonnées)
       await logAction({
-        entityType: "note_sef",
+        entityType: 'note_sef',
         entityId: shadowSef.id,
-        action: "create",
-        newValues: { ...shadowSef, is_shadow: true, created_via: "AEF_DIRECT_DG" },
+        action: 'create',
+        newValues: { ...shadowSef, is_shadow: true, created_via: 'AEF_DIRECT_DG' },
       });
 
       // 3. Créer l'AEF liée à la SEF shadow
       const { data: aefData, error: aefError } = await supabase
-        .from("notes_dg")
-        .insert([{
-          objet: noteData.objet,
-          contenu: noteData.contenu || null,
-          direction_id: noteData.direction_id,
-          priorite: noteData.priorite || "normale",
-          montant_estime: noteData.montant_estime || 0,
-          type_depense: noteData.type_depense || "fonctionnement",
-          justification: noteData.justification,
-          note_sef_id: shadowSef.id, // Lien vers la SEF shadow
-          is_direct_aef: true,
-          origin: 'DIRECT',
-          reference_pivot: referencePivot, // Même référence que la SEF
-          exercice: exercice || new Date().getFullYear(),
-          created_by: user.id,
-          statut: "brouillon",
-        }])
+        .from('notes_dg')
+        .insert([
+          {
+            objet: noteData.objet,
+            contenu: noteData.contenu || null,
+            direction_id: noteData.direction_id,
+            priorite: noteData.priorite || 'normale',
+            montant_estime: noteData.montant_estime || 0,
+            type_depense: noteData.type_depense || 'fonctionnement',
+            justification: noteData.justification,
+            note_sef_id: shadowSef.id, // Lien vers la SEF shadow
+            is_direct_aef: true,
+            origin: 'DIRECT',
+            reference_pivot: referencePivot, // Même référence que la SEF
+            exercice: exercice || new Date().getFullYear(),
+            created_by: user.id,
+            statut: 'brouillon',
+          },
+        ])
         .select()
         .single();
 
       if (aefError) {
-        console.error("Erreur création AEF:", aefError);
-        throw new Error("Erreur lors de la création de la Note AEF");
+        throw new Error('Erreur lors de la création de la Note AEF');
       }
 
       // Log création AEF directe DG (utilise "create" avec métadonnées)
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: aefData.id,
-        action: "create",
-        newValues: { 
-          ...aefData, 
+        action: 'create',
+        newValues: {
+          ...aefData,
           is_direct_dg: true,
           shadow_sef_id: shadowSef.id,
           shadow_sef_numero: shadowSef.numero,
@@ -457,39 +498,41 @@ export function useNotesAEF() {
       };
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
-      toast({ 
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-sef'] });
+      toast({
         title: `AEF directe ${result.reference} créée`,
-        description: "Une Note SEF a été générée automatiquement",
+        description: 'Une Note SEF a été générée automatiquement',
       });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur AEF directe", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur AEF directe', description: error.message, variant: 'destructive' });
     },
   });
 
   // Update note
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<NoteAEF> & { id: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
-      const { data: oldData } = await supabase.from("notes_dg").select("*").eq("id", id).single();
+      const { data: oldData } = await supabase.from('notes_dg').select('*').eq('id', id).single();
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update(updates)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: id,
-        action: "update",
+        action: 'update',
         oldValues: oldData,
         newValues: data,
       });
@@ -497,28 +540,30 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note AEF mise à jour" });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast({ title: 'Note AEF mise à jour' });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Submit note - avec validations des champs requis et verrouillage cohérence SEF
   const submitMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Récupérer la note pour validation
       const { data: note, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("*")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('*')
+        .eq('id', noteId)
         .single();
 
-      if (fetchError) throw new Error("Note introuvable");
+      if (fetchError) throw new Error('Note introuvable');
 
       const oldStatut = note.statut || NoteAEFStatut.DRAFT;
       const newStatut = NoteAEFStatut.SUBMITTED;
@@ -530,20 +575,20 @@ export function useNotesAEF() {
         const availableTransitions = getAvailableTransitionsAEF(oldStatut);
         throw new Error(
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
-          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
       }
 
       // Validations des champs requis
       const errors: string[] = [];
-      if (!note.objet?.trim()) errors.push("Objet");
-      if (!note.direction_id) errors.push("Direction");
-      if (!note.priorite) errors.push("Urgence");
-      if (!note.montant_estime || note.montant_estime <= 0) errors.push("Montant estimé");
-      if (!note.contenu?.trim()) errors.push("Description/Justification");
+      if (!note.objet?.trim()) errors.push('Objet');
+      if (!note.direction_id) errors.push('Direction');
+      if (!note.priorite) errors.push('Urgence');
+      if (!note.montant_estime || note.montant_estime <= 0) errors.push('Montant estimé');
+      if (!note.contenu?.trim()) errors.push('Description/Justification');
 
       if (errors.length > 0) {
-        throw new Error(`Champs obligatoires manquants: ${errors.join(", ")}`);
+        throw new Error(`Champs obligatoires manquants: ${errors.join(', ')}`);
       }
 
       // ═══════════════════════════════════════════════════════════════════════
@@ -556,11 +601,11 @@ export function useNotesAEF() {
       if (!note.note_sef_id || !note.reference_pivot) {
         // Vérifier si l'utilisateur est DG/ADMIN
         const { data: userRoles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id);
-        
-        const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
+
+        const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
 
         if (hasDGRole) {
           // CAS DG: Auto-créer une SEF shadow pour corriger les données legacy/incohérentes
@@ -568,53 +613,54 @@ export function useNotesAEF() {
 
           // Générer la référence ARTI (étape 0 = SEF)
           const { data: referencePivot, error: refError } = await supabase.rpc(
-            "generate_arti_reference",
+            'generate_arti_reference',
             { p_etape: 0, p_date: new Date().toISOString() }
           );
 
           if (refError || !referencePivot) {
-            throw new Error("Erreur lors de la génération de la référence SEF");
+            throw new Error('Erreur lors de la génération de la référence SEF');
           }
 
           // Créer la SEF shadow (auto-validée)
           const { data: shadowSef, error: sefError } = await supabase
-            .from("notes_sef")
-            .insert([{
-              objet: `[AUTO-LINK] ${note.objet}`,
-              description: note.contenu || null,
-              justification: `Auto-générée lors de la soumission (cohérence AEF legacy)`,
-              direction_id: note.direction_id,
-              demandeur_id: user.id,
-              urgence: note.priorite || "normale",
-              exercice: note.exercice || new Date().getFullYear(),
-              created_by: user.id,
-              numero: referencePivot,
-              reference_pivot: referencePivot,
-              statut: "valide_auto",
-              validated_by: user.id,
-              validated_at: new Date().toISOString(),
-              submitted_by: user.id,
-              submitted_at: new Date().toISOString(),
-              dg_validation_required: false,
-            }])
+            .from('notes_sef')
+            .insert([
+              {
+                objet: `[AUTO-LINK] ${note.objet}`,
+                description: note.contenu || null,
+                justification: `Auto-générée lors de la soumission (cohérence AEF legacy)`,
+                direction_id: note.direction_id,
+                demandeur_id: user.id,
+                urgence: note.priorite || 'normale',
+                exercice: note.exercice || new Date().getFullYear(),
+                created_by: user.id,
+                numero: referencePivot,
+                reference_pivot: referencePivot,
+                statut: 'valide_auto',
+                validated_by: user.id,
+                validated_at: new Date().toISOString(),
+                submitted_by: user.id,
+                submitted_at: new Date().toISOString(),
+                dg_validation_required: false,
+              },
+            ])
             .select()
             .single();
 
           if (sefError || !shadowSef) {
-            console.error("Erreur création SEF shadow lors de submit:", sefError);
-            throw new Error("Erreur lors de la création automatique de la Note SEF");
+            throw new Error('Erreur lors de la création automatique de la Note SEF');
           }
 
           // Log création SEF shadow avec audit enrichi
           await logAction({
-            entityType: "note_sef",
+            entityType: 'note_sef',
             entityId: shadowSef.id,
-            action: "create",
+            action: 'create',
             oldValues: { statut: null },
-            newValues: { 
-              statut: "valide_auto",
-              is_shadow: true, 
-              created_via: "SUBMIT_AUTO_LINK",
+            newValues: {
+              statut: 'valide_auto',
+              is_shadow: true,
+              created_via: 'SUBMIT_AUTO_LINK',
               linked_aef_id: noteId,
             },
           });
@@ -626,7 +672,7 @@ export function useNotesAEF() {
           // CAS NON-DG: Erreur explicite
           throw new Error(
             "Impossible de soumettre : cette Note AEF n'est pas liée à une Note SEF validée. " +
-            "Veuillez sélectionner une Note SEF avant de soumettre."
+              'Veuillez sélectionner une Note SEF avant de soumettre.'
           );
         }
       }
@@ -647,9 +693,9 @@ export function useNotesAEF() {
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update(updateData)
-        .eq("id", noteId)
+        .eq('id', noteId)
         .select()
         .single();
 
@@ -657,11 +703,11 @@ export function useNotesAEF() {
 
       // Log action submit avec audit enrichi (old_statut, new_statut)
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: noteId,
-        action: "submit",
+        action: 'submit',
         oldValues: { statut: oldStatut },
-        newValues: { 
+        newValues: {
           statut: newStatut,
           reference_pivot: updatedReferencePivot,
           ...(autoLinkedSef && { auto_linked_sef_id: updatedSefId, via_auto_link: true }),
@@ -671,12 +717,12 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      queryClient.invalidateQueries({ queryKey: ["notes-sef"] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-sef'] });
       toast({ title: `Note ${data.reference_pivot || data.numero} soumise pour validation` });
     },
     onError: (error: Error) => {
-      toast({ title: "Soumission impossible", description: error.message, variant: "destructive" });
+      toast({ title: 'Soumission impossible', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -684,28 +730,30 @@ export function useNotesAEF() {
   // GUARD: Double vérification de la cohérence SEF avant validation
   const validateMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier le rôle DG/ADMIN
       const { data: userRoles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      
-      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
-        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent valider une note AEF");
+        throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent valider une note AEF');
       }
 
       // Récupérer la note pour vérification de cohérence
       const { data: note, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("id, note_sef_id, reference_pivot, objet, statut")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('id, note_sef_id, reference_pivot, objet, statut')
+        .eq('id', noteId)
         .single();
 
-      if (fetchError) throw new Error("Note introuvable");
+      if (fetchError) throw new Error('Note introuvable');
 
       const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
       const newStatut = NoteAEFStatut.TO_IMPUTE;
@@ -717,7 +765,7 @@ export function useNotesAEF() {
         const availableTransitions = getAvailableTransitionsAEF(oldStatut);
         throw new Error(
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
-          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
       }
 
@@ -725,21 +773,20 @@ export function useNotesAEF() {
       // GUARD FINAL: Impossible de valider une AEF sans référence SEF valide
       // ═══════════════════════════════════════════════════════════════════════
       if (!note.note_sef_id || !note.reference_pivot) {
-        console.error("[VALIDATE] Incohérence détectée - AEF sans SEF:", { noteId, note });
         throw new Error(
           "Incohérence détectée : cette Note AEF n'a pas de référence SEF valide. " +
-          "Veuillez d'abord soumettre la note pour corriger cette incohérence."
+            "Veuillez d'abord soumettre la note pour corriger cette incohérence."
         );
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update({
           statut: newStatut,
           validated_by: user.id,
           validated_at: new Date().toISOString(),
         })
-        .eq("id", noteId)
+        .eq('id', noteId)
         .select()
         .single();
 
@@ -747,11 +794,11 @@ export function useNotesAEF() {
 
       // Log action validate avec audit enrichi (old_statut, new_statut)
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: noteId,
-        action: "validate",
+        action: 'validate',
         oldValues: { statut: oldStatut },
-        newValues: { 
+        newValues: {
           statut: newStatut,
           validated_by: user.id,
           validated_at: data.validated_at,
@@ -761,42 +808,47 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
-      toast({ title: `Note ${data.reference_pivot || data.numero} validée ✓`, description: "Disponible pour imputation" });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-a-imputer'] });
+      toast({
+        title: `Note ${data.reference_pivot || data.numero} validée ✓`,
+        description: 'Disponible pour imputation',
+      });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur de validation", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur de validation', description: error.message, variant: 'destructive' });
     },
   });
 
   // Reject note - DG/ADMIN only
   const rejectMutation = useMutation({
     mutationFn: async ({ noteId, motif }: { noteId: string; motif: string }) => {
-      if (!motif?.trim()) throw new Error("Le motif de rejet est obligatoire");
+      if (!motif?.trim()) throw new Error('Le motif de rejet est obligatoire');
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier le rôle DG/ADMIN
       const { data: userRoles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      
-      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
-        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note AEF");
+        throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note AEF');
       }
 
       // Récupérer le statut actuel pour l'audit
       const { data: note, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("statut")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('statut')
+        .eq('id', noteId)
         .single();
 
-      if (fetchError) throw new Error("Note introuvable");
+      if (fetchError) throw new Error('Note introuvable');
 
       const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
       const newStatut = NoteAEFStatut.REJECTED;
@@ -806,19 +858,19 @@ export function useNotesAEF() {
         const availableTransitions = getAvailableTransitionsAEF(oldStatut);
         throw new Error(
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
-          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update({
           statut: newStatut,
           rejection_reason: motif,
           rejected_by: user.id,
           rejected_at: new Date().toISOString(),
         })
-        .eq("id", noteId)
+        .eq('id', noteId)
         .select()
         .single();
 
@@ -826,11 +878,11 @@ export function useNotesAEF() {
 
       // Log action reject avec audit enrichi
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: noteId,
-        action: "reject",
+        action: 'reject',
         oldValues: { statut: oldStatut },
-        newValues: { 
+        newValues: {
           statut: newStatut,
           rejection_reason: motif,
           rejected_by: user.id,
@@ -841,11 +893,11 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note rejetée" });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast({ title: 'Note rejetée' });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -860,30 +912,32 @@ export function useNotesAEF() {
       motif: string;
       deadlineCorrection?: string;
     }) => {
-      if (!motif?.trim()) throw new Error("Le motif de report est obligatoire");
+      if (!motif?.trim()) throw new Error('Le motif de report est obligatoire');
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier le rôle DG/ADMIN
       const { data: userRoles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      
-      const hasDGRole = userRoles?.some(r => r.role === "ADMIN" || r.role === "DG");
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
       if (!hasDGRole) {
-        throw new Error("Seuls les utilisateurs DG ou ADMIN peuvent différer une note AEF");
+        throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent différer une note AEF');
       }
 
       // Récupérer le statut actuel pour l'audit
       const { data: note, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("statut")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('statut')
+        .eq('id', noteId)
         .single();
 
-      if (fetchError) throw new Error("Note introuvable");
+      if (fetchError) throw new Error('Note introuvable');
 
       const oldStatut = note.statut || NoteAEFStatut.SUBMITTED;
       const newStatut = NoteAEFStatut.DEFERRED;
@@ -893,12 +947,12 @@ export function useNotesAEF() {
         const availableTransitions = getAvailableTransitionsAEF(oldStatut);
         throw new Error(
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
-          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update({
           statut: newStatut,
           motif_differe: motif,
@@ -906,7 +960,7 @@ export function useNotesAEF() {
           deadline_correction: deadlineCorrection || null,
           differe_by: user.id,
         })
-        .eq("id", noteId)
+        .eq('id', noteId)
         .select()
         .single();
 
@@ -914,11 +968,11 @@ export function useNotesAEF() {
 
       // Log action defer avec audit enrichi
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: noteId,
-        action: "defer",
+        action: 'defer',
         oldValues: { statut: oldStatut },
-        newValues: { 
+        newValues: {
           statut: newStatut,
           motif_differe: motif,
           date_differe: data.date_differe,
@@ -930,34 +984,30 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note différée" });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast({ title: 'Note différée' });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Impute note to budget line
   const imputeMutation = useMutation({
-    mutationFn: async ({
-      noteId,
-      budgetLineId,
-    }: {
-      noteId: string;
-      budgetLineId: string;
-    }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+    mutationFn: async ({ noteId, budgetLineId }: { noteId: string; budgetLineId: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Récupérer le statut actuel pour l'audit
       const { data: note, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("statut")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('statut')
+        .eq('id', noteId)
         .single();
 
-      if (fetchError) throw new Error("Note introuvable");
+      if (fetchError) throw new Error('Note introuvable');
 
       const oldStatut = note.statut || NoteAEFStatut.TO_IMPUTE;
       const newStatut = NoteAEFStatut.IMPUTED;
@@ -967,19 +1017,19 @@ export function useNotesAEF() {
         const availableTransitions = getAvailableTransitionsAEF(oldStatut);
         throw new Error(
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
-          `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
       }
 
       const { data, error } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update({
           statut: newStatut,
           budget_line_id: budgetLineId,
           imputed_by: user.id,
           imputed_at: new Date().toISOString(),
         })
-        .eq("id", noteId)
+        .eq('id', noteId)
         .select()
         .single();
 
@@ -987,11 +1037,11 @@ export function useNotesAEF() {
 
       // Log action impute avec audit enrichi
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: noteId,
-        action: "update",  // Imputation is an update action
+        action: 'update', // Imputation is an update action
         oldValues: { statut: oldStatut },
-        newValues: { 
+        newValues: {
           statut: newStatut,
           budget_line_id: budgetLineId,
           imputed_by: user.id,
@@ -1002,90 +1052,94 @@ export function useNotesAEF() {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-a-imputer'] });
       toast({ title: `Note ${data.reference_pivot || data.numero} imputée avec succès` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Duplicate note
   const duplicateMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Récupérer la note originale
       const { data: original, error: fetchError } = await supabase
-        .from("notes_dg")
-        .select("*")
-        .eq("id", noteId)
+        .from('notes_dg')
+        .select('*')
+        .eq('id', noteId)
         .single();
 
       if (fetchError) throw fetchError;
 
       // Créer une copie
       const { data, error } = await supabase
-        .from("notes_dg")
-        .insert([{
-          objet: `[Copie] ${original.objet}`,
-          contenu: original.contenu,
-          direction_id: original.direction_id,
-          priorite: original.priorite,
-          montant_estime: original.montant_estime,
-          exercice: exercice || new Date().getFullYear(),
-          created_by: user.id,
-          statut: "brouillon",
-        }])
+        .from('notes_dg')
+        .insert([
+          {
+            objet: `[Copie] ${original.objet}`,
+            contenu: original.contenu,
+            direction_id: original.direction_id,
+            priorite: original.priorite,
+            montant_estime: original.montant_estime,
+            exercice: exercice || new Date().getFullYear(),
+            created_by: user.id,
+            statut: 'brouillon',
+          },
+        ])
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "note_aef",
+        entityType: 'note_aef',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: { ...data, duplicated_from: noteId },
       });
 
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
       toast({ title: `Note ${data.numero} créée (copie)` });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Delete note
   const deleteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      const { error } = await supabase.from("notes_dg").delete().eq("id", noteId);
+      const { error } = await supabase.from('notes_dg').delete().eq('id', noteId);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes-aef"] });
-      toast({ title: "Note supprimée" });
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast({ title: 'Note supprimée' });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Filter notes by status - aligné sur les nouveaux statuts
   const notesByStatus = {
-    brouillon: notes.filter((n) => n.statut === "brouillon"),
-    soumis: notes.filter((n) => n.statut === "soumis"),
-    a_valider: notes.filter((n) => n.statut === "soumis" || n.statut === "a_valider"),
-    a_imputer: notes.filter((n) => n.statut === "a_imputer"), // Validé par DG, en attente d'imputation
-    impute: notes.filter((n) => n.statut === "impute"),
-    rejete: notes.filter((n) => n.statut === "rejete"),
-    differe: notes.filter((n) => n.statut === "differe"),
+    brouillon: notes.filter((n) => n.statut === 'brouillon'),
+    soumis: notes.filter((n) => n.statut === 'soumis'),
+    a_valider: notes.filter((n) => n.statut === 'soumis' || n.statut === 'a_valider'),
+    a_imputer: notes.filter((n) => n.statut === 'a_imputer'), // Validé par DG, en attente d'imputation
+    impute: notes.filter((n) => n.statut === 'impute'),
+    rejete: notes.filter((n) => n.statut === 'rejete'),
+    differe: notes.filter((n) => n.statut === 'differe'),
   };
 
   return {

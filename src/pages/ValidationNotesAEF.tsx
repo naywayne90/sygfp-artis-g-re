@@ -457,14 +457,11 @@ export default function ValidationNotesAEF() {
                           {formatMontant(note.montant_estime)}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate text-orange-700">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(note as any).motif_differe || '—'}
+                          {note.motif_differe || '—'}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-muted-foreground">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(note as any).date_differe
-                            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              format(new Date((note as any).date_differe), 'dd MMM yyyy', {
+                          {note.date_differe
+                            ? format(new Date(note.date_differe), 'dd MMM yyyy', {
                                 locale: fr,
                               })
                             : '—'}

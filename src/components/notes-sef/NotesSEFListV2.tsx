@@ -17,7 +17,7 @@ import { useNotesSEFList } from '@/hooks/useNotesSEFList';
 import { useNotesSEF } from '@/hooks/useNotesSEF';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { usePermissions } from '@/hooks/usePermissions';
-import NoteSEFForm from './NoteSEFForm';
+import { NoteSEFForm } from './NoteSEFForm';
 
 interface NotesSEFListV2Props {
   className?: string;
@@ -127,10 +127,9 @@ export function NotesSEFListV2({ className }: NotesSEFListV2Props) {
       {/* Modal de création */}
       <NoteSEFForm
         open={showCreateForm}
-        onClose={() => setShowCreateForm(false)}
-        onSuccess={() => {
-          setShowCreateForm(false);
-          refetch();
+        onOpenChange={(open) => {
+          setShowCreateForm(open);
+          if (!open) refetch();
         }}
       />
     </div>
