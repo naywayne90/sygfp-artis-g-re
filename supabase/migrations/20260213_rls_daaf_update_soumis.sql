@@ -1,21 +1,32 @@
 -- Migration: Ajouter DAAF à la policy UPDATE des notes_sef
 -- La DAAF doit pouvoir modifier les notes soumises (pour validation/décision)
--- Actuellement seuls Admin, DG, et créateur (brouillon) peuvent modifier
+-- Actuellement seuls Admin, DG, et créateur peuvent modifier
+-- Utilise user_roles avec app_role (schéma réel de la base)
 
--- Remplacer la policy notes_sef_update existante
-DROP POLICY IF EXISTS "notes_sef_update" ON public.notes_sef;
+-- Remplacer la policy notes_sef_update_authorized existante
+DROP POLICY IF EXISTS "notes_sef_update_authorized" ON public.notes_sef;
 
-CREATE POLICY "notes_sef_update" ON public.notes_sef
-  FOR UPDATE TO authenticated USING (
-    -- Admin : accès total
-    public.is_admin()
-    -- DG : accès total
-    OR public.is_dg()
-    -- DAAF : peut modifier les notes soumises (validation workflow)
-    OR (public.is_daaf() AND statut IN ('soumis', 'a_valider'))
-    -- Créateur : peut modifier ses brouillons uniquement
-    OR (created_by = auth.uid() AND statut = 'brouillon')
+CREATE POLICY "notes_sef_update_authorized" ON public.notes_sef
+  FOR UPDATE
+  USING (
+    auth.uid() IS NOT NULL
+    AND (
+      -- Créateur peut modifier sa note
+      created_by = auth.uid()
+      -- Admin ou DG : accès total
+      OR EXISTS (
+        SELECT 1 FROM user_roles
+        WHERE user_roles.user_id = auth.uid()
+        AND user_roles.role = ANY (ARRAY['ADMIN'::app_role, 'DG'::app_role])
+      )
+      -- DAAF : peut modifier les notes soumises ou à valider
+      OR (
+        statut IN ('soumis', 'a_valider')
+        AND EXISTS (
+          SELECT 1 FROM user_roles
+          WHERE user_roles.user_id = auth.uid()
+          AND user_roles.role = 'DAAF'::app_role
+        )
+      )
+    )
   );
-
-COMMENT ON POLICY "notes_sef_update" ON public.notes_sef IS
-  'Admin/DG: tout modifier. DAAF: modifier les notes soumises/à valider. Créateur: modifier ses brouillons.';
