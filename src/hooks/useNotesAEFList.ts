@@ -83,7 +83,7 @@ const defaultFilters: NotesAEFFiltersState = {
  * avec recherche serveur-side et debounce 300ms
  */
 export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesAEFListReturn {
-  const { pageSize: initialPageSize = 20, initialTab = 'toutes' } = options;
+  const { pageSize: initialPageSize = 50, initialTab = 'toutes' } = options;
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
 

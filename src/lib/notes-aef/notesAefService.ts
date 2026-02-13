@@ -130,34 +130,27 @@ export const notesAefService = {
 
   /**
    * Récupérer les compteurs par statut pour un exercice
+   * Utilise la RPC count_notes_aef_by_statut (1 seul scan, respecte RLS)
    */
   async getCounts(exercice: number): Promise<ServiceResult<NoteAEFCounts>> {
     try {
-      const { data, error } = await supabase
-        .from('notes_dg')
-        .select('statut')
-        .eq('exercice', exercice);
+      const { data, error } = await supabase.rpc('count_notes_aef_by_statut', {
+        p_exercice: exercice,
+      });
 
       if (error) throw error;
 
+      const raw = data as Record<string, number> | null;
       const counts: NoteAEFCounts = {
-        total: 0,
-        brouillon: 0,
-        soumis: 0,
-        a_valider: 0,
-        a_imputer: 0,
-        impute: 0,
-        differe: 0,
-        rejete: 0,
+        total: raw?.total ?? 0,
+        brouillon: raw?.brouillon ?? 0,
+        soumis: raw?.soumis ?? 0,
+        a_valider: raw?.a_valider ?? 0,
+        a_imputer: raw?.a_imputer ?? 0,
+        impute: raw?.impute ?? 0,
+        differe: raw?.differe ?? 0,
+        rejete: raw?.rejete ?? 0,
       };
-
-      for (const note of data || []) {
-        counts.total++;
-        const statut = note.statut || 'brouillon';
-        if (statut in counts && statut !== 'total') {
-          counts[statut as keyof Omit<NoteAEFCounts, 'total'>]++;
-        }
-      }
 
       return { success: true, data: counts };
     } catch (error) {

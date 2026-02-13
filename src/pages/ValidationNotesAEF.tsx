@@ -38,6 +38,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNotesAEF } from '@/hooks/useNotesAEF';
 import type { BudgetAvailabilityCheck } from '@/hooks/useNotesAEF';
 import { useNotesAEFList } from '@/hooks/useNotesAEFList';
+import { useNotesAEFExport } from '@/hooks/useNotesAEFExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -62,6 +63,9 @@ import {
   ExternalLink,
   Building2,
   Ban,
+  FileSpreadsheet,
+  FileDown,
+  Download,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { NoteAEFEntity } from '@/lib/notes-aef/types';
@@ -84,6 +88,10 @@ export default function ValidationNotesAEF() {
   // Mutations hook
   const { validateNote, rejectNote, deferNote, resumeNote, checkBudgetAvailability } =
     useNotesAEF();
+
+  // Export hook
+  const { exportNotesAEF, exportNotesAEFPDF, exportNotesAEFCSV, isExporting, exportProgress } =
+    useNotesAEFExport();
 
   // List hook
   const { notes, isLoading, error, searchQuery, setSearchQuery, refetch } = useNotesAEFList({
@@ -421,6 +429,50 @@ export default function ValidationNotesAEF() {
             DG
           </Badge>
         )}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportNotesAEF({ statut: ['soumis', 'a_valider'] }, 'a_valider')}
+            disabled={isExporting}
+            className="gap-1.5"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileSpreadsheet className="h-4 w-4" />
+            )}
+            {isExporting ? exportProgress || 'Export...' : 'Excel'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportNotesAEFPDF({ statut: ['soumis', 'a_valider'] }, 'a_valider')}
+            disabled={isExporting}
+            className="gap-1.5"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="h-4 w-4" />
+            )}
+            PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportNotesAEFCSV({ statut: ['soumis', 'a_valider'] }, 'a_valider')}
+            disabled={isExporting}
+            className="gap-1.5"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            CSV
+          </Button>
+        </div>
       </PageHeader>
 
       {/* KPIs — based on notesToValidate only */}
