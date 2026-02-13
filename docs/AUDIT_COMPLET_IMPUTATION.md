@@ -13,12 +13,12 @@
 
 | Critere          | Score      | Details                                                                                                                       |
 | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Frontend Complet | **18/25**  | 17 fichiers, ~6,500 LOC, architecture modulaire, mais absence de tests unitaires/E2E, quelques `any`                          |
+| Frontend Complet | **16/25**  | 17 fichiers, ~6,500 LOC, architecture modulaire, mais sidebar RBAC cassee, WorkflowStepIndicator incomplet, quelques `any`    |
 | Backend Securise | **12/25**  | Table riche (35+ colonnes), RLS existante MAIS conflits policies, functions RBAC inexistantes, CHECK constraint desynchronise |
 | Performance      | **14/20**  | 6 index existants, React Query, mais pas de RPC count, pas de pagination server-side sur listing imputations                  |
 | Workflow         | **10/15**  | 5 statuts implementes, dialogs rejet/report, MAIS pas de trigger server-side d'enforcement des transitions                    |
 | Tests & QA       | **4/15**   | Build `tsc` passe (0 erreurs), imputation-utils teste (~80%), mais 0 test E2E, 0 test composant                               |
-| **TOTAL**        | **58/100** | **Module partiellement fonctionnel -- 7 gaps critiques a corriger avant production**                                          |
+| **TOTAL**        | **56/100** | **Module partiellement fonctionnel -- 8 gaps critiques + 6 gaps moyens a corriger avant production**                          |
 
 ---
 
@@ -336,7 +336,7 @@ IMPUTATION (Etape 3)
 
 ---
 
-## 8. GAPS Identifies -- 7 Critiques + 5 Moyens
+## 8. GAPS Identifies -- 8 Critiques + 6 Moyens
 
 ### GAP 1 : CHECK Constraint Desynchronise
 
@@ -446,6 +446,26 @@ IMPUTATION (Etape 3)
 | **Impact**     | Requetes de dashboard lentes avec volume.                                         |
 | **Fix requis** | Ajouter index composites comme fait pour notes_dg (prompt 7).                     |
 
+### GAP 13 : Sidebar Inaccessible pour DAAF (RBAC Mismatch)
+
+|                |                                                                                                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Severite**   | CRITIQUE                                                                                                                                                                                                    |
+| **Probleme**   | Le menu lateral n'affiche pas l'etape Imputation pour `daaf@arti.ci`. La matrice `ROUTE_ACCESS_MATRIX` attend `DAAF` mais `RBACContext` lit `profil_fonctionnel = "Validateur"` depuis la table `profiles`. |
+| **Impact**     | L'utilisateur DAAF ne peut acceder a la page Imputation que par URL directe ou liens de navigation AEF, pas par le menu sidebar.                                                                            |
+| **Fix requis** | Harmoniser le systeme RBAC : soit `canAccess()` doit consulter `user_roles`, soit la matrice doit accepter `"Validateur"` en plus de `"DAAF"`.                                                              |
+| **Fichiers**   | `src/contexts/RBACContext.tsx` (l.146), `src/lib/config/rbac-config.ts` (l.675), `src/components/layout/SidebarV2.tsx` (l.175)                                                                              |
+
+### GAP 14 : WorkflowStepIndicator Omet Imputation
+
+|                |                                                                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Severite**   | MOYEN                                                                                                                                                                       |
+| **Probleme**   | Le composant `WorkflowStepIndicator` definit 8 etapes au lieu de 9, omettant completement "Imputation". L'etape 3 affichee est "Expression Besoin" au lieu de "Imputation". |
+| **Impact**     | La chaine de depense en haut de la page Imputation ne montre pas l'etape en cours. `ImputationPage.tsx` passe `currentStep={2}` (AEF).                                      |
+| **Fix requis** | Ajouter "Imputation" comme etape 3 dans `WorkflowStepIndicator.tsx` (lignes 27-36) et ajuster `currentStep` dans `ImputationPage.tsx`.                                      |
+| **Fichier**    | `src/components/workflow/WorkflowStepIndicator.tsx`                                                                                                                         |
+
 ---
 
 ## 9. Migrations Appliquees (9)
@@ -475,14 +495,18 @@ IMPUTATION (Etape 3)
 
 ## 11. Verifications Statiques
 
-| Outil                              | Resultat                              |
-| ---------------------------------- | ------------------------------------- |
-| TypeScript (`tsc --noEmit`)        | 0 erreurs                             |
-| ESLint                             | Quelques `any` ignores (non bloquant) |
-| Build production (`npm run build`) | Succes                                |
-| Tests unitaires (imputation-utils) | Passent (~80% coverage)               |
-| Tests composants                   | 0 test                                |
-| Tests E2E                          | 0 test                                |
+| Outil                              | Resultat                                          |
+| ---------------------------------- | ------------------------------------------------- |
+| TypeScript (`tsc --noEmit`)        | 0 erreurs                                         |
+| ESLint                             | Quelques `any` ignores (non bloquant)             |
+| Build production (`npm run build`) | Succes (34.96s, 4860 modules, chunk 62.13 KB)     |
+| Tests unitaires                    | 275/275 passent (imputation-utils: 52 tests)      |
+| Tests composants React             | 0 test                                            |
+| Tests E2E                          | 0 test                                            |
+| Page `/execution/imputation`       | Charge correctement, KPIs affiches, 2 imputations |
+| Sidebar navigation DAAF            | MANQUANTE (bug RBAC GAP 13)                       |
+| WorkflowStepIndicator              | IMPUTATION OMISE (GAP 14)                         |
+| Console browser                    | 1 warning React ref (non bloquant)                |
 
 ---
 
@@ -564,7 +588,7 @@ IMPUTATION (Etape 3)
 
 ## 14. Conclusion
 
-Le module **Imputation** dispose d'une base frontend fonctionnelle (~6,850 LOC, 19 fichiers) et d'un schema backend riche (35+ colonnes, 3 triggers, 3 vues). Cependant, **7 gaps critiques** empechent la certification :
+Le module **Imputation** dispose d'une base frontend fonctionnelle (~6,850 LOC, 19 fichiers) et d'un schema backend riche (35+ colonnes, 3 triggers, 3 vues). Cependant, **8 gaps critiques** empechent la certification :
 
 1. CHECK constraint desynchronise entre migrations et BD reelle
 2. RLS policies conflictuelles (3 migrations contradictoires)
@@ -573,8 +597,11 @@ Le module **Imputation** dispose d'une base frontend fonctionnelle (~6,850 LOC, 
 5. Pas de trigger server-side pour le workflow
 6. 0 test E2E, 0 test composant
 7. Pas de pagination server-side ni RPC count
+8. Sidebar inaccessible pour DAAF (mismatch RBAC profil_fonctionnel vs user_roles)
 
-**Score : 58/100 -- Module NON certifiable en l'etat.**
+Et **6 gaps moyens** : table `imputation_lignes` morte-nee, `useImputation.ts` trop long, `any` TypeScript, index composites manquants, WorkflowStepIndicator incomplet, pas d'exports.
+
+**Score : 56/100 -- Module NON certifiable en l'etat.**
 
 8 prompts de correction sont necessaires pour atteindre le niveau de certification du module Notes AEF (100/100).
 
@@ -582,12 +609,12 @@ Le module **Imputation** dispose d'une base frontend fonctionnelle (~6,850 LOC, 
 
 ### Signatures
 
-| Role                     | Statut                   |
-| ------------------------ | ------------------------ |
-| Auditeur (Claude Code)   | Audit termine            |
-| Frontend (Agent a12c014) | Cartographie complete    |
-| Backend (Agent a608b2f)  | Schema documente         |
-| QA (Agent addc8f2)       | Build OK, browser bloque |
+| Role                     | Statut                                                  |
+| ------------------------ | ------------------------------------------------------- |
+| Auditeur (Claude Code)   | Audit termine                                           |
+| Frontend (Agent a12c014) | Cartographie complete                                   |
+| Backend (Agent a608b2f)  | Schema documente                                        |
+| QA (Agent addc8f2)       | Build OK, browser teste, 2 gaps supplementaires trouves |
 
 ---
 
