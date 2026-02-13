@@ -32,6 +32,8 @@ export interface NoteAEF {
   imputed_at: string | null;
   imputed_by: string | null;
   budget_line_id: string | null;
+  budget_bloque: boolean | null;
+  budget_bloque_raison: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -761,7 +763,9 @@ export function useNotesAEF() {
       // Récupérer la note pour vérification de cohérence
       const { data: note, error: fetchError } = await supabase
         .from('notes_dg')
-        .select('id, note_sef_id, reference_pivot, objet, statut')
+        .select(
+          'id, note_sef_id, reference_pivot, objet, statut, montant_estime, budget_line_id, created_by, numero, budget_bloque, is_direct_aef'
+        )
         .eq('id', noteId)
         .single();
 
@@ -782,9 +786,52 @@ export function useNotesAEF() {
       }
 
       // ═══════════════════════════════════════════════════════════════════════
-      // GUARD FINAL: Impossible de valider une AEF sans référence SEF valide
+      // GUARD BUDGET: Vérifier la disponibilité budgétaire si ligne assignée
       // ═══════════════════════════════════════════════════════════════════════
-      if (!note.note_sef_id || !note.reference_pivot) {
+      if (note.budget_line_id && note.montant_estime) {
+        const { data: budgetLine } = await supabase
+          .from('budget_lines')
+          .select('id, code, label, dotation_initiale, dotation_modifiee')
+          .eq('id', note.budget_line_id)
+          .single();
+
+        if (budgetLine) {
+          const dotation = budgetLine.dotation_modifiee || budgetLine.dotation_initiale || 0;
+          const { data: engagements } = await supabase
+            .from('budget_engagements')
+            .select('montant')
+            .eq('budget_line_id', note.budget_line_id)
+            .neq('statut', 'annule');
+
+          const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+          const disponible = dotation - totalEngaged;
+
+          if (note.montant_estime > disponible) {
+            throw new Error(
+              `Budget insuffisant : le montant estimé (${note.montant_estime.toLocaleString('fr-FR')} FCFA) ` +
+                `dépasse le disponible (${disponible.toLocaleString('fr-FR')} FCFA) ` +
+                `sur la ligne ${budgetLine.code}. Veuillez ajuster le montant ou choisir une autre ligne budgétaire.`
+            );
+          }
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // GUARD BUDGET BLOQUÉ: Avertir si le budget était insuffisant à la soumission
+      // ═══════════════════════════════════════════════════════════════════════
+      if (note.budget_bloque) {
+        throw new Error(
+          'Attention : cette note a été marquée « budget bloqué » lors de sa soumission. ' +
+            'Le montant estimé dépasse le disponible sur la ligne budgétaire assignée. ' +
+            'Veuillez vérifier la disponibilité avant de valider.'
+        );
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // GUARD FINAL: Impossible de valider une AEF sans référence SEF valide
+      // (sauf pour les AEF directes qui n'ont pas de SEF liée)
+      // ═══════════════════════════════════════════════════════════════════════
+      if (!note.is_direct_aef && (!note.note_sef_id || !note.reference_pivot)) {
         throw new Error(
           "Incohérence détectée : cette Note AEF n'a pas de référence SEF valide. " +
             "Veuillez d'abord soumettre la note pour corriger cette incohérence."
@@ -817,14 +864,30 @@ export function useNotesAEF() {
         },
       });
 
+      // ═══ Notification au créateur de la note ═══
+      if (note.created_by && note.created_by !== user.id) {
+        const ref = note.reference_pivot || note.numero || '';
+        await supabase.from('notifications').insert([
+          {
+            user_id: note.created_by,
+            type: 'validation',
+            title: 'Note AEF validée par le DG',
+            message: `Votre note ${ref} a été validée et est en attente d'imputation budgétaire.`,
+            entity_type: 'note_aef',
+            entity_id: noteId,
+            category: 'workflow',
+          },
+        ]);
+      }
+
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
       queryClient.invalidateQueries({ queryKey: ['notes-a-imputer'] });
       toast({
-        title: `Note ${data.reference_pivot || data.numero} validée ✓`,
-        description: 'Disponible pour imputation',
+        title: `Note ${data.reference_pivot || data.numero} validée`,
+        description: 'Disponible pour imputation budgétaire',
       });
     },
     onError: (error: Error) => {
@@ -853,10 +916,10 @@ export function useNotesAEF() {
         throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent rejeter une note AEF');
       }
 
-      // Récupérer le statut actuel pour l'audit
+      // Récupérer la note pour l'audit et notification
       const { data: note, error: fetchError } = await supabase
         .from('notes_dg')
-        .select('statut')
+        .select('statut, created_by, reference_pivot, numero')
         .eq('id', noteId)
         .single();
 
@@ -902,6 +965,23 @@ export function useNotesAEF() {
         },
       });
 
+      // ═══ Notification au créateur de la note ═══
+      if (note.created_by && note.created_by !== user.id) {
+        const ref = note.reference_pivot || note.numero || '';
+        await supabase.from('notifications').insert([
+          {
+            user_id: note.created_by,
+            type: 'rejet',
+            title: 'Note AEF rejetée',
+            message: `Votre note ${ref} a été rejetée. Motif : ${motif}`,
+            entity_type: 'note_aef',
+            entity_id: noteId,
+            is_urgent: true,
+            category: 'workflow',
+          },
+        ]);
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -942,10 +1022,10 @@ export function useNotesAEF() {
         throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent différer une note AEF');
       }
 
-      // Récupérer le statut actuel pour l'audit
+      // Récupérer la note pour l'audit et notification
       const { data: note, error: fetchError } = await supabase
         .from('notes_dg')
-        .select('statut')
+        .select('statut, created_by, reference_pivot, numero')
         .eq('id', noteId)
         .single();
 
@@ -993,6 +1073,22 @@ export function useNotesAEF() {
         },
       });
 
+      // ═══ Notification au créateur de la note ═══
+      if (note.created_by && note.created_by !== user.id) {
+        const ref = note.reference_pivot || note.numero || '';
+        await supabase.from('notifications').insert([
+          {
+            user_id: note.created_by,
+            type: 'differe',
+            title: 'Note AEF différée',
+            message: `Votre note ${ref} a été différée. Motif : ${motif}`,
+            entity_type: 'note_aef',
+            entity_id: noteId,
+            category: 'workflow',
+          },
+        ]);
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -1004,7 +1100,82 @@ export function useNotesAEF() {
     },
   });
 
-  // Impute note to budget line
+  // Resume deferred note - retour vers 'soumis'
+  const resumeMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      // Vérifier le rôle DG/ADMIN
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const hasDGRole = userRoles?.some((r) => r.role === 'ADMIN' || r.role === 'DG');
+      if (!hasDGRole) {
+        throw new Error('Seuls les utilisateurs DG ou ADMIN peuvent reprendre une note AEF');
+      }
+
+      const { data: note, error: fetchError } = await supabase
+        .from('notes_dg')
+        .select('statut')
+        .eq('id', noteId)
+        .single();
+
+      if (fetchError) throw new Error('Note introuvable');
+
+      const oldStatut = note.statut || NoteAEFStatut.DEFERRED;
+      const newStatut = NoteAEFStatut.SUBMITTED;
+
+      if (!isValidTransitionAEF(oldStatut, newStatut)) {
+        const availableTransitions = getAvailableTransitionsAEF(oldStatut);
+        throw new Error(
+          `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
+            `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
+        );
+      }
+
+      const { data, error } = await supabase
+        .from('notes_dg')
+        .update({
+          statut: newStatut,
+          motif_differe: null,
+          date_differe: null,
+          deadline_correction: null,
+          differe_by: null,
+        })
+        .eq('id', noteId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await logAction({
+        entityType: 'note_aef',
+        entityId: noteId,
+        action: 'resubmitted',
+        oldValues: { statut: oldStatut },
+        newValues: { statut: newStatut },
+      });
+
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
+      toast({
+        title: `Note ${data.reference_pivot || data.numero} reprise`,
+        description: 'La note est de nouveau soumise pour validation',
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Erreur de reprise', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Impute note to budget line - CONTRÔLE BUDGÉTAIRE BLOQUANT
   const imputeMutation = useMutation({
     mutationFn: async ({ noteId, budgetLineId }: { noteId: string; budgetLineId: string }) => {
       const {
@@ -1012,10 +1183,23 @@ export function useNotesAEF() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Récupérer le statut actuel pour l'audit
+      // ═══════════════════════════════════════════════════════════════════════
+      // GUARD RBAC: Seuls CB, DAAF ou ADMIN peuvent imputer
+      // ═══════════════════════════════════════════════════════════════════════
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const canImpute = userRoles?.some((r) => ['ADMIN', 'DAAF', 'CB'].includes(r.role));
+      if (!canImpute) {
+        throw new Error('Seuls les utilisateurs CB, DAAF ou ADMIN peuvent imputer une note AEF');
+      }
+
+      // Récupérer la note avec montant pour vérification budgétaire
       const { data: note, error: fetchError } = await supabase
         .from('notes_dg')
-        .select('statut')
+        .select('statut, montant_estime, created_by, reference_pivot, numero')
         .eq('id', noteId)
         .single();
 
@@ -1031,6 +1215,40 @@ export function useNotesAEF() {
           `Transition de statut invalide: ${oldStatut} → ${newStatut}. ` +
             `Transitions possibles: ${availableTransitions.join(', ') || 'aucune'}`
         );
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // GUARD BUDGET BLOQUANT: Vérifier la disponibilité budgétaire
+      // ═══════════════════════════════════════════════════════════════════════
+      if (note.montant_estime) {
+        const { data: budgetLine } = await supabase
+          .from('budget_lines')
+          .select('id, code, label, dotation_initiale, dotation_modifiee')
+          .eq('id', budgetLineId)
+          .single();
+
+        if (!budgetLine) {
+          throw new Error('Ligne budgétaire introuvable');
+        }
+
+        const dotation = budgetLine.dotation_modifiee || budgetLine.dotation_initiale || 0;
+        const { data: engagements } = await supabase
+          .from('budget_engagements')
+          .select('montant')
+          .eq('budget_line_id', budgetLineId)
+          .neq('statut', 'annule');
+
+        const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+        const disponible = dotation - totalEngaged;
+
+        if (note.montant_estime > disponible) {
+          throw new Error(
+            `Budget insuffisant sur la ligne ${budgetLine.code} : ` +
+              `montant demandé (${note.montant_estime.toLocaleString('fr-FR')} FCFA) ` +
+              `dépasse le disponible (${disponible.toLocaleString('fr-FR')} FCFA). ` +
+              `L'imputation est bloquée.`
+          );
+        }
       }
 
       const { data, error } = await supabase
@@ -1051,7 +1269,7 @@ export function useNotesAEF() {
       await logAction({
         entityType: 'note_aef',
         entityId: noteId,
-        action: 'update', // Imputation is an update action
+        action: 'impute',
         oldValues: { statut: oldStatut },
         newValues: {
           statut: newStatut,
@@ -1061,15 +1279,32 @@ export function useNotesAEF() {
         },
       });
 
+      // ═══ Notification au créateur de la note ═══
+      if (note.created_by && note.created_by !== user.id) {
+        const ref = note.reference_pivot || note.numero || '';
+        await supabase.from('notifications').insert([
+          {
+            user_id: note.created_by,
+            type: 'validation',
+            title: 'Note AEF imputée',
+            message: `Votre note ${ref} a été imputée sur une ligne budgétaire et est prête pour engagement.`,
+            entity_type: 'note_aef',
+            entity_id: noteId,
+            category: 'workflow',
+          },
+        ]);
+      }
+
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['notes-aef'] });
       queryClient.invalidateQueries({ queryKey: ['notes-a-imputer'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
       toast({ title: `Note ${data.reference_pivot || data.numero} imputée avec succès` });
     },
     onError: (error: Error) => {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      toast({ title: 'Imputation impossible', description: error.message, variant: 'destructive' });
     },
   });
 
@@ -1173,6 +1408,7 @@ export function useNotesAEF() {
     validateNote: validateMutation.mutateAsync,
     rejectNote: rejectMutation.mutateAsync,
     deferNote: deferMutation.mutateAsync,
+    resumeNote: resumeMutation.mutateAsync,
     imputeNote: imputeMutation.mutateAsync,
     duplicateNote: duplicateMutation.mutateAsync,
     deleteNote: deleteMutation.mutateAsync,

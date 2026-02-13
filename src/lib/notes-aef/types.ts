@@ -29,6 +29,8 @@ export interface NoteAEFEntity {
   imputed_at: string | null;
   imputed_by: string | null;
   budget_line_id: string | null;
+  budget_bloque: boolean | null;
+  budget_bloque_raison: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -48,7 +50,13 @@ export interface NoteAEFEntity {
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   imputed_by_profile?: { id: string; first_name: string | null; last_name: string | null };
   budget_line?: { id: string; code: string; label: string; dotation_initiale: number };
-  note_sef?: { id: string; numero: string | null; reference_pivot: string | null; objet: string; dossier_id?: string | null };
+  note_sef?: {
+    id: string;
+    numero: string | null;
+    reference_pivot: string | null;
+    objet: string;
+    dossier_id?: string | null;
+  };
 }
 
 export interface NoteAEFCounts {

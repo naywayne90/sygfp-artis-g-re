@@ -449,11 +449,7 @@ export default function NotesAEF() {
         onOpenChange={() => setViewingNote(null)}
         note={viewingNote}
         onEdit={handleEdit}
-        onSubmit={handleSubmit}
-        onValidate={handleValidate}
-        onReject={setRejectingNote}
-        onDefer={setDeferringNote}
-        onImpute={setImputingNote}
+        onRefresh={() => refetch()}
       />
 
       <NoteAEFRejectDialog
