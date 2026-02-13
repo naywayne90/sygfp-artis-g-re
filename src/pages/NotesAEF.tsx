@@ -32,6 +32,8 @@ import {
   Loader2,
   Download,
   FileEdit,
+  FileDown,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -42,8 +44,9 @@ export default function NotesAEF() {
   const { canWrite, getDisabledMessage } = useExerciceWriteGuard();
   const { hasAnyRole } = usePermissions();
 
-  // Hook pour l'export Excel
-  const { exportNotesAEF, isExporting, exportProgress } = useNotesAEFExport();
+  // Hook pour les exports (Excel, PDF, CSV)
+  const { exportNotesAEF, exportNotesAEFPDF, exportNotesAEFCSV, isExporting, exportProgress } =
+    useNotesAEFExport();
 
   // Nouveau hook pour liste paginée avec filtres
   const {
@@ -62,7 +65,7 @@ export default function NotesAEF() {
     setFilters,
     resetFilters,
     refetch,
-  } = useNotesAEFList({ pageSize: 20 });
+  } = useNotesAEFList({ pageSize: 50 });
 
   // Hook existant pour les mutations
   const { submitNote, validateNote, rejectNote, deferNote, imputeNote, deleteNote } = useNotesAEF();
@@ -80,9 +83,26 @@ export default function NotesAEF() {
 
   const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
 
-  // Handler pour l'export Excel
+  // Filters communs pour les exports (respectent les filtres actifs)
+  const exportFilters = {
+    search: searchQuery || undefined,
+    directionId: filters.directionId || undefined,
+    urgence: filters.urgence || undefined,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+  };
+
+  // Handlers pour les exports
   const handleExportExcel = async () => {
-    await exportNotesAEF({ search: searchQuery || undefined }, activeTab);
+    await exportNotesAEF(exportFilters, activeTab);
+  };
+
+  const handleExportPDF = async () => {
+    await exportNotesAEFPDF(exportFilters, activeTab);
+  };
+
+  const handleExportCSV = async () => {
+    await exportNotesAEFCSV(exportFilters, activeTab);
   };
 
   // Gérer le prefill depuis l'URL
@@ -196,28 +216,77 @@ export default function NotesAEF() {
             </Tooltip>
           </TooltipProvider>
         )}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                onClick={handleExportExcel}
-                disabled={isExporting}
-                className="gap-2"
-              >
-                {isExporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-                {isExporting ? exportProgress || 'Export...' : 'Exporter Excel'}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Exporter les notes de l'onglet actuel en Excel</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  className="gap-1.5"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileSpreadsheet className="h-4 w-4" />
+                  )}
+                  {isExporting ? exportProgress || 'Export...' : 'Excel'}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exporter en Excel (.xlsx)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportPDF}
+                  disabled={isExporting}
+                  className="gap-1.5"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="h-4 w-4" />
+                  )}
+                  PDF
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exporter en PDF avec en-tête ARTI</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportCSV}
+                  disabled={isExporting}
+                  className="gap-1.5"
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  CSV
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exporter en CSV</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

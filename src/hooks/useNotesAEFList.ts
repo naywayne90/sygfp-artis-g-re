@@ -164,7 +164,7 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
       return result;
     },
     enabled: !!exercice,
-    staleTime: 10000,
+    staleTime: 30000,
     refetchOnWindowFocus: true,
     retry: 1,
   });
