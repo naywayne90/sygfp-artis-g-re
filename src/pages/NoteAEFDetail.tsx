@@ -31,13 +31,19 @@ import {
   Upload,
   X,
   FolderOpen,
+  Wallet,
+  QrCode,
+  GitBranch,
 } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { DecisionBlock } from '@/components/workflow/DecisionBlock';
@@ -315,6 +321,35 @@ export default function NoteAEFDetail() {
       return data || [];
     },
     enabled: !!id,
+  });
+
+  // Fetch budget availability data
+  const { data: budgetData } = useQuery({
+    queryKey: ['note-aef-budget', note?.budget_line_id],
+    queryFn: async () => {
+      if (!note?.budget_line_id) return null;
+      const { data: line, error: lineError } = await supabase
+        .from('budget_lines')
+        .select('id, code, label, dotation_initiale, dotation_modifiee')
+        .eq('id', note.budget_line_id)
+        .single();
+      if (lineError || !line) return null;
+
+      const dotation = line.dotation_modifiee || line.dotation_initiale || 0;
+
+      const { data: engagements } = await supabase
+        .from('budget_engagements')
+        .select('montant')
+        .eq('budget_line_id', note.budget_line_id)
+        .neq('statut', 'annule');
+
+      const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const disponible = dotation - totalEngaged;
+      const utilisation = dotation > 0 ? Math.round((totalEngaged / dotation) * 100) : 0;
+
+      return { ...line, dotation, totalEngaged, disponible, utilisation };
+    },
+    enabled: !!note?.budget_line_id,
   });
 
   // Access control
@@ -718,152 +753,362 @@ export default function NoteAEFDetail() {
         </div>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Origin - Linked SEF Note */}
-          {linkedNoteSEF && (
-            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <LinkIcon className="h-4 w-4 text-blue-600" />
-                  Note SEF d'origine
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{linkedNoteSEF.numero}</p>
-                    <p className="text-sm text-muted-foreground">{linkedNoteSEF.objet}</p>
-                  </div>
-                  <Link to={`/notes-sef/${linkedNoteSEF.id}`}>
-                    <Button variant="outline" size="sm">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Voir
-                    </Button>
-                  </Link>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Building2 className="h-3 w-3" />
-                    {linkedNoteSEF.direction?.sigle || linkedNoteSEF.direction?.label}
-                  </span>
-                  {linkedNoteSEF.validated_at && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      Validée le {formatDate(linkedNoteSEF.validated_at)}
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {/* 5-Tab Detail Panel */}
+      <Tabs defaultValue="resume" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="resume" className="gap-1.5">
+            <FileText className="h-4 w-4" />
+            Résumé
+          </TabsTrigger>
+          <TabsTrigger value="budget" className="gap-1.5">
+            <Wallet className="h-4 w-4" />
+            Budget
+          </TabsTrigger>
+          <TabsTrigger value="pieces" className="gap-1.5">
+            <Paperclip className="h-4 w-4" />
+            Pièces jointes
+            {attachments.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                {attachments.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="historique" className="gap-1.5">
+            <History className="h-4 w-4" />
+            Historique
+          </TabsTrigger>
+          <TabsTrigger value="workflow" className="gap-1.5">
+            <GitBranch className="h-4 w-4" />
+            Workflow
+          </TabsTrigger>
+        </TabsList>
 
-          {/* Direct AEF Justification */}
-          {(note.is_direct_aef || note.origin === 'DIRECT') && note.justification && (
-            <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
-              <CardHeader className="pb-3">
+        {/* ──── TAB 1: RÉSUMÉ ──── */}
+        <TabsContent value="resume" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Origin - Linked SEF Note */}
+              {linkedNoteSEF && (
+                <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4 text-blue-600" />
+                      Note SEF d'origine
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{linkedNoteSEF.numero}</p>
+                        <p className="text-sm text-muted-foreground">{linkedNoteSEF.objet}</p>
+                      </div>
+                      <Link to={`/notes-sef/${linkedNoteSEF.id}`}>
+                        <Button variant="outline" size="sm">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Voir NSEF
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        {linkedNoteSEF.direction?.sigle || linkedNoteSEF.direction?.label}
+                      </span>
+                      {linkedNoteSEF.validated_at && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Validée le {formatDate(linkedNoteSEF.validated_at)}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Direct AEF Justification */}
+              {(note.is_direct_aef || note.origin === 'DIRECT') && note.justification && (
+                <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      Justification AEF Directe
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm whitespace-pre-wrap">{note.justification}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Main information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Informations générales</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Objet</label>
+                    <p className="mt-1">{note.objet}</p>
+                  </div>
+                  {note.contenu && (
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Description / Contenu
+                      </label>
+                      <p className="mt-1 whitespace-pre-wrap">{note.contenu}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Financial details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Détails financiers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Montant estimé
+                    </label>
+                    <p className="mt-1 text-lg font-semibold">
+                      {formatMontant(note.montant_estime)}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Type de dépense
+                    </label>
+                    <p className="mt-1 capitalize">{note.type_depense || '-'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Urgence</label>
+                    <p className="mt-1 capitalize">{note.priorite || 'Normale'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Direction</label>
+                    <p className="mt-1">{note.direction?.label || note.direction?.sigle || '-'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Decision Blocks */}
+              {note.validated_at && note.validated_by_profile && (
+                <DecisionBlock
+                  type="validation"
+                  acteur={note.validated_by_profile}
+                  date={note.validated_at}
+                />
+              )}
+              {note.statut === 'rejete' && note.rejected_by_profile && (
+                <DecisionBlock
+                  type="rejet"
+                  acteur={note.rejected_by_profile}
+                  date={note.rejected_at}
+                  commentaire={note.rejection_reason}
+                />
+              )}
+              {note.statut === 'differe' && note.differe_by_profile && (
+                <DecisionBlock
+                  type="differe"
+                  acteur={note.differe_by_profile}
+                  date={note.date_differe}
+                  commentaire={note.motif_differe}
+                  dateReprise={note.deadline_correction}
+                />
+              )}
+              {note.imputed_at && note.imputed_by_profile && (
+                <DecisionBlock
+                  type="imputation"
+                  acteur={note.imputed_by_profile}
+                  date={note.imputed_at}
+                  ligneBudgetaire={note.budget_line}
+                />
+              )}
+            </div>
+
+            {/* Sidebar - Technical info + QR code for validated notes */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Informations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Référence</span>
+                    <span className="font-mono">{note.numero || '-'}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Exercice</span>
+                    <span>{note.exercice}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Créé le</span>
+                    <span>{formatDate(note.created_at)}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Créé par</span>
+                    <span>
+                      {note.created_by_profile
+                        ? `${note.created_by_profile.first_name || ''} ${note.created_by_profile.last_name || ''}`.trim()
+                        : '-'}
+                    </span>
+                  </div>
+                  {note.submitted_at && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Soumis le</span>
+                        <span>{formatDate(note.submitted_at)}</span>
+                      </div>
+                    </>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Dernière MAJ</span>
+                    <span>{formatDate(note.updated_at)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* QR Code for validated/imputed notes */}
+              {['valide', 'a_imputer', 'impute'].includes(note.statut || '') && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <QrCode className="h-4 w-4" />
+                      QR Code de vérification
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center gap-3">
+                    <QRCodeCanvas
+                      value={`${window.location.origin}/verify?type=note_aef&ref=${note.numero || note.id}`}
+                      size={150}
+                      level="M"
+                      includeMargin
+                    />
+                    <p className="text-xs text-muted-foreground text-center">
+                      Scannez pour vérifier l'authenticité
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* ──── TAB 2: BUDGET ──── */}
+        <TabsContent value="budget" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Budget line info */}
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  Justification AEF Directe
+                  <Wallet className="h-4 w-4" />
+                  Ligne budgétaire
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{note.justification}</p>
+                {budgetData ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Code</label>
+                      <p className="mt-1 font-mono text-lg">{budgetData.code}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Libellé</label>
+                      <p className="mt-1">{budgetData.label}</p>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          Dotation
+                        </label>
+                        <p className="mt-1 font-semibold">{formatMontant(budgetData.dotation)}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Engagé</label>
+                        <p className="mt-1 font-semibold text-orange-600">
+                          {formatMontant(budgetData.totalEngaged)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : note.budget_line ? (
+                  <div className="space-y-2">
+                    <p className="font-mono">{note.budget_line.code}</p>
+                    <p className="text-sm text-muted-foreground">{note.budget_line.label}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Aucune ligne budgétaire assignée
+                  </p>
+                )}
               </CardContent>
             </Card>
-          )}
 
-          {/* Main information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Informations générales</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Objet</label>
-                <p className="mt-1">{note.objet}</p>
-              </div>
-              {note.contenu && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Description / Contenu
-                  </label>
-                  <p className="mt-1 whitespace-pre-wrap">{note.contenu}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            {/* Budget disponible + progress bar */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Disponible budgétaire
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {budgetData ? (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-green-600">
+                        {formatMontant(budgetData.disponible)}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">Montant disponible</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Utilisation</span>
+                        <span className="font-medium">{budgetData.utilisation}%</span>
+                      </div>
+                      <Progress
+                        value={budgetData.utilisation}
+                        className={`h-3 ${budgetData.utilisation > 80 ? '[&>div]:bg-red-500' : budgetData.utilisation > 50 ? '[&>div]:bg-orange-500' : '[&>div]:bg-green-500'}`}
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>0 FCFA</span>
+                        <span>{formatMontant(budgetData.dotation)}</span>
+                      </div>
+                    </div>
+                    {note.montant_estime && budgetData.disponible < note.montant_estime && (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <AlertTriangle className="h-4 w-4 shrink-0" />
+                        <span>
+                          Le montant estimé ({formatMontant(note.montant_estime)}) dépasse le
+                          disponible
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    {note.budget_line_id
+                      ? 'Chargement des données budgétaires...'
+                      : 'Aucune ligne budgétaire assignée'}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-          {/* Financial details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Détails financiers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Montant estimé</label>
-                <p className="mt-1 text-lg font-semibold">{formatMontant(note.montant_estime)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Type de dépense</label>
-                <p className="mt-1 capitalize">{note.type_depense || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Urgence</label>
-                <p className="mt-1 capitalize">{note.priorite || 'Normale'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Direction</label>
-                <p className="mt-1">{note.direction?.label || note.direction?.sigle || '-'}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Decision Block - Validation */}
-          {note.validated_at && note.validated_by_profile && (
-            <DecisionBlock
-              type="validation"
-              acteur={note.validated_by_profile}
-              date={note.validated_at}
-            />
-          )}
-
-          {/* Decision Block - Rejection */}
-          {note.statut === 'rejete' && note.rejected_by_profile && (
-            <DecisionBlock
-              type="rejet"
-              acteur={note.rejected_by_profile}
-              date={note.rejected_at}
-              commentaire={note.rejection_reason}
-            />
-          )}
-
-          {/* Decision Block - Deferred */}
-          {note.statut === 'differe' && note.differe_by_profile && (
-            <DecisionBlock
-              type="differe"
-              acteur={note.differe_by_profile}
-              date={note.date_differe}
-              commentaire={note.motif_differe}
-              dateReprise={note.deadline_correction}
-            />
-          )}
-
-          {/* Decision Block - Imputation */}
-          {note.imputed_at && note.imputed_by_profile && (
-            <DecisionBlock
-              type="imputation"
-              acteur={note.imputed_by_profile}
-              date={note.imputed_at}
-              ligneBudgetaire={note.budget_line}
-            />
-          )}
-
-          {/* Pièces jointes */}
+        {/* ──── TAB 3: PIÈCES JOINTES ──── */}
+        <TabsContent value="pieces" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-base flex items-center gap-2">
@@ -873,7 +1118,6 @@ export default function NoteAEFDetail() {
                   {attachments.length}
                 </Badge>
               </CardTitle>
-              {/* Upload button - only for brouillon and creator */}
               {note.statut === 'brouillon' && accessControl.canEdit && (
                 <div className="relative">
                   <input
@@ -902,19 +1146,17 @@ export default function NoteAEFDetail() {
               )}
             </CardHeader>
             <CardContent>
-              {/* Upload hint for brouillon */}
               {note.statut === 'brouillon' && accessControl.canEdit && (
                 <p className="text-xs text-muted-foreground mb-3">
                   Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF • Max 10 MB
                 </p>
               )}
-
               {attachmentsLoading ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
               ) : attachments.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-8">
                   Aucune pièce jointe
                 </p>
               ) : (
@@ -944,7 +1186,6 @@ export default function NoteAEFDetail() {
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        {/* Delete button - only for brouillon */}
                         {note.statut === 'brouillon' && accessControl.canEdit && (
                           <Button
                             variant="ghost"
@@ -963,71 +1204,21 @@ export default function NoteAEFDetail() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </TabsContent>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Technical info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Informations</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Référence</span>
-                <span className="font-mono">{note.numero || '-'}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Exercice</span>
-                <span>{note.exercice}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Créé le</span>
-                <span>{formatDate(note.created_at)}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Créé par</span>
-                <span>
-                  {note.created_by_profile
-                    ? `${note.created_by_profile.first_name || ''} ${note.created_by_profile.last_name || ''}`.trim()
-                    : '-'}
-                </span>
-              </div>
-              {note.submitted_at && (
-                <>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Soumis le</span>
-                    <span>{formatDate(note.submitted_at)}</span>
-                  </div>
-                </>
-              )}
-              <Separator />
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Dernière MAJ</span>
-                <span>{formatDate(note.updated_at)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Progression du Workflow (nouveau système wf_*) */}
-          <WorkflowTimeline entityType="note_aef" entityId={note.id} variant="vertical" />
-
-          {/* Timeline */}
+        {/* ──── TAB 4: HISTORIQUE ──── */}
+        <TabsContent value="historique" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <History className="h-4 w-4" />
-                Historique
+                Historique des actions
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
+              <ScrollArea className="h-[500px] pr-4">
                 {history.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
+                  <p className="text-sm text-muted-foreground text-center py-8">
                     Aucun historique disponible
                   </p>
                 ) : (
@@ -1067,8 +1258,41 @@ export default function NoteAEFDetail() {
               </ScrollArea>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+
+        {/* ──── TAB 5: WORKFLOW ──── */}
+        <TabsContent value="workflow" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <WorkflowTimeline entityType="note_aef" entityId={note.id} variant="vertical" />
+
+            {/* QR Code for validated notes */}
+            {['valide', 'a_imputer', 'impute'].includes(note.statut || '') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <QrCode className="h-4 w-4" />
+                    QR Code de vérification
+                  </CardTitle>
+                  <CardDescription>
+                    Ce QR code permet de vérifier l'authenticité de cette note
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-4">
+                  <QRCodeCanvas
+                    value={`${window.location.origin}/verify?type=note_aef&ref=${note.numero || note.id}`}
+                    size={200}
+                    level="M"
+                    includeMargin
+                  />
+                  <p className="text-sm text-muted-foreground text-center">
+                    Référence: <span className="font-mono font-medium">{note.numero}</span>
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       <NoteAEFRejectDialog
