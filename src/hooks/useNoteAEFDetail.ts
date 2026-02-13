@@ -17,14 +17,13 @@ export interface NoteAEFHistoryEntry {
 
 export interface NoteAEFAttachment {
   id: string;
+  note_id: string;
   file_name: string;
   file_path: string;
   file_type: string | null;
   file_size: number | null;
   uploaded_by: string | null;
   created_at: string;
-  etape: string | null;
-  uploader?: { first_name: string | null; last_name: string | null } | null;
 }
 
 interface LinkedNoteSEF {
@@ -39,7 +38,7 @@ interface LinkedNoteSEF {
 // HOOK
 // ============================================
 
-export function useNoteAEFDetail(noteId: string | null, referencePivot?: string | null) {
+export function useNoteAEFDetail(noteId: string | null, _referencePivot?: string | null) {
   // 1. Historique des actions
   const { data: history = [], isLoading: loadingHistory } = useQuery<NoteAEFHistoryEntry[]>({
     queryKey: ['note-aef-history', noteId],
@@ -65,47 +64,23 @@ export function useNoteAEFDetail(noteId: string | null, referencePivot?: string 
     staleTime: 30_000,
   });
 
-  // 2. Pieces jointes (via attachments generiques par dossier_ref)
+  // 2. Pieces jointes (via note_attachments par note_id)
   const { data: pieces = [], isLoading: loadingPieces } = useQuery<NoteAEFAttachment[]>({
-    queryKey: ['note-aef-pieces', noteId, referencePivot],
+    queryKey: ['note-aef-pieces', noteId],
     queryFn: async () => {
       if (!noteId) return [];
 
-      // Strategie 1: via attachments par reference_pivot
-      if (referencePivot) {
-        const { data, error } = await supabase
-          .from('attachments')
-          .select(
-            `
-            *,
-            uploader:profiles!attachments_uploaded_by_fkey(first_name, last_name)
-          `
-          )
-          .eq('dossier_ref', referencePivot)
-          .order('created_at', { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          return (data || []) as unknown as NoteAEFAttachment[];
-        }
-      }
-
-      // Strategie 2: via entity_id
-      const { data: data2, error: error2 } = await supabase
-        .from('attachments')
-        .select(
-          `
-          *,
-          uploader:profiles!attachments_uploaded_by_fkey(first_name, last_name)
-        `
-        )
-        .eq('entity_id', noteId)
+      const { data, error } = await supabase
+        .from('note_attachments')
+        .select('*')
+        .eq('note_id', noteId)
         .order('created_at', { ascending: false });
 
-      if (error2) {
-        console.error('Error fetching AEF attachments:', error2);
+      if (error) {
+        console.error('Error fetching AEF attachments:', error);
         return [];
       }
-      return (data2 || []) as unknown as NoteAEFAttachment[];
+      return (data || []) as unknown as NoteAEFAttachment[];
     },
     enabled: !!noteId,
     staleTime: 30_000,

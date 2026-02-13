@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NoteAEFForm } from '@/components/notes-aef/NoteAEFForm';
 import { NoteAEFList } from '@/components/notes-aef/NoteAEFList';
-import { NoteAEFDetails } from '@/components/notes-aef/NoteAEFDetails';
+import { NoteAEFDetailSheet } from '@/components/notes-aef/NoteAEFDetailSheet';
 import { NoteAEFRejectDialog } from '@/components/notes-aef/NoteAEFRejectDialog';
 import { NoteAEFDeferDialog } from '@/components/notes-aef/NoteAEFDeferDialog';
 import { NoteAEFImputeDialog } from '@/components/notes-aef/NoteAEFImputeDialog';
@@ -444,10 +444,16 @@ export default function NotesAEF() {
         initialNoteSEFId={prefillNoteSEFId}
       />
 
-      <NoteAEFDetails
+      <NoteAEFDetailSheet
         open={!!viewingNote}
         onOpenChange={() => setViewingNote(null)}
         note={viewingNote}
+        onEdit={handleEdit}
+        onSubmit={handleSubmit}
+        onValidate={handleValidate}
+        onReject={setRejectingNote}
+        onDefer={setDeferringNote}
+        onImpute={setImputingNote}
       />
 
       <NoteAEFRejectDialog
