@@ -24,7 +24,9 @@ CREATE INDEX IF NOT EXISTS idx_notes_dg_exercice_direction_statut
 -- 1B. Sécurité : révoquer accès anon à la vue v_notes_aef_detail
 -- ============================================================================
 
-REVOKE SELECT ON public.v_notes_aef_detail FROM anon;
+-- anon avait DELETE, INSERT, REFERENCES, TRIGGER, TRUNCATE, UPDATE (pas SELECT)
+-- Révoquer TOUT pour fermer complètement l'accès anon
+REVOKE ALL ON public.v_notes_aef_detail FROM anon;
 
 
 -- ============================================================================
