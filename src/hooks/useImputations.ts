@@ -37,7 +37,15 @@ export interface Imputation {
   // Relations
   direction?: { id: string; label: string; sigle: string | null } | null;
   note_aef?: { id: string; numero: string; objet: string } | null;
-  budget_line?: { id: string; code: string; label: string } | null;
+  budget_line?: {
+    id: string;
+    code: string;
+    label: string;
+    dotation_initiale: number | null;
+    dotation_modifiee: number | null;
+    total_engage: number | null;
+    montant_reserve: number | null;
+  } | null;
   created_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
   validated_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
 }
@@ -72,7 +80,7 @@ export function useImputations(filters?: ImputationFilters) {
           *,
           direction:directions(id, label, sigle),
           note_aef:notes_dg!imputations_note_aef_id_fkey(id, numero, objet),
-          budget_line:budget_lines(id, code, label),
+          budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
           created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
           validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name)
         `
@@ -190,55 +198,40 @@ export function useImputations(filters?: ImputationFilters) {
     },
   });
 
-  // Valider une imputation
+  // Valider une imputation via RPC atomique (réserve les crédits)
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      const { data, error } = await supabase
-        .from('imputations')
-        .update({
-          statut: 'valide',
-          validated_at: new Date().toISOString(),
-          validated_by: user.id,
-        })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Mettre à jour l'étape du dossier
-      if (data.dossier_id) {
-        await supabase
-          .from('dossiers')
-          .update({ etape_courante: 'imputation', updated_at: new Date().toISOString() })
-          .eq('id', data.dossier_id);
-      }
-
-      await logAction({
-        entityType: 'imputation',
-        entityId: id,
-        action: 'validate',
-        newValues: { statut: 'valide' },
+      const { data, error } = await supabase.rpc('validate_imputation', {
+        p_imputation_id: id,
       });
-
-      return data;
+      if (error) throw error;
+      const result = data as {
+        success: boolean;
+        error?: string;
+        montant?: number;
+        disponible_apres?: number;
+        reference?: string;
+        [key: string]: unknown;
+      };
+      if (!result.success) throw new Error(result.error || 'Validation échouée');
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['imputations'] });
       queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-line-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-impact-preview'] });
       queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      const montant = typeof result.montant === 'number' ? result.montant : 0;
+      const disponible = typeof result.disponible_apres === 'number' ? result.disponible_apres : 0;
       toast({
         title: 'Imputation validée',
-        description: "L'imputation a été validée avec succès.",
+        description: `${new Intl.NumberFormat('fr-FR').format(montant)} FCFA réservés. Disponible: ${new Intl.NumberFormat('fr-FR').format(disponible)} FCFA`,
       });
     },
     onError: (error: Error) => {
-      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+      toast({ title: 'Erreur de validation', description: error.message, variant: 'destructive' });
     },
   });
 

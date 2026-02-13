@@ -21,6 +21,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
+import { ImputationValidationDialog } from '@/components/imputation/ImputationValidationDialog';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +52,7 @@ import {
   ShoppingCart,
   AlertTriangle,
   Tag,
+  Lock,
 } from 'lucide-react';
 
 // ============================================
@@ -844,8 +846,8 @@ function ActionMenu({
   onNavigate,
   setRejectOpen,
   setDeferOpen,
+  setValidateOpen,
   submitImputation,
-  validateImputation,
   deleteImputation,
 }: {
   imputation: Imputation;
@@ -855,8 +857,8 @@ function ActionMenu({
   onNavigate: (path: string) => void;
   setRejectOpen: (v: boolean) => void;
   setDeferOpen: (v: boolean) => void;
+  setValidateOpen: (v: boolean) => void;
   submitImputation: (id: string) => Promise<unknown>;
-  validateImputation: (id: string) => Promise<unknown>;
   deleteImputation: (id: string) => Promise<unknown>;
 }) {
   const { toast } = useToast();
@@ -932,9 +934,7 @@ function ActionMenu({
         {canValidate && isAValider && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => handleAction(() => validateImputation(imputation.id), 'Validation')}
-            >
+            <DropdownMenuItem onClick={() => setValidateOpen(true)}>
               <CheckCircle className="mr-2 h-4 w-4 text-success" />
               Valider
             </DropdownMenuItem>
@@ -1015,11 +1015,13 @@ export function ImputationDetailSheet({
     rejectImputation,
     deferImputation,
     deleteImputation,
+    isValidating,
   } = useImputations();
 
   // Dialog states
   const [rejectOpen, setRejectOpen] = useState(false);
   const [deferOpen, setDeferOpen] = useState(false);
+  const [validateOpen, setValidateOpen] = useState(false);
 
   // Fetch budget line details
   const { data: budgetLine = null, isLoading: loadingBudget } = useQuery({
@@ -1185,11 +1187,6 @@ export function ImputationDetailSheet({
     onRefresh?.();
   };
 
-  const handleValidate = async (id: string) => {
-    await validateImputation(id);
-    onRefresh?.();
-  };
-
   const handleDelete = async (id: string) => {
     await deleteImputation(id);
     onRefresh?.();
@@ -1213,8 +1210,8 @@ export function ImputationDetailSheet({
                 onNavigate={navigate}
                 setRejectOpen={setRejectOpen}
                 setDeferOpen={setDeferOpen}
+                setValidateOpen={setValidateOpen}
                 submitImputation={handleSubmit}
-                validateImputation={handleValidate}
                 deleteImputation={handleDelete}
               />
             </div>
@@ -1223,6 +1220,12 @@ export function ImputationDetailSheet({
               {imputation.reference && (
                 <Badge variant="outline" className="font-mono text-xs">
                   {imputation.reference}
+                </Badge>
+              )}
+              {imputation.statut === 'valide' && (
+                <Badge className="bg-green-100 text-green-700 border-green-200">
+                  <Lock className="h-3 w-3 mr-1" />
+                  Crédits engagés
                 </Badge>
               )}
             </div>
@@ -1297,6 +1300,17 @@ export function ImputationDetailSheet({
         onOpenChange={setDeferOpen}
         imputationReference={imputation.reference}
         onConfirm={handleDefer}
+      />
+      <ImputationValidationDialog
+        open={validateOpen}
+        onOpenChange={setValidateOpen}
+        imputation={imputation}
+        onConfirm={async () => {
+          await validateImputation(imputation.id);
+          setValidateOpen(false);
+          onRefresh?.();
+        }}
+        isLoading={isValidating}
       />
     </>
   );

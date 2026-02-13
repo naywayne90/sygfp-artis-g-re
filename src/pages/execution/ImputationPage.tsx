@@ -12,6 +12,7 @@ import { ImputationForm } from '@/components/imputation/ImputationForm';
 import { ImputationDetailSheet } from '@/components/imputation/ImputationDetailSheet';
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
+import { ImputationValidationDialog } from '@/components/imputation/ImputationValidationDialog';
 import {
   Table,
   TableBody,
@@ -45,6 +46,8 @@ import {
   Loader2,
   Tag,
   ShoppingCart,
+  Building2,
+  Banknote,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -103,6 +106,7 @@ export default function ImputationPage() {
   const [viewingImputation, setViewingImputation] = useState<Imputation | null>(null);
   const [rejectingImputation, setRejectingImputation] = useState<Imputation | null>(null);
   const [deferringImputation, setDeferringImputation] = useState<Imputation | null>(null);
+  const [validatingImputation, setValidatingImputation] = useState<Imputation | null>(null);
 
   // Hooks
   const { notesAImputer, loadingNotes } = useImputation();
@@ -116,6 +120,7 @@ export default function ImputationPage() {
     rejectImputation,
     deferImputation,
     deleteImputation,
+    isValidating,
   } = useImputations({ search: searchQuery });
 
   // Gérer le paramètre sourceAef depuis l'URL
@@ -207,6 +212,23 @@ export default function ImputationPage() {
     }),
     [imputations]
   );
+
+  // KPIs pour l'onglet validation
+  const validationKpis = useMemo(() => {
+    const items = imputationsByTab.a_valider;
+    return {
+      total: items.length,
+      montantTotal: items.reduce((sum, i) => sum + (i.montant || 0), 0),
+      directions: new Set(items.map((i) => i.direction_id).filter(Boolean)).size,
+    };
+  }, [imputationsByTab.a_valider]);
+
+  /** Color class for budget availability ratio */
+  const getDisponibleColor = (ratio: number) => {
+    if (ratio >= 90) return 'text-destructive font-bold';
+    if (ratio >= 50) return 'text-orange-600 font-medium';
+    return 'text-green-600 font-medium';
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -417,8 +439,187 @@ export default function ImputationPage() {
           </Card>
         </TabsContent>
 
-        {/* Onglets imputations (a_valider, imputees, differees, rejetees) */}
-        {['a_valider', 'imputees', 'differees', 'rejetees'].map((tab) => (
+        {/* Onglet enrichi: À valider */}
+        <TabsContent value="a_valider" className="mt-4 space-y-4">
+          {/* KPIs validation */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total à valider</p>
+                    <p className="text-xl font-bold">{validationKpis.total}</p>
+                  </div>
+                  <Clock className="h-6 w-6 text-warning opacity-80" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Montant total</p>
+                    <p className="text-xl font-bold">
+                      {formatMontant(validationKpis.montantTotal)}
+                    </p>
+                  </div>
+                  <Banknote className="h-6 w-6 text-primary opacity-80" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Directions</p>
+                    <p className="text-xl font-bold">{validationKpis.directions}</p>
+                  </div>
+                  <Building2 className="h-6 w-6 text-muted-foreground opacity-80" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardContent className="pt-6">
+              {loadingImputations ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : !imputationsByTab.a_valider.length ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucune imputation à valider</p>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Référence</TableHead>
+                        <TableHead>Objet</TableHead>
+                        <TableHead>Direction</TableHead>
+                        <TableHead>NAEF</TableHead>
+                        <TableHead className="text-right">Montant (FCFA)</TableHead>
+                        <TableHead>Ligne budget</TableHead>
+                        <TableHead className="text-right">Disponible</TableHead>
+                        <TableHead>Soumise le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {imputationsByTab.a_valider.map((imp) => {
+                        const bl = imp.budget_line;
+                        const dotation = bl
+                          ? Math.max(bl.dotation_modifiee || 0, bl.dotation_initiale || 0)
+                          : 0;
+                        const disponible = bl
+                          ? dotation - (bl.total_engage || 0) - imp.montant
+                          : null;
+                        const ratio =
+                          bl && dotation > 0
+                            ? (((bl.total_engage || 0) + imp.montant) / dotation) * 100
+                            : 0;
+
+                        return (
+                          <TableRow key={imp.id}>
+                            <TableCell className="font-mono text-sm">
+                              {imp.reference || '-'}
+                            </TableCell>
+                            <TableCell className="max-w-[180px] truncate">{imp.objet}</TableCell>
+                            <TableCell>
+                              {imp.direction?.sigle || imp.direction?.label || '-'}
+                            </TableCell>
+                            <TableCell>
+                              {imp.note_aef?.numero ? (
+                                <button
+                                  onClick={() => navigate(`/notes-aef/${imp.note_aef_id}`)}
+                                  className="font-mono text-xs text-blue-600 hover:underline"
+                                >
+                                  {imp.note_aef.numero}
+                                </button>
+                              ) : (
+                                '-'
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatMontant(imp.montant)}
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">{bl?.code || '-'}</TableCell>
+                            <TableCell className="text-right">
+                              {disponible !== null ? (
+                                <span className={`font-mono text-xs ${getDisponibleColor(ratio)}`}>
+                                  {formatMontant(disponible)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {imp.submitted_at
+                                ? format(new Date(imp.submitted_at), 'dd MMM yyyy', { locale: fr })
+                                : format(new Date(imp.created_at), 'dd MMM yyyy', { locale: fr })}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setViewingImputation(imp)}
+                                  title="Voir détails"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                {canValidate && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-green-600 hover:text-green-700"
+                                      onClick={() => setValidatingImputation(imp)}
+                                      title="Valider"
+                                    >
+                                      <CheckCircle2 className="h-4 w-4" />
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="bg-popover">
+                                        <DropdownMenuItem
+                                          onClick={() => setDeferringImputation(imp)}
+                                        >
+                                          <Clock className="mr-2 h-4 w-4" />
+                                          Différer
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => setRejectingImputation(imp)}
+                                          className="text-destructive"
+                                        >
+                                          <XCircle className="mr-2 h-4 w-4" />
+                                          Rejeter
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Onglets imputations (imputees, differees, rejetees) */}
+        {['imputees', 'differees', 'rejetees'].map((tab) => (
           <TabsContent key={tab} value={tab} className="mt-4">
             <Card>
               <CardContent className="pt-6">
@@ -507,27 +708,6 @@ export default function ImputationPage() {
                                     </>
                                   )}
 
-                                  {imp.statut === 'a_valider' && canValidate && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => validateImputation(imp.id)}>
-                                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                                        Valider
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => setDeferringImputation(imp)}>
-                                        <Clock className="mr-2 h-4 w-4" />
-                                        Différer
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => setRejectingImputation(imp)}
-                                        className="text-destructive"
-                                      >
-                                        <XCircle className="mr-2 h-4 w-4" />
-                                        Rejeter
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
                                   {imp.statut === 'valide' && (
                                     <>
                                       <DropdownMenuSeparator />
@@ -610,6 +790,19 @@ export default function ImputationPage() {
         onOpenChange={(open) => !open && setDeferringImputation(null)}
         imputationReference={deferringImputation?.reference || null}
         onConfirm={handleDefer}
+      />
+
+      <ImputationValidationDialog
+        open={!!validatingImputation}
+        onOpenChange={(open) => !open && setValidatingImputation(null)}
+        imputation={validatingImputation}
+        onConfirm={async () => {
+          if (validatingImputation) {
+            await validateImputation(validatingImputation.id);
+            setValidatingImputation(null);
+          }
+        }}
+        isLoading={isValidating}
       />
     </div>
   );
