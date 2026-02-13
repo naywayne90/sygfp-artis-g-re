@@ -1,10 +1,11 @@
 /**
  * NoteAEFForm - Formulaire amélioré pour création/édition de Notes AEF
- * Création obligatoirement depuis une SEF validée (sauf DG avec AEF directe)
- * Pré-remplissage complet depuis SEF + pièces jointes + audit
+ * - Note SEF d'origine optionnelle (filtrée : SEF validées sans AEF)
+ * - Ligne budgétaire avec disponible et warning
+ * - Pré-remplissage complet depuis SEF + pièces jointes + audit
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { NoteAEF, useNotesAEF } from '@/hooks/useNotesAEF';
+import { NoteAEF, BudgetAvailabilityCheck, useNotesAEF } from '@/hooks/useNotesAEF';
 import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { ARTIReferenceBadge } from '@/components/shared/ARTIReferenceBadge';
@@ -51,6 +52,7 @@ import {
   Upload,
   Save,
   Info,
+  CreditCard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -111,8 +113,11 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     createDirectDG,
     updateNote,
     directions,
+    notesSEFDisponibles,
     notesSEFValidees,
     beneficiaires,
+    budgetLines,
+    checkBudgetAvailability,
     isCreating,
     isCreatingDirectDG,
     isUpdating,
@@ -136,6 +141,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     justification: '',
     beneficiaire_id: '',
     os_id: '',
+    ligne_budgetaire_id: '',
   });
 
   // Note SEF détaillée (avec toutes les infos pour pré-remplissage)
@@ -146,9 +152,54 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
+  // Budget line availability
+  const [budgetAvailability, setBudgetAvailability] = useState<BudgetAvailabilityCheck | null>(
+    null
+  );
+  const [loadingBudgetCheck, setLoadingBudgetCheck] = useState(false);
+
   // Validation temps réel
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [_submitAfterSave, _setSubmitAfterSave] = useState(false);
+
+  // Liste SEF pour le select : en édition, inclure aussi la SEF déjà liée
+  const sefListForSelect =
+    note?.note_sef_id && !notesSEFDisponibles.some((s) => s.id === note.note_sef_id)
+      ? [...notesSEFDisponibles, ...notesSEFValidees.filter((s) => s.id === note.note_sef_id)]
+      : notesSEFDisponibles;
+
+  // Budget lines filtrées par direction sélectionnée
+  const filteredBudgetLines = formData.direction_id
+    ? budgetLines.filter((bl) => !bl.direction_id || bl.direction_id === formData.direction_id)
+    : budgetLines;
+
+  // Vérifier le disponible quand la ligne budgétaire change
+  const checkBudget = useCallback(
+    async (lineId: string, montant: number) => {
+      if (!lineId) {
+        setBudgetAvailability(null);
+        return;
+      }
+      setLoadingBudgetCheck(true);
+      try {
+        const result = await checkBudgetAvailability(lineId, montant);
+        setBudgetAvailability(result);
+      } catch {
+        setBudgetAvailability(null);
+      } finally {
+        setLoadingBudgetCheck(false);
+      }
+    },
+    [checkBudgetAvailability]
+  );
+
+  useEffect(() => {
+    if (formData.ligne_budgetaire_id) {
+      const montant = parseNumber(formData.montant_estime);
+      checkBudget(formData.ligne_budgetaire_id, montant);
+    } else {
+      setBudgetAvailability(null);
+    }
+  }, [formData.ligne_budgetaire_id, formData.montant_estime, checkBudget]);
 
   // Charger les détails de la Note SEF sélectionnée
   useEffect(() => {
@@ -225,9 +276,11 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         justification: note.justification || '',
         beneficiaire_id: note.beneficiaire_id || '',
         os_id: note.os_id || '',
+        ligne_budgetaire_id: note.ligne_budgetaire_id || note.budget_line_id || '',
       });
       setTouched({});
       setUploadedFiles([]);
+      setBudgetAvailability(null);
     } else if (initialNoteSEFId) {
       // Création depuis SEF pré-sélectionnée
       setFormData((prev) => ({
@@ -237,6 +290,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
       }));
       setTouched({});
       setUploadedFiles([]);
+      setBudgetAvailability(null);
     } else if (open) {
       // Nouvelle création vierge
       setFormData({
@@ -251,9 +305,11 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         justification: '',
         beneficiaire_id: '',
         os_id: '',
+        ligne_budgetaire_id: '',
       });
       setTouched({});
       setUploadedFiles([]);
+      setBudgetAvailability(null);
     }
   }, [note, open, initialNoteSEFId]);
 
@@ -293,9 +349,6 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         return !value || (typeof value === 'string' && !value.trim())
           ? "L'objet est obligatoire"
           : null;
-      case 'note_sef_id':
-        if (!formData.is_direct_aef && !value) return 'Sélectionnez une Note SEF validée';
-        return null;
       case 'justification':
         if (formData.is_direct_aef && (!value || (typeof value === 'string' && !value.trim()))) {
           return 'La justification est obligatoire pour une AEF directe';
@@ -320,6 +373,19 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
+  // Reset budget line when direction changes
+  const handleDirectionChange = (value: string) => {
+    updateField('direction_id', value);
+    // Reset la ligne budgétaire si elle n'appartient plus à la direction
+    if (formData.ligne_budgetaire_id) {
+      const currentLine = budgetLines.find((bl) => bl.id === formData.ligne_budgetaire_id);
+      if (currentLine?.direction_id && currentLine.direction_id !== value) {
+        setFormData((prev) => ({ ...prev, ligne_budgetaire_id: '' }));
+        setBudgetAvailability(null);
+      }
+    }
+  };
+
   // Upload des fichiers vers Supabase Storage
   const uploadFiles = async (noteId: string): Promise<boolean> => {
     const validFiles = uploadedFiles.filter((f) => !f.error);
@@ -331,9 +397,8 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
         const uploadFile = validFiles[i];
         const fileName = `${noteId}/${Date.now()}_${uploadFile.file.name}`;
 
-        // Mise à jour du progress
         setUploadedFiles((prev) =>
-          prev.map((f, _idx) => (f === uploadFile ? { ...f, progress: 50 } : f))
+          prev.map((f) => (f === uploadFile ? { ...f, progress: 50 } : f))
         );
 
         const { error } = await supabase.storage
@@ -346,7 +411,6 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
             prev.map((f) => (f === uploadFile ? { ...f, error: 'Échec upload', progress: 0 } : f))
           );
         } else {
-          // Enregistrer en BDD
           await supabase.from('note_attachments').insert({
             note_id: noteId,
             note_type: 'AEF',
@@ -373,17 +437,10 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Marquer tous les champs comme touchés
     setTouched({
       objet: true,
-      note_sef_id: true,
       justification: true,
     });
-
-    // Vérification: soit AEF directe, soit liée à une Note SEF
-    if (!formData.is_direct_aef && !formData.note_sef_id) {
-      return;
-    }
 
     // AEF directe requiert une justification
     if (formData.is_direct_aef && !formData.justification?.trim()) {
@@ -405,12 +462,14 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
           direction_id: formData.direction_id || null,
           priorite: formData.priorite,
           montant_estime: parseNumber(formData.montant_estime),
-          note_sef_id: formData.is_direct_aef ? null : formData.note_sef_id,
+          note_sef_id: formData.is_direct_aef ? null : formData.note_sef_id || null,
           is_direct_aef: formData.is_direct_aef,
           type_depense: formData.type_depense,
           justification: formData.justification || null,
           beneficiaire_id: formData.beneficiaire_id || null,
           os_id: formData.os_id || null,
+          ligne_budgetaire_id: formData.ligne_budgetaire_id || null,
+          budget_line_id: formData.ligne_budgetaire_id || null,
         };
         createdNote = await updateNote({ id: note.id, ...payload });
       } else if (formData.is_direct_aef) {
@@ -423,22 +482,25 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
           montant_estime: parseNumber(formData.montant_estime),
           type_depense: formData.type_depense,
           justification: formData.justification,
+          ligne_budgetaire_id: formData.ligne_budgetaire_id || null,
         });
         createdNote = result?.aef;
       } else {
-        // Mode normal: lié à une SEF existante
+        // Mode normal: lié à une SEF existante ou non
         const payload = {
           objet: formData.objet,
           contenu: formData.contenu || null,
           direction_id: formData.direction_id || null,
           priorite: formData.priorite,
           montant_estime: parseNumber(formData.montant_estime),
-          note_sef_id: formData.note_sef_id,
+          note_sef_id: formData.note_sef_id || null,
           is_direct_aef: false,
           type_depense: formData.type_depense,
           justification: formData.justification || null,
           beneficiaire_id: formData.beneficiaire_id || null,
           os_id: formData.os_id || null,
+          ligne_budgetaire_id: formData.ligne_budgetaire_id || null,
+          budget_line_id: formData.ligne_budgetaire_id || null,
         };
         createdNote = await createNote(payload);
       }
@@ -455,10 +517,14 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
   };
 
   const isLoading = isCreating || isCreatingDirectDG || isUpdating || isUploadingFiles;
-  const needsNoteSEF = !formData.is_direct_aef && !formData.note_sef_id;
   const needsJustification = formData.is_direct_aef && !formData.justification?.trim();
   const needsObjet = !formData.objet?.trim();
-  const canSubmit = !needsNoteSEF && !needsJustification && !needsObjet && !isLoading;
+  const canSubmit = !needsJustification && !needsObjet && !isLoading;
+
+  // Montant vs disponible : warning orange
+  const montantEstime = parseNumber(formData.montant_estime);
+  const budgetInsuffisant =
+    budgetAvailability && !budgetAvailability.isAvailable && montantEstime > 0;
 
   const selectedNoteSEF = notesSEFValidees.find((n) => n.id === formData.note_sef_id);
   const displayReference =
@@ -512,49 +578,47 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
               </Card>
             )}
 
-            {/* Sélection de la Note SEF (masqué si AEF directe) */}
+            {/* Sélection de la Note SEF (optionnel, masqué si AEF directe) */}
             {!formData.is_direct_aef && (
               <Card
                 className={cn(
                   'border-2 transition-colors',
-                  selectedNoteSEFDetail
-                    ? 'border-primary/30 bg-primary/5'
-                    : needsNoteSEF && touched.note_sef_id
-                      ? 'border-destructive/50 bg-destructive/5'
-                      : 'border-muted'
+                  selectedNoteSEFDetail ? 'border-primary/30 bg-primary/5' : 'border-muted'
                 )}
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Link2 className="h-4 w-4 text-primary" />
-                    Note SEF source
-                    <Badge variant="outline" className="ml-auto">
-                      Obligatoire
+                    Note SEF d'origine
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      Optionnel
                     </Badge>
                   </CardTitle>
                   <CardDescription>
-                    Sélectionnez la Note SEF validée à partir de laquelle créer cette AEF
+                    Sélectionnez une Note SEF validée pour pré-remplir les champs (uniquement les
+                    SEF sans AEF existante)
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <Select
                     value={formData.note_sef_id}
-                    onValueChange={(value) => updateField('note_sef_id', value)}
+                    onValueChange={(value) =>
+                      updateField('note_sef_id', value === '__none__' ? '' : value)
+                    }
                   >
-                    <SelectTrigger
-                      className={getFieldError('note_sef_id') ? 'border-destructive' : ''}
-                    >
-                      <SelectValue placeholder="Sélectionner une Note SEF validée..." />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Aucune (saisie libre)" />
                     </SelectTrigger>
                     <SelectContent>
-                      {notesSEFValidees.length === 0 ? (
+                      <SelectItem value="__none__">Aucune (saisie libre)</SelectItem>
+                      {sefListForSelect.length === 0 ? (
                         <div className="p-4 text-sm text-muted-foreground text-center">
                           <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-warning" />
-                          <p className="font-medium">Aucune Note SEF validée</p>
-                          <p className="text-xs">Créez et faites valider une Note SEF d'abord</p>
+                          <p className="font-medium">Aucune Note SEF disponible</p>
+                          <p className="text-xs">Toutes les SEF validées ont déjà une AEF liée</p>
                         </div>
                       ) : (
-                        notesSEFValidees.map((noteSEF) => (
+                        sefListForSelect.map((noteSEF) => (
                           <SelectItem key={noteSEF.id} value={noteSEF.id}>
                             <div className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-success" />
@@ -600,12 +664,21 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                             {selectedNoteSEFDetail.objet}
                           </p>
                         </div>
-                        {selectedNoteSEFDetail.direction && (
+                        <div>
+                          <span className="text-muted-foreground">Direction :</span>
+                          <p className="font-medium">
+                            {selectedNoteSEFDetail.direction
+                              ? selectedNoteSEFDetail.direction.sigle ||
+                                selectedNoteSEFDetail.direction.label
+                              : 'Non spécifiée'}
+                          </p>
+                        </div>
+                        {selectedNoteSEFDetail.demandeur && (
                           <div>
-                            <span className="text-muted-foreground">Direction :</span>
+                            <span className="text-muted-foreground">Demandeur :</span>
                             <p className="font-medium">
-                              {selectedNoteSEFDetail.direction.sigle ||
-                                selectedNoteSEFDetail.direction.label}
+                              {selectedNoteSEFDetail.demandeur.first_name}{' '}
+                              {selectedNoteSEFDetail.demandeur.last_name}
                             </p>
                           </div>
                         )}
@@ -636,15 +709,6 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                         </AlertDescription>
                       </Alert>
                     </div>
-                  )}
-
-                  {getFieldError('note_sef_id') && (
-                    <Alert variant="destructive">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        Une Note AEF doit obligatoirement être liée à une Note SEF validée.
-                      </AlertDescription>
-                    </Alert>
                   )}
                 </CardContent>
               </Card>
@@ -700,10 +764,7 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
 
               <div>
                 <Label htmlFor="direction">Direction</Label>
-                <Select
-                  value={formData.direction_id}
-                  onValueChange={(value) => updateField('direction_id', value)}
-                >
+                <Select value={formData.direction_id} onValueChange={handleDirectionChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une direction" />
                   </SelectTrigger>
@@ -764,6 +825,79 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                   placeholder="0"
                   className="text-right font-mono"
                 />
+              </div>
+
+              {/* Ligne budgétaire - filtrée par exercice + direction */}
+              <div className="col-span-full">
+                <Label htmlFor="ligne_budgetaire" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Ligne budgétaire
+                </Label>
+                <Select
+                  value={formData.ligne_budgetaire_id}
+                  onValueChange={(value) =>
+                    updateField('ligne_budgetaire_id', value === '__none__' ? '' : value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une ligne budgétaire (optionnel)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Aucune</SelectItem>
+                    {filteredBudgetLines.map((bl) => (
+                      <SelectItem key={bl.id} value={bl.id}>
+                        <span className="font-mono text-xs">{bl.code}</span>
+                        <span className="ml-2 truncate">{bl.label}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Affichage du disponible */}
+                {formData.ligne_budgetaire_id && (
+                  <div className="mt-2">
+                    {loadingBudgetCheck ? (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Vérification du disponible...
+                      </div>
+                    ) : budgetAvailability ? (
+                      <div
+                        className={cn(
+                          'flex items-center gap-2 text-xs p-2 rounded-md',
+                          budgetInsuffisant
+                            ? 'bg-orange-50 text-orange-700 dark:bg-orange-950/20 dark:text-orange-400 border border-orange-200'
+                            : 'bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 border border-green-200'
+                        )}
+                      >
+                        {budgetInsuffisant ? (
+                          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                        ) : (
+                          <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                        )}
+                        <span>
+                          Dotation : {budgetAvailability.dotation.toLocaleString('fr-FR')} FCFA |
+                          Engagé : {budgetAvailability.engaged.toLocaleString('fr-FR')} FCFA |{' '}
+                          <strong>
+                            Disponible : {budgetAvailability.disponible.toLocaleString('fr-FR')}{' '}
+                            FCFA
+                          </strong>
+                        </span>
+                      </div>
+                    ) : null}
+
+                    {budgetInsuffisant && (
+                      <Alert className="mt-2 border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                        <AlertDescription className="text-xs text-orange-700 dark:text-orange-400">
+                          Le montant estimé ({montantEstime.toLocaleString('fr-FR')} FCFA) dépasse
+                          le disponible. Vous pouvez enregistrer en brouillon, mais la soumission
+                          sera bloquée.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                )}
               </div>
 
               {beneficiaires.length > 0 && (

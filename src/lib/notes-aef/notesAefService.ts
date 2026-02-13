@@ -90,7 +90,7 @@ export const notesAefService = {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines(id, code, label, dotation_initiale),
+          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id),
           attachments:note_attachments(id)
         `
@@ -178,7 +178,7 @@ export const notesAefService = {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines(id, code, label, dotation_initiale),
+          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
         `
         )

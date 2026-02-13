@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
@@ -98,7 +99,7 @@ export function useNotesAEF() {
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name),
-          budget_line:budget_lines(id, code, label, dotation_initiale),
+          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
           note_sef:notes_sef!notes_dg_note_sef_id_fkey(id, numero, reference_pivot, objet, dossier_id)
         `
         )
@@ -135,7 +136,7 @@ export function useNotesAEF() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notes_sef')
-        .select('id, numero, reference_pivot, objet, direction_id, validated_at')
+        .select('id, numero, reference_pivot, objet, direction_id, validated_at, montant_estime')
         .eq('statut', 'valide')
         .eq('exercice', exercice || new Date().getFullYear())
         .order('validated_at', { ascending: false });
@@ -147,10 +148,16 @@ export function useNotesAEF() {
         objet: string;
         direction_id: string | null;
         validated_at: string | null;
+        montant_estime: number | null;
       }[];
     },
     enabled: !!exercice,
   });
+
+  // Notes SEF disponibles (validées SANS AEF déjà liée)
+  const notesSEFDisponibles = notesSEFValidees.filter(
+    (sef) => !notes.some((aef) => aef.note_sef_id === sef.id)
+  );
 
   // Fetch beneficiaires (prestataires)
   const { data: beneficiaires = [] } = useQuery({
@@ -165,13 +172,13 @@ export function useNotesAEF() {
     },
   });
 
-  // Fetch budget lines for imputation
+  // Fetch budget lines for imputation (includes direction_id for filtering)
   const { data: budgetLines = [] } = useQuery({
     queryKey: ['budget-lines-for-imputation', exercice],
     queryFn: async () => {
       let query = supabase
         .from('budget_lines')
-        .select('id, code, label, dotation_initiale, dotation_modifiee, statut')
+        .select('id, code, label, dotation_initiale, dotation_modifiee, statut, direction_id')
         .eq('is_active', true)
         .order('code');
 
@@ -234,52 +241,53 @@ export function useNotesAEF() {
   // (Removed duplicate queries - already defined above)
 
   // Check budget availability for a specific line
-  const checkBudgetAvailability = async (
-    budgetLineId: string,
-    montant: number
-  ): Promise<BudgetAvailabilityCheck> => {
-    // Get budget line dotation
-    const { data: line, error: lineError } = await supabase
-      .from('budget_lines')
-      .select('id, dotation_initiale, dotation_modifiee')
-      .eq('id', budgetLineId)
-      .single();
+  // Stable reference via useCallback to prevent infinite re-render loops in consumers
+  const checkBudgetAvailability = useCallback(
+    async (budgetLineId: string, montant: number): Promise<BudgetAvailabilityCheck> => {
+      // Get budget line dotation
+      const { data: line, error: lineError } = await supabase
+        .from('budget_lines')
+        .select('id, dotation_initiale, dotation_modifiee')
+        .eq('id', budgetLineId)
+        .single();
 
-    if (lineError || !line) {
+      if (lineError || !line) {
+        return {
+          isAvailable: false,
+          dotation: 0,
+          engaged: 0,
+          disponible: 0,
+          message: 'Ligne budgétaire introuvable',
+        };
+      }
+
+      const dotation = line.dotation_modifiee || line.dotation_initiale || 0;
+
+      // Get total engagements on this line
+      const { data: engagements, error: engError } = await supabase
+        .from('budget_engagements')
+        .select('montant')
+        .eq('budget_line_id', budgetLineId)
+        .neq('statut', 'annule');
+
+      if (engError) throw engError;
+
+      const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const disponible = dotation - totalEngaged;
+      const isAvailable = montant <= disponible;
+
       return {
-        isAvailable: false,
-        dotation: 0,
-        engaged: 0,
-        disponible: 0,
-        message: 'Ligne budgétaire introuvable',
+        isAvailable,
+        dotation,
+        engaged: totalEngaged,
+        disponible,
+        message: isAvailable
+          ? `Disponible: ${disponible.toLocaleString('fr-FR')} FCFA`
+          : `Insuffisant: ${disponible.toLocaleString('fr-FR')} FCFA disponibles`,
       };
-    }
-
-    const dotation = line.dotation_modifiee || line.dotation_initiale || 0;
-
-    // Get total engagements on this line
-    const { data: engagements, error: engError } = await supabase
-      .from('budget_engagements')
-      .select('montant')
-      .eq('budget_line_id', budgetLineId)
-      .neq('statut', 'annule');
-
-    if (engError) throw engError;
-
-    const totalEngaged = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-    const disponible = dotation - totalEngaged;
-    const isAvailable = montant <= disponible;
-
-    return {
-      isAvailable,
-      dotation,
-      engaged: totalEngaged,
-      disponible,
-      message: isAvailable
-        ? `Disponible: ${disponible.toLocaleString('fr-FR')} FCFA`
-        : `Insuffisant: ${disponible.toLocaleString('fr-FR')} FCFA disponibles`,
-    };
-  };
+    },
+    []
+  );
 
   // Create note - La référence AEF = référence SEF liée (règle métier)
   const createMutation = useMutation({
@@ -338,6 +346,7 @@ export function useNotesAEF() {
             reference_pivot: referencePivot, // Copie de la référence SEF
             beneficiaire_id: noteData.beneficiaire_id,
             ligne_budgetaire_id: noteData.ligne_budgetaire_id,
+            budget_line_id: noteData.ligne_budgetaire_id || null,
             os_id: noteData.os_id,
             action_id: noteData.action_id,
             activite_id: noteData.activite_id,
@@ -380,6 +389,7 @@ export function useNotesAEF() {
       montant_estime?: number;
       type_depense?: string;
       justification: string; // Obligatoire pour AEF directe
+      ligne_budgetaire_id?: string | null;
     }) => {
       const {
         data: { user },
@@ -466,6 +476,8 @@ export function useNotesAEF() {
             is_direct_aef: true,
             origin: 'DIRECT',
             reference_pivot: referencePivot, // Même référence que la SEF
+            ligne_budgetaire_id: noteData.ligne_budgetaire_id || null,
+            budget_line_id: noteData.ligne_budgetaire_id || null,
             exercice: exercice || new Date().getFullYear(),
             created_by: user.id,
             statut: 'brouillon',
@@ -1151,7 +1163,8 @@ export function useNotesAEF() {
     beneficiaires,
     budgetLines,
     budgetValidationStatus,
-    notesSEFValidees, // POINT 2: Notes SEF validées pour liaison
+    notesSEFValidees,
+    notesSEFDisponibles, // SEF validées sans AEF déjà liée
     checkBudgetAvailability,
     createNote: createMutation.mutateAsync,
     createDirectDG: createDirectDGMutation.mutateAsync, // Nouvelle: AEF directe DG

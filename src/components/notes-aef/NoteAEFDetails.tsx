@@ -230,7 +230,11 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
               <Building2 className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Direction:</span>
               <span className="font-medium">
-                {note.direction?.sigle || note.direction?.label || 'Non spécifiée'}
+                {note.direction?.sigle || note.direction?.label || (
+                  <Badge variant="outline" className="bg-muted/50 text-muted-foreground text-xs">
+                    Migré
+                  </Badge>
+                )}
               </span>
             </div>
 
@@ -254,15 +258,19 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
               <span>{format(new Date(note.created_at), 'dd MMMM yyyy', { locale: fr })}</span>
             </div>
 
-            {note.created_by_profile && (
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Créée par:</span>
-                <span>
-                  {note.created_by_profile.first_name} {note.created_by_profile.last_name}
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">Créée par:</span>
+              <span>
+                {note.created_by_profile ? (
+                  `${note.created_by_profile.first_name} ${note.created_by_profile.last_name}`
+                ) : (
+                  <Badge variant="outline" className="bg-muted/50 text-muted-foreground text-xs">
+                    Migré
+                  </Badge>
+                )}
+              </span>
+            </div>
           </div>
 
           {/* Lignes estimatives */}

@@ -8,10 +8,35 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Build options with a timeout-safe lock to prevent infinite hang
+// when navigator.locks gets stuck (Playwright / stale browser tabs).
+const authOptions: Record<string, unknown> = {
+  storage: localStorage,
+  persistSession: true,
+  autoRefreshToken: true,
+};
+
+if (typeof globalThis !== 'undefined' && globalThis.navigator?.locks) {
+  authOptions.lock = async (name: string, acquireTimeout: number, fn: () => Promise<unknown>) => {
+    const controller = new AbortController();
+    const ms = acquireTimeout > 0 ? acquireTimeout : 5000;
+    const timer = setTimeout(() => controller.abort(), ms);
+    try {
+      return await globalThis.navigator.locks.request(
+        name,
+        { mode: 'exclusive', signal: controller.signal },
+        async () => {
+          clearTimeout(timer);
+          return await fn();
+        }
+      );
+    } catch {
+      clearTimeout(timer);
+      return await fn();
+    }
+  };
+}
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
+  auth: authOptions,
 });

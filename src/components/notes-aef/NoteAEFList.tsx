@@ -315,7 +315,16 @@ export function NoteAEFList({
                   <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                     {note.objet}
                   </TableCell>
-                  <TableCell>{note.direction?.sigle || note.direction?.label || '—'}</TableCell>
+                  <TableCell>
+                    {note.direction?.sigle || note.direction?.label || (
+                      <Badge
+                        variant="outline"
+                        className="bg-muted/50 text-muted-foreground text-xs"
+                      >
+                        Migré
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">{formatMontant(note.montant_estime)}</TableCell>
                   <TableCell>{getOriginBadge(note)}</TableCell>
                   <TableCell>{getStatusBadge(note.statut)}</TableCell>

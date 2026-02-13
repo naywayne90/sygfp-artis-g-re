@@ -6,7 +6,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notesAefService } from '@/lib/notes-aef/notesAefService';
-import type { NoteAEFEntity, NoteAEFCounts, PaginatedResult, ListNotesAEFOptions } from '@/lib/notes-aef/types';
+import type {
+  NoteAEFEntity,
+  NoteAEFCounts,
+  PaginatedResult,
+  ListNotesAEFOptions,
+} from '@/lib/notes-aef/types';
 import { useExercice } from '@/contexts/ExerciceContext';
 import type { FiltersState } from '@/components/shared/NotesFiltersBar';
 
@@ -116,10 +121,7 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
   }, [activeTab]);
 
   // Query pour les compteurs
-  const {
-    data: countsResult,
-    isLoading: isCountsLoading
-  } = useQuery({
+  const { data: countsResult, isLoading: isCountsLoading } = useQuery({
     queryKey: ['notes-aef-counts', exercice],
     queryFn: async () => {
       if (!exercice) return null;
@@ -135,7 +137,7 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
     data: listResult,
     isLoading,
     error: queryError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ['notes-aef-list', exercice, page, pageSize, debouncedSearch, statutFilter, filters],
     queryFn: async () => {
@@ -152,14 +154,19 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
         dateFrom: filters.dateFrom || undefined,
         dateTo: filters.dateTo || undefined,
         sortBy: 'updated_at',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
       };
 
-      return notesAefService.listPaginated(options);
+      const result = await notesAefService.listPaginated(options);
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur lors du chargement des notes AEF');
+      }
+      return result;
     },
     enabled: !!exercice,
     staleTime: 10000,
     refetchOnWindowFocus: true,
+    retry: 1,
   });
 
   // Invalider les queries après mutation
@@ -171,7 +178,7 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
 
   // Mise à jour des filtres
   const setFilters = useCallback((newFilters: Partial<NotesAEFFiltersState>) => {
-    setFiltersState(prev => ({ ...prev, ...newFilters }));
+    setFiltersState((prev) => ({ ...prev, ...newFilters }));
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -196,12 +203,13 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
     total: 0,
     page: 1,
     pageSize,
-    totalPages: 0
+    totalPages: 0,
   };
 
   // Extraire les données
-  const counts = countsResult?.success ? countsResult.data! : defaultCounts;
-  const paginatedData = listResult?.success ? listResult.data! : defaultPagination;
+  const counts = countsResult?.success && countsResult.data ? countsResult.data : defaultCounts;
+  const paginatedData =
+    listResult?.success && listResult.data ? listResult.data : defaultPagination;
 
   return {
     // Data
@@ -211,7 +219,7 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
       page: paginatedData.page,
       pageSize: paginatedData.pageSize,
       total: paginatedData.total,
-      totalPages: paginatedData.totalPages
+      totalPages: paginatedData.totalPages,
     },
 
     // State
@@ -234,6 +242,6 @@ export function useNotesAEFList(options: UseNotesAEFListOptions = {}): UseNotesA
     refetch: () => {
       invalidateQueries();
       refetch();
-    }
+    },
   };
 }
