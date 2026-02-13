@@ -358,8 +358,9 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
       s.libelle?.toLowerCase().includes(syscoSearch.toLowerCase())
   );
 
-  // Vérifier si la note est migrée
-  const isMigrated = selectedNoteData?.is_migrated === true;
+  // Vérifier si la note est migrée (colonne existe en base mais pas dans les types générés)
+  const isMigrated =
+    (selectedNoteData as Record<string, unknown> | undefined)?.is_migrated === true;
 
   return (
     <div className="space-y-6">
@@ -392,7 +393,7 @@ export function ImputationForm({ note, onSuccess, onCancel }: ImputationFormProp
                     <span className="truncate max-w-[250px]">{n.objet}</span>
                     <span className="text-muted-foreground">—</span>
                     <span className="font-medium">{formatMontant(n.montant_estime || 0)}</span>
-                    {n.is_migrated && (
+                    {(n as Record<string, unknown>).is_migrated && (
                       <Badge variant="outline" className="text-xs ml-1">
                         <Database className="h-3 w-3 mr-1" />
                         Migré
