@@ -55,6 +55,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 
+/** Note AEF source pour le dialog d'imputation */
+interface SourceAefNote {
+  id: string;
+  numero: string | null;
+  objet: string;
+  montant_estime: number | null;
+  statut: string | null;
+  priorite: string | null;
+  direction?: { id: string; label: string; sigle: string | null } | null;
+  created_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
+}
+
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string }> = {
     brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
@@ -87,9 +99,7 @@ export default function ImputationPage() {
   // States
   const [activeTab, setActiveTab] = useState('a_imputer');
   const [searchQuery, setSearchQuery] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [sourceAefNote, setSourceAefNote] = useState<any>(null);
-  const [_isLoadingSource, setIsLoadingSource] = useState(false);
+  const [sourceAefNote, setSourceAefNote] = useState<SourceAefNote | null>(null);
   const [viewingImputation, setViewingImputation] = useState<Imputation | null>(null);
   const [rejectingImputation, setRejectingImputation] = useState<Imputation | null>(null);
   const [deferringImputation, setDeferringImputation] = useState<Imputation | null>(null);
@@ -112,7 +122,6 @@ export default function ImputationPage() {
   useEffect(() => {
     const sourceAefId = searchParams.get('sourceAef');
     if (sourceAefId) {
-      setIsLoadingSource(true);
       supabase
         .from('notes_dg')
         .select(
@@ -125,7 +134,6 @@ export default function ImputationPage() {
         .eq('id', sourceAefId)
         .single()
         .then(({ data, error }) => {
-          setIsLoadingSource(false);
           if (error) {
             toast({
               title: 'Erreur',
@@ -384,8 +392,7 @@ export default function ImputationPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {notesAImputer.map((note: any) => (
+                      {notesAImputer.map((note) => (
                         <TableRow key={note.id}>
                           <TableCell className="font-mono text-sm">{note.numero || '-'}</TableCell>
                           <TableCell className="max-w-[200px] truncate">{note.objet}</TableCell>

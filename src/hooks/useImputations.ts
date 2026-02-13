@@ -1,8 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useToast } from "@/hooks/use-toast";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 export interface Imputation {
   id: string;
@@ -41,7 +41,7 @@ export interface Imputation {
   validated_by_profile?: { id: string; first_name: string | null; last_name: string | null } | null;
 }
 
-export type ImputationStatus = "brouillon" | "a_valider" | "valide" | "rejete" | "differe";
+export type ImputationStatus = 'brouillon' | 'a_valider' | 'valide' | 'rejete' | 'differe';
 
 export interface ImputationFilters {
   statut?: ImputationStatus | ImputationStatus[];
@@ -62,33 +62,35 @@ export function useImputations(filters?: ImputationFilters) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["imputations", exercice, filters],
+    queryKey: ['imputations', exercice, filters],
     queryFn: async () => {
       let query = supabase
-        .from("imputations")
-        .select(`
+        .from('imputations')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           note_aef:notes_dg!imputations_note_aef_id_fkey(id, numero, objet),
           budget_line:budget_lines(id, code, label),
           created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
           validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('created_at', { ascending: false });
 
       // Filtrer par statut
       if (filters?.statut) {
         if (Array.isArray(filters.statut)) {
-          query = query.in("statut", filters.statut);
+          query = query.in('statut', filters.statut);
         } else {
-          query = query.eq("statut", filters.statut);
+          query = query.eq('statut', filters.statut);
         }
       }
 
       // Filtrer par direction
       if (filters?.directionId) {
-        query = query.eq("direction_id", filters.directionId);
+        query = query.eq('direction_id', filters.directionId);
       }
 
       const { data, error } = await query;
@@ -99,13 +101,15 @@ export function useImputations(filters?: ImputationFilters) {
   });
 
   // Compteurs par statut
-  const { data: counts = { brouillon: 0, a_valider: 0, valide: 0, rejete: 0, differe: 0, total: 0 } } = useQuery({
-    queryKey: ["imputations-counts", exercice],
+  const {
+    data: counts = { brouillon: 0, a_valider: 0, valide: 0, rejete: 0, differe: 0, total: 0 },
+  } = useQuery({
+    queryKey: ['imputations-counts', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("imputations")
-        .select("statut")
-        .eq("exercice", exercice || new Date().getFullYear());
+        .from('imputations')
+        .select('statut')
+        .eq('exercice', exercice || new Date().getFullYear());
 
       if (error) throw error;
 
@@ -131,67 +135,76 @@ export function useImputations(filters?: ImputationFilters) {
 
   // Filtrer côté client si recherche textuelle
   const filteredImputations = filters?.search
-    ? imputations.filter(
-        (imp) =>
-          imp.objet?.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          imp.reference?.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          imp.code_imputation?.toLowerCase().includes(filters.search!.toLowerCase()) ||
-          imp.direction?.label?.toLowerCase().includes(filters.search!.toLowerCase())
-      )
+    ? imputations.filter((imp) => {
+        const searchLower = (filters.search ?? '').toLowerCase();
+        return (
+          imp.objet?.toLowerCase().includes(searchLower) ||
+          imp.reference?.toLowerCase().includes(searchLower) ||
+          imp.code_imputation?.toLowerCase().includes(searchLower) ||
+          imp.direction?.label?.toLowerCase().includes(searchLower)
+        );
+      })
     : imputations;
 
   // Soumettre une imputation
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
-        .from("imputations")
+        .from('imputations')
         .update({
-          statut: "a_valider",
+          statut: 'a_valider',
           submitted_at: new Date().toISOString(),
           submitted_by: user.id,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      
+
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: id,
-        action: "submit",
-        newValues: { statut: "a_valider" },
+        action: 'submit',
+        newValues: { statut: 'a_valider' },
       });
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["imputations"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-counts"] });
-      toast({ title: "Imputation soumise", description: "L'imputation a été soumise pour validation." });
+      queryClient.invalidateQueries({ queryKey: ['imputations'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      toast({
+        title: 'Imputation soumise',
+        description: "L'imputation a été soumise pour validation.",
+      });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Valider une imputation
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
-        .from("imputations")
+        .from('imputations')
         .update({
-          statut: "valide",
+          statut: 'valide',
           validated_at: new Date().toISOString(),
           validated_by: user.id,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -200,129 +213,144 @@ export function useImputations(filters?: ImputationFilters) {
       // Mettre à jour l'étape du dossier
       if (data.dossier_id) {
         await supabase
-          .from("dossiers")
-          .update({ etape_courante: "imputation", updated_at: new Date().toISOString() })
-          .eq("id", data.dossier_id);
+          .from('dossiers')
+          .update({ etape_courante: 'imputation', updated_at: new Date().toISOString() })
+          .eq('id', data.dossier_id);
       }
 
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: id,
-        action: "validate",
-        newValues: { statut: "valide" },
+        action: 'validate',
+        newValues: { statut: 'valide' },
       });
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["imputations"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-counts"] });
-      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
-      toast({ title: "Imputation validée", description: "L'imputation a été validée avec succès." });
+      queryClient.invalidateQueries({ queryKey: ['imputations'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
+      toast({
+        title: 'Imputation validée',
+        description: "L'imputation a été validée avec succès.",
+      });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Rejeter une imputation
   const rejectMutation = useMutation({
     mutationFn: async ({ id, motif }: { id: string; motif: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
-        .from("imputations")
+        .from('imputations')
         .update({
-          statut: "rejete",
+          statut: 'rejete',
           motif_rejet: motif,
           rejected_at: new Date().toISOString(),
           rejected_by: user.id,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: id,
-        action: "reject",
-        newValues: { statut: "rejete", motif },
+        action: 'reject',
+        newValues: { statut: 'rejete', motif },
       });
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["imputations"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-counts"] });
-      toast({ title: "Imputation rejetée", description: "L'imputation a été rejetée." });
+      queryClient.invalidateQueries({ queryKey: ['imputations'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      toast({ title: 'Imputation rejetée', description: "L'imputation a été rejetée." });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Différer une imputation
   const deferMutation = useMutation({
-    mutationFn: async ({ id, motif, dateReprise }: { id: string; motif: string; dateReprise?: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+    mutationFn: async ({
+      id,
+      motif,
+      dateReprise,
+    }: {
+      id: string;
+      motif: string;
+      dateReprise?: string;
+    }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const { data, error } = await supabase
-        .from("imputations")
+        .from('imputations')
         .update({
-          statut: "differe",
+          statut: 'differe',
           motif_differe: motif,
           date_differe: dateReprise || null,
           differed_at: new Date().toISOString(),
           differed_by: user.id,
         })
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: id,
-        action: "defer",
-        newValues: { statut: "differe", motif },
+        action: 'defer',
+        newValues: { statut: 'differe', motif },
       });
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["imputations"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-counts"] });
-      toast({ title: "Imputation différée", description: "L'imputation a été mise en attente." });
+      queryClient.invalidateQueries({ queryKey: ['imputations'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      toast({ title: 'Imputation différée', description: "L'imputation a été mise en attente." });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
   // Supprimer une imputation (brouillon uniquement)
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("imputations").delete().eq("id", id);
+      const { error } = await supabase.from('imputations').delete().eq('id', id);
       if (error) throw error;
 
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: id,
-        action: "delete",
+        action: 'delete',
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["imputations"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-counts"] });
-      toast({ title: "Imputation supprimée" });
+      queryClient.invalidateQueries({ queryKey: ['imputations'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-counts'] });
+      toast({ title: 'Imputation supprimée' });
     },
     onError: (error: Error) => {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 

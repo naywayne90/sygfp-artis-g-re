@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   CreditCard,
   Target,
@@ -16,8 +16,8 @@ import {
   ArrowLeft,
   FolderOpen,
   Send,
-} from "lucide-react";
-import { Imputation } from "@/hooks/useImputations";
+} from 'lucide-react';
+import { Imputation } from '@/hooks/useImputations';
 
 interface ImputationDetailsProps {
   imputation: Imputation;
@@ -32,14 +32,24 @@ interface ImputationDetailsProps {
 
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    a_valider: { label: "À valider", className: "bg-warning/10 text-warning border-warning/20" },
-    valide: { label: "Validée", className: "bg-success/10 text-success border-success/20" },
-    rejete: { label: "Rejetée", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    differe: { label: "Différée", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
+    a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
+    valide: { label: 'Validée', className: 'bg-success/10 text-success border-success/20' },
+    rejete: {
+      label: 'Rejetée',
+      className: 'bg-destructive/10 text-destructive border-destructive/20',
+    },
+    differe: {
+      label: 'Différée',
+      className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    },
   };
   const variant = variants[status] || variants.brouillon;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
 export function ImputationDetails({
@@ -53,7 +63,7 @@ export function ImputationDetails({
   canValidate = false,
 }: ImputationDetailsProps) {
   const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   return (
     <div className="space-y-6">
@@ -62,14 +72,17 @@ export function ImputationDetails({
         <div>
           <div className="flex items-center gap-3">
             <CreditCard className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-semibold">{imputation.reference || "Sans référence"}</h2>
+            <h2 className="text-2xl font-semibold">{imputation.reference || 'Sans référence'}</h2>
             {getStatusBadge(imputation.statut)}
           </div>
           <p className="text-muted-foreground mt-1">{imputation.objet}</p>
         </div>
         <div className="flex gap-2">
           {imputation.dossier_id && onGoToDossier && (
-            <Button variant="outline" onClick={() => onGoToDossier(imputation.dossier_id!)}>
+            <Button
+              variant="outline"
+              onClick={() => onGoToDossier(imputation.dossier_id as string)}
+            >
               <FolderOpen className="mr-2 h-4 w-4" />
               Voir le dossier
             </Button>
@@ -96,24 +109,28 @@ export function ImputationDetails({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">Référence:</span>
-                <p className="font-medium font-mono">{imputation.reference || "-"}</p>
+                <p className="font-medium font-mono">{imputation.reference || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Code imputation:</span>
-                <p className="font-medium font-mono text-xs">{imputation.code_imputation || "-"}</p>
+                <p className="font-medium font-mono text-xs">{imputation.code_imputation || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Direction:</span>
-                <p className="font-medium">{imputation.direction?.sigle || imputation.direction?.label || "-"}</p>
+                <p className="font-medium">
+                  {imputation.direction?.sigle || imputation.direction?.label || '-'}
+                </p>
               </div>
               <div>
                 <span className="text-muted-foreground">Source financement:</span>
-                <p className="font-medium capitalize">{imputation.source_financement?.replace(/_/g, " ") || "-"}</p>
+                <p className="font-medium capitalize">
+                  {imputation.source_financement?.replace(/_/g, ' ') || '-'}
+                </p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div>
               <span className="text-muted-foreground text-sm">Montant:</span>
               <p className="text-2xl font-bold text-primary">{formatMontant(imputation.montant)}</p>
@@ -142,12 +159,12 @@ export function ImputationDetails({
           <CardContent className="space-y-3 text-sm">
             <div>
               <span className="text-muted-foreground">Ligne budgétaire:</span>
-              <p className="font-mono text-xs">{imputation.budget_line?.code || "-"}</p>
-              <p className="text-sm">{imputation.budget_line?.label || ""}</p>
+              <p className="font-mono text-xs">{imputation.budget_line?.code || '-'}</p>
+              <p className="text-sm">{imputation.budget_line?.label || ''}</p>
             </div>
             <div>
               <span className="text-muted-foreground">Note AEF source:</span>
-              <p className="font-mono">{imputation.note_aef?.numero || "-"}</p>
+              <p className="font-mono">{imputation.note_aef?.numero || '-'}</p>
             </div>
           </CardContent>
         </Card>
@@ -169,10 +186,11 @@ export function ImputationDetails({
                 <div>
                   <p className="text-muted-foreground">Créée par</p>
                   <p className="font-medium">
-                    {imputation.created_by_profile?.first_name} {imputation.created_by_profile?.last_name}
+                    {imputation.created_by_profile?.first_name}{' '}
+                    {imputation.created_by_profile?.last_name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {format(new Date(imputation.created_at), "dd MMM yyyy à HH:mm", { locale: fr })}
+                    {format(new Date(imputation.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                   </p>
                 </div>
               </div>
@@ -185,7 +203,9 @@ export function ImputationDetails({
                   <div>
                     <p className="text-muted-foreground">Soumise</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(imputation.submitted_at), "dd MMM yyyy à HH:mm", { locale: fr })}
+                      {format(new Date(imputation.submitted_at), 'dd MMM yyyy à HH:mm', {
+                        locale: fr,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -199,10 +219,13 @@ export function ImputationDetails({
                   <div>
                     <p className="text-muted-foreground">Validée par</p>
                     <p className="font-medium">
-                      {imputation.validated_by_profile?.first_name} {imputation.validated_by_profile?.last_name}
+                      {imputation.validated_by_profile?.first_name}{' '}
+                      {imputation.validated_by_profile?.last_name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(imputation.validated_at), "dd MMM yyyy à HH:mm", { locale: fr })}
+                      {format(new Date(imputation.validated_at), 'dd MMM yyyy à HH:mm', {
+                        locale: fr,
+                      })}
                     </p>
                   </div>
                 </div>
@@ -217,7 +240,7 @@ export function ImputationDetails({
                     <p className="text-muted-foreground">Rejetée</p>
                     <p className="text-sm">{imputation.motif_rejet}</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(imputation.rejected_at), "dd MMM yyyy", { locale: fr })}
+                      {format(new Date(imputation.rejected_at), 'dd MMM yyyy', { locale: fr })}
                     </p>
                   </div>
                 </div>
@@ -228,17 +251,18 @@ export function ImputationDetails({
       </div>
 
       {/* Actions */}
-      {(imputation.statut === "brouillon" || (imputation.statut === "a_valider" && canValidate)) && (
+      {(imputation.statut === 'brouillon' ||
+        (imputation.statut === 'a_valider' && canValidate)) && (
         <Card>
           <CardContent className="pt-6">
             <div className="flex justify-end gap-3">
-              {imputation.statut === "brouillon" && onSubmit && (
+              {imputation.statut === 'brouillon' && onSubmit && (
                 <Button onClick={() => onSubmit(imputation.id)}>
                   <Send className="mr-2 h-4 w-4" />
                   Soumettre pour validation
                 </Button>
               )}
-              {imputation.statut === "a_valider" && canValidate && (
+              {imputation.statut === 'a_valider' && canValidate && (
                 <>
                   {onDefer && (
                     <Button variant="outline" onClick={() => onDefer(imputation)}>

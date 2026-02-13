@@ -1,9 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useToast } from "@/hooks/use-toast";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { useExerciceWriteGuard } from "@/hooks/useExerciceWriteGuard";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
 
 export interface ImputationData {
   noteId: string;
@@ -63,19 +63,21 @@ export function useImputation() {
 
   // Fetch notes validées à imputer
   const { data: notesAImputer = [], isLoading: loadingNotes } = useQuery({
-    queryKey: ["notes-a-imputer", exercice],
+    queryKey: ['notes-a-imputer', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name)
-        `)
-        .eq("statut", "a_imputer")
-        .is("imputed_at", null)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("validated_at", { ascending: true });
+        `
+        )
+        .eq('statut', 'a_imputer')
+        .is('imputed_at', null)
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('validated_at', { ascending: true });
 
       if (error) throw error;
       return data;
@@ -85,19 +87,21 @@ export function useImputation() {
 
   // Fetch notes imputées
   const { data: notesImputees = [], isLoading: loadingImputees } = useQuery({
-    queryKey: ["notes-imputees", exercice],
+    queryKey: ['notes-imputees', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           *,
           direction:directions(id, label, sigle),
           budget_line:budget_lines(id, code, label, dotation_initiale),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name)
-        `)
-        .eq("statut", "impute")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("imputed_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'impute')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('imputed_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -107,39 +111,39 @@ export function useImputation() {
 
   // Référentiels
   const { data: objectifsStrategiques = [] } = useQuery({
-    queryKey: ["objectifs-strategiques-active"],
+    queryKey: ['objectifs-strategiques-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("objectifs_strategiques")
-        .select("id, code, libelle")
-        .eq("est_actif", true)
-        .order("code");
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .eq('est_actif', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: missions = [] } = useQuery({
-    queryKey: ["missions-active"],
+    queryKey: ['missions-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("missions")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
+        .from('missions')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions-active"],
+    queryKey: ['directions-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, code, label, sigle")
-        .eq("est_active", true)
-        .order("label");
+        .from('directions')
+        .select('id, code, label, sigle')
+        .eq('est_active', true)
+        .order('label');
       if (error) throw error;
       return data;
     },
@@ -148,13 +152,13 @@ export function useImputation() {
   // Fetch actions filtrées par mission et OS
   const fetchActions = async (missionId?: string, osId?: string) => {
     let query = supabase
-      .from("actions")
-      .select("id, code, libelle, mission_id, os_id")
-      .eq("est_active", true)
-      .order("code");
+      .from('actions')
+      .select('id, code, libelle, mission_id, os_id')
+      .eq('est_active', true)
+      .order('code');
 
-    if (missionId) query = query.eq("mission_id", missionId);
-    if (osId) query = query.eq("os_id", osId);
+    if (missionId) query = query.eq('mission_id', missionId);
+    if (osId) query = query.eq('os_id', osId);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -164,12 +168,12 @@ export function useImputation() {
   // Fetch activités filtrées par action
   const fetchActivites = async (actionId?: string) => {
     let query = supabase
-      .from("activites")
-      .select("id, code, libelle, action_id")
-      .eq("est_active", true)
-      .order("code");
+      .from('activites')
+      .select('id, code, libelle, action_id')
+      .eq('est_active', true)
+      .order('code');
 
-    if (actionId) query = query.eq("action_id", actionId);
+    if (actionId) query = query.eq('action_id', actionId);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -179,12 +183,12 @@ export function useImputation() {
   // Fetch sous-activités filtrées par activité
   const fetchSousActivites = async (activiteId?: string) => {
     let query = supabase
-      .from("sous_activites")
-      .select("id, code, libelle, activite_id")
-      .eq("est_active", true)
-      .order("code");
+      .from('sous_activites')
+      .select('id, code, libelle, activite_id')
+      .eq('est_active', true)
+      .order('code');
 
-    if (activiteId) query = query.eq("activite_id", activiteId);
+    if (activiteId) query = query.eq('activite_id', activiteId);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -193,13 +197,13 @@ export function useImputation() {
 
   // Fetch NBE
   const { data: nomenclaturesNBE = [] } = useQuery({
-    queryKey: ["nomenclature-nbe-active"],
+    queryKey: ['nomenclature-nbe-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("nomenclature_nbe")
-        .select("id, code, libelle, niveau")
-        .eq("est_active", true)
-        .order("code");
+        .from('nomenclature_nbe')
+        .select('id, code, libelle, niveau')
+        .eq('est_active', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
@@ -207,13 +211,13 @@ export function useImputation() {
 
   // Fetch SYSCO
   const { data: planComptableSYSCO = [] } = useQuery({
-    queryKey: ["plan-comptable-sysco-active"],
+    queryKey: ['plan-comptable-sysco-active'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("plan_comptable_sysco")
-        .select("id, code, libelle, type")
-        .eq("est_active", true)
-        .order("code");
+        .from('plan_comptable_sysco')
+        .select('id, code, libelle, type')
+        .eq('est_active', true)
+        .order('code');
       if (error) throw error;
       return data as { id: string; code: string; libelle: string; type: string | null }[];
     },
@@ -233,20 +237,22 @@ export function useImputation() {
   }): Promise<BudgetAvailability> => {
     // Trouver la ligne budgétaire correspondante
     let query = supabase
-      .from("budget_lines")
-      .select("id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve")
-      .eq("exercice", exercice || new Date().getFullYear())
-      .eq("is_active", true);
+      .from('budget_lines')
+      .select(
+        'id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve'
+      )
+      .eq('exercice', exercice || new Date().getFullYear())
+      .eq('is_active', true);
 
     // Appliquer les filtres de rattachement
-    if (params.direction_id) query = query.eq("direction_id", params.direction_id);
-    if (params.os_id) query = query.eq("os_id", params.os_id);
-    if (params.mission_id) query = query.eq("mission_id", params.mission_id);
-    if (params.action_id) query = query.eq("action_id", params.action_id);
-    if (params.activite_id) query = query.eq("activite_id", params.activite_id);
-    if (params.sous_activite_id) query = query.eq("sous_activite_id", params.sous_activite_id);
-    if (params.nbe_id) query = query.eq("nbe_id", params.nbe_id);
-    if (params.sysco_id) query = query.eq("sysco_id", params.sysco_id);
+    if (params.direction_id) query = query.eq('direction_id', params.direction_id);
+    if (params.os_id) query = query.eq('os_id', params.os_id);
+    if (params.mission_id) query = query.eq('mission_id', params.mission_id);
+    if (params.action_id) query = query.eq('action_id', params.action_id);
+    if (params.activite_id) query = query.eq('activite_id', params.activite_id);
+    if (params.sous_activite_id) query = query.eq('sous_activite_id', params.sous_activite_id);
+    if (params.nbe_id) query = query.eq('nbe_id', params.nbe_id);
+    if (params.sysco_id) query = query.eq('sysco_id', params.sysco_id);
 
     const { data: lines, error } = await query;
     if (error) throw error;
@@ -270,21 +276,21 @@ export function useImputation() {
     }
 
     // Prendre la première ligne correspondante (ou sommer si plusieurs)
-    const lineIds = lines.map(l => l.id);
+    const lineIds = lines.map((l) => l.id);
     const primaryLine = lines[0];
 
     // Calculer les virements pour dotation actuelle
     const { data: virementsRecusData } = await supabase
-      .from("credit_transfers")
-      .select("amount")
-      .in("to_budget_line_id", lineIds)
-      .eq("status", "execute");
+      .from('credit_transfers')
+      .select('amount')
+      .in('to_budget_line_id', lineIds)
+      .eq('status', 'execute');
 
     const { data: virementsEmisData } = await supabase
-      .from("credit_transfers")
-      .select("amount")
-      .in("from_budget_line_id", lineIds)
-      .eq("status", "execute");
+      .from('credit_transfers')
+      .select('amount')
+      .in('from_budget_line_id', lineIds)
+      .eq('status', 'execute');
 
     const totalRecus = virementsRecusData?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
     const totalEmis = virementsEmisData?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
@@ -293,7 +299,7 @@ export function useImputation() {
     const dotation_initiale = lines.reduce((sum, l) => sum + (l.dotation_initiale || 0), 0);
     const dotation_actuelle = dotation_initiale + totalRecus - totalEmis;
     const engagements_anterieurs = lines.reduce((sum, l) => sum + (l.total_engage || 0), 0);
-    const montant_reserve = lines.reduce((sum, l) => sum + ((l as any).montant_reserve || 0), 0);
+    const montant_reserve = lines.reduce((sum, l) => sum + (l.montant_reserve || 0), 0);
     const engagement_actuel = params.montant_actuel;
     const cumul = engagements_anterieurs + engagement_actuel;
     const disponible = dotation_actuelle - engagements_anterieurs;
@@ -326,19 +332,19 @@ export function useImputation() {
   const findOrCreateBudgetLine = async (data: ImputationData): Promise<string> => {
     // Chercher une ligne existante
     let query = supabase
-      .from("budget_lines")
-      .select("id")
-      .eq("exercice", exercice || new Date().getFullYear())
-      .eq("is_active", true);
+      .from('budget_lines')
+      .select('id')
+      .eq('exercice', exercice || new Date().getFullYear())
+      .eq('is_active', true);
 
-    if (data.direction_id) query = query.eq("direction_id", data.direction_id);
-    if (data.os_id) query = query.eq("os_id", data.os_id);
-    if (data.mission_id) query = query.eq("mission_id", data.mission_id);
-    if (data.action_id) query = query.eq("action_id", data.action_id);
-    if (data.activite_id) query = query.eq("activite_id", data.activite_id);
-    if (data.sous_activite_id) query = query.eq("sous_activite_id", data.sous_activite_id);
-    if (data.nbe_id) query = query.eq("nbe_id", data.nbe_id);
-    if (data.sysco_id) query = query.eq("sysco_id", data.sysco_id);
+    if (data.direction_id) query = query.eq('direction_id', data.direction_id);
+    if (data.os_id) query = query.eq('os_id', data.os_id);
+    if (data.mission_id) query = query.eq('mission_id', data.mission_id);
+    if (data.action_id) query = query.eq('action_id', data.action_id);
+    if (data.activite_id) query = query.eq('activite_id', data.activite_id);
+    if (data.sous_activite_id) query = query.eq('sous_activite_id', data.sous_activite_id);
+    if (data.nbe_id) query = query.eq('nbe_id', data.nbe_id);
+    if (data.sysco_id) query = query.eq('sysco_id', data.sysco_id);
 
     const { data: existingLines } = await query.limit(1);
 
@@ -348,11 +354,11 @@ export function useImputation() {
 
     // Créer une nouvelle ligne si nécessaire
     const { data: newLine, error } = await supabase
-      .from("budget_lines")
+      .from('budget_lines')
       .insert({
         code: `AUTO-${Date.now()}`,
-        label: "Ligne créée automatiquement",
-        level: "ligne",
+        label: 'Ligne créée automatiquement',
+        level: 'ligne',
         exercice: exercice || new Date().getFullYear(),
         dotation_initiale: 0,
         direction_id: data.direction_id,
@@ -364,7 +370,7 @@ export function useImputation() {
         nbe_id: data.nbe_id,
         sysco_id: data.sysco_id,
         source_financement: data.source_financement,
-        statut: "valide",
+        statut: 'valide',
       })
       .select()
       .single();
@@ -376,14 +382,14 @@ export function useImputation() {
   // Vérifier si une AEF est déjà imputée
   const checkAlreadyImputed = async (noteAefId: string): Promise<boolean> => {
     const { data, error } = await supabase
-      .from("imputations")
-      .select("id")
-      .eq("note_aef_id", noteAefId)
-      .eq("statut", "active")
+      .from('imputations')
+      .select('id')
+      .eq('note_aef_id', noteAefId)
+      .eq('statut', 'active')
       .maybeSingle();
-    
+
     if (error) {
-      console.error("Erreur vérification imputation:", error);
+      console.error('Erreur vérification imputation:', error);
       return false;
     }
     return !!data;
@@ -397,13 +403,17 @@ export function useImputation() {
         throw new Error("L'exercice est clôturé. Aucune imputation n'est possible.");
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Vérifier que l'AEF n'est pas déjà imputée
       const alreadyImputed = await checkAlreadyImputed(data.noteId);
       if (alreadyImputed) {
-        throw new Error("Cette note AEF a déjà été imputée. Une seule imputation par note est autorisée.");
+        throw new Error(
+          'Cette note AEF a déjà été imputée. Une seule imputation par note est autorisée.'
+        );
       }
 
       // Vérifier la disponibilité budgétaire
@@ -421,18 +431,22 @@ export function useImputation() {
 
       if (!availability.is_sufficient && !data.forcer_imputation) {
         throw new Error(
-          `BLOCAGE: Disponible net insuffisant (${availability.disponible_net.toLocaleString("fr-FR")} FCFA). ` +
-          `Montant demandé: ${data.montant.toLocaleString("fr-FR")} FCFA. ` +
-          `Déficit: ${availability.deficit?.toLocaleString("fr-FR")} FCFA. ` +
-          `Pour continuer, activez "Forcer l'imputation" et fournissez une justification obligatoire.`
+          `BLOCAGE: Disponible net insuffisant (${availability.disponible_net.toLocaleString('fr-FR')} FCFA). ` +
+            `Montant demandé: ${data.montant.toLocaleString('fr-FR')} FCFA. ` +
+            `Déficit: ${availability.deficit?.toLocaleString('fr-FR')} FCFA. ` +
+            `Pour continuer, activez "Forcer l'imputation" et fournissez une justification obligatoire.`
         );
       }
 
       // Vérifier que la justification est fournie si forçage
-      if (!availability.is_sufficient && data.forcer_imputation && (!data.justification_depassement || data.justification_depassement.trim().length < 10)) {
+      if (
+        !availability.is_sufficient &&
+        data.forcer_imputation &&
+        (!data.justification_depassement || data.justification_depassement.trim().length < 10)
+      ) {
         throw new Error(
           `Une justification détaillée (minimum 10 caractères) est obligatoire pour forcer une imputation ` +
-          `avec dépassement budgétaire de ${availability.deficit?.toLocaleString("fr-FR")} FCFA.`
+            `avec dépassement budgétaire de ${availability.deficit?.toLocaleString('fr-FR')} FCFA.`
         );
       }
 
@@ -441,74 +455,76 @@ export function useImputation() {
 
       // Récupérer la note pour créer le dossier
       const { data: note, error: noteError } = await supabase
-        .from("notes_dg")
-        .select("*, direction:directions(id, label, sigle)")
-        .eq("id", data.noteId)
+        .from('notes_dg')
+        .select('*, direction:directions(id, label, sigle)')
+        .eq('id', data.noteId)
         .single();
 
       if (noteError) throw noteError;
 
       // Créer le dossier avec statut IMPUTE/READY_FOR_PASSATION
+      // numero is auto-generated by DB trigger — provide empty placeholder for TS
       const dossierInsert = {
+        numero: '',
         objet: note.objet,
         direction_id: data.direction_id || note.direction_id,
         montant_estime: data.montant,
         exercice: exercice || new Date().getFullYear(),
         created_by: user.id,
-        etape_courante: "imputation",
-        statut_global: "impute", // Statut IMPUTE = prêt pour passation
+        etape_courante: 'imputation',
+        statut_global: 'impute',
       };
-      
+
       const { data: dossier, error: dossierError } = await supabase
-        .from("dossiers")
-        .insert(dossierInsert as any)
+        .from('dossiers')
+        .insert(dossierInsert)
         .select()
         .single();
 
       if (dossierError) throw dossierError;
 
       // Créer le mouvement de réservation budgétaire (bloquant)
-      await supabase.from("budget_movements").insert({
+      await supabase.from('budget_movements').insert({
         budget_line_id: budgetLineId,
-        type_mouvement: "reservation",
+        type_mouvement: 'reservation',
         montant: data.montant,
-        sens: "debit",
+        sens: 'debit',
         disponible_avant: availability.disponible,
         disponible_apres: availability.disponible_net,
         reserve_avant: availability.montant_reserve,
         reserve_apres: availability.montant_reserve + data.montant,
-        entity_type: "imputation",
+        entity_type: 'imputation',
         entity_id: data.noteId,
         dossier_id: dossier.id,
         exercice: exercice || new Date().getFullYear(),
-        motif: "Réservation budgétaire - Imputation AEF",
+        motif: 'Réservation budgétaire - Imputation AEF',
         created_by: user.id,
-        statut: "valide",
+        statut: 'valide',
       });
 
       // Mettre à jour montant_reserve sur la ligne budgétaire
       await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
           montant_reserve: (availability.montant_reserve || 0) + data.montant,
         })
-        .eq("id", budgetLineId);
+        .eq('id', budgetLineId);
 
       // Créer l'étape d'imputation dans le dossier
-      await supabase.from("dossier_etapes").insert({
-        dossier_id: dossier.id,
-        type_etape: "imputation",
+      await supabase.from('dossier_etapes').insert({
+        dossier_id: dossier.id as string,
+        type_etape: 'imputation',
         entity_id: data.noteId,
-        statut: "valide",
+        statut: 'valide',
         montant: data.montant,
         commentaire: data.justification_depassement || null,
         created_by: user.id,
-      } as any);
+      });
 
       // Créer l'enregistrement dans la table imputations
       const imputationCode = buildImputationCode(data);
       const { data: imputation, error: imputationError } = await supabase
-        .from("imputations")
+        .from('imputations')
         .insert({
           note_aef_id: data.noteId,
           budget_line_id: budgetLineId,
@@ -537,14 +553,14 @@ export function useImputation() {
 
       // Mettre à jour la note avec l'imputation
       const { data: updatedNote, error: updateError } = await supabase
-        .from("notes_dg")
+        .from('notes_dg')
         .update({
-          statut: "impute",
+          statut: 'impute',
           budget_line_id: budgetLineId,
           imputed_by: user.id,
           imputed_at: new Date().toISOString(),
         })
-        .eq("id", data.noteId)
+        .eq('id', data.noteId)
         .select()
         .single();
 
@@ -552,12 +568,12 @@ export function useImputation() {
 
       // Logger l'action avec détails complets pour l'audit
       await logAction({
-        entityType: "imputation",
+        entityType: 'imputation',
         entityId: imputation.id,
-        action: data.forcer_imputation ? "impute_forced" : "create",
-        module: "imputation",
+        action: data.forcer_imputation ? 'impute_forced' : 'create',
+        module: 'imputation',
         entityCode: imputationCode,
-        resume: `Imputation ${imputationCode} - ${data.montant.toLocaleString("fr-FR")} FCFA`,
+        resume: `Imputation ${imputationCode} - ${data.montant.toLocaleString('fr-FR')} FCFA`,
         newValues: {
           note_aef_id: data.noteId,
           note_numero: note.numero,
@@ -604,12 +620,12 @@ export function useImputation() {
       // Logger également l'action sur le budget si dépassement forcé
       if (data.forcer_imputation) {
         await logAction({
-          entityType: "budget_line",
+          entityType: 'budget_line',
           entityId: budgetLineId,
-          action: "override_request",
-          module: "imputation",
+          action: 'override_request',
+          module: 'imputation',
           entityCode: availability.budget_line_code,
-          resume: `Dépassement forcé de ${availability.deficit?.toLocaleString("fr-FR")} FCFA`,
+          resume: `Dépassement forcé de ${availability.deficit?.toLocaleString('fr-FR')} FCFA`,
           oldValues: {
             disponible_net: availability.disponible,
             montant_reserve: availability.montant_reserve,
@@ -627,20 +643,20 @@ export function useImputation() {
       return { note: updatedNote, dossier, imputation, budgetLineId, availability };
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["notes-a-imputer"] });
-      queryClient.invalidateQueries({ queryKey: ["notes-imputees"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      queryClient.invalidateQueries({ queryKey: ["dossiers"] });
+      queryClient.invalidateQueries({ queryKey: ['notes-a-imputer'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-imputees'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      queryClient.invalidateQueries({ queryKey: ['dossiers'] });
       toast({
-        title: "Imputation réussie",
-        description: `Dossier ${result.dossier.numero} créé. Disponible: ${result.availability.disponible.toLocaleString("fr-FR")} FCFA`,
+        title: 'Imputation réussie',
+        description: `Dossier ${result.dossier.numero} créé. Disponible: ${result.availability.disponible.toLocaleString('fr-FR')} FCFA`,
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Erreur d'imputation",
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -659,7 +675,7 @@ export function useImputation() {
 
     // OS (Objectif Stratégique)
     if (data.os_id) {
-      const os = objectifsStrategiques.find(o => o.id === data.os_id);
+      const os = objectifsStrategiques.find((o) => o.id === data.os_id);
       if (os) parts.push(os.code);
     }
 
@@ -680,17 +696,17 @@ export function useImputation() {
 
     // NBE
     if (data.nbe_id) {
-      const nbe = nomenclaturesNBE.find(n => n.id === data.nbe_id);
+      const nbe = nomenclaturesNBE.find((n) => n.id === data.nbe_id);
       if (nbe) parts.push(nbe.code);
     }
 
     // SYSCO
     if (data.sysco_id && planComptableSYSCO.length > 0) {
-      const sysco = planComptableSYSCO.find((s: any) => s.id === data.sysco_id);
+      const sysco = planComptableSYSCO.find((s) => s.id === data.sysco_id);
       if (sysco) parts.push(sysco.code);
     }
 
-    return parts.join("-") || "N/A";
+    return parts.join('-') || 'N/A';
   };
 
   // Construire la chaîne d'imputation lisible pour affichage
@@ -718,60 +734,76 @@ export function useImputation() {
 
     // OS
     if (data.os_id) {
-      const os = objectifsStrategiques.find(o => o.id === data.os_id);
+      const os = objectifsStrategiques.find((o) => o.id === data.os_id);
       if (os) {
-        segments.push({ type: "OS", code: os.code, libelle: os.libelle });
+        segments.push({ type: 'OS', code: os.code, libelle: os.libelle });
       }
     }
 
     // Action
     if (contextData?.actionCode && contextData?.actionLibelle) {
-      segments.push({ type: "Action", code: contextData.actionCode, libelle: contextData.actionLibelle });
+      segments.push({
+        type: 'Action',
+        code: contextData.actionCode,
+        libelle: contextData.actionLibelle,
+      });
     }
 
     // Activité
     if (contextData?.activiteCode && contextData?.activiteLibelle) {
-      segments.push({ type: "Activité", code: contextData.activiteCode, libelle: contextData.activiteLibelle });
+      segments.push({
+        type: 'Activité',
+        code: contextData.activiteCode,
+        libelle: contextData.activiteLibelle,
+      });
     }
 
     // Sous-Activité
     if (contextData?.sousActiviteCode && contextData?.sousActiviteLibelle) {
-      segments.push({ type: "Sous-Activité", code: contextData.sousActiviteCode, libelle: contextData.sousActiviteLibelle });
+      segments.push({
+        type: 'Sous-Activité',
+        code: contextData.sousActiviteCode,
+        libelle: contextData.sousActiviteLibelle,
+      });
     }
 
     // NBE
     if (data.nbe_id) {
-      const nbe = nomenclaturesNBE.find(n => n.id === data.nbe_id);
+      const nbe = nomenclaturesNBE.find((n) => n.id === data.nbe_id);
       if (nbe) {
-        segments.push({ type: "NBE", code: nbe.code, libelle: nbe.libelle });
+        segments.push({ type: 'NBE', code: nbe.code, libelle: nbe.libelle });
       }
     }
 
     // SYSCO
     if (data.sysco_id && planComptableSYSCO.length > 0) {
-      const sysco = planComptableSYSCO.find((s: any) => s.id === data.sysco_id);
+      const sysco = planComptableSYSCO.find((s) => s.id === data.sysco_id);
       if (sysco) {
-        segments.push({ type: "SYSCO", code: sysco.code, libelle: sysco.libelle });
+        segments.push({ type: 'SYSCO', code: sysco.code, libelle: sysco.libelle });
       }
     }
 
     // Construire le code compact
-    const code = segments.map(s => s.code).join("-") || "N/A";
+    const code = segments.map((s) => s.code).join('-') || 'N/A';
 
     // Construire la chaîne lisible
     const programmaticParts = segments
-      .filter(s => ["OS", "Action", "Activité", "Sous-Activité"].includes(s.type))
-      .map(s => `[${s.type}: ${s.code}]`)
-      .join(" > ");
+      .filter((s) => ['OS', 'Action', 'Activité', 'Sous-Activité'].includes(s.type))
+      .map((s) => `[${s.type}: ${s.code}]`)
+      .join(' > ');
 
     const nomenclatureParts = segments
-      .filter(s => ["NBE", "SYSCO"].includes(s.type))
-      .map(s => `${s.type}: ${s.code}`)
-      .join(" | ");
+      .filter((s) => ['NBE', 'SYSCO'].includes(s.type))
+      .map((s) => `${s.type}: ${s.code}`)
+      .join(' | ');
 
     const readable = programmaticParts
-      ? (nomenclatureParts ? `# ${programmaticParts} | ${nomenclatureParts}` : `# ${programmaticParts}`)
-      : (nomenclatureParts ? `# ${nomenclatureParts}` : "N/A");
+      ? nomenclatureParts
+        ? `# ${programmaticParts} | ${nomenclatureParts}`
+        : `# ${programmaticParts}`
+      : nomenclatureParts
+        ? `# ${nomenclatureParts}`
+        : 'N/A';
 
     return { code, readable, segments };
   };
