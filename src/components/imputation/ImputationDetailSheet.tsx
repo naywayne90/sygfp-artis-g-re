@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { type Imputation, useImputations } from '@/hooks/useImputations';
 import { usePermissions } from '@/hooks/usePermissions';
+import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
 import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
@@ -196,6 +197,24 @@ function TabInformations({
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">
       <div className="space-y-4 pr-4">
+        {/* QR Code pour imputations validées */}
+        {imputation.statut === 'valide' && (
+          <div className="flex justify-center py-2">
+            <QRCodeGenerator
+              reference={imputation.reference || imputation.id}
+              type="IMPUTATION"
+              dateValidation={imputation.validated_at || undefined}
+              validateur={
+                getPersonName(imputation.validated_by_profile) !== '\u2014'
+                  ? getPersonName(imputation.validated_by_profile)
+                  : undefined
+              }
+              size="sm"
+              showHash={true}
+            />
+          </div>
+        )}
+
         {/* Identification */}
         <Card>
           <CardHeader className="pb-2">

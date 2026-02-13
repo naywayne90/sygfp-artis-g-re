@@ -19,6 +19,7 @@ import {
   useNoteAEFDetail,
   type NoteAEFHistoryEntry,
   type NoteAEFAttachment,
+  type LinkedImputation,
 } from '@/hooks/useNoteAEFDetail';
 import { type NoteAEF, type BudgetAvailabilityCheck, useNotesAEF } from '@/hooks/useNotesAEF';
 import { ARTIReferenceInline } from '@/components/shared/ARTIReferenceBadge';
@@ -216,6 +217,8 @@ function TabInformations({
   note,
   linkedNoteSEF,
   loadingSEF,
+  linkedImputation,
+  loadingImputation,
 }: {
   note: NoteAEF;
   linkedNoteSEF: {
@@ -226,6 +229,8 @@ function TabInformations({
     reference_pivot: string | null;
   } | null;
   loadingSEF: boolean;
+  linkedImputation: LinkedImputation | null;
+  loadingImputation: boolean;
 }) {
   const navigate = useNavigate();
   const isDirectAEF = note.is_direct_aef === true;
@@ -359,6 +364,52 @@ function TabInformations({
               >
                 <ExternalLink className="h-4 w-4" />
                 Voir la Note SEF
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {/* Imputation liée */}
+        {loadingImputation ? (
+          <div className="flex items-center gap-2 p-3 rounded-lg border">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">Recherche imputation liée...</span>
+          </div>
+        ) : linkedImputation ? (
+          <Card className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-purple-600" />
+                Imputation budgétaire
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <InfoRow
+                label="Réf."
+                value={
+                  <span className="font-mono text-purple-600">
+                    {linkedImputation.reference || '—'}
+                  </span>
+                }
+              />
+              <InfoRow label="Montant" value={formatMontant(linkedImputation.montant)} />
+              <InfoRow label="Statut" value={getStatusBadge(linkedImputation.statut)} />
+              {linkedImputation.budget_line && (
+                <InfoRow
+                  label="Ligne budget"
+                  value={
+                    <span className="text-xs font-mono">{linkedImputation.budget_line.code}</span>
+                  }
+                />
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-2 gap-2"
+                onClick={() => navigate('/execution/imputation')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Voir l'Imputation
               </Button>
             </CardContent>
           </Card>
@@ -789,6 +840,8 @@ function TabChaineHistorique({
   linkedNoteSEF,
   loadingHistory,
   loadingSEF,
+  linkedImputation,
+  loadingImputation,
 }: {
   note: NoteAEF;
   history: NoteAEFHistoryEntry[];
@@ -801,6 +854,8 @@ function TabChaineHistorique({
   } | null;
   loadingHistory: boolean;
   loadingSEF: boolean;
+  linkedImputation: LinkedImputation | null;
+  loadingImputation: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -857,6 +912,52 @@ function TabChaineHistorique({
               >
                 <ExternalLink className="h-4 w-4" />
                 Voir la Note SEF
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {/* Imputation liée */}
+        {loadingImputation ? (
+          <div className="flex items-center gap-2 p-3 rounded-lg border">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm text-muted-foreground">Recherche imputation liée...</span>
+          </div>
+        ) : linkedImputation ? (
+          <Card className="border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-purple-600" />
+                Imputation budgétaire
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <InfoRow
+                label="Réf."
+                value={
+                  <span className="font-mono text-purple-600">
+                    {linkedImputation.reference || '—'}
+                  </span>
+                }
+              />
+              <InfoRow label="Montant" value={formatMontant(linkedImputation.montant)} />
+              <InfoRow label="Statut" value={getStatusBadge(linkedImputation.statut)} />
+              {linkedImputation.budget_line && (
+                <InfoRow
+                  label="Ligne budget"
+                  value={
+                    <span className="text-xs font-mono">{linkedImputation.budget_line.code}</span>
+                  }
+                />
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-2 gap-2"
+                onClick={() => navigate('/execution/imputation')}
+              >
+                <ExternalLink className="h-4 w-4" />
+                Voir l'Imputation
               </Button>
             </CardContent>
           </Card>
@@ -1146,8 +1247,16 @@ export function NoteAEFDetailSheet({
   } = useNotesAEF();
 
   // Data
-  const { history, pieces, linkedNoteSEF, loadingHistory, loadingPieces, loadingSEF } =
-    useNoteAEFDetail(open && note ? note.id : null, note?.reference_pivot);
+  const {
+    history,
+    pieces,
+    linkedNoteSEF,
+    linkedImputation,
+    loadingHistory,
+    loadingPieces,
+    loadingSEF,
+    loadingImputation,
+  } = useNoteAEFDetail(open && note ? note.id : null, note?.reference_pivot);
 
   // Budget availability check
   const [budgetAvailability, setBudgetAvailability] = useState<BudgetAvailabilityCheck | null>(
@@ -1277,7 +1386,13 @@ export function NoteAEFDetailSheet({
             </TabsList>
 
             <TabsContent value="informations" className="mt-4">
-              <TabInformations note={note} linkedNoteSEF={linkedNoteSEF} loadingSEF={loadingSEF} />
+              <TabInformations
+                note={note}
+                linkedNoteSEF={linkedNoteSEF}
+                loadingSEF={loadingSEF}
+                linkedImputation={linkedImputation}
+                loadingImputation={loadingImputation}
+              />
             </TabsContent>
 
             <TabsContent value="budget" className="mt-4">
@@ -1303,6 +1418,8 @@ export function NoteAEFDetailSheet({
                 linkedNoteSEF={linkedNoteSEF}
                 loadingHistory={loadingHistory}
                 loadingSEF={loadingSEF}
+                linkedImputation={linkedImputation}
+                loadingImputation={loadingImputation}
               />
             </TabsContent>
           </Tabs>

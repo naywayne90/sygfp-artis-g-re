@@ -34,6 +34,16 @@ interface LinkedNoteSEF {
   reference_pivot: string | null;
 }
 
+export interface LinkedImputation {
+  id: string;
+  reference: string | null;
+  objet: string;
+  montant: number;
+  statut: string;
+  created_at: string;
+  budget_line: { code: string; label: string } | null;
+}
+
 // ============================================
 // HOOK
 // ============================================
@@ -114,13 +124,39 @@ export function useNoteAEFDetail(noteId: string | null, _referencePivot?: string
     staleTime: 60_000,
   });
 
+  // 4. Imputation liée (0 ou 1 imputation par AEF)
+  const { data: linkedImputation = null, isLoading: loadingImputation } = useQuery({
+    queryKey: ['linked-imputation-detail', noteId],
+    queryFn: async (): Promise<LinkedImputation | null> => {
+      if (!noteId) return null;
+
+      const { data, error } = await supabase
+        .from('imputations')
+        .select(
+          'id, reference, objet, montant, statut, created_at, budget_line:budget_lines(code, label)'
+        )
+        .eq('note_aef_id', noteId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching linked imputation:', error);
+        return null;
+      }
+      return data as LinkedImputation | null;
+    },
+    enabled: !!noteId,
+    staleTime: 30_000,
+  });
+
   return {
     history,
     pieces,
     linkedNoteSEF,
-    isLoading: loadingHistory || loadingPieces || loadingSEF,
+    linkedImputation,
+    isLoading: loadingHistory || loadingPieces || loadingSEF || loadingImputation,
     loadingHistory,
     loadingPieces,
     loadingSEF,
+    loadingImputation,
   };
 }

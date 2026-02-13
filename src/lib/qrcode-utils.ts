@@ -7,6 +7,7 @@
 export const DOCUMENT_TYPES = [
   'NOTE_SEF',
   'NOTE_AEF',
+  'IMPUTATION',
   'ENGAGEMENT',
   'LIQUIDATION',
   'ORDONNANCEMENT',
@@ -14,12 +15,13 @@ export const DOCUMENT_TYPES = [
   'MARCHE',
 ] as const;
 
-export type DocumentType = typeof DOCUMENT_TYPES[number];
+export type DocumentType = (typeof DOCUMENT_TYPES)[number];
 
 // Labels des types de documents
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   NOTE_SEF: 'Note SEF',
   NOTE_AEF: 'Note AEF',
+  IMPUTATION: 'Imputation budgétaire',
   ENGAGEMENT: 'Engagement',
   LIQUIDATION: 'Liquidation',
   ORDONNANCEMENT: 'Ordonnancement',
@@ -80,10 +82,7 @@ export function encodePayload(data: QRCodeData, checksum: string): string {
 
   const jsonString = JSON.stringify(payload);
   // Base64 URL-safe encoding
-  const base64 = btoa(jsonString)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  const base64 = btoa(jsonString).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
   return base64;
 }
@@ -133,9 +132,7 @@ export async function generateVerifyUrl(data: QRCodeData): Promise<{
 /**
  * Vérifie l'intégrité d'un document via son payload
  */
-export async function verifyDocument(
-  encoded: string
-): Promise<{
+export async function verifyDocument(encoded: string): Promise<{
   valid: boolean;
   data: QRCodePayload | null;
   error?: string;
