@@ -16847,6 +16847,12 @@ export type Database = {
         };
         Returns: Json;
       };
+      count_notes_aef_by_statut: {
+        Args: {
+          p_exercice: number;
+        };
+        Returns: Json;
+      };
       count_search_notes_aef: {
         Args: {
           p_date_from?: string;
