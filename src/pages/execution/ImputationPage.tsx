@@ -594,20 +594,22 @@ export default function ImputationPage() {
               Créer une imputation
             </DialogTitle>
           </DialogHeader>
-          {sourceAefNote && (
-            <ImputationForm
-              note={{
-                id: sourceAefNote.id,
-                numero: sourceAefNote.numero,
-                objet: sourceAefNote.objet,
-                montant_estime: sourceAefNote.montant_estime,
-                direction: sourceAefNote.direction,
-                created_by_profile: sourceAefNote.created_by_profile,
-              }}
-              onSuccess={handleImputationSuccess}
-              onCancel={handleCloseImputationDialog}
-            />
-          )}
+          <ImputationForm
+            note={
+              sourceAefNote
+                ? {
+                    id: sourceAefNote.id,
+                    numero: sourceAefNote.numero,
+                    objet: sourceAefNote.objet,
+                    montant_estime: sourceAefNote.montant_estime,
+                    direction: sourceAefNote.direction,
+                    created_by_profile: sourceAefNote.created_by_profile,
+                  }
+                : undefined
+            }
+            onSuccess={handleImputationSuccess}
+            onCancel={handleCloseImputationDialog}
+          />
         </DialogContent>
       </Dialog>
 

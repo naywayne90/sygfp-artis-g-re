@@ -71,6 +71,7 @@ export function useImputation() {
           `
           *,
           direction:directions(id, label, sigle),
+          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, os_id, direction_id, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
           created_by_profile:profiles!notes_dg_created_by_fkey(id, first_name, last_name)
         `
         )
@@ -95,7 +96,7 @@ export function useImputation() {
           `
           *,
           direction:directions(id, label, sigle),
-          budget_line:budget_lines(id, code, label, dotation_initiale),
+          budget_line:budget_lines!notes_dg_budget_line_id_fkey(id, code, label, dotation_initiale),
           imputed_by_profile:profiles!notes_dg_imputed_by_fkey(id, first_name, last_name)
         `
         )
@@ -521,11 +522,21 @@ export function useImputation() {
         created_by: user.id,
       });
 
+      // Générer la référence séquentielle (format sans "/" ni "-")
+      const currentYear = exercice || new Date().getFullYear();
+      const { count: imputationCount } = await supabase
+        .from('imputations')
+        .select('*', { count: 'exact', head: true })
+        .eq('exercice', currentYear);
+      const seqNum = ((imputationCount || 0) + 1).toString().padStart(4, '0');
+      const reference = `IMP${currentYear}${seqNum}`;
+
       // Créer l'enregistrement dans la table imputations
       const imputationCode = buildImputationCode(data);
       const { data: imputation, error: imputationError } = await supabase
         .from('imputations')
         .insert({
+          reference,
           note_aef_id: data.noteId,
           budget_line_id: budgetLineId,
           dossier_id: dossier.id,
@@ -543,7 +554,7 @@ export function useImputation() {
           code_imputation: imputationCode,
           justification_depassement: data.justification_depassement || null,
           forcer_imputation: data.forcer_imputation || false,
-          exercice: exercice || new Date().getFullYear(),
+          exercice: currentYear,
           created_by: user.id,
         })
         .select()
