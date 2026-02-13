@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useImputations, Imputation } from '@/hooks/useImputations';
+import { useImputations, type Imputation, type ImputationStatus } from '@/hooks/useImputations';
+import { useImputationsExport, type ImputationExportFilters } from '@/hooks/useImputationsExport';
 import { useImputation } from '@/hooks/useImputation';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ImputationForm } from '@/components/imputation/ImputationForm';
@@ -13,6 +14,7 @@ import { ImputationDetailSheet } from '@/components/imputation/ImputationDetailS
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
 import { ImputationValidationDialog } from '@/components/imputation/ImputationValidationDialog';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   Table,
   TableBody,
@@ -48,6 +50,7 @@ import {
   ShoppingCart,
   Building2,
   Banknote,
+  Download,
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -56,7 +59,6 @@ import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
 import { BudgetFormulas } from '@/components/budget/BudgetFormulas';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 
 /** Note AEF source pour le dialog d'imputation */
 interface SourceAefNote {
@@ -102,17 +104,38 @@ export default function ImputationPage() {
   // States
   const [activeTab, setActiveTab] = useState('a_imputer');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [sourceAefNote, setSourceAefNote] = useState<SourceAefNote | null>(null);
   const [viewingImputation, setViewingImputation] = useState<Imputation | null>(null);
   const [rejectingImputation, setRejectingImputation] = useState<Imputation | null>(null);
   const [deferringImputation, setDeferringImputation] = useState<Imputation | null>(null);
   const [validatingImputation, setValidatingImputation] = useState<Imputation | null>(null);
 
+  // Mapping onglet → filtre statut serveur
+  const tabStatutFilter = useMemo(
+    (): Record<string, ImputationStatus | undefined> => ({
+      a_imputer: undefined,
+      a_valider: 'a_valider',
+      imputees: 'valide',
+      differees: 'differe',
+      rejetees: 'rejete',
+    }),
+    []
+  );
+
+  // Reset page quand on change d'onglet ou de recherche
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, searchQuery]);
+
   // Hooks
   const { notesAImputer, loadingNotes } = useImputation();
   const {
     imputations,
     counts,
+    totalCount,
+    totalPages,
     isLoading: loadingImputations,
     refetch,
     submitImputation,
@@ -121,7 +144,13 @@ export default function ImputationPage() {
     deferImputation,
     deleteImputation,
     isValidating,
-  } = useImputations({ search: searchQuery });
+  } = useImputations({
+    search: searchQuery,
+    statut: tabStatutFilter[activeTab],
+    page,
+    pageSize,
+  });
+  const { exportExcel, exportCSV, exportPDF, isExporting } = useImputationsExport();
 
   // Gérer le paramètre sourceAef depuis l'URL
   useEffect(() => {
@@ -201,27 +230,25 @@ export default function ImputationPage() {
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
-  // Filtrer les imputations par onglet
-  const imputationsByTab = useMemo(
-    () => ({
-      a_valider: imputations.filter((i) => i.statut === 'a_valider'),
-      brouillons: imputations.filter((i) => i.statut === 'brouillon'),
-      imputees: imputations.filter((i) => i.statut === 'valide'),
-      differees: imputations.filter((i) => i.statut === 'differe'),
-      rejetees: imputations.filter((i) => i.statut === 'rejete'),
-    }),
-    [imputations]
-  );
-
-  // KPIs pour l'onglet validation
+  // KPIs pour l'onglet validation (données serveur)
   const validationKpis = useMemo(() => {
-    const items = imputationsByTab.a_valider;
+    if (activeTab !== 'a_valider')
+      return { total: counts.a_valider, montantTotal: 0, directions: 0 };
     return {
-      total: items.length,
-      montantTotal: items.reduce((sum, i) => sum + (i.montant || 0), 0),
-      directions: new Set(items.map((i) => i.direction_id).filter(Boolean)).size,
+      total: totalCount,
+      montantTotal: imputations.reduce((sum, i) => sum + (i.montant || 0), 0),
+      directions: new Set(imputations.map((i) => i.direction_id).filter(Boolean)).size,
     };
-  }, [imputationsByTab.a_valider]);
+  }, [activeTab, counts.a_valider, totalCount, imputations]);
+
+  // Filtres d'export pour l'onglet actif
+  const currentExportFilters = useMemo(
+    (): ImputationExportFilters => ({
+      statut: tabStatutFilter[activeTab],
+      search: searchQuery || undefined,
+    }),
+    [activeTab, searchQuery, tabStatutFilter]
+  );
 
   /** Color class for budget availability ratio */
   const getDisponibleColor = (ratio: number) => {
@@ -311,7 +338,7 @@ export default function ImputationPage() {
         </Card>
       </div>
 
-      {/* Recherche */}
+      {/* Recherche + Exports */}
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -322,6 +349,29 @@ export default function ImputationPage() {
             className="pl-9"
           />
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={isExporting} className="gap-2">
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuItem onClick={() => exportExcel(currentExportFilters, activeTab)}>
+              Excel (.xlsx)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportCSV(currentExportFilters, activeTab)}>
+              CSV (.csv)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportPDF(currentExportFilters, activeTab)}>
+              PDF (.pdf)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Tabs */}
@@ -486,7 +536,7 @@ export default function ImputationPage() {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : !imputationsByTab.a_valider.length ? (
+              ) : !imputations.length ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Aucune imputation à valider</p>
@@ -508,7 +558,7 @@ export default function ImputationPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {imputationsByTab.a_valider.map((imp) => {
+                      {imputations.map((imp) => {
                         const bl = imp.budget_line;
                         const dotation = bl
                           ? Math.max(bl.dotation_modifiee || 0, bl.dotation_initiale || 0)
@@ -616,6 +666,17 @@ export default function ImputationPage() {
               )}
             </CardContent>
           </Card>
+          <NotesPagination
+            page={page}
+            pageSize={pageSize}
+            total={totalCount}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </TabsContent>
 
         {/* Onglets imputations (imputees, differees, rejetees) */}
@@ -627,7 +688,7 @@ export default function ImputationPage() {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : !imputationsByTab[tab as keyof typeof imputationsByTab]?.length ? (
+                ) : !imputations.length ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Aucune imputation dans cet onglet</p>
@@ -648,7 +709,7 @@ export default function ImputationPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {imputationsByTab[tab as keyof typeof imputationsByTab].map((imp) => (
+                        {imputations.map((imp) => (
                           <TableRow key={imp.id}>
                             <TableCell className="font-mono text-sm">
                               {imp.reference || '-'}
@@ -734,6 +795,17 @@ export default function ImputationPage() {
                 )}
               </CardContent>
             </Card>
+            <NotesPagination
+              page={page}
+              pageSize={pageSize}
+              total={totalCount}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
           </TabsContent>
         ))}
       </Tabs>

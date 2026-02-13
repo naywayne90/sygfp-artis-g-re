@@ -59,11 +59,12 @@ function useBudgetImpactPreview(imputationId: string | null, enabled: boolean) {
     queryKey: ['budget-impact-preview', imputationId],
     queryFn: async () => {
       if (!imputationId) return null;
-      const { data, error } = await supabase.rpc('get_budget_impact_preview', {
-        p_imputation_id: imputationId,
-      });
+      const { data, error } = await supabase.rpc(
+        'get_budget_impact_preview' as 'acknowledge_budget_alert',
+        { p_imputation_id: imputationId } as never
+      );
       if (error) throw error;
-      return data as BudgetImpactPreview;
+      return data as unknown as BudgetImpactPreview;
     },
     enabled: enabled && !!imputationId,
     staleTime: 0,

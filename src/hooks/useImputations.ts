@@ -56,6 +56,8 @@ export interface ImputationFilters {
   statut?: ImputationStatus | ImputationStatus[];
   search?: string;
   directionId?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export function useImputations(filters?: ImputationFilters) {
@@ -64,15 +66,21 @@ export function useImputations(filters?: ImputationFilters) {
   const queryClient = useQueryClient();
   const { logAction } = useAuditLog();
 
-  // Fetch imputations avec filtres
+  const page = filters?.page ?? 1;
+  const pageSize = filters?.pageSize ?? 50;
+
+  // Fetch imputations avec filtres + pagination serveur
   const {
-    data: imputations = [],
+    data: queryResult,
     isLoading,
     error,
     refetch,
   } = useQuery({
     queryKey: ['imputations', exercice, filters],
     queryFn: async () => {
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       let query = supabase
         .from('imputations')
         .select(
@@ -83,10 +91,12 @@ export function useImputations(filters?: ImputationFilters) {
           budget_line:budget_lines(id, code, label, dotation_initiale, dotation_modifiee, total_engage, montant_reserve),
           created_by_profile:profiles!imputations_created_by_fkey(id, first_name, last_name),
           validated_by_profile:profiles!imputations_validated_by_fkey(id, first_name, last_name)
-        `
+        `,
+          { count: 'exact' }
         )
         .eq('exercice', exercice || new Date().getFullYear())
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       // Filtrer par statut
       if (filters?.statut) {
@@ -102,12 +112,29 @@ export function useImputations(filters?: ImputationFilters) {
         query = query.eq('direction_id', filters.directionId);
       }
 
-      const { data, error } = await query;
+      // Recherche serveur
+      if (filters?.search?.trim()) {
+        const term = `%${filters.search.trim()}%`;
+        query = query.or(
+          `objet.ilike.${term},reference.ilike.${term},code_imputation.ilike.${term}`
+        );
+      }
+
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data as unknown as Imputation[];
+      return {
+        items: data as unknown as Imputation[],
+        totalCount: count ?? 0,
+      };
     },
     enabled: !!exercice,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
+
+  const imputations = queryResult?.items ?? [];
+  const totalCount = queryResult?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Compteurs par statut
   const {
@@ -140,20 +167,9 @@ export function useImputations(filters?: ImputationFilters) {
       return counts;
     },
     enabled: !!exercice,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
-
-  // Filtrer côté client si recherche textuelle
-  const filteredImputations = filters?.search
-    ? imputations.filter((imp) => {
-        const searchLower = (filters.search ?? '').toLowerCase();
-        return (
-          imp.objet?.toLowerCase().includes(searchLower) ||
-          imp.reference?.toLowerCase().includes(searchLower) ||
-          imp.code_imputation?.toLowerCase().includes(searchLower) ||
-          imp.direction?.label?.toLowerCase().includes(searchLower)
-        );
-      })
-    : imputations;
 
   // Soumettre une imputation
   const submitMutation = useMutation({
@@ -201,11 +217,12 @@ export function useImputations(filters?: ImputationFilters) {
   // Valider une imputation via RPC atomique (réserve les crédits)
   const validateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('validate_imputation', {
-        p_imputation_id: id,
-      });
+      const { data, error } = await supabase.rpc(
+        'validate_imputation' as 'acknowledge_budget_alert',
+        { p_imputation_id: id } as never
+      );
       if (error) throw error;
-      const result = data as {
+      const result = data as unknown as {
         success: boolean;
         error?: string;
         montant?: number;
@@ -349,8 +366,12 @@ export function useImputations(filters?: ImputationFilters) {
   });
 
   return {
-    imputations: filteredImputations,
+    imputations,
     counts,
+    totalCount,
+    totalPages,
+    page,
+    pageSize,
     isLoading,
     error: error?.message || null,
     refetch,
