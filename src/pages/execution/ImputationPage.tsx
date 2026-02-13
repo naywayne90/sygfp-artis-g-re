@@ -9,7 +9,7 @@ import { useImputations, Imputation } from '@/hooks/useImputations';
 import { useImputation } from '@/hooks/useImputation';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ImputationForm } from '@/components/imputation/ImputationForm';
-import { ImputationDetails } from '@/components/imputation/ImputationDetails';
+import { ImputationDetailSheet } from '@/components/imputation/ImputationDetailSheet';
 import { ImputationRejectDialog } from '@/components/imputation/ImputationRejectDialog';
 import { ImputationDeferDialog } from '@/components/imputation/ImputationDeferDialog';
 import {
@@ -207,30 +207,6 @@ export default function ImputationPage() {
     }),
     [imputations]
   );
-
-  // Afficher les détails si une imputation est sélectionnée
-  if (viewingImputation) {
-    return (
-      <div className="space-y-6 animate-fade-in">
-        <ImputationDetails
-          imputation={viewingImputation}
-          onClose={() => setViewingImputation(null)}
-          onSubmit={async (id) => {
-            await submitImputation(id);
-            setViewingImputation(null);
-          }}
-          onValidate={async (id) => {
-            await validateImputation(id);
-            setViewingImputation(null);
-          }}
-          onReject={setRejectingImputation}
-          onDefer={setDeferringImputation}
-          onGoToDossier={handleGoToDossier}
-          canValidate={canValidate}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -612,6 +588,14 @@ export default function ImputationPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Sheet détail imputation */}
+      <ImputationDetailSheet
+        open={!!viewingImputation}
+        onOpenChange={(open) => !open && setViewingImputation(null)}
+        imputation={viewingImputation}
+        onRefresh={refetch}
+      />
 
       {/* Dialogs de rejet et report */}
       <ImputationRejectDialog

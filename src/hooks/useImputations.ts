@@ -33,6 +33,7 @@ export interface Imputation {
   rejected_at: string | null;
   motif_rejet: string | null;
   motif_differe: string | null;
+  is_migrated: boolean | null;
   // Relations
   direction?: { id: string; label: string; sigle: string | null } | null;
   note_aef?: { id: string; numero: string; objet: string } | null;
@@ -95,7 +96,7 @@ export function useImputations(filters?: ImputationFilters) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Imputation[];
+      return data as unknown as Imputation[];
     },
     enabled: !!exercice,
   });
