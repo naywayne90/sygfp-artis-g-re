@@ -1,10 +1,9 @@
 /**
  * ExpressionBesoinTimeline - Timeline du workflow d'expression de besoin
  *
- * Affiche l'historique des étapes du workflow:
- * CRÉATION → SOUMISSION → VALIDATION (multi-step) → VALIDÉ/REJETÉ/DIFFÉRÉ
- *
- * Avec dates, acteurs et motifs si applicable
+ * Auto-détecte le format:
+ * - Nouveau workflow (CB + DG/DAAF): CRÉATION → SOUMISSION → VÉRIFICATION CB → VALIDATION DG
+ * - Legacy (3 niveaux hiérarchiques): CRÉATION → SOUMISSION → Chef Service → Sous-Dir → Directeur
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,11 +19,16 @@ import {
   Calendar,
   ArrowRight,
   Users,
+  ShieldCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { ExpressionBesoin, VALIDATION_STEPS } from '@/hooks/useExpressionsBesoin';
+import {
+  ExpressionBesoin,
+  VALIDATION_STEPS,
+  LEGACY_VALIDATION_STEPS,
+} from '@/hooks/useExpressionsBesoin';
 
 interface TimelineStep {
   key: string;
@@ -42,12 +46,24 @@ interface ExpressionBesoinTimelineProps {
   className?: string;
 }
 
+const LEGACY_ROLES = new Set(['CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR']);
+
+/**
+ * Détecte si l'EB utilise l'ancien workflow hiérarchique (3 niveaux)
+ */
+function isLegacyWorkflow(expression: ExpressionBesoin): boolean {
+  if (!expression.validations || expression.validations.length === 0) return false;
+  return expression.validations.some((v) => LEGACY_ROLES.has(v.role));
+}
+
 export function ExpressionBesoinTimeline({
   expression,
   compact = false,
   className,
 }: ExpressionBesoinTimelineProps) {
-  // Build timeline steps based on expression status
+  const legacy = isLegacyWorkflow(expression);
+  const validationSteps = legacy ? LEGACY_VALIDATION_STEPS : VALIDATION_STEPS;
+
   const buildTimelineSteps = (): TimelineStep[] => {
     const steps: TimelineStep[] = [];
 
@@ -71,30 +87,40 @@ export function ExpressionBesoinTimeline({
       date: expression.submitted_at,
     });
 
-    // Step 3: Multi-step validation (only if submitted)
+    // Validation steps (only if submitted and not terminal state)
     if (hasBeenSubmitted && expression.statut !== 'rejete' && expression.statut !== 'differe') {
       const currentStep = expression.current_validation_step || 1;
 
-      // Add each validation step
-      VALIDATION_STEPS.forEach((step) => {
+      validationSteps.forEach((step) => {
         const validation = expression.validations?.find((v) => v.step_order === step.order);
         const isCompleted = validation?.status === 'approved';
-        const isCurrent = step.order === currentStep && expression.statut === 'soumis';
-        const isPending = step.order > currentStep && !isCompleted;
+
+        // Pour le nouveau workflow, la vérification est complète si statut >= verifie
+        const isVerified =
+          !legacy &&
+          step.order === 1 &&
+          ['verifie', 'valide', 'satisfaite'].includes(expression.statut || '');
+        const isCurrentStep =
+          step.order === currentStep && ['soumis', 'verifie'].includes(expression.statut || '');
+        const isPending = step.order > currentStep && !isCompleted && !isVerified;
 
         steps.push({
           key: `validation_${step.order}`,
           label: step.label,
-          icon: Users,
-          status: isCompleted
-            ? 'completed'
-            : isCurrent
-              ? 'current'
-              : isPending
-                ? 'pending'
-                : 'pending',
-          date: validation?.validated_at,
-          actor: validation?.validator?.full_name,
+          icon: !legacy && step.order === 1 ? ShieldCheck : Users,
+          status:
+            isCompleted || isVerified
+              ? 'completed'
+              : isCurrentStep
+                ? 'current'
+                : isPending
+                  ? 'pending'
+                  : 'pending',
+          date: isVerified && !validation ? expression.verified_at : validation?.validated_at,
+          actor:
+            isVerified && !validation
+              ? expression.verifier?.full_name
+              : validation?.validator?.full_name,
           comment: validation?.comments,
         });
       });
@@ -218,6 +244,11 @@ export function ExpressionBesoinTimeline({
         <CardTitle className="text-sm flex items-center gap-2">
           <ArrowRight className="h-4 w-4" />
           Historique du workflow
+          {legacy && (
+            <Badge variant="outline" className="text-xs ml-2">
+              Ancien format
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -17,10 +17,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ExpressionBesoin, useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ExpressionBesoinDetails } from './ExpressionBesoinDetails';
 import { ExpressionBesoinRejectDialog } from './ExpressionBesoinRejectDialog';
 import { ExpressionBesoinDeferDialog } from './ExpressionBesoinDeferDialog';
 import { ExpressionBesoinValidateDialog } from './ExpressionBesoinValidateDialog';
+import { ExpressionBesoinVerifyDialog } from './ExpressionBesoinVerifyDialog';
 import {
   MoreHorizontal,
   Eye,
@@ -32,6 +34,7 @@ import {
   FileText,
   Trash2,
   CreditCard,
+  ShieldCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -47,7 +50,8 @@ const STATUS_CONFIG: Record<
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
   brouillon: { label: 'Brouillon', variant: 'secondary' },
-  soumis: { label: 'À valider', variant: 'outline' },
+  soumis: { label: 'Soumis', variant: 'outline' },
+  verifie: { label: 'Vérifié CB', variant: 'outline' },
   valide: { label: 'Validé', variant: 'default' },
   rejete: { label: 'Rejeté', variant: 'destructive' },
   differe: { label: 'Différé', variant: 'outline' },
@@ -68,6 +72,7 @@ export function ExpressionBesoinList({
   const navigate = useNavigate();
   const {
     submitExpression,
+    verifyExpression,
     validateExpression,
     rejectExpression,
     deferExpression,
@@ -76,14 +81,23 @@ export function ExpressionBesoinList({
     isSubmitting,
   } = useExpressionsBesoin();
 
+  const { canVerifyEB, canValidateEB } = usePermissions();
+
   const [selectedExpression, setSelectedExpression] = useState<ExpressionBesoin | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
 
   const handleSubmit = async (expression: ExpressionBesoin) => {
     await submitExpression(expression.id);
+  };
+
+  const handleVerify = async (comments?: string) => {
+    if (!selectedExpression) return;
+    await verifyExpression({ id: selectedExpression.id, comments });
+    setShowVerifyDialog(false);
   };
 
   const handleValidate = async (comments?: string) => {
@@ -195,6 +209,7 @@ export function ExpressionBesoinList({
                           Voir détails
                         </DropdownMenuItem>
 
+                        {/* Brouillon : Soumettre / Supprimer */}
                         {expression.statut === 'brouillon' && (
                           <>
                             <DropdownMenuSeparator />
@@ -215,17 +230,18 @@ export function ExpressionBesoinList({
                           </>
                         )}
 
-                        {expression.statut === 'soumis' && (
+                        {/* Soumis : CB peut Vérifier / Rejeter / Différer */}
+                        {expression.statut === 'soumis' && canVerifyEB() && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedExpression(expression);
-                                setShowValidateDialog(true);
+                                setShowVerifyDialog(true);
                               }}
                             >
-                              <CheckCircle2 className="mr-2 h-4 w-4" />
-                              Valider
+                              <ShieldCheck className="mr-2 h-4 w-4" />
+                              Vérifier (CB)
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
@@ -244,6 +260,31 @@ export function ExpressionBesoinList({
                             >
                               <Clock className="mr-2 h-4 w-4" />
                               Différer
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* Vérifié : DG/DAAF peut Valider / Rejeter */}
+                        {expression.statut === 'verifie' && canValidateEB() && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedExpression(expression);
+                                setShowValidateDialog(true);
+                              }}
+                            >
+                              <CheckCircle2 className="mr-2 h-4 w-4" />
+                              Valider (DG/DAAF)
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedExpression(expression);
+                                setShowRejectDialog(true);
+                              }}
+                            >
+                              <XCircle className="mr-2 h-4 w-4" />
+                              Rejeter
                             </DropdownMenuItem>
                           </>
                         )}
@@ -287,6 +328,10 @@ export function ExpressionBesoinList({
             open={showDetails}
             onOpenChange={setShowDetails}
             onSubmit={(id) => submitExpression(id)}
+            onVerify={() => {
+              setShowDetails(false);
+              setShowVerifyDialog(true);
+            }}
             onValidate={() => {
               setShowDetails(false);
               setShowValidateDialog(true);
@@ -314,6 +359,16 @@ export function ExpressionBesoinList({
             onOpenChange={setShowValidateDialog}
             onConfirm={handleValidate}
             expressionNumero={selectedExpression.numero}
+            verifiedAt={selectedExpression.verified_at}
+            verifierName={selectedExpression.verifier?.full_name}
+          />
+          <ExpressionBesoinVerifyDialog
+            open={showVerifyDialog}
+            onOpenChange={setShowVerifyDialog}
+            onConfirm={handleVerify}
+            expressionNumero={selectedExpression.numero}
+            montant={selectedExpression.montant_estime}
+            exercice={selectedExpression.exercice}
           />
         </>
       )}

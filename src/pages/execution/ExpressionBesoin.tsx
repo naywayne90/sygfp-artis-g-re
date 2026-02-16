@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import { usePermissions } from '@/hooks/usePermissions';
 import { ExpressionBesoinForm } from '@/components/expression-besoin/ExpressionBesoinForm';
 import {
   ExpressionBesoinFromImputationForm,
@@ -39,6 +40,7 @@ import {
   Eye,
   ShoppingCart,
   FileSignature,
+  ShieldCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
@@ -56,6 +58,7 @@ export default function ExpressionBesoin() {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     expressions,
+    expressionsAVerifier,
     expressionsAValider,
     expressionsValidees,
     expressionsRejetees,
@@ -65,6 +68,8 @@ export default function ExpressionBesoin() {
     imputationsValidees,
     isLoading,
   } = useExpressionsBesoin();
+
+  const { canVerifyEB, canValidateEB } = usePermissions();
 
   const [showForm, setShowForm] = useState(false);
   const [showImputationForm, setShowImputationForm] = useState(false);
@@ -135,8 +140,10 @@ export default function ExpressionBesoin() {
     switch (activeTab) {
       case 'brouillons':
         return filteredExpressions.filter((e) => e.statut === 'brouillon');
-      case 'a_valider':
+      case 'a_verifier':
         return filteredExpressions.filter((e) => e.statut === 'soumis');
+      case 'a_valider':
+        return filteredExpressions.filter((e) => e.statut === 'verifie');
       case 'validees':
         return filteredExpressions.filter((e) => e.statut === 'valide');
       case 'rejetees':
@@ -182,7 +189,7 @@ export default function ExpressionBesoin() {
       </PageHeader>
 
       {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">À traiter</CardTitle>
@@ -205,6 +212,21 @@ export default function ExpressionBesoin() {
           </CardContent>
         </Card>
 
+        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">
+              À vérifier
+            </CardTitle>
+            <ShieldCheck className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+              {expressionsAVerifier.length}
+            </div>
+            <p className="text-xs text-blue-600/70 dark:text-blue-400/70">CB (couverture budget)</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">À valider</CardTitle>
@@ -212,7 +234,7 @@ export default function ExpressionBesoin() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{expressionsAValider.length}</div>
-            <p className="text-xs text-muted-foreground">Chef de service</p>
+            <p className="text-xs text-muted-foreground">DG/DAAF</p>
           </CardContent>
         </Card>
 
@@ -316,7 +338,19 @@ export default function ExpressionBesoin() {
               <TabsTrigger value="brouillons">
                 Brouillons ({expressionsBrouillon?.length || 0})
               </TabsTrigger>
-              <TabsTrigger value="a_valider">À valider ({expressionsAValider.length})</TabsTrigger>
+              {canVerifyEB() && (
+                <TabsTrigger value="a_verifier" className="gap-1">
+                  <ShieldCheck className="h-3 w-3" />À vérifier
+                  <Badge variant="secondary" className="ml-1 text-xs bg-blue-100 text-blue-700">
+                    {expressionsAVerifier.length}
+                  </Badge>
+                </TabsTrigger>
+              )}
+              {canValidateEB() && (
+                <TabsTrigger value="a_valider">
+                  À valider ({expressionsAValider.length})
+                </TabsTrigger>
+              )}
               <TabsTrigger value="validees">Validées ({expressionsValidees.length})</TabsTrigger>
               <TabsTrigger value="satisfaites">
                 Satisfaites ({expressionsSatisfaites?.length || 0})
@@ -454,13 +488,19 @@ export default function ExpressionBesoin() {
             </TabsContent>
 
             {/* Autres onglets */}
-            {['toutes', 'brouillons', 'a_valider', 'satisfaites', 'rejetees', 'differees'].map(
-              (tab) => (
-                <TabsContent key={tab} value={tab}>
-                  <ExpressionBesoinList expressions={getFilteredByTab()} />
-                </TabsContent>
-              )
-            )}
+            {[
+              'toutes',
+              'brouillons',
+              'a_verifier',
+              'a_valider',
+              'satisfaites',
+              'rejetees',
+              'differees',
+            ].map((tab) => (
+              <TabsContent key={tab} value={tab}>
+                <ExpressionBesoinList expressions={getFilteredByTab()} />
+              </TabsContent>
+            ))}
           </Tabs>
         </CardContent>
       </Card>

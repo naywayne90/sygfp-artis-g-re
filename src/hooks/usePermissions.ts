@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = {
   role: string;
@@ -13,22 +13,24 @@ type UserPermission = {
 export function usePermissions() {
   // Récupérer l'utilisateur courant
   const { data: currentUser } = useQuery({
-    queryKey: ["current-user"],
+    queryKey: ['current-user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
     },
   });
 
   // Récupérer le profil utilisateur (incluant direction_id)
   const { data: userProfile } = useQuery({
-    queryKey: ["user-profile", currentUser?.id],
+    queryKey: ['user-profile', currentUser?.id],
     queryFn: async () => {
       if (!currentUser?.id) return null;
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, direction_id, role_hierarchique, poste")
-        .eq("id", currentUser.id)
+        .from('profiles')
+        .select('id, direction_id, role_hierarchique, poste')
+        .eq('id', currentUser.id)
         .single();
       if (error) return null;
       return data;
@@ -38,14 +40,14 @@ export function usePermissions() {
 
   // Récupérer les rôles de l'utilisateur
   const { data: userRoles } = useQuery({
-    queryKey: ["user-roles", currentUser?.id],
+    queryKey: ['user-roles', currentUser?.id],
     queryFn: async () => {
       if (!currentUser?.id) return [];
       const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", currentUser.id)
-        .eq("is_active", true);
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id)
+        .eq('is_active', true);
       if (error) throw error;
       return data as UserRole[];
     },
@@ -54,13 +56,14 @@ export function usePermissions() {
 
   // Récupérer les permissions via la fonction SECURITY DEFINER (inclut délégations)
   const { data: userPermissions } = useQuery({
-    queryKey: ["user-permissions", currentUser?.id],
+    queryKey: ['user-permissions', currentUser?.id],
     queryFn: async () => {
       if (!currentUser?.id) return [];
-      const { data, error } = await supabase
-        .rpc("get_user_permissions", { p_user_id: currentUser.id });
+      const { data, error } = await supabase.rpc('get_user_permissions', {
+        p_user_id: currentUser.id,
+      });
       if (error) {
-        console.error("Error fetching permissions:", error);
+        console.error('Error fetching permissions:', error);
         return [];
       }
       return (data || []) as UserPermission[];
@@ -103,7 +106,7 @@ export function usePermissions() {
   };
 
   // Vérifier si l'utilisateur est admin
-  const isAdmin = hasRole("ADMIN") || hasRole("admin");
+  const isAdmin = hasRole('ADMIN') || hasRole('admin');
 
   // Vérifier l'accès à un module entier (ex: "budget", "engagement")
   const hasModuleAccess = (module: string): boolean => {
@@ -124,67 +127,82 @@ export function usePermissions() {
 
   // Vérifier si l'utilisateur peut valider une Note SEF (DG uniquement)
   const canValidateNoteSEF = (): boolean => {
-    return isAdmin || hasRole("DG") || hasPermission("notes_sef_validate");
+    return isAdmin || hasRole('DG') || hasPermission('notes_sef_validate');
   };
 
   // Vérifier si l'utilisateur peut valider une Note AEF (Directeur ou DG)
   const canValidateNoteAEF = (): boolean => {
-    return isAdmin || hasAnyRole(["DG", "DIRECTEUR"]) || hasPermission("notes_aef_validate");
+    return isAdmin || hasAnyRole(['DG', 'DIRECTEUR']) || hasPermission('notes_aef_validate');
   };
 
   // Vérifier si l'utilisateur peut imputer (CB uniquement)
   const canImpute = (): boolean => {
-    return isAdmin || hasRole("CB") || hasPermission("imputation_create");
+    return isAdmin || hasRole('CB') || hasPermission('imputation_create');
   };
 
   // Vérifier si l'utilisateur peut valider un engagement (CB uniquement)
   const canValidateEngagement = (): boolean => {
-    return isAdmin || hasRole("CB") || hasPermission("engagement_validate");
+    return isAdmin || hasRole('CB') || hasPermission('engagement_validate');
   };
 
   // Vérifier si l'utilisateur peut valider une liquidation (DAAF)
   const canValidateLiquidation = (): boolean => {
-    return isAdmin || hasAnyRole(["DAAF", "CB"]) || hasPermission("liquidation_validate");
+    return isAdmin || hasAnyRole(['DAAF', 'CB']) || hasPermission('liquidation_validate');
   };
 
   // Vérifier si l'utilisateur peut signer un ordonnancement (DG uniquement)
   const canSignOrdonnancement = (): boolean => {
-    return isAdmin || hasRole("DG") || hasPermission("ordonnancement_sign");
+    return isAdmin || hasRole('DG') || hasPermission('ordonnancement_sign');
   };
 
   // Vérifier si l'utilisateur peut exécuter un règlement (Trésorerie/Agent Comptable)
   const canExecuteReglement = (): boolean => {
-    return isAdmin || hasAnyRole(["TRESORERIE", "AGENT_COMPTABLE", "AC"]) || hasPermission("reglement_execute");
+    return (
+      isAdmin ||
+      hasAnyRole(['TRESORERIE', 'AGENT_COMPTABLE', 'AC']) ||
+      hasPermission('reglement_execute')
+    );
   };
 
   // Vérifier si l'utilisateur peut valider un marché (Commission/DG)
   const canValidateMarche = (): boolean => {
-    return isAdmin || hasAnyRole(["DG", "COMMISSION_MARCHES"]) || hasPermission("marche_validate");
+    return isAdmin || hasAnyRole(['DG', 'COMMISSION_MARCHES']) || hasPermission('marche_validate');
   };
 
   // Vérifier si l'utilisateur peut approuver un virement (CB)
   const canApproveVirement = (): boolean => {
-    return isAdmin || hasRole("CB") || hasPermission("virement_approve");
+    return isAdmin || hasRole('CB') || hasPermission('virement_approve');
+  };
+
+  // Vérifier si l'utilisateur peut vérifier une Expression de Besoin (CB)
+  const canVerifyEB = (): boolean => {
+    return isAdmin || hasRole('CB');
+  };
+
+  // Vérifier si l'utilisateur peut valider une Expression de Besoin (DG/DAAF)
+  const canValidateEB = (): boolean => {
+    return isAdmin || hasRole('DG') || hasRole('DAAF');
   };
 
   // Message d'erreur pour rôle insuffisant
   const getRequiredRoleMessage = (action: string): string => {
     const roleMap: Record<string, string> = {
-      "validate_note_sef": "DG",
-      "validate_note_aef": "Directeur ou DG",
-      "impute": "CB (Contrôleur Budgétaire)",
-      "validate_engagement": "CB (Contrôleur Budgétaire)",
-      "validate_liquidation": "DAAF",
-      "sign_ordonnancement": "DG (Directeur Général)",
-      "execute_reglement": "Trésorerie / Agent Comptable",
-      "validate_marche": "Commission des Marchés ou DG",
-      "approve_virement": "CB (Contrôleur Budgétaire)",
+      validate_note_sef: 'DG',
+      validate_note_aef: 'Directeur ou DG',
+      impute: 'CB (Contrôleur Budgétaire)',
+      validate_engagement: 'CB (Contrôleur Budgétaire)',
+      validate_liquidation: 'DAAF',
+      sign_ordonnancement: 'DG (Directeur Général)',
+      execute_reglement: 'Trésorerie / Agent Comptable',
+      validate_marche: 'Commission des Marchés ou DG',
+      approve_virement: 'CB (Contrôleur Budgétaire)',
     };
-    return roleMap[action] || "Administrateur";
+    return roleMap[action] || 'Administrateur';
   };
 
   // Calcul de l'état de chargement
-  const isLoading = currentUser === undefined || (!!currentUser?.id && (!userRoles || !userPermissions));
+  const isLoading =
+    currentUser === undefined || (!!currentUser?.id && (!userRoles || !userPermissions));
 
   return {
     userId: currentUser?.id,
@@ -212,6 +230,8 @@ export function usePermissions() {
     canExecuteReglement,
     canValidateMarche,
     canApproveVirement,
+    canVerifyEB,
+    canValidateEB,
     getRequiredRoleMessage,
   };
 }

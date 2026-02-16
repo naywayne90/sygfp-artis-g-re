@@ -41,6 +41,8 @@ export interface ExpressionBesoin {
   submitted_at: string | null;
   validated_at: string | null;
   validated_by: string | null;
+  verified_at: string | null;
+  verified_by: string | null;
   rejection_reason: string | null;
   date_differe: string | null;
   motif_differe: string | null;
@@ -80,6 +82,7 @@ export interface ExpressionBesoin {
   } | null;
   creator?: { id: string; full_name: string | null } | null;
   validator?: { id: string; full_name: string | null } | null;
+  verifier?: { id: string; full_name: string | null } | null;
   validations?: ExpressionBesoinValidation[];
   attachments?: ExpressionBesoinAttachment[];
 }
@@ -119,7 +122,14 @@ export interface MarcheValide {
   } | null;
 }
 
+// Nouveau workflow : 2 étapes fonctionnelles
 export const VALIDATION_STEPS = [
+  { order: 1, role: 'CB', label: 'Vérification CB' },
+  { order: 2, role: 'DG', label: 'Validation DG/DAAF' },
+];
+
+// Legacy : ancien workflow 3 niveaux hiérarchiques (pour les 189 EB existantes)
+export const LEGACY_VALIDATION_STEPS = [
   { order: 1, role: 'CHEF_SERVICE', label: 'Chef de Service' },
   { order: 2, role: 'SOUS_DIRECTEUR', label: 'Sous-Directeur' },
   { order: 3, role: 'DIRECTEUR', label: 'Directeur' },
@@ -173,7 +183,20 @@ export function useExpressionsBesoin() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as unknown as ExpressionBesoin[];
+
+      // Derive verifier from CB validation step (FK to profiles not in PostgREST cache)
+      const enriched = (data as unknown as ExpressionBesoin[]).map((eb) => {
+        if (!eb.verifier && eb.verified_by && eb.validations) {
+          const cbValidation = eb.validations.find(
+            (v) => v.role === 'CB' && v.status === 'approved'
+          );
+          if (cbValidation?.validator) {
+            eb.verifier = cbValidation.validator;
+          }
+        }
+        return eb;
+      });
+      return enriched;
     },
   });
 
@@ -181,12 +204,11 @@ export function useExpressionsBesoin() {
   const { data: imputationsValidees = [] } = useQuery({
     queryKey: ['imputations-validees-pour-eb', exercice],
     queryFn: async () => {
-      // Récupérer les imputations validées qui n'ont pas encore d'EB
       const { data: imputations, error } = await supabase
         .from('imputations')
         .select(
           `
-          id, reference, objet, montant, code_imputation, 
+          id, reference, objet, montant, code_imputation,
           direction_id, dossier_id,
           direction:directions(id, label, sigle),
           budget_line:budget_lines(id, code, label)
@@ -198,7 +220,6 @@ export function useExpressionsBesoin() {
 
       if (error) throw error;
 
-      // Filtrer pour exclure celles qui ont déjà une EB
       const { data: existingEBs } = await supabase
         .from('expressions_besoin')
         .select('imputation_id')
@@ -234,12 +255,10 @@ export function useExpressionsBesoin() {
     enabled: !!exercice,
   });
 
-  // Fetch marchés attribués (ready for execution) without expressions
+  // Fetch marchés attribués
   const { data: marchesValides = [] } = useQuery({
     queryKey: ['marches-valides-pour-expression', exercice],
     queryFn: async () => {
-      // Get marchés with statuses that allow expressions de besoin
-      // Statuts valides: attribue, valide, validé, en_cours, en_execution
       const { data: marches, error } = await supabase
         .from('marches')
         .select(
@@ -271,7 +290,6 @@ export function useExpressionsBesoin() {
       numero_lot?: number | null;
       intitule_lot?: string | null;
     }) => {
-      // Generate atomic sequence number
       const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
         p_doc_type: 'EB',
         p_exercice: exercice || new Date().getFullYear(),
@@ -327,9 +345,8 @@ export function useExpressionsBesoin() {
       liste_articles: ExpressionBesoinLigne[];
     }) => {
       const { liste_articles, ...rest } = data;
-
-      // JSON.parse/stringify convertit ExpressionBesoinLigne[] en Json compatible Supabase
       const articlesJson = JSON.parse(JSON.stringify(liste_articles));
+      const userId = (await supabase.auth.getUser()).data.user?.id;
 
       const { data: result, error } = await supabase
         .from('expressions_besoin')
@@ -338,6 +355,7 @@ export function useExpressionsBesoin() {
           liste_articles: articlesJson,
           exercice: exercice || new Date().getFullYear(),
           statut: 'brouillon',
+          created_by: userId,
         })
         .select()
         .single();
@@ -377,7 +395,6 @@ export function useExpressionsBesoin() {
   // Submit expression (génère un numéro si absent)
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Vérifier si un numéro existe déjà
       const { data: existing, error: fetchError } = await supabase
         .from('expressions_besoin')
         .select('numero')
@@ -391,7 +408,6 @@ export function useExpressionsBesoin() {
         submitted_at: new Date().toISOString(),
       };
 
-      // Générer le numéro si absent
       if (!existing.numero) {
         const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
           p_doc_type: 'EB',
@@ -408,12 +424,10 @@ export function useExpressionsBesoin() {
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const yy = String(now.getFullYear()).slice(-2);
         const nnnn = seq.number_padded || String(seq.number_raw).padStart(4, '0');
-        // Format: ARTI03MMYYNNNN (03 = code étape EB)
         updateData.numero = `ARTI03${mm}${yy}${nnnn}`;
       }
 
       const { error } = await supabase.from('expressions_besoin').update(updateData).eq('id', id);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -425,65 +439,83 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Validate expression (avance dans le workflow ou valide définitivement)
-  const validateMutation = useMutation({
+  // Verify expression (CB vérifie couverture budgétaire : soumis → verifie)
+  const verifyMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
-      // Récupérer l'expression actuelle
-      const { data: expression, error: fetchError } = await supabase
-        .from('expressions_besoin')
-        .select('current_validation_step')
-        .eq('id', id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      const currentStep = expression.current_validation_step || 1;
-      const nextStep = currentStep + 1;
-      const isLastStep = nextStep > VALIDATION_STEPS.length;
-
-      // Enregistrer la validation de l'étape actuelle
+      // Enregistrer la validation CB (step 1)
       await supabase.from('expression_besoin_validations').insert({
         expression_besoin_id: id,
-        step_order: currentStep,
-        role: VALIDATION_STEPS.find((s) => s.order === currentStep)?.role || 'UNKNOWN',
+        step_order: 1,
+        role: 'CB',
         status: 'approved',
         validated_at: new Date().toISOString(),
         comments: comments || null,
       });
 
-      // Mettre à jour l'expression
-      const updateData: Record<string, string | number | null> = {
-        current_validation_step: isLastStep ? currentStep : nextStep,
-        rejection_reason: null,
-        date_differe: null,
-        motif_differe: null,
-      };
-
-      if (isLastStep) {
-        updateData.statut = 'valide';
-        updateData.validated_at = new Date().toISOString();
-      }
-
-      const { error } = await supabase.from('expressions_besoin').update(updateData).eq('id', id);
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const { error } = await supabase
+        .from('expressions_besoin')
+        .update({
+          statut: 'verifie',
+          verified_at: new Date().toISOString(),
+          verified_by: userId,
+          current_validation_step: 2,
+          rejection_reason: null,
+          date_differe: null,
+          motif_differe: null,
+        })
+        .eq('id', id);
 
       if (error) throw error;
-
-      return { isLastStep };
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
-      if (result.isLastStep) {
-        toast.success('Expression de besoin validée définitivement !');
-      } else {
-        toast.success("Validation effectuée, transmis à l'étape suivante");
-      }
+      toast.success('Couverture budgétaire vérifiée, transmis au DG/DAAF');
+    },
+    onError: (error) => {
+      toast.error('Erreur lors de la vérification: ' + error.message);
+    },
+  });
+
+  // Validate expression (DG/DAAF valide : verifie → valide)
+  const validateMutation = useMutation({
+    mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
+      // Enregistrer la validation DG/DAAF (step 2)
+      await supabase.from('expression_besoin_validations').insert({
+        expression_besoin_id: id,
+        step_order: 2,
+        role: 'DG',
+        status: 'approved',
+        validated_at: new Date().toISOString(),
+        comments: comments || null,
+      });
+
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const { error } = await supabase
+        .from('expressions_besoin')
+        .update({
+          statut: 'valide',
+          validated_at: new Date().toISOString(),
+          validated_by: userId,
+          current_validation_step: 2,
+          rejection_reason: null,
+          date_differe: null,
+          motif_differe: null,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin validée définitivement !');
     },
     onError: (error) => {
       toast.error('Erreur lors de la validation: ' + error.message);
     },
   });
 
-  // Reject expression
+  // Reject expression (depuis soumis par CB ou depuis verifie par DG/DAAF)
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
@@ -565,7 +597,6 @@ export function useExpressionsBesoin() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('expressions_besoin').delete().eq('id', id);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -577,16 +608,13 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Mark expression as satisfied (passation marché créée)
+  // Mark expression as satisfied
   const satisfyMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('expressions_besoin')
-        .update({
-          statut: 'satisfaite',
-        })
+        .update({ statut: 'satisfaite' })
         .eq('id', id);
-
       if (error) throw error;
     },
     onSuccess: () => {
@@ -599,7 +627,8 @@ export function useExpressionsBesoin() {
   });
 
   // Filter helpers
-  const expressionsAValider = expressions.filter((e) => e.statut === 'soumis');
+  const expressionsAVerifier = expressions.filter((e) => e.statut === 'soumis');
+  const expressionsAValider = expressions.filter((e) => e.statut === 'verifie');
   const expressionsValidees = expressions.filter((e) => e.statut === 'valide');
   const expressionsRejetees = expressions.filter((e) => e.statut === 'rejete');
   const expressionsDifferees = expressions.filter((e) => e.statut === 'differe');
@@ -608,6 +637,7 @@ export function useExpressionsBesoin() {
 
   return {
     expressions,
+    expressionsAVerifier,
     expressionsAValider,
     expressionsValidees,
     expressionsRejetees,
@@ -623,6 +653,7 @@ export function useExpressionsBesoin() {
     createFromImputation: createFromImputationMutation.mutateAsync,
     updateExpression: updateMutation.mutateAsync,
     submitExpression: submitMutation.mutateAsync,
+    verifyExpression: verifyMutation.mutateAsync,
     validateExpression: validateMutation.mutateAsync,
     rejectExpression: rejectMutation.mutateAsync,
     deferExpression: deferMutation.mutateAsync,
@@ -632,6 +663,7 @@ export function useExpressionsBesoin() {
     isCreating: createMutation.isPending || createFromImputationMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
+    isVerifying: verifyMutation.isPending,
     isValidating: validateMutation.isPending,
   };
 }

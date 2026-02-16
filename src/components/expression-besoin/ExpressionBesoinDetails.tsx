@@ -25,7 +25,6 @@ import {
   ExpressionBesoin,
   ExpressionBesoinLigne,
   ExpressionBesoinAttachment,
-  VALIDATION_STEPS,
 } from '@/hooks/useExpressionsBesoin';
 import { ExpressionBesoinTimeline } from './ExpressionBesoinTimeline';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
@@ -66,6 +65,7 @@ interface ExpressionBesoinDetailsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit?: (id: string) => void;
+  onVerify?: (id: string) => void;
   onValidate?: (id: string) => void;
   onReject?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -82,6 +82,11 @@ const STATUS_CONFIG: Record<
 > = {
   brouillon: { label: 'Brouillon', variant: 'secondary', icon: <FileText className="h-4 w-4" /> },
   soumis: { label: 'À valider', variant: 'outline', icon: <Clock className="h-4 w-4" /> },
+  verifie: {
+    label: 'Vérifié CB',
+    variant: 'outline',
+    icon: <ShieldCheck className="h-4 w-4" />,
+  },
   valide: { label: 'Validé', variant: 'default', icon: <CheckCircle2 className="h-4 w-4" /> },
   rejete: { label: 'Rejeté', variant: 'destructive', icon: <XCircle className="h-4 w-4" /> },
   differe: { label: 'Différé', variant: 'outline', icon: <Clock className="h-4 w-4" /> },
@@ -107,6 +112,7 @@ export function ExpressionBesoinDetails({
   open,
   onOpenChange,
   onSubmit,
+  onVerify,
   onValidate,
   onReject,
   onDelete,
@@ -115,7 +121,6 @@ export function ExpressionBesoinDetails({
   const navigate = useNavigate();
   const status = STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
   const urgence = URGENCE_CONFIG[expression.urgence || 'normale'] || URGENCE_CONFIG.normale;
-  const currentStep = expression.current_validation_step || 1;
 
   // Use attachments from the hook query (expression_besoin_attachments)
   const attachments: ExpressionBesoinAttachment[] = expression.attachments || [];
@@ -216,22 +221,29 @@ export function ExpressionBesoinDetails({
                   {expression.statut === 'soumis' && (
                     <>
                       <DropdownMenuSeparator />
-                      {onValidate && (
-                        <DropdownMenuItem onClick={() => onValidate(expression.id)}>
+                      {onVerify && (
+                        <DropdownMenuItem onClick={() => onVerify(expression.id)}>
                           <ShieldCheck className="mr-2 h-4 w-4" />
-                          Vérifier (couverture budget)
+                          Vérifier (CB)
+                        </DropdownMenuItem>
+                      )}
+                      {onReject && (
+                        <DropdownMenuItem onClick={() => onReject(expression.id)}>
+                          <XCircle className="mr-2 h-4 w-4" />
+                          Rejeter
                         </DropdownMenuItem>
                       )}
                     </>
                   )}
 
-                  {/* Vérifié/soumis — DG/DAAF valide ou rejette */}
-                  {expression.statut === 'soumis' && (
+                  {/* Vérifié — DG valide ou rejette */}
+                  {expression.statut === 'verifie' && (
                     <>
+                      <DropdownMenuSeparator />
                       {onValidate && (
                         <DropdownMenuItem onClick={() => onValidate(expression.id)}>
                           <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Valider
+                          Valider (DG)
                         </DropdownMenuItem>
                       )}
                       {onReject && (
@@ -304,8 +316,8 @@ export function ExpressionBesoinDetails({
           {/* Onglet 1 : Informations       */}
           {/* ============================== */}
           <TabsContent value="infos" className="mt-4 space-y-4">
-            {/* Workflow de validation */}
-            {expression.statut === 'soumis' && (
+            {/* Workflow de validation CB → DG */}
+            {(expression.statut === 'soumis' || expression.statut === 'verifie') && (
               <Card className="border-primary/30 bg-primary/5">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
@@ -315,50 +327,68 @@ export function ExpressionBesoinDetails({
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between gap-2">
-                    {VALIDATION_STEPS.map((step, index) => {
-                      const validation = expression.validations?.find(
-                        (v) => v.step_order === step.order
-                      );
-                      const isCompleted = validation?.status === 'approved';
-                      const isCurrent = step.order === currentStep;
-                      const isPending = step.order > currentStep;
-
-                      return (
-                        <div key={step.order} className="flex items-center gap-2 flex-1">
-                          <div
-                            className={cn(
-                              'flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium',
-                              isCompleted && 'bg-success text-white',
-                              isCurrent && 'bg-primary text-primary-foreground',
-                              isPending && 'bg-muted text-muted-foreground'
-                            )}
-                          >
-                            {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : step.order}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className={cn(
-                                'text-sm font-medium truncate',
-                                isPending && 'text-muted-foreground'
-                              )}
-                            >
-                              {step.label}
-                            </p>
-                            {isCompleted && validation?.validated_at && (
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(validation.validated_at), 'dd/MM HH:mm')}
-                              </p>
-                            )}
-                            {isCurrent && <p className="text-xs text-primary">En attente</p>}
-                          </div>
-                          {index < VALIDATION_STEPS.length - 1 && (
-                            <div
-                              className={cn('h-0.5 w-4', isCompleted ? 'bg-success' : 'bg-muted')}
-                            />
+                    {/* Étape CB */}
+                    <div className="flex items-center gap-2 flex-1">
+                      <div
+                        className={cn(
+                          'flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium',
+                          expression.statut === 'verifie'
+                            ? 'bg-success text-white'
+                            : 'bg-primary text-primary-foreground'
+                        )}
+                      >
+                        {expression.statut === 'verifie' ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <ShieldCheck className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">Vérification CB</p>
+                        {expression.verified_at ? (
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(expression.verified_at), 'dd/MM HH:mm')}
+                            {expression.verifier && ` — ${expression.verifier.full_name}`}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-primary">En attente</p>
+                        )}
+                      </div>
+                    </div>
+                    <div
+                      className={cn(
+                        'h-0.5 w-4',
+                        expression.statut === 'verifie' ? 'bg-success' : 'bg-muted'
+                      )}
+                    />
+                    {/* Étape DG */}
+                    <div className="flex items-center gap-2 flex-1">
+                      <div
+                        className={cn(
+                          'flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium',
+                          expression.statut === 'verifie'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                        )}
+                      >
+                        2
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={cn(
+                            'text-sm font-medium',
+                            expression.statut !== 'verifie' && 'text-muted-foreground'
                           )}
-                        </div>
-                      );
-                    })}
+                        >
+                          Validation DG
+                        </p>
+                        {expression.statut === 'verifie' ? (
+                          <p className="text-xs text-primary">En attente</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">À venir</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -954,13 +984,24 @@ export function ExpressionBesoinDetails({
                       </span>
                     </div>
                   )}
+                  {expression.verified_at && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Vérifié CB</span>
+                      <span>
+                        {format(new Date(expression.verified_at), 'dd/MM/yyyy HH:mm', {
+                          locale: fr,
+                        })}
+                        {expression.verifier && ` par ${expression.verifier.full_name}`}
+                      </span>
+                    </div>
+                  )}
                   {expression.validations &&
                     expression.validations
                       .filter((v) => v.status === 'approved')
                       .map((v) => (
                         <div key={v.id} className="flex justify-between">
                           <span className="text-muted-foreground">
-                            Validé (étape {v.step_order})
+                            {v.role === 'CB' ? 'Vérifié CB' : `Validé (${v.role})`}
                           </span>
                           <span>
                             {v.validated_at &&
