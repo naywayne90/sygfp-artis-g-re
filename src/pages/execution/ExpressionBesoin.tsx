@@ -20,6 +20,7 @@ import {
   ImputationValidee,
 } from '@/components/expression-besoin/ExpressionBesoinFromImputationForm';
 import { ExpressionBesoinList } from '@/components/expression-besoin/ExpressionBesoinList';
+import { ExpressionBesoinDetails } from '@/components/expression-besoin/ExpressionBesoinDetails';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -71,6 +72,20 @@ export default function ExpressionBesoin() {
   const [activeTab, setActiveTab] = useState('a_traiter');
   const [sourceImputation, setSourceImputation] = useState<ImputationValidee | null>(null);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
+  const [viewExpression, setViewExpression] = useState<(typeof expressions)[0] | null>(null);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+
+  // Gérer le paramètre ?view= pour ouvrir le détail
+  useEffect(() => {
+    const viewId = searchParams.get('view');
+    if (viewId && expressions.length > 0) {
+      const found = expressions.find((e) => e.id === viewId);
+      if (found) {
+        setViewExpression(found);
+        setShowViewDialog(true);
+      }
+    }
+  }, [searchParams, expressions]);
 
   // Gérer le paramètre sourceImputation depuis l'URL
   useEffect(() => {
@@ -452,6 +467,22 @@ export default function ExpressionBesoin() {
 
       {/* Form dialog depuis marché */}
       <ExpressionBesoinForm open={showForm} onOpenChange={setShowForm} />
+
+      {/* Detail dialog via ?view= */}
+      {viewExpression && (
+        <ExpressionBesoinDetails
+          expression={viewExpression}
+          open={showViewDialog}
+          onOpenChange={(open) => {
+            setShowViewDialog(open);
+            if (!open) {
+              setViewExpression(null);
+              searchParams.delete('view');
+              setSearchParams(searchParams, { replace: true });
+            }
+          }}
+        />
+      )}
 
       {/* Form dialog depuis imputation */}
       <ExpressionBesoinFromImputationForm

@@ -70,6 +70,8 @@ export interface ExpressionBesoin {
     reference: string | null;
     objet: string;
     montant: number | null;
+    code_imputation: string | null;
+    budget_line?: { id: string; code: string; label: string } | null;
   } | null;
   dossier?: {
     id: string;
@@ -79,6 +81,18 @@ export interface ExpressionBesoin {
   creator?: { id: string; full_name: string | null } | null;
   validator?: { id: string; full_name: string | null } | null;
   validations?: ExpressionBesoinValidation[];
+  attachments?: ExpressionBesoinAttachment[];
+}
+
+export interface ExpressionBesoinAttachment {
+  id: string;
+  document_type: string;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  file_type: string | null;
+  uploaded_by: string | null;
+  created_at: string;
 }
 
 export interface ExpressionBesoinValidation {
@@ -140,7 +154,11 @@ export function useExpressionsBesoin() {
             prestataire:prestataires(id, raison_sociale)
           ),
           imputation:imputations!expressions_besoin_imputation_id_fkey(
-            id, reference, objet, montant
+            id, reference, objet, montant, code_imputation,
+            budget_line:budget_lines(id, code, label)
+          ),
+          attachments:expression_besoin_attachments(
+            id, document_type, file_name, file_path, file_size, file_type, uploaded_by, created_at
           ),
           dossier:dossiers(id, numero, objet),
           creator:profiles!expressions_besoin_created_by_fkey(id, full_name),

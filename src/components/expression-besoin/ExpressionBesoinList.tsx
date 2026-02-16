@@ -286,6 +286,16 @@ export function ExpressionBesoinList({
             expression={selectedExpression}
             open={showDetails}
             onOpenChange={setShowDetails}
+            onSubmit={(id) => submitExpression(id)}
+            onValidate={() => {
+              setShowDetails(false);
+              setShowValidateDialog(true);
+            }}
+            onReject={() => {
+              setShowDetails(false);
+              setShowRejectDialog(true);
+            }}
+            onDelete={() => handleDelete(selectedExpression)}
           />
           <ExpressionBesoinRejectDialog
             open={showRejectDialog}
