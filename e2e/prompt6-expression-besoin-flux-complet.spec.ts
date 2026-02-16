@@ -458,7 +458,7 @@ test.describe.serial('Prompt 6 — Flux complet CB → DG', () => {
 
     // Click Rejeter and wait for success toast
     await rejectBtn.click();
-    const rejectToast = page.locator('text=/rejetée/i');
+    const rejectToast = page.locator('[data-sonner-toast][data-type="success"]');
     const rejectError = page.locator('[data-sonner-toast][data-type="error"]');
     const rejectResult = await Promise.race([
       rejectToast.waitFor({ state: 'visible', timeout: 15000 }).then(() => 'success'),
