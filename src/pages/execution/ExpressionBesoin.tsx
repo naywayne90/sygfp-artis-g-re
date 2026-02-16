@@ -332,8 +332,7 @@ export default function ExpressionBesoin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {imputationsValidees.map((imp: any) => (
+                      {imputationsValidees.map((imp) => (
                         <TableRow key={imp.id}>
                           <TableCell className="font-mono text-sm">
                             {imp.reference || '-'}
@@ -395,8 +394,7 @@ export default function ExpressionBesoin() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      expressionsValidees.map((eb: any) => (
+                      expressionsValidees.map((eb) => (
                         <TableRow key={eb.id}>
                           <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
                           <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>

@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -17,24 +17,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { URGENCE_OPTIONS } from "@/hooks/useExpressionsBesoin";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { CreditCard, Calendar, Loader2, Search, Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { URGENCE_OPTIONS, ExpressionBesoinLigne } from '@/hooks/useExpressionsBesoin';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { CreditCard, Calendar, Loader2, Search, Plus, Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface ImputationValidee {
   id: string;
@@ -50,9 +50,11 @@ export interface ImputationValidee {
 
 interface ArticleLigne {
   id: string;
-  article: string;
+  designation: string;
   quantite: number;
   unite: string;
+  prix_unitaire: number;
+  prix_total: number;
 }
 
 interface ExpressionBesoinFromImputationFormProps {
@@ -64,14 +66,14 @@ interface ExpressionBesoinFromImputationFormProps {
 }
 
 const UNITES = [
-  { value: "piece", label: "Pièce(s)" },
-  { value: "kg", label: "Kilogramme(s)" },
-  { value: "m", label: "Mètre(s)" },
-  { value: "m2", label: "m²" },
-  { value: "m3", label: "m³" },
-  { value: "litre", label: "Litre(s)" },
-  { value: "lot", label: "Lot(s)" },
-  { value: "forfait", label: "Forfait" },
+  { value: 'piece', label: 'Pièce(s)' },
+  { value: 'kg', label: 'Kilogramme(s)' },
+  { value: 'm', label: 'Mètre(s)' },
+  { value: 'm2', label: 'm²' },
+  { value: 'm3', label: 'm³' },
+  { value: 'litre', label: 'Litre(s)' },
+  { value: 'lot', label: 'Lot(s)' },
+  { value: 'forfait', label: 'Forfait' },
 ];
 
 export function ExpressionBesoinFromImputationForm({
@@ -85,25 +87,32 @@ export function ExpressionBesoinFromImputationForm({
   const queryClient = useQueryClient();
 
   const [selectedImputation, setSelectedImputation] = useState<ImputationValidee | null>(null);
-  const [searchImputation, setSearchImputation] = useState("");
+  const [searchImputation, setSearchImputation] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  
+
   const [formData, setFormData] = useState({
-    objet: "",
-    description: "",
-    justification: "",
-    specifications: "",
-    calendrier_debut: "",
-    calendrier_fin: "",
-    montant_estime: "",
-    urgence: "normal",
-    lieu_livraison: "",
-    delai_livraison: "",
-    contact_livraison: "",
+    objet: '',
+    description: '',
+    justification: '',
+    specifications: '',
+    calendrier_debut: '',
+    calendrier_fin: '',
+    montant_estime: '',
+    urgence: 'normal',
+    lieu_livraison: '',
+    delai_livraison: '',
+    contact_livraison: '',
   });
 
   const [articles, setArticles] = useState<ArticleLigne[]>([
-    { id: crypto.randomUUID(), article: "", quantite: 1, unite: "piece" },
+    {
+      id: crypto.randomUUID(),
+      designation: '',
+      quantite: 1,
+      unite: 'piece',
+      prix_unitaire: 0,
+      prix_total: 0,
+    },
   ]);
 
   // Auto-sélectionner l'imputation si elle est fournie
@@ -112,8 +121,8 @@ export function ExpressionBesoinFromImputationForm({
       setSelectedImputation(sourceImputation);
       setFormData((prev) => ({
         ...prev,
-        objet: sourceImputation.objet || "",
-        montant_estime: sourceImputation.montant?.toString() || "",
+        objet: sourceImputation.objet || '',
+        montant_estime: sourceImputation.montant?.toString() || '',
       }));
     }
   }, [sourceImputation]);
@@ -129,15 +138,22 @@ export function ExpressionBesoinFromImputationForm({
     setSelectedImputation(imputation);
     setFormData((prev) => ({
       ...prev,
-      objet: imputation.objet || "",
-      montant_estime: imputation.montant?.toString() || "",
+      objet: imputation.objet || '',
+      montant_estime: imputation.montant?.toString() || '',
     }));
   };
 
   const handleAddArticle = () => {
     setArticles((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), article: "", quantite: 1, unite: "piece" },
+      {
+        id: crypto.randomUUID(),
+        designation: '',
+        quantite: 1,
+        unite: 'piece',
+        prix_unitaire: 0,
+        prix_total: 0,
+      },
     ]);
   };
 
@@ -149,7 +165,14 @@ export function ExpressionBesoinFromImputationForm({
 
   const handleArticleChange = (id: string, field: keyof ArticleLigne, value: string | number) => {
     setArticles((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, [field]: value } : a))
+      prev.map((a) => {
+        if (a.id !== id) return a;
+        const updated = { ...a, [field]: value };
+        if (field === 'quantite' || field === 'prix_unitaire') {
+          updated.prix_total = updated.quantite * updated.prix_unitaire;
+        }
+        return updated;
+      })
     );
   };
 
@@ -160,13 +183,19 @@ export function ExpressionBesoinFromImputationForm({
     setIsCreating(true);
     try {
       // Préparer les articles pour le JSON
-      const listeArticles = articles
-        .filter((a) => a.article.trim() !== "")
-        .map(({ article, quantite, unite }) => ({ article, quantite, unite }));
+      const listeArticles: Omit<ExpressionBesoinLigne, 'article'>[] = articles
+        .filter((a) => a.designation.trim() !== '')
+        .map(({ designation, quantite, unite, prix_unitaire, prix_total }) => ({
+          designation,
+          quantite,
+          unite,
+          prix_unitaire,
+          prix_total,
+        }));
 
       // Créer l'expression de besoin
       const { data: _data, error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .insert({
           imputation_id: selectedImputation.id,
           dossier_id: selectedImputation.dossier_id,
@@ -184,23 +213,23 @@ export function ExpressionBesoinFromImputationForm({
           contact_livraison: formData.contact_livraison || null,
           liste_articles: listeArticles,
           exercice: exercice || new Date().getFullYear(),
-          statut: "brouillon",
+          statut: 'brouillon',
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      toast.success("Expression de besoin créée avec succès");
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      queryClient.invalidateQueries({ queryKey: ["imputations-validees-pour-eb"] });
-      
+      toast.success('Expression de besoin créée avec succès');
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-validees-pour-eb'] });
+
       onOpenChange(false);
       resetForm();
       onSuccess?.();
-    } catch (error: any) {
-      console.error("Erreur création EB:", error);
-      toast.error("Erreur lors de la création: " + error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      toast.error('Erreur lors de la création: ' + message);
     } finally {
       setIsCreating(false);
     }
@@ -208,25 +237,34 @@ export function ExpressionBesoinFromImputationForm({
 
   const resetForm = () => {
     setSelectedImputation(null);
-    setSearchImputation("");
+    setSearchImputation('');
     setFormData({
-      objet: "",
-      description: "",
-      justification: "",
-      specifications: "",
-      calendrier_debut: "",
-      calendrier_fin: "",
-      montant_estime: "",
-      urgence: "normal",
-      lieu_livraison: "",
-      delai_livraison: "",
-      contact_livraison: "",
+      objet: '',
+      description: '',
+      justification: '',
+      specifications: '',
+      calendrier_debut: '',
+      calendrier_fin: '',
+      montant_estime: '',
+      urgence: 'normal',
+      lieu_livraison: '',
+      delai_livraison: '',
+      contact_livraison: '',
     });
-    setArticles([{ id: crypto.randomUUID(), article: "", quantite: 1, unite: "piece" }]);
+    setArticles([
+      {
+        id: crypto.randomUUID(),
+        designation: '',
+        quantite: 1,
+        unite: 'piece',
+        prix_unitaire: 0,
+        prix_total: 0,
+      },
+    ]);
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -273,7 +311,7 @@ export function ExpressionBesoinFromImputationForm({
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="font-medium font-mono text-sm">
-                              {imputation.reference || "Réf. en attente"}
+                              {imputation.reference || 'Réf. en attente'}
                             </p>
                             <p className="text-sm text-muted-foreground line-clamp-1">
                               {imputation.objet}
@@ -317,22 +355,24 @@ export function ExpressionBesoinFromImputationForm({
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Référence:</span>{" "}
+                      <span className="text-muted-foreground">Référence:</span>{' '}
                       <span className="font-medium font-mono">
-                        {selectedImputation.reference || "En attente"}
+                        {selectedImputation.reference || 'En attente'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Montant:</span>{" "}
-                      <span className="font-medium">{formatMontant(selectedImputation.montant)}</span>
+                      <span className="text-muted-foreground">Montant:</span>{' '}
+                      <span className="font-medium">
+                        {formatMontant(selectedImputation.montant)}
+                      </span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Objet:</span>{" "}
+                      <span className="text-muted-foreground">Objet:</span>{' '}
                       <span className="font-medium">{selectedImputation.objet}</span>
                     </div>
                     {selectedImputation.direction && (
                       <div className="col-span-2">
-                        <span className="text-muted-foreground">Direction:</span>{" "}
+                        <span className="text-muted-foreground">Direction:</span>{' '}
                         <span className="font-medium">
                           {selectedImputation.direction.sigle || selectedImputation.direction.label}
                         </span>
@@ -397,9 +437,11 @@ export function ExpressionBesoinFromImputationForm({
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[50%]">Article / Désignation</TableHead>
-                          <TableHead className="w-[20%]">Quantité</TableHead>
-                          <TableHead className="w-[25%]">Unité</TableHead>
+                          <TableHead className="w-[30%]">Désignation</TableHead>
+                          <TableHead className="w-[12%]">Quantité</TableHead>
+                          <TableHead className="w-[18%]">Unité</TableHead>
+                          <TableHead className="w-[15%]">Prix unit.</TableHead>
+                          <TableHead className="w-[15%]">Prix total</TableHead>
                           <TableHead className="w-[5%]" />
                         </TableRow>
                       </TableHeader>
@@ -408,9 +450,9 @@ export function ExpressionBesoinFromImputationForm({
                           <TableRow key={article.id}>
                             <TableCell>
                               <Input
-                                value={article.article}
+                                value={article.designation}
                                 onChange={(e) =>
-                                  handleArticleChange(article.id, "article", e.target.value)
+                                  handleArticleChange(article.id, 'designation', e.target.value)
                                 }
                                 placeholder="Nom de l'article..."
                               />
@@ -423,7 +465,7 @@ export function ExpressionBesoinFromImputationForm({
                                 onChange={(e) =>
                                   handleArticleChange(
                                     article.id,
-                                    "quantite",
+                                    'quantite',
                                     parseInt(e.target.value) || 1
                                   )
                                 }
@@ -433,7 +475,7 @@ export function ExpressionBesoinFromImputationForm({
                               <Select
                                 value={article.unite}
                                 onValueChange={(value) =>
-                                  handleArticleChange(article.id, "unite", value)
+                                  handleArticleChange(article.id, 'unite', value)
                                 }
                               >
                                 <SelectTrigger>
@@ -447,6 +489,26 @@ export function ExpressionBesoinFromImputationForm({
                                   ))}
                                 </SelectContent>
                               </Select>
+                            </TableCell>
+                            <TableCell>
+                              <Input
+                                type="number"
+                                min="0"
+                                value={article.prix_unitaire || ''}
+                                onChange={(e) =>
+                                  handleArticleChange(
+                                    article.id,
+                                    'prix_unitaire',
+                                    parseFloat(e.target.value) || 0
+                                  )
+                                }
+                                placeholder="0"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-sm font-medium">
+                                {new Intl.NumberFormat('fr-FR').format(article.prix_total)}
+                              </span>
                             </TableCell>
                             <TableCell>
                               <Button

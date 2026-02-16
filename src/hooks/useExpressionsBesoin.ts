@@ -1,7 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useExercice } from '@/contexts/ExerciceContext';
+
+export interface ExpressionBesoinLigne {
+  designation: string;
+  quantite: number;
+  unite: string;
+  prix_unitaire: number;
+  prix_total: number;
+  /** @deprecated Ancien champ, utiliser `designation` */
+  article?: string;
+}
 
 export interface ExpressionBesoin {
   id: string;
@@ -24,7 +34,7 @@ export interface ExpressionBesoin {
   imputation_id: string | null;
   dossier_id: string | null;
   direction_id: string | null;
-  liste_articles: any;
+  liste_articles: ExpressionBesoinLigne[] | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -50,8 +60,8 @@ export interface ExpressionBesoin {
     objet: string;
     montant: number;
     mode_passation: string;
-    prestataire?: { 
-      id: string; 
+    prestataire?: {
+      id: string;
       raison_sociale: string;
     } | null;
   } | null;
@@ -96,15 +106,15 @@ export interface MarcheValide {
 }
 
 export const VALIDATION_STEPS = [
-  { order: 1, role: "CHEF_SERVICE", label: "Chef de Service" },
-  { order: 2, role: "SOUS_DIRECTEUR", label: "Sous-Directeur" },
-  { order: 3, role: "DIRECTEUR", label: "Directeur" },
+  { order: 1, role: 'CHEF_SERVICE', label: 'Chef de Service' },
+  { order: 2, role: 'SOUS_DIRECTEUR', label: 'Sous-Directeur' },
+  { order: 3, role: 'DIRECTEUR', label: 'Directeur' },
 ];
 
 export const URGENCE_OPTIONS = [
-  { value: "normal", label: "Normal" },
-  { value: "urgent", label: "Urgent" },
-  { value: "tres_urgent", label: "Très urgent" },
+  { value: 'normal', label: 'Normal' },
+  { value: 'urgent', label: 'Urgent' },
+  { value: 'tres_urgent', label: 'Très urgent' },
 ];
 
 export function useExpressionsBesoin() {
@@ -112,12 +122,17 @@ export function useExpressionsBesoin() {
   const { exercice } = useExercice();
 
   // Fetch all expressions de besoin
-  const { data: expressions = [], isLoading, error } = useQuery({
-    queryKey: ["expressions-besoin", exercice],
+  const {
+    data: expressions = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['expressions-besoin', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("expressions_besoin")
-        .select(`
+        .from('expressions_besoin')
+        .select(
+          `
           *,
           direction:directions(id, code, label, sigle),
           marche:marches!expressions_besoin_marche_id_fkey(
@@ -134,61 +149,66 @@ export function useExpressionsBesoin() {
             id, expression_besoin_id, step_order, role, status, validated_by, validated_at, comments,
             validator:profiles!expression_besoin_validations_validated_by_fkey(id, full_name)
           )
-        `)
-        .eq("exercice", exercice)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ExpressionBesoin[];
+      return data as unknown as ExpressionBesoin[];
     },
   });
 
   // Fetch imputations validées disponibles pour créer une EB
   const { data: imputationsValidees = [] } = useQuery({
-    queryKey: ["imputations-validees-pour-eb", exercice],
+    queryKey: ['imputations-validees-pour-eb', exercice],
     queryFn: async () => {
       // Récupérer les imputations validées qui n'ont pas encore d'EB
       const { data: imputations, error } = await supabase
-        .from("imputations")
-        .select(`
+        .from('imputations')
+        .select(
+          `
           id, reference, objet, montant, code_imputation, 
           direction_id, dossier_id,
           direction:directions(id, label, sigle),
           budget_line:budget_lines(id, code, label)
-        `)
-        .eq("statut", "valide")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("validated_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'valide')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('validated_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Filtrer pour exclure celles qui ont déjà une EB
       const { data: existingEBs } = await supabase
-        .from("expressions_besoin")
-        .select("imputation_id")
-        .not("imputation_id", "is", null);
-      
-      const usedImputationIds = new Set(existingEBs?.map(eb => eb.imputation_id) || []);
-      
-      return imputations?.filter(imp => !usedImputationIds.has(imp.id)) || [];
+        .from('expressions_besoin')
+        .select('imputation_id')
+        .not('imputation_id', 'is', null);
+
+      const usedImputationIds = new Set(existingEBs?.map((eb) => eb.imputation_id) || []);
+
+      return imputations?.filter((imp) => !usedImputationIds.has(imp.id)) || [];
     },
     enabled: !!exercice,
   });
 
   // Fetch notes imputées disponibles pour créer une EB
   const { data: notesImputees = [] } = useQuery({
-    queryKey: ["notes-imputees-disponibles", exercice],
+    queryKey: ['notes-imputees-disponibles', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("notes_dg")
-        .select(`
+        .from('notes_dg')
+        .select(
+          `
           id, numero, objet, montant_estime, budget_line_id, direction_id,
           direction:directions(label, sigle),
           budget_line:budget_lines(id, code, label)
-        `)
-        .eq("statut", "impute")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("imputed_at", { ascending: false });
+        `
+        )
+        .eq('statut', 'impute')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('imputed_at', { ascending: false });
 
       if (error) throw error;
       return data;
@@ -198,18 +218,20 @@ export function useExpressionsBesoin() {
 
   // Fetch marchés attribués (ready for execution) without expressions
   const { data: marchesValides = [] } = useQuery({
-    queryKey: ["marches-valides-pour-expression", exercice],
+    queryKey: ['marches-valides-pour-expression', exercice],
     queryFn: async () => {
       // Get marchés with statuses that allow expressions de besoin
       // Statuts valides: attribue, valide, validé, en_cours, en_execution
       const { data: marches, error } = await supabase
-        .from("marches")
-        .select(`
+        .from('marches')
+        .select(
+          `
           id, numero, objet, montant, mode_passation,
           prestataire:prestataires(id, raison_sociale)
-        `)
-        .in("statut", ["attribue", "valide", "validé", "en_cours", "en_execution"])
-        .order("created_at", { ascending: false });
+        `
+        )
+        .in('statut', ['attribue', 'valide', 'validé', 'en_cours', 'en_execution'])
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return marches as MarcheValide[];
@@ -232,25 +254,25 @@ export function useExpressionsBesoin() {
       intitule_lot?: string | null;
     }) => {
       // Generate atomic sequence number
-      const { data: seqData, error: seqError } = await supabase.rpc("get_next_sequence", {
-        p_doc_type: "EB",
+      const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
+        p_doc_type: 'EB',
         p_exercice: exercice || new Date().getFullYear(),
         p_direction_code: null,
-        p_scope: "global",
+        p_scope: 'global',
       });
 
       if (seqError) throw seqError;
-      if (!seqData || seqData.length === 0) throw new Error("Échec génération numéro");
+      if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
 
       const numero = seqData[0].full_code;
 
       const { data: result, error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .insert({
           ...data,
           numero,
           exercice,
-          statut: "brouillon",
+          statut: 'brouillon',
         })
         .select()
         .single();
@@ -259,11 +281,11 @@ export function useExpressionsBesoin() {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin créée");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin créée');
     },
     onError: (error) => {
-      toast.error("Erreur lors de la création: " + error.message);
+      toast.error('Erreur lors de la création: ' + error.message);
     },
   });
 
@@ -271,18 +293,18 @@ export function useExpressionsBesoin() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: string } & Partial<ExpressionBesoin>) => {
       const { error } = await supabase
-        .from("expressions_besoin")
-        .update(data)
-        .eq("id", id);
+        .from('expressions_besoin')
+        .update(data as Record<string, unknown>)
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin mise à jour");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin mise à jour');
     },
     onError: (error) => {
-      toast.error("Erreur lors de la mise à jour: " + error.message);
+      toast.error('Erreur lors de la mise à jour: ' + error.message);
     },
   });
 
@@ -290,21 +312,21 @@ export function useExpressionsBesoin() {
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .update({
-          statut: "soumis",
+          statut: 'soumis',
           submitted_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin soumise");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin soumise');
     },
     onError: (error) => {
-      toast.error("Erreur lors de la soumission: " + error.message);
+      toast.error('Erreur lors de la soumission: ' + error.message);
     },
   });
 
@@ -313,9 +335,9 @@ export function useExpressionsBesoin() {
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
       // Récupérer l'expression actuelle
       const { data: expression, error: fetchError } = await supabase
-        .from("expressions_besoin")
-        .select("current_validation_step")
-        .eq("id", id)
+        .from('expressions_besoin')
+        .select('current_validation_step')
+        .eq('id', id)
         .single();
 
       if (fetchError) throw fetchError;
@@ -325,17 +347,17 @@ export function useExpressionsBesoin() {
       const isLastStep = nextStep > VALIDATION_STEPS.length;
 
       // Enregistrer la validation de l'étape actuelle
-      await supabase.from("expression_besoin_validations").insert({
+      await supabase.from('expression_besoin_validations').insert({
         expression_besoin_id: id,
         step_order: currentStep,
-        role: VALIDATION_STEPS.find(s => s.order === currentStep)?.role || "UNKNOWN",
-        status: "approved",
+        role: VALIDATION_STEPS.find((s) => s.order === currentStep)?.role || 'UNKNOWN',
+        status: 'approved',
         validated_at: new Date().toISOString(),
         comments: comments || null,
       });
 
       // Mettre à jour l'expression
-      const updateData: any = {
+      const updateData: Record<string, string | number | null> = {
         current_validation_step: isLastStep ? currentStep : nextStep,
         rejection_reason: null,
         date_differe: null,
@@ -343,29 +365,26 @@ export function useExpressionsBesoin() {
       };
 
       if (isLastStep) {
-        updateData.statut = "validé";
+        updateData.statut = 'valide';
         updateData.validated_at = new Date().toISOString();
       }
 
-      const { error } = await supabase
-        .from("expressions_besoin")
-        .update(updateData)
-        .eq("id", id);
+      const { error } = await supabase.from('expressions_besoin').update(updateData).eq('id', id);
 
       if (error) throw error;
 
       return { isLastStep };
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
       if (result.isLastStep) {
-        toast.success("Expression de besoin validée définitivement !");
+        toast.success('Expression de besoin validée définitivement !');
       } else {
         toast.success("Validation effectuée, transmis à l'étape suivante");
       }
     },
     onError: (error) => {
-      toast.error("Erreur lors de la validation: " + error.message);
+      toast.error('Erreur lors de la validation: ' + error.message);
     },
   });
 
@@ -373,21 +392,21 @@ export function useExpressionsBesoin() {
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .update({
-          statut: "rejeté",
+          statut: 'rejete',
           rejection_reason: reason,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin rejetée");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin rejetée');
     },
     onError: (error) => {
-      toast.error("Erreur lors du rejet: " + error.message);
+      toast.error('Erreur lors du rejet: ' + error.message);
     },
   });
 
@@ -403,23 +422,23 @@ export function useExpressionsBesoin() {
       dateReprise?: string;
     }) => {
       const { error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .update({
-          statut: "différé",
+          statut: 'differe',
           motif_differe: motif,
           date_differe: new Date().toISOString(),
           deadline_correction: dateReprise || null,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin différée");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin différée');
     },
     onError: (error) => {
-      toast.error("Erreur lors du report: " + error.message);
+      toast.error('Erreur lors du report: ' + error.message);
     },
   });
 
@@ -427,42 +446,39 @@ export function useExpressionsBesoin() {
   const resumeMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .update({
-          statut: "soumis",
+          statut: 'soumis',
           date_differe: null,
           motif_differe: null,
           deadline_correction: null,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin reprise");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin reprise');
     },
     onError: (error) => {
-      toast.error("Erreur lors de la reprise: " + error.message);
+      toast.error('Erreur lors de la reprise: ' + error.message);
     },
   });
 
   // Delete expression
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("expressions_besoin")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from('expressions_besoin').delete().eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin supprimée");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin supprimée');
     },
     onError: (error) => {
-      toast.error("Erreur lors de la suppression: " + error.message);
+      toast.error('Erreur lors de la suppression: ' + error.message);
     },
   });
 
@@ -470,30 +486,30 @@ export function useExpressionsBesoin() {
   const satisfyMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("expressions_besoin")
+        .from('expressions_besoin')
         .update({
-          statut: "satisfaite",
+          statut: 'satisfaite',
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expressions-besoin"] });
-      toast.success("Expression de besoin marquée comme satisfaite");
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Expression de besoin marquée comme satisfaite');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Filter helpers
-  const expressionsAValider = expressions.filter((e) => e.statut === "soumis");
-  const expressionsValidees = expressions.filter((e) => e.statut === "validé");
-  const expressionsRejetees = expressions.filter((e) => e.statut === "rejeté");
-  const expressionsDifferees = expressions.filter((e) => e.statut === "différé");
-  const expressionsSatisfaites = expressions.filter((e) => e.statut === "satisfaite");
-  const expressionsBrouillon = expressions.filter((e) => e.statut === "brouillon");
+  const expressionsAValider = expressions.filter((e) => e.statut === 'soumis');
+  const expressionsValidees = expressions.filter((e) => e.statut === 'valide');
+  const expressionsRejetees = expressions.filter((e) => e.statut === 'rejete');
+  const expressionsDifferees = expressions.filter((e) => e.statut === 'differe');
+  const expressionsSatisfaites = expressions.filter((e) => e.statut === 'satisfaite');
+  const expressionsBrouillon = expressions.filter((e) => e.statut === 'brouillon');
 
   return {
     expressions,

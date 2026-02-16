@@ -6,15 +6,15 @@
  * - Exporter filtré: Exporte uniquement les données filtrées (statut, dates)
  */
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -22,18 +22,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Download, FileSpreadsheet, Filter, Loader2 } from "lucide-react";
-import { useExportBudgetChain, ExportStep, ExportFilters } from "@/hooks/useExportBudgetChain";
+} from '@/components/ui/select';
+import { Download, FileSpreadsheet, Filter, Loader2 } from 'lucide-react';
+import { useExportBudgetChain, ExportStep, ExportFilters } from '@/hooks/useExportBudgetChain';
 
 interface BudgetChainExportButtonProps {
   step: ExportStep;
@@ -44,57 +44,57 @@ interface BudgetChainExportButtonProps {
   /** Afficher le bouton de façon compacte (icône seulement) */
   compact?: boolean;
   /** Variante du bouton */
-  variant?: "default" | "outline" | "ghost";
+  variant?: 'default' | 'outline' | 'ghost';
   /** Taille du bouton */
-  size?: "default" | "sm" | "lg" | "icon";
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
 const STEP_LABELS: Record<ExportStep, string> = {
-  expression: "Expressions de Besoin",
-  engagement: "Engagements",
-  liquidation: "Liquidations",
-  ordonnancement: "Ordonnancements",
-  reglement: "Règlements",
+  expression: 'Expressions de Besoin',
+  engagement: 'Engagements',
+  liquidation: 'Liquidations',
+  ordonnancement: 'Ordonnancements',
+  reglement: 'Règlements',
 };
 
 const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string }[]> = {
   expression: [
-    { value: "", label: "Tous les statuts" },
-    { value: "brouillon", label: "Brouillon" },
-    { value: "soumis", label: "Soumis" },
-    { value: "validé", label: "Validé" },
-    { value: "rejeté", label: "Rejeté" },
-    { value: "différé", label: "Différé" },
-    { value: "satisfaite", label: "Satisfaite" },
+    { value: '', label: 'Tous les statuts' },
+    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
+    { value: 'valide', label: 'Validé' },
+    { value: 'rejete', label: 'Rejeté' },
+    { value: 'differe', label: 'Différé' },
+    { value: 'satisfaite', label: 'Satisfaite' },
   ],
   engagement: [
-    { value: "", label: "Tous les statuts" },
-    { value: "brouillon", label: "Brouillon" },
-    { value: "soumis", label: "Soumis" },
-    { value: "valide", label: "Validé" },
-    { value: "rejete", label: "Rejeté" },
-    { value: "differe", label: "Différé" },
+    { value: '', label: 'Tous les statuts' },
+    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
+    { value: 'valide', label: 'Validé' },
+    { value: 'rejete', label: 'Rejeté' },
+    { value: 'differe', label: 'Différé' },
   ],
   liquidation: [
-    { value: "", label: "Tous les statuts" },
-    { value: "brouillon", label: "Brouillon" },
-    { value: "soumis", label: "Soumis" },
-    { value: "valide", label: "Validé" },
-    { value: "rejete", label: "Rejeté" },
-    { value: "differe", label: "Différé" },
+    { value: '', label: 'Tous les statuts' },
+    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
+    { value: 'valide', label: 'Validé' },
+    { value: 'rejete', label: 'Rejeté' },
+    { value: 'differe', label: 'Différé' },
   ],
   ordonnancement: [
-    { value: "", label: "Tous les statuts" },
-    { value: "brouillon", label: "Brouillon" },
-    { value: "soumis", label: "Soumis" },
-    { value: "valide", label: "Validé" },
-    { value: "rejete", label: "Rejeté" },
-    { value: "differe", label: "Différé" },
+    { value: '', label: 'Tous les statuts' },
+    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
+    { value: 'valide', label: 'Validé' },
+    { value: 'rejete', label: 'Rejeté' },
+    { value: 'differe', label: 'Différé' },
   ],
   reglement: [
-    { value: "", label: "Tous les statuts" },
-    { value: "valide", label: "Validé" },
-    { value: "rejete", label: "Rejeté" },
+    { value: '', label: 'Tous les statuts' },
+    { value: 'valide', label: 'Validé' },
+    { value: 'rejete', label: 'Rejeté' },
   ],
 };
 
@@ -103,8 +103,8 @@ export function BudgetChainExportButton({
   defaultFilters = {},
   statutOptions,
   compact = false,
-  variant = "outline",
-  size = "sm",
+  variant = 'outline',
+  size = 'sm',
 }: BudgetChainExportButtonProps) {
   const { isExporting, exportStep } = useExportBudgetChain();
   const [showFilterDialog, setShowFilterDialog] = useState(false);
@@ -143,7 +143,7 @@ export function BudgetChainExportButton({
             ) : (
               <Download className="h-4 w-4" />
             )}
-            {!compact && "Exporter Excel"}
+            {!compact && 'Exporter Excel'}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
@@ -177,8 +177,8 @@ export function BudgetChainExportButton({
               </Label>
               <div className="col-span-3">
                 <Select
-                  value={filters.statut || ""}
-                  onValueChange={(value) => handleFilterChange("statut", value)}
+                  value={filters.statut || ''}
+                  onValueChange={(value) => handleFilterChange('statut', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un statut" />
@@ -203,8 +203,8 @@ export function BudgetChainExportButton({
                 <Input
                   id="dateDebut"
                   type="date"
-                  value={filters.dateDebut || ""}
-                  onChange={(e) => handleFilterChange("dateDebut", e.target.value)}
+                  value={filters.dateDebut || ''}
+                  onChange={(e) => handleFilterChange('dateDebut', e.target.value)}
                 />
               </div>
             </div>
@@ -218,8 +218,8 @@ export function BudgetChainExportButton({
                 <Input
                   id="dateFin"
                   type="date"
-                  value={filters.dateFin || ""}
-                  onChange={(e) => handleFilterChange("dateFin", e.target.value)}
+                  value={filters.dateFin || ''}
+                  onChange={(e) => handleFilterChange('dateFin', e.target.value)}
                 />
               </div>
             </div>

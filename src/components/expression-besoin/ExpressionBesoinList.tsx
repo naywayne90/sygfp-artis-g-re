@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -6,21 +6,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ExpressionBesoin, useExpressionsBesoin } from "@/hooks/useExpressionsBesoin";
-import { ExpressionBesoinDetails } from "./ExpressionBesoinDetails";
-import { ExpressionBesoinRejectDialog } from "./ExpressionBesoinRejectDialog";
-import { ExpressionBesoinDeferDialog } from "./ExpressionBesoinDeferDialog";
-import { ExpressionBesoinValidateDialog } from "./ExpressionBesoinValidateDialog";
+} from '@/components/ui/dropdown-menu';
+import { ExpressionBesoin, useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import { ExpressionBesoinDetails } from './ExpressionBesoinDetails';
+import { ExpressionBesoinRejectDialog } from './ExpressionBesoinRejectDialog';
+import { ExpressionBesoinDeferDialog } from './ExpressionBesoinDeferDialog';
+import { ExpressionBesoinValidateDialog } from './ExpressionBesoinValidateDialog';
 import {
   MoreHorizontal,
   Eye,
@@ -32,32 +32,39 @@ import {
   FileText,
   Trash2,
   CreditCard,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useNavigate } from "react-router-dom";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 interface ExpressionBesoinListProps {
   expressions: ExpressionBesoin[];
   showActions?: boolean;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  brouillon: { label: "Brouillon", variant: "secondary" },
-  soumis: { label: "À valider", variant: "outline" },
-  validé: { label: "Validé", variant: "default" },
-  rejeté: { label: "Rejeté", variant: "destructive" },
-  différé: { label: "Différé", variant: "outline" },
-  satisfaite: { label: "Satisfaite", variant: "default" },
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
+  brouillon: { label: 'Brouillon', variant: 'secondary' },
+  soumis: { label: 'À valider', variant: 'outline' },
+  valide: { label: 'Validé', variant: 'default' },
+  rejete: { label: 'Rejeté', variant: 'destructive' },
+  differe: { label: 'Différé', variant: 'outline' },
+  satisfaite: { label: 'Satisfaite', variant: 'default' },
 };
 
 const URGENCE_CONFIG: Record<string, { label: string; className: string }> = {
-  normal: { label: "Normal", className: "bg-muted text-muted-foreground" },
-  urgent: { label: "Urgent", className: "bg-warning/20 text-warning" },
-  tres_urgent: { label: "Très urgent", className: "bg-destructive/20 text-destructive" },
+  normal: { label: 'Normal', className: 'bg-muted text-muted-foreground' },
+  normale: { label: 'Normal', className: 'bg-muted text-muted-foreground' },
+  urgent: { label: 'Urgent', className: 'bg-warning/20 text-warning' },
+  tres_urgent: { label: 'Très urgent', className: 'bg-destructive/20 text-destructive' },
 };
 
-export function ExpressionBesoinList({ expressions, showActions = true }: ExpressionBesoinListProps) {
+export function ExpressionBesoinList({
+  expressions,
+  showActions = true,
+}: ExpressionBesoinListProps) {
   const navigate = useNavigate();
   const {
     submitExpression,
@@ -102,7 +109,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
   };
 
   const handleDelete = async (expression: ExpressionBesoin) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette expression de besoin ?")) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette expression de besoin ?')) {
       await deleteExpression(expression.id);
     }
   };
@@ -138,27 +145,24 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
         </TableHeader>
         <TableBody>
           {expressions.map((expression) => {
-            const status = STATUS_CONFIG[expression.statut || "brouillon"];
-            const urgence = URGENCE_CONFIG[expression.urgence || "normal"];
+            const status =
+              STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
+            const urgence = URGENCE_CONFIG[expression.urgence || 'normal'] || URGENCE_CONFIG.normal;
 
             return (
               <TableRow key={expression.id}>
-                <TableCell className="font-medium">
-                  {expression.numero || "En attente"}
-                </TableCell>
-                <TableCell className="max-w-[200px] truncate">
-                  {expression.objet}
-                </TableCell>
+                <TableCell className="font-medium">{expression.numero || 'En attente'}</TableCell>
+                <TableCell className="max-w-[200px] truncate">{expression.objet}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {expression.marche?.numero || "-"}
+                  {expression.marche?.numero || '-'}
                 </TableCell>
                 <TableCell>
-                  {expression.direction?.sigle || expression.direction?.code || "-"}
+                  {expression.direction?.sigle || expression.direction?.code || '-'}
                 </TableCell>
                 <TableCell>
                   {expression.montant_estime
-                    ? new Intl.NumberFormat("fr-FR").format(expression.montant_estime) + " FCFA"
-                    : "-"}
+                    ? new Intl.NumberFormat('fr-FR').format(expression.montant_estime) + ' FCFA'
+                    : '-'}
                 </TableCell>
                 <TableCell>
                   <Badge className={urgence.className} variant="outline">
@@ -169,7 +173,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
                   <Badge variant={status.variant}>{status.label}</Badge>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                  {format(new Date(expression.created_at), "dd/MM/yyyy", { locale: fr })}
+                  {format(new Date(expression.created_at), 'dd/MM/yyyy', { locale: fr })}
                 </TableCell>
                 {showActions && (
                   <TableCell>
@@ -190,7 +194,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
                           Voir détails
                         </DropdownMenuItem>
 
-                        {expression.statut === "brouillon" && (
+                        {expression.statut === 'brouillon' && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -210,7 +214,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
                           </>
                         )}
 
-                        {expression.statut === "soumis" && (
+                        {expression.statut === 'soumis' && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -243,7 +247,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
                           </>
                         )}
 
-                        {expression.statut === "différé" && (
+                        {expression.statut === 'differe' && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleResume(expression)}>
@@ -253,7 +257,7 @@ export function ExpressionBesoinList({ expressions, showActions = true }: Expres
                           </>
                         )}
 
-                        {expression.statut === "validé" && (
+                        {expression.statut === 'valide' && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

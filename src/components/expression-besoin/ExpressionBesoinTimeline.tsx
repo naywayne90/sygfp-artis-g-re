@@ -7,14 +7,9 @@
  * Avec dates, acteurs et motifs si applicable
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileEdit,
   Send,
@@ -25,17 +20,17 @@ import {
   Calendar,
   ArrowRight,
   Users,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { ExpressionBesoin, VALIDATION_STEPS } from "@/hooks/useExpressionsBesoin";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { ExpressionBesoin, VALIDATION_STEPS } from '@/hooks/useExpressionsBesoin';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: "completed" | "current" | "pending" | "rejected" | "deferred";
+  status: 'completed' | 'current' | 'pending' | 'rejected' | 'deferred';
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
@@ -58,35 +53,33 @@ export function ExpressionBesoinTimeline({
 
     // Step 1: Creation (always completed)
     steps.push({
-      key: "creation",
-      label: "Création",
+      key: 'creation',
+      label: 'Création',
       icon: FileEdit,
-      status: "completed",
+      status: 'completed',
       date: expression.created_at,
       actor: expression.creator?.full_name,
     });
 
     // Step 2: Submission
-    const hasBeenSubmitted = expression.statut !== "brouillon";
+    const hasBeenSubmitted = expression.statut !== 'brouillon';
     steps.push({
-      key: "soumission",
-      label: "Soumission",
+      key: 'soumission',
+      label: 'Soumission',
       icon: Send,
-      status: hasBeenSubmitted
-        ? "completed"
-        : "current",
+      status: hasBeenSubmitted ? 'completed' : 'current',
       date: expression.submitted_at,
     });
 
     // Step 3: Multi-step validation (only if submitted)
-    if (hasBeenSubmitted && expression.statut !== "rejeté" && expression.statut !== "différé") {
+    if (hasBeenSubmitted && expression.statut !== 'rejete' && expression.statut !== 'differe') {
       const currentStep = expression.current_validation_step || 1;
 
       // Add each validation step
       VALIDATION_STEPS.forEach((step) => {
-        const validation = expression.validations?.find(v => v.step_order === step.order);
-        const isCompleted = validation?.status === "approved";
-        const isCurrent = step.order === currentStep && expression.statut === "soumis";
+        const validation = expression.validations?.find((v) => v.step_order === step.order);
+        const isCompleted = validation?.status === 'approved';
+        const isCurrent = step.order === currentStep && expression.statut === 'soumis';
         const isPending = step.order > currentStep && !isCompleted;
 
         steps.push({
@@ -94,12 +87,12 @@ export function ExpressionBesoinTimeline({
           label: step.label,
           icon: Users,
           status: isCompleted
-            ? "completed"
+            ? 'completed'
             : isCurrent
-            ? "current"
-            : isPending
-            ? "pending"
-            : "pending",
+              ? 'current'
+              : isPending
+                ? 'pending'
+                : 'pending',
           date: validation?.validated_at,
           actor: validation?.validator?.full_name,
           comment: validation?.comments,
@@ -108,38 +101,38 @@ export function ExpressionBesoinTimeline({
     }
 
     // Final status
-    if (expression.statut === "validé") {
+    if (expression.statut === 'valide') {
       steps.push({
-        key: "validation_finale",
-        label: "Validation finale",
+        key: 'validation_finale',
+        label: 'Validation finale',
         icon: CheckCircle2,
-        status: "completed",
+        status: 'completed',
         date: expression.validated_at,
         actor: expression.validator?.full_name,
       });
-    } else if (expression.statut === "rejeté") {
+    } else if (expression.statut === 'rejete') {
       steps.push({
-        key: "rejet",
-        label: "Rejet",
+        key: 'rejet',
+        label: 'Rejet',
         icon: XCircle,
-        status: "rejected",
+        status: 'rejected',
         comment: expression.rejection_reason,
       });
-    } else if (expression.statut === "différé") {
+    } else if (expression.statut === 'differe') {
       steps.push({
-        key: "differe",
-        label: "Différé",
+        key: 'differe',
+        label: 'Différé',
         icon: Clock,
-        status: "deferred",
+        status: 'deferred',
         date: expression.date_differe,
         comment: expression.motif_differe,
       });
-    } else if (expression.statut === "satisfaite") {
+    } else if (expression.statut === 'satisfaite') {
       steps.push({
-        key: "satisfaite",
-        label: "Satisfaite",
+        key: 'satisfaite',
+        label: 'Satisfaite',
         icon: CheckCircle2,
-        status: "completed",
+        status: 'completed',
       });
     }
 
@@ -148,38 +141,38 @@ export function ExpressionBesoinTimeline({
 
   const steps = buildTimelineSteps();
 
-  const getStatusColor = (status: TimelineStep["status"]) => {
+  const getStatusColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500 text-white";
-      case "current":
-        return "bg-primary text-white ring-4 ring-primary/30";
-      case "rejected":
-        return "bg-red-500 text-white";
-      case "deferred":
-        return "bg-orange-500 text-white";
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'current':
+        return 'bg-primary text-white ring-4 ring-primary/30';
+      case 'rejected':
+        return 'bg-red-500 text-white';
+      case 'deferred':
+        return 'bg-orange-500 text-white';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLineColor = (status: TimelineStep["status"]) => {
+  const getLineColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      case "deferred":
-        return "bg-orange-500";
+      case 'completed':
+        return 'bg-green-500';
+      case 'rejected':
+        return 'bg-red-500';
+      case 'deferred':
+        return 'bg-orange-500';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn("flex items-center gap-2 overflow-x-auto", className)}>
+        <div className={cn('flex items-center gap-2 overflow-x-auto', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -188,7 +181,7 @@ export function ExpressionBesoinTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
                         getStatusColor(step.status)
                       )}
                     >
@@ -200,20 +193,16 @@ export function ExpressionBesoinTimeline({
                       <p className="font-medium">{step.label}</p>
                       {step.date && (
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(step.date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                          {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.actor && (
-                        <p className="text-xs">Par: {step.actor}</p>
-                      )}
-                      {step.comment && (
-                        <p className="text-xs max-w-xs">{step.comment}</p>
-                      )}
+                      {step.actor && <p className="text-xs">Par: {step.actor}</p>}
+                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn("h-0.5 w-4 mx-1 shrink-0", getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-4 mx-1 shrink-0', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -241,7 +230,7 @@ export function ExpressionBesoinTimeline({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full -ml-px",
+                      'absolute left-4 top-8 w-0.5 h-full -ml-px',
                       getLineColor(step.status)
                     )}
                   />
@@ -250,7 +239,7 @@ export function ExpressionBesoinTimeline({
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10",
+                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10',
                     getStatusColor(step.status)
                   )}
                 >
@@ -264,19 +253,19 @@ export function ExpressionBesoinTimeline({
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-xs",
-                        step.status === "completed" && "border-green-500 text-green-600",
-                        step.status === "current" && "border-primary text-primary",
-                        step.status === "rejected" && "border-red-500 text-red-600",
-                        step.status === "deferred" && "border-orange-500 text-orange-600",
-                        step.status === "pending" && "border-muted-foreground text-muted-foreground"
+                        'text-xs',
+                        step.status === 'completed' && 'border-green-500 text-green-600',
+                        step.status === 'current' && 'border-primary text-primary',
+                        step.status === 'rejected' && 'border-red-500 text-red-600',
+                        step.status === 'deferred' && 'border-orange-500 text-orange-600',
+                        step.status === 'pending' && 'border-muted-foreground text-muted-foreground'
                       )}
                     >
-                      {step.status === "completed" && "Terminé"}
-                      {step.status === "current" && "En cours"}
-                      {step.status === "rejected" && "Rejeté"}
-                      {step.status === "deferred" && "Différé"}
-                      {step.status === "pending" && "En attente"}
+                      {step.status === 'completed' && 'Terminé'}
+                      {step.status === 'current' && 'En cours'}
+                      {step.status === 'rejected' && 'Rejeté'}
+                      {step.status === 'deferred' && 'Différé'}
+                      {step.status === 'pending' && 'En attente'}
                     </Badge>
                   </div>
 
@@ -285,7 +274,7 @@ export function ExpressionBesoinTimeline({
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(step.date), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>
