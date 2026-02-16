@@ -22,33 +22,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
   useExpressionsBesoin,
   URGENCE_OPTIONS,
   ExpressionBesoinLigne,
 } from '@/hooks/useExpressionsBesoin';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { AttachmentService } from '@/services/attachmentService';
-import {
-  CreditCard,
-  Calendar,
-  Loader2,
-  Search,
-  Plus,
-  Trash2,
-  AlertTriangle,
-  Paperclip,
-  X,
-} from 'lucide-react';
+import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
+import { CreditCard, Calendar, Loader2, Search, Plus, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface ImputationValidee {
@@ -63,15 +44,6 @@ export interface ImputationValidee {
   budget_line?: { id: string; code: string; label: string } | null;
 }
 
-interface ArticleLigne {
-  id: string;
-  designation: string;
-  quantite: number;
-  unite: string;
-  prix_unitaire: number;
-  prix_total: number;
-}
-
 interface SelectedFile {
   file: File;
   typePiece: string;
@@ -84,17 +56,6 @@ interface ExpressionBesoinFromImputationFormProps {
   imputationsValidees?: ImputationValidee[];
   onSuccess?: () => void;
 }
-
-const UNITES = [
-  { value: 'piece', label: 'Pièce(s)' },
-  { value: 'kg', label: 'Kilogramme(s)' },
-  { value: 'm', label: 'Mètre(s)' },
-  { value: 'm2', label: 'm²' },
-  { value: 'm3', label: 'm³' },
-  { value: 'litre', label: 'Litre(s)' },
-  { value: 'lot', label: 'Lot(s)' },
-  { value: 'forfait', label: 'Forfait' },
-];
 
 const TYPES_PIECES = [
   { value: 'tdr', label: 'Termes de référence (TDR)' },
@@ -142,6 +103,8 @@ export function ExpressionBesoinFromImputationForm({
       unite: 'piece',
       prix_unitaire: 0,
       prix_total: 0,
+      categorie: 'autre',
+      ordre: 0,
     },
   ]);
 
@@ -175,49 +138,18 @@ export function ExpressionBesoinFromImputationForm({
     }));
   };
 
-  const handleAddArticle = () => {
-    setArticles((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        designation: '',
-        quantite: 1,
-        unite: 'piece',
-        prix_unitaire: 0,
-        prix_total: 0,
-      },
-    ]);
-  };
-
-  const handleRemoveArticle = (id: string) => {
-    if (articles.length > 1) {
-      setArticles((prev) => prev.filter((a) => a.id !== id));
-    }
-  };
-
   // Calcul du total des articles
   const totalArticles = articles.reduce((sum, a) => sum + a.prix_total, 0);
   const montantImpute = selectedImputation?.montant || 0;
   const hasValidArticles = articles.some((a) => a.designation.trim() !== '');
   const budgetDepasse = totalArticles > montantImpute && montantImpute > 0 && hasValidArticles;
 
-  const handleArticleChange = (id: string, field: keyof ArticleLigne, value: string | number) => {
-    setArticles((prev) => {
-      const updated = prev.map((a) => {
-        if (a.id !== id) return a;
-        const upd = { ...a, [field]: value };
-        if (field === 'quantite' || field === 'prix_unitaire') {
-          upd.prix_total = upd.quantite * upd.prix_unitaire;
-        }
-        return upd;
-      });
-      // Auto-calcul du montant estimé
-      const newTotal = updated.reduce((sum, a) => sum + a.prix_total, 0);
-      if (newTotal > 0) {
-        setFormData((f) => ({ ...f, montant_estime: newTotal.toString() }));
-      }
-      return updated;
-    });
+  const handleArticlesChange = (updated: ArticleLigne[]) => {
+    setArticles(updated);
+    const newTotal = updated.reduce((sum, a) => sum + a.prix_total, 0);
+    if (newTotal > 0) {
+      setFormData((f) => ({ ...f, montant_estime: newTotal.toString() }));
+    }
   };
 
   // Gestion des pièces jointes
@@ -271,12 +203,14 @@ export function ExpressionBesoinFromImputationForm({
     // Validation: au moins un article avec désignation
     const listeArticles: ExpressionBesoinLigne[] = articles
       .filter((a) => a.designation.trim() !== '')
-      .map(({ designation, quantite, unite, prix_unitaire, prix_total }) => ({
+      .map(({ designation, quantite, unite, prix_unitaire, prix_total, categorie, ordre }) => ({
         designation,
         quantite,
         unite,
         prix_unitaire,
         prix_total,
+        categorie,
+        ordre,
       }));
 
     if (listeArticles.length === 0) {
@@ -364,6 +298,8 @@ export function ExpressionBesoinFromImputationForm({
         unite: 'piece',
         prix_unitaire: 0,
         prix_total: 0,
+        categorie: 'autre',
+        ordre: 0,
       },
     ]);
     setSelectedFiles([]);
@@ -541,137 +477,18 @@ export function ExpressionBesoinFromImputationForm({
                   />
                 </div>
 
-                {/* Liste des articles avec N° et Total */}
+                {/* Liste des articles avec drag & drop et catégories */}
                 <Card>
                   <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-base">Liste des articles *</CardTitle>
-                      <Button type="button" variant="outline" size="sm" onClick={handleAddArticle}>
-                        <Plus className="h-4 w-4 mr-1" />
-                        Ajouter
-                      </Button>
-                    </div>
+                    <CardTitle className="text-base">Liste des articles *</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[5%]">N°</TableHead>
-                          <TableHead className="w-[28%]">Désignation</TableHead>
-                          <TableHead className="w-[10%]">Quantité</TableHead>
-                          <TableHead className="w-[15%]">Unité</TableHead>
-                          <TableHead className="w-[15%]">Prix unit.</TableHead>
-                          <TableHead className="w-[17%]">Prix total</TableHead>
-                          <TableHead className="w-[5%]" />
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {articles.map((article, index) => (
-                          <TableRow key={article.id}>
-                            <TableCell className="text-center font-mono text-muted-foreground">
-                              {index + 1}
-                            </TableCell>
-                            <TableCell>
-                              <Input
-                                value={article.designation}
-                                onChange={(e) =>
-                                  handleArticleChange(article.id, 'designation', e.target.value)
-                                }
-                                placeholder="Nom de l'article..."
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={article.quantite}
-                                onChange={(e) =>
-                                  handleArticleChange(
-                                    article.id,
-                                    'quantite',
-                                    parseInt(e.target.value) || 1
-                                  )
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Select
-                                value={article.unite}
-                                onValueChange={(value) =>
-                                  handleArticleChange(article.id, 'unite', value)
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {UNITES.map((u) => (
-                                    <SelectItem key={u.value} value={u.value}>
-                                      {u.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              <Input
-                                type="number"
-                                min="0"
-                                value={article.prix_unitaire || ''}
-                                onChange={(e) =>
-                                  handleArticleChange(
-                                    article.id,
-                                    'prix_unitaire',
-                                    parseFloat(e.target.value) || 0
-                                  )
-                                }
-                                placeholder="0"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-sm font-medium">
-                                {new Intl.NumberFormat('fr-FR').format(article.prix_total)}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemoveArticle(article.id)}
-                                disabled={articles.length === 1}
-                              >
-                                <Trash2 className="h-4 w-4 text-muted-foreground" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableFooter>
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-right font-bold">
-                            TOTAL GÉNÉRAL
-                          </TableCell>
-                          <TableCell className="font-bold text-base">
-                            {new Intl.NumberFormat('fr-FR').format(totalArticles)} FCFA
-                          </TableCell>
-                          <TableCell />
-                        </TableRow>
-                      </TableFooter>
-                    </Table>
-
-                    {/* Alerte dépassement budget */}
-                    {budgetDepasse && (
-                      <Alert variant="destructive" className="mt-3">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription>
-                          Le total des articles (
-                          {new Intl.NumberFormat('fr-FR').format(totalArticles)} FCFA) dépasse le
-                          montant imputé ({new Intl.NumberFormat('fr-FR').format(montantImpute)}{' '}
-                          FCFA)
-                        </AlertDescription>
-                      </Alert>
-                    )}
+                    <ArticlesTableEditor
+                      articles={articles}
+                      onChange={handleArticlesChange}
+                      montantImpute={montantImpute}
+                      showBudgetComparison={montantImpute > 0}
+                    />
                   </CardContent>
                 </Card>
 

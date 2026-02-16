@@ -1,19 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,14 +18,19 @@ import {
   ExpressionBesoin,
   ExpressionBesoinLigne,
   ExpressionBesoinAttachment,
+  useExpressionsBesoin,
 } from '@/hooks/useExpressionsBesoin';
+import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
 import { ExpressionBesoinTimeline } from './ExpressionBesoinTimeline';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
 import { AttachmentService } from '@/services/attachmentService';
+import { generateArticlesPdf } from '@/services/expressionBesoinArticlesPdfService';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   FileText,
   Calendar,
@@ -58,6 +56,12 @@ import {
   ShieldCheck,
   ArrowRight,
   Wallet,
+  Printer,
+  Pencil,
+  Save,
+  X,
+  ChevronsUpDown,
+  Loader2,
 } from 'lucide-react';
 
 interface ExpressionBesoinDetailsProps {
@@ -70,6 +74,7 @@ interface ExpressionBesoinDetailsProps {
   onReject?: (id: string) => void;
   onDelete?: (id: string) => void;
   onDuplicate?: (expression: ExpressionBesoin) => void;
+  onSaveArticles?: (id: string, articles: ExpressionBesoinLigne[]) => Promise<void>;
 }
 
 const STATUS_CONFIG: Record<
@@ -117,6 +122,7 @@ export function ExpressionBesoinDetails({
   onReject,
   onDelete,
   onDuplicate,
+  onSaveArticles,
 }: ExpressionBesoinDetailsProps) {
   const navigate = useNavigate();
   const status = STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
@@ -135,8 +141,91 @@ export function ExpressionBesoinDetails({
   const budgetRatio = montantImpute > 0 ? Math.min((totalArticles / montantImpute) * 100, 100) : 0;
   const budgetDepasse = totalArticles > montantImpute && montantImpute > 0;
 
+  // Inline editing with ArticlesTableEditor
+  const { updateArticles, isUpdatingArticles } = useExpressionsBesoin();
+  const canEditArticles = expression.statut === 'brouillon' || expression.statut === 'rejete';
+  const [isEditingArticles, setIsEditingArticles] = useState(false);
+  const [editableArticles, setEditableArticles] = useState<ArticleLigne[]>([]);
+
+  // Convert ExpressionBesoinLigne[] to ArticleLigne[] (backward compat)
+  const toEditable = (items: ExpressionBesoinLigne[]): ArticleLigne[] =>
+    items.map((a, i) => ({
+      id: crypto.randomUUID(),
+      designation: a.designation || ((a as Record<string, unknown>).article as string) || '',
+      quantite: a.quantite,
+      unite: a.unite,
+      prix_unitaire: a.prix_unitaire,
+      prix_total: a.prix_total,
+      categorie: a.categorie || 'autre',
+      ordre: a.ordre ?? i,
+    }));
+
+  const handleStartEditArticles = () => {
+    setEditableArticles(toEditable(articles));
+    setIsEditingArticles(true);
+  };
+
+  const handleCancelEditArticles = () => {
+    setIsEditingArticles(false);
+    setEditableArticles([]);
+  };
+
+  const handleSaveArticles = async () => {
+    const cleaned: ExpressionBesoinLigne[] = editableArticles
+      .filter((a) => a.designation.trim() !== '')
+      .map(({ designation, quantite, unite, prix_unitaire, prix_total, categorie, ordre }) => ({
+        designation,
+        quantite,
+        unite,
+        prix_unitaire,
+        prix_total,
+        categorie,
+        ordre,
+      }));
+    if (cleaned.length === 0) {
+      toast.error('Au moins un article avec une désignation est requis');
+      return;
+    }
+    try {
+      if (onSaveArticles) {
+        await onSaveArticles(expression.id, cleaned);
+      } else {
+        await updateArticles({ id: expression.id, articles: cleaned });
+      }
+      setIsEditingArticles(false);
+      setEditableArticles([]);
+    } catch {
+      toast.error('Erreur lors de la sauvegarde des articles');
+    }
+  };
+
+  // Audit log query for article modifications
+  const { data: articleAuditLogs = [] } = useQuery({
+    queryKey: ['audit-logs-articles', expression.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('entity_id', expression.id)
+        .eq('action', 'update_articles')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: open,
+  });
+
+  const handlePrintArticles = async () => {
+    try {
+      await generateArticlesPdf(expression);
+    } catch {
+      toast.error('Erreur lors de la génération du PDF');
+    }
+  };
+
   const formatMontant = (montant: number | null | undefined) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+    montant ? formatCurrency(montant) : '-';
 
   const handleDownloadAttachment = async (attachment: ExpressionBesoinAttachment) => {
     const result = await AttachmentService.getSignedUrl(attachment.file_path);
@@ -173,11 +262,7 @@ export function ExpressionBesoinDetails({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {/* Toujours visible */}
-                  <DropdownMenuItem
-                    onClick={() => {
-                      /* TODO: PDF export */
-                    }}
-                  >
+                  <DropdownMenuItem onClick={handlePrintArticles}>
                     <FileDown className="mr-2 h-4 w-4" />
                     Exporter PDF
                   </DropdownMenuItem>
@@ -611,105 +696,139 @@ export function ExpressionBesoinDetails({
           <TabsContent value="articles" className="mt-4 space-y-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Articles ({articles.length})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Package className="h-4 w-4" />
+                    Articles ({isEditingArticles ? editableArticles.length : articles.length})
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    {!isEditingArticles && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePrintArticles}
+                        title="Imprimer la liste"
+                      >
+                        <Printer className="h-4 w-4 mr-1" />
+                        Imprimer
+                      </Button>
+                    )}
+                    {canEditArticles && !isEditingArticles && (
+                      <Button variant="outline" size="sm" onClick={handleStartEditArticles}>
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Modifier
+                      </Button>
+                    )}
+                    {isEditingArticles && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCancelEditArticles}
+                          disabled={isUpdatingArticles}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Annuler
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveArticles}
+                          disabled={isUpdatingArticles}
+                        >
+                          {isUpdatingArticles ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4 mr-1" />
+                          )}
+                          {isUpdatingArticles ? 'Enregistrement...' : 'Enregistrer'}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                {articles.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Aucun article renseigné
-                  </p>
+                {isEditingArticles ? (
+                  <ArticlesTableEditor
+                    articles={editableArticles}
+                    onChange={setEditableArticles}
+                    montantImpute={montantImpute}
+                    showBudgetComparison={montantImpute > 0}
+                  />
                 ) : (
-                  <>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[5%]">N°</TableHead>
-                          <TableHead className="w-[35%]">Désignation</TableHead>
-                          <TableHead className="w-[10%] text-right">Quantité</TableHead>
-                          <TableHead className="w-[12%]">Unité</TableHead>
-                          <TableHead className="w-[17%] text-right">PU (FCFA)</TableHead>
-                          <TableHead className="w-[21%] text-right">Total (FCFA)</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {articles.map((item, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="text-center font-mono text-muted-foreground">
-                              {index + 1}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {item.designation || item.article || '-'}
-                            </TableCell>
-                            <TableCell className="text-right">{item.quantite}</TableCell>
-                            <TableCell>{item.unite}</TableCell>
-                            <TableCell className="text-right font-mono">
-                              {item.prix_unitaire > 0
-                                ? new Intl.NumberFormat('fr-FR').format(item.prix_unitaire)
-                                : '-'}
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-medium">
-                              {item.prix_total > 0
-                                ? new Intl.NumberFormat('fr-FR').format(item.prix_total)
-                                : '-'}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableFooter>
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-right font-bold">
-                            TOTAL GÉNÉRAL
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-base">
-                            {new Intl.NumberFormat('fr-FR').format(totalArticles)}
-                          </TableCell>
-                        </TableRow>
-                      </TableFooter>
-                    </Table>
-
-                    {/* Comparaison avec montant imputé */}
-                    {montantImpute > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>
-                            Total articles :{' '}
-                            <strong>
-                              {new Intl.NumberFormat('fr-FR').format(totalArticles)} FCFA
-                            </strong>
-                          </span>
-                          <span>
-                            Montant imputé :{' '}
-                            <strong>
-                              {new Intl.NumberFormat('fr-FR').format(montantImpute)} FCFA
-                            </strong>
-                          </span>
-                        </div>
-                        <Progress
-                          value={budgetRatio}
-                          className={cn(
-                            'h-3',
-                            budgetDepasse ? '[&>div]:bg-destructive' : '[&>div]:bg-success'
-                          )}
-                        />
-                        <p
-                          className={cn(
-                            'text-xs text-right font-medium',
-                            budgetDepasse ? 'text-destructive' : 'text-success'
-                          )}
-                        >
-                          {budgetDepasse
-                            ? `Dépassement de ${new Intl.NumberFormat('fr-FR').format(totalArticles - montantImpute)} FCFA`
-                            : `Reste disponible : ${new Intl.NumberFormat('fr-FR').format(montantImpute - totalArticles)} FCFA`}
-                        </p>
-                      </div>
-                    )}
-                  </>
+                  <ArticlesTableEditor
+                    readOnly
+                    articles={toEditable(articles)}
+                    onChange={() => {}}
+                    montantImpute={montantImpute}
+                    showBudgetComparison={montantImpute > 0}
+                  />
                 )}
               </CardContent>
             </Card>
+
+            {/* Historique des modifications articles */}
+            {articleAuditLogs.length > 0 && (
+              <Collapsible>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        Historique des modifications ({articleAuditLogs.length})
+                      </CardTitle>
+                      <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+                    </CollapsibleTrigger>
+                  </CardHeader>
+                  <CollapsibleContent>
+                    <CardContent>
+                      <div className="space-y-2 text-sm">
+                        {articleAuditLogs.map((log) => {
+                          const details = (log.new_values || {}) as Record<string, unknown>;
+                          return (
+                            <div
+                              key={log.id}
+                              className="flex justify-between items-center py-1 border-b last:border-0"
+                            >
+                              <div>
+                                <span className="text-muted-foreground">
+                                  {log.created_at
+                                    ? format(new Date(log.created_at), 'dd/MM/yyyy HH:mm', {
+                                        locale: fr,
+                                      })
+                                    : '-'}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-mono text-xs">
+                                  {(details.articles_count_before as number) ?? '?'} →{' '}
+                                  {(details.articles_count_after as number) ?? '?'} articles
+                                </span>
+                                {' | '}
+                                <span className="font-mono text-xs">
+                                  {details.articles_total_before != null
+                                    ? new Intl.NumberFormat('fr-FR').format(
+                                        details.articles_total_before as number
+                                      )
+                                    : '?'}{' '}
+                                  →{' '}
+                                  {details.articles_total_after != null
+                                    ? new Intl.NumberFormat('fr-FR').format(
+                                        details.articles_total_after as number
+                                      )
+                                    : '?'}{' '}
+                                  FCFA
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
           </TabsContent>
 
           {/* ============================== */}
@@ -864,9 +983,7 @@ export function ExpressionBesoinDetails({
                     </div>
                     <div>
                       <span className="text-sm text-muted-foreground">Montant</span>
-                      <p className="font-medium">
-                        {new Intl.NumberFormat('fr-FR').format(expression.marche.montant)} FCFA
-                      </p>
+                      <p className="font-medium">{formatCurrency(expression.marche.montant)}</p>
                     </div>
                     <div className="col-span-2">
                       <span className="text-sm text-muted-foreground">Objet</span>

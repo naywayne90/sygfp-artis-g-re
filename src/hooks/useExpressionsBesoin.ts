@@ -9,6 +9,8 @@ export interface ExpressionBesoinLigne {
   unite: string;
   prix_unitaire: number;
   prix_total: number;
+  categorie?: string;
+  ordre?: number;
   /** @deprecated Ancien champ, utiliser `designation` */
   article?: string;
 }
@@ -140,6 +142,29 @@ export const URGENCE_OPTIONS = [
   { value: 'haute', label: 'Urgent' },
   { value: 'urgente', label: 'Très urgent' },
 ];
+
+export const CATEGORIES_ARTICLES = [
+  { value: 'fournitures_bureau', label: 'Fournitures de bureau' },
+  { value: 'equipement_informatique', label: 'Équipement informatique' },
+  { value: 'materiel_technique', label: 'Matériel technique' },
+  { value: 'services_prestations', label: 'Services & prestations' },
+  { value: 'travaux', label: 'Travaux' },
+  { value: 'autre', label: 'Autre' },
+] as const;
+
+export const UNITES = [
+  { value: 'piece', label: 'Pièce(s)' },
+  { value: 'kg', label: 'Kilogramme(s)' },
+  { value: 'm', label: 'Mètre(s)' },
+  { value: 'm2', label: 'm²' },
+  { value: 'm3', label: 'm³' },
+  { value: 'litre', label: 'Litre(s)' },
+  { value: 'lot', label: 'Lot(s)' },
+  { value: 'forfait', label: 'Forfait' },
+  { value: 'boite', label: 'Boîte(s)' },
+  { value: 'carton', label: 'Carton(s)' },
+  { value: 'ramette', label: 'Ramette(s)' },
+] as const;
 
 export function useExpressionsBesoin() {
   const queryClient = useQueryClient();
@@ -608,6 +633,26 @@ export function useExpressionsBesoin() {
     },
   });
 
+  // Update articles (JSONB) on an existing EB — trigger recalculates montant_estime
+  const updateArticlesMutation = useMutation({
+    mutationFn: async ({ id, articles }: { id: string; articles: ExpressionBesoinLigne[] }) => {
+      const articlesJson = JSON.parse(JSON.stringify(articles));
+      const { error } = await supabase
+        .from('expressions_besoin')
+        .update({ liste_articles: articlesJson })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      toast.success('Articles mis à jour');
+    },
+    onError: (error) => {
+      toast.error('Erreur lors de la mise à jour des articles: ' + error.message);
+    },
+  });
+
   // Mark expression as satisfied
   const satisfyMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -660,6 +705,8 @@ export function useExpressionsBesoin() {
     resumeExpression: resumeMutation.mutateAsync,
     deleteExpression: deleteMutation.mutateAsync,
     satisfyExpression: satisfyMutation.mutateAsync,
+    updateArticles: updateArticlesMutation.mutateAsync,
+    isUpdatingArticles: updateArticlesMutation.isPending,
     isCreating: createMutation.isPending || createFromImputationMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
