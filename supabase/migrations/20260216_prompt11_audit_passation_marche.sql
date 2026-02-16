@@ -1,0 +1,330 @@
+-- ============================================================
+-- Prompt 11 — AUDIT COMPLET Module Passation de Marché
+-- Date: 2026-02-16
+-- Description: Exploration complète backend (LECTURE SEULE)
+-- ============================================================
+
+-- ============================================================
+-- 1. TABLES DÉCOUVERTES (11 objets)
+-- ============================================================
+-- | # | Table/Vue              | Type  |
+-- |---|------------------------|-------|
+-- | 1 | marches                | TABLE | Table principale des marchés
+-- | 2 | passation_marche       | TABLE | Processus de passation
+-- | 3 | marche_lots            | TABLE | Lots par marché (allotissement)
+-- | 4 | marche_offres          | TABLE | Offres reçues par marché
+-- | 5 | soumissions            | TABLE | Soumissions par lot
+-- | 6 | marche_validations     | TABLE | Étapes de validation multi-niveaux
+-- | 7 | marche_attachments     | TABLE | Pièces jointes
+-- | 8 | marche_documents       | TABLE | Documents du marché (DAO, PV, etc.)
+-- | 9 | marche_historique      | TABLE | Historique des changements de statut
+-- |10 | marche_sequences       | TABLE | Séquences de numérotation
+-- |11 | v_marches_stats        | VIEW  | Vue statistiques agrégées
+
+-- ============================================================
+-- 2. SCHÉMA TABLE marches (47 colonnes)
+-- ============================================================
+-- Identité:
+--   id (uuid PK), numero (text), objet (text NOT NULL), annee (int), exercice (int)
+-- Montant:
+--   montant (numeric NOT NULL)
+-- Passation:
+--   mode_passation (text NOT NULL), type_marche (text), type_procedure (text)
+--   mode_force (bool), justification_derogation (text), autorisation_path (text)
+-- Calendrier:
+--   date_lancement (date), date_attribution (date), date_signature (date)
+--   calendrier_lancement (date), calendrier_ouverture (date)
+--   calendrier_attribution (date), calendrier_notification (date)
+-- Lots:
+--   nombre_lots (int), numero_lot (int), intitule_lot (text)
+-- Commission:
+--   commission_membres (ARRAY), pv_attribution_path (text)
+-- Exécution:
+--   duree_execution (int), observations (text), prestataire_id (uuid FK→prestataires)
+-- Validation:
+--   statut (text), validation_status (text), current_validation_step (int)
+--   validated_at (timestamptz), validated_by (uuid FK→profiles)
+--   rejected_at (timestamptz), rejected_by (uuid FK→profiles), rejection_reason (text)
+--   differe_at (timestamptz), differe_by (uuid FK→profiles)
+--   differe_motif (text), differe_date_reprise (date)
+-- Relations:
+--   expression_besoin_id (uuid FK→expressions_besoin)
+--   note_id (uuid FK→notes_dg), dossier_id (uuid FK→dossiers)
+--   created_by (uuid FK→profiles)
+-- Technique:
+--   created_at (timestamptz), updated_at (timestamptz)
+--   legacy_import (bool), code_locked (bool)
+
+-- ============================================================
+-- 3. SCHÉMA TABLE passation_marche (34 colonnes)
+-- ============================================================
+-- Identité:
+--   id (uuid PK), reference (text), exercice (int)
+-- Relations:
+--   dossier_id (uuid FK→dossiers)
+--   expression_besoin_id (uuid FK→expressions_besoin)
+-- Passation:
+--   mode_passation (text NOT NULL), type_procedure (text), seuil_montant (text)
+-- Prestataires (JSONB):
+--   prestataires_sollicites (jsonb), analyse_offres (jsonb), criteres_evaluation (jsonb)
+-- Documents:
+--   pv_ouverture (text), pv_evaluation (text), rapport_analyse (text)
+--   pieces_jointes (jsonb)
+-- Attribution:
+--   decision (text), prestataire_retenu_id (uuid FK→prestataires)
+--   montant_retenu (numeric), motif_selection (text)
+-- Statut/Workflow:
+--   statut (text)
+--   submitted_at/by, validated_at/by, rejected_at/by, rejection_reason
+--   differed_at/by, motif_differe, date_reprise
+-- Technique:
+--   created_by (uuid FK→profiles), created_at, updated_at
+
+-- ============================================================
+-- 4. SCHÉMA TABLE marche_lots (12 colonnes)
+-- ============================================================
+--   id (uuid PK), marche_id (uuid FK→marches NOT NULL)
+--   numero_lot (int NOT NULL), intitule (varchar NOT NULL), description (text)
+--   montant_estime (numeric), montant_attribue (numeric)
+--   attributaire_id (uuid FK→prestataires), statut (varchar)
+--   date_attribution (date), created_at, updated_at
+
+-- ============================================================
+-- 5. SCHÉMA TABLE marche_offres (15 colonnes)
+-- ============================================================
+--   id (uuid PK), marche_id (uuid FK→marches NOT NULL)
+--   prestataire_id (uuid FK→prestataires), nom_fournisseur (text)
+--   montant_offre (numeric NOT NULL), delai_execution (int)
+--   note_technique (numeric), note_financiere (numeric), note_globale (numeric)
+--   observations (text), est_retenu (bool), motif_selection (text)
+--   document_path (text), created_at, updated_at
+
+-- ============================================================
+-- 6. SCHÉMA TABLE soumissions (16 colonnes)
+-- ============================================================
+--   id (uuid PK), lot_id (uuid FK→marche_lots NOT NULL)
+--   prestataire_id (uuid FK→prestataires NOT NULL)
+--   date_soumission (timestamptz NOT NULL), montant_offre (numeric NOT NULL)
+--   delai_execution (int)
+--   note_technique (numeric), note_financiere (numeric), note_globale (numeric)
+--   classement (int), statut (varchar), motif_rejet (text)
+--   observations (text), created_by (uuid FK→profiles)
+--   created_at, updated_at
+
+-- ============================================================
+-- 7. SCHÉMA TABLE marche_validations (10 colonnes)
+-- ============================================================
+--   id (uuid PK), marche_id (uuid FK→marches NOT NULL)
+--   step_order (int NOT NULL), role (text NOT NULL)
+--   status (text), comments (text)
+--   validated_at (timestamptz), validated_by (uuid FK→profiles)
+--   ip_address (text), created_at (timestamptz NOT NULL)
+
+-- ============================================================
+-- 8. TABLES ANNEXES (résumé)
+-- ============================================================
+-- marche_attachments (10 col): marche_id, document_type, file_name/path/size/type, is_required, uploaded_by
+-- marche_documents   (14 col): marche_id, type_document, libelle, description, file_path/name/size/type, metadata(jsonb)
+-- marche_historique  (10 col): marche_id, type_action, description, ancien/nouveau_statut, commentaire, user_id, metadata(jsonb)
+-- marche_sequences    (4 col): annee (UNIQUE), dernier_numero, updated_at
+
+-- ============================================================
+-- 9. DONNÉES EXISTANTES
+-- ============================================================
+-- | Donnée                 | Valeur |
+-- |------------------------|--------|
+-- | marches TOTAL          |     16 |
+-- | Statut en_preparation  |     15 |
+-- | Statut attribue        |      1 |
+-- | Type: fourniture       |     16 | (100% fourniture)
+-- | Mode: gré à gré        |     16 | (100% gré à gré)
+-- | Exercice 2024          |     14 |
+-- | Exercice 2026          |      2 |
+-- | marche_lots            |      0 | ⚠️ VIDE
+-- | marche_offres          |      0 | ⚠️ VIDE
+-- | soumissions            |      0 | ⚠️ VIDE
+-- | passation_marche       |      0 | ⚠️ VIDE
+-- | marche_validations     |      0 | ⚠️ VIDE
+-- | marche_attachments     |      0 | ⚠️ VIDE
+-- | marche_documents       |      0 | ⚠️ VIDE
+-- | marche_historique      |     14 | (logs création legacy)
+-- | marche_sequences       |      1 |
+
+-- ============================================================
+-- 10. LIENS FK
+-- ============================================================
+-- marches:
+--   expression_besoin_id → expressions_besoin.id   (0 liés)
+--   note_id → notes_dg.id                          (2 liés)
+--   dossier_id → dossiers.id                       (0 liés)
+--   prestataire_id → prestataires.id               (1 lié)
+--   created_by → profiles.id
+-- passation_marche:
+--   expression_besoin_id → expressions_besoin.id   (0 liés)
+--   dossier_id → dossiers.id
+--   prestataire_retenu_id → prestataires.id
+--   created_by/submitted_by/validated_by/rejected_by/differed_by → profiles.id
+-- marche_lots:
+--   marche_id → marches.id
+--   attributaire_id → prestataires.id
+-- marche_offres:
+--   marche_id → marches.id
+--   prestataire_id → prestataires.id
+-- soumissions:
+--   lot_id → marche_lots.id
+--   prestataire_id → prestataires.id
+--   created_by → profiles.id
+-- marche_validations:
+--   marche_id → marches.id
+--   validated_by → profiles.id
+-- marche_attachments/documents/historique:
+--   marche_id → marches.id (+ uploaded_by/user_id → profiles.id)
+
+-- ============================================================
+-- 11. RLS — TOUTES TABLES ENABLED ✅
+-- ============================================================
+-- | Table                | RLS | Policies |
+-- |----------------------|-----|----------|
+-- | marches              | ON  | 3        |
+-- | passation_marche     | ON  | 4        |
+-- | marche_lots          | ON  | 1        |
+-- | marche_offres        | ON  | 3        |
+-- | soumissions          | ON  | 1        |
+-- | marche_validations   | ON  | 2        |
+-- | marche_attachments   | ON  | 2        |
+-- | marche_documents     | ON  | 2        |
+-- | marche_historique    | ON  | 2        |
+-- | marche_sequences     | ON  | 2        |
+
+-- Policies détaillées:
+-- marches:
+--   SELECT "Everyone can view marches" → true
+--   SELECT "DG can read all marches" → has_role(DG)
+--   ALL "Authorized roles can manage" → has_role(ADMIN) OR has_role(DAAF)...
+-- passation_marche:
+--   SELECT "Users can read" → true
+--   INSERT "Authenticated users can insert" → auth.uid() IS NOT NULL
+--   UPDATE "Authenticated users can update" → auth.uid() IS NOT NULL
+--   DELETE "Users can delete draft" → auth.uid() = created_by AND statut = 'brouillon'
+-- soumissions:
+--   ALL "Authenticated access" → true
+-- marche_lots:
+--   ALL "Authenticated access lots" → true
+-- ⚠️ PROBLÈMES POTENTIELS RLS:
+--   - soumissions: ALL true = trop permissif
+--   - marche_lots: ALL true = trop permissif
+--   - marche_offres: INSERT sans restriction = tout authenticated peut créer
+
+-- ============================================================
+-- 12. TRIGGERS (11)
+-- ============================================================
+-- marches:
+--   generate_marche_numero_trigger → BEFORE INSERT → generate_marche_numero()
+--   trg_generate_marche_numero → BEFORE INSERT → generate_marche_numero() ⚠️ DOUBLON
+--   lock_code_marches → BEFORE UPDATE → lock_code_on_validation()
+--   trg_log_marche_status → AFTER UPDATE → fn_log_marche_status_change()
+--   trg_marche_created → AFTER INSERT → fn_marche_created_log()
+--   trg_marche_validation_complete → AFTER UPDATE → fn_marche_validation_complete()
+--   update_marches_updated_at → BEFORE UPDATE → update_updated_at_column()
+-- passation_marche:
+--   trg_generate_passation_marche_reference → BEFORE INSERT → generate_passation_marche_reference()
+--   trg_update_dossier_on_passation_marche → AFTER INSERT → update_dossier_on_passation_marche()
+--   trg_update_passation_marche_updated_at → BEFORE UPDATE → update_passation_marche_updated_at()
+-- marche_offres:
+--   update_marche_offres_updated_at → BEFORE UPDATE → update_updated_at_column()
+-- ⚠️ PROBLÈMES:
+--   - DOUBLON: generate_marche_numero_trigger + trg_generate_marche_numero (même fonction)
+--   - MANQUANT: pas de trigger sur soumissions pour calcul note_globale
+--   - MANQUANT: pas de trigger sur marche_lots pour statut
+--   - MANQUANT: pas de notification sur transition de statut marché
+
+-- ============================================================
+-- 13. FONCTIONS (9)
+-- ============================================================
+-- generate_marche_numero() → Génération auto numéro marché
+-- generate_passation_marche_reference() → Génération auto référence passation
+-- fn_log_marche_status_change() → Log historique changement statut
+-- fn_marche_created_log() → Log création marché
+-- fn_marche_validation_complete() → Action post-validation complète
+-- lock_code_on_validation() → Verrouille code après validation
+-- update_dossier_on_passation_marche() → Met à jour dossier après création passation
+-- update_passation_marche_updated_at() → Mise à jour timestamp
+-- check_marche_prerequisites(uuid) → Vérifie que toutes EB liées sont validées
+--   ⚠️ BUG CONNU (Prompt 2): compare `statut = 'valide'` sur expressions_besoin
+--      via marche_id, mais 0 EB liées → retourne toujours FALSE
+
+-- ============================================================
+-- 14. VUE v_marches_stats
+-- ============================================================
+-- GROUP BY exercice, type_procedure, type_marche
+-- Colonnes: total, en_attente, valides, rejetes, montant_total, montant_valide
+
+-- ============================================================
+-- 15. INDEX (20 hors PK)
+-- ============================================================
+-- marches:
+--   idx_marches_dossier, idx_marches_dossier_id, idx_marches_exercice
+--   idx_marches_exercice_statut, idx_marches_expression_besoin_id, idx_marches_legacy
+-- marche_lots:
+--   idx_marche_lots_marche, marche_lots_marche_id_numero_lot_key (UNIQUE)
+-- marche_offres:
+--   idx_marche_offres_marche_id, idx_marche_offres_prestataire_id
+-- marche_documents:
+--   idx_marche_documents_marche_id, idx_marche_documents_type
+-- marche_historique:
+--   idx_marche_historique_marche_id, idx_marche_historique_created_at
+-- marche_sequences:
+--   marche_sequences_annee_key (UNIQUE)
+-- passation_marche:
+--   idx_passation_marche_dossier, idx_passation_marche_eb
+--   idx_passation_marche_exercice, idx_passation_marche_statut
+-- soumissions:
+--   idx_soumissions_lot
+
+-- ============================================================
+-- 16. FRONTEND (17 fichiers)
+-- ============================================================
+-- Pages:
+--   src/pages/Marches.tsx
+--   src/pages/execution/PassationMarche.tsx
+-- Hooks:
+--   src/hooks/useMarches.ts
+--   src/hooks/useMarcheDocuments.ts
+--   src/hooks/useMarcheOffres.ts
+--   src/hooks/usePassationsMarche.ts
+-- Composants marches/:
+--   MarcheList, MarcheDetails, MarcheForm
+--   MarcheOffresList, MarcheOffresTab, MarcheDocumentsTab, MarcheHistoriqueTab
+--   MarcheValidateDialog, MarcheRejectDialog, MarcheDeferDialog
+-- Composants passation-marche/:
+--   PassationMarcheForm, PassationDetails, PassationChecklist, PassationTimeline
+--   PassationValidateDialog, PassationRejectDialog, PassationDeferDialog
+
+-- ============================================================
+-- 17. EDGE FUNCTIONS
+-- ============================================================
+-- Pas d'Edge Function dédiée marchés
+-- workflow-validation/index.ts → inclut 'marches' comme type validable
+-- validate-workflow/index.ts → inclut 'marches' comme type validable
+
+-- ============================================================
+-- 18. RÉSUMÉ DIAGNOSTIC
+-- ============================================================
+-- ✅ ACQUIS:
+--   - 11 tables/vues bien structurées
+--   - RLS activé partout (22 policies)
+--   - 11 triggers, 9 fonctions
+--   - 20 index performants
+--   - Frontend complet (17 fichiers)
+--   - 16 marchés legacy (14 exercice 2024 + 2 exercice 2026)
+--
+-- ⚠️ PROBLÈMES IDENTIFIÉS:
+--   P1. TRIGGER DOUBLON: generate_marche_numero + trg_generate_marche_numero
+--   P2. RLS TROP PERMISSIF: soumissions ALL=true, marche_lots ALL=true
+--   P3. check_marche_prerequisites: toujours FALSE (0 EB liées)
+--   P4. DONNÉES VIDES: 8/10 tables annexes sont vides (lots, offres, soumissions, etc.)
+--   P5. 100% gré_a_gre: aucune diversité de mode_passation
+--   P6. PAS DE NOTIFICATIONS: aucun trigger de notification sur transitions marché
+--   P7. PAS DE CALCUL note_globale: soumissions.note_globale non calculé automatiquement
+--   P8. LIEN EB→MARCHÉ inexistant: 0 EB a marche_id renseigné
+--   P9. passation_marche VIDE: table créée mais jamais utilisée
