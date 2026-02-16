@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShieldCheck } from 'lucide-react';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 
 interface ExpressionBesoinVerifyDialogProps {
   open: boolean;
@@ -48,8 +49,7 @@ export function ExpressionBesoinVerifyDialog({
     onOpenChange(value);
   };
 
-  const formatMontant = (m: number | null) =>
-    m ? new Intl.NumberFormat('fr-FR').format(m) + ' FCFA' : '-';
+  const formatMontantOrDash = (m: number | null) => (m ? formatMontant(m) : '-');
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
@@ -70,7 +70,7 @@ export function ExpressionBesoinVerifyDialog({
           <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Montant estimé</span>
-              <span className="font-medium">{formatMontant(montant)}</span>
+              <span className="font-medium">{formatMontantOrDash(montant)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Exercice</span>

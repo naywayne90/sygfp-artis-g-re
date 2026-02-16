@@ -646,10 +646,7 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
           p_nom_fichier: `ARTI_EB_${ebData?.numero || 'UNKNOWN'}.pdf`,
           p_exercice: exercice || new Date().getFullYear(),
           p_direction_id: ebData?.direction_id || undefined,
-          p_metadata: { validated_by: userId, objet: ebData?.objet } as unknown as Record<
-            string,
-            unknown
-          >,
+          p_metadata: JSON.parse(JSON.stringify({ validated_by: userId, objet: ebData?.objet })),
         });
       } catch (qrError) {
         // QR registration failure should not block validation

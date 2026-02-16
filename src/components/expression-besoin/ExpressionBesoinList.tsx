@@ -39,6 +39,7 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 
 interface ExpressionBesoinListProps {
   expressions: ExpressionBesoin[];
@@ -150,7 +151,8 @@ export function ExpressionBesoinList({
     return (
       <div className="text-center py-12 text-muted-foreground">
         <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p>Aucune expression de besoin</p>
+        <p className="font-medium">Aucune expression de besoin</p>
+        <p className="text-sm mt-1">Les expressions de besoin correspondantes apparaîtront ici</p>
       </div>
     );
   }
@@ -189,9 +191,7 @@ export function ExpressionBesoinList({
                   {expression.direction?.sigle || expression.direction?.code || '-'}
                 </TableCell>
                 <TableCell>
-                  {expression.montant_estime
-                    ? new Intl.NumberFormat('fr-FR').format(expression.montant_estime) + ' FCFA'
-                    : '-'}
+                  {expression.montant_estime ? formatMontant(expression.montant_estime) : '-'}
                 </TableCell>
                 <TableCell>
                   <Badge className={urgence.className} variant="outline">

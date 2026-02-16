@@ -28,6 +28,7 @@ import {
 } from '@/hooks/useExpressionsBesoin';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { AttachmentService } from '@/services/attachmentService';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
 import { CreditCard, Calendar, Loader2, Search, Plus, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -304,9 +305,6 @@ export function ExpressionBesoinFromImputationForm({
     ]);
     setSelectedFiles([]);
   };
-
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   const isBusy = isCreating || isUploading;
 

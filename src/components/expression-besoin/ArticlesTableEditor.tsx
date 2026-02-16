@@ -387,66 +387,68 @@ export function ArticlesTableEditor({
         </Button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={articles.map((a) => a.id)} strategy={verticalListSortingStrategy}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-8" />
-                <TableHead className="w-10">N°</TableHead>
-                <TableHead>Désignation</TableHead>
-                <TableHead className="w-[120px]">Catégorie</TableHead>
-                <TableHead className="w-[80px]">Qté</TableHead>
-                <TableHead className="w-[100px]">Unité</TableHead>
-                <TableHead className="w-[110px]">Prix unit.</TableHead>
-                <TableHead className="w-[110px] text-right">Total</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {articles.map((article, index) => (
-                <SortableArticleRow
-                  key={article.id}
-                  article={article}
-                  index={index}
-                  onChange={handleArticleChange}
-                  onRemove={handleRemoveArticle}
-                  canRemove={articles.length > 1}
-                />
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={7} className="text-right font-bold">
-                  Total HT
-                </TableCell>
-                <TableCell className="text-right font-bold text-base font-mono">
-                  {formatNumber(totalGeneral)} FCFA
-                </TableCell>
-                <TableCell />
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={7} className="text-right text-sm text-muted-foreground">
-                  TVA 18% (indicatif)
-                </TableCell>
-                <TableCell className="text-right text-sm font-mono text-muted-foreground">
-                  {formatNumber(Math.round(totalGeneral * 0.18))} FCFA
-                </TableCell>
-                <TableCell />
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={7} className="text-right font-bold">
-                  Total TTC (indicatif)
-                </TableCell>
-                <TableCell className="text-right font-bold text-base font-mono">
-                  {formatNumber(totalGeneral + Math.round(totalGeneral * 0.18))} FCFA
-                </TableCell>
-                <TableCell />
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </SortableContext>
-      </DndContext>
+      <div className="overflow-x-auto">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={articles.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8" />
+                  <TableHead className="w-10">N°</TableHead>
+                  <TableHead>Désignation</TableHead>
+                  <TableHead className="w-[120px]">Catégorie</TableHead>
+                  <TableHead className="w-[80px]">Qté</TableHead>
+                  <TableHead className="w-[100px]">Unité</TableHead>
+                  <TableHead className="w-[110px]">Prix unit.</TableHead>
+                  <TableHead className="w-[110px] text-right">Total</TableHead>
+                  <TableHead className="w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {articles.map((article, index) => (
+                  <SortableArticleRow
+                    key={article.id}
+                    article={article}
+                    index={index}
+                    onChange={handleArticleChange}
+                    onRemove={handleRemoveArticle}
+                    canRemove={articles.length > 1}
+                  />
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={7} className="text-right font-bold">
+                    Total HT
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-base font-mono">
+                    {formatNumber(totalGeneral)} FCFA
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="text-right text-sm text-muted-foreground">
+                    TVA 18% (indicatif)
+                  </TableCell>
+                  <TableCell className="text-right text-sm font-mono text-muted-foreground">
+                    {formatNumber(Math.round(totalGeneral * 0.18))} FCFA
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+                <TableRow>
+                  <TableCell colSpan={7} className="text-right font-bold">
+                    Total TTC (indicatif)
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-base font-mono">
+                    {formatNumber(totalGeneral + Math.round(totalGeneral * 0.18))} FCFA
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </SortableContext>
+        </DndContext>
+      </div>
 
       {/* Budget alert */}
       {budgetDepasse && (

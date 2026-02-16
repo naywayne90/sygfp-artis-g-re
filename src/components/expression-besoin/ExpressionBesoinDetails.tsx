@@ -898,17 +898,12 @@ export function ExpressionBesoinDetails({
                                 {' | '}
                                 <span className="font-mono text-xs">
                                   {details.articles_total_before != null
-                                    ? new Intl.NumberFormat('fr-FR').format(
-                                        details.articles_total_before as number
-                                      )
+                                    ? formatMontant(details.articles_total_before as number)
                                     : '?'}{' '}
                                   →{' '}
                                   {details.articles_total_after != null
-                                    ? new Intl.NumberFormat('fr-FR').format(
-                                        details.articles_total_after as number
-                                      )
-                                    : '?'}{' '}
-                                  FCFA
+                                    ? formatMontant(details.articles_total_after as number)
+                                    : '?'}
                                 </span>
                               </div>
                             </div>

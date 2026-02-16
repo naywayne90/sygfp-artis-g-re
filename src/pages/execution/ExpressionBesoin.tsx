@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -162,8 +163,7 @@ export default function ExpressionBesoin() {
     setSearchParams(searchParams, { replace: true });
   };
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+  const formatMontantOrDash = (montant: number | null) => (montant ? formatMontant(montant) : '-');
 
   if (isLoadingSource) {
     return (
@@ -335,7 +335,7 @@ export default function ExpressionBesoin() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4 flex flex-wrap gap-1">
+            <TabsList className="mb-4 flex flex-wrap gap-1 h-auto">
               <TabsTrigger value="a_traiter" className="gap-1">
                 <Tag className="h-3 w-3" />À traiter
                 <Badge variant="secondary" className="ml-1 text-xs">
@@ -392,7 +392,7 @@ export default function ExpressionBesoin() {
                             {imp.direction?.sigle || imp.direction?.label || '-'}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {formatMontant(imp.montant)}
+                            {formatMontantOrDash(imp.montant)}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
@@ -457,7 +457,7 @@ export default function ExpressionBesoin() {
                               {eb.direction?.sigle || eb.direction?.label || '-'}
                             </TableCell>
                             <TableCell className="text-right font-medium">
-                              {formatMontant(eb.montant_estime)}
+                              {formatMontantOrDash(eb.montant_estime)}
                             </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>

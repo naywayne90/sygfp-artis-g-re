@@ -41,7 +41,7 @@ export const ETAPES_CHAINE_DEPENSE = [
     shortLabel: 'AEF',
     icon: FileEdit,
     color: 'bg-indigo-500',
-    route: '/notes-dg',
+    route: '/notes-aef',
   },
   {
     key: 'imputation',
@@ -49,7 +49,7 @@ export const ETAPES_CHAINE_DEPENSE = [
     shortLabel: 'IMP',
     icon: Target,
     color: 'bg-purple-500',
-    route: '/imputations',
+    route: '/execution/imputation',
   },
   {
     key: 'expression_besoin',
@@ -65,7 +65,7 @@ export const ETAPES_CHAINE_DEPENSE = [
     shortLabel: 'PM',
     icon: ScrollText,
     color: 'bg-pink-500',
-    route: '/passation-marche',
+    route: '/execution/passation-marche',
   },
   {
     key: 'engagement',
@@ -197,8 +197,12 @@ export function DossierStepTimeline({
           status,
           date: etapeDossier?.created_at,
           montant: etapeDossier?.montant,
-          reference: etapeDossier?.reference,
-          entityId: etapeDossier?.ref_id,
+          reference: (etapeDossier as unknown as Record<string, unknown>)?.reference as
+            | string
+            | undefined,
+          entityId: (etapeDossier as unknown as Record<string, unknown>)?.ref_id as
+            | string
+            | undefined,
         };
       });
 

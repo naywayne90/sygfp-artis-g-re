@@ -166,11 +166,12 @@ export function useExportBudgetChain() {
       return (data || []).map((item, index) => {
         const articles = Array.isArray(item.liste_articles) ? item.liste_articles : [];
         const articlesDetail = articles
-          .map((a: Record<string, unknown>) => {
-            const designation = (a.designation as string) || (a.article as string) || '?';
-            const qte = Number(a.quantite) || 0;
-            const pu = Number(a.prix_unitaire) || 0;
-            const total = Number(a.prix_total) || qte * pu;
+          .map((a: unknown) => {
+            const rec = a as Record<string, unknown>;
+            const designation = (rec.designation as string) || (rec.article as string) || '?';
+            const qte = Number(rec.quantite) || 0;
+            const pu = Number(rec.prix_unitaire) || 0;
+            const total = Number(rec.prix_total) || qte * pu;
             return `${designation} (${qte} × ${new Intl.NumberFormat('fr-FR').format(pu)} = ${new Intl.NumberFormat('fr-FR').format(total)})`;
           })
           .join(' | ');
