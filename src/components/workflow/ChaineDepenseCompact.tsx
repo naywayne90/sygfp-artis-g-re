@@ -1,12 +1,8 @@
-import { useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+/* eslint-disable react-refresh/only-export-components */
+import { useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileText,
   Calculator,
@@ -17,7 +13,8 @@ import {
   CreditCard,
   CheckCircle2,
   ArrowRight,
-} from "lucide-react";
+  ShoppingCart,
+} from 'lucide-react';
 
 interface EtapeChaine {
   id: string;
@@ -32,84 +29,94 @@ interface EtapeChaine {
 
 const ETAPES_CHAINE: EtapeChaine[] = [
   {
-    id: "note_sef",
-    code: "SEF",
+    id: 'note_sef',
+    code: 'SEF',
     numero: 1,
-    titre: "Note SEF",
-    titreCourt: "SEF",
-    url: "/notes-sef",
+    titre: 'Note SEF',
+    titreCourt: 'SEF',
+    url: '/notes-sef',
     icon: FileText,
     description: "Note Sans Effet Financier - Point d'entrée",
   },
   {
-    id: "note_aef",
-    code: "AEF",
+    id: 'note_aef',
+    code: 'AEF',
     numero: 2,
-    titre: "Note AEF",
-    titreCourt: "AEF",
-    url: "/notes-aef",
+    titre: 'Note AEF',
+    titreCourt: 'AEF',
+    url: '/notes-aef',
     icon: Calculator,
-    description: "Note Avec Effet Financier - Estimation budgétaire",
+    description: 'Note Avec Effet Financier - Estimation budgétaire',
   },
   {
-    id: "imputation",
-    code: "IMP",
+    id: 'imputation',
+    code: 'IMP',
     numero: 3,
-    titre: "Imputation",
-    titreCourt: "Imp",
-    url: "/execution/imputation",
+    titre: 'Imputation',
+    titreCourt: 'Imp',
+    url: '/execution/imputation',
     icon: Receipt,
-    description: "Imputation budgétaire - Réservation des crédits",
+    description: 'Imputation budgétaire - Réservation des crédits',
   },
   {
-    id: "marche",
-    code: "MCH",
+    id: 'expression_besoin',
+    code: 'EB',
     numero: 4,
-    titre: "Marché",
-    titreCourt: "Mché",
-    url: "/marches",
-    icon: Briefcase,
-    description: "Passation de marché - Sélection du fournisseur",
+    titre: 'Expression Besoin',
+    titreCourt: 'EB',
+    url: '/execution/expression-besoin',
+    icon: ShoppingCart,
+    description: 'Expression de besoin — Définition des articles et besoins',
   },
   {
-    id: "engagement",
-    code: "ENG",
+    id: 'marche',
+    code: 'MCH',
     numero: 5,
-    titre: "Engagement",
-    titreCourt: "Eng",
-    url: "/engagements",
-    icon: ClipboardCheck,
-    description: "Engagement budgétaire - Réservation définitive",
+    titre: 'Marché',
+    titreCourt: 'Mché',
+    url: '/marches',
+    icon: Briefcase,
+    description: 'Passation de marché - Sélection du fournisseur',
   },
   {
-    id: "liquidation",
-    code: "LIQ",
+    id: 'engagement',
+    code: 'ENG',
     numero: 6,
-    titre: "Liquidation",
-    titreCourt: "Liq",
-    url: "/liquidations",
-    icon: Receipt,
-    description: "Liquidation - Vérification service fait",
+    titre: 'Engagement',
+    titreCourt: 'Eng',
+    url: '/engagements',
+    icon: ClipboardCheck,
+    description: 'Engagement budgétaire - Réservation définitive',
   },
   {
-    id: "ordonnancement",
-    code: "ORD",
+    id: 'liquidation',
+    code: 'LIQ',
     numero: 7,
-    titre: "Ordonnancement",
-    titreCourt: "Ord",
-    url: "/ordonnancements",
-    icon: Pen,
-    description: "Ordonnancement - Ordre de payer",
+    titre: 'Liquidation',
+    titreCourt: 'Liq',
+    url: '/liquidations',
+    icon: Receipt,
+    description: 'Liquidation - Vérification service fait',
   },
   {
-    id: "reglement",
-    code: "REG",
+    id: 'ordonnancement',
+    code: 'ORD',
     numero: 8,
-    titre: "Règlement",
-    titreCourt: "Règl",
-    url: "/reglements",
+    titre: 'Ordonnancement',
+    titreCourt: 'Ord',
+    url: '/ordonnancements',
+    icon: Pen,
+    description: 'Ordonnancement - Ordre de payer',
+  },
+  {
+    id: 'reglement',
+    code: 'REG',
+    numero: 9,
+    titre: 'Règlement',
+    titreCourt: 'Règl',
+    url: '/reglements',
     icon: CreditCard,
-    description: "Règlement - Paiement effectif",
+    description: 'Règlement - Paiement effectif',
   },
 ];
 
@@ -118,16 +125,16 @@ interface ChaineDepenseCompactProps {
   completedSteps?: number[];
   className?: string;
   showLabels?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   onClick?: (etape: EtapeChaine) => void;
 }
 
 export function ChaineDepenseCompact({
   currentStep,
   completedSteps = [],
-  className = "",
+  className = '',
   showLabels = true,
-  size = "md",
+  size = 'md',
   onClick,
 }: ChaineDepenseCompactProps) {
   const navigate = useNavigate();
@@ -140,9 +147,9 @@ export function ChaineDepenseCompact({
   }, [currentStep, location.pathname]);
 
   const sizeClasses = {
-    sm: { icon: "h-3 w-3", container: "gap-0.5", step: "w-6 h-6", text: "text-[10px]" },
-    md: { icon: "h-4 w-4", container: "gap-1", step: "w-8 h-8", text: "text-xs" },
-    lg: { icon: "h-5 w-5", container: "gap-2", step: "w-10 h-10", text: "text-sm" },
+    sm: { icon: 'h-3 w-3', container: 'gap-0.5', step: 'w-6 h-6', text: 'text-[10px]' },
+    md: { icon: 'h-4 w-4', container: 'gap-1', step: 'w-8 h-8', text: 'text-xs' },
+    lg: { icon: 'h-5 w-5', container: 'gap-2', step: 'w-10 h-10', text: 'text-sm' },
   };
 
   const sizes = sizeClasses[size];
@@ -172,18 +179,19 @@ export function ChaineDepenseCompact({
                     onClick={() => handleClick(etape)}
                     className={`
                       flex flex-col items-center transition-all duration-200
-                      ${isActive ? "scale-110" : "hover:scale-105"}
+                      ${isActive ? 'scale-110' : 'hover:scale-105'}
                     `}
                   >
                     <div
                       className={`
                         ${sizes.step} rounded-full flex items-center justify-center
                         transition-all duration-200 cursor-pointer
-                        ${isActive 
-                          ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2" 
-                          : isPassed 
-                            ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" 
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        ${
+                          isActive
+                            ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                            : isPassed
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }
                       `}
                     >
@@ -193,11 +201,11 @@ export function ChaineDepenseCompact({
                         <Icon className={sizes.icon} />
                       )}
                     </div>
-                    {showLabels && size !== "sm" && (
+                    {showLabels && size !== 'sm' && (
                       <span
                         className={`
                           ${sizes.text} mt-1 font-medium
-                          ${isActive ? "text-primary" : isPassed ? "text-green-600" : "text-muted-foreground"}
+                          ${isActive ? 'text-primary' : isPassed ? 'text-green-600' : 'text-muted-foreground'}
                         `}
                       >
                         {etape.titreCourt}
@@ -208,7 +216,7 @@ export function ChaineDepenseCompact({
                 <TooltipContent side="bottom" className="max-w-xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant={isActive ? "default" : isPassed ? "secondary" : "outline"}>
+                      <Badge variant={isActive ? 'default' : isPassed ? 'secondary' : 'outline'}>
                         Étape {etape.numero}
                       </Badge>
                       <span className="font-medium">{etape.titre}</span>
@@ -217,12 +225,12 @@ export function ChaineDepenseCompact({
                   </div>
                 </TooltipContent>
               </Tooltip>
-              
+
               {index < ETAPES_CHAINE.length - 1 && (
-                <ArrowRight 
+                <ArrowRight
                   className={`
-                    ${size === "sm" ? "h-2 w-2 mx-0.5" : size === "md" ? "h-3 w-3 mx-1" : "h-4 w-4 mx-2"}
-                    ${isPassed ? "text-green-500" : "text-muted-foreground/50"}
+                    ${size === 'sm' ? 'h-2 w-2 mx-0.5' : size === 'md' ? 'h-3 w-3 mx-1' : 'h-4 w-4 mx-2'}
+                    ${isPassed ? 'text-green-500' : 'text-muted-foreground/50'}
                   `}
                 />
               )}

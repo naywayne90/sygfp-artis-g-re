@@ -24,6 +24,8 @@ import { useExpressionBesoinDetail } from '@/hooks/useExpressionBesoinDetail';
 import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
 import { ExpressionBesoinTimeline } from './ExpressionBesoinTimeline';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
+import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
+import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact';
 import { AttachmentService } from '@/services/attachmentService';
 import { generateArticlesPdf } from '@/services/expressionBesoinArticlesPdfService';
 import { supabase } from '@/integrations/supabase/client';
@@ -261,6 +263,14 @@ export function ExpressionBesoinDetails({
   const formatMontant = (montant: number | null | undefined) =>
     montant ? formatCurrency(montant) : '-';
 
+  /** Compute completedSteps for ChaineDepenseCompact based on EB statut */
+  const getCompletedStepsEB = (statut: string | null): number[] => {
+    // SEF=1, AEF=2, IMP=3 toujours complétés (l'EB vient d'une imputation)
+    const base = [1, 2, 3];
+    if (statut === 'valide' || statut === 'satisfaite') return [...base, 4];
+    return base;
+  };
+
   const handleDownloadAttachment = async (attachment: ExpressionBesoinAttachment) => {
     const result = await AttachmentService.getSignedUrl(attachment.file_path);
     if (result.url) {
@@ -406,6 +416,19 @@ export function ExpressionBesoinDetails({
             </div>
           </div>
         </DialogHeader>
+
+        {/* QR Code anti-falsification pour EB validées */}
+        {expression.statut === 'valide' && (
+          <div className="flex justify-center py-2">
+            <QRCodeGenerator
+              reference={expression.numero || expression.id}
+              type="EXPRESSION_BESOIN"
+              dateValidation={expression.validated_at || undefined}
+              validateur={expression.validator?.full_name || undefined}
+              size="sm"
+            />
+          </div>
+        )}
 
         <Tabs defaultValue="infos" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
@@ -618,6 +641,25 @@ export function ExpressionBesoinDetails({
                     </button>
                   </div>
                 )}
+
+                {/* Note AEF source (via imputation) */}
+                {expression.imputation?.note_aef_id && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">Note AEF source</span>
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 mt-1 text-primary hover:underline font-medium"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/notes-aef/${expression.imputation?.note_aef_id}`);
+                      }}
+                    >
+                      <FileText className="h-3 w-3" />
+                      Voir la Note AEF
+                      <ExternalLink className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -722,6 +764,21 @@ export function ExpressionBesoinDetails({
                 </CardContent>
               </Card>
             )}
+
+            {/* Chaîne de la dépense */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Chaîne de la dépense</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChaineDepenseCompact
+                  currentStep={4}
+                  completedSteps={getCompletedStepsEB(expression.statut)}
+                  size="sm"
+                  showLabels={false}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* ============================== */}
@@ -971,6 +1028,80 @@ export function ExpressionBesoinDetails({
                     <p className="font-medium">
                       {expression.direction?.sigle || expression.direction?.label || '-'}
                     </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cohérence chaîne de la dépense */}
+            <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  Cohérence chaîne de la dépense
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {/* Check 1: Imputation liée et validée */}
+                  <div className="flex items-center gap-2">
+                    {expression.imputation ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                    )}
+                    <span className="text-sm">Imputation liée et validée</span>
+                  </div>
+
+                  {/* Check 2: Budget non dépassé */}
+                  <div className="flex items-center gap-2">
+                    {!budgetDepasse ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                    )}
+                    <span className="text-sm">
+                      Budget non dépassé
+                      {montantImpute > 0 && (
+                        <span className="text-muted-foreground ml-1">
+                          ({budgetRatio.toFixed(1)}% consommé)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Check 3: Direction cohérente */}
+                  <div className="flex items-center gap-2">
+                    {expression.direction_id ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                    )}
+                    <span className="text-sm">Direction cohérente avec imputation</span>
+                  </div>
+
+                  {/* Check 4: Marché lié (optionnel) */}
+                  <div className="flex items-center gap-2">
+                    {expression.marche_id ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      Marché lié {expression.marche_id ? '' : '(optionnel)'}
+                    </span>
+                  </div>
+
+                  {/* Check 5: Dossier de dépense lié (optionnel) */}
+                  <div className="flex items-center gap-2">
+                    {expression.dossier_id ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      Dossier de dépense lié {expression.dossier_id ? '' : '(optionnel)'}
+                    </span>
                   </div>
                 </div>
               </CardContent>

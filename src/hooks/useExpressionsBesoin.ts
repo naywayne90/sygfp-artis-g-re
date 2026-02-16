@@ -75,6 +75,7 @@ export interface ExpressionBesoin {
     objet: string;
     montant: number | null;
     code_imputation: string | null;
+    note_aef_id?: string | null;
     budget_line?: { id: string; code: string; label: string } | null;
   } | null;
   dossier?: {
@@ -612,6 +613,14 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
       });
 
       const userId = (await supabase.auth.getUser()).data.user?.id;
+
+      // Fetch EB details for QR code registration
+      const { data: ebData } = await supabase
+        .from('expressions_besoin')
+        .select('numero, objet, direction_id')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('expressions_besoin')
         .update({
@@ -626,6 +635,26 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Register QR code document for anti-falsification
+      try {
+        await supabase.rpc('register_generated_document', {
+          p_entity_type: 'expressions_besoin',
+          p_entity_id: id,
+          p_type_document: 'pdf_expression_besoin',
+          p_reference: ebData?.numero || id,
+          p_nom_fichier: `ARTI_EB_${ebData?.numero || 'UNKNOWN'}.pdf`,
+          p_exercice: exercice || new Date().getFullYear(),
+          p_direction_id: ebData?.direction_id || undefined,
+          p_metadata: { validated_by: userId, objet: ebData?.objet } as unknown as Record<
+            string,
+            unknown
+          >,
+        });
+      } catch (qrError) {
+        // QR registration failure should not block validation
+        console.warn('[EB Validate] QR registration failed:', qrError);
+      }
     },
     onSuccess: () => {
       invalidateAll(queryClient);

@@ -14,6 +14,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { QRCodeCanvas } from 'qrcode.react';
+import { createRoot } from 'react-dom/client';
+import { createElement } from 'react';
 import type { ExpressionBesoin, ExpressionBesoinLigne } from '@/hooks/useExpressionsBesoin';
 import { generatePDFHeader, loadImageAsDataUrl } from '@/lib/pdf/pdfHeader';
 import { generatePDFFooter } from '@/lib/pdf/pdfFooter';
@@ -38,6 +41,39 @@ function formatDateFr(date: string | Date | null): string {
   }
 }
 
+/**
+ * Generates a QR code canvas and returns its data URL (PNG)
+ */
+async function generateQRCodeDataUrl(data: string, size: number = 150): Promise<string> {
+  return new Promise((resolve) => {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    document.body.appendChild(container);
+
+    const root = createRoot(container);
+    root.render(
+      createElement(QRCodeCanvas, {
+        value: data,
+        size: size,
+        level: 'H',
+        includeMargin: true,
+      })
+    );
+
+    setTimeout(() => {
+      const canvas = container.querySelector('canvas');
+      if (canvas) {
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        resolve('');
+      }
+      root.unmount();
+      document.body.removeChild(container);
+    }, 100);
+  });
+}
+
 // ============================================================================
 // FONCTION PRINCIPALE
 // ============================================================================
@@ -60,6 +96,18 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
     console.warn('[ArticlesPDF] Logo introuvable:', e);
   }
 
+  // QR Code for validated EBs
+  const isValidated = expression.statut === 'valide' || expression.statut === 'satisfaite';
+  let qrCodeDataUrl = '';
+  if (isValidated) {
+    try {
+      const verifyUrl = `${window.location.origin}/verify/eb/${expression.id}`;
+      qrCodeDataUrl = await generateQRCodeDataUrl(verifyUrl, 150);
+    } catch (e) {
+      console.warn('[ArticlesPDF] QR code generation failed:', e);
+    }
+  }
+
   // Créer le document PDF
   const doc = new jsPDF({
     orientation: PDF_PAGE.orientation,
@@ -73,6 +121,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
     logoDataUrl,
     direction: expression.direction?.label,
     directionSigle: expression.direction?.sigle,
+    qrCodeDataUrl: qrCodeDataUrl || undefined,
   });
 
   let yPos = headerEndY;
@@ -211,6 +260,8 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
       doc,
       pageNumber: i,
       totalPages,
+      qrCodeDataUrl: qrCodeDataUrl || undefined,
+      showSecurityNote: isValidated && i === totalPages,
     });
   }
 

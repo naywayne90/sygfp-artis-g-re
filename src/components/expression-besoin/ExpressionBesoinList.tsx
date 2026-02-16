@@ -33,7 +33,7 @@ import {
   Play,
   FileText,
   Trash2,
-  CreditCard,
+  ArrowRight,
   ShieldCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -136,8 +136,8 @@ export function ExpressionBesoinList({
     }
   };
 
-  const handleCreateEngagement = (expression: ExpressionBesoin) => {
-    navigate(`/engagements?expression_id=${expression.id}`);
+  const handleCreatePassation = (expression: ExpressionBesoin) => {
+    navigate(`/execution/passation-marche?expression_id=${expression.id}`);
   };
 
   const openDetail = (expression: ExpressionBesoin) => {
@@ -312,11 +312,11 @@ export function ExpressionBesoinList({
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleCreateEngagement(expression)}
+                              onClick={() => handleCreatePassation(expression)}
                               className="text-primary"
                             >
-                              <CreditCard className="mr-2 h-4 w-4" />
-                              Créer engagement
+                              <ArrowRight className="mr-2 h-4 w-4" />
+                              Créer passation / marché
                             </DropdownMenuItem>
                           </>
                         )}

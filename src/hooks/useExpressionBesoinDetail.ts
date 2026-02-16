@@ -22,7 +22,7 @@ export function useExpressionBesoinDetail(id: string | null, enabled: boolean) {
             prestataire:prestataires(id, raison_sociale)
           ),
           imputation:imputations!expressions_besoin_imputation_id_fkey(
-            id, reference, objet, montant, code_imputation,
+            id, reference, objet, montant, code_imputation, note_aef_id,
             budget_line:budget_lines(id, code, label)
           ),
           attachments:expression_besoin_attachments(
