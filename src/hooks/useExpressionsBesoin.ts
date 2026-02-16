@@ -166,66 +166,155 @@ export const UNITES = [
   { value: 'ramette', label: 'Ramette(s)' },
 ] as const;
 
-export function useExpressionsBesoin() {
+// ---------------------------------------------------------------------------
+// Filters interface
+// ---------------------------------------------------------------------------
+
+export interface ExpressionBesoinFilters {
+  statut?: string;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Counts type
+// ---------------------------------------------------------------------------
+
+export interface ExpressionBesoinCounts {
+  brouillon: number;
+  soumis: number;
+  verifie: number;
+  valide: number;
+  rejete: number;
+  differe: number;
+  satisfaite: number;
+  total: number;
+}
+
+const EMPTY_COUNTS: ExpressionBesoinCounts = {
+  brouillon: 0,
+  soumis: 0,
+  verifie: 0,
+  valide: 0,
+  rejete: 0,
+  differe: 0,
+  satisfaite: 0,
+  total: 0,
+};
+
+// ---------------------------------------------------------------------------
+// Invalidation helper — called from every mutation onSuccess
+// ---------------------------------------------------------------------------
+
+function invalidateAll(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+  queryClient.invalidateQueries({ queryKey: ['expressions-besoin-counts'] });
+  queryClient.invalidateQueries({ queryKey: ['expression-besoin-detail'] });
+}
+
+// ---------------------------------------------------------------------------
+// Main hook
+// ---------------------------------------------------------------------------
+
+export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
 
-  // Fetch all expressions de besoin
+  const page = filters?.page ?? 1;
+  const pageSize = filters?.pageSize ?? 50;
+
+  // =========================================================================
+  // Main paginated query — LEAN select (no liste_articles, attachments, validations)
+  // =========================================================================
+
   const {
-    data: expressions = [],
+    data: queryResult,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['expressions-besoin', exercice],
+    queryKey: ['expressions-besoin', exercice, filters],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
         .from('expressions_besoin')
         .select(
           `
-          *,
+          id, numero, objet, montant_estime, urgence, statut, exercice,
+          created_at, submitted_at, validated_at, verified_at, verified_by,
+          direction_id, marche_id, imputation_id, dossier_id,
+          rejection_reason, date_differe, motif_differe, deadline_correction,
           direction:directions(id, code, label, sigle),
-          marche:marches!expressions_besoin_marche_id_fkey(
-            id, numero, objet, montant, mode_passation,
-            prestataire:prestataires(id, raison_sociale)
-          ),
-          imputation:imputations!expressions_besoin_imputation_id_fkey(
-            id, reference, objet, montant, code_imputation,
-            budget_line:budget_lines(id, code, label)
-          ),
-          attachments:expression_besoin_attachments(
-            id, document_type, file_name, file_path, file_size, file_type, uploaded_by, created_at
-          ),
-          dossier:dossiers(id, numero, objet),
-          creator:profiles!expressions_besoin_created_by_fkey(id, full_name),
-          validator:profiles!expressions_besoin_validated_by_fkey(id, full_name),
-          validations:expression_besoin_validations(
-            id, expression_besoin_id, step_order, role, status, validated_by, validated_at, comments,
-            validator:profiles!expression_besoin_validations_validated_by_fkey(id, full_name)
-          )
-        `
+          marche:marches!expressions_besoin_marche_id_fkey(id, numero),
+          creator:profiles!expressions_besoin_created_by_fkey(id, full_name)
+        `,
+          { count: 'exact' }
         )
-        .eq('exercice', exercice)
-        .order('created_at', { ascending: false });
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      // Server-side status filter
+      if (filters?.statut) {
+        query = query.eq('statut', filters.statut);
+      }
+
+      // Server-side search filter
+      if (filters?.search?.trim()) {
+        const term = `%${filters.search.trim()}%`;
+        query = query.or(`objet.ilike.${term},numero.ilike.${term}`);
+      }
+
+      const { data, error, count } = await query;
+      if (error) throw error;
+
+      return {
+        items: data as unknown as ExpressionBesoin[],
+        totalCount: count ?? 0,
+      };
+    },
+    enabled: !!exercice,
+    staleTime: 30_000,
+  });
+
+  const expressions = queryResult?.items ?? [];
+  const totalCount = queryResult?.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // =========================================================================
+  // Counts query (pattern from useImputations.ts)
+  // =========================================================================
+
+  const { data: counts = EMPTY_COUNTS } = useQuery({
+    queryKey: ['expressions-besoin-counts', exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('expressions_besoin')
+        .select('statut')
+        .eq('exercice', exercice || new Date().getFullYear());
 
       if (error) throw error;
 
-      // Derive verifier from CB validation step (FK to profiles not in PostgREST cache)
-      const enriched = (data as unknown as ExpressionBesoin[]).map((eb) => {
-        if (!eb.verifier && eb.verified_by && eb.validations) {
-          const cbValidation = eb.validations.find(
-            (v) => v.role === 'CB' && v.status === 'approved'
-          );
-          if (cbValidation?.validator) {
-            eb.verifier = cbValidation.validator;
-          }
+      const result: ExpressionBesoinCounts = { ...EMPTY_COUNTS };
+      for (const row of data || []) {
+        const s = (row.statut || 'brouillon') as keyof Omit<ExpressionBesoinCounts, 'total'>;
+        if (s in result) {
+          result[s]++;
         }
-        return eb;
-      });
-      return enriched;
+        result.total++;
+      }
+      return result;
     },
+    enabled: !!exercice,
+    staleTime: 30_000,
   });
 
-  // Fetch imputations validées disponibles pour créer une EB
+  // =========================================================================
+  // Imputations validées (for creating EBs)
+  // =========================================================================
+
   const { data: imputationsValidees = [] } = useQuery({
     queryKey: ['imputations-validees-pour-eb', exercice],
     queryFn: async () => {
@@ -255,6 +344,7 @@ export function useExpressionsBesoin() {
       return imputations?.filter((imp) => !usedImputationIds.has(imp.id)) || [];
     },
     enabled: !!exercice,
+    staleTime: 30_000,
   });
 
   // Fetch notes imputées disponibles pour créer une EB
@@ -278,6 +368,7 @@ export function useExpressionsBesoin() {
       return data;
     },
     enabled: !!exercice,
+    staleTime: 30_000,
   });
 
   // Fetch marchés attribués
@@ -298,7 +389,12 @@ export function useExpressionsBesoin() {
       if (error) throw error;
       return marches as MarcheValide[];
     },
+    staleTime: 30_000,
   });
+
+  // =========================================================================
+  // Mutations
+  // =========================================================================
 
   // Create expression de besoin (from marché)
   const createMutation = useMutation({
@@ -342,7 +438,7 @@ export function useExpressionsBesoin() {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin créée');
     },
     onError: (error) => {
@@ -389,7 +485,7 @@ export function useExpressionsBesoin() {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       queryClient.invalidateQueries({ queryKey: ['imputations-validees-pour-eb'] });
       toast.success('Expression de besoin créée avec succès');
     },
@@ -409,7 +505,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin mise à jour');
     },
     onError: (error) => {
@@ -456,7 +552,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin soumise');
     },
     onError: (error) => {
@@ -464,7 +560,7 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Verify expression (CB vérifie couverture budgétaire : soumis → verifie)
+  // Verify expression (CB vérifie couverture budgétaire : soumis -> verifie)
   const verifyMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
       // Enregistrer la validation CB (step 1)
@@ -494,7 +590,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Couverture budgétaire vérifiée, transmis au DG/DAAF');
     },
     onError: (error) => {
@@ -502,7 +598,7 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Validate expression (DG/DAAF valide : verifie → valide)
+  // Validate expression (DG/DAAF valide : verifie -> valide)
   const validateMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
       // Enregistrer la validation DG/DAAF (step 2)
@@ -532,7 +628,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin validée définitivement !');
     },
     onError: (error) => {
@@ -540,7 +636,7 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Reject expression (depuis soumis par CB ou depuis verifie par DG/DAAF)
+  // Reject expression
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
@@ -554,7 +650,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin rejetée');
     },
     onError: (error) => {
@@ -586,7 +682,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin différée');
     },
     onError: (error) => {
@@ -610,7 +706,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin reprise');
     },
     onError: (error) => {
@@ -625,7 +721,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin supprimée');
     },
     onError: (error) => {
@@ -633,7 +729,7 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Update articles (JSONB) on an existing EB — trigger recalculates montant_estime
+  // Update articles (JSONB) on an existing EB
   const updateArticlesMutation = useMutation({
     mutationFn: async ({ id, articles }: { id: string; articles: ExpressionBesoinLigne[] }) => {
       const articlesJson = JSON.parse(JSON.stringify(articles));
@@ -645,7 +741,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Articles mis à jour');
     },
     onError: (error) => {
@@ -663,7 +759,7 @@ export function useExpressionsBesoin() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      invalidateAll(queryClient);
       toast.success('Expression de besoin marquée comme satisfaite');
     },
     onError: (error) => {
@@ -671,29 +767,17 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Filter helpers
-  const expressionsAVerifier = expressions.filter((e) => e.statut === 'soumis');
-  const expressionsAValider = expressions.filter((e) => e.statut === 'verifie');
-  const expressionsValidees = expressions.filter((e) => e.statut === 'valide');
-  const expressionsRejetees = expressions.filter((e) => e.statut === 'rejete');
-  const expressionsDifferees = expressions.filter((e) => e.statut === 'differe');
-  const expressionsSatisfaites = expressions.filter((e) => e.statut === 'satisfaite');
-  const expressionsBrouillon = expressions.filter((e) => e.statut === 'brouillon');
-
   return {
     expressions,
-    expressionsAVerifier,
-    expressionsAValider,
-    expressionsValidees,
-    expressionsRejetees,
-    expressionsDifferees,
-    expressionsSatisfaites,
-    expressionsBrouillon,
+    totalCount,
+    totalPages,
+    counts,
+    imputationsValidees,
     marchesValides,
     notesImputees,
-    imputationsValidees,
     isLoading,
     error,
+    // Mutations
     createExpression: createMutation.mutateAsync,
     createFromImputation: createFromImputationMutation.mutateAsync,
     updateExpression: updateMutation.mutateAsync,

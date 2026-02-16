@@ -37,6 +37,11 @@ export interface ExportOptions {
   showTotals?: boolean;
   totalColumns?: string[];
   orientation?: 'portrait' | 'landscape';
+  additionalSheets?: Array<{
+    name: string;
+    data: Record<string, unknown>[];
+    columns: ExportColumn[];
+  }>;
 }
 
 export interface ExportResult {
@@ -257,6 +262,37 @@ export function exportToExcel(
     worksheet['!freeze'] = { xSplit: 0, ySplit: headerRows.length + 1 };
 
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Données');
+
+    // Add additional sheets if provided
+    if (options.additionalSheets) {
+      for (const sheet of options.additionalSheets) {
+        const sheetHeaders = sheet.columns.map((c) => c.label);
+        const sheetWs = XLSX.utils.aoa_to_sheet([sheetHeaders]);
+
+        if (sheet.data.length > 0) {
+          const sheetRows = sheet.data.map((row) =>
+            sheet.columns.map((col) => {
+              const rawValue = getNestedValue(row, col.key);
+              if (col.type === 'currency' || col.type === 'number') {
+                if (rawValue === null || rawValue === undefined || rawValue === '') return '';
+                const num = typeof rawValue === 'number' ? rawValue : parseFloat(String(rawValue));
+                return isNaN(num) ? '' : num;
+              }
+              return formatCellValue(rawValue, col);
+            })
+          );
+
+          XLSX.utils.sheet_add_aoa(sheetWs, sheetRows, { origin: 'A2' });
+        }
+
+        sheetWs['!cols'] = sheet.columns.map((col) => {
+          if (col.width) return { wch: col.width };
+          return { wch: Math.min(Math.max(col.label.length + 2, 10), 50) };
+        });
+
+        XLSX.utils.book_append_sheet(workbook, sheetWs, sheet.name);
+      }
+    }
 
     // Generate and download
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });

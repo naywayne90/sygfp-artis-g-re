@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Download, FileSpreadsheet, Filter, Loader2 } from 'lucide-react';
 import { useExportBudgetChain, ExportStep, ExportFilters } from '@/hooks/useExportBudgetChain';
+import { useDirections } from '@/hooks/useDirections';
 
 interface BudgetChainExportButtonProps {
   step: ExportStep;
@@ -107,6 +108,7 @@ export function BudgetChainExportButton({
   size = 'sm',
 }: BudgetChainExportButtonProps) {
   const { isExporting, exportStep } = useExportBudgetChain();
+  const { data: directions = [] } = useDirections();
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [filters, setFilters] = useState<ExportFilters>(defaultFilters);
 
@@ -187,6 +189,31 @@ export function BudgetChainExportButton({
                     {effectiveStatutOptions.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Filtre direction */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="direction" className="text-right">
+                Direction
+              </Label>
+              <div className="col-span-3">
+                <Select
+                  value={filters.directionId || ''}
+                  onValueChange={(value) => handleFilterChange('directionId', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Toutes les directions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Toutes les directions</SelectItem>
+                    {directions.map((dir) => (
+                      <SelectItem key={dir.id} value={dir.id}>
+                        {dir.sigle || dir.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -51,6 +51,17 @@ const EXPRESSION_COLUMNS: ExportColumn[] = [
   { key: 'direction_sigle', label: 'Direction', type: 'text', width: 10 },
   { key: 'urgence', label: 'Urgence', type: 'text', width: 10 },
   { key: 'statut', label: 'Statut', type: 'text', width: 12 },
+  { key: 'nb_articles', label: 'Nb Articles', type: 'number', width: 10 },
+  { key: 'articles_detail', label: 'Détail Articles', type: 'text', width: 50 },
+];
+
+const EXPRESSION_ARTICLES_COLUMNS: ExportColumn[] = [
+  { key: 'eb_numero', label: 'N° EB', type: 'text', width: 18 },
+  { key: 'designation', label: 'Désignation', type: 'text', width: 40 },
+  { key: 'quantite', label: 'Quantité', type: 'number', width: 10 },
+  { key: 'unite', label: 'Unité', type: 'text', width: 12 },
+  { key: 'prix_unitaire', label: 'PU (FCFA)', type: 'currency', width: 15 },
+  { key: 'prix_total', label: 'Total (FCFA)', type: 'currency', width: 15 },
 ];
 
 const ENGAGEMENT_COLUMNS: ExportColumn[] = [
@@ -126,7 +137,7 @@ export function useExportBudgetChain() {
         .select(
           `
         id, numero, objet, description, montant_estime, urgence, statut,
-        created_at, submitted_at, validated_at,
+        created_at, submitted_at, validated_at, liste_articles,
         direction:directions(sigle, label),
         marche:marches!expressions_besoin_marche_id_fkey(
           prestataire:prestataires(raison_sociale)
@@ -152,17 +163,32 @@ export function useExportBudgetChain() {
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((item, index) => ({
-        rowNum: index + 1,
-        numero: item.numero || '-',
-        created_at: item.created_at,
-        fournisseur: item.marche?.prestataire?.raison_sociale || '-',
-        objet: item.objet || '-',
-        montant_estime: item.montant_estime || 0,
-        direction_sigle: item.direction?.sigle || '-',
-        urgence: item.urgence || 'normale',
-        statut: item.statut || '-',
-      }));
+      return (data || []).map((item, index) => {
+        const articles = Array.isArray(item.liste_articles) ? item.liste_articles : [];
+        const articlesDetail = articles
+          .map((a: Record<string, unknown>) => {
+            const designation = (a.designation as string) || (a.article as string) || '?';
+            const qte = Number(a.quantite) || 0;
+            const pu = Number(a.prix_unitaire) || 0;
+            const total = Number(a.prix_total) || qte * pu;
+            return `${designation} (${qte} × ${new Intl.NumberFormat('fr-FR').format(pu)} = ${new Intl.NumberFormat('fr-FR').format(total)})`;
+          })
+          .join(' | ');
+
+        return {
+          rowNum: index + 1,
+          numero: item.numero || '-',
+          created_at: item.created_at,
+          fournisseur: item.marche?.prestataire?.raison_sociale || '-',
+          objet: item.objet || '-',
+          montant_estime: item.montant_estime || 0,
+          direction_sigle: item.direction?.sigle || '-',
+          urgence: item.urgence || 'normale',
+          statut: item.statut || '-',
+          nb_articles: articles.length,
+          articles_detail: articlesDetail || '-',
+        };
+      });
     },
     [exercice]
   );
@@ -393,13 +419,58 @@ export function useExportBudgetChain() {
         // Si exportAll, on ignore les filtres de statut
         const effectiveFilters = exportAll ? { ...filters, statut: undefined } : filters;
 
+        // Articles data for expression sheet
+        const expressionArticles: Record<string, unknown>[] = [];
+
         switch (step) {
-          case 'expression':
+          case 'expression': {
             data = await fetchExpressions(effectiveFilters);
             columns = EXPRESSION_COLUMNS;
             title = 'Expressions de Besoin';
             filename = `expressions_besoin_${exercice}`;
+
+            // Build flattened articles list for secondary sheet
+            let articlesQuery = supabase
+              .from('expressions_besoin')
+              .select('numero, liste_articles')
+              .eq('exercice', exercice);
+
+            if (effectiveFilters.statut) {
+              articlesQuery = articlesQuery.eq('statut', effectiveFilters.statut);
+            }
+            if (effectiveFilters.directionId) {
+              articlesQuery = articlesQuery.eq('direction_id', effectiveFilters.directionId);
+            }
+            if (effectiveFilters.dateDebut) {
+              articlesQuery = articlesQuery.gte('created_at', effectiveFilters.dateDebut);
+            }
+            if (effectiveFilters.dateFin) {
+              articlesQuery = articlesQuery.lte(
+                'created_at',
+                effectiveFilters.dateFin + 'T23:59:59'
+              );
+            }
+
+            const { data: articlesData } = await articlesQuery;
+            if (articlesData) {
+              for (const eb of articlesData) {
+                const articles = Array.isArray(eb.liste_articles) ? eb.liste_articles : [];
+                for (const a of articles as Record<string, unknown>[]) {
+                  const qte = Number(a.quantite) || 0;
+                  const pu = Number(a.prix_unitaire) || 0;
+                  expressionArticles.push({
+                    eb_numero: eb.numero || '-',
+                    designation: (a.designation as string) || (a.article as string) || '-',
+                    quantite: qte,
+                    unite: (a.unite as string) || '-',
+                    prix_unitaire: pu,
+                    prix_total: Number(a.prix_total) || qte * pu,
+                  });
+                }
+              }
+            }
             break;
+          }
 
           case 'engagement':
             data = await fetchEngagements(effectiveFilters);
@@ -456,6 +527,15 @@ export function useExportBudgetChain() {
           exercice,
           showTotals: true,
           totalColumns: ['montant', 'montant_estime', 'net_a_payer'],
+          ...(step === 'expression' && {
+            additionalSheets: [
+              {
+                name: 'Articles',
+                data: expressionArticles,
+                columns: EXPRESSION_ARTICLES_COLUMNS,
+              },
+            ],
+          }),
         };
 
         const result = exportToExcel(data, columns, options);

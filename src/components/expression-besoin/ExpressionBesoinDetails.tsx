@@ -20,6 +20,7 @@ import {
   ExpressionBesoinAttachment,
   useExpressionsBesoin,
 } from '@/hooks/useExpressionsBesoin';
+import { useExpressionBesoinDetail } from '@/hooks/useExpressionBesoinDetail';
 import { ArticlesTableEditor, type ArticleLigne } from './ArticlesTableEditor';
 import { ExpressionBesoinTimeline } from './ExpressionBesoinTimeline';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
@@ -65,7 +66,8 @@ import {
 } from 'lucide-react';
 
 interface ExpressionBesoinDetailsProps {
-  expression: ExpressionBesoin;
+  expression?: ExpressionBesoin;
+  expressionId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit?: (id: string) => void;
@@ -113,7 +115,8 @@ const URGENCE_CONFIG: Record<string, { label: string; className: string }> = {
 };
 
 export function ExpressionBesoinDetails({
-  expression,
+  expression: expressionProp,
+  expressionId,
   open,
   onOpenChange,
   onSubmit,
@@ -125,6 +128,56 @@ export function ExpressionBesoinDetails({
   onSaveArticles,
 }: ExpressionBesoinDetailsProps) {
   const navigate = useNavigate();
+
+  // Lazy-loading: fetch detail only when dialog is open
+  const { data: detailData, isLoading: isLoadingDetail } = useExpressionBesoinDetail(
+    expressionId ?? expressionProp?.id ?? null,
+    open
+  );
+  const resolvedExpression = detailData ?? expressionProp;
+
+  // All hooks MUST be called before any early return (rules of hooks)
+  const { updateArticles, isUpdatingArticles } = useExpressionsBesoin();
+  const [isEditingArticles, setIsEditingArticles] = useState(false);
+  const [editableArticles, setEditableArticles] = useState<ArticleLigne[]>([]);
+
+  const expressionIdForAudit = resolvedExpression?.id;
+  const { data: articleAuditLogs = [] } = useQuery({
+    queryKey: ['audit-logs-articles', expressionIdForAudit],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('entity_id', expressionIdForAudit as string)
+        .eq('action', 'update_articles')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: open && !!expressionIdForAudit,
+  });
+
+  // Show spinner while loading
+  if (isLoadingDetail && !resolvedExpression) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Guard: if no data at all, render nothing
+  if (!resolvedExpression) {
+    return null;
+  }
+
+  const expression = resolvedExpression;
+
   const status = STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
   const urgence = URGENCE_CONFIG[expression.urgence || 'normale'] || URGENCE_CONFIG.normale;
 
@@ -142,16 +195,14 @@ export function ExpressionBesoinDetails({
   const budgetDepasse = totalArticles > montantImpute && montantImpute > 0;
 
   // Inline editing with ArticlesTableEditor
-  const { updateArticles, isUpdatingArticles } = useExpressionsBesoin();
   const canEditArticles = expression.statut === 'brouillon' || expression.statut === 'rejete';
-  const [isEditingArticles, setIsEditingArticles] = useState(false);
-  const [editableArticles, setEditableArticles] = useState<ArticleLigne[]>([]);
 
   // Convert ExpressionBesoinLigne[] to ArticleLigne[] (backward compat)
   const toEditable = (items: ExpressionBesoinLigne[]): ArticleLigne[] =>
     items.map((a, i) => ({
       id: crypto.randomUUID(),
-      designation: a.designation || ((a as Record<string, unknown>).article as string) || '',
+      designation:
+        a.designation || ((a as unknown as Record<string, unknown>).article as string) || '',
       quantite: a.quantite,
       unite: a.unite,
       prix_unitaire: a.prix_unitaire,
@@ -198,23 +249,6 @@ export function ExpressionBesoinDetails({
       toast.error('Erreur lors de la sauvegarde des articles');
     }
   };
-
-  // Audit log query for article modifications
-  const { data: articleAuditLogs = [] } = useQuery({
-    queryKey: ['audit-logs-articles', expression.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .eq('entity_id', expression.id)
-        .eq('action', 'update_articles')
-        .order('created_at', { ascending: false })
-        .limit(20);
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: open,
-  });
 
   const handlePrintArticles = async () => {
     try {

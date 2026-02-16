@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ExpressionBesoin, useExpressionsBesoin } from '@/hooks/useExpressionsBesoin';
+import type { ExpressionBesoin } from '@/hooks/useExpressionsBesoin';
 import { usePermissions } from '@/hooks/usePermissions';
 import { ExpressionBesoinDetails } from './ExpressionBesoinDetails';
 import { ExpressionBesoinRejectDialog } from './ExpressionBesoinRejectDialog';
@@ -43,6 +43,15 @@ import { useNavigate } from 'react-router-dom';
 interface ExpressionBesoinListProps {
   expressions: ExpressionBesoin[];
   showActions?: boolean;
+  // Mutations passed from parent (page) to avoid duplicate hook call
+  onSubmit?: (id: string) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
+  onVerify?: (params: { id: string; comments?: string }) => Promise<void>;
+  onValidate?: (params: { id: string; comments?: string }) => Promise<void>;
+  onReject?: (params: { id: string; reason: string }) => Promise<void>;
+  onDefer?: (params: { id: string; motif: string; dateReprise?: string }) => Promise<void>;
+  onResume?: (id: string) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 const STATUS_CONFIG: Record<
@@ -68,21 +77,20 @@ const URGENCE_CONFIG: Record<string, { label: string; className: string }> = {
 export function ExpressionBesoinList({
   expressions,
   showActions = true,
+  onSubmit,
+  onDelete,
+  onVerify,
+  onValidate,
+  onReject,
+  onDefer,
+  onResume,
+  isSubmitting,
 }: ExpressionBesoinListProps) {
   const navigate = useNavigate();
-  const {
-    submitExpression,
-    verifyExpression,
-    validateExpression,
-    rejectExpression,
-    deferExpression,
-    resumeExpression,
-    deleteExpression,
-    isSubmitting,
-  } = useExpressionsBesoin();
-
   const { canVerifyEB, canValidateEB } = usePermissions();
 
+  // Detail dialog — pass only the ID for lazy loading
+  const [selectedExpressionId, setSelectedExpressionId] = useState<string | null>(null);
   const [selectedExpression, setSelectedExpression] = useState<ExpressionBesoin | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -91,45 +99,51 @@ export function ExpressionBesoinList({
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
 
   const handleSubmit = async (expression: ExpressionBesoin) => {
-    await submitExpression(expression.id);
+    if (onSubmit) await onSubmit(expression.id);
   };
 
   const handleVerify = async (comments?: string) => {
-    if (!selectedExpression) return;
-    await verifyExpression({ id: selectedExpression.id, comments });
+    if (!selectedExpression || !onVerify) return;
+    await onVerify({ id: selectedExpression.id, comments });
     setShowVerifyDialog(false);
   };
 
   const handleValidate = async (comments?: string) => {
-    if (!selectedExpression) return;
-    await validateExpression({ id: selectedExpression.id, comments });
+    if (!selectedExpression || !onValidate) return;
+    await onValidate({ id: selectedExpression.id, comments });
     setShowValidateDialog(false);
   };
 
   const handleReject = async (reason: string) => {
-    if (!selectedExpression) return;
-    await rejectExpression({ id: selectedExpression.id, reason });
+    if (!selectedExpression || !onReject) return;
+    await onReject({ id: selectedExpression.id, reason });
     setShowRejectDialog(false);
   };
 
   const handleDefer = async (motif: string, dateReprise?: string) => {
-    if (!selectedExpression) return;
-    await deferExpression({ id: selectedExpression.id, motif, dateReprise });
+    if (!selectedExpression || !onDefer) return;
+    await onDefer({ id: selectedExpression.id, motif, dateReprise });
     setShowDeferDialog(false);
   };
 
   const handleResume = async (expression: ExpressionBesoin) => {
-    await resumeExpression(expression.id);
+    if (onResume) await onResume(expression.id);
   };
 
   const handleDelete = async (expression: ExpressionBesoin) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette expression de besoin ?')) {
-      await deleteExpression(expression.id);
+      if (onDelete) await onDelete(expression.id);
     }
   };
 
   const handleCreateEngagement = (expression: ExpressionBesoin) => {
     navigate(`/engagements?expression_id=${expression.id}`);
+  };
+
+  const openDetail = (expression: ExpressionBesoin) => {
+    setSelectedExpression(expression);
+    setSelectedExpressionId(expression.id);
+    setShowDetails(true);
   };
 
   if (expressions.length === 0) {
@@ -199,12 +213,7 @@ export function ExpressionBesoinList({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedExpression(expression);
-                            setShowDetails(true);
-                          }}
-                        >
+                        <DropdownMenuItem onClick={() => openDetail(expression)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Voir détails
                         </DropdownMenuItem>
@@ -321,27 +330,44 @@ export function ExpressionBesoinList({
         </TableBody>
       </Table>
 
+      {/* Detail dialog with lazy loading via expressionId */}
+      <ExpressionBesoinDetails
+        expressionId={selectedExpressionId ?? undefined}
+        expression={selectedExpression ?? undefined}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+        onSubmit={onSubmit ? (id) => onSubmit(id) : undefined}
+        onVerify={
+          onVerify
+            ? () => {
+                setShowDetails(false);
+                setShowVerifyDialog(true);
+              }
+            : undefined
+        }
+        onValidate={
+          onValidate
+            ? () => {
+                setShowDetails(false);
+                setShowValidateDialog(true);
+              }
+            : undefined
+        }
+        onReject={
+          onReject
+            ? () => {
+                setShowDetails(false);
+                setShowRejectDialog(true);
+              }
+            : undefined
+        }
+        onDelete={
+          onDelete ? () => selectedExpression && handleDelete(selectedExpression) : undefined
+        }
+      />
+
       {selectedExpression && (
         <>
-          <ExpressionBesoinDetails
-            expression={selectedExpression}
-            open={showDetails}
-            onOpenChange={setShowDetails}
-            onSubmit={(id) => submitExpression(id)}
-            onVerify={() => {
-              setShowDetails(false);
-              setShowVerifyDialog(true);
-            }}
-            onValidate={() => {
-              setShowDetails(false);
-              setShowValidateDialog(true);
-            }}
-            onReject={() => {
-              setShowDetails(false);
-              setShowRejectDialog(true);
-            }}
-            onDelete={() => handleDelete(selectedExpression)}
-          />
           <ExpressionBesoinRejectDialog
             open={showRejectDialog}
             onOpenChange={setShowRejectDialog}

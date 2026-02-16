@@ -22,6 +22,7 @@ import {
 } from '@/components/expression-besoin/ExpressionBesoinFromImputationForm';
 import { ExpressionBesoinList } from '@/components/expression-besoin/ExpressionBesoinList';
 import { ExpressionBesoinDetails } from '@/components/expression-besoin/ExpressionBesoinDetails';
+import { ExpressionBesoinExportButton } from '@/components/expression-besoin/ExpressionBesoinExportButton';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -43,7 +44,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,45 +53,77 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 
+// Tab -> server statut filter mapping
+const TAB_STATUT: Record<string, string | undefined> = {
+  a_traiter: undefined,
+  brouillons: 'brouillon',
+  a_verifier: 'soumis',
+  a_valider: 'verifie',
+  validees: 'valide',
+  satisfaites: 'satisfaite',
+  rejetees: 'rejete',
+  differees: 'differe',
+  toutes: undefined,
+};
+
 export default function ExpressionBesoin() {
   const { exercice: _exercice } = useExercice();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { canVerifyEB, canValidateEB } = usePermissions();
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('a_traiter');
+
+  // Reset page on tab or search change
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, searchTerm]);
+
+  // Server filter based on active tab
+  const serverStatut = TAB_STATUT[activeTab];
+
   const {
     expressions,
-    expressionsAVerifier,
-    expressionsAValider,
-    expressionsValidees,
-    expressionsRejetees,
-    expressionsDifferees,
-    expressionsSatisfaites,
-    expressionsBrouillon,
+    totalCount,
+    totalPages,
+    counts,
     imputationsValidees,
     isLoading,
-  } = useExpressionsBesoin();
-
-  const { canVerifyEB, canValidateEB } = usePermissions();
+    // Mutations
+    submitExpression,
+    verifyExpression,
+    validateExpression,
+    rejectExpression,
+    deferExpression,
+    resumeExpression,
+    deleteExpression,
+    isSubmitting,
+  } = useExpressionsBesoin({
+    statut: serverStatut,
+    search: searchTerm || undefined,
+    page,
+    pageSize,
+  });
 
   const [showForm, setShowForm] = useState(false);
   const [showImputationForm, setShowImputationForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('a_traiter');
   const [sourceImputation, setSourceImputation] = useState<ImputationValidee | null>(null);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
-  const [viewExpression, setViewExpression] = useState<(typeof expressions)[0] | null>(null);
+  const [viewExpressionId, setViewExpressionId] = useState<string | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
 
-  // Gérer le paramètre ?view= pour ouvrir le détail
+  // Gérer le paramètre ?view= pour ouvrir le détail (lazy-loaded by ID)
   useEffect(() => {
     const viewId = searchParams.get('view');
-    if (viewId && expressions.length > 0) {
-      const found = expressions.find((e) => e.id === viewId);
-      if (found) {
-        setViewExpression(found);
-        setShowViewDialog(true);
-      }
+    if (viewId) {
+      setViewExpressionId(viewId);
+      setShowViewDialog(true);
     }
-  }, [searchParams, expressions]);
+  }, [searchParams]);
 
   // Gérer le paramètre sourceImputation depuis l'URL
   useEffect(() => {
@@ -129,38 +162,10 @@ export default function ExpressionBesoin() {
     setSearchParams(searchParams, { replace: true });
   };
 
-  const filteredExpressions = expressions.filter(
-    (e) =>
-      e.numero?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.objet.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.direction?.label?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getFilteredByTab = () => {
-    switch (activeTab) {
-      case 'brouillons':
-        return filteredExpressions.filter((e) => e.statut === 'brouillon');
-      case 'a_verifier':
-        return filteredExpressions.filter((e) => e.statut === 'soumis');
-      case 'a_valider':
-        return filteredExpressions.filter((e) => e.statut === 'verifie');
-      case 'validees':
-        return filteredExpressions.filter((e) => e.statut === 'valide');
-      case 'rejetees':
-        return filteredExpressions.filter((e) => e.statut === 'rejete');
-      case 'differees':
-        return filteredExpressions.filter((e) => e.statut === 'differe');
-      case 'satisfaites':
-        return filteredExpressions.filter((e) => e.statut === 'satisfaite');
-      default:
-        return filteredExpressions;
-    }
-  };
-
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
-  if (isLoading || isLoadingSource) {
+  if (isLoadingSource) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -177,7 +182,9 @@ export default function ExpressionBesoin() {
         stepNumber={4}
         backUrl="/"
       >
-        <BudgetChainExportButton step="expression" />
+        <ExpressionBesoinExportButton
+          filters={{ statut: serverStatut, search: searchTerm || undefined }}
+        />
         <Button variant="outline" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Depuis marché
@@ -207,7 +214,7 @@ export default function ExpressionBesoin() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsBrouillon?.length || 0}</div>
+            <div className="text-2xl font-bold">{counts.brouillon}</div>
             <p className="text-xs text-muted-foreground">En cours</p>
           </CardContent>
         </Card>
@@ -221,7 +228,7 @@ export default function ExpressionBesoin() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-              {expressionsAVerifier.length}
+              {counts.soumis}
             </div>
             <p className="text-xs text-blue-600/70 dark:text-blue-400/70">CB (couverture budget)</p>
           </CardContent>
@@ -233,7 +240,7 @@ export default function ExpressionBesoin() {
             <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsAValider.length}</div>
+            <div className="text-2xl font-bold">{counts.verifie}</div>
             <p className="text-xs text-muted-foreground">DG/DAAF</p>
           </CardContent>
         </Card>
@@ -244,7 +251,7 @@ export default function ExpressionBesoin() {
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsValidees.length}</div>
+            <div className="text-2xl font-bold">{counts.valide}</div>
             <p className="text-xs text-muted-foreground">Prêtes passation</p>
           </CardContent>
         </Card>
@@ -255,7 +262,7 @@ export default function ExpressionBesoin() {
             <CheckCircle2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsSatisfaites?.length || 0}</div>
+            <div className="text-2xl font-bold">{counts.satisfaite}</div>
             <p className="text-xs text-muted-foreground">Passation créée</p>
           </CardContent>
         </Card>
@@ -266,7 +273,7 @@ export default function ExpressionBesoin() {
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsRejetees.length}</div>
+            <div className="text-2xl font-bold">{counts.rejete}</div>
             <p className="text-xs text-muted-foreground">Refusées</p>
           </CardContent>
         </Card>
@@ -277,7 +284,7 @@ export default function ExpressionBesoin() {
             <PauseCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{expressionsDifferees.length}</div>
+            <div className="text-2xl font-bold">{counts.differe}</div>
             <p className="text-xs text-muted-foreground">Reportées</p>
           </CardContent>
         </Card>
@@ -335,29 +342,23 @@ export default function ExpressionBesoin() {
                   {imputationsValidees.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="brouillons">
-                Brouillons ({expressionsBrouillon?.length || 0})
-              </TabsTrigger>
+              <TabsTrigger value="brouillons">Brouillons ({counts.brouillon})</TabsTrigger>
               {canVerifyEB() && (
                 <TabsTrigger value="a_verifier" className="gap-1">
                   <ShieldCheck className="h-3 w-3" />À vérifier
                   <Badge variant="secondary" className="ml-1 text-xs bg-blue-100 text-blue-700">
-                    {expressionsAVerifier.length}
+                    {counts.soumis}
                   </Badge>
                 </TabsTrigger>
               )}
               {canValidateEB() && (
-                <TabsTrigger value="a_valider">
-                  À valider ({expressionsAValider.length})
-                </TabsTrigger>
+                <TabsTrigger value="a_valider">À valider ({counts.verifie})</TabsTrigger>
               )}
-              <TabsTrigger value="validees">Validées ({expressionsValidees.length})</TabsTrigger>
-              <TabsTrigger value="satisfaites">
-                Satisfaites ({expressionsSatisfaites?.length || 0})
-              </TabsTrigger>
-              <TabsTrigger value="rejetees">Rejetées ({expressionsRejetees.length})</TabsTrigger>
-              <TabsTrigger value="differees">Différées ({expressionsDifferees.length})</TabsTrigger>
-              <TabsTrigger value="toutes">Toutes ({expressions.length})</TabsTrigger>
+              <TabsTrigger value="validees">Validées ({counts.valide})</TabsTrigger>
+              <TabsTrigger value="satisfaites">Satisfaites ({counts.satisfaite})</TabsTrigger>
+              <TabsTrigger value="rejetees">Rejetées ({counts.rejete})</TabsTrigger>
+              <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
+              <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
             </TabsList>
 
             {/* Onglet Imputations à traiter */}
@@ -424,70 +425,78 @@ export default function ExpressionBesoin() {
 
             {/* Onglet validées avec action passation */}
             <TabsContent value="validees">
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Référence</TableHead>
-                      <TableHead>Objet</TableHead>
-                      <TableHead>Direction</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {expressionsValidees.length === 0 ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                          Aucune expression de besoin validée
-                        </TableCell>
+                        <TableHead>Référence</TableHead>
+                        <TableHead>Objet</TableHead>
+                        <TableHead>Direction</TableHead>
+                        <TableHead className="text-right">Montant</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      expressionsValidees.map((eb) => (
-                        <TableRow key={eb.id}>
-                          <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
-                          <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
-                          <TableCell>{eb.direction?.sigle || eb.direction?.label || '-'}</TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatMontant(eb.montant_estime)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    navigate(`/execution/expression-besoin?view=${eb.id}`)
-                                  }
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    navigate(`/execution/passation-marche?sourceEB=${eb.id}`)
-                                  }
-                                  className="text-primary"
-                                >
-                                  <FileSignature className="mr-2 h-4 w-4" />
-                                  Créer passation marché
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                    </TableHeader>
+                    <TableBody>
+                      {expressions.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                            Aucune expression de besoin validée
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      ) : (
+                        expressions.map((eb) => (
+                          <TableRow key={eb.id}>
+                            <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
+                            <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
+                            <TableCell>
+                              {eb.direction?.sigle || eb.direction?.label || '-'}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatMontant(eb.montant_estime)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      navigate(`/execution/expression-besoin?view=${eb.id}`)
+                                    }
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Voir détails
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      navigate(`/execution/passation-marche?sourceEB=${eb.id}`)
+                                    }
+                                    className="text-primary"
+                                  >
+                                    <FileSignature className="mr-2 h-4 w-4" />
+                                    Créer passation marché
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </TabsContent>
 
-            {/* Autres onglets */}
+            {/* Autres onglets — server-filtered data from the hook */}
             {[
               'toutes',
               'brouillons',
@@ -498,31 +507,58 @@ export default function ExpressionBesoin() {
               'differees',
             ].map((tab) => (
               <TabsContent key={tab} value={tab}>
-                <ExpressionBesoinList expressions={getFilteredByTab()} />
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <ExpressionBesoinList
+                    expressions={expressions}
+                    onSubmit={submitExpression}
+                    onDelete={deleteExpression}
+                    onVerify={verifyExpression}
+                    onValidate={validateExpression}
+                    onReject={rejectExpression}
+                    onDefer={deferExpression}
+                    onResume={resumeExpression}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
               </TabsContent>
             ))}
           </Tabs>
+
+          {/* Pagination */}
+          <NotesPagination
+            page={page}
+            pageSize={pageSize}
+            total={totalCount}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setPage(1);
+            }}
+          />
         </CardContent>
       </Card>
 
       {/* Form dialog depuis marché */}
       <ExpressionBesoinForm open={showForm} onOpenChange={setShowForm} />
 
-      {/* Detail dialog via ?view= */}
-      {viewExpression && (
-        <ExpressionBesoinDetails
-          expression={viewExpression}
-          open={showViewDialog}
-          onOpenChange={(open) => {
-            setShowViewDialog(open);
-            if (!open) {
-              setViewExpression(null);
-              searchParams.delete('view');
-              setSearchParams(searchParams, { replace: true });
-            }
-          }}
-        />
-      )}
+      {/* Detail dialog via ?view= (lazy loaded by ID) */}
+      <ExpressionBesoinDetails
+        expressionId={viewExpressionId ?? undefined}
+        open={showViewDialog}
+        onOpenChange={(open) => {
+          setShowViewDialog(open);
+          if (!open) {
+            setViewExpressionId(null);
+            searchParams.delete('view');
+            setSearchParams(searchParams, { replace: true });
+          }
+        }}
+      />
 
       {/* Form dialog depuis imputation */}
       <ExpressionBesoinFromImputationForm
