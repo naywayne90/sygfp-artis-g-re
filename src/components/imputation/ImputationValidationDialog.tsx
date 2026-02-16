@@ -125,7 +125,7 @@ export function ImputationValidationDialog({
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin mr-2 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                Calcul de l'impact budgetaire...
+                Calcul de l'impact budgétaire...
               </span>
             </div>
           )}
@@ -136,7 +136,7 @@ export function ImputationValidationDialog({
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Erreur</AlertTitle>
               <AlertDescription>
-                Impossible de calculer l'impact budgetaire :{' '}
+                Impossible de calculer l'impact budgétaire :{' '}
                 {previewError instanceof Error ? previewError.message : 'Erreur inconnue'}
               </AlertDescription>
             </Alert>
@@ -146,10 +146,10 @@ export function ImputationValidationDialog({
           {preview && !loadingPreview && !hasBudgetLine && (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Aucune ligne budgetaire</AlertTitle>
+              <AlertTitle>Aucune ligne budgétaire</AlertTitle>
               <AlertDescription>
-                Cette imputation n'est pas rattachee a une ligne budgetaire. Aucune reservation de
-                credits ne sera effectuee.
+                Cette imputation n'est pas rattachée à une ligne budgétaire. Aucune réservation de
+                crédits ne sera effectuée.
               </AlertDescription>
             </Alert>
           )}
@@ -159,12 +159,12 @@ export function ImputationValidationDialog({
             <Card className="border-blue-200 dark:border-blue-800">
               <CardContent className="pt-4 space-y-3">
                 <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-400">
-                  Impact budgetaire
+                  Impact budgétaire
                 </h4>
 
-                {/* Ligne budgetaire */}
+                {/* Ligne budgétaire */}
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Ligne budgetaire</span>
+                  <span className="text-muted-foreground">Ligne budgétaire</span>
                   <span className="font-mono text-xs text-right max-w-[60%] truncate">
                     {preview.budget_code} — {preview.budget_label}
                   </span>
@@ -178,7 +178,7 @@ export function ImputationValidationDialog({
 
                 {/* Engage */}
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Deja engage</span>
+                  <span className="text-muted-foreground">Déjà engagé</span>
                   <span className="font-mono text-orange-600">
                     {formatMontant(preview.engage ?? 0)}
                   </span>
@@ -186,7 +186,7 @@ export function ImputationValidationDialog({
 
                 {/* Reserve */}
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Deja reserve</span>
+                  <span className="text-muted-foreground">Déjà réservé</span>
                   <span className="font-mono text-orange-600">
                     {formatMontant(preview.reserve ?? 0)}
                   </span>
@@ -202,17 +202,17 @@ export function ImputationValidationDialog({
 
                 <Separator />
 
-                {/* Montant a reserver */}
+                {/* Montant à réserver */}
                 <div className="flex justify-between text-sm">
-                  <span className="font-semibold text-primary">Montant a reserver</span>
+                  <span className="font-semibold text-primary">Montant à réserver</span>
                   <span className="font-mono font-bold text-primary">
                     {formatMontant(imputation?.montant ?? 0)}
                   </span>
                 </div>
 
-                {/* Disponible apres */}
+                {/* Disponible après */}
                 <div className="flex justify-between text-sm">
-                  <span className="font-semibold">Disponible apres</span>
+                  <span className="font-semibold">Disponible après</span>
                   <span
                     className={`font-mono font-bold ${
                       (preview.disponible_apres ?? 0) >= 0 ? 'text-green-600' : 'text-destructive'
@@ -250,10 +250,10 @@ export function ImputationValidationDialog({
               <ShieldAlert className="h-4 w-4" />
               <AlertTitle>Budget insuffisant</AlertTitle>
               <AlertDescription>
-                Le disponible sera negatif apres cette validation.
+                Le disponible sera négatif après cette validation.
                 {isForced
-                  ? " L'imputation est forcee : la validation est autorisee malgre le depassement."
-                  : ' Un depassement necessite une justification et un virement correctif.'}
+                  ? " L'imputation est forcée : la validation est autorisée malgré le dépassement."
+                  : ' Un dépassement nécessite une justification et un virement correctif.'}
               </AlertDescription>
             </Alert>
           )}
@@ -263,8 +263,8 @@ export function ImputationValidationDialog({
             <div className="flex gap-2">
               <Info className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-emerald-700 dark:text-emerald-400">
-                Cette action est irreversible. Le montant sera reserve sur la ligne budgetaire et le
-                disponible diminuera en consequence.
+                Cette action est irréversible. Le montant sera réservé sur la ligne budgétaire et le
+                disponible diminuera en conséquence.
               </p>
             </div>
           </div>

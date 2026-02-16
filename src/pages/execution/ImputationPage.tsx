@@ -30,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { formatMontant } from '@/lib/config/sygfp-constants';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -227,8 +228,7 @@ export default function ImputationPage() {
     navigate(`/recherche?dossier=${dossierId}`);
   };
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+  // formatMontant importé depuis @/lib/config/sygfp-constants
 
   // KPIs pour l'onglet validation (données serveur)
   const validationKpis = useMemo(() => {
