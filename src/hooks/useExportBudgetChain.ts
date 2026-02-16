@@ -160,7 +160,7 @@ export function useExportBudgetChain() {
         objet: item.objet || '-',
         montant_estime: item.montant_estime || 0,
         direction_sigle: item.direction?.sigle || '-',
-        urgence: item.urgence || 'normal',
+        urgence: item.urgence || 'normale',
         statut: item.statut || '-',
       }));
     },

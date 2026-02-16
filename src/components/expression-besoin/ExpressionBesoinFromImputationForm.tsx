@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,16 +25,31 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { URGENCE_OPTIONS, ExpressionBesoinLigne } from '@/hooks/useExpressionsBesoin';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  useExpressionsBesoin,
+  URGENCE_OPTIONS,
+  ExpressionBesoinLigne,
+} from '@/hooks/useExpressionsBesoin';
 import { useExercice } from '@/contexts/ExerciceContext';
-import { CreditCard, Calendar, Loader2, Search, Plus, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { AttachmentService } from '@/services/attachmentService';
+import {
+  CreditCard,
+  Calendar,
+  Loader2,
+  Search,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  Paperclip,
+  X,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
 
 export interface ImputationValidee {
   id: string;
@@ -57,6 +72,11 @@ interface ArticleLigne {
   prix_total: number;
 }
 
+interface SelectedFile {
+  file: File;
+  typePiece: string;
+}
+
 interface ExpressionBesoinFromImputationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -76,6 +96,15 @@ const UNITES = [
   { value: 'forfait', label: 'Forfait' },
 ];
 
+const TYPES_PIECES = [
+  { value: 'tdr', label: 'Termes de référence (TDR)' },
+  { value: 'devis', label: 'Devis' },
+  { value: 'specifications', label: 'Spécifications techniques' },
+];
+
+const MAX_FILES = 3;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 Mo
+
 export function ExpressionBesoinFromImputationForm({
   open,
   onOpenChange,
@@ -84,11 +113,12 @@ export function ExpressionBesoinFromImputationForm({
   onSuccess,
 }: ExpressionBesoinFromImputationFormProps) {
   const { exercice } = useExercice();
-  const queryClient = useQueryClient();
+  const { createFromImputation, isCreating } = useExpressionsBesoin();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedImputation, setSelectedImputation] = useState<ImputationValidee | null>(null);
   const [searchImputation, setSearchImputation] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     objet: '',
@@ -98,7 +128,7 @@ export function ExpressionBesoinFromImputationForm({
     calendrier_debut: '',
     calendrier_fin: '',
     montant_estime: '',
-    urgence: 'normal',
+    urgence: 'normale',
     lieu_livraison: '',
     delai_livraison: '',
     contact_livraison: '',
@@ -114,6 +144,8 @@ export function ExpressionBesoinFromImputationForm({
       prix_total: 0,
     },
   ]);
+
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
 
   // Auto-sélectionner l'imputation si elle est fournie
   useEffect(() => {
@@ -163,75 +195,148 @@ export function ExpressionBesoinFromImputationForm({
     }
   };
 
+  // Calcul du total des articles
+  const totalArticles = articles.reduce((sum, a) => sum + a.prix_total, 0);
+  const montantImpute = selectedImputation?.montant || 0;
+  const hasValidArticles = articles.some((a) => a.designation.trim() !== '');
+  const budgetDepasse = totalArticles > montantImpute && montantImpute > 0 && hasValidArticles;
+
   const handleArticleChange = (id: string, field: keyof ArticleLigne, value: string | number) => {
-    setArticles((prev) =>
-      prev.map((a) => {
+    setArticles((prev) => {
+      const updated = prev.map((a) => {
         if (a.id !== id) return a;
-        const updated = { ...a, [field]: value };
+        const upd = { ...a, [field]: value };
         if (field === 'quantite' || field === 'prix_unitaire') {
-          updated.prix_total = updated.quantite * updated.prix_unitaire;
+          upd.prix_total = upd.quantite * upd.prix_unitaire;
         }
-        return updated;
-      })
-    );
+        return upd;
+      });
+      // Auto-calcul du montant estimé
+      const newTotal = updated.reduce((sum, a) => sum + a.prix_total, 0);
+      if (newTotal > 0) {
+        setFormData((f) => ({ ...f, montant_estime: newTotal.toString() }));
+      }
+      return updated;
+    });
+  };
+
+  // Gestion des pièces jointes
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const remainingSlots = MAX_FILES - selectedFiles.length;
+    if (remainingSlots <= 0) {
+      toast.error(`Maximum ${MAX_FILES} pièces jointes autorisées`);
+      return;
+    }
+
+    const newFiles: SelectedFile[] = [];
+    for (let i = 0; i < Math.min(files.length, remainingSlots); i++) {
+      const file = files[i];
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name} dépasse la taille maximale de 10 Mo`);
+        continue;
+      }
+      const validation = AttachmentService.validateFile(file);
+      if (!validation.valid) {
+        toast.error(`${file.name}: ${validation.error}`);
+        continue;
+      }
+      newFiles.push({ file, typePiece: 'specifications' });
+    }
+
+    if (newFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
+    }
+
+    // Reset input pour permettre la re-sélection du même fichier
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleFileTypeChange = (index: number, typePiece: string) => {
+    setSelectedFiles((prev) => prev.map((f, i) => (i === index ? { ...f, typePiece } : f)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedImputation) return;
 
-    setIsCreating(true);
+    // Validation: au moins un article avec désignation
+    const listeArticles: ExpressionBesoinLigne[] = articles
+      .filter((a) => a.designation.trim() !== '')
+      .map(({ designation, quantite, unite, prix_unitaire, prix_total }) => ({
+        designation,
+        quantite,
+        unite,
+        prix_unitaire,
+        prix_total,
+      }));
+
+    if (listeArticles.length === 0) {
+      toast.error('Veuillez saisir au moins un article avec une désignation');
+      return;
+    }
+
+    // Bloquer si dépassement budget
+    if (budgetDepasse) {
+      toast.error('Le total des articles dépasse le montant imputé');
+      return;
+    }
+
     try {
-      // Préparer les articles pour le JSON
-      const listeArticles: Omit<ExpressionBesoinLigne, 'article'>[] = articles
-        .filter((a) => a.designation.trim() !== '')
-        .map(({ designation, quantite, unite, prix_unitaire, prix_total }) => ({
-          designation,
-          quantite,
-          unite,
-          prix_unitaire,
-          prix_total,
-        }));
+      const result = await createFromImputation({
+        imputation_id: selectedImputation.id,
+        dossier_id: selectedImputation.dossier_id || null,
+        direction_id: selectedImputation.direction_id || null,
+        objet: formData.objet,
+        description: formData.description || null,
+        justification: formData.justification || null,
+        specifications: formData.specifications || null,
+        calendrier_debut: formData.calendrier_debut || null,
+        calendrier_fin: formData.calendrier_fin || null,
+        montant_estime: formData.montant_estime ? parseFloat(formData.montant_estime) : null,
+        urgence: formData.urgence,
+        lieu_livraison: formData.lieu_livraison || null,
+        delai_livraison: formData.delai_livraison || null,
+        contact_livraison: formData.contact_livraison || null,
+        liste_articles: listeArticles,
+      });
 
-      // Créer l'expression de besoin
-      const { data: _data, error } = await supabase
-        .from('expressions_besoin')
-        .insert({
-          imputation_id: selectedImputation.id,
-          dossier_id: selectedImputation.dossier_id,
-          direction_id: selectedImputation.direction_id,
-          objet: formData.objet,
-          description: formData.description || null,
-          justification: formData.justification || null,
-          specifications: formData.specifications || null,
-          calendrier_debut: formData.calendrier_debut || null,
-          calendrier_fin: formData.calendrier_fin || null,
-          montant_estime: formData.montant_estime ? parseFloat(formData.montant_estime) : null,
-          urgence: formData.urgence,
-          lieu_livraison: formData.lieu_livraison || null,
-          delai_livraison: formData.delai_livraison || null,
-          contact_livraison: formData.contact_livraison || null,
-          liste_articles: listeArticles,
+      // Upload des PJ après création réussie
+      if (selectedFiles.length > 0 && result?.id) {
+        setIsUploading(true);
+        const dossierRef = selectedImputation.reference || result.id;
+        const filesToUpload = selectedFiles.map((sf) => sf.file);
+
+        const uploadResult = await AttachmentService.uploadFiles({
+          dossierRef,
+          step: 'expression_besoin',
+          files: filesToUpload,
           exercice: exercice || new Date().getFullYear(),
-          statut: 'brouillon',
-        })
-        .select()
-        .single();
+          entityId: result.id,
+        });
 
-      if (error) throw error;
-
-      toast.success('Expression de besoin créée avec succès');
-      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
-      queryClient.invalidateQueries({ queryKey: ['imputations-validees-pour-eb'] });
+        if (uploadResult.failedCount > 0) {
+          toast.warning(
+            `${uploadResult.successCount} fichier(s) uploadé(s), ${uploadResult.failedCount} en erreur`
+          );
+        }
+        setIsUploading(false);
+      }
 
       onOpenChange(false);
       resetForm();
       onSuccess?.();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Erreur inconnue';
-      toast.error('Erreur lors de la création: ' + message);
-    } finally {
-      setIsCreating(false);
+    } catch {
+      // Error handled by hook's onError
+      setIsUploading(false);
     }
   };
 
@@ -246,7 +351,7 @@ export function ExpressionBesoinFromImputationForm({
       calendrier_debut: '',
       calendrier_fin: '',
       montant_estime: '',
-      urgence: 'normal',
+      urgence: 'normale',
       lieu_livraison: '',
       delai_livraison: '',
       contact_livraison: '',
@@ -261,10 +366,13 @@ export function ExpressionBesoinFromImputationForm({
         prix_total: 0,
       },
     ]);
+    setSelectedFiles([]);
   };
 
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+
+  const isBusy = isCreating || isUploading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -332,7 +440,7 @@ export function ExpressionBesoinFromImputationForm({
             </Card>
           ) : (
             <>
-              {/* Informations de l'imputation sélectionnée */}
+              {/* Informations de l'imputation sélectionnée — enrichies */}
               <Card className="bg-muted/50">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-center">
@@ -360,9 +468,28 @@ export function ExpressionBesoinFromImputationForm({
                         {selectedImputation.reference || 'En attente'}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Montant:</span>{' '}
-                      <span className="font-medium">
+                    {selectedImputation.direction && (
+                      <div>
+                        <span className="text-muted-foreground">Direction:</span>{' '}
+                        <span className="font-medium">
+                          {selectedImputation.direction.sigle || selectedImputation.direction.label}
+                        </span>
+                      </div>
+                    )}
+                    {selectedImputation.budget_line && (
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground">Ligne budgétaire:</span>{' '}
+                        <span className="font-medium font-mono">
+                          {selectedImputation.budget_line.code}
+                        </span>{' '}
+                        <span className="text-muted-foreground">
+                          — {selectedImputation.budget_line.label}
+                        </span>
+                      </div>
+                    )}
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Budget imputé:</span>{' '}
+                      <span className="font-bold text-primary text-base">
                         {formatMontant(selectedImputation.montant)}
                       </span>
                     </div>
@@ -370,14 +497,6 @@ export function ExpressionBesoinFromImputationForm({
                       <span className="text-muted-foreground">Objet:</span>{' '}
                       <span className="font-medium">{selectedImputation.objet}</span>
                     </div>
-                    {selectedImputation.direction && (
-                      <div className="col-span-2">
-                        <span className="text-muted-foreground">Direction:</span>{' '}
-                        <span className="font-medium">
-                          {selectedImputation.direction.sigle || selectedImputation.direction.label}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -422,11 +541,11 @@ export function ExpressionBesoinFromImputationForm({
                   />
                 </div>
 
-                {/* Liste des articles */}
+                {/* Liste des articles avec N° et Total */}
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
-                      <CardTitle className="text-base">Liste des articles</CardTitle>
+                      <CardTitle className="text-base">Liste des articles *</CardTitle>
                       <Button type="button" variant="outline" size="sm" onClick={handleAddArticle}>
                         <Plus className="h-4 w-4 mr-1" />
                         Ajouter
@@ -437,17 +556,21 @@ export function ExpressionBesoinFromImputationForm({
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[30%]">Désignation</TableHead>
-                          <TableHead className="w-[12%]">Quantité</TableHead>
-                          <TableHead className="w-[18%]">Unité</TableHead>
+                          <TableHead className="w-[5%]">N°</TableHead>
+                          <TableHead className="w-[28%]">Désignation</TableHead>
+                          <TableHead className="w-[10%]">Quantité</TableHead>
+                          <TableHead className="w-[15%]">Unité</TableHead>
                           <TableHead className="w-[15%]">Prix unit.</TableHead>
-                          <TableHead className="w-[15%]">Prix total</TableHead>
+                          <TableHead className="w-[17%]">Prix total</TableHead>
                           <TableHead className="w-[5%]" />
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {articles.map((article) => (
+                        {articles.map((article, index) => (
                           <TableRow key={article.id}>
+                            <TableCell className="text-center font-mono text-muted-foreground">
+                              {index + 1}
+                            </TableCell>
                             <TableCell>
                               <Input
                                 value={article.designation}
@@ -524,7 +647,31 @@ export function ExpressionBesoinFromImputationForm({
                           </TableRow>
                         ))}
                       </TableBody>
+                      <TableFooter>
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-right font-bold">
+                            TOTAL GÉNÉRAL
+                          </TableCell>
+                          <TableCell className="font-bold text-base">
+                            {new Intl.NumberFormat('fr-FR').format(totalArticles)} FCFA
+                          </TableCell>
+                          <TableCell />
+                        </TableRow>
+                      </TableFooter>
                     </Table>
+
+                    {/* Alerte dépassement budget */}
+                    {budgetDepasse && (
+                      <Alert variant="destructive" className="mt-3">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          Le total des articles (
+                          {new Intl.NumberFormat('fr-FR').format(totalArticles)} FCFA) dépasse le
+                          montant imputé ({new Intl.NumberFormat('fr-FR').format(montantImpute)}{' '}
+                          FCFA)
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -646,6 +793,86 @@ export function ExpressionBesoinFromImputationForm({
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Pièces jointes */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Paperclip className="h-4 w-4" />
+                      Pièces jointes
+                      <span className="text-xs text-muted-foreground font-normal">
+                        (max {MAX_FILES} fichiers, 10 Mo chacun)
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Liste des fichiers sélectionnés */}
+                    {selectedFiles.length > 0 && (
+                      <div className="space-y-2">
+                        {selectedFiles.map((sf, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-3 p-2 border rounded-md bg-background"
+                          >
+                            <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{sf.file.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {AttachmentService.formatFileSize(sf.file.size)}
+                              </p>
+                            </div>
+                            <Select
+                              value={sf.typePiece}
+                              onValueChange={(value) => handleFileTypeChange(index, value)}
+                            >
+                              <SelectTrigger className="w-[200px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {TYPES_PIECES.map((tp) => (
+                                  <SelectItem key={tp.value} value={tp.value}>
+                                    {tp.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveFile(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Bouton d'ajout */}
+                    {selectedFiles.length < MAX_FILES && (
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          accept={AttachmentService.getAcceptedExtensions()}
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Ajouter un fichier
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             </>
           )}
@@ -654,9 +881,9 @@ export function ExpressionBesoinFromImputationForm({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
-            <Button type="submit" disabled={!selectedImputation || isCreating}>
-              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Créer l'expression de besoin
+            <Button type="submit" disabled={!selectedImputation || isBusy || budgetDepasse}>
+              {isBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isUploading ? 'Upload des fichiers...' : "Créer l'expression de besoin"}
             </Button>
           </DialogFooter>
         </form>

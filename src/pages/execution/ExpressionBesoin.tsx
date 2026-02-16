@@ -123,11 +123,11 @@ export default function ExpressionBesoin() {
       case 'a_valider':
         return filteredExpressions.filter((e) => e.statut === 'soumis');
       case 'validees':
-        return filteredExpressions.filter((e) => e.statut === 'validé');
+        return filteredExpressions.filter((e) => e.statut === 'valide');
       case 'rejetees':
-        return filteredExpressions.filter((e) => e.statut === 'rejeté');
+        return filteredExpressions.filter((e) => e.statut === 'rejete');
       case 'differees':
-        return filteredExpressions.filter((e) => e.statut === 'différé');
+        return filteredExpressions.filter((e) => e.statut === 'differe');
       case 'satisfaites':
         return filteredExpressions.filter((e) => e.statut === 'satisfaite');
       default:

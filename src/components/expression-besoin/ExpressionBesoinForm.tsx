@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -17,17 +17,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { 
-  useExpressionsBesoin, 
-  MarcheValide, 
-  URGENCE_OPTIONS 
-} from "@/hooks/useExpressionsBesoin";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { Briefcase, Calendar, Loader2, Search } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useExpressionsBesoin, MarcheValide, URGENCE_OPTIONS } from '@/hooks/useExpressionsBesoin';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { Briefcase, Calendar, Loader2, Search } from 'lucide-react';
 
 interface ExpressionBesoinFormProps {
   open: boolean;
@@ -44,18 +40,18 @@ export function ExpressionBesoinForm({
   const { marchesValides, createExpression, isCreating } = useExpressionsBesoin();
 
   const [selectedMarche, setSelectedMarche] = useState<MarcheValide | null>(null);
-  const [searchMarche, setSearchMarche] = useState("");
+  const [searchMarche, setSearchMarche] = useState('');
   const [formData, setFormData] = useState({
-    objet: "",
-    description: "",
-    justification: "",
-    specifications: "",
-    calendrier_debut: "",
-    calendrier_fin: "",
-    montant_estime: "",
-    urgence: "normal",
-    numero_lot: "",
-    intitule_lot: "",
+    objet: '',
+    description: '',
+    justification: '',
+    specifications: '',
+    calendrier_debut: '',
+    calendrier_fin: '',
+    montant_estime: '',
+    urgence: 'normale',
+    numero_lot: '',
+    intitule_lot: '',
   });
 
   // Auto-select marché if pre-selected
@@ -110,18 +106,18 @@ export function ExpressionBesoinForm({
 
   const resetForm = () => {
     setSelectedMarche(null);
-    setSearchMarche("");
+    setSearchMarche('');
     setFormData({
-      objet: "",
-      description: "",
-      justification: "",
-      specifications: "",
-      calendrier_debut: "",
-      calendrier_fin: "",
-      montant_estime: "",
-      urgence: "normal",
-      numero_lot: "",
-      intitule_lot: "",
+      objet: '',
+      description: '',
+      justification: '',
+      specifications: '',
+      calendrier_debut: '',
+      calendrier_fin: '',
+      montant_estime: '',
+      urgence: 'normale',
+      numero_lot: '',
+      intitule_lot: '',
     });
   };
 
@@ -169,7 +165,7 @@ export function ExpressionBesoinForm({
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium">{marche.numero || "N° en attente"}</p>
+                            <p className="font-medium">{marche.numero || 'N° en attente'}</p>
                             <p className="text-sm text-muted-foreground line-clamp-1">
                               {marche.objet}
                             </p>
@@ -180,7 +176,7 @@ export function ExpressionBesoinForm({
                             )}
                           </div>
                           <Badge variant="outline">
-                            {new Intl.NumberFormat("fr-FR").format(marche.montant)} FCFA
+                            {new Intl.NumberFormat('fr-FR').format(marche.montant)} FCFA
                           </Badge>
                         </div>
                       </div>
@@ -212,22 +208,22 @@ export function ExpressionBesoinForm({
                 <CardContent className="space-y-2">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Numéro:</span>{" "}
-                      <span className="font-medium">{selectedMarche.numero || "En attente"}</span>
+                      <span className="text-muted-foreground">Numéro:</span>{' '}
+                      <span className="font-medium">{selectedMarche.numero || 'En attente'}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Montant:</span>{" "}
+                      <span className="text-muted-foreground">Montant:</span>{' '}
                       <span className="font-medium">
-                        {new Intl.NumberFormat("fr-FR").format(selectedMarche.montant)} FCFA
+                        {new Intl.NumberFormat('fr-FR').format(selectedMarche.montant)} FCFA
                       </span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Objet:</span>{" "}
+                      <span className="text-muted-foreground">Objet:</span>{' '}
                       <span className="font-medium">{selectedMarche.objet}</span>
                     </div>
                     {selectedMarche.prestataire && (
                       <div className="col-span-2">
-                        <span className="text-muted-foreground">Fournisseur:</span>{" "}
+                        <span className="text-muted-foreground">Fournisseur:</span>{' '}
                         <span className="font-medium">
                           {selectedMarche.prestataire.raison_sociale}
                         </span>

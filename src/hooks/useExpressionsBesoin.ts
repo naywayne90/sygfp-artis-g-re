@@ -112,9 +112,9 @@ export const VALIDATION_STEPS = [
 ];
 
 export const URGENCE_OPTIONS = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'urgent', label: 'Urgent' },
-  { value: 'tres_urgent', label: 'Très urgent' },
+  { value: 'normale', label: 'Normal' },
+  { value: 'haute', label: 'Urgent' },
+  { value: 'urgente', label: 'Très urgent' },
 ];
 
 export function useExpressionsBesoin() {
@@ -238,7 +238,7 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Create expression de besoin
+  // Create expression de besoin (from marché)
   const createMutation = useMutation({
     mutationFn: async (data: {
       marche_id: string;
@@ -289,6 +289,54 @@ export function useExpressionsBesoin() {
     },
   });
 
+  // Create expression de besoin from imputation (with articles)
+  const createFromImputationMutation = useMutation({
+    mutationFn: async (data: {
+      imputation_id: string;
+      dossier_id: string | null;
+      direction_id: string | null;
+      objet: string;
+      description: string | null;
+      justification: string | null;
+      specifications: string | null;
+      calendrier_debut: string | null;
+      calendrier_fin: string | null;
+      montant_estime: number | null;
+      urgence: string;
+      lieu_livraison: string | null;
+      delai_livraison: string | null;
+      contact_livraison: string | null;
+      liste_articles: ExpressionBesoinLigne[];
+    }) => {
+      const { liste_articles, ...rest } = data;
+
+      // JSON.parse/stringify convertit ExpressionBesoinLigne[] en Json compatible Supabase
+      const articlesJson = JSON.parse(JSON.stringify(liste_articles));
+
+      const { data: result, error } = await supabase
+        .from('expressions_besoin')
+        .insert({
+          ...rest,
+          liste_articles: articlesJson,
+          exercice: exercice || new Date().getFullYear(),
+          statut: 'brouillon',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expressions-besoin'] });
+      queryClient.invalidateQueries({ queryKey: ['imputations-validees-pour-eb'] });
+      toast.success('Expression de besoin créée avec succès');
+    },
+    onError: (error) => {
+      toast.error('Erreur lors de la création: ' + error.message);
+    },
+  });
+
   // Update expression de besoin
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: { id: string } & Partial<ExpressionBesoin>) => {
@@ -308,16 +356,45 @@ export function useExpressionsBesoin() {
     },
   });
 
-  // Submit expression
+  // Submit expression (génère un numéro si absent)
   const submitMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      // Vérifier si un numéro existe déjà
+      const { data: existing, error: fetchError } = await supabase
         .from('expressions_besoin')
-        .update({
-          statut: 'soumis',
-          submitted_at: new Date().toISOString(),
-        })
-        .eq('id', id);
+        .select('numero')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const updateData: Record<string, unknown> = {
+        statut: 'soumis',
+        submitted_at: new Date().toISOString(),
+      };
+
+      // Générer le numéro si absent
+      if (!existing.numero) {
+        const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
+          p_doc_type: 'EB',
+          p_exercice: exercice || new Date().getFullYear(),
+          p_direction_code: null,
+          p_scope: 'global',
+        });
+
+        if (seqError) throw seqError;
+        if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
+
+        const seq = seqData[0];
+        const now = new Date();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const yy = String(now.getFullYear()).slice(-2);
+        const nnnn = seq.number_padded || String(seq.number_raw).padStart(4, '0');
+        // Format: ARTI03MMYYNNNN (03 = code étape EB)
+        updateData.numero = `ARTI03${mm}${yy}${nnnn}`;
+      }
+
+      const { error } = await supabase.from('expressions_besoin').update(updateData).eq('id', id);
 
       if (error) throw error;
     },
@@ -525,6 +602,7 @@ export function useExpressionsBesoin() {
     isLoading,
     error,
     createExpression: createMutation.mutateAsync,
+    createFromImputation: createFromImputationMutation.mutateAsync,
     updateExpression: updateMutation.mutateAsync,
     submitExpression: submitMutation.mutateAsync,
     validateExpression: validateMutation.mutateAsync,
@@ -533,7 +611,7 @@ export function useExpressionsBesoin() {
     resumeExpression: resumeMutation.mutateAsync,
     deleteExpression: deleteMutation.mutateAsync,
     satisfyExpression: satisfyMutation.mutateAsync,
-    isCreating: createMutation.isPending,
+    isCreating: createMutation.isPending || createFromImputationMutation.isPending,
     isUpdating: updateMutation.isPending,
     isSubmitting: submitMutation.isPending,
     isValidating: validateMutation.isPending,

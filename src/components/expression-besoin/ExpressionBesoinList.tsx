@@ -55,10 +55,10 @@ const STATUS_CONFIG: Record<
 };
 
 const URGENCE_CONFIG: Record<string, { label: string; className: string }> = {
-  normal: { label: 'Normal', className: 'bg-muted text-muted-foreground' },
+  basse: { label: 'Basse', className: 'bg-muted text-muted-foreground' },
   normale: { label: 'Normal', className: 'bg-muted text-muted-foreground' },
-  urgent: { label: 'Urgent', className: 'bg-warning/20 text-warning' },
-  tres_urgent: { label: 'Très urgent', className: 'bg-destructive/20 text-destructive' },
+  haute: { label: 'Urgent', className: 'bg-warning/20 text-warning' },
+  urgente: { label: 'Très urgent', className: 'bg-destructive/20 text-destructive' },
 };
 
 export function ExpressionBesoinList({
@@ -147,7 +147,8 @@ export function ExpressionBesoinList({
           {expressions.map((expression) => {
             const status =
               STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
-            const urgence = URGENCE_CONFIG[expression.urgence || 'normal'] || URGENCE_CONFIG.normal;
+            const urgence =
+              URGENCE_CONFIG[expression.urgence || 'normale'] || URGENCE_CONFIG.normale;
 
             return (
               <TableRow key={expression.id}>
