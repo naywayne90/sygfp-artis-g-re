@@ -309,6 +309,66 @@ export const budgetTemplates: ExportTemplate[] = [
 ];
 
 // ============================================================================
+// Templates Marchés (Passation)
+// ============================================================================
+
+export const marchesTemplates: ExportTemplate[] = [
+  {
+    id: 'marches_complet',
+    name: 'Export complet',
+    module: 'marches',
+    description: 'Tous les marchés avec détails',
+    columns: [
+      { key: 'numero', label: 'N° Marché', type: 'text', width: 18 },
+      { key: 'objet', label: 'Objet', type: 'text', width: 40 },
+      { key: 'type_marche', label: 'Type', type: 'text', width: 14 },
+      { key: 'mode_passation', label: 'Mode passation', type: 'text', width: 18 },
+      { key: 'montant_estime', label: 'Montant estimé', type: 'currency', width: 16 },
+      { key: 'montant_attribue', label: 'Montant attribué', type: 'currency', width: 16 },
+      { key: 'statut', label: 'Statut', type: 'text', format: formatters.status, width: 14 },
+      { key: 'prestataire.raison_sociale', label: 'Prestataire', type: 'text', width: 30 },
+      { key: 'budget_line.code', label: 'Ligne budgétaire', type: 'text', width: 20 },
+      { key: 'date_publication', label: 'Date publication', type: 'date', width: 14 },
+      { key: 'date_cloture', label: 'Date clôture', type: 'date', width: 14 },
+      { key: 'date_attribution', label: 'Date attribution', type: 'date', width: 14 },
+    ],
+  },
+  {
+    id: 'marches_approbation',
+    name: 'Pour approbation DG',
+    module: 'marches',
+    description: "Marchés en attente d'approbation",
+    defaultFilters: { statut: 'attribue' },
+    columns: [
+      { key: 'numero', label: 'N° Marché', type: 'text', width: 18 },
+      { key: 'objet', label: 'Objet', type: 'text', width: 40 },
+      { key: 'montant_estime', label: 'Montant estimé', type: 'currency', width: 16 },
+      { key: 'montant_attribue', label: 'Montant attribué', type: 'currency', width: 16 },
+      { key: 'prestataire.raison_sociale', label: 'Prestataire', type: 'text', width: 30 },
+      { key: 'mode_passation', label: 'Mode', type: 'text', width: 18 },
+      { key: 'date_attribution', label: 'Date attribution', type: 'date', width: 14 },
+    ],
+  },
+  {
+    id: 'marches_suivi',
+    name: 'Suivi avancement',
+    module: 'marches',
+    description: "État d'avancement des marchés",
+    columns: [
+      { key: 'numero', label: 'N° Marché', type: 'text', width: 18 },
+      { key: 'objet', label: 'Objet', type: 'text', width: 40 },
+      { key: 'statut', label: 'Statut', type: 'text', format: formatters.status, width: 14 },
+      { key: 'montant_estime', label: 'Montant', type: 'currency', width: 16 },
+      { key: 'date_lancement', label: 'Lancement', type: 'date', width: 14 },
+      { key: 'date_publication', label: 'Publication', type: 'date', width: 14 },
+      { key: 'date_cloture', label: 'Clôture', type: 'date', width: 14 },
+      { key: 'date_attribution', label: 'Attribution', type: 'date', width: 14 },
+      { key: 'date_signature', label: 'Signature', type: 'date', width: 14 },
+    ],
+  },
+];
+
+// ============================================================================
 // Templates Tâches
 // ============================================================================
 
@@ -414,6 +474,7 @@ export const exportTemplatesRegistry: Record<string, ExportTemplate[]> = {
   ordonnancements: ordonnancementsTemplates,
   reglements: reglementsTemplates,
   budget: budgetTemplates,
+  marches: marchesTemplates,
   taches: tachesTemplates,
   notifications: notificationsTemplates,
   feuilles_route: feuillesRouteTemplates,

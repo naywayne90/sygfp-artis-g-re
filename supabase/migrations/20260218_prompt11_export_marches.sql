@@ -1,0 +1,61 @@
+-- ============================================================
+-- Prompt 11 BACKEND — Edge Functions export marchés
+-- Date: 2026-02-18
+-- Description: Ce fichier documente les changements apportés
+--              à l'Edge Function generate-export et au frontend.
+--              Pas de DDL SQL requis — les tables/fonctions existent déjà.
+-- ============================================================
+
+-- ============================================================
+-- 1. CONTEXTE
+-- ============================================================
+-- Edge Function generate-export (supabase/functions/generate-export/index.ts):
+--   Existant: 4 types PDF (engagement, liquidation, ordonnancement, note_sef)
+--   + CSV/Excel pour budget_lines
+--
+-- Ajouté dans cette migration:
+--   + type "marche" → Fiche de Marché (PDF HTML via fn_get_marche_detail)
+--   + type "pv_cojo" → PV COJO (PDF HTML via fn_get_marche_detail)
+--
+-- Frontend:
+--   + usePassationMarcheExport.ts — Hook export marchés
+--     - Excel 4 feuilles: Marchés, Lots, Soumissions, Évaluations
+--     - PDF liste (jsPDF landscape, autoTable)
+--     - CSV flat list
+--     - PV COJO via edge function
+--     - Fiche marché individuelle via edge function
+--   + export-templates.ts — 3 templates marchés ajoutés au registry
+--     - marches_complet, marches_approbation, marches_suivi
+--   + useExport.ts — EntityType étendu avec "pv_cojo"
+
+-- ============================================================
+-- 2. AUCUNE MIGRATION SQL REQUISE
+-- ============================================================
+-- Les tables et fonctions nécessaires existent déjà:
+--   - fn_get_marche_detail(UUID) → JSONB (Prompt 8)
+--   - marches, marche_lots, soumissions, evaluations_offre
+--   - export_jobs (tracking des exports)
+--
+-- L'Edge Function generate-export doit être redéployée:
+--   npx supabase functions deploy generate-export --no-verify-jwt
+
+-- ============================================================
+-- VÉRIFICATION
+-- ============================================================
+-- Edge Function generate-export:
+--   +2 cases dans switch PDF: "marche", "pv_cojo"
+--   +2 fonctions: generateMarchePDF(), generatePVCOJOPDF()
+--   generateMarchePDF: sections marché, prestataire, EB, budget, lots,
+--     soumissions, évaluations, validations, QR code, signatures (DAAF, CB, DG)
+--   generatePVCOJOPDF: 4 sections (ouverture plis, allotissement,
+--     évaluation offres, résultat attribution), signatures (Président COJO,
+--     Rapporteur, Membre)
+--
+-- Frontend usePassationMarcheExport:
+--   exportExcel() → XLSX 4 feuilles avec en-tête ARTI
+--   exportPDF() → jsPDF landscape avec autoTable
+--   exportCSV() → CSV semicolon UTF-8 BOM
+--   exportPVCOJO(marcheId) → HTML PDF via edge function
+--   printMarche(marcheId) → Fiche marché PDF via edge function
+--
+-- Export templates registry: +3 templates (complet, approbation, suivi)
