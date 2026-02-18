@@ -1,32 +1,46 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { usePassationsMarche, PassationMarche, MODES_PASSATION, STATUTS, EBValidee } from "@/hooks/usePassationsMarche";
-import { 
+} from '@/components/ui/dropdown-menu';
+import { useExercice } from '@/contexts/ExerciceContext';
+import {
+  usePassationsMarche,
+  PassationMarche,
+  MODES_PASSATION,
+  STATUTS,
+  EBValidee,
+  LotMarche,
+} from '@/hooks/usePassationsMarche';
+import {
   PassationMarcheForm,
   PassationDetails,
   PassationValidateDialog,
   PassationRejectDialog,
   PassationDeferDialog,
-} from "@/components/passation-marche";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { WorkflowStepIndicator } from "@/components/workflow/WorkflowStepIndicator";
+} from '@/components/passation-marche';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import {
   FileText,
   Clock,
@@ -43,7 +57,7 @@ import {
   FolderOpen,
   Trash2,
   Gavel,
-} from "lucide-react";
+} from 'lucide-react';
 
 const getStatusBadge = (statut: string) => {
   const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.brouillon;
@@ -73,8 +87,8 @@ export default function PassationMarchePage() {
   } = usePassationsMarche();
 
   const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("a_traiter");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('a_traiter');
   const [sourceEB, setSourceEB] = useState<EBValidee | null>(null);
   const [isLoadingSource, setIsLoadingSource] = useState(false);
 
@@ -87,22 +101,24 @@ export default function PassationMarchePage() {
 
   // Gérer sourceEB depuis l'URL
   useEffect(() => {
-    const sourceEBId = searchParams.get("sourceEB");
+    const sourceEBId = searchParams.get('sourceEB');
     if (sourceEBId) {
       setIsLoadingSource(true);
       supabase
-        .from("expressions_besoin")
-        .select(`
+        .from('expressions_besoin')
+        .select(
+          `
           id, numero, objet, montant_estime, dossier_id, direction_id,
           direction:directions(id, label, sigle)
-        `)
-        .eq("id", sourceEBId)
+        `
+        )
+        .eq('id', sourceEBId)
         .single()
         .then(({ data, error }) => {
           setIsLoadingSource(false);
           if (error) {
             toast.error("Impossible de charger l'EB source");
-            searchParams.delete("sourceEB");
+            searchParams.delete('sourceEB');
             setSearchParams(searchParams, { replace: true });
           } else if (data) {
             setSourceEB(data as unknown as EBValidee);
@@ -115,7 +131,7 @@ export default function PassationMarchePage() {
   const handleCloseForm = () => {
     setShowForm(false);
     setSourceEB(null);
-    searchParams.delete("sourceEB");
+    searchParams.delete('sourceEB');
     setSearchParams(searchParams, { replace: true });
   };
 
@@ -171,7 +187,7 @@ export default function PassationMarchePage() {
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   const filteredPassations = passations.filter(
     (p) =>
@@ -181,11 +197,11 @@ export default function PassationMarchePage() {
 
   const passationsByTab = {
     a_traiter: ebValidees,
-    brouillon: filteredPassations.filter((p) => p.statut === "brouillon"),
-    soumis: filteredPassations.filter((p) => p.statut === "soumis"),
-    valide: filteredPassations.filter((p) => p.statut === "valide"),
-    rejete: filteredPassations.filter((p) => p.statut === "rejete"),
-    differe: filteredPassations.filter((p) => p.statut === "differe"),
+    brouillon: filteredPassations.filter((p) => p.statut === 'brouillon'),
+    soumis: filteredPassations.filter((p) => p.statut === 'soumis'),
+    valide: filteredPassations.filter((p) => p.statut === 'valide'),
+    rejete: filteredPassations.filter((p) => p.statut === 'rejete'),
+    differe: filteredPassations.filter((p) => p.statut === 'differe'),
   };
 
   if (isLoading || isLoadingSource) {
@@ -217,9 +233,7 @@ export default function PassationMarchePage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              À traiter
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">À traiter</CardTitle>
             <Tag className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
@@ -230,9 +244,7 @@ export default function PassationMarchePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Brouillons
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Brouillons</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -242,9 +254,7 @@ export default function PassationMarchePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Soumis
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
             <Clock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -254,9 +264,7 @@ export default function PassationMarchePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Validés
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Validés</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
@@ -266,9 +274,7 @@ export default function PassationMarchePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rejetés
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
@@ -278,9 +284,7 @@ export default function PassationMarchePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Différés
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Différés</CardTitle>
             <PauseCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -300,8 +304,12 @@ export default function PassationMarchePage() {
                   Expression de Besoin validée requise
                 </h4>
                 <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                  Pour créer une Passation de Marché, vous devez d'abord disposer d'au moins une Expression de Besoin validée.
-                  Rendez-vous sur la page <a href="/execution/expression-besoin" className="underline font-medium">Expression de Besoin</a> pour en créer ou valider une.
+                  Pour créer une Passation de Marché, vous devez d'abord disposer d'au moins une
+                  Expression de Besoin validée. Rendez-vous sur la page{' '}
+                  <a href="/execution/expression-besoin" className="underline font-medium">
+                    Expression de Besoin
+                  </a>{' '}
+                  pour en créer ou valider une.
                 </p>
               </div>
             </div>
@@ -326,25 +334,16 @@ export default function PassationMarchePage() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="a_traiter" className="gap-1">
-                <Tag className="h-3 w-3" />
-                À traiter
-                <Badge variant="secondary" className="ml-1 text-xs">{ebValidees.length}</Badge>
+                <Tag className="h-3 w-3" />À traiter
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {ebValidees.length}
+                </Badge>
               </TabsTrigger>
-              <TabsTrigger value="brouillon">
-                Brouillons ({counts.brouillon})
-              </TabsTrigger>
-              <TabsTrigger value="soumis">
-                Soumis ({counts.soumis})
-              </TabsTrigger>
-              <TabsTrigger value="valide">
-                Validés ({counts.valide})
-              </TabsTrigger>
-              <TabsTrigger value="rejete">
-                Rejetés ({counts.rejete})
-              </TabsTrigger>
-              <TabsTrigger value="differe">
-                Différés ({counts.differe})
-              </TabsTrigger>
+              <TabsTrigger value="brouillon">Brouillons ({counts.brouillon})</TabsTrigger>
+              <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
+              <TabsTrigger value="valide">Validés ({counts.valide})</TabsTrigger>
+              <TabsTrigger value="rejete">Rejetés ({counts.rejete})</TabsTrigger>
+              <TabsTrigger value="differe">Différés ({counts.differe})</TabsTrigger>
             </TabsList>
 
             {/* Onglet EB à traiter */}
@@ -366,11 +365,11 @@ export default function PassationMarchePage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ebValidees.map((eb: any) => (
+                    {ebValidees.map((eb) => (
                       <TableRow key={eb.id}>
-                        <TableCell className="font-mono text-sm">{eb.numero || "-"}</TableCell>
+                        <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
                         <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
-                        <TableCell>{eb.direction?.sigle || "-"}</TableCell>
+                        <TableCell>{eb.direction?.sigle || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatMontant(eb.montant_estime)}
                         </TableCell>
@@ -378,7 +377,7 @@ export default function PassationMarchePage() {
                           <Button
                             size="sm"
                             onClick={() => {
-                              setSourceEB(eb);
+                              setSourceEB(eb as unknown as EBValidee);
                               setShowForm(true);
                             }}
                           >
@@ -394,7 +393,7 @@ export default function PassationMarchePage() {
             </TabsContent>
 
             {/* Autres onglets passations */}
-            {["brouillon", "soumis", "valide", "rejete", "differe"].map((tab) => (
+            {['brouillon', 'soumis', 'valide', 'rejete', 'differe'].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-4">
                 {passationsByTab[tab as keyof typeof passationsByTab].length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
@@ -408,6 +407,7 @@ export default function PassationMarchePage() {
                         <TableHead>Référence</TableHead>
                         <TableHead>EB Source</TableHead>
                         <TableHead>Mode</TableHead>
+                        <TableHead className="text-center">Nb lots</TableHead>
                         <TableHead className="text-right">Montant retenu</TableHead>
                         <TableHead>Statut</TableHead>
                         <TableHead>Créé le</TableHead>
@@ -415,98 +415,107 @@ export default function PassationMarchePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(passationsByTab[tab as keyof typeof passationsByTab] as PassationMarche[]).map(
-                        (pm) => (
-                          <TableRow key={pm.id}>
-                            <TableCell className="font-mono text-sm">{pm.reference || "-"}</TableCell>
-                            <TableCell className="max-w-[200px] truncate">
-                              {pm.expression_besoin?.numero || pm.expression_besoin?.objet || "-"}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
-                            </TableCell>
-                            <TableCell className="text-right font-medium">
-                              {formatMontant(pm.montant_retenu)}
-                            </TableCell>
-                            <TableCell>{getStatusBadge(pm.statut)}</TableCell>
-                            <TableCell>
-                              {format(new Date(pm.created_at), "dd MMM yyyy", { locale: fr })}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-popover">
-                                  <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Voir détails
+                      {(
+                        passationsByTab[tab as keyof typeof passationsByTab] as PassationMarche[]
+                      ).map((pm) => (
+                        <TableRow key={pm.id}>
+                          <TableCell className="font-mono text-sm">{pm.reference || '-'}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            {pm.expression_besoin?.numero || pm.expression_besoin?.objet || '-'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge variant="secondary" className="font-mono">
+                              {pm.allotissement && ((pm.lots as LotMarche[]) || []).length > 0
+                                ? (pm.lots as LotMarche[]).length
+                                : 1}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(pm.montant_retenu)}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(pm.statut)}</TableCell>
+                          <TableCell>
+                            {format(new Date(pm.created_at), 'dd MMM yyyy', { locale: fr })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-popover">
+                                <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Voir détails
+                                </DropdownMenuItem>
+
+                                {pm.dossier_id && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleGoToDossier(pm.dossier_id as string)}
+                                  >
+                                    <FolderOpen className="mr-2 h-4 w-4" />
+                                    Voir le dossier
                                   </DropdownMenuItem>
+                                )}
 
-                                  {pm.dossier_id && (
-                                    <DropdownMenuItem onClick={() => handleGoToDossier(pm.dossier_id!)}>
-                                      <FolderOpen className="mr-2 h-4 w-4" />
-                                      Voir le dossier
+                                {pm.statut === 'brouillon' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => submitPassation(pm.id)}>
+                                      <Send className="mr-2 h-4 w-4" />
+                                      Soumettre
                                     </DropdownMenuItem>
-                                  )}
+                                    <DropdownMenuItem
+                                      onClick={() => deletePassation(pm.id)}
+                                      className="text-destructive"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Supprimer
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
 
-                                  {pm.statut === "brouillon" && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => submitPassation(pm.id)}>
-                                        <Send className="mr-2 h-4 w-4" />
-                                        Soumettre
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => deletePassation(pm.id)}
-                                        className="text-destructive"
-                                      >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Supprimer
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
+                                {pm.statut === 'soumis' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleValidateClick(pm)}>
+                                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                                      Valider
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleDeferClick(pm)}>
+                                      <Clock className="mr-2 h-4 w-4" />
+                                      Différer
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleRejectClick(pm)}
+                                      className="text-destructive"
+                                    >
+                                      <XCircle className="mr-2 h-4 w-4" />
+                                      Rejeter
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
 
-                                  {pm.statut === "soumis" && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => handleValidateClick(pm)}>
-                                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                                        Valider
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={() => handleDeferClick(pm)}>
-                                        <Clock className="mr-2 h-4 w-4" />
-                                        Différer
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleRejectClick(pm)}
-                                        className="text-destructive"
-                                      >
-                                        <XCircle className="mr-2 h-4 w-4" />
-                                        Rejeter
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {pm.statut === "valide" && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
-                                      >
-                                        <FileText className="mr-2 h-4 w-4" />
-                                        Créer engagement
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      )}
+                                {pm.statut === 'valide' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
+                                    >
+                                      <FileText className="mr-2 h-4 w-4" />
+                                      Créer engagement
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 )}
@@ -521,7 +530,7 @@ export default function PassationMarchePage() {
         open={showForm}
         onOpenChange={handleCloseForm}
         sourceEB={sourceEB}
-        onSuccess={() => setActiveTab("brouillon")}
+        onSuccess={() => setActiveTab('brouillon')}
       />
 
       {/* Details dialog */}

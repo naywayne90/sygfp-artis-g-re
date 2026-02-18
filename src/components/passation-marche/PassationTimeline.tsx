@@ -7,14 +7,9 @@
  * Avec dates, acteurs et motifs si applicable
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileEdit,
   Send,
@@ -25,17 +20,17 @@ import {
   Calendar,
   ArrowRight,
   AlertCircle,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { PassationMarche } from "@/hooks/usePassationsMarche";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { PassationMarche } from '@/hooks/usePassationsMarche';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: "completed" | "current" | "pending" | "rejected" | "deferred";
+  status: 'completed' | 'current' | 'pending' | 'rejected' | 'deferred';
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
@@ -58,71 +53,67 @@ export function PassationTimeline({
 
     // Step 1: Creation (always completed)
     steps.push({
-      key: "creation",
-      label: "Création",
+      key: 'creation',
+      label: 'Création',
       icon: FileEdit,
-      status: "completed",
+      status: 'completed',
       date: passation.created_at,
       actor: passation.creator?.full_name,
     });
 
     // Step 2: Submission
-    const isSubmitted = ["soumis", "en_analyse", "valide", "rejete", "differe"].includes(
+    const isSubmitted = ['soumis', 'en_analyse', 'valide', 'rejete', 'differe'].includes(
       passation.statut
     );
     steps.push({
-      key: "soumission",
-      label: "Soumission",
+      key: 'soumission',
+      label: 'Soumission',
       icon: Send,
-      status: isSubmitted
-        ? "completed"
-        : passation.statut === "brouillon"
-        ? "current"
-        : "pending",
+      status: isSubmitted ? 'completed' : passation.statut === 'brouillon' ? 'current' : 'pending',
       date: passation.submitted_at,
     });
 
     // Step 3: Final status (validation/rejection/defer)
-    if (passation.statut === "valide") {
+    if (passation.statut === 'valide') {
       steps.push({
-        key: "validation",
-        label: "Validation",
+        key: 'validation',
+        label: 'Validation',
         icon: CheckCircle2,
-        status: "completed",
+        status: 'completed',
         date: passation.validated_at,
       });
-    } else if (passation.statut === "rejete") {
+    } else if (passation.statut === 'rejete') {
       steps.push({
-        key: "rejet",
-        label: "Rejet",
+        key: 'rejet',
+        label: 'Rejet',
         icon: XCircle,
-        status: "rejected",
-        date: (passation as any).rejected_at,
+        status: 'rejected',
+        date: passation.rejected_at,
         comment: passation.rejection_reason,
       });
-    } else if (passation.statut === "differe") {
+    } else if (passation.statut === 'differe') {
       steps.push({
-        key: "differe",
-        label: "Différé",
+        key: 'differe',
+        label: 'Différé',
         icon: Clock,
-        status: "deferred",
-        date: (passation as any).differed_at,
+        status: 'deferred',
+        date: passation.differed_at,
         comment: passation.motif_differe,
       });
-    } else if (passation.statut === "soumis" || passation.statut === "en_analyse") {
+    } else if (passation.statut === 'soumis' || passation.statut === 'en_analyse') {
       steps.push({
-        key: "en_attente",
-        label: "En attente de décision",
+        key: 'en_attente',
+        label: 'En attente de décision',
         icon: AlertCircle,
-        status: "current",
+        status: 'current',
       });
     } else {
       // Brouillon - final step is pending
       steps.push({
-        key: "decision",
-        label: "Décision",
+        key: 'decision',
+        label: 'Décision',
         icon: CheckCircle2,
-        status: "pending",
+        status: 'pending',
       });
     }
 
@@ -131,38 +122,38 @@ export function PassationTimeline({
 
   const steps = buildTimelineSteps();
 
-  const getStatusColor = (status: TimelineStep["status"]) => {
+  const getStatusColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500 text-white";
-      case "current":
-        return "bg-primary text-white ring-4 ring-primary/30";
-      case "rejected":
-        return "bg-red-500 text-white";
-      case "deferred":
-        return "bg-orange-500 text-white";
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'current':
+        return 'bg-primary text-white ring-4 ring-primary/30';
+      case 'rejected':
+        return 'bg-red-500 text-white';
+      case 'deferred':
+        return 'bg-orange-500 text-white';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLineColor = (status: TimelineStep["status"]) => {
+  const getLineColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      case "deferred":
-        return "bg-orange-500";
+      case 'completed':
+        return 'bg-green-500';
+      case 'rejected':
+        return 'bg-red-500';
+      case 'deferred':
+        return 'bg-orange-500';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn("flex items-center gap-2", className)}>
+        <div className={cn('flex items-center gap-2', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -171,7 +162,7 @@ export function PassationTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all',
                         getStatusColor(step.status)
                       )}
                     >
@@ -183,17 +174,15 @@ export function PassationTimeline({
                       <p className="font-medium">{step.label}</p>
                       {step.date && (
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(step.date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                          {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.comment && (
-                        <p className="text-xs max-w-xs">{step.comment}</p>
-                      )}
+                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn("h-0.5 w-6 mx-1", getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-6 mx-1', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -221,7 +210,7 @@ export function PassationTimeline({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full -ml-px",
+                      'absolute left-4 top-8 w-0.5 h-full -ml-px',
                       getLineColor(step.status)
                     )}
                   />
@@ -230,7 +219,7 @@ export function PassationTimeline({
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10",
+                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10',
                     getStatusColor(step.status)
                   )}
                 >
@@ -244,19 +233,19 @@ export function PassationTimeline({
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-xs",
-                        step.status === "completed" && "border-green-500 text-green-600",
-                        step.status === "current" && "border-primary text-primary",
-                        step.status === "rejected" && "border-red-500 text-red-600",
-                        step.status === "deferred" && "border-orange-500 text-orange-600",
-                        step.status === "pending" && "border-muted-foreground text-muted-foreground"
+                        'text-xs',
+                        step.status === 'completed' && 'border-green-500 text-green-600',
+                        step.status === 'current' && 'border-primary text-primary',
+                        step.status === 'rejected' && 'border-red-500 text-red-600',
+                        step.status === 'deferred' && 'border-orange-500 text-orange-600',
+                        step.status === 'pending' && 'border-muted-foreground text-muted-foreground'
                       )}
                     >
-                      {step.status === "completed" && "Terminé"}
-                      {step.status === "current" && "En cours"}
-                      {step.status === "rejected" && "Rejeté"}
-                      {step.status === "deferred" && "Différé"}
-                      {step.status === "pending" && "En attente"}
+                      {step.status === 'completed' && 'Terminé'}
+                      {step.status === 'current' && 'En cours'}
+                      {step.status === 'rejected' && 'Rejeté'}
+                      {step.status === 'deferred' && 'Différé'}
+                      {step.status === 'pending' && 'En attente'}
                     </Badge>
                   </div>
 
@@ -265,7 +254,7 @@ export function PassationTimeline({
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(step.date), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>

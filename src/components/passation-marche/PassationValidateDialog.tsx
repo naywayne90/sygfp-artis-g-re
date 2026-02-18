@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,15 +6,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
-import { PassationMarche, MODES_PASSATION } from "@/hooks/usePassationsMarche";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { CheckCircle2, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { PassationMarche, MODES_PASSATION } from '@/hooks/usePassationsMarche';
 
 interface PassationValidateDialogProps {
   passation: PassationMarche | null;
@@ -31,17 +31,17 @@ export function PassationValidateDialog({
   onConfirm,
   isLoading = false,
 }: PassationValidateDialogProps) {
-  const [comments, setComments] = useState("");
+  const [comments, setComments] = useState('');
   const [hasConfirmedChecklist, setHasConfirmedChecklist] = useState(false);
 
   const handleConfirm = async () => {
     await onConfirm();
-    setComments("");
+    setComments('');
     setHasConfirmedChecklist(false);
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   const getModeName = (value: string) =>
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
@@ -51,8 +51,9 @@ export function PassationValidateDialog({
   // Vérifier les pièces jointes
   const piecesJointes = passation.pieces_jointes || [];
   const hasDocuments = piecesJointes.length > 0;
-  const hasPrestataire = passation.prestataire_retenu_id || 
-    (passation.prestataires_sollicites || []).some((p: any) => p.selectionne);
+  const hasPrestataire =
+    passation.prestataire_retenu_id ||
+    (passation.prestataires_sollicites || []).some((p) => p.selectionne);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +74,7 @@ export function PassationValidateDialog({
             <CardContent className="pt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Référence:</span>
-                <span className="font-mono font-medium">{passation.reference || "N/A"}</span>
+                <span className="font-mono font-medium">{passation.reference || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Mode:</span>
@@ -123,8 +124,8 @@ export function PassationValidateDialog({
                 className="mt-1"
               />
               <label htmlFor="confirm-checklist" className="text-sm cursor-pointer">
-                Je confirme avoir vérifié la conformité de la procédure de passation, 
-                la validité des pièces justificatives et la sélection du prestataire.
+                Je confirme avoir vérifié la conformité de la procédure de passation, la validité
+                des pièces justificatives et la sélection du prestataire.
               </label>
             </div>
           </div>
@@ -145,8 +146,8 @@ export function PassationValidateDialog({
           <Alert className="bg-green-50 border-green-200">
             <ShieldCheck className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-700">
-              La validation permettra de créer l'engagement budgétaire correspondant 
-              et mettra à jour le statut du dossier.
+              La validation permettra de créer l'engagement budgétaire correspondant et mettra à
+              jour le statut du dossier.
             </AlertDescription>
           </Alert>
         </div>

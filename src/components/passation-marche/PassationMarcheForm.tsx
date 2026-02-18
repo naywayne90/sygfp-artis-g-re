@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -17,26 +17,56 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { usePassationsMarche, MODES_PASSATION, DECISIONS_SORTIE, EBValidee, LotMarche, DecisionSortie } from "@/hooks/usePassationsMarche";
-import { usePrestataires } from "@/hooks/usePrestataires";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { FileText, Search, Plus, Trash2, Loader2, Users, ClipboardList, Gavel, Building2, Package, ArrowRight, FileCheck, CreditCard, AlertTriangle } from "lucide-react";
+  TableRow,
+} from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  usePassationsMarche,
+  PROCEDURES_PASSATION,
+  DECISIONS_SORTIE,
+  MIN_SOUMISSIONNAIRES,
+  getSeuilForMontant,
+  isProcedureCoherente,
+  EBValidee,
+  LotMarche,
+  DecisionSortie,
+} from '@/hooks/usePassationsMarche';
+import { useBudgetAvailability } from '@/hooks/useBudgetAvailability';
+import type { ExpressionBesoinLigne } from '@/hooks/useExpressionsBesoin';
+import { usePrestataires } from '@/hooks/usePrestataires';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { cn } from '@/lib/utils';
+import {
+  FileText,
+  Search,
+  Plus,
+  Trash2,
+  Loader2,
+  Users,
+  ClipboardList,
+  Gavel,
+  Building2,
+  Package,
+  ArrowRight,
+  FileCheck,
+  CreditCard,
+  AlertTriangle,
+  Upload,
+  UserPlus,
+} from 'lucide-react';
 
 interface PassationMarcheFormProps {
   open: boolean;
@@ -54,6 +84,7 @@ interface PrestataireSollicite {
   note_technique: number | null;
   note_financiere: number | null;
   selectionne: boolean;
+  is_manual_entry: boolean;
 }
 
 export function PassationMarcheForm({
@@ -66,18 +97,18 @@ export function PassationMarcheForm({
   const { ebValidees, createPassation, isCreating } = usePassationsMarche();
   const { prestataires } = usePrestataires();
 
-  const [activeStep, setActiveStep] = useState("mode");
+  const [activeStep, setActiveStep] = useState('mode');
   const [selectedEB, setSelectedEB] = useState<EBValidee | null>(null);
-  const [searchEB, setSearchEB] = useState("");
-  const [searchPrestataire, setSearchPrestataire] = useState("");
+  const [searchEB, setSearchEB] = useState('');
+  const [searchPrestataire, setSearchPrestataire] = useState('');
+  const [manualName, setManualName] = useState('');
 
   const [formData, setFormData] = useState({
-    mode_passation: "gre_a_gre",
-    type_procedure: "",
+    mode_passation: 'entente_directe',
     // Décision
-    decision: "" as DecisionSortie | "",
-    justification_decision: "",
-    motif_selection: "",
+    decision: '' as DecisionSortie | '',
+    justification_decision: '',
+    motif_selection: '',
   });
 
   // Lots (allotissement)
@@ -86,18 +117,47 @@ export function PassationMarcheForm({
 
   const [prestatairesSollicites, setPrestatairesSollicites] = useState<PrestataireSollicite[]>([]);
   const [criteres, setCriteres] = useState([
-    { nom: "Prix", poids: 40 },
-    { nom: "Qualité technique", poids: 30 },
-    { nom: "Délai", poids: 20 },
-    { nom: "Références", poids: 10 },
+    { nom: 'Prix', poids: 40 },
+    { nom: 'Qualité technique', poids: 30 },
+    { nom: 'Délai', poids: 20 },
+    { nom: 'Références', poids: 10 },
   ]);
+
+  // Budget disponible sur la ligne EB
+  const { lineAvailability } = useBudgetAvailability(selectedEB?.ligne_budgetaire_id || undefined);
+
+  // Articles de l'EB sélectionnée
+  const articles: ExpressionBesoinLigne[] = (selectedEB?.liste_articles ||
+    []) as ExpressionBesoinLigne[];
+
+  // Seuil DGMP coloré
+  const seuilDGMP = getSeuilForMontant(selectedEB?.montant_estime ?? null);
+
+  // Calculs lots
+  const totalLots = lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0);
+  const montantMarche = selectedEB?.montant_estime || 0;
+  const lotsExceedMontant =
+    allotissement && lots.length > 0 && totalLots > montantMarche && montantMarche > 0;
+  const lotsMismatchMontant =
+    allotissement &&
+    lots.length > 0 &&
+    totalLots !== montantMarche &&
+    montantMarche > 0 &&
+    !lotsExceedMontant;
+
+  // Soumissionnaires
+  const soumissionnairesCount = prestatairesSollicites.length;
+  const minRequired = MIN_SOUMISSIONNAIRES[formData.mode_passation] || 1;
+  const insufficientSoumissionnaires =
+    soumissionnairesCount > 0 && soumissionnairesCount < minRequired;
 
   // Gestion des lots
   const handleAddLot = () => {
     const newLot: LotMarche = {
       id: crypto.randomUUID(),
       numero: lots.length + 1,
-      designation: "",
+      designation: '',
+      description: '',
       montant_estime: null,
     };
     setLots([...lots, newLot]);
@@ -107,16 +167,23 @@ export function PassationMarcheForm({
     setLots((prev) => prev.filter((l) => l.id !== id).map((l, idx) => ({ ...l, numero: idx + 1 })));
   };
 
-  const handleLotChange = (id: string, field: keyof LotMarche, value: any) => {
-    setLots((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, [field]: value } : l))
-    );
+  const handleLotChange = (id: string, field: keyof LotMarche, value: string | number | null) => {
+    setLots((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  };
+
+  // Sélection d'une EB avec auto-select procédure
+  const handleSelectEB = (eb: EBValidee) => {
+    setSelectedEB(eb);
+    const seuil = getSeuilForMontant(eb.montant_estime);
+    if (seuil) {
+      setFormData((prev) => ({ ...prev, mode_passation: seuil.procedure }));
+    }
   };
 
   // Auto-select EB si fournie
   useEffect(() => {
     if (sourceEB) {
-      setSelectedEB(sourceEB);
+      handleSelectEB(sourceEB);
     }
   }, [sourceEB]);
 
@@ -133,7 +200,7 @@ export function PassationMarcheForm({
         p.code?.toLowerCase().includes(searchPrestataire.toLowerCase()))
   );
 
-  const handleAddPrestataire = (prestataire: any) => {
+  const handleAddPrestataire = (prestataire: { id: string; raison_sociale: string }) => {
     setPrestatairesSollicites((prev) => [
       ...prev,
       {
@@ -145,9 +212,30 @@ export function PassationMarcheForm({
         note_technique: null,
         note_financiere: null,
         selectionne: false,
+        is_manual_entry: false,
       },
     ]);
-    setSearchPrestataire("");
+    setSearchPrestataire('');
+  };
+
+  const handleAddManualPrestataire = () => {
+    const name = manualName.trim();
+    if (!name) return;
+    setPrestatairesSollicites((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        prestataire_id: '',
+        raison_sociale: name,
+        offre_montant: null,
+        offre_documents: [],
+        note_technique: null,
+        note_financiere: null,
+        selectionne: false,
+        is_manual_entry: true,
+      },
+    ]);
+    setManualName('');
   };
 
   const handleRemovePrestataire = (id: string) => {
@@ -157,7 +245,7 @@ export function PassationMarcheForm({
   const handlePrestataireChange = (
     id: string,
     field: keyof PrestataireSollicite,
-    value: any
+    value: string | number | boolean | string[] | null
   ) => {
     setPrestatairesSollicites((prev) =>
       prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
@@ -173,7 +261,6 @@ export function PassationMarcheForm({
     await createPassation({
       expression_besoin_id: selectedEB.id,
       mode_passation: formData.mode_passation,
-      type_procedure: formData.type_procedure || undefined,
       prestataires_sollicites: prestatairesSollicites.map((p) => ({
         prestataire_id: p.prestataire_id,
         raison_sociale: p.raison_sociale,
@@ -200,22 +287,22 @@ export function PassationMarcheForm({
 
   const resetForm = () => {
     setSelectedEB(null);
-    setSearchEB("");
-    setActiveStep("mode");
+    setSearchEB('');
+    setActiveStep('mode');
     setFormData({
-      mode_passation: "gre_a_gre",
-      type_procedure: "",
-      decision: "",
-      justification_decision: "",
-      motif_selection: "",
+      mode_passation: 'entente_directe',
+      decision: '',
+      justification_decision: '',
+      motif_selection: '',
     });
     setAllotissement(false);
     setLots([]);
     setPrestatairesSollicites([]);
+    setManualName('');
   };
 
   const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat("fr-FR").format(montant) + " FCFA" : "-";
+    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -255,17 +342,15 @@ export function PassationMarcheForm({
                   filteredEBs.map((eb) => (
                     <div
                       key={eb.id}
-                      onClick={() => setSelectedEB(eb)}
+                      onClick={() => handleSelectEB(eb)}
                       className="p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
                     >
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium font-mono text-sm">
-                            {eb.numero || "Réf. en attente"}
+                            {eb.numero || 'Réf. en attente'}
                           </p>
-                          <p className="text-sm text-muted-foreground line-clamp-1">
-                            {eb.objet}
-                          </p>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{eb.objet}</p>
                           {eb.direction && (
                             <p className="text-xs text-muted-foreground mt-1">
                               {eb.direction.sigle || eb.direction.label}
@@ -291,11 +376,7 @@ export function PassationMarcheForm({
                     Expression de besoin source
                   </CardTitle>
                   {!sourceEB && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedEB(null)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedEB(null)}>
                       Changer
                     </Button>
                   )}
@@ -304,23 +385,81 @@ export function PassationMarcheForm({
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Référence:</span>{" "}
-                    <span className="font-mono font-medium">{selectedEB.numero || "-"}</span>
+                    <span className="text-muted-foreground">Référence:</span>{' '}
+                    <span className="font-mono font-medium">{selectedEB.numero || '-'}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Montant:</span>{" "}
+                    <span className="text-muted-foreground">Montant:</span>{' '}
                     <span className="font-medium">{formatMontant(selectedEB.montant_estime)}</span>
+                    {selectedEB.montant_estime &&
+                      (() => {
+                        const seuil = getSeuilForMontant(selectedEB.montant_estime);
+                        return seuil ? (
+                          <Badge className={cn('mt-1 text-xs ml-2', seuil.color)}>
+                            {seuil.label}
+                          </Badge>
+                        ) : null;
+                      })()}
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Direction:</span>{" "}
+                    <span className="text-muted-foreground">Direction:</span>{' '}
                     <span className="font-medium">
-                      {selectedEB.direction?.sigle || selectedEB.direction?.label || "-"}
+                      {selectedEB.direction?.sigle || selectedEB.direction?.label || '-'}
                     </span>
                   </div>
-                  <div className="col-span-3">
-                    <span className="text-muted-foreground">Objet:</span>{" "}
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Objet:</span>{' '}
                     <span className="font-medium">{selectedEB.objet}</span>
                   </div>
+                  <div>
+                    <span className="text-muted-foreground">Ligne budgétaire:</span>{' '}
+                    <span className="font-mono font-medium text-xs">
+                      {selectedEB.budget_line?.code || '-'}
+                    </span>
+                  </div>
+                  {articles.length > 0 && (
+                    <div className="col-span-3 mt-2">
+                      <span className="text-muted-foreground text-xs font-medium">
+                        Articles ({articles.length})
+                      </span>
+                      <div className="mt-1 max-h-32 overflow-y-auto space-y-1">
+                        {articles.map((a, i) => (
+                          <div
+                            key={i}
+                            className="flex justify-between text-xs bg-muted/30 px-2 py-1 rounded"
+                          >
+                            <span className="truncate mr-4">{a.designation}</span>
+                            <span className="font-mono whitespace-nowrap">
+                              {a.quantite} {a.unite} x {formatMontant(a.prix_unitaire)}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between text-xs font-bold pt-1 border-t">
+                          <span>Total articles</span>
+                          <span className="font-mono">
+                            {formatMontant(articles.reduce((s, a) => s + (a.prix_total || 0), 0))}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {lineAvailability && (
+                    <div className="col-span-3 p-2 rounded-lg bg-muted/50 border mt-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Disponible sur la ligne</span>
+                        <span
+                          className={cn(
+                            'font-bold font-mono',
+                            lineAvailability.disponible < (selectedEB.montant_estime || 0)
+                              ? 'text-destructive'
+                              : 'text-green-700'
+                          )}
+                        >
+                          {formatMontant(lineAvailability.disponible)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -352,10 +491,20 @@ export function PassationMarcheForm({
                 </TabsTrigger>
               </TabsList>
 
-              {/* Mode de passation */}
+              {/* Procédure de passation */}
               <TabsContent value="mode" className="mt-4 space-y-4">
+                {seuilDGMP && (
+                  <Alert className={cn('border', seuilDGMP.color)}>
+                    <CreditCard className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Seuil automatique :</strong> {seuilDGMP.label} (montant{' '}
+                      {formatMontant(selectedEB?.montant_estime ?? null)})
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <div>
-                  <Label htmlFor="mode_passation">Mode de passation *</Label>
+                  <Label htmlFor="mode_passation">Procédure de passation *</Label>
                   <Select
                     value={formData.mode_passation}
                     onValueChange={(value) =>
@@ -366,47 +515,54 @@ export function PassationMarcheForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {MODES_PASSATION.map((mode) => (
-                        <SelectItem key={mode.value} value={mode.value}>
-                          {mode.label}
-                        </SelectItem>
-                      ))}
+                      {PROCEDURES_PASSATION.map((proc) => {
+                        const isRecommended = seuilDGMP?.procedure === proc.value;
+                        return (
+                          <SelectItem key={proc.value} value={proc.value}>
+                            {proc.label}
+                            {isRecommended ? ' (Recommande)' : ''}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="type_procedure">Type de procédure</Label>
-                  <Input
-                    id="type_procedure"
-                    value={formData.type_procedure}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, type_procedure: e.target.value }))
-                    }
-                    placeholder="Ex: Consultation restreinte avec 3 offres minimum"
-                  />
-                </div>
+                {selectedEB?.montant_estime &&
+                  formData.mode_passation &&
+                  !isProcedureCoherente(selectedEB.montant_estime, formData.mode_passation) && (
+                    <Alert className="bg-yellow-50 border-yellow-300">
+                      <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                      <AlertDescription className="text-yellow-800">
+                        Pour un montant de {formatMontant(selectedEB.montant_estime)}, la procedure
+                        recommandee est « {getSeuilForMontant(selectedEB.montant_estime)?.label} ».
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
                 <div className="flex justify-end">
-                  <Button onClick={() => setActiveStep("lots")}>
-                    Suivant: Lots
-                  </Button>
+                  <Button onClick={() => setActiveStep('lots')}>Suivant: Lots</Button>
                 </div>
               </TabsContent>
 
-              {/* Lots (optionnel) */}
+              {/* Lots */}
               <TabsContent value="lots" className="mt-4 space-y-4">
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-base">Allotissement</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          Marché alloti
+                        </CardTitle>
                         <CardDescription>
-                          Optionnel - Divisez le marché en lots distincts si nécessaire
+                          Activez l'allotissement pour diviser le marché en lots distincts
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="allotissement">Activer l'allotissement</Label>
+                        <Label htmlFor="allotissement" className="text-sm">
+                          Marché alloti
+                        </Label>
                         <Switch
                           id="allotissement"
                           checked={allotissement}
@@ -422,43 +578,55 @@ export function PassationMarcheForm({
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="w-16">N°</TableHead>
-                                <TableHead>Désignation</TableHead>
-                                <TableHead className="text-right">Montant estimé</TableHead>
+                                <TableHead className="w-20">N°</TableHead>
+                                <TableHead>Libellé</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead className="text-right w-40">Montant estimé</TableHead>
                                 <TableHead className="w-12" />
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {lots.map((lot) => (
                                 <TableRow key={lot.id}>
-                                  <TableCell className="font-mono font-medium">
+                                  <TableCell className="font-mono font-medium align-top pt-3">
                                     Lot {lot.numero}
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="align-top">
                                     <Input
-                                      placeholder="Désignation du lot"
+                                      placeholder="Libellé du lot"
                                       value={lot.designation}
                                       onChange={(e) =>
-                                        handleLotChange(lot.id, "designation", e.target.value)
+                                        handleLotChange(lot.id, 'designation', e.target.value)
                                       }
                                     />
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="align-top">
+                                    <Textarea
+                                      placeholder="Description du lot..."
+                                      value={lot.description || ''}
+                                      onChange={(e) =>
+                                        handleLotChange(lot.id, 'description', e.target.value)
+                                      }
+                                      rows={2}
+                                      className="resize-none text-sm"
+                                    />
+                                  </TableCell>
+                                  <TableCell className="align-top">
                                     <Input
                                       type="number"
                                       placeholder="Montant"
-                                      value={lot.montant_estime || ""}
+                                      value={lot.montant_estime || ''}
                                       onChange={(e) =>
                                         handleLotChange(
                                           lot.id,
-                                          "montant_estime",
+                                          'montant_estime',
                                           e.target.value ? parseFloat(e.target.value) : null
                                         )
                                       }
                                       className="text-right"
                                     />
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell className="align-top">
                                     <Button
                                       variant="ghost"
                                       size="icon"
@@ -479,31 +647,76 @@ export function PassationMarcheForm({
                         </Button>
 
                         {lots.length > 0 && (
-                          <div className="text-sm text-muted-foreground text-right">
-                            Total estimé:{" "}
-                            <span className="font-medium">
-                              {formatMontant(
-                                lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0)
-                              )}
-                            </span>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-sm border-t pt-2">
+                              <span className="text-muted-foreground">Total lots</span>
+                              <span
+                                className={cn(
+                                  'font-bold font-mono',
+                                  lotsExceedMontant
+                                    ? 'text-destructive'
+                                    : lotsMismatchMontant
+                                      ? 'text-yellow-700'
+                                      : 'text-foreground'
+                                )}
+                              >
+                                {formatMontant(totalLots)}
+                              </span>
+                            </div>
+                            {montantMarche > 0 && (
+                              <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">
+                                  Montant du marché (EB)
+                                </span>
+                                <span className="font-mono">{formatMontant(montantMarche)}</span>
+                              </div>
+                            )}
                           </div>
+                        )}
+
+                        {lotsExceedMontant && (
+                          <Alert variant="destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                              Le total des lots ({formatMontant(totalLots)}) dépasse le montant du
+                              marché ({formatMontant(montantMarche)}). Veuillez corriger les
+                              montants.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        {lotsMismatchMontant && (
+                          <Alert className="bg-yellow-50 border-yellow-300">
+                            <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                            <AlertDescription className="text-yellow-800">
+                              Le total des lots ({formatMontant(totalLots)}) ne correspond pas au
+                              montant du marché ({formatMontant(montantMarche)}).
+                            </AlertDescription>
+                          </Alert>
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>L'allotissement n'est pas activé pour ce marché</p>
-                        <p className="text-sm">Activez l'option ci-dessus pour diviser le marché en lots</p>
+                      <div className="p-4 rounded-lg bg-muted/50 border">
+                        <div className="flex items-center gap-3">
+                          <Package className="h-8 w-8 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium text-sm">Lot unique (implicite)</p>
+                            <p className="text-xs text-muted-foreground">
+                              Le marché n'est pas alloti. Un lot unique sera créé avec le montant
+                              total de {formatMontant(montantMarche)}.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </CardContent>
                 </Card>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep("mode")}>
+                  <Button variant="outline" onClick={() => setActiveStep('mode')}>
                     Précédent
                   </Button>
-                  <Button onClick={() => setActiveStep("prestataires")}>
+                  <Button onClick={() => setActiveStep('prestataires')}>
                     Suivant: Prestataires
                   </Button>
                 </div>
@@ -513,7 +726,13 @@ export function PassationMarcheForm({
               <TabsContent value="prestataires" className="mt-4 space-y-4">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Ajouter des prestataires</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">Soumissionnaires</CardTitle>
+                      <Badge data-testid="soumissionnaires-counter">
+                        {soumissionnairesCount} soumissionnaire
+                        {soumissionnairesCount !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="relative">
@@ -525,22 +744,72 @@ export function PassationMarcheForm({
                         className="pl-9"
                       />
                     </div>
-                    {searchPrestataire && filteredPrestataires && filteredPrestataires.length > 0 && (
-                      <div className="max-h-40 overflow-y-auto border rounded-md">
-                        {filteredPrestataires.slice(0, 5).map((p) => (
-                          <div
-                            key={p.id}
-                            onClick={() => handleAddPrestataire(p)}
-                            className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
-                          >
-                            <p className="font-medium text-sm">{p.raison_sociale}</p>
-                            <p className="text-xs text-muted-foreground">{p.code}</p>
-                          </div>
-                        ))}
+                    {searchPrestataire &&
+                      filteredPrestataires &&
+                      filteredPrestataires.length > 0 && (
+                        <div className="max-h-40 overflow-y-auto border rounded-md">
+                          {filteredPrestataires.slice(0, 5).map((p) => (
+                            <div
+                              key={p.id}
+                              onClick={() => handleAddPrestataire(p)}
+                              className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
+                            >
+                              <p className="font-medium text-sm">{p.raison_sociale}</p>
+                              <p className="text-xs text-muted-foreground">{p.code}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                    <Separator />
+
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-2 block">
+                        <UserPlus className="h-3.5 w-3.5 inline mr-1" />
+                        Saisie manuelle
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          data-testid="manual-soumissionnaire-input"
+                          placeholder="Nom du prestataire..."
+                          value={manualName}
+                          onChange={(e) => setManualName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddManualPrestataire();
+                            }
+                          }}
+                        />
+                        <Button
+                          data-testid="add-manual-soumissionnaire"
+                          variant="outline"
+                          onClick={handleAddManualPrestataire}
+                          disabled={!manualName.trim()}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Ajouter
+                        </Button>
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
+
+                {insufficientSoumissionnaires && (
+                  <Alert
+                    data-testid="soumissionnaires-warning"
+                    className="bg-yellow-50 border-yellow-300"
+                  >
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                    <AlertDescription className="text-yellow-800">
+                      La procedure &laquo;
+                      {PROCEDURES_PASSATION.find((p) => p.value === formData.mode_passation)
+                        ?.label || formData.mode_passation}
+                      &raquo; requiert au minimum {minRequired} soumissionnaires. Actuellement :{' '}
+                      {soumissionnairesCount}.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 {prestatairesSollicites.length > 0 && (
                   <Table>
@@ -548,6 +817,7 @@ export function PassationMarcheForm({
                       <TableRow>
                         <TableHead>Prestataire</TableHead>
                         <TableHead className="text-right">Offre (FCFA)</TableHead>
+                        <TableHead className="text-center">Offre tech.</TableHead>
                         <TableHead className="text-center">Note Tech.</TableHead>
                         <TableHead className="text-center">Note Fin.</TableHead>
                         <TableHead />
@@ -556,21 +826,58 @@ export function PassationMarcheForm({
                     <TableBody>
                       {prestatairesSollicites.map((ps) => (
                         <TableRow key={ps.id}>
-                          <TableCell className="font-medium">{ps.raison_sociale}</TableCell>
+                          <TableCell className="font-medium">
+                            {ps.raison_sociale}
+                            {ps.is_manual_entry && (
+                              <Badge variant="outline" className="ml-2 text-xs">
+                                Manuel
+                              </Badge>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <Input
                               type="number"
                               placeholder="Montant"
-                              value={ps.offre_montant || ""}
+                              value={ps.offre_montant || ''}
                               onChange={(e) =>
                                 handlePrestataireChange(
                                   ps.id,
-                                  "offre_montant",
+                                  'offre_montant',
                                   e.target.value ? parseFloat(e.target.value) : null
                                 )
                               }
                               className="w-32 text-right"
                             />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <input
+                              type="file"
+                              id={`offre-tech-${ps.id}`}
+                              className="hidden"
+                              accept=".pdf,.doc,.docx"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handlePrestataireChange(ps.id, 'offre_documents', [file.name]);
+                                }
+                              }}
+                            />
+                            {ps.offre_documents.length > 0 ? (
+                              <span
+                                className="text-xs text-green-700 font-medium truncate max-w-[100px] inline-block"
+                                title={ps.offre_documents[0]}
+                              >
+                                {ps.offre_documents[0]}
+                              </span>
+                            ) : (
+                              <label
+                                htmlFor={`offre-tech-${ps.id}`}
+                                className="cursor-pointer inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                <Upload className="h-3.5 w-3.5" />
+                                PJ
+                              </label>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Input
@@ -578,11 +885,11 @@ export function PassationMarcheForm({
                               min="0"
                               max="100"
                               placeholder="0-100"
-                              value={ps.note_technique || ""}
+                              value={ps.note_technique || ''}
                               onChange={(e) =>
                                 handlePrestataireChange(
                                   ps.id,
-                                  "note_technique",
+                                  'note_technique',
                                   e.target.value ? parseFloat(e.target.value) : null
                                 )
                               }
@@ -595,11 +902,11 @@ export function PassationMarcheForm({
                               min="0"
                               max="100"
                               placeholder="0-100"
-                              value={ps.note_financiere || ""}
+                              value={ps.note_financiere || ''}
                               onChange={(e) =>
                                 handlePrestataireChange(
                                   ps.id,
-                                  "note_financiere",
+                                  'note_financiere',
                                   e.target.value ? parseFloat(e.target.value) : null
                                 )
                               }
@@ -622,12 +929,10 @@ export function PassationMarcheForm({
                 )}
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep("lots")}>
+                  <Button variant="outline" onClick={() => setActiveStep('lots')}>
                     Précédent
                   </Button>
-                  <Button onClick={() => setActiveStep("criteres")}>
-                    Suivant: Critères
-                  </Button>
+                  <Button onClick={() => setActiveStep('criteres')}>Suivant: Critères</Button>
                 </div>
               </TabsContent>
 
@@ -683,12 +988,10 @@ export function PassationMarcheForm({
                 </Card>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep("prestataires")}>
+                  <Button variant="outline" onClick={() => setActiveStep('prestataires')}>
                     Précédent
                   </Button>
-                  <Button onClick={() => setActiveStep("decision")}>
-                    Suivant: Décision
-                  </Button>
+                  <Button onClick={() => setActiveStep('decision')}>Suivant: Décision</Button>
                 </div>
               </TabsContent>
 
@@ -707,7 +1010,8 @@ export function PassationMarcheForm({
                       <Alert variant="destructive">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
-                          Aucun prestataire sollicité. Retournez à l'onglet Prestataires pour en ajouter.
+                          Aucun prestataire sollicité. Retournez à l'onglet Prestataires pour en
+                          ajouter.
                         </AlertDescription>
                       </Alert>
                     ) : (
@@ -716,9 +1020,7 @@ export function PassationMarcheForm({
                           <div
                             key={ps.id}
                             className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                              ps.selectionne
-                                ? "bg-primary/10 border-primary"
-                                : "hover:bg-accent"
+                              ps.selectionne ? 'bg-primary/10 border-primary' : 'hover:bg-accent'
                             }`}
                             onClick={() => {
                               setPrestatairesSollicites((prev) =>
@@ -790,8 +1092,8 @@ export function PassationMarcheForm({
                           key={decision.value}
                           className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             formData.decision === decision.value
-                              ? "border-primary bg-primary/5"
-                              : "border-muted hover:border-primary/50"
+                              ? 'border-primary bg-primary/5'
+                              : 'border-muted hover:border-primary/50'
                           }`}
                           onClick={() =>
                             setFormData((prev) => ({ ...prev, decision: decision.value }))
@@ -800,12 +1102,10 @@ export function PassationMarcheForm({
                           <div className="flex items-start gap-3">
                             <div
                               className={`p-2 rounded-lg ${
-                                formData.decision === decision.value
-                                  ? "bg-primary/10"
-                                  : "bg-muted"
+                                formData.decision === decision.value ? 'bg-primary/10' : 'bg-muted'
                               }`}
                             >
-                              {decision.value === "engagement_possible" ? (
+                              {decision.value === 'engagement_possible' ? (
                                 <CreditCard className="h-5 w-5 text-green-600" />
                               ) : (
                                 <FileCheck className="h-5 w-5 text-blue-600" />
@@ -824,9 +1124,7 @@ export function PassationMarcheForm({
 
                     {/* Justification de la décision */}
                     <div>
-                      <Label htmlFor="justification_decision">
-                        Justification de la décision
-                      </Label>
+                      <Label htmlFor="justification_decision">Justification de la décision</Label>
                       <Textarea
                         id="justification_decision"
                         placeholder="Expliquez pourquoi cette voie de sortie a été choisie..."
@@ -844,16 +1142,32 @@ export function PassationMarcheForm({
 
                     {/* Info sur la suite */}
                     {formData.decision && (
-                      <Alert className={formData.decision === "engagement_possible" ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}>
-                        <ArrowRight className={`h-4 w-4 ${formData.decision === "engagement_possible" ? "text-green-600" : "text-blue-600"}`} />
-                        <AlertDescription className={formData.decision === "engagement_possible" ? "text-green-700" : "text-blue-700"}>
-                          {formData.decision === "engagement_possible" ? (
+                      <Alert
+                        className={
+                          formData.decision === 'engagement_possible'
+                            ? 'bg-green-50 border-green-200'
+                            : 'bg-blue-50 border-blue-200'
+                        }
+                      >
+                        <ArrowRight
+                          className={`h-4 w-4 ${formData.decision === 'engagement_possible' ? 'text-green-600' : 'text-blue-600'}`}
+                        />
+                        <AlertDescription
+                          className={
+                            formData.decision === 'engagement_possible'
+                              ? 'text-green-700'
+                              : 'text-blue-700'
+                          }
+                        >
+                          {formData.decision === 'engagement_possible' ? (
                             <>
-                              <strong>Prochaine étape :</strong> Après validation, vous pourrez créer directement un engagement à partir de cette passation.
+                              <strong>Prochaine étape :</strong> Après validation, vous pourrez
+                              créer directement un engagement à partir de cette passation.
                             </>
                           ) : (
                             <>
-                              <strong>Prochaine étape :</strong> Après validation, cette passation nécessitera la création d'un contrat formel avant l'engagement.
+                              <strong>Prochaine étape :</strong> Après validation, cette passation
+                              nécessitera la création d'un contrat formel avant l'engagement.
                             </>
                           )}
                         </AlertDescription>
@@ -863,7 +1177,7 @@ export function PassationMarcheForm({
                 </Card>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setActiveStep("criteres")}>
+                  <Button variant="outline" onClick={() => setActiveStep('criteres')}>
                     Précédent
                   </Button>
                 </div>
@@ -876,10 +1190,7 @@ export function PassationMarcheForm({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedEB || isCreating}
-          >
+          <Button onClick={handleSubmit} disabled={!selectedEB || isCreating || lotsExceedMontant}>
             {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Créer la passation
           </Button>

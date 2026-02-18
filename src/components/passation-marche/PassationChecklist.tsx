@@ -1,62 +1,174 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
-  FileText, 
-  Upload, 
-  CheckCircle2, 
+/* eslint-disable react-refresh/only-export-components */
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  FileText,
+  Upload,
+  CheckCircle2,
   AlertTriangle,
   Trash2,
   Loader2,
   ClipboardCheck,
-  ShieldCheck
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  ShieldCheck,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { PieceJointePassation } from '@/hooks/usePassationsMarche';
 
 // Types de documents selon le mode de passation
 export const DOCUMENTS_PAR_MODE = {
   gre_a_gre: [
-    { code: "proforma", label: "Proforma / Devis", required: true, description: "Devis détaillé du prestataire" },
-    { code: "justification_gre", label: "Note de justification", required: true, description: "Justification du choix gré à gré" },
+    {
+      code: 'proforma',
+      label: 'Proforma / Devis',
+      required: true,
+      description: 'Devis détaillé du prestataire',
+    },
+    {
+      code: 'justification_gre',
+      label: 'Note de justification',
+      required: true,
+      description: 'Justification du choix gré à gré',
+    },
   ],
   consultation: [
-    { code: "lettre_consultation", label: "Lettre de consultation", required: true, description: "Invitation à soumissionner" },
-    { code: "proforma", label: "Proformas reçus (min. 3)", required: true, description: "Au minimum 3 offres" },
-    { code: "tableau_comparatif", label: "Tableau comparatif des offres", required: true, description: "Analyse comparative" },
-    { code: "pv_ouverture", label: "PV d'ouverture des plis", required: true, description: "Procès-verbal d'ouverture" },
+    {
+      code: 'lettre_consultation',
+      label: 'Lettre de consultation',
+      required: true,
+      description: 'Invitation à soumissionner',
+    },
+    {
+      code: 'proforma',
+      label: 'Proformas reçus (min. 3)',
+      required: true,
+      description: 'Au minimum 3 offres',
+    },
+    {
+      code: 'tableau_comparatif',
+      label: 'Tableau comparatif des offres',
+      required: true,
+      description: 'Analyse comparative',
+    },
+    {
+      code: 'pv_ouverture',
+      label: "PV d'ouverture des plis",
+      required: true,
+      description: "Procès-verbal d'ouverture",
+    },
   ],
   appel_offres_ouvert: [
-    { code: "dao", label: "Dossier d'Appel d'Offres (DAO)", required: true, description: "Cahier des charges complet" },
-    { code: "avis_appel_offres", label: "Avis d'appel d'offres", required: true, description: "Publication officielle" },
-    { code: "pv_ouverture", label: "PV d'ouverture des plis", required: true, description: "Procès-verbal d'ouverture" },
-    { code: "pv_evaluation", label: "PV d'évaluation", required: true, description: "Rapport d'évaluation technique et financière" },
-    { code: "rapport_analyse", label: "Rapport d'analyse", required: true, description: "Rapport détaillé d'analyse" },
-    { code: "decision_attribution", label: "Décision d'attribution", required: true, description: "Notification officielle" },
+    {
+      code: 'dao',
+      label: "Dossier d'Appel d'Offres (DAO)",
+      required: true,
+      description: 'Cahier des charges complet',
+    },
+    {
+      code: 'avis_appel_offres',
+      label: "Avis d'appel d'offres",
+      required: true,
+      description: 'Publication officielle',
+    },
+    {
+      code: 'pv_ouverture',
+      label: "PV d'ouverture des plis",
+      required: true,
+      description: "Procès-verbal d'ouverture",
+    },
+    {
+      code: 'pv_evaluation',
+      label: "PV d'évaluation",
+      required: true,
+      description: "Rapport d'évaluation technique et financière",
+    },
+    {
+      code: 'rapport_analyse',
+      label: "Rapport d'analyse",
+      required: true,
+      description: "Rapport détaillé d'analyse",
+    },
+    {
+      code: 'decision_attribution',
+      label: "Décision d'attribution",
+      required: true,
+      description: 'Notification officielle',
+    },
   ],
   appel_offres_restreint: [
-    { code: "lettre_invitation", label: "Lettres d'invitation", required: true, description: "Invitations aux soumissionnaires présélectionnés" },
-    { code: "dao", label: "Dossier d'Appel d'Offres (DAO)", required: true, description: "Cahier des charges" },
-    { code: "pv_ouverture", label: "PV d'ouverture des plis", required: true, description: "Procès-verbal d'ouverture" },
-    { code: "pv_evaluation", label: "PV d'évaluation", required: true, description: "Rapport d'évaluation" },
-    { code: "decision_attribution", label: "Décision d'attribution", required: true, description: "Notification officielle" },
+    {
+      code: 'lettre_invitation',
+      label: "Lettres d'invitation",
+      required: true,
+      description: 'Invitations aux soumissionnaires présélectionnés',
+    },
+    {
+      code: 'dao',
+      label: "Dossier d'Appel d'Offres (DAO)",
+      required: true,
+      description: 'Cahier des charges',
+    },
+    {
+      code: 'pv_ouverture',
+      label: "PV d'ouverture des plis",
+      required: true,
+      description: "Procès-verbal d'ouverture",
+    },
+    {
+      code: 'pv_evaluation',
+      label: "PV d'évaluation",
+      required: true,
+      description: "Rapport d'évaluation",
+    },
+    {
+      code: 'decision_attribution',
+      label: "Décision d'attribution",
+      required: true,
+      description: 'Notification officielle',
+    },
   ],
   entente_directe: [
-    { code: "note_justification", label: "Note de justification", required: true, description: "Justification de l'entente directe" },
-    { code: "autorisation_dcmp", label: "Autorisation DCMP", required: true, description: "Autorisation de la Direction des marchés publics" },
-    { code: "proforma", label: "Proforma", required: true, description: "Offre du prestataire" },
+    {
+      code: 'note_justification',
+      label: 'Note de justification',
+      required: true,
+      description: "Justification de l'entente directe",
+    },
+    {
+      code: 'autorisation_dcmp',
+      label: 'Autorisation DCMP',
+      required: true,
+      description: 'Autorisation de la Direction des marchés publics',
+    },
+    { code: 'proforma', label: 'Proforma', required: true, description: 'Offre du prestataire' },
   ],
 };
 
 // Documents communs à tous les modes
 export const DOCUMENTS_COMMUNS = [
-  { code: "fiche_engagement", label: "Fiche d'engagement budgétaire", required: false, description: "Si engagement déjà créé" },
-  { code: "attestation_fiscale", label: "Attestation fiscale prestataire", required: false, description: "Document fiscal du prestataire" },
-  { code: "autres", label: "Autres documents", required: false, description: "Documents complémentaires" },
+  {
+    code: 'fiche_engagement',
+    label: "Fiche d'engagement budgétaire",
+    required: false,
+    description: 'Si engagement déjà créé',
+  },
+  {
+    code: 'attestation_fiscale',
+    label: 'Attestation fiscale prestataire',
+    required: false,
+    description: 'Document fiscal du prestataire',
+  },
+  {
+    code: 'autres',
+    label: 'Autres documents',
+    required: false,
+    description: 'Documents complémentaires',
+  },
 ];
 
 interface DocumentItem {
@@ -73,8 +185,8 @@ interface DocumentItem {
 interface PassationChecklistProps {
   passationId: string;
   modePassation: string;
-  piecesJointes: any[];
-  onUpdate?: (pieces: any[]) => void;
+  piecesJointes: PieceJointePassation[];
+  onUpdate?: (pieces: PieceJointePassation[]) => void;
   readOnly?: boolean;
   onValidationChange?: (isComplete: boolean, missingDocs: string[]) => void;
 }
@@ -94,9 +206,9 @@ export function PassationChecklist({
   useEffect(() => {
     const modeKey = modePassation as keyof typeof DOCUMENTS_PAR_MODE;
     const modeDocs = DOCUMENTS_PAR_MODE[modeKey] || DOCUMENTS_PAR_MODE.gre_a_gre;
-    
+
     const allDocs = [...modeDocs, ...DOCUMENTS_COMMUNS].map((doc) => {
-      const uploaded = piecesJointes.find((p: any) => p.code === doc.code);
+      const uploaded = piecesJointes.find((p) => p.code === doc.code);
       return {
         ...doc,
         uploaded: !!uploaded,
@@ -105,22 +217,24 @@ export function PassationChecklist({
         uploadedAt: uploaded?.uploadedAt,
       };
     });
-    
+
     setDocuments(allDocs);
   }, [modePassation, piecesJointes]);
 
   // Calculer le statut de complétion
   const requiredDocs = documents.filter((d) => d.required);
   const uploadedRequired = requiredDocs.filter((d) => d.uploaded);
-  const completionPercent = requiredDocs.length > 0 
-    ? Math.round((uploadedRequired.length / requiredDocs.length) * 100)
-    : 100;
+  const completionPercent =
+    requiredDocs.length > 0
+      ? Math.round((uploadedRequired.length / requiredDocs.length) * 100)
+      : 100;
   const isComplete = uploadedRequired.length === requiredDocs.length;
   const missingDocs = requiredDocs.filter((d) => !d.uploaded).map((d) => d.label);
 
   // Notifier le parent du changement de validation
   useEffect(() => {
     onValidationChange?.(isComplete, missingDocs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, missingDocs.length]);
 
   const handleFileChange = async (code: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +247,7 @@ export function PassationChecklist({
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const updatedPieces = [
-      ...piecesJointes.filter((p: any) => p.code !== code),
+      ...piecesJointes.filter((p) => p.code !== code),
       {
         code,
         fileName: file.name,
@@ -149,7 +263,7 @@ export function PassationChecklist({
   };
 
   const handleRemove = (code: string) => {
-    const updatedPieces = piecesJointes.filter((p: any) => p.code !== code);
+    const updatedPieces = piecesJointes.filter((p) => p.code !== code);
     onUpdate?.(updatedPieces);
   };
 
@@ -161,17 +275,15 @@ export function PassationChecklist({
             <ClipboardCheck className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Pièces justificatives</CardTitle>
           </div>
-          <Badge 
-            variant={isComplete ? "default" : "secondary"}
-            className={cn(
-              isComplete && "bg-green-100 text-green-700 hover:bg-green-100"
-            )}
+          <Badge
+            variant={isComplete ? 'default' : 'secondary'}
+            className={cn(isComplete && 'bg-green-100 text-green-700 hover:bg-green-100')}
           >
             {completionPercent}% complet
           </Badge>
         </div>
         <CardDescription>
-          Documents requis pour le mode "{modePassation.replace(/_/g, " ")}"
+          Documents requis pour le mode "{modePassation.replace(/_/g, ' ')}"
         </CardDescription>
         <Progress value={completionPercent} className="h-2 mt-2" />
       </CardHeader>
@@ -186,7 +298,9 @@ export function PassationChecklist({
               La soumission est bloquée. Documents requis manquants :
               <ul className="list-disc list-inside mt-1">
                 {missingDocs.map((doc) => (
-                  <li key={doc} className="text-sm">{doc}</li>
+                  <li key={doc} className="text-sm">
+                    {doc}
+                  </li>
                 ))}
               </ul>
             </AlertDescription>
@@ -209,19 +323,21 @@ export function PassationChecklist({
             <div
               key={doc.code}
               className={cn(
-                "flex items-center justify-between p-3 rounded-lg border transition-colors",
-                doc.uploaded 
-                  ? "bg-green-50 border-green-200" 
-                  : doc.required 
-                    ? "bg-orange-50 border-orange-200" 
-                    : "bg-muted/30"
+                'flex items-center justify-between p-3 rounded-lg border transition-colors',
+                doc.uploaded
+                  ? 'bg-green-50 border-green-200'
+                  : doc.required
+                    ? 'bg-orange-50 border-orange-200'
+                    : 'bg-muted/30'
               )}
             >
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "h-8 w-8 rounded-full flex items-center justify-center",
-                  doc.uploaded ? "bg-green-100" : doc.required ? "bg-orange-100" : "bg-muted"
-                )}>
+                <div
+                  className={cn(
+                    'h-8 w-8 rounded-full flex items-center justify-center',
+                    doc.uploaded ? 'bg-green-100' : doc.required ? 'bg-orange-100' : 'bg-muted'
+                  )}
+                >
                   {doc.uploaded ? (
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                   ) : doc.required ? (
@@ -234,7 +350,10 @@ export function PassationChecklist({
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{doc.label}</span>
                     {doc.required && (
-                      <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200">
+                      <Badge
+                        variant="outline"
+                        className="text-xs bg-orange-100 text-orange-700 border-orange-200"
+                      >
                         Obligatoire
                       </Badge>
                     )}
@@ -279,7 +398,9 @@ export function PassationChecklist({
                   </>
                 )}
                 {readOnly && !doc.uploaded && doc.required && (
-                  <Badge variant="destructive" className="text-xs">Manquant</Badge>
+                  <Badge variant="destructive" className="text-xs">
+                    Manquant
+                  </Badge>
                 )}
               </div>
             </div>

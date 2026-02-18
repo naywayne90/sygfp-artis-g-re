@@ -10282,8 +10282,176 @@ export type Database = {
           },
         ];
       };
+      lots_marche: {
+        Row: {
+          id: string;
+          passation_marche_id: string;
+          numero: number;
+          designation: string;
+          description: string | null;
+          montant_estime: number | null;
+          montant_retenu: number | null;
+          prestataire_retenu_id: string | null;
+          statut: string;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          passation_marche_id: string;
+          numero?: number;
+          designation?: string;
+          description?: string | null;
+          montant_estime?: number | null;
+          montant_retenu?: number | null;
+          prestataire_retenu_id?: string | null;
+          statut?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          passation_marche_id?: string;
+          numero?: number;
+          designation?: string;
+          description?: string | null;
+          montant_estime?: number | null;
+          montant_retenu?: number | null;
+          prestataire_retenu_id?: string | null;
+          statut?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'lots_marche_passation_marche_id_fkey';
+            columns: ['passation_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'passation_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lots_marche_prestataire_retenu_id_fkey';
+            columns: ['prestataire_retenu_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      soumissionnaires_lot: {
+        Row: {
+          id: string;
+          passation_marche_id: string;
+          lot_marche_id: string | null;
+          prestataire_id: string | null;
+          is_manual_entry: boolean;
+          raison_sociale: string;
+          contact_nom: string | null;
+          email: string | null;
+          telephone: string | null;
+          rccm: string | null;
+          offre_technique_url: string | null;
+          offre_financiere: number | null;
+          date_depot: string | null;
+          note_technique: number | null;
+          note_financiere: number | null;
+          statut: string;
+          motif_elimination: string | null;
+          observations: string | null;
+          qualifie_technique: boolean;
+          note_finale: number | null;
+          rang_classement: number | null;
+          created_by: string | null;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          passation_marche_id: string;
+          lot_marche_id?: string | null;
+          prestataire_id?: string | null;
+          is_manual_entry?: boolean;
+          raison_sociale: string;
+          contact_nom?: string | null;
+          email?: string | null;
+          telephone?: string | null;
+          rccm?: string | null;
+          offre_technique_url?: string | null;
+          offre_financiere?: number | null;
+          date_depot?: string | null;
+          note_technique?: number | null;
+          note_financiere?: number | null;
+          statut?: string;
+          motif_elimination?: string | null;
+          observations?: string | null;
+          qualifie_technique?: boolean;
+          note_finale?: number | null;
+          rang_classement?: number | null;
+          created_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          passation_marche_id?: string;
+          lot_marche_id?: string | null;
+          prestataire_id?: string | null;
+          is_manual_entry?: boolean;
+          raison_sociale?: string;
+          contact_nom?: string | null;
+          email?: string | null;
+          telephone?: string | null;
+          rccm?: string | null;
+          offre_technique_url?: string | null;
+          offre_financiere?: number | null;
+          date_depot?: string | null;
+          note_technique?: number | null;
+          note_financiere?: number | null;
+          statut?: string;
+          motif_elimination?: string | null;
+          observations?: string | null;
+          qualifie_technique?: boolean;
+          note_finale?: number | null;
+          rang_classement?: number | null;
+          created_by?: string | null;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'soumissionnaires_lot_passation_marche_id_fkey';
+            columns: ['passation_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'passation_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_lot_marche_id_fkey';
+            columns: ['lot_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'lots_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       passation_marche: {
         Row: {
+          allotissement: boolean | null;
           analyse_offres: Json | null;
           created_at: string | null;
           created_by: string | null;
@@ -10296,6 +10464,7 @@ export type Database = {
           exercice: number | null;
           expression_besoin_id: string | null;
           id: string;
+          ligne_budgetaire_id: string | null;
           mode_passation: string;
           montant_retenu: number | null;
           motif_differe: string | null;
@@ -10320,6 +10489,7 @@ export type Database = {
           validated_by: string | null;
         };
         Insert: {
+          allotissement?: boolean | null;
           analyse_offres?: Json | null;
           created_at?: string | null;
           created_by?: string | null;
@@ -10332,6 +10502,7 @@ export type Database = {
           exercice?: number | null;
           expression_besoin_id?: string | null;
           id?: string;
+          ligne_budgetaire_id?: string | null;
           mode_passation?: string;
           montant_retenu?: number | null;
           motif_differe?: string | null;
@@ -10356,6 +10527,7 @@ export type Database = {
           validated_by?: string | null;
         };
         Update: {
+          allotissement?: boolean | null;
           analyse_offres?: Json | null;
           created_at?: string | null;
           created_by?: string | null;
@@ -10368,6 +10540,7 @@ export type Database = {
           exercice?: number | null;
           expression_besoin_id?: string | null;
           id?: string;
+          ligne_budgetaire_id?: string | null;
           mode_passation?: string;
           montant_retenu?: number | null;
           motif_differe?: string | null;

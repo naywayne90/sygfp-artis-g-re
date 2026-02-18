@@ -1,31 +1,37 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Building2, 
-  FileText, 
-  Loader2, 
-  Save, 
-  Target, 
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Building2,
+  FileText,
+  Loader2,
+  Save,
+  Target,
   CreditCard,
   Banknote,
   AlertTriangle,
-  Search
-} from "lucide-react";
-import { 
-  useMarches, 
-  TYPES_MARCHE, 
-  TYPES_PROCEDURE, 
+  Search,
+} from 'lucide-react';
+import {
+  useMarches,
+  TYPES_MARCHE,
+  TYPES_PROCEDURE,
   MarcheFormData,
-  Prestataire 
-} from "@/hooks/useMarches";
+  Prestataire,
+} from '@/hooks/useMarches';
 
 interface NoteImputation {
   id: string;
@@ -56,32 +62,32 @@ interface MarcheFormProps {
 
 export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
   const { prestataires, notesImputees, createMarche, isCreating } = useMarches();
-  
+
   const [selectedNote, setSelectedNote] = useState<NoteImputation | null>(null);
   const [selectedPrestataire, setSelectedPrestataire] = useState<Prestataire | null>(null);
-  const [prestataireSearch, setPrestataireSearch] = useState("");
-  
+  const [prestataireSearch, setPrestataireSearch] = useState('');
+
   const [formData, setFormData] = useState<Partial<MarcheFormData>>({
-    objet: "",
+    objet: '',
     montant: 0,
-    mode_passation: "consultation",
-    type_marche: "fourniture",
-    type_procedure: "consultation",
+    mode_passation: 'consultation',
+    type_marche: 'fourniture',
+    type_procedure: 'consultation',
     nombre_lots: 1,
     numero_lot: 1,
-    intitule_lot: "",
+    intitule_lot: '',
     duree_execution: 30,
-    observations: "",
+    observations: '',
     note_id: noteId,
   });
 
   // Charger la note si fournie
   useEffect(() => {
     if (noteId) {
-      const note = notesImputees.find(n => n.id === noteId);
+      const note = notesImputees.find((n) => n.id === noteId);
       if (note) {
-        setSelectedNote(note as any);
-        setFormData(prev => ({
+        setSelectedNote(note as NoteImputation);
+        setFormData((prev) => ({
           ...prev,
           objet: note.objet,
           montant: note.montant_estime || 0,
@@ -93,8 +99,9 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
 
   // Filtrer les prestataires
   const filteredPrestataires = prestataires.filter(
-    p => p.raison_sociale.toLowerCase().includes(prestataireSearch.toLowerCase()) ||
-         p.code?.toLowerCase().includes(prestataireSearch.toLowerCase())
+    (p) =>
+      p.raison_sociale.toLowerCase().includes(prestataireSearch.toLowerCase()) ||
+      p.code?.toLowerCase().includes(prestataireSearch.toLowerCase())
   );
 
   const handleSubmit = async () => {
@@ -108,15 +115,15 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
         prestataire_id: selectedPrestataire?.id,
       } as MarcheFormData);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       // Error handled by hook
     }
   };
 
   const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
-  const needsJustification = formData.type_procedure === "gre_a_gre";
+  const needsJustification = formData.type_procedure === 'gre_a_gre';
 
   return (
     <div className="space-y-6">
@@ -136,23 +143,23 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
             <div className="grid gap-4 md:grid-cols-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Direction:</span>
-                <p className="font-medium">{selectedNote.direction?.sigle || "-"}</p>
+                <p className="font-medium">{selectedNote.direction?.sigle || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Objectif Stratégique:</span>
-                <p className="font-medium">{selectedNote.os?.code || "-"}</p>
+                <p className="font-medium">{selectedNote.os?.code || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Mission:</span>
-                <p className="font-medium">{selectedNote.mission?.code || "-"}</p>
+                <p className="font-medium">{selectedNote.mission?.code || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Action:</span>
-                <p className="font-medium">{selectedNote.action?.code || "-"}</p>
+                <p className="font-medium">{selectedNote.action?.code || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Activité:</span>
-                <p className="font-medium">{selectedNote.activite?.code || "-"}</p>
+                <p className="font-medium">{selectedNote.activite?.code || '-'}</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Montant estimé:</span>
@@ -174,12 +181,12 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
           </CardHeader>
           <CardContent>
             <Select
-              value={formData.note_id || ""}
+              value={formData.note_id || ''}
               onValueChange={(v) => {
-                const note = notesImputees.find(n => n.id === v);
+                const note = notesImputees.find((n) => n.id === v);
                 if (note) {
-                  setSelectedNote(note as any);
-                  setFormData(prev => ({
+                  setSelectedNote(note as NoteImputation);
+                  setFormData((prev) => ({
                     ...prev,
                     note_id: v,
                     objet: note.objet,
@@ -192,7 +199,7 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <SelectValue placeholder="Sélectionner une note imputée" />
               </SelectTrigger>
               <SelectContent>
-                {notesImputees.map((note: any) => (
+                {notesImputees.map((note) => (
                   <SelectItem key={note.id} value={note.id}>
                     <span className="font-mono text-xs">{note.numero}</span> - {note.objet}
                   </SelectItem>
@@ -225,9 +232,9 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 />
               </div>
               <Select
-                value={selectedPrestataire?.id || ""}
+                value={selectedPrestataire?.id || ''}
                 onValueChange={(v) => {
-                  const p = prestataires.find(x => x.id === v);
+                  const p = prestataires.find((x) => x.id === v);
                   setSelectedPrestataire(p || null);
                 }}
               >
@@ -235,7 +242,7 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                   <SelectValue placeholder="Sélectionner un prestataire" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {filteredPrestataires.slice(0, 30).map(p => (
+                  {filteredPrestataires.slice(0, 30).map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{p.raison_sociale}</span>
@@ -309,14 +316,16 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Label>Type de marché *</Label>
                 <Select
                   value={formData.type_marche}
-                  onValueChange={(v) => setFormData(prev => ({ ...prev, type_marche: v }))}
+                  onValueChange={(v) => setFormData((prev) => ({ ...prev, type_marche: v }))}
                 >
                   <SelectTrigger className="mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {TYPES_MARCHE.map(t => (
-                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    {TYPES_MARCHE.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -326,14 +335,16 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Label>Type de procédure *</Label>
                 <Select
                   value={formData.type_procedure}
-                  onValueChange={(v) => setFormData(prev => ({ ...prev, type_procedure: v }))}
+                  onValueChange={(v) => setFormData((prev) => ({ ...prev, type_procedure: v }))}
                 >
                   <SelectTrigger className="mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {TYPES_PROCEDURE.map(t => (
-                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    {TYPES_PROCEDURE.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -344,7 +355,9 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Input
                   type="number"
                   value={formData.nombre_lots || 1}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nombre_lots: parseInt(e.target.value) || 1 }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, nombre_lots: parseInt(e.target.value) || 1 }))
+                  }
                   className="mt-1.5"
                   min={1}
                 />
@@ -355,7 +368,9 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Input
                   type="number"
                   value={formData.numero_lot || 1}
-                  onChange={(e) => setFormData(prev => ({ ...prev, numero_lot: parseInt(e.target.value) || 1 }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, numero_lot: parseInt(e.target.value) || 1 }))
+                  }
                   className="mt-1.5"
                   min={1}
                 />
@@ -365,8 +380,8 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
             <div>
               <Label>Intitulé du lot</Label>
               <Input
-                value={formData.intitule_lot || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, intitule_lot: e.target.value }))}
+                value={formData.intitule_lot || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, intitule_lot: e.target.value }))}
                 className="mt-1.5"
                 placeholder="Ex: Lot 1 - Fournitures informatiques"
               />
@@ -377,8 +392,10 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Label>Date d'attribution</Label>
                 <Input
                   type="date"
-                  value={formData.date_attribution || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, date_attribution: e.target.value }))}
+                  value={formData.date_attribution || ''}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, date_attribution: e.target.value }))
+                  }
                   className="mt-1.5"
                 />
               </div>
@@ -387,8 +404,13 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
                 <Label>Durée d'exécution (jours)</Label>
                 <Input
                   type="number"
-                  value={formData.duree_execution || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duree_execution: parseInt(e.target.value) || undefined }))}
+                  value={formData.duree_execution || ''}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duree_execution: parseInt(e.target.value) || undefined,
+                    }))
+                  }
                   className="mt-1.5"
                   min={1}
                   placeholder="30"
@@ -413,7 +435,7 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
             <Input
               id="objet"
               value={formData.objet}
-              onChange={(e) => setFormData(prev => ({ ...prev, objet: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, objet: e.target.value }))}
               className="mt-1.5"
               placeholder="Description de l'objet du marché..."
             />
@@ -425,8 +447,10 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
               <Input
                 id="montant"
                 type="number"
-                value={formData.montant || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, montant: parseFloat(e.target.value) || 0 }))}
+                value={formData.montant || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, montant: parseFloat(e.target.value) || 0 }))
+                }
                 className="mt-1.5"
                 min={0}
               />
@@ -441,8 +465,8 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
           <div>
             <Label>Observations</Label>
             <Textarea
-              value={formData.observations || ""}
-              onChange={(e) => setFormData(prev => ({ ...prev, observations: e.target.value }))}
+              value={formData.observations || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, observations: e.target.value }))}
               className="mt-1.5"
               rows={3}
               placeholder="Remarques ou observations..."
@@ -462,12 +486,14 @@ export function MarcheForm({ noteId, onSuccess, onCancel }: MarcheFormProps) {
             <div>
               <Label>Justification de la dérogation *</Label>
               <Textarea
-                value={formData.justification_derogation || ""}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  justification_derogation: e.target.value,
-                  mode_force: true 
-                }))}
+                value={formData.justification_derogation || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    justification_derogation: e.target.value,
+                    mode_force: true,
+                  }))
+                }
                 className="mt-1.5"
                 rows={3}
                 placeholder="Expliquez les raisons du recours au gré à gré..."
