@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { usePermissions } from '@/hooks/usePermissions';
 import {
@@ -64,7 +66,13 @@ import {
   FileSignature,
   Pencil,
   XCircle,
+  Download,
+  FileDown,
+  FileSpreadsheet,
 } from 'lucide-react';
+import { exportPassationPDF } from '@/services/passationExportService';
+import { usePassationExport } from '@/hooks/usePassationExport';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 
 const getStatusBadge = (statut: string) => {
   const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.brouillon;
@@ -80,17 +88,19 @@ export default function PassationMarchePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { hasAnyRole, isAdmin } = usePermissions();
+  const { hasAnyRole, isAdmin, userDirectionId } = usePermissions();
   const isDAAF = isAdmin || hasAnyRole(['DAAF']);
   const isDG = isAdmin || hasAnyRole(['DG']);
   const canManageWorkflow = isDAAF; // DAAF gère le workflow opérationnel
   const canApprove = isDG; // DG approuve/rejette les attributions
+  const isDirectionAgent = !isDAAF && !isDG && !isAdmin;
 
   const {
     passations,
     ebValidees,
     counts,
     isLoading,
+    error: loadError,
     refetch,
     deletePassation,
     publishPassation,
@@ -100,7 +110,18 @@ export default function PassationMarchePage() {
     approvePassation,
     rejectAttributionPassation,
     signPassation,
+    // Pagination serveur
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    total,
+    totalPages,
+    statutFilter: _statutFilter,
+    setStatutFilter,
   } = usePassationsMarche();
+
+  const { exportExcel, exportPDF, exportCSV, isExporting } = usePassationExport();
 
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,30 +227,81 @@ export default function PassationMarchePage() {
     }
   };
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+  const formatMontant = (montant: number | null) => (montant ? formatCurrency(montant) : '-');
 
-  const filteredPassations = passations.filter(
-    (p) =>
-      p.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.expression_besoin?.objet?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Direction filtering for EB list (client-side, small dataset)
+  const directionEBs =
+    isDirectionAgent && userDirectionId
+      ? ebValidees.filter((eb) => eb.direction_id === userDirectionId)
+      : ebValidees;
 
-  const passationsByTab: Record<string, PassationMarche[] | EBValidee[]> = {
-    a_traiter: ebValidees,
-    brouillon: filteredPassations.filter((p) => p.statut === 'brouillon'),
-    publie: filteredPassations.filter((p) => p.statut === 'publie'),
-    cloture: filteredPassations.filter((p) => p.statut === 'cloture'),
-    en_evaluation: filteredPassations.filter((p) => p.statut === 'en_evaluation'),
-    attribue: filteredPassations.filter((p) => p.statut === 'attribue'),
-    approuve: filteredPassations.filter((p) => p.statut === 'approuve'),
-    signe: filteredPassations.filter((p) => p.statut === 'signe'),
+  // Direction filtering for lifecycle tabs (client-side)
+  const directionPassations =
+    isDirectionAgent && userDirectionId
+      ? passations.filter((p) => p.expression_besoin?.direction_id === userDirectionId)
+      : passations;
+
+  // Client-side search on direction-filtered results
+  const filteredPassations = searchTerm
+    ? directionPassations.filter(
+        (p) =>
+          p.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.expression_besoin?.objet?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : directionPassations;
+
+  // Handle tab change: set server filter + reset page
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    if (tab === 'a_traiter') {
+      setStatutFilter(null);
+    } else {
+      setStatutFilter(tab);
+    }
   };
+
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, setPage]);
 
   if (isLoading || isLoadingSource) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-6 animate-fade-in">
+        {/* Skeleton KPI cards */}
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-1 pt-3 px-3">
+                <Skeleton className="h-3 w-16" />
+              </CardHeader>
+              <CardContent className="pb-3 px-3">
+                <Skeleton className="h-7 w-10" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {/* Skeleton table rows */}
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <Skeleton className="h-9 w-full" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-destructive">Erreur lors du chargement des passations</p>
+        <p className="text-sm text-muted-foreground">{(loadError as Error).message}</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Réessayer
+        </Button>
       </div>
     );
   }
@@ -245,10 +317,43 @@ export default function PassationMarchePage() {
             Gestion des procédures de passation depuis les EB validées - Exercice {exercice}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isExporting}
+                data-testid="export-dropdown-btn"
+              >
+                {isExporting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                Exporter
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-popover">
+              <DropdownMenuItem onClick={() => exportExcel()}>
+                <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                Excel complet (4 feuilles)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportPDF()}>
+                <FileText className="mr-2 h-4 w-4 text-red-600" />
+                PDF rapport
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => exportCSV()}>
+                <FileDown className="mr-2 h-4 w-4 text-blue-600" />
+                CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {canApprove && counts.attribue > 0 && (
             <Button
               variant="outline"
+              size="sm"
               onClick={() => navigate('/execution/passation-marche/approbation')}
             >
               <ShieldCheck className="mr-2 h-4 w-4" />
@@ -265,23 +370,23 @@ export default function PassationMarchePage() {
       </div>
 
       {/* KPIs — 8 lifecycle cards */}
-      <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-8" data-testid="kpi-cards">
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('a_traiter')}
+          onClick={() => handleTabChange('a_traiter')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-muted-foreground">À traiter</CardTitle>
             <Tag className="h-3.5 w-3.5 text-primary" />
           </CardHeader>
           <CardContent className="pb-3 px-3">
-            <div className="text-xl font-bold">{ebValidees.length}</div>
+            <div className="text-xl font-bold">{directionEBs.length}</div>
           </CardContent>
         </Card>
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('brouillon')}
+          onClick={() => handleTabChange('brouillon')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-muted-foreground">Brouillons</CardTitle>
@@ -294,7 +399,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('publie')}
+          onClick={() => handleTabChange('publie')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-cyan-600">Publiés</CardTitle>
@@ -307,7 +412,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('cloture')}
+          onClick={() => handleTabChange('cloture')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-indigo-600">Clôturés</CardTitle>
@@ -320,7 +425,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('en_evaluation')}
+          onClick={() => handleTabChange('en_evaluation')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-amber-600">En éval.</CardTitle>
@@ -333,7 +438,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('attribue')}
+          onClick={() => handleTabChange('attribue')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-purple-600">Attribués</CardTitle>
@@ -346,7 +451,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('approuve')}
+          onClick={() => handleTabChange('approuve')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-green-600">Approuvés</CardTitle>
@@ -359,7 +464,7 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => setActiveTab('signe')}
+          onClick={() => handleTabChange('signe')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
             <CardTitle className="text-xs font-medium text-emerald-600">Signés</CardTitle>
@@ -372,7 +477,7 @@ export default function PassationMarchePage() {
       </div>
 
       {/* Alerte si aucune EB validée */}
-      {ebValidees.length === 0 && (
+      {directionEBs.length === 0 && (
         <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/20">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
@@ -409,13 +514,13 @@ export default function PassationMarchePage() {
       {/* Tabs */}
       <Card>
         <CardContent className="pt-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="flex w-full overflow-x-auto">
               <TabsTrigger value="a_traiter" className="gap-1 text-xs px-2">
                 <Tag className="h-3 w-3" />
                 EB
                 <Badge variant="secondary" className="ml-0.5 text-[10px] h-4 px-1">
-                  {ebValidees.length}
+                  {directionEBs.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="brouillon" className="text-xs px-2">
@@ -443,51 +548,53 @@ export default function PassationMarchePage() {
 
             {/* Onglet EB à traiter */}
             <TabsContent value="a_traiter" className="mt-4">
-              {ebValidees.length === 0 ? (
+              {directionEBs.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Aucune expression de besoin à traiter</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Référence</TableHead>
-                      <TableHead>Objet</TableHead>
-                      <TableHead>Direction</TableHead>
-                      <TableHead className="text-right">Montant estimé</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {ebValidees.map((eb) => (
-                      <TableRow key={eb.id}>
-                        <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
-                        <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
-                        <TableCell>{eb.direction?.sigle || '-'}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatMontant(eb.montant_estime)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSourceEB(eb as unknown as EBValidee);
-                              setShowForm(true);
-                            }}
-                          >
-                            <Gavel className="mr-2 h-4 w-4" />
-                            Passation
-                          </Button>
-                        </TableCell>
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Référence</TableHead>
+                        <TableHead>Objet</TableHead>
+                        <TableHead>Direction</TableHead>
+                        <TableHead className="text-right">Montant estimé</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {directionEBs.map((eb) => (
+                        <TableRow key={eb.id}>
+                          <TableCell className="font-mono text-sm">{eb.numero || '-'}</TableCell>
+                          <TableCell className="max-w-[250px] truncate">{eb.objet}</TableCell>
+                          <TableCell>{eb.direction?.sigle || '-'}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatMontant(eb.montant_estime)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSourceEB(eb as unknown as EBValidee);
+                                setShowForm(true);
+                              }}
+                            >
+                              <Gavel className="mr-2 h-4 w-4" />
+                              Passation
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </>
               )}
             </TabsContent>
 
-            {/* Lifecycle tabs */}
+            {/* Lifecycle tabs — server-paginated */}
             {[
               'brouillon',
               'publie',
@@ -498,193 +605,223 @@ export default function PassationMarchePage() {
               'signe',
             ].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-4">
-                {(passationsByTab[tab] as PassationMarche[]).length === 0 ? (
+                {activeTab === tab && filteredPassations.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Gavel className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Aucune passation dans cet onglet</p>
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Référence</TableHead>
-                        <TableHead>EB Source</TableHead>
-                        <TableHead>Mode</TableHead>
-                        <TableHead className="text-center">Nb lots</TableHead>
-                        <TableHead className="text-right">Montant retenu</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Créé le</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(passationsByTab[tab] as PassationMarche[]).map((pm) => (
-                        <TableRow key={pm.id}>
-                          <TableCell className="font-mono text-sm">{pm.reference || '-'}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {pm.expression_besoin?.numero || pm.expression_besoin?.objet || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="secondary" className="font-mono">
-                              {pm.allotissement && ((pm.lots as LotMarche[]) || []).length > 0
-                                ? (pm.lots as LotMarche[]).length
-                                : 1}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatMontant(pm.montant_retenu)}
-                          </TableCell>
-                          <TableCell>{getStatusBadge(pm.statut)}</TableCell>
-                          <TableCell>
-                            {format(new Date(pm.created_at), 'dd MMM yyyy', { locale: fr })}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-popover">
-                                {/* Tout le monde peut voir les détails */}
-                                <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-
-                                {pm.dossier_id && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleGoToDossier(pm.dossier_id as string)}
-                                  >
-                                    <FolderOpen className="mr-2 h-4 w-4" />
-                                    Voir le dossier
-                                  </DropdownMenuItem>
-                                )}
-
-                                {/* DAAF: Modifier (brouillon) */}
-                                {canManageWorkflow && pm.statut === 'brouillon' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
-                                      <Pencil className="mr-2 h-4 w-4" />
-                                      Modifier
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF: Publier (brouillon) */}
-                                {canManageWorkflow && pm.statut === 'brouillon' && (
-                                  <DropdownMenuItem onClick={() => handleTransition('publish', pm)}>
-                                    <Send className="mr-2 h-4 w-4" />
-                                    Publier
-                                  </DropdownMenuItem>
-                                )}
-
-                                {/* DAAF: Clôturer (publié) */}
-                                {canManageWorkflow && pm.statut === 'publie' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleTransition('close', pm)}>
-                                      <Lock className="mr-2 h-4 w-4" />
-                                      Clôturer
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF: Lancer évaluation (clôturé) */}
-                                {canManageWorkflow && pm.statut === 'cloture' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => handleTransition('startEvaluation', pm)}
-                                    >
-                                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                                      Lancer l'évaluation
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF: Attribuer (en_evaluation) */}
-                                {canManageWorkflow && pm.statut === 'en_evaluation' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleTransition('award', pm)}>
-                                      <Award className="mr-2 h-4 w-4" />
-                                      Attribuer
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DG: Approuver / Rejeter (attribué) */}
-                                {canApprove && pm.statut === 'attribue' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => handleTransition('approve', pm)}
-                                    >
-                                      <ShieldCheck className="mr-2 h-4 w-4" />
-                                      Approuver
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedPassation(pm);
-                                        setRejectDialogOpen(true);
-                                      }}
-                                      className="text-destructive"
-                                    >
-                                      <XCircle className="mr-2 h-4 w-4" />
-                                      Rejeter l'attribution
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF: Signer le contrat (approuvé) */}
-                                {canManageWorkflow && pm.statut === 'approuve' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleTransition('sign', pm)}>
-                                      <FileSignature className="mr-2 h-4 w-4" />
-                                      Signer le contrat
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF/DG: Créer engagement (signé) */}
-                                {(canManageWorkflow || canApprove) && pm.statut === 'signe' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
-                                    >
-                                      <FileText className="mr-2 h-4 w-4" />
-                                      Créer engagement
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-
-                                {/* DAAF: Supprimer (brouillon uniquement) */}
-                                {canManageWorkflow && pm.statut === 'brouillon' && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => deletePassation(pm.id)}
-                                      className="text-destructive"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Supprimer
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
+                  <>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Référence</TableHead>
+                          <TableHead>EB Source</TableHead>
+                          <TableHead>Mode</TableHead>
+                          <TableHead className="text-center">Nb lots</TableHead>
+                          <TableHead className="text-right">Montant retenu</TableHead>
+                          <TableHead>Statut</TableHead>
+                          <TableHead>Créé le</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPassations.map((pm) => (
+                          <TableRow key={pm.id}>
+                            <TableCell className="font-mono text-sm">
+                              {pm.reference || '-'}
+                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate">
+                              {pm.expression_besoin?.numero || pm.expression_besoin?.objet || '-'}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="secondary" className="font-mono">
+                                {pm.allotissement && ((pm.lots as LotMarche[]) || []).length > 0
+                                  ? (pm.lots as LotMarche[]).length
+                                  : 1}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatMontant(pm.montant_retenu)}
+                            </TableCell>
+                            <TableCell>{getStatusBadge(pm.statut)}</TableCell>
+                            <TableCell>
+                              {format(new Date(pm.created_at), 'dd MMM yyyy', { locale: fr })}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-popover">
+                                  {/* Tout le monde peut voir les détails */}
+                                  <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Voir détails
+                                  </DropdownMenuItem>
+
+                                  <DropdownMenuItem onClick={() => exportPassationPDF(pm)}>
+                                    <FileDown className="mr-2 h-4 w-4" />
+                                    Exporter PDF
+                                  </DropdownMenuItem>
+
+                                  {pm.dossier_id && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleGoToDossier(pm.dossier_id as string)}
+                                    >
+                                      <FolderOpen className="mr-2 h-4 w-4" />
+                                      Voir le dossier
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  {/* DAAF: Modifier (brouillon) */}
+                                  {canManageWorkflow && pm.statut === 'brouillon' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Modifier
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF: Publier (brouillon) */}
+                                  {canManageWorkflow && pm.statut === 'brouillon' && (
+                                    <DropdownMenuItem
+                                      onClick={() => handleTransition('publish', pm)}
+                                    >
+                                      <Send className="mr-2 h-4 w-4" />
+                                      Publier
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  {/* DAAF: Clôturer (publié) */}
+                                  {canManageWorkflow && pm.statut === 'publie' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('close', pm)}
+                                      >
+                                        <Lock className="mr-2 h-4 w-4" />
+                                        Clôturer
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF: Lancer évaluation (clôturé) */}
+                                  {canManageWorkflow && pm.statut === 'cloture' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('startEvaluation', pm)}
+                                      >
+                                        <ClipboardCheck className="mr-2 h-4 w-4" />
+                                        Lancer l'évaluation
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF: Attribuer (en_evaluation) */}
+                                  {canManageWorkflow && pm.statut === 'en_evaluation' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('award', pm)}
+                                      >
+                                        <Award className="mr-2 h-4 w-4" />
+                                        Attribuer
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DG: Approuver / Rejeter (attribué) */}
+                                  {canApprove && pm.statut === 'attribue' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('approve', pm)}
+                                      >
+                                        <ShieldCheck className="mr-2 h-4 w-4" />
+                                        Approuver
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setSelectedPassation(pm);
+                                          setRejectDialogOpen(true);
+                                        }}
+                                        className="text-destructive"
+                                      >
+                                        <XCircle className="mr-2 h-4 w-4" />
+                                        Rejeter l'attribution
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF: Signer le contrat (approuvé) */}
+                                  {canManageWorkflow && pm.statut === 'approuve' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('sign', pm)}
+                                      >
+                                        <FileSignature className="mr-2 h-4 w-4" />
+                                        Signer le contrat
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF/DG: Créer engagement (signé) */}
+                                  {(canManageWorkflow || canApprove) && pm.statut === 'signe' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
+                                      >
+                                        <FileText className="mr-2 h-4 w-4" />
+                                        Créer engagement
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+
+                                  {/* DAAF: Supprimer (brouillon uniquement) */}
+                                  {canManageWorkflow && pm.statut === 'brouillon' && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => deletePassation(pm.id)}
+                                        className="text-destructive"
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Supprimer
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {activeTab === tab && totalPages > 1 && (
+                      <div className="mt-4" data-testid="pagination">
+                        <NotesPagination
+                          page={page}
+                          pageSize={pageSize}
+                          total={total}
+                          totalPages={totalPages}
+                          onPageChange={setPage}
+                          onPageSizeChange={setPageSize}
+                          pageSizeOptions={[10, 20, 50]}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
             ))}

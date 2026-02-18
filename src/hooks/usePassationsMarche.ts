@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -432,16 +433,35 @@ export function usePassationsMarche() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
 
-  // Fetch all passations
+  // Pagination + filtrage serveur
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [statutFilter, setStatutFilter] = useState<string | null>(null);
+
+  // Reset page quand exercice ou filtre change
+  const handleSetStatutFilter = useCallback((statut: string | null) => {
+    setStatutFilter(statut);
+    setPage(1);
+  }, []);
+
+  const handleSetPageSize = useCallback((size: number) => {
+    setPageSize(size);
+    setPage(1);
+  }, []);
+
+  // Fetch passations avec pagination serveur
   const {
-    data: passations = [],
+    data: queryResult,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['passations-marche', exercice],
+    queryKey: ['passations-marche', exercice, page, pageSize, statutFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
         .from('passation_marche')
         .select(
           `
@@ -452,18 +472,25 @@ export function usePassationsMarche() {
           dossier:dossiers(id, numero, objet),
           prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(id, raison_sociale),
           creator:profiles!passation_marche_created_by_fkey(id, full_name)
-        `
+        `,
+          { count: 'exact' }
         )
-        .eq('exercice', exercice)
-        .order('created_at', { ascending: false });
+        .eq('exercice', exercice);
+
+      if (statutFilter) {
+        query = query.eq('statut', statutFilter);
+      }
+
+      const { data, error, count } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) throw error;
-      return (data ?? []).map((row) => {
+
+      const passations = (data ?? []).map((row) => {
         const parsed = row as unknown as PassationMarche;
-        // Lots from DB join, sorted by numero
         if (Array.isArray(parsed.lots)) {
           parsed.lots.sort((a, b) => a.numero - b.numero);
-          // Attach soumissionnaires to their respective lots
           const soums = (parsed.soumissionnaires || []) as Soumissionnaire[];
           for (const lot of parsed.lots) {
             lot.soumissionnaires = soums.filter((s) => s.lot_marche_id === lot.id);
@@ -471,9 +498,16 @@ export function usePassationsMarche() {
         }
         return parsed;
       });
+
+      return { passations, total: count ?? 0 };
     },
     enabled: !!exercice,
+    staleTime: 30_000,
   });
+
+  const passations = queryResult?.passations ?? [];
+  const total = queryResult?.total ?? 0;
+  const totalPages = Math.ceil(total / pageSize);
 
   // Fetch EB validées disponibles
   const { data: ebValidees = [] } = useQuery({
@@ -504,23 +538,36 @@ export function usePassationsMarche() {
       return (ebs?.filter((eb) => !usedIds.has(eb.id)) || []) as unknown as EBValidee[];
     },
     enabled: !!exercice,
+    staleTime: 60_000,
   });
 
-  // Counts par statut
-  const counts = {
-    brouillon: passations.filter((p) => p.statut === 'brouillon').length,
-    publie: passations.filter((p) => p.statut === 'publie').length,
-    cloture: passations.filter((p) => p.statut === 'cloture').length,
-    en_evaluation: passations.filter((p) => p.statut === 'en_evaluation').length,
-    attribue: passations.filter((p) => p.statut === 'attribue').length,
-    approuve: passations.filter((p) => p.statut === 'approuve').length,
-    signe: passations.filter((p) => p.statut === 'signe').length,
-    // Legacy
-    soumis: passations.filter((p) => p.statut === 'soumis').length,
-    en_analyse: passations.filter((p) => p.statut === 'en_analyse').length,
-    valide: passations.filter((p) => p.statut === 'valide').length,
-    rejete: passations.filter((p) => p.statut === 'rejete').length,
-    differe: passations.filter((p) => p.statut === 'differe').length,
+  // Counts par statut via RPC (1 seule requête, indépendant de la pagination)
+  const { data: rpcCounts } = useQuery({
+    queryKey: ['passation-counts', exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_passation_counts', {
+        p_exercice: exercice as number,
+      });
+      if (error) throw error;
+      return (data as Record<string, number>) ?? {};
+    },
+    enabled: !!exercice,
+    staleTime: 30_000,
+  });
+
+  const counts: Record<string, number> = {
+    brouillon: rpcCounts?.brouillon ?? 0,
+    publie: rpcCounts?.publie ?? 0,
+    cloture: rpcCounts?.cloture ?? 0,
+    en_evaluation: rpcCounts?.en_evaluation ?? 0,
+    attribue: rpcCounts?.attribue ?? 0,
+    approuve: rpcCounts?.approuve ?? 0,
+    signe: rpcCounts?.signe ?? 0,
+    soumis: rpcCounts?.soumis ?? 0,
+    en_analyse: rpcCounts?.en_analyse ?? 0,
+    valide: rpcCounts?.valide ?? 0,
+    rejete: rpcCounts?.rejete ?? 0,
+    differe: rpcCounts?.differe ?? 0,
   };
 
   // Create
@@ -624,11 +671,14 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       queryClient.invalidateQueries({ queryKey: ['eb-validees-pour-pm'] });
       toast.success('Passation de marché créée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la création de la passation', {
+        description: error.message,
+      });
     },
   });
 
@@ -644,10 +694,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Mise à jour effectuée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la mise à jour', {
+        description: error.message,
+      });
     },
   });
 
@@ -666,10 +719,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation soumise pour validation');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la soumission', {
+        description: error.message,
+      });
     },
   });
 
@@ -690,10 +746,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation validée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la validation', {
+        description: error.message,
+      });
     },
   });
 
@@ -713,10 +772,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation rejetée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors du rejet', {
+        description: error.message,
+      });
     },
   });
 
@@ -745,10 +807,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation différée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors du report', {
+        description: error.message,
+      });
     },
   });
 
@@ -780,9 +845,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation publiée');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error('Erreur lors de la publication', {
+        description: error.message,
+      }),
   });
 
   // Close (publie → cloture)
@@ -811,9 +880,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Passation clôturée');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error('Erreur lors de la clôture', {
+        description: error.message,
+      }),
   });
 
   // Start evaluation (cloture → en_evaluation)
@@ -842,9 +915,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Évaluation lancée');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error("Erreur lors du lancement de l'évaluation", {
+        description: error.message,
+      }),
   });
 
   // Propose attribution (en_evaluation → attribue)
@@ -873,9 +950,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Attribution proposée au DG');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error("Erreur lors de l'attribution", {
+        description: error.message,
+      }),
   });
 
   // Approve attribution (attribue → approuve)
@@ -904,9 +985,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Attribution approuvée');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error("Erreur lors de l'approbation", {
+        description: error.message,
+      }),
   });
 
   // Reject attribution (attribue → en_evaluation)
@@ -925,9 +1010,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Attribution rejetée');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error("Erreur lors du rejet de l'attribution", {
+        description: error.message,
+      }),
   });
 
   // Sign (approuve → signe)
@@ -964,9 +1053,13 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       toast.success('Contrat signé');
     },
-    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+    onError: (error: Error) =>
+      toast.error('Erreur lors de la signature', {
+        description: error.message,
+      }),
   });
 
   // Save lots (upsert: delete all then re-insert)
@@ -999,7 +1092,9 @@ export function usePassationsMarche() {
       toast.success('Lots mis à jour');
     },
     onError: (error: Error) => {
-      toast.error('Erreur lots: ' + error.message);
+      toast.error('Erreur lors de la sauvegarde des lots', {
+        description: error.message,
+      });
     },
   });
 
@@ -1050,7 +1145,9 @@ export function usePassationsMarche() {
       toast.success('Soumissionnaires mis à jour');
     },
     onError: (error: Error) => {
-      toast.error('Erreur soumissionnaires: ' + error.message);
+      toast.error('Erreur lors de la sauvegarde des soumissionnaires', {
+        description: error.message,
+      });
     },
   });
 
@@ -1098,10 +1195,12 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
-      toast.success('Soumissionnaire ajoute');
+      toast.success('Soumissionnaire ajouté');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error("Erreur lors de l'ajout du soumissionnaire", {
+        description: error.message,
+      });
     },
   });
 
@@ -1118,10 +1217,12 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
-      toast.success('Soumissionnaire mis a jour');
+      toast.success('Soumissionnaire mis à jour');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la mise à jour du soumissionnaire', {
+        description: error.message,
+      });
     },
   });
 
@@ -1133,10 +1234,12 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
-      toast.success('Soumissionnaire supprime');
+      toast.success('Soumissionnaire supprimé');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la suppression du soumissionnaire', {
+        description: error.message,
+      });
     },
   });
 
@@ -1161,7 +1264,9 @@ export function usePassationsMarche() {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
     },
     onError: (error: Error) => {
-      toast.error('Erreur evaluation: ' + error.message);
+      toast.error("Erreur lors de l'évaluation", {
+        description: error.message,
+      });
     },
   });
 
@@ -1216,10 +1321,12 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
-      toast.success('Classement recalcule');
+      toast.success('Classement recalculé');
     },
     onError: (error: Error) => {
-      toast.error('Erreur classement: ' + error.message);
+      toast.error('Erreur lors du recalcul du classement', {
+        description: error.message,
+      });
     },
   });
 
@@ -1232,11 +1339,14 @@ export function usePassationsMarche() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      queryClient.invalidateQueries({ queryKey: ['passation-counts'] });
       queryClient.invalidateQueries({ queryKey: ['eb-validees-pour-pm'] });
       toast.success('Passation supprimée');
     },
     onError: (error: Error) => {
-      toast.error('Erreur: ' + error.message);
+      toast.error('Erreur lors de la suppression', {
+        description: error.message,
+      });
     },
   });
 
@@ -1247,6 +1357,15 @@ export function usePassationsMarche() {
     isLoading,
     error,
     refetch,
+    // Pagination
+    page,
+    setPage,
+    pageSize,
+    setPageSize: handleSetPageSize,
+    total,
+    totalPages,
+    statutFilter,
+    setStatutFilter: handleSetStatutFilter,
     createPassation: createMutation.mutateAsync,
     updatePassation: updateMutation.mutateAsync,
     saveLots: saveLotsMutation.mutateAsync,

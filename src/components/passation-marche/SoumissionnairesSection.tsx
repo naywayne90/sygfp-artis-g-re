@@ -48,6 +48,7 @@ import {
   Phone,
   Mail,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface SoumissionnairesSectionProps {
   passationId: string;
@@ -117,8 +118,7 @@ export function SoumissionnairesSection({
         p.code?.toLowerCase().includes(searchPrestataire.toLowerCase()))
   );
 
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+  const formatMontant = (montant: number | null) => (montant ? formatCurrency(montant) : '-');
 
   const handleSelectPrestataire = (p: Prestataire) => {
     setNewSoum((prev) => ({

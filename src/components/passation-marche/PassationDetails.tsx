@@ -45,11 +45,14 @@ import {
 } from '@/hooks/usePassationsMarche';
 import { SoumissionnairesSection } from './SoumissionnairesSection';
 import { EvaluationCOJO } from './EvaluationCOJO';
+import { ComparatifEvaluation } from './ComparatifEvaluation';
+import { TableauComparatif } from './TableauComparatif';
 import { WorkflowActionBar } from './WorkflowActionBar';
+import { generatePVCOJO } from '@/services/pvCojoPdfService';
+import { usePassationMarcheExport } from '@/hooks/usePassationMarcheExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 import {
   Gavel,
   FileText,
@@ -70,6 +73,8 @@ import {
   Building2,
   CalendarDays,
   BarChart3,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 
 interface PassationDetailsProps {
@@ -90,6 +95,7 @@ export function PassationDetails({
     usePassationsMarche();
   const [_checklistComplete, setChecklistComplete] = useState(false);
   const [_missingDocs, setMissingDocs] = useState<string[]>([]);
+  const { exportPdfMarche, exportPdfComparatif, isExporting } = usePassationMarcheExport();
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('infos');
 
@@ -100,6 +106,9 @@ export function PassationDetails({
   // RBAC
   const { hasAnyRole: hasPermRole, isAdmin: isPermAdmin } = usePermissions();
   const canEvaluate = isPermAdmin || hasPermRole(['DG', 'DAAF', 'CB', 'DIRECTEUR']);
+  // Agents can view evaluation results after attribution (read-only)
+  const isPostAttribution = ['attribue', 'approuve', 'signe'].includes(passation.statut);
+  const canViewEvaluation = canEvaluate || isPostAttribution;
 
   // Seuil DGMP
   const montantEB = passation.expression_besoin?.montant_estime ?? null;
@@ -108,8 +117,7 @@ export function PassationDetails({
   const procedureCoherente = isProcedureCoherente(montantEB, passation.mode_passation);
 
   // Helpers
-  const formatMontant = (montant: number | null) =>
-    montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
+  const formatMontant = (montant: number | null) => (montant ? formatCurrency(montant) : '-');
 
   const getModeName = (value: string) =>
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
@@ -121,7 +129,7 @@ export function PassationDetails({
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null;
-    return format(new Date(dateStr), 'dd MMM yyyy', { locale: fr });
+    return format(new Date(dateStr), 'dd/MM/yyyy');
   };
 
   return (
@@ -133,7 +141,22 @@ export function PassationDetails({
               <Gavel className="h-5 w-5" />
               Passation {passation.reference || ''}
             </DialogTitle>
-            {getStatusBadge(passation.statut)}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportPdfMarche(passation)}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                PDF
+              </Button>
+              {getStatusBadge(passation.statut)}
+            </div>
           </div>
           <DialogDescription>
             {passation.expression_besoin?.objet || 'Details de la passation de marche'}
@@ -144,7 +167,7 @@ export function PassationDetails({
         <WorkflowActionBar passation={passation} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="infos" className="gap-1">
               <ClipboardList className="h-3 w-3" />
               <span className="hidden sm:inline">Infos</span>
@@ -170,6 +193,10 @@ export function PassationDetails({
             <TabsTrigger value="evaluation" className="gap-1" data-testid="evaluation-tab">
               <Award className="h-3 w-3" />
               <span className="hidden sm:inline">Evaluation</span>
+            </TabsTrigger>
+            <TabsTrigger value="comparatif" className="gap-1">
+              <BarChart3 className="h-3 w-3" />
+              <span className="hidden sm:inline">Comparatif</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-1">
               <FileText className="h-3 w-3" />
@@ -285,7 +312,7 @@ export function PassationDetails({
                     <div>
                       <p className="text-xs text-muted-foreground">Cree le</p>
                       <p className="font-medium">
-                        {format(new Date(passation.created_at), 'dd MMM yyyy', { locale: fr })}
+                        {format(new Date(passation.created_at), 'dd/MM/yyyy')}
                       </p>
                     </div>
                   </div>
@@ -760,13 +787,27 @@ export function PassationDetails({
 
           {/* ============ TAB 4 : EVALUATION (fusion eval+analyse) ============ */}
           <TabsContent value="evaluation" className="mt-4">
-            {canEvaluate ? (
+            {canViewEvaluation ? (
               <div data-testid="evaluation-grid">
-                <EvaluationCOJO
-                  passation={passation}
-                  onUpdateSoumissionnaire={updateSoumissionnaire}
-                  readOnly={passation.statut !== 'en_evaluation'}
-                />
+                <Tabs defaultValue="cojo" className="w-full">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="cojo">Évaluation COJO</TabsTrigger>
+                    <TabsTrigger value="comparatif">Tableau comparatif</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="cojo">
+                    <EvaluationCOJO
+                      passation={passation}
+                      onUpdateSoumissionnaire={updateSoumissionnaire}
+                      readOnly={!canEvaluate || passation.statut !== 'en_evaluation'}
+                    />
+                  </TabsContent>
+                  <TabsContent value="comparatif">
+                    <ComparatifEvaluation
+                      passation={passation}
+                      onExportPV={() => generatePVCOJO(passation)}
+                    />
+                  </TabsContent>
+                </Tabs>
               </div>
             ) : (
               <div data-testid="evaluation-access-denied" className="text-center py-8">
@@ -776,7 +817,16 @@ export function PassationDetails({
             )}
           </TabsContent>
 
-          {/* ============ TAB 5 : DOCUMENTS ============ */}
+          {/* ============ TAB 5 : COMPARATIF ============ */}
+          <TabsContent value="comparatif" className="mt-4">
+            <TableauComparatif
+              passation={passation}
+              onExportPdf={() => exportPdfComparatif(passation)}
+              isExporting={isExporting}
+            />
+          </TabsContent>
+
+          {/* ============ TAB 6 : DOCUMENTS ============ */}
           <TabsContent value="documents" className="mt-4 space-y-4">
             {/* Documents officiels */}
             {(passation.pv_ouverture || passation.pv_evaluation || passation.rapport_analyse) && (
