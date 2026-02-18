@@ -5,7 +5,7 @@ import { useExercice } from "@/contexts/ExerciceContext";
 import * as XLSX from "xlsx";
 
 export type ExportType = "excel" | "csv" | "pdf" | "zip";
-export type EntityType = "budget_lines" | "engagement" | "liquidation" | "ordonnancement" | "dossier" | "note_aef" | "note_sef" | "marche";
+export type EntityType = "budget_lines" | "engagement" | "liquidation" | "ordonnancement" | "dossier" | "note_aef" | "note_sef" | "marche" | "pv_cojo";
 
 interface ExportOptions {
   type: ExportType;

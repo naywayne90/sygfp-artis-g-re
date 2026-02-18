@@ -193,6 +193,12 @@ function generatePDFHTML(data: any, entityType: string): string {
     case "note_sef":
       content = generateNoteSEFPDF(data, logoUrl);
       break;
+    case "marche":
+      content = generateMarchePDF(data, logoUrl);
+      break;
+    case "pv_cojo":
+      content = generatePVCOJOPDF(data, logoUrl);
+      break;
     default:
       content = generateGenericPDF(data, entityType, logoUrl);
   }
@@ -540,6 +546,334 @@ function generateNoteSEFPDF(data: any, logoUrl: string): string {
   `;
 }
 
+function generateMarchePDF(data: any, logoUrl: string): string {
+  const m = data?.marche || {};
+  const qrData = encodeURIComponent(m.numero || "");
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+
+  const getStatutLabel = (s: string | null) => {
+    const labels: Record<string, string> = {
+      en_preparation: "En préparation", publie: "Publié", cloture: "Clôturé",
+      en_evaluation: "En évaluation", attribue: "Attribué", approuve: "Approuvé",
+      rejete: "Rejeté", signe: "Signé", annule: "Annulé", en_cours: "En cours",
+    };
+    return labels[s || "en_preparation"] || s || "N/A";
+  };
+
+  const lots = data?.lots || [];
+  const soumissions = data?.soumissions || [];
+  const evaluations = data?.evaluations || [];
+  const validations = data?.validations || [];
+
+  return `
+    <div class="header">
+      <img src="${logoUrl}" alt="ARTI" class="logo" onerror="this.style.display='none'"/>
+      <div class="title-section">
+        <h1 class="title">FICHE DE MARCHÉ</h1>
+        <p class="subtitle">Exercice ${m.exercice || new Date().getFullYear()}</p>
+      </div>
+    </div>
+
+    <div class="doc-info">
+      <h3>Informations Générales</h3>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">N° Marché :</span><span class="info-value">${m.numero || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Statut :</span><span class="info-value">${getStatutLabel(m.statut)}</span></div>
+        <div class="info-item"><span class="info-label">Type :</span><span class="info-value">${m.type_marche || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Mode passation :</span><span class="info-value">${m.mode_passation || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Date lancement :</span><span class="info-value">${formatDate(m.date_lancement)}</span></div>
+        <div class="info-item"><span class="info-label">Date clôture :</span><span class="info-value">${formatDate(m.date_cloture)}</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Objet du marché</div>
+      <p style="font-size: 12pt; font-weight: 500;">${m.objet || "N/A"}</p>
+    </div>
+
+    ${data?.prestataire ? `
+    <div class="section">
+      <div class="section-title">Prestataire attributaire</div>
+      <p>${data.prestataire.raison_sociale || "N/A"}</p>
+    </div>
+    ` : ""}
+
+    ${data?.expression_besoin ? `
+    <div class="section">
+      <div class="section-title">Expression de besoin</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">N° :</span><span class="info-value">${data.expression_besoin.numero || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Objet :</span><span class="info-value">${data.expression_besoin.objet || "N/A"}</span></div>
+      </div>
+    </div>
+    ` : ""}
+
+    ${data?.budget_line ? `
+    <div class="section">
+      <div class="section-title">Ligne budgétaire</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Code :</span><span class="info-value">${data.budget_line.code || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Libellé :</span><span class="info-value">${data.budget_line.label || "N/A"}</span></div>
+      </div>
+    </div>
+    ` : ""}
+
+    <div class="section">
+      <div class="section-title">Montants</div>
+      <table>
+        <tr><th>Description</th><th style="text-align: right;">Montant (FCFA)</th></tr>
+        <tr><td>Montant estimé</td><td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(m.montant_estime || 0)}</td></tr>
+        ${m.montant_attribue ? `<tr><td>Montant attribué</td><td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(m.montant_attribue)}</td></tr>` : ""}
+        ${m.montant ? `<tr style="background: #1e40af; color: white;"><th>Montant final</th><th style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(m.montant)}</th></tr>` : ""}
+      </table>
+    </div>
+
+    ${lots.length > 0 ? `
+    <div class="section">
+      <div class="section-title">Lots (${lots.length})</div>
+      <table>
+        <tr><th>N°</th><th>Intitulé</th><th style="text-align: right;">Montant est.</th><th style="text-align: right;">Montant att.</th><th>Statut</th></tr>
+        ${lots.map((l: any) => `
+          <tr>
+            <td>${l.numero_lot || ""}</td>
+            <td>${l.intitule || ""}</td>
+            <td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(l.montant_estime || 0)}</td>
+            <td style="text-align: right;">${l.montant_attribue ? new Intl.NumberFormat("fr-FR").format(l.montant_attribue) : "-"}</td>
+            <td>${l.statut || "-"}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    ` : ""}
+
+    ${soumissions.length > 0 ? `
+    <div class="section">
+      <div class="section-title">Soumissions (${soumissions.length})</div>
+      <table>
+        <tr><th>Entreprise</th><th style="text-align: right;">Montant offre</th><th>Statut</th><th>Date</th></tr>
+        ${soumissions.map((s: any) => `
+          <tr>
+            <td>${s.nom_entreprise || s.prestataire_nom || "N/A"}</td>
+            <td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(s.montant_offre || 0)}</td>
+            <td>${s.statut || "-"}</td>
+            <td>${formatDate(s.date_soumission)}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    ` : ""}
+
+    ${evaluations.length > 0 ? `
+    <div class="section">
+      <div class="section-title">Évaluations (${evaluations.length})</div>
+      <table>
+        <tr><th>Rang</th><th>Note tech.</th><th>Note fin.</th><th>Note finale</th><th>Qualifié</th><th>Évaluateur</th></tr>
+        ${evaluations.map((e: any) => `
+          <tr>
+            <td style="text-align: center;">${e.rang || "-"}</td>
+            <td style="text-align: right;">${e.note_technique != null ? Number(e.note_technique).toFixed(2) : "-"}</td>
+            <td style="text-align: right;">${e.note_financiere != null ? Number(e.note_financiere).toFixed(2) : "-"}</td>
+            <td style="text-align: right; font-weight: bold;">${e.note_finale != null ? Number(e.note_finale).toFixed(2) : "-"}</td>
+            <td style="text-align: center;">${e.qualifie_techniquement ? "✓" : "✗"}</td>
+            <td>${e.evaluateur || "-"}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    ` : ""}
+
+    ${validations.length > 0 ? `
+    <div class="section">
+      <div class="section-title">Circuit de validation</div>
+      <table>
+        <tr><th>Étape</th><th>Rôle</th><th>Statut</th><th>Commentaire</th><th>Date</th></tr>
+        ${validations.map((v: any) => `
+          <tr>
+            <td>${v.step_order || ""}</td>
+            <td>${v.role || ""}</td>
+            <td>${v.status || ""}</td>
+            <td>${v.comments || "-"}</td>
+            <td>${formatDate(v.validated_at)}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    ` : ""}
+
+    <div class="qr-code">
+      <img src="${qrUrl}" alt="QR Code ${m.numero}" />
+      <p style="font-size: 9pt; color: #666;">${m.numero || ""}</p>
+    </div>
+
+    <div class="signatures">
+      <div class="signature-box">
+        <div class="signature-title">Le DAAF</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le Contrôleur Budgétaire</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le DG</div>
+        <div>Date: _______________</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Document généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")} - ARTI SYGFP
+    </div>
+  `;
+}
+
+function generatePVCOJOPDF(data: any, logoUrl: string): string {
+  const m = data?.marche || {};
+  const lots = data?.lots || [];
+  const soumissions = data?.soumissions || [];
+  const evaluations = data?.evaluations || [];
+  const qrData = encodeURIComponent(`PV-COJO-${m.numero || ""}`);
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}`;
+
+  // Separate qualified vs non-qualified
+  const qualified = evaluations.filter((e: any) => e.qualifie_techniquement);
+  const disqualified = evaluations.filter((e: any) => !e.qualifie_techniquement);
+
+  return `
+    <div class="header">
+      <img src="${logoUrl}" alt="ARTI" class="logo" onerror="this.style.display='none'"/>
+      <div class="title-section">
+        <h1 class="title">PROCÈS-VERBAL</h1>
+        <p class="subtitle">Commission d'Ouverture et de Jugement des Offres (COJO)</p>
+      </div>
+    </div>
+
+    <div class="doc-info">
+      <h3>Marché concerné</h3>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">N° Marché :</span><span class="info-value">${m.numero || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Exercice :</span><span class="info-value">${m.exercice || new Date().getFullYear()}</span></div>
+        <div class="info-item"><span class="info-label">Objet :</span><span class="info-value">${m.objet || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Type :</span><span class="info-value">${m.type_marche || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Mode passation :</span><span class="info-value">${m.mode_passation || "N/A"}</span></div>
+        <div class="info-item"><span class="info-label">Montant estimé :</span><span class="info-value">${new Intl.NumberFormat("fr-FR").format(m.montant_estime || 0)} FCFA</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">1. Ouverture des plis</div>
+      <p>La Commission d'Ouverture et de Jugement des Offres (COJO) s'est réunie pour procéder à l'ouverture des plis relatifs au marché <strong>${m.numero || "N/A"}</strong> — "${m.objet || ""}".</p>
+      <p><strong>${soumissions.length} offre(s)</strong> ont été réceptionnées${m.date_cloture ? ` à la date de clôture du ${formatDate(m.date_cloture)}` : ""}.</p>
+
+      ${soumissions.length > 0 ? `
+      <table>
+        <tr><th>N°</th><th>Soumissionnaire</th><th style="text-align: right;">Montant offre (FCFA)</th><th>Date dépôt</th><th>Statut</th></tr>
+        ${soumissions.map((s: any, i: number) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.nom_entreprise || s.prestataire_nom || "N/A"}</td>
+            <td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(s.montant_offre || 0)}</td>
+            <td>${formatDate(s.date_soumission)}</td>
+            <td>${s.statut || "-"}</td>
+          </tr>
+        `).join("")}
+      </table>
+      ` : "<p><em>Aucune soumission enregistrée.</em></p>"}
+    </div>
+
+    ${lots.length > 0 ? `
+    <div class="section">
+      <div class="section-title">2. Allotissement</div>
+      <table>
+        <tr><th>Lot</th><th>Intitulé</th><th style="text-align: right;">Montant estimé (FCFA)</th></tr>
+        ${lots.map((l: any) => `
+          <tr>
+            <td style="text-align: center;">${l.numero_lot || ""}</td>
+            <td>${l.intitule || ""}</td>
+            <td style="text-align: right;">${new Intl.NumberFormat("fr-FR").format(l.montant_estime || 0)}</td>
+          </tr>
+        `).join("")}
+      </table>
+    </div>
+    ` : ""}
+
+    <div class="section">
+      <div class="section-title">${lots.length > 0 ? "3" : "2"}. Évaluation des offres</div>
+
+      ${evaluations.length > 0 ? `
+      <p>Les offres ont été évaluées selon la méthode de notation pondérée :</p>
+      <ul style="margin: 5px 0;">
+        <li>Note technique : coefficient 70% — seuil de qualification : 70/100</li>
+        <li>Note financière : coefficient 30% — uniquement pour les offres qualifiées techniquement</li>
+      </ul>
+
+      <table>
+        <tr><th>Rang</th><th>Soumissionnaire</th><th style="text-align: right;">Note tech. /100</th><th style="text-align: right;">Note fin. /100</th><th style="text-align: right;">Note finale /100</th><th>Qualifié</th></tr>
+        ${evaluations.map((e: any) => {
+          const soum = soumissions.find((s: any) => s.id === e.soumission_id);
+          return `
+          <tr style="${e.rang === 1 ? 'background: #d1fae5; font-weight: bold;' : !e.qualifie_techniquement ? 'color: #999;' : ''}">
+            <td style="text-align: center;">${e.rang || "-"}</td>
+            <td>${soum?.nom_entreprise || soum?.prestataire_nom || e.evaluateur || "N/A"}</td>
+            <td style="text-align: right;">${e.note_technique != null ? Number(e.note_technique).toFixed(2) : "-"}</td>
+            <td style="text-align: right;">${e.note_financiere != null ? Number(e.note_financiere).toFixed(2) : "-"}</td>
+            <td style="text-align: right;">${e.note_finale != null ? Number(e.note_finale).toFixed(2) : "-"}</td>
+            <td style="text-align: center;">${e.qualifie_techniquement ? "✓ Oui" : "✗ Non"}</td>
+          </tr>`;
+        }).join("")}
+      </table>
+      ` : "<p><em>Aucune évaluation enregistrée.</em></p>"}
+    </div>
+
+    ${qualified.length > 0 ? `
+    <div class="section" style="background: #d1fae5; padding: 15px; border-radius: 8px; border: 1px solid #10b981;">
+      <div class="section-title" style="color: #059669; border: none;">${lots.length > 0 ? "4" : "3"}. Résultat — Attribution recommandée</div>
+      <p>Sur la base des évaluations ci-dessus, la Commission recommande l'attribution du marché au soumissionnaire classé <strong>premier</strong> :</p>
+      <div style="padding: 10px; background: white; border-radius: 4px; margin: 10px 0;">
+        <p style="margin: 5px 0;"><strong>Attributaire recommandé :</strong> ${data?.prestataire?.raison_sociale || qualified[0]?.evaluateur || "N/A"}</p>
+        ${qualified[0]?.note_finale ? `<p style="margin: 5px 0;"><strong>Note finale :</strong> ${Number(qualified[0].note_finale).toFixed(2)}/100</p>` : ""}
+        ${m.montant_attribue ? `<p style="margin: 5px 0;"><strong>Montant attribué :</strong> ${new Intl.NumberFormat("fr-FR").format(m.montant_attribue)} FCFA</p>` : ""}
+      </div>
+      <p><strong>${qualified.length}</strong> offre(s) qualifiée(s) sur ${evaluations.length} évaluée(s).</p>
+      ${disqualified.length > 0 ? `<p><strong>${disqualified.length}</strong> offre(s) éliminée(s) (note technique &lt; 70).</p>` : ""}
+    </div>
+    ` : `
+    <div class="section" style="background: #fef3c7; padding: 15px; border-radius: 8px; border: 1px solid #f59e0b;">
+      <div class="section-title" style="color: #d97706; border: none;">Résultat</div>
+      <p>Aucun soumissionnaire n'a été qualifié techniquement. La Commission recommande de déclarer l'appel d'offres infructueux.</p>
+    </div>
+    `}
+
+    <div style="margin-top: 30px; font-size: 10pt; color: #666; font-style: italic;">
+      <p>Le présent procès-verbal a été établi en séance et signé par les membres de la Commission.</p>
+      <p>Fait à Abidjan, le ${new Date().toLocaleDateString("fr-FR")}</p>
+    </div>
+
+    <div class="qr-code">
+      <img src="${qrUrl}" alt="QR Code PV-COJO" />
+      <p style="font-size: 9pt; color: #666;">PV-COJO ${m.numero || ""}</p>
+    </div>
+
+    <div class="signatures">
+      <div class="signature-box">
+        <div class="signature-title">Le Président de la COJO</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le Rapporteur</div>
+        <div>Date: _______________</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-title">Le Membre</div>
+        <div>Date: _______________</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Document généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")} - ARTI SYGFP — PV COJO
+    </div>
+  `;
+}
+
 function generateGenericPDF(data: any, entityType: string, logoUrl: string): string {
   const title = entityType.toUpperCase().replace(/_/g, " ");
   return `
@@ -747,6 +1081,21 @@ Deno.serve(async (req) => {
               .single();
             if (error) throw error;
             entityData = data;
+            break;
+          }
+          case "marche": {
+            const { data: rpcResult, error: rpcError } = await supabase
+              .rpc("fn_get_marche_detail", { p_marche_id: body.entity_id! });
+            if (rpcError) throw rpcError;
+            entityData = rpcResult;
+            break;
+          }
+          case "pv_cojo": {
+            // PV COJO = Procès-Verbal de la Commission d'Ouverture et de Jugement des Offres
+            const { data: rpcResult, error: rpcError } = await supabase
+              .rpc("fn_get_marche_detail", { p_marche_id: body.entity_id! });
+            if (rpcError) throw rpcError;
+            entityData = rpcResult;
             break;
           }
           default:
