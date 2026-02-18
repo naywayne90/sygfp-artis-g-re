@@ -3,6 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -28,25 +37,16 @@ import {
   EBValidee,
   LotMarche,
 } from '@/hooks/usePassationsMarche';
-import {
-  PassationMarcheForm,
-  PassationDetails,
-  PassationValidateDialog,
-  PassationRejectDialog,
-  PassationDeferDialog,
-} from '@/components/passation-marche';
+import { PassationMarcheForm, PassationDetails } from '@/components/passation-marche';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   FileText,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  PauseCircle,
   Search,
   Loader2,
   ShoppingCart,
@@ -57,6 +57,13 @@ import {
   FolderOpen,
   Trash2,
   Gavel,
+  Lock,
+  ClipboardCheck,
+  Award,
+  ShieldCheck,
+  FileSignature,
+  Pencil,
+  XCircle,
 } from 'lucide-react';
 
 const getStatusBadge = (statut: string) => {
@@ -73,17 +80,26 @@ export default function PassationMarchePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const { hasAnyRole, isAdmin } = usePermissions();
+  const isDAAF = isAdmin || hasAnyRole(['DAAF']);
+  const isDG = isAdmin || hasAnyRole(['DG']);
+  const canManageWorkflow = isDAAF; // DAAF gère le workflow opérationnel
+  const canApprove = isDG; // DG approuve/rejette les attributions
+
   const {
     passations,
     ebValidees,
     counts,
     isLoading,
     refetch,
-    submitPassation,
-    validatePassation,
-    rejectPassation,
-    deferPassation,
     deletePassation,
+    publishPassation,
+    closePassation,
+    startEvaluationPassation,
+    proposeAttributionPassation,
+    approvePassation,
+    rejectAttributionPassation,
+    signPassation,
   } = usePassationsMarche();
 
   const [showForm, setShowForm] = useState(false);
@@ -95,9 +111,9 @@ export default function PassationMarchePage() {
   // Dialogs
   const [selectedPassation, setSelectedPassation] = useState<PassationMarche | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [validateOpen, setValidateOpen] = useState(false);
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const [deferOpen, setDeferOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectMotif, setRejectMotif] = useState('');
+  const [isRejecting, setIsRejecting] = useState(false);
 
   // Gérer sourceEB depuis l'URL
   useEffect(() => {
@@ -140,50 +156,54 @@ export default function PassationMarchePage() {
     setDetailsOpen(true);
   };
 
-  const handleValidateClick = (pm: PassationMarche) => {
-    setSelectedPassation(pm);
-    setValidateOpen(true);
-  };
-
-  const handleRejectClick = (pm: PassationMarche) => {
-    setSelectedPassation(pm);
-    setRejectOpen(true);
-  };
-
-  const handleDeferClick = (pm: PassationMarche) => {
-    setSelectedPassation(pm);
-    setDeferOpen(true);
-  };
-
-  const handleConfirmValidate = async () => {
-    if (selectedPassation) {
-      await validatePassation(selectedPassation.id);
-      setValidateOpen(false);
-      setSelectedPassation(null);
-      refetch();
-    }
-  };
-
-  const handleConfirmReject = async (motif: string) => {
-    if (selectedPassation) {
-      await rejectPassation({ id: selectedPassation.id, motif });
-      setRejectOpen(false);
-      setSelectedPassation(null);
-      refetch();
-    }
-  };
-
-  const handleConfirmDefer = async (motif: string, dateReprise?: string) => {
-    if (selectedPassation) {
-      await deferPassation({ id: selectedPassation.id, motif, dateReprise });
-      setDeferOpen(false);
-      setSelectedPassation(null);
-      refetch();
-    }
-  };
-
   const handleGoToDossier = (dossierId: string) => {
     navigate(`/recherche?dossier=${dossierId}`);
+  };
+
+  const handleRejectAttribution = async () => {
+    if (!selectedPassation || !rejectMotif.trim()) return;
+    setIsRejecting(true);
+    try {
+      await rejectAttributionPassation({ id: selectedPassation.id, motif: rejectMotif.trim() });
+      setRejectDialogOpen(false);
+      setRejectMotif('');
+      refetch();
+    } catch {
+      // handled by mutation onError
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
+  const handleTransition = async (action: string, pm?: PassationMarche) => {
+    const target = pm || selectedPassation;
+    if (!target) return;
+    try {
+      switch (action) {
+        case 'publish':
+          await publishPassation({ id: target.id });
+          break;
+        case 'close':
+          await closePassation(target.id);
+          break;
+        case 'startEvaluation':
+          await startEvaluationPassation(target.id);
+          break;
+        case 'award':
+          await proposeAttributionPassation(target.id);
+          break;
+        case 'approve':
+          await approvePassation(target.id);
+          break;
+        case 'sign':
+          await signPassation({ id: target.id, contratUrl: target.contrat_url || '' });
+          break;
+      }
+      setDetailsOpen(false);
+      refetch();
+    } catch {
+      // errors handled by mutation onError
+    }
   };
 
   const formatMontant = (montant: number | null) =>
@@ -195,13 +215,15 @@ export default function PassationMarchePage() {
       p.expression_besoin?.objet?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const passationsByTab = {
+  const passationsByTab: Record<string, PassationMarche[] | EBValidee[]> = {
     a_traiter: ebValidees,
     brouillon: filteredPassations.filter((p) => p.statut === 'brouillon'),
-    soumis: filteredPassations.filter((p) => p.statut === 'soumis'),
-    valide: filteredPassations.filter((p) => p.statut === 'valide'),
-    rejete: filteredPassations.filter((p) => p.statut === 'rejete'),
-    differe: filteredPassations.filter((p) => p.statut === 'differe'),
+    publie: filteredPassations.filter((p) => p.statut === 'publie'),
+    cloture: filteredPassations.filter((p) => p.statut === 'cloture'),
+    en_evaluation: filteredPassations.filter((p) => p.statut === 'en_evaluation'),
+    attribue: filteredPassations.filter((p) => p.statut === 'attribue'),
+    approuve: filteredPassations.filter((p) => p.statut === 'approuve'),
+    signe: filteredPassations.filter((p) => p.statut === 'signe'),
   };
 
   if (isLoading || isLoadingSource) {
@@ -223,72 +245,128 @@ export default function PassationMarchePage() {
             Gestion des procédures de passation depuis les EB validées - Exercice {exercice}
           </p>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Gavel className="mr-2 h-4 w-4" />
-          Nouvelle passation
-        </Button>
+        <div className="flex gap-2">
+          {canApprove && counts.attribue > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => navigate('/execution/passation-marche/approbation')}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Approbation DG ({counts.attribue})
+            </Button>
+          )}
+          {canManageWorkflow && (
+            <Button onClick={() => setShowForm(true)}>
+              <Gavel className="mr-2 h-4 w-4" />
+              Nouvelle passation
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">À traiter</CardTitle>
-            <Tag className="h-4 w-4 text-primary" />
+      {/* KPIs — 8 lifecycle cards */}
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('a_traiter')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-muted-foreground">À traiter</CardTitle>
+            <Tag className="h-3.5 w-3.5 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{ebValidees.length}</div>
-            <p className="text-xs text-muted-foreground">EB validées</p>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{ebValidees.length}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Brouillons</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('brouillon')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-muted-foreground">Brouillons</CardTitle>
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.brouillon}</div>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.brouillon}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('publie')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-cyan-600">Publiés</CardTitle>
+            <Send className="h-3.5 w-3.5 text-cyan-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.soumis}</div>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.publie}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Validés</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('cloture')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-indigo-600">Clôturés</CardTitle>
+            <Lock className="h-3.5 w-3.5 text-indigo-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.valide}</div>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.cloture}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Rejetés</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('en_evaluation')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-amber-600">En éval.</CardTitle>
+            <ClipboardCheck className="h-3.5 w-3.5 text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.rejete}</div>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.en_evaluation}</div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Différés</CardTitle>
-            <PauseCircle className="h-4 w-4 text-orange-500" />
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('attribue')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-purple-600">Attribués</CardTitle>
+            <Award className="h-3.5 w-3.5 text-purple-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{counts.differe}</div>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.attribue}</div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('approuve')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-green-600">Approuvés</CardTitle>
+            <ShieldCheck className="h-3.5 w-3.5 text-green-500" />
+          </CardHeader>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.approuve}</div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:ring-2 ring-primary/50"
+          onClick={() => setActiveTab('signe')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
+            <CardTitle className="text-xs font-medium text-emerald-600">Signés</CardTitle>
+            <FileSignature className="h-3.5 w-3.5 text-emerald-500" />
+          </CardHeader>
+          <CardContent className="pb-3 px-3">
+            <div className="text-xl font-bold">{counts.signe}</div>
           </CardContent>
         </Card>
       </div>
@@ -332,18 +410,35 @@ export default function PassationMarchePage() {
       <Card>
         <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="a_traiter" className="gap-1">
-                <Tag className="h-3 w-3" />À traiter
-                <Badge variant="secondary" className="ml-1 text-xs">
+            <TabsList className="flex w-full overflow-x-auto">
+              <TabsTrigger value="a_traiter" className="gap-1 text-xs px-2">
+                <Tag className="h-3 w-3" />
+                EB
+                <Badge variant="secondary" className="ml-0.5 text-[10px] h-4 px-1">
                   {ebValidees.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="brouillon">Brouillons ({counts.brouillon})</TabsTrigger>
-              <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
-              <TabsTrigger value="valide">Validés ({counts.valide})</TabsTrigger>
-              <TabsTrigger value="rejete">Rejetés ({counts.rejete})</TabsTrigger>
-              <TabsTrigger value="differe">Différés ({counts.differe})</TabsTrigger>
+              <TabsTrigger value="brouillon" className="text-xs px-2">
+                Brouillons ({counts.brouillon})
+              </TabsTrigger>
+              <TabsTrigger value="publie" className="text-xs px-2">
+                Publiés ({counts.publie})
+              </TabsTrigger>
+              <TabsTrigger value="cloture" className="text-xs px-2">
+                Clôturés ({counts.cloture})
+              </TabsTrigger>
+              <TabsTrigger value="en_evaluation" className="text-xs px-2">
+                Éval. ({counts.en_evaluation})
+              </TabsTrigger>
+              <TabsTrigger value="attribue" className="text-xs px-2">
+                Attribués ({counts.attribue})
+              </TabsTrigger>
+              <TabsTrigger value="approuve" className="text-xs px-2">
+                Approuvés ({counts.approuve})
+              </TabsTrigger>
+              <TabsTrigger value="signe" className="text-xs px-2">
+                Signés ({counts.signe})
+              </TabsTrigger>
             </TabsList>
 
             {/* Onglet EB à traiter */}
@@ -392,10 +487,18 @@ export default function PassationMarchePage() {
               )}
             </TabsContent>
 
-            {/* Autres onglets passations */}
-            {['brouillon', 'soumis', 'valide', 'rejete', 'differe'].map((tab) => (
+            {/* Lifecycle tabs */}
+            {[
+              'brouillon',
+              'publie',
+              'cloture',
+              'en_evaluation',
+              'attribue',
+              'approuve',
+              'signe',
+            ].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-4">
-                {passationsByTab[tab as keyof typeof passationsByTab].length === 0 ? (
+                {(passationsByTab[tab] as PassationMarche[]).length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Gavel className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Aucune passation dans cet onglet</p>
@@ -415,9 +518,7 @@ export default function PassationMarchePage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(
-                        passationsByTab[tab as keyof typeof passationsByTab] as PassationMarche[]
-                      ).map((pm) => (
+                      {(passationsByTab[tab] as PassationMarche[]).map((pm) => (
                         <TableRow key={pm.id}>
                           <TableCell className="font-mono text-sm">{pm.reference || '-'}</TableCell>
                           <TableCell className="max-w-[200px] truncate">
@@ -448,6 +549,7 @@ export default function PassationMarchePage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="bg-popover">
+                                {/* Tout le monde peut voir les détails */}
                                 <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
                                   <Eye className="mr-2 h-4 w-4" />
                                   Voir détails
@@ -462,45 +564,96 @@ export default function PassationMarchePage() {
                                   </DropdownMenuItem>
                                 )}
 
-                                {pm.statut === 'brouillon' && (
+                                {/* DAAF: Modifier (brouillon) */}
+                                {canManageWorkflow && pm.statut === 'brouillon' && (
                                   <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => submitPassation(pm.id)}>
-                                      <Send className="mr-2 h-4 w-4" />
-                                      Soumettre
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => deletePassation(pm.id)}
-                                      className="text-destructive"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Supprimer
+                                    <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                      <Pencil className="mr-2 h-4 w-4" />
+                                      Modifier
                                     </DropdownMenuItem>
                                   </>
                                 )}
 
-                                {pm.statut === 'soumis' && (
+                                {/* DAAF: Publier (brouillon) */}
+                                {canManageWorkflow && pm.statut === 'brouillon' && (
+                                  <DropdownMenuItem onClick={() => handleTransition('publish', pm)}>
+                                    <Send className="mr-2 h-4 w-4" />
+                                    Publier
+                                  </DropdownMenuItem>
+                                )}
+
+                                {/* DAAF: Clôturer (publié) */}
+                                {canManageWorkflow && pm.statut === 'publie' && (
                                   <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleValidateClick(pm)}>
-                                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                                      Valider
+                                    <DropdownMenuItem onClick={() => handleTransition('close', pm)}>
+                                      <Lock className="mr-2 h-4 w-4" />
+                                      Clôturer
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleDeferClick(pm)}>
-                                      <Clock className="mr-2 h-4 w-4" />
-                                      Différer
+                                  </>
+                                )}
+
+                                {/* DAAF: Lancer évaluation (clôturé) */}
+                                {canManageWorkflow && pm.statut === 'cloture' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleTransition('startEvaluation', pm)}
+                                    >
+                                      <ClipboardCheck className="mr-2 h-4 w-4" />
+                                      Lancer l'évaluation
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* DAAF: Attribuer (en_evaluation) */}
+                                {canManageWorkflow && pm.statut === 'en_evaluation' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleTransition('award', pm)}>
+                                      <Award className="mr-2 h-4 w-4" />
+                                      Attribuer
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* DG: Approuver / Rejeter (attribué) */}
+                                {canApprove && pm.statut === 'attribue' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleTransition('approve', pm)}
+                                    >
+                                      <ShieldCheck className="mr-2 h-4 w-4" />
+                                      Approuver
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      onClick={() => handleRejectClick(pm)}
+                                      onClick={() => {
+                                        setSelectedPassation(pm);
+                                        setRejectDialogOpen(true);
+                                      }}
                                       className="text-destructive"
                                     >
                                       <XCircle className="mr-2 h-4 w-4" />
-                                      Rejeter
+                                      Rejeter l'attribution
                                     </DropdownMenuItem>
                                   </>
                                 )}
 
-                                {pm.statut === 'valide' && (
+                                {/* DAAF: Signer le contrat (approuvé) */}
+                                {canManageWorkflow && pm.statut === 'approuve' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleTransition('sign', pm)}>
+                                      <FileSignature className="mr-2 h-4 w-4" />
+                                      Signer le contrat
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* DAAF/DG: Créer engagement (signé) */}
+                                {(canManageWorkflow || canApprove) && pm.statut === 'signe' && (
                                   <>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
@@ -508,6 +661,20 @@ export default function PassationMarchePage() {
                                     >
                                       <FileText className="mr-2 h-4 w-4" />
                                       Créer engagement
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+
+                                {/* DAAF: Supprimer (brouillon uniquement) */}
+                                {canManageWorkflow && pm.statut === 'brouillon' && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => deletePassation(pm.id)}
+                                      className="text-destructive"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Supprimer
                                     </DropdownMenuItem>
                                   </>
                                 )}
@@ -539,50 +706,46 @@ export default function PassationMarchePage() {
           passation={selectedPassation}
           open={detailsOpen}
           onOpenChange={setDetailsOpen}
-          onSubmit={() => {
-            submitPassation(selectedPassation.id);
-            setDetailsOpen(false);
-            refetch();
-          }}
-          onValidate={() => {
-            setDetailsOpen(false);
-            setValidateOpen(true);
-          }}
-          onReject={() => {
-            setDetailsOpen(false);
-            setRejectOpen(true);
-          }}
-          onDefer={() => {
-            setDetailsOpen(false);
-            setDeferOpen(true);
-          }}
-          canValidate={true}
+          onTransition={(action) => handleTransition(action)}
         />
       )}
 
-      {/* Validate dialog */}
-      <PassationValidateDialog
-        passation={selectedPassation}
-        open={validateOpen}
-        onOpenChange={setValidateOpen}
-        onConfirm={handleConfirmValidate}
-      />
-
-      {/* Reject dialog */}
-      <PassationRejectDialog
-        open={rejectOpen}
-        onOpenChange={setRejectOpen}
-        onConfirm={handleConfirmReject}
-        reference={selectedPassation?.reference || undefined}
-      />
-
-      {/* Defer dialog */}
-      <PassationDeferDialog
-        open={deferOpen}
-        onOpenChange={setDeferOpen}
-        onConfirm={handleConfirmDefer}
-        reference={selectedPassation?.reference || undefined}
-      />
+      {/* Reject attribution dialog */}
+      <Dialog
+        open={rejectDialogOpen}
+        onOpenChange={(open) => {
+          setRejectDialogOpen(open);
+          if (!open) setRejectMotif('');
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rejeter l'attribution</DialogTitle>
+            <DialogDescription>
+              Passation {selectedPassation?.reference} — Indiquez le motif du rejet.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Motif du rejet de l'attribution..."
+            value={rejectMotif}
+            onChange={(e) => setRejectMotif(e.target.value)}
+            rows={4}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectAttribution}
+              disabled={!rejectMotif.trim() || isRejecting}
+            >
+              {isRejecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Rejeter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PassationChecklist } from './PassationChecklist';
 import { PassationTimeline } from './PassationTimeline';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
@@ -32,18 +33,27 @@ import {
   LotMarche,
   Soumissionnaire,
   usePassationsMarche,
+  getSeuilForMontant,
+  getSeuilRecommande,
+  isProcedureCoherente,
+  canPublish,
+  canClose,
+  canStartEvaluation,
+  canAward,
+  canApprove,
+  canSign,
 } from '@/hooks/usePassationsMarche';
 import { SoumissionnairesSection } from './SoumissionnairesSection';
-import { EvaluationGrid } from './EvaluationGrid';
 import { EvaluationCOJO } from './EvaluationCOJO';
+import { WorkflowActionBar } from './WorkflowActionBar';
 import { usePermissions } from '@/hooks/usePermissions';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 import {
   Gavel,
   FileText,
   Users,
-  BarChart3,
   Clock,
   CheckCircle2,
   XCircle,
@@ -55,43 +65,49 @@ import {
   CreditCard,
   FileCheck,
   ExternalLink,
-  History,
   Award,
+  Link2,
+  Building2,
+  CalendarDays,
+  BarChart3,
 } from 'lucide-react';
 
 interface PassationDetailsProps {
   passation: PassationMarche;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit?: () => void;
-  onValidate?: () => void;
-  onReject?: () => void;
-  onDefer?: () => void;
-  canValidate?: boolean;
+  onTransition?: (action: string) => void;
 }
 
 export function PassationDetails({
   passation,
   open,
   onOpenChange,
-  onSubmit,
-  onValidate,
-  onReject,
-  onDefer,
-  canValidate = false,
+  onTransition,
 }: PassationDetailsProps) {
   const navigate = useNavigate();
   const { addSoumissionnaire, updateSoumissionnaire, deleteSoumissionnaire } =
     usePassationsMarche();
-  const [checklistComplete, setChecklistComplete] = useState(false);
+  const [_checklistComplete, setChecklistComplete] = useState(false);
   const [_missingDocs, setMissingDocs] = useState<string[]>([]);
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('infos');
 
-  // Trouver la config de décision
+  // Derived
   const decisionConfig = DECISIONS_SORTIE.find((d) => d.value === passation.decision);
   const lots = (passation.lots || []) as LotMarche[];
+  const allSoumissionnaires = (passation.soumissionnaires || []) as Soumissionnaire[];
+  // RBAC
+  const { hasAnyRole: hasPermRole, isAdmin: isPermAdmin } = usePermissions();
+  const canEvaluate = isPermAdmin || hasPermRole(['DG', 'DAAF', 'CB', 'DIRECTEUR']);
 
+  // Seuil DGMP
+  const montantEB = passation.expression_besoin?.montant_estime ?? null;
+  const seuilDGMP = getSeuilForMontant(montantEB);
+  const seuilRecommande = getSeuilRecommande(montantEB);
+  const procedureCoherente = isProcedureCoherente(montantEB, passation.mode_passation);
+
+  // Helpers
   const formatMontant = (montant: number | null) =>
     montant ? new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '-';
 
@@ -103,11 +119,10 @@ export function PassationDetails({
     return <Badge className={config.color}>{config.label}</Badge>;
   };
 
-  const criteres = passation.criteres_evaluation || [];
-
-  // RBAC: evaluation accessible uniquement aux evaluateurs (DG, DAAF, CB, DIRECTEUR)
-  const { hasAnyRole: hasPermRole, isAdmin: isPermAdmin } = usePermissions();
-  const canEvaluate = isPermAdmin || hasPermRole(['DG', 'DAAF', 'CB', 'DIRECTEUR']);
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    return format(new Date(dateStr), 'dd MMM yyyy', { locale: fr });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,49 +136,54 @@ export function PassationDetails({
             {getStatusBadge(passation.statut)}
           </div>
           <DialogDescription>
-            {passation.expression_besoin?.objet || 'Détails de la passation de marché'}
+            {passation.expression_besoin?.objet || 'Details de la passation de marche'}
           </DialogDescription>
         </DialogHeader>
 
+        {/* Workflow action bar */}
+        <WorkflowActionBar passation={passation} />
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="infos" className="gap-1">
               <ClipboardList className="h-3 w-3" />
-              Infos
+              <span className="hidden sm:inline">Infos</span>
             </TabsTrigger>
             <TabsTrigger value="lots" className="gap-1">
               <Package className="h-3 w-3" />
-              Lots {passation.allotissement && lots.length > 0 ? `(${lots.length})` : '(1)'}
+              <span className="hidden sm:inline">Lots</span>
+              {passation.allotissement && lots.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs h-5 px-1">
+                  {lots.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="prestataires" className="gap-1">
               <Users className="h-3 w-3" />
-              Soumissionnaires
-              {(passation.soumissionnaires || []).length > 0 && (
+              <span className="hidden sm:inline">Soumis.</span>
+              {allSoumissionnaires.length > 0 && (
                 <Badge variant="secondary" className="ml-1 text-xs h-5 px-1">
-                  {(passation.soumissionnaires || []).length}
+                  {allSoumissionnaires.length}
                 </Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="evaluation" className="gap-1" data-testid="evaluation-tab">
               <Award className="h-3 w-3" />
-              Evaluation
+              <span className="hidden sm:inline">Evaluation</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="gap-1">
               <FileText className="h-3 w-3" />
-              Documents
+              <span className="hidden sm:inline">Documents</span>
             </TabsTrigger>
-            <TabsTrigger value="analyse" className="gap-1">
-              <BarChart3 className="h-3 w-3" />
-              Analyse
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="gap-1">
-              <History className="h-3 w-3" />
-              Historique
+            <TabsTrigger value="chaine" className="gap-1">
+              <Link2 className="h-3 w-3" />
+              <span className="hidden sm:inline">Chaine</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Informations générales */}
+          {/* ============ TAB 1 : INFORMATIONS ============ */}
           <TabsContent value="infos" className="mt-4 space-y-4">
+            {/* EB source */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Expression de besoin source</CardTitle>
@@ -171,51 +191,176 @@ export function PassationDetails({
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Numéro EB:</span>{' '}
+                    <span className="text-muted-foreground">Numero EB:</span>{' '}
                     <span className="font-mono font-medium">
                       {passation.expression_besoin?.numero || '-'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Montant estimé:</span>{' '}
+                    <span className="text-muted-foreground">Direction:</span>{' '}
                     <span className="font-medium">
-                      {formatMontant(passation.expression_besoin?.montant_estime || null)}
+                      {passation.expression_besoin?.direction ? (
+                        <span className="flex items-center gap-1 inline-flex">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
+                          {passation.expression_besoin.direction.sigle ||
+                            passation.expression_besoin.direction.label}
+                        </span>
+                      ) : (
+                        '-'
+                      )}
                     </span>
                   </div>
                   <div className="col-span-2">
                     <span className="text-muted-foreground">Objet:</span>{' '}
                     <span className="font-medium">{passation.expression_besoin?.objet}</span>
                   </div>
+                  <div>
+                    <span className="text-muted-foreground">Montant estime:</span>{' '}
+                    <span className="font-medium">{formatMontant(montantEB)}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Seuil DGMP:</span>{' '}
+                    {seuilDGMP ? (
+                      <Badge className={cn('text-xs', seuilDGMP.color)}>{seuilDGMP.label}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Passation details */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Détails de la passation</CardTitle>
+                <CardTitle className="text-base">Details de la passation</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Mode de passation:</span>{' '}
+                    <span className="text-muted-foreground">Reference:</span>{' '}
+                    <span className="font-mono font-medium">{passation.reference || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Exercice:</span>{' '}
+                    <span className="font-medium">{passation.exercice || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Procedure:</span>{' '}
                     <Badge variant="outline">{getModeName(passation.mode_passation)}</Badge>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Type de procédure:</span>{' '}
+                    <span className="text-muted-foreground">Type procedure:</span>{' '}
                     <span className="font-medium">{passation.type_procedure || '-'}</span>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Créé le:</span>{' '}
-                    <span className="font-medium">
-                      {format(new Date(passation.created_at), 'dd MMMM yyyy', { locale: fr })}
-                    </span>
+                  {seuilRecommande && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Code seuil:</span>{' '}
+                      <Badge variant="outline" className="text-xs">
+                        {seuilRecommande.code} — {seuilRecommande.label}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        ({seuilRecommande.description})
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Seuil / procedure coherence warning */}
+                {montantEB && passation.mode_passation && !procedureCoherente && (
+                  <Alert className="bg-yellow-50 border-yellow-300">
+                    <AlertTriangle className="h-4 w-4 text-yellow-700" />
+                    <AlertDescription className="text-yellow-800 text-sm">
+                      Pour un montant de {formatMontant(montantEB)}, la procedure recommandee est «{' '}
+                      {seuilDGMP?.label} ». La procedure choisie (
+                      {getModeName(passation.mode_passation)}) ne correspond pas au seuil.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Lifecycle dates */}
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Cree le</p>
+                      <p className="font-medium">
+                        {format(new Date(passation.created_at), 'dd MMM yyyy', { locale: fr })}
+                      </p>
+                    </div>
                   </div>
+                  {passation.date_publication && (
+                    <div className="flex items-center gap-2">
+                      <Send className="h-3.5 w-3.5 text-cyan-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Publication prevue</p>
+                        <p className="font-medium">{formatDate(passation.date_publication)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.date_cloture && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5 text-indigo-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Cloture prevue</p>
+                        <p className="font-medium">{formatDate(passation.date_cloture)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.publie_at && (
+                    <div className="flex items-center gap-2">
+                      <Send className="h-3.5 w-3.5 text-blue-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Publie le</p>
+                        <p className="font-medium">{formatDate(passation.publie_at)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.cloture_at && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-indigo-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Cloture le</p>
+                        <p className="font-medium">{formatDate(passation.cloture_at)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.attribue_at && (
+                    <div className="flex items-center gap-2">
+                      <Award className="h-3.5 w-3.5 text-purple-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Attribue le</p>
+                        <p className="font-medium">{formatDate(passation.attribue_at)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.approuve_at && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Approuve le</p>
+                        <p className="font-medium">{formatDate(passation.approuve_at)}</p>
+                      </div>
+                    </div>
+                  )}
+                  {passation.signe_at && (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Signe le</p>
+                        <p className="font-medium">{formatDate(passation.signe_at)}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Par:</span>{' '}
+                    <span className="text-muted-foreground">Cree par:</span>{' '}
                     <span className="font-medium">{passation.creator?.full_name || '-'}</span>
                   </div>
                   {passation.montant_retenu && (
-                    <div className="col-span-2">
+                    <div>
                       <span className="text-muted-foreground">Montant retenu:</span>{' '}
                       <span className="font-bold text-primary">
                         {formatMontant(passation.montant_retenu)}
@@ -224,9 +369,9 @@ export function PassationDetails({
                   )}
                 </div>
 
-                {/* Motif de rejet/différé */}
+                {/* Motif de rejet */}
                 {passation.statut === 'rejete' && passation.rejection_reason && (
-                  <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                  <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                     <div className="flex items-center gap-2 text-destructive mb-1">
                       <XCircle className="h-4 w-4" />
                       <span className="font-medium">Motif de rejet</span>
@@ -235,16 +380,17 @@ export function PassationDetails({
                   </div>
                 )}
 
+                {/* Differe */}
                 {passation.statut === 'differe' && passation.motif_differe && (
-                  <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                     <div className="flex items-center gap-2 text-orange-700 mb-1">
                       <Clock className="h-4 w-4" />
-                      <span className="font-medium">Différé</span>
+                      <span className="font-medium">Differe</span>
                     </div>
                     <p className="text-sm">{passation.motif_differe}</p>
                     {passation.date_reprise && (
                       <p className="text-xs text-orange-600 mt-1">
-                        Reprise prévue: {format(new Date(passation.date_reprise), 'dd/MM/yyyy')}
+                        Reprise prevue: {format(new Date(passation.date_reprise), 'dd/MM/yyyy')}
                       </p>
                     )}
                   </div>
@@ -252,7 +398,7 @@ export function PassationDetails({
               </CardContent>
             </Card>
 
-            {/* Décision de sortie */}
+            {/* Decision de sortie */}
             {decisionConfig && (
               <Card
                 className={`border-2 ${passation.decision === 'engagement_possible' ? 'border-green-200' : 'border-blue-200'}`}
@@ -260,7 +406,7 @@ export function PassationDetails({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <ArrowRight className="h-4 w-4" />
-                    Décision de sortie
+                    Decision de sortie
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -291,13 +437,12 @@ export function PassationDetails({
 
                   {passation.motif_selection && (
                     <div className="text-sm">
-                      <span className="text-muted-foreground">Motif de sélection:</span>{' '}
+                      <span className="text-muted-foreground">Motif de selection:</span>{' '}
                       <span>{passation.motif_selection}</span>
                     </div>
                   )}
 
-                  {/* Bouton d'action pour les passations validées */}
-                  {passation.statut === 'valide' && (
+                  {passation.statut === 'signe' && (
                     <div className="pt-2">
                       <Button
                         onClick={() => {
@@ -317,12 +462,12 @@ export function PassationDetails({
                         {passation.decision === 'engagement_possible' ? (
                           <>
                             <CreditCard className="h-4 w-4 mr-2" />
-                            Créer l'engagement
+                            Creer l'engagement
                           </>
                         ) : (
                           <>
                             <FileCheck className="h-4 w-4 mr-2" />
-                            Créer le contrat
+                            Creer le contrat
                           </>
                         )}
                         <ExternalLink className="h-4 w-4 ml-2" />
@@ -334,18 +479,18 @@ export function PassationDetails({
             )}
           </TabsContent>
 
-          {/* Lots */}
+          {/* ============ TAB 2 : LOTS ============ */}
           <TabsContent value="lots" className="mt-4">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  {passation.allotissement ? 'Lots du marché' : 'Lot unique (non alloti)'}
+                  {passation.allotissement ? 'Lots du marche' : 'Lot unique (non alloti)'}
                 </CardTitle>
                 <CardDescription>
                   {passation.allotissement
-                    ? `${lots.length} lot${lots.length > 1 ? 's' : ''} défini${lots.length > 1 ? 's' : ''}`
-                    : 'Marché non alloti — lot unique implicite'}
+                    ? `${lots.length} lot${lots.length > 1 ? 's' : ''} defini${lots.length > 1 ? 's' : ''}`
+                    : 'Marche non alloti — lot unique implicite'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -355,64 +500,124 @@ export function PassationDetails({
                       <TableHeader>
                         <TableRow>
                           <TableHead className="w-20">N° Lot</TableHead>
-                          <TableHead>Libellé</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead className="text-right">Montant estimé</TableHead>
+                          <TableHead>Libelle</TableHead>
+                          <TableHead className="text-right">Montant estime</TableHead>
+                          <TableHead className="w-20 text-center">Soum.</TableHead>
+                          <TableHead className="text-right">Montant retenu</TableHead>
+                          <TableHead>Attributaire</TableHead>
                           <TableHead className="w-24 text-center">Statut</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {lots.map((lot) => (
-                          <TableRow
-                            key={lot.id}
-                            className="cursor-pointer hover:bg-accent/50 transition-colors"
-                            onClick={() => {
-                              setSelectedLotId(lot.id);
-                              setActiveTab('prestataires');
-                            }}
-                          >
-                            <TableCell className="font-mono font-medium">
-                              Lot {lot.numero}
-                            </TableCell>
-                            <TableCell className="font-medium">{lot.designation || '-'}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
-                              {lot.description || '-'}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              {formatMontant(lot.montant_estime)}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge
-                                variant="outline"
-                                className={
-                                  lot.statut === 'attribue'
-                                    ? 'bg-green-50 text-green-700 border-green-300'
+                        {lots.map((lot) => {
+                          const lotSoums = (lot.soumissionnaires || []) as Soumissionnaire[];
+                          const attributaire = lotSoums.find((s) => s.statut === 'retenu');
+                          return (
+                            <TableRow
+                              key={lot.id}
+                              className="cursor-pointer hover:bg-accent/50 transition-colors"
+                              onClick={() => {
+                                setSelectedLotId(lot.id);
+                                setActiveTab('prestataires');
+                              }}
+                            >
+                              <TableCell className="font-mono font-medium">
+                                Lot {lot.numero}
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm">{lot.designation || '-'}</p>
+                                  {lot.description && (
+                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                      {lot.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                {formatMontant(lot.montant_estime)}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="outline" className="text-xs">
+                                  {lotSoums.length}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                {lot.montant_retenu ? (
+                                  formatMontant(lot.montant_retenu)
+                                ) : (
+                                  <span className="text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {attributaire ? (
+                                  <div className="flex items-center gap-1">
+                                    <CheckCircle2 className="h-3 w-3 text-green-600 flex-shrink-0" />
+                                    <span className="text-sm font-medium text-green-700 truncate max-w-[150px]">
+                                      {attributaire.raison_sociale}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    lot.statut === 'attribue'
+                                      ? 'bg-green-50 text-green-700 border-green-300'
+                                      : lot.statut === 'annule'
+                                        ? 'bg-red-50 text-red-700 border-red-300'
+                                        : lot.statut === 'infructueux'
+                                          ? 'bg-orange-50 text-orange-700 border-orange-300'
+                                          : 'bg-blue-50 text-blue-700 border-blue-300'
+                                  }
+                                >
+                                  {lot.statut === 'attribue'
+                                    ? 'Attribue'
                                     : lot.statut === 'annule'
-                                      ? 'bg-red-50 text-red-700 border-red-300'
+                                      ? 'Annule'
                                       : lot.statut === 'infructueux'
-                                        ? 'bg-orange-50 text-orange-700 border-orange-300'
-                                        : 'bg-blue-50 text-blue-700 border-blue-300'
-                                }
-                              >
-                                {lot.statut === 'attribue'
-                                  ? 'Attribué'
-                                  : lot.statut === 'annule'
-                                    ? 'Annulé'
-                                    : lot.statut === 'infructueux'
-                                      ? 'Infructueux'
-                                      : 'En cours'}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                        ? 'Infructueux'
+                                        : 'En cours'}
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
-                    <div className="mt-4 text-sm text-right">
-                      <span className="text-muted-foreground">Total estimé:</span>{' '}
+                    {/* Total row */}
+                    <div className="mt-4 flex justify-between items-center text-sm border-t pt-3">
+                      <span className="text-muted-foreground">
+                        Total: {lots.length} lot{lots.length > 1 ? 's' : ''} —{' '}
+                        {allSoumissionnaires.length} soumissionnaire
+                        {allSoumissionnaires.length !== 1 ? 's' : ''}
+                      </span>
                       <span className="font-bold">
                         {formatMontant(lots.reduce((sum, l) => sum + (l.montant_estime || 0), 0))}
                       </span>
                     </div>
+                    {/* Comparison with EB amount */}
+                    {montantEB && (
+                      <div className="mt-1 text-xs text-right text-muted-foreground">
+                        Montant EB: {formatMontant(montantEB)}
+                        {(() => {
+                          const totalLots = lots.reduce((s, l) => s + (l.montant_estime || 0), 0);
+                          const diff = totalLots - montantEB;
+                          if (Math.abs(diff) < 1) return null;
+                          return (
+                            <span
+                              className={diff > 0 ? 'text-orange-600 ml-2' : 'text-green-600 ml-2'}
+                            >
+                              ({diff > 0 ? '+' : ''}
+                              {formatMontant(diff)})
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="p-4 rounded-lg bg-muted/50 border">
@@ -422,11 +627,11 @@ export function PassationDetails({
                         <p className="font-medium text-sm">Lot unique</p>
                         <p className="text-xs text-muted-foreground">
                           Montant total :{' '}
-                          {formatMontant(
-                            passation.expression_besoin?.montant_estime ||
-                              passation.montant_retenu ||
-                              null
-                          )}
+                          {formatMontant(montantEB || passation.montant_retenu || null)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {allSoumissionnaires.filter((s) => !s.lot_marche_id).length}{' '}
+                          soumissionnaire(s)
                         </p>
                       </div>
                     </div>
@@ -436,51 +641,41 @@ export function PassationDetails({
             </Card>
           </TabsContent>
 
-          {/* Soumissionnaires */}
+          {/* ============ TAB 3 : SOUMISSIONNAIRES ============ */}
           <TabsContent value="prestataires" className="mt-4 space-y-4">
-            {/* Si alloti: sélecteur de lot */}
+            {/* Filter bar for alloti */}
             {passation.allotissement && lots.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Selectionner un lot</CardTitle>
-                  <CardDescription>
-                    Choisissez un lot pour gerer ses soumissionnaires
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-2">
-                    {lots.map((lot) => {
-                      const lotSoums = (lot.soumissionnaires || []) as Soumissionnaire[];
-                      return (
-                        <div
-                          key={lot.id}
-                          className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                            selectedLotId === lot.id
-                              ? 'bg-primary/10 border-primary'
-                              : 'hover:bg-accent'
-                          }`}
-                          onClick={() => setSelectedLotId(lot.id)}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-mono font-medium text-sm">Lot {lot.numero}</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {lot.designation || '-'}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {lotSoums.length} soum.
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selectedLotId === null ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedLotId(null)}
+                >
+                  Tous
+                  <Badge variant="secondary" className="ml-1 text-xs h-5 px-1">
+                    {allSoumissionnaires.length}
+                  </Badge>
+                </Button>
+                {lots.map((lot) => {
+                  const lotSoums = (lot.soumissionnaires || []) as Soumissionnaire[];
+                  return (
+                    <Button
+                      key={lot.id}
+                      variant={selectedLotId === lot.id ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedLotId(lot.id)}
+                    >
+                      Lot {lot.numero}
+                      <Badge variant="secondary" className="ml-1 text-xs h-5 px-1">
+                        {lotSoums.length}
+                      </Badge>
+                    </Button>
+                  );
+                })}
+              </div>
             )}
 
-            {/* Soumissionnaires du lot sélectionné ou du marché entier */}
+            {/* Soumissionnaires content */}
             {passation.allotissement && lots.length > 0 ? (
               selectedLotId ? (
                 <SoumissionnairesSection
@@ -491,15 +686,44 @@ export function PassationDetails({
                     (lots.find((l) => l.id === selectedLotId)?.soumissionnaires ||
                       []) as Soumissionnaire[]
                   }
-                  readOnly={passation.statut !== 'brouillon' && passation.statut !== 'soumis'}
+                  readOnly={!['brouillon', 'publie', 'cloture'].includes(passation.statut)}
                   onAdd={addSoumissionnaire}
                   onUpdate={updateSoumissionnaire}
                   onDelete={deleteSoumissionnaire}
                 />
               ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Selectionnez un lot pour voir ses soumissionnaires</p>
+                /* Vue "Tous" : un Card par lot */
+                <div className="space-y-4">
+                  {lots.map((lot) => {
+                    const lotSoums = (lot.soumissionnaires || []) as Soumissionnaire[];
+                    return (
+                      <Card key={lot.id}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Package className="h-3.5 w-3.5" />
+                            Lot {lot.numero} — {lot.designation || '-'}
+                            <Badge variant="outline" className="ml-auto text-xs">
+                              {lotSoums.length} soumissionnaire{lotSoums.length !== 1 ? 's' : ''}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <SoumissionnairesSection
+                            passationId={passation.id}
+                            lotId={lot.id}
+                            modePassation={passation.mode_passation}
+                            soumissionnaires={lotSoums}
+                            readOnly={
+                              !['brouillon', 'publie', 'cloture'].includes(passation.statut)
+                            }
+                            onAdd={addSoumissionnaire}
+                            onUpdate={updateSoumissionnaire}
+                            onDelete={deleteSoumissionnaire}
+                          />
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )
             ) : (
@@ -507,17 +731,15 @@ export function PassationDetails({
                 passationId={passation.id}
                 lotId={null}
                 modePassation={passation.mode_passation}
-                soumissionnaires={((passation.soumissionnaires || []) as Soumissionnaire[]).filter(
-                  (s) => !s.lot_marche_id
-                )}
-                readOnly={passation.statut !== 'brouillon' && passation.statut !== 'soumis'}
+                soumissionnaires={allSoumissionnaires.filter((s) => !s.lot_marche_id)}
+                readOnly={!['brouillon', 'publie', 'cloture'].includes(passation.statut)}
                 onAdd={addSoumissionnaire}
                 onUpdate={updateSoumissionnaire}
                 onDelete={deleteSoumissionnaire}
               />
             )}
 
-            {/* Prestataire retenu (ancien affichage conserve) */}
+            {/* Prestataire retenu global */}
             {passation.prestataire_retenu && (
               <Card className="bg-green-50 border-green-200">
                 <CardContent className="pt-4">
@@ -536,58 +758,80 @@ export function PassationDetails({
             )}
           </TabsContent>
 
-          {/* Evaluation */}
+          {/* ============ TAB 4 : EVALUATION (fusion eval+analyse) ============ */}
           <TabsContent value="evaluation" className="mt-4">
             {canEvaluate ? (
-              <div className="space-y-4">
-                {/* Criteres rappel */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Criteres d'evaluation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {criteres.length === 0 ? (
-                      <p className="text-muted-foreground text-sm">Aucun critere defini</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {criteres.map((c, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between items-center p-2 bg-muted/50 rounded"
-                          >
-                            <span className="text-sm">{c.nom}</span>
-                            <Badge variant="secondary">{c.poids}%</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Grille d'evaluation */}
-                <EvaluationGrid
-                  soumissionnaires={(passation.soumissionnaires || []) as Soumissionnaire[]}
-                  onUpdate={updateSoumissionnaire}
-                  readOnly={passation.statut === 'valide' || passation.statut === 'rejete'}
+              <div data-testid="evaluation-grid">
+                <EvaluationCOJO
+                  passation={passation}
+                  onUpdateSoumissionnaire={updateSoumissionnaire}
+                  readOnly={passation.statut !== 'en_evaluation'}
                 />
               </div>
             ) : (
               <div data-testid="evaluation-access-denied" className="text-center py-8">
                 <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-orange-500 opacity-50" />
-                <p className="text-muted-foreground">
-                  Acces reserve aux evaluateurs (DG, DAAF, CB)
-                </p>
+                <p className="text-muted-foreground">Acces reserve aux evaluateurs</p>
               </div>
             )}
           </TabsContent>
 
-          {/* Documents / Checklist */}
-          <TabsContent value="documents" className="mt-4">
+          {/* ============ TAB 5 : DOCUMENTS ============ */}
+          <TabsContent value="documents" className="mt-4 space-y-4">
+            {/* Documents officiels */}
+            {(passation.pv_ouverture || passation.pv_evaluation || passation.rapport_analyse) && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Documents officiels</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {passation.pv_ouverture && (
+                      <a
+                        href={passation.pv_ouverture}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <span className="text-sm font-medium flex-1">PV ouverture des plis</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                      </a>
+                    )}
+                    {passation.pv_evaluation && (
+                      <a
+                        href={passation.pv_evaluation}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <FileText className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm font-medium flex-1">PV evaluation</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                      </a>
+                    )}
+                    {passation.rapport_analyse && (
+                      <a
+                        href={passation.rapport_analyse}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <BarChart3 className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <span className="text-sm font-medium flex-1">Rapport d'analyse</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                      </a>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <PassationChecklist
               passationId={passation.id}
               modePassation={passation.mode_passation}
               piecesJointes={passation.pieces_jointes || []}
-              readOnly={passation.statut !== 'brouillon'}
+              readOnly={!['brouillon', 'publie'].includes(passation.statut)}
               onValidationChange={(complete, missing) => {
                 setChecklistComplete(complete);
                 setMissingDocs(missing);
@@ -595,27 +839,86 @@ export function PassationDetails({
             />
           </TabsContent>
 
-          {/* Analyse COJO */}
-          <TabsContent value="analyse" className="mt-4 space-y-4">
-            <EvaluationCOJO
-              passation={passation}
-              onUpdateSoumissionnaire={updateSoumissionnaire}
-              readOnly={!['brouillon', 'soumis', 'en_analyse'].includes(passation.statut)}
-            />
-          </TabsContent>
-
-          {/* Timeline / Historique */}
-          <TabsContent value="timeline" className="mt-4 space-y-4">
-            {/* Chaîne de la dépense (si lié à un dossier) */}
-            {passation.dossier_id && (
+          {/* ============ TAB 6 : CHAINE DE DEPENSE ============ */}
+          <TabsContent value="chaine" className="mt-4 space-y-4">
+            {/* Chaine de la depense */}
+            {passation.dossier_id ? (
               <DossierStepTimeline
                 dossierId={passation.dossier_id}
                 highlightStep="passation_marche"
                 showNavigation
               />
+            ) : (
+              <Card>
+                <CardContent className="py-6 text-center text-muted-foreground">
+                  <Link2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Aucun dossier de depense lie a cette passation.</p>
+                  <p className="text-xs mt-1">
+                    La chaine de depense sera visible une fois le dossier cree.
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
-            {/* Workflow interne de la passation */}
+            {/* Navigation rapide */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ArrowRight className="h-4 w-4" />
+                  Navigation rapide
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {passation.expression_besoin_id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(
+                          `/execution/expression-besoin?id=${passation.expression_besoin_id}`
+                        );
+                      }}
+                    >
+                      <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
+                      Voir l'expression de besoin
+                      <ExternalLink className="h-3 w-3 ml-1.5" />
+                    </Button>
+                  )}
+                  {passation.statut === 'signe' && passation.decision === 'engagement_possible' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/engagements?sourcePM=${passation.id}`);
+                      }}
+                    >
+                      <CreditCard className="h-3.5 w-3.5 mr-1.5" />
+                      Voir/Creer l'engagement
+                      <ExternalLink className="h-3 w-3 ml-1.5" />
+                    </Button>
+                  )}
+                  {passation.statut === 'signe' && passation.decision === 'contrat_a_creer' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate(`/contractualisation?sourcePM=${passation.id}`);
+                      }}
+                    >
+                      <FileCheck className="h-3.5 w-3.5 mr-1.5" />
+                      Voir/Creer le contrat
+                      <ExternalLink className="h-3 w-3 ml-1.5" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Workflow interne */}
             <PassationTimeline passation={passation} />
           </TabsContent>
         </Tabs>
@@ -623,37 +926,96 @@ export function PassationDetails({
         <Separator className="my-4" />
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          {/* Actions selon le statut */}
-          {passation.statut === 'brouillon' && (
-            <>
-              {!checklistComplete && (
-                <div className="flex items-center gap-2 text-sm text-orange-600 mr-auto">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>Checklist incomplète - soumission bloquée</span>
-                </div>
-              )}
-              <Button onClick={onSubmit} disabled={!checklistComplete} className="gap-2">
-                <Send className="h-4 w-4" />
-                Soumettre pour validation
-              </Button>
-            </>
-          )}
+          {/* Next-step button based on lifecycle */}
+          {(() => {
+            const statut = passation.statut;
+            const actions: Record<
+              string,
+              {
+                label: string;
+                action: string;
+                icon: React.ElementType;
+                check: () => { ok: boolean; errors: string[] };
+              }
+            > = {
+              brouillon: {
+                label: 'Publier',
+                action: 'publish',
+                icon: Send,
+                check: () => canPublish(passation),
+              },
+              publie: {
+                label: 'Cloturer',
+                action: 'close',
+                icon: Clock,
+                check: () => canClose(passation),
+              },
+              cloture: {
+                label: "Lancer l'evaluation",
+                action: 'startEvaluation',
+                icon: ClipboardList,
+                check: () => canStartEvaluation(passation),
+              },
+              en_evaluation: {
+                label: 'Attribuer le marche',
+                action: 'award',
+                icon: Award,
+                check: () => canAward(passation),
+              },
+              attribue: {
+                label: 'Approuver (DG)',
+                action: 'approve',
+                icon: CheckCircle2,
+                check: () => canApprove(passation),
+              },
+              approuve: {
+                label: 'Signer le contrat',
+                action: 'sign',
+                icon: FileCheck,
+                check: () => canSign(passation),
+              },
+            };
 
-          {passation.statut === 'soumis' && canValidate && (
-            <>
-              <Button variant="outline" onClick={onDefer} className="gap-2">
-                <Clock className="h-4 w-4" />
-                Différer
-              </Button>
-              <Button variant="destructive" onClick={onReject} className="gap-2">
-                <XCircle className="h-4 w-4" />
-                Rejeter
-              </Button>
-              <Button onClick={onValidate} className="gap-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Valider
-              </Button>
-            </>
+            const config = actions[statut];
+            if (!config) return null;
+
+            const checkResult = config.check();
+            const Icon = config.icon;
+
+            return (
+              <div className="flex items-center gap-2 flex-1">
+                {!checkResult.ok && (
+                  <Alert className="bg-orange-50 border-orange-200 py-2 px-3 mr-auto">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-xs text-orange-700">
+                      {checkResult.errors.join(' | ')}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                <Button
+                  onClick={() => onTransition?.(config.action)}
+                  disabled={!checkResult.ok}
+                  className="gap-2 ml-auto"
+                >
+                  <Icon className="h-4 w-4" />
+                  {config.label}
+                </Button>
+              </div>
+            );
+          })()}
+
+          {passation.statut === 'signe' && (
+            <Button
+              onClick={() => {
+                onOpenChange(false);
+                navigate(`/engagements?sourcePM=${passation.id}`);
+              }}
+              className="gap-2"
+            >
+              <CreditCard className="h-4 w-4" />
+              Creer l'engagement
+              <ExternalLink className="h-3 w-3 ml-1" />
+            </Button>
           )}
 
           <Button variant="outline" onClick={() => onOpenChange(false)}>

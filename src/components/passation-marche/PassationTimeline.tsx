@@ -1,10 +1,9 @@
 /**
- * PassationTimeline - Timeline du workflow de passation de marché
+ * PassationTimeline - Timeline du workflow 7 étapes de passation de marché
  *
- * Affiche l'historique des étapes du workflow:
- * BROUILLON → SOUMIS → VALIDÉ/REJETÉ/DIFFÉRÉ
+ * brouillon → publié → clôturé → en_évaluation → attribué → approuvé → signé
  *
- * Avec dates, acteurs et motifs si applicable
+ * Avec dates, acteurs et statut visuel par étape.
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,28 +12,48 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import {
   FileEdit,
   Send,
-  CheckCircle2,
-  XCircle,
-  Clock,
+  Lock,
+  ClipboardCheck,
+  Award,
+  ShieldCheck,
+  FileSignature,
   User,
   Calendar,
   ArrowRight,
-  AlertCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { PassationMarche } from '@/hooks/usePassationsMarche';
+import { PassationMarche, STATUTS, LIFECYCLE_STEPS } from '@/hooks/usePassationsMarche';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: 'completed' | 'current' | 'pending' | 'rejected' | 'deferred';
+  status: 'completed' | 'current' | 'pending' | 'legacy';
   date?: string | null;
   actor?: string | null;
-  comment?: string | null;
 }
+
+const STEP_ICONS: Record<string, React.ElementType> = {
+  brouillon: FileEdit,
+  publie: Send,
+  cloture: Lock,
+  en_evaluation: ClipboardCheck,
+  attribue: Award,
+  approuve: ShieldCheck,
+  signe: FileSignature,
+};
+
+const STEP_DATES: Record<string, (p: PassationMarche) => string | null> = {
+  brouillon: (p) => p.created_at,
+  publie: (p) => p.publie_at,
+  cloture: (p) => p.cloture_at,
+  en_evaluation: (p) => p.evaluation_at,
+  attribue: (p) => p.attribue_at,
+  approuve: (p) => p.approuve_at,
+  signe: (p) => p.signe_at,
+};
 
 interface PassationTimelineProps {
   passation: PassationMarche;
@@ -47,77 +66,46 @@ export function PassationTimeline({
   compact = false,
   className,
 }: PassationTimelineProps) {
-  // Build timeline steps based on passation status
+  const currentStep = STATUTS[passation.statut]?.step ?? -1;
+  const isLegacy = currentStep < 0;
+
   const buildTimelineSteps = (): TimelineStep[] => {
-    const steps: TimelineStep[] = [];
-
-    // Step 1: Creation (always completed)
-    steps.push({
-      key: 'creation',
-      label: 'Création',
-      icon: FileEdit,
-      status: 'completed',
-      date: passation.created_at,
-      actor: passation.creator?.full_name,
-    });
-
-    // Step 2: Submission
-    const isSubmitted = ['soumis', 'en_analyse', 'valide', 'rejete', 'differe'].includes(
-      passation.statut
-    );
-    steps.push({
-      key: 'soumission',
-      label: 'Soumission',
-      icon: Send,
-      status: isSubmitted ? 'completed' : passation.statut === 'brouillon' ? 'current' : 'pending',
-      date: passation.submitted_at,
-    });
-
-    // Step 3: Final status (validation/rejection/defer)
-    if (passation.statut === 'valide') {
-      steps.push({
-        key: 'validation',
-        label: 'Validation',
-        icon: CheckCircle2,
-        status: 'completed',
-        date: passation.validated_at,
-      });
-    } else if (passation.statut === 'rejete') {
-      steps.push({
-        key: 'rejet',
-        label: 'Rejet',
-        icon: XCircle,
-        status: 'rejected',
-        date: passation.rejected_at,
-        comment: passation.rejection_reason,
-      });
-    } else if (passation.statut === 'differe') {
-      steps.push({
-        key: 'differe',
-        label: 'Différé',
-        icon: Clock,
-        status: 'deferred',
-        date: passation.differed_at,
-        comment: passation.motif_differe,
-      });
-    } else if (passation.statut === 'soumis' || passation.statut === 'en_analyse') {
-      steps.push({
-        key: 'en_attente',
-        label: 'En attente de décision',
-        icon: AlertCircle,
-        status: 'current',
-      });
-    } else {
-      // Brouillon - final step is pending
-      steps.push({
-        key: 'decision',
-        label: 'Décision',
-        icon: CheckCircle2,
-        status: 'pending',
-      });
+    if (isLegacy) {
+      // For legacy statuts, show a single badge
+      return [
+        {
+          key: passation.statut,
+          label: STATUTS[passation.statut]?.label ?? passation.statut,
+          icon: FileEdit,
+          status: 'legacy',
+          date: passation.created_at,
+          actor: passation.creator?.full_name,
+        },
+      ];
     }
 
-    return steps;
+    return LIFECYCLE_STEPS.map((key) => {
+      const step = STATUTS[key]?.step ?? 0;
+      const dateGetter = STEP_DATES[key];
+      const date = dateGetter ? dateGetter(passation) : null;
+
+      let status: TimelineStep['status'];
+      if (step < currentStep) {
+        status = 'completed';
+      } else if (step === currentStep) {
+        status = 'current';
+      } else {
+        status = 'pending';
+      }
+
+      return {
+        key,
+        label: STATUTS[key]?.label ?? key,
+        icon: STEP_ICONS[key] ?? FileEdit,
+        status,
+        date,
+      };
+    });
   };
 
   const steps = buildTimelineSteps();
@@ -128,10 +116,8 @@ export function PassationTimeline({
         return 'bg-green-500 text-white';
       case 'current':
         return 'bg-primary text-white ring-4 ring-primary/30';
-      case 'rejected':
-        return 'bg-red-500 text-white';
-      case 'deferred':
-        return 'bg-orange-500 text-white';
+      case 'legacy':
+        return 'bg-gray-400 text-white';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -141,10 +127,8 @@ export function PassationTimeline({
     switch (status) {
       case 'completed':
         return 'bg-green-500';
-      case 'rejected':
-        return 'bg-red-500';
-      case 'deferred':
-        return 'bg-orange-500';
+      case 'legacy':
+        return 'bg-gray-400';
       default:
         return 'bg-muted';
     }
@@ -153,7 +137,7 @@ export function PassationTimeline({
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn('flex items-center gap-2', className)}>
+        <div className={cn('flex items-center gap-1', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -162,11 +146,11 @@ export function PassationTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        'w-8 h-8 rounded-full flex items-center justify-center transition-all',
+                        'w-7 h-7 rounded-full flex items-center justify-center transition-all',
                         getStatusColor(step.status)
                       )}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3.5 w-3.5" />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -177,12 +161,11 @@ export function PassationTimeline({
                           {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn('h-0.5 w-6 mx-1', getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-4 mx-0.5', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -197,7 +180,7 @@ export function PassationTimeline({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <ArrowRight className="h-4 w-4" />
-          Historique du workflow
+          Cycle de vie du marché
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -236,15 +219,13 @@ export function PassationTimeline({
                         'text-xs',
                         step.status === 'completed' && 'border-green-500 text-green-600',
                         step.status === 'current' && 'border-primary text-primary',
-                        step.status === 'rejected' && 'border-red-500 text-red-600',
-                        step.status === 'deferred' && 'border-orange-500 text-orange-600',
+                        step.status === 'legacy' && 'border-gray-400 text-gray-500',
                         step.status === 'pending' && 'border-muted-foreground text-muted-foreground'
                       )}
                     >
                       {step.status === 'completed' && 'Terminé'}
                       {step.status === 'current' && 'En cours'}
-                      {step.status === 'rejected' && 'Rejeté'}
-                      {step.status === 'deferred' && 'Différé'}
+                      {step.status === 'legacy' && 'Legacy'}
                       {step.status === 'pending' && 'En attente'}
                     </Badge>
                   </div>
@@ -265,11 +246,6 @@ export function PassationTimeline({
                         <User className="h-3 w-3" />
                         <span>{step.actor}</span>
                       </div>
-                    )}
-                    {step.comment && (
-                      <p className="text-sm mt-2 p-2 bg-muted/50 rounded text-foreground">
-                        {step.comment}
-                      </p>
                     )}
                   </div>
                 </div>

@@ -148,6 +148,23 @@ export interface PassationMarche {
   rejection_reason: string | null;
   motif_differe: string | null;
   date_reprise: string | null;
+  // Workflow extended (columns already in DB)
+  date_publication: string | null;
+  date_cloture: string | null;
+  publie_at: string | null;
+  publie_by: string | null;
+  cloture_at: string | null;
+  cloture_by: string | null;
+  evaluation_at: string | null;
+  evaluation_by: string | null;
+  attribue_at: string | null;
+  attribue_by: string | null;
+  approuve_at: string | null;
+  approuve_by: string | null;
+  signe_at: string | null;
+  signe_by: string | null;
+  contrat_url: string | null;
+  motif_rejet_attribution: string | null;
   pieces_jointes: PieceJointePassation[];
   // Joined
   expression_besoin?: {
@@ -155,6 +172,10 @@ export interface PassationMarche {
     numero: string | null;
     objet: string;
     montant_estime: number | null;
+    direction_id: string | null;
+    ligne_budgetaire_id: string | null;
+    type_procedure: string | null;
+    direction?: { id: string; label: string; sigle: string | null } | null;
   } | null;
   dossier?: {
     id: string;
@@ -308,14 +329,104 @@ export const DECISIONS_SORTIE = [
 
 export type DecisionSortie = (typeof DECISIONS_SORTIE)[number]['value'];
 
-export const STATUTS = {
-  brouillon: { label: 'Brouillon', color: 'bg-muted text-muted-foreground' },
-  soumis: { label: 'Soumis', color: 'bg-blue-100 text-blue-700' },
-  en_analyse: { label: 'En analyse', color: 'bg-yellow-100 text-yellow-700' },
-  valide: { label: 'Validé', color: 'bg-green-100 text-green-700' },
-  rejete: { label: 'Rejeté', color: 'bg-red-100 text-red-700' },
-  differe: { label: 'Différé', color: 'bg-orange-100 text-orange-700' },
+export type PassationStatut =
+  | 'brouillon'
+  | 'publie'
+  | 'cloture'
+  | 'en_evaluation'
+  | 'attribue'
+  | 'approuve'
+  | 'signe';
+
+export const STATUTS: Record<string, { label: string; color: string; step: number }> = {
+  brouillon: { label: 'Brouillon', color: 'bg-muted text-muted-foreground', step: 0 },
+  publie: { label: 'Publié', color: 'bg-cyan-100 text-cyan-700', step: 1 },
+  cloture: { label: 'Clôturé', color: 'bg-indigo-100 text-indigo-700', step: 2 },
+  en_evaluation: { label: 'En évaluation', color: 'bg-amber-100 text-amber-700', step: 3 },
+  attribue: { label: 'Attribué', color: 'bg-purple-100 text-purple-700', step: 4 },
+  approuve: { label: 'Approuvé', color: 'bg-green-100 text-green-700', step: 5 },
+  signe: { label: 'Signé', color: 'bg-emerald-100 text-emerald-800', step: 6 },
+  // Legacy
+  soumis: { label: 'Soumis', color: 'bg-blue-100 text-blue-700', step: -1 },
+  en_analyse: { label: 'En analyse', color: 'bg-yellow-100 text-yellow-700', step: -1 },
+  valide: { label: 'Validé', color: 'bg-green-100 text-green-700', step: -1 },
+  rejete: { label: 'Rejeté', color: 'bg-red-100 text-red-700', step: -1 },
+  differe: { label: 'Différé', color: 'bg-orange-100 text-orange-700', step: -1 },
 };
+
+export const WORKFLOW_STEPS = [
+  { key: 'brouillon', label: 'Brouillon' },
+  { key: 'publie', label: 'Publié' },
+  { key: 'cloture', label: 'Clôturé' },
+  { key: 'en_evaluation', label: 'Évaluation' },
+  { key: 'attribue', label: 'Attribué' },
+  { key: 'approuve', label: 'Approuvé' },
+  { key: 'signe', label: 'Signé' },
+] as const;
+
+export const LIFECYCLE_STEPS: PassationStatut[] = [
+  'brouillon',
+  'publie',
+  'cloture',
+  'en_evaluation',
+  'attribue',
+  'approuve',
+  'signe',
+];
+
+// ─── Client-side prerequisite checks ──────────────────────────────────────────
+
+export function canPublish(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'brouillon') errors.push('Le statut doit être "brouillon"');
+  if (!p.expression_besoin_id) errors.push('Expression de besoin liée obligatoire');
+  if (!p.mode_passation) errors.push('Mode de passation obligatoire');
+  if (!p.date_publication) errors.push('Date de publication obligatoire');
+  if (!p.date_cloture) errors.push('Date de clôture obligatoire');
+  if (p.date_publication && p.date_cloture && p.date_cloture <= p.date_publication)
+    errors.push('La date de clôture doit être postérieure à la date de publication');
+  if (p.allotissement && (!p.lots || p.lots.length === 0))
+    errors.push('Au moins 1 lot requis pour un marché alloti');
+  return { ok: errors.length === 0, errors };
+}
+
+export function canClose(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'publie') errors.push('Le statut doit être "publié"');
+  return { ok: errors.length === 0, errors };
+}
+
+export function canStartEvaluation(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'cloture') errors.push('Le statut doit être "clôturé"');
+  const soumCount = p.soumissionnaires?.length ?? 0;
+  if (soumCount === 0) errors.push('Au moins 1 soumissionnaire requis');
+  return { ok: errors.length === 0, errors };
+}
+
+export function canAward(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'en_evaluation') errors.push('Le statut doit être "en évaluation"');
+  const soums = p.soumissionnaires ?? [];
+  const nonEvalues = soums.filter((s) => s.note_finale === null && s.statut !== 'elimine');
+  if (nonEvalues.length > 0) errors.push(`${nonEvalues.length} soumissionnaire(s) non évalué(s)`);
+  const qualifies = soums.filter((s) => s.qualifie_technique);
+  if (qualifies.length === 0) errors.push('Aucun soumissionnaire qualifié');
+  return { ok: errors.length === 0, errors };
+}
+
+export function canApprove(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'attribue') errors.push('Le statut doit être "attribué"');
+  return { ok: errors.length === 0, errors };
+}
+
+export function canSign(p: PassationMarche): { ok: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (p.statut !== 'approuve') errors.push('Le statut doit être "approuvé"');
+  if (!p.contrat_url) errors.push('URL du contrat signé obligatoire');
+  return { ok: errors.length === 0, errors };
+}
 
 export function usePassationsMarche() {
   const queryClient = useQueryClient();
@@ -337,7 +448,7 @@ export function usePassationsMarche() {
           *,
           lots:lots_marche(*),
           soumissionnaires:soumissionnaires_lot(*),
-          expression_besoin:expressions_besoin(id, numero, objet, montant_estime),
+          expression_besoin:expressions_besoin(id, numero, objet, montant_estime, direction_id, ligne_budgetaire_id, type_procedure, direction:directions(id, label, sigle)),
           dossier:dossiers(id, numero, objet),
           prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(id, raison_sociale),
           creator:profiles!passation_marche_created_by_fkey(id, full_name)
@@ -398,6 +509,13 @@ export function usePassationsMarche() {
   // Counts par statut
   const counts = {
     brouillon: passations.filter((p) => p.statut === 'brouillon').length,
+    publie: passations.filter((p) => p.statut === 'publie').length,
+    cloture: passations.filter((p) => p.statut === 'cloture').length,
+    en_evaluation: passations.filter((p) => p.statut === 'en_evaluation').length,
+    attribue: passations.filter((p) => p.statut === 'attribue').length,
+    approuve: passations.filter((p) => p.statut === 'approuve').length,
+    signe: passations.filter((p) => p.statut === 'signe').length,
+    // Legacy
     soumis: passations.filter((p) => p.statut === 'soumis').length,
     en_analyse: passations.filter((p) => p.statut === 'en_analyse').length,
     valide: passations.filter((p) => p.statut === 'valide').length,
@@ -421,6 +539,9 @@ export function usePassationsMarche() {
       prestataire_retenu_id?: string;
       montant_retenu?: number;
       motif_selection?: string;
+      // Dates lifecycle
+      date_publication?: string;
+      date_cloture?: string;
     }) => {
       // Récupérer l'utilisateur courant
       const {
@@ -455,7 +576,9 @@ export function usePassationsMarche() {
         exercice: exercice || new Date().getFullYear(),
         statut: 'brouillon',
         created_by: user?.id || null,
-      };
+        date_publication: data.date_publication || null,
+        date_cloture: data.date_cloture || null,
+      } as PassationInsert;
 
       const { data: result, error } = await supabase
         .from('passation_marche')
@@ -627,6 +750,223 @@ export function usePassationsMarche() {
     onError: (error: Error) => {
       toast.error('Erreur: ' + error.message);
     },
+  });
+
+  // Publish (brouillon → publie)
+  const publishMutation = useMutation({
+    mutationFn: async ({ id, dateCloture }: { id: string; dateCloture?: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      // RPC prerequisite check
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'publie',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'publie',
+          publie_at: new Date().toISOString(),
+          publie_by: user?.id || null,
+          date_cloture: dateCloture || null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Passation publiée');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Close (publie → cloture)
+  const closeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'cloture',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'cloture',
+          cloture_at: new Date().toISOString(),
+          cloture_by: user?.id || null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Passation clôturée');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Start evaluation (cloture → en_evaluation)
+  const startEvaluationMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'en_evaluation',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'en_evaluation',
+          evaluation_at: new Date().toISOString(),
+          evaluation_by: user?.id || null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Évaluation lancée');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Propose attribution (en_evaluation → attribue)
+  const proposeAttributionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'attribue',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'attribue',
+          attribue_at: new Date().toISOString(),
+          attribue_by: user?.id || null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Attribution proposée au DG');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Approve attribution (attribue → approuve)
+  const approveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'approuve',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'approuve',
+          approuve_at: new Date().toISOString(),
+          approuve_by: user?.id || null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Attribution approuvée');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Reject attribution (attribue → en_evaluation)
+  const rejectAttributionMutation = useMutation({
+    mutationFn: async ({ id, motif }: { id: string; motif: string }) => {
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'en_evaluation',
+          motif_rejet_attribution: motif,
+          attribue_at: null,
+          attribue_by: null,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Attribution rejetée');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
+  });
+
+  // Sign (approuve → signe)
+  const signMutation = useMutation({
+    mutationFn: async ({ id, contratUrl }: { id: string; contratUrl: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      // Set contrat_url first so the RPC check passes
+      const { error: urlErr } = await supabase
+        .from('passation_marche')
+        .update({ contrat_url: contratUrl })
+        .eq('id', id);
+      if (urlErr) throw urlErr;
+
+      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
+        p_id: id,
+        p_new_statut: 'signe',
+      });
+      if (rpcErr) throw rpcErr;
+      const result = check as unknown as { ok: boolean; errors: string[] };
+      if (!result.ok) throw new Error(result.errors.join(', '));
+
+      const { error } = await supabase
+        .from('passation_marche')
+        .update({
+          statut: 'signe',
+          signe_at: new Date().toISOString(),
+          signe_by: user?.id || null,
+          contrat_url: contratUrl,
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
+      toast.success('Contrat signé');
+    },
+    onError: (error: Error) => toast.error('Erreur: ' + error.message),
   });
 
   // Save lots (upsert: delete all then re-insert)
@@ -916,6 +1256,13 @@ export function usePassationsMarche() {
     rejectPassation: rejectMutation.mutateAsync,
     deferPassation: deferMutation.mutateAsync,
     deletePassation: deleteMutation.mutateAsync,
+    publishPassation: publishMutation.mutateAsync,
+    closePassation: closeMutation.mutateAsync,
+    startEvaluationPassation: startEvaluationMutation.mutateAsync,
+    proposeAttributionPassation: proposeAttributionMutation.mutateAsync,
+    approvePassation: approveMutation.mutateAsync,
+    rejectAttributionPassation: rejectAttributionMutation.mutateAsync,
+    signPassation: signMutation.mutateAsync,
     addSoumissionnaire: addSoumissionnaireMutation.mutateAsync,
     updateSoumissionnaire: updateSoumissionnaireMutation.mutateAsync,
     deleteSoumissionnaire: deleteSoumissionnaireMutation.mutateAsync,

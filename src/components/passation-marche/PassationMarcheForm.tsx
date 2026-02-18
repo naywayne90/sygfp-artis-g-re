@@ -109,6 +109,9 @@ export function PassationMarcheForm({
     decision: '' as DecisionSortie | '',
     justification_decision: '',
     motif_selection: '',
+    // Dates lifecycle
+    date_publication: '',
+    date_cloture: '',
   });
 
   // Lots (allotissement)
@@ -278,6 +281,8 @@ export function PassationMarcheForm({
       prestataire_retenu_id: prestataireRetenu?.prestataire_id,
       montant_retenu: prestataireRetenu?.offre_montant || undefined,
       motif_selection: formData.motif_selection || undefined,
+      date_publication: formData.date_publication || undefined,
+      date_cloture: formData.date_cloture || undefined,
     });
 
     onOpenChange(false);
@@ -294,6 +299,8 @@ export function PassationMarcheForm({
       decision: '',
       justification_decision: '',
       motif_selection: '',
+      date_publication: '',
+      date_cloture: '',
     });
     setAllotissement(false);
     setLots([]);
@@ -539,6 +546,33 @@ export function PassationMarcheForm({
                       </AlertDescription>
                     </Alert>
                   )}
+
+                <Separator />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="date_publication">Date de publication</Label>
+                    <Input
+                      id="date_publication"
+                      type="date"
+                      value={formData.date_publication}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, date_publication: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="date_cloture">Date de clôture des offres</Label>
+                    <Input
+                      id="date_cloture"
+                      type="date"
+                      value={formData.date_cloture}
+                      min={formData.date_publication || undefined}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, date_cloture: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
 
                 <div className="flex justify-end">
                   <Button onClick={() => setActiveStep('lots')}>Suivant: Lots</Button>

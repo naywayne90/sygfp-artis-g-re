@@ -130,6 +130,7 @@ const ExpressionBesoin = lazy(() => import('./pages/execution/ExpressionBesoin')
 const ImputationPage = lazy(() => import('./pages/execution/ImputationPage'));
 const DashboardExecution = lazy(() => import('./pages/execution/DashboardExecution'));
 const PassationMarche = lazy(() => import('./pages/execution/PassationMarche'));
+const PassationApprobation = lazy(() => import('./pages/execution/PassationApprobation'));
 const DashboardDGPage = lazy(() => import('./pages/execution/DashboardDGPage'));
 const DashboardDirectionPage = lazy(() => import('./pages/execution/DashboardDirectionPage'));
 const DashboardDMG = lazy(() => import('./pages/DashboardDMG'));
@@ -348,6 +349,10 @@ const App = () => (
                 <Route path="/execution/imputation" element={<ImputationPage />} />
                 <Route path="/execution/expression-besoin" element={<ExpressionBesoin />} />
                 <Route path="/execution/passation-marche" element={<PassationMarche />} />
+                <Route
+                  path="/execution/passation-marche/approbation"
+                  element={<PassationApprobation />}
+                />
                 <Route path="/marches" element={<Marches />} />
                 <Route path="/engagements" element={<Engagements />} />
                 <Route path="/execution/scanning-engagement" element={<ScanningEngagement />} />
