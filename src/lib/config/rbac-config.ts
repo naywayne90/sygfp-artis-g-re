@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 /**
  * Configuration centrale RBAC pour SYGFP/ARTI
@@ -31,7 +32,14 @@ export const ROLES_HIERARCHIQUES = {
     label: 'Sous-Directeur',
     description: 'Validation niveau 2, lecture des dossiers de son périmètre',
     color: '#8b5cf6', // violet
-    permissions: ['create', 'submit', 'read_own', 'read_service', 'read_direction', 'validate_level_2'],
+    permissions: [
+      'create',
+      'submit',
+      'read_own',
+      'read_service',
+      'read_direction',
+      'validate_level_2',
+    ],
   },
   DIRECTEUR: {
     code: 'Directeur',
@@ -39,7 +47,15 @@ export const ROLES_HIERARCHIQUES = {
     label: 'Directeur',
     description: 'Validation niveau 3 ou supervision, lecture de toute sa direction',
     color: '#f97316', // orange
-    permissions: ['create', 'submit', 'read_own', 'read_service', 'read_direction', 'validate_level_3', 'validate_note_aef'],
+    permissions: [
+      'create',
+      'submit',
+      'read_own',
+      'read_service',
+      'read_direction',
+      'validate_level_3',
+      'validate_note_aef',
+    ],
   },
   DG: {
     code: 'DG',
@@ -62,7 +78,14 @@ export const PROFILS_FONCTIONNELS = {
     description: 'Accès complet au paramétrage, référentiels, budgets et utilisateurs',
     color: '#ef4444', // red
     isSystem: true,
-    capabilities: ['manage_users', 'manage_roles', 'manage_referentiels', 'manage_budget', 'view_audit', 'bypass_all'],
+    capabilities: [
+      'manage_users',
+      'manage_roles',
+      'manage_referentiels',
+      'manage_budget',
+      'view_audit',
+      'bypass_all',
+    ],
   },
   CB: {
     code: 'CB',
@@ -78,7 +101,12 @@ export const PROFILS_FONCTIONNELS = {
     description: 'Création des engagements et liquidations, supervision financière',
     color: '#a855f7', // purple
     isSystem: true,
-    capabilities: ['create_engagement', 'create_liquidation', 'validate_liquidation', 'view_all_finances'],
+    capabilities: [
+      'create_engagement',
+      'create_liquidation',
+      'validate_liquidation',
+      'view_all_finances',
+    ],
   },
   DG: {
     code: 'DG',
@@ -267,7 +295,10 @@ export const AUDITED_ACTIONS = [
 /**
  * Vérifie si un rôle peut valider un type d'entité
  */
-export function canRoleValidate(roleCode: string, entityType: keyof typeof VALIDATION_MATRIX): boolean {
+export function canRoleValidate(
+  roleCode: string,
+  entityType: keyof typeof VALIDATION_MATRIX
+): boolean {
   const rule = VALIDATION_MATRIX[entityType];
   if (!rule) return false;
   return (rule.validators as readonly string[]).includes(roleCode) || roleCode === 'ADMIN';
@@ -316,7 +347,7 @@ export function getProfilLabel(profilCode: string): string {
  * Récupère le niveau hiérarchique
  */
 export function getHierarchicalLevel(roleCode: string): number {
-  const role = Object.values(ROLES_HIERARCHIQUES).find(r => r.code === roleCode);
+  const role = Object.values(ROLES_HIERARCHIQUES).find((r) => r.code === roleCode);
   return role?.niveau || 1;
 }
 
@@ -415,10 +446,32 @@ export const WORKFLOW_STEPS = {
     label: 'Note SEF',
     steps: [
       { state: 'brouillon', label: 'Brouillon', nextStates: ['soumis'], notifyOnEnter: [] },
-      { state: 'soumis', label: 'Soumis', nextStates: ['valide', 'rejete', 'differe'], notifyOnEnter: ['DG'] },
-      { state: 'valide', label: 'Validé', nextStates: ['impute'], notifyOnEnter: ['creator', 'CB'] },
-      { state: 'rejete', label: 'Rejeté', nextStates: ['brouillon'], notifyOnEnter: ['creator'], requireMotif: true },
-      { state: 'differe', label: 'Différé', nextStates: ['soumis'], notifyOnEnter: ['creator'], requireMotif: true },
+      {
+        state: 'soumis',
+        label: 'Soumis',
+        nextStates: ['valide', 'rejete', 'differe'],
+        notifyOnEnter: ['DG'],
+      },
+      {
+        state: 'valide',
+        label: 'Validé',
+        nextStates: ['impute'],
+        notifyOnEnter: ['creator', 'CB'],
+      },
+      {
+        state: 'rejete',
+        label: 'Rejeté',
+        nextStates: ['brouillon'],
+        notifyOnEnter: ['creator'],
+        requireMotif: true,
+      },
+      {
+        state: 'differe',
+        label: 'Différé',
+        nextStates: ['soumis'],
+        notifyOnEnter: ['creator'],
+        requireMotif: true,
+      },
       { state: 'impute', label: 'Imputé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
     initialState: 'brouillon',
@@ -428,10 +481,32 @@ export const WORKFLOW_STEPS = {
     label: 'Note AEF',
     steps: [
       { state: 'brouillon', label: 'Brouillon', nextStates: ['soumis'], notifyOnEnter: [] },
-      { state: 'soumis', label: 'Soumis', nextStates: ['valide', 'rejete', 'differe'], notifyOnEnter: ['DIRECTEUR'] },
-      { state: 'valide', label: 'Validé', nextStates: ['impute'], notifyOnEnter: ['creator', 'CB'] },
-      { state: 'rejete', label: 'Rejeté', nextStates: ['brouillon'], notifyOnEnter: ['creator'], requireMotif: true },
-      { state: 'differe', label: 'Différé', nextStates: ['soumis'], notifyOnEnter: ['creator'], requireMotif: true },
+      {
+        state: 'soumis',
+        label: 'Soumis',
+        nextStates: ['valide', 'rejete', 'differe'],
+        notifyOnEnter: ['DIRECTEUR'],
+      },
+      {
+        state: 'valide',
+        label: 'Validé',
+        nextStates: ['impute'],
+        notifyOnEnter: ['creator', 'CB'],
+      },
+      {
+        state: 'rejete',
+        label: 'Rejeté',
+        nextStates: ['brouillon'],
+        notifyOnEnter: ['creator'],
+        requireMotif: true,
+      },
+      {
+        state: 'differe',
+        label: 'Différé',
+        nextStates: ['soumis'],
+        notifyOnEnter: ['creator'],
+        requireMotif: true,
+      },
       { state: 'impute', label: 'Imputé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
     initialState: 'brouillon',
@@ -441,9 +516,19 @@ export const WORKFLOW_STEPS = {
     label: 'Engagement',
     steps: [
       { state: 'brouillon', label: 'Brouillon', nextStates: ['valide'], notifyOnEnter: [] },
-      { state: 'valide', label: 'Validé', nextStates: ['liquide'], notifyOnEnter: ['creator', 'DAAF'] },
+      {
+        state: 'valide',
+        label: 'Validé',
+        nextStates: ['liquide'],
+        notifyOnEnter: ['creator', 'DAAF'],
+      },
       { state: 'liquide', label: 'Liquidé', nextStates: ['ordonnance'], notifyOnEnter: ['DG'] },
-      { state: 'ordonnance', label: 'Ordonnancé', nextStates: ['paye'], notifyOnEnter: ['TRESORERIE'] },
+      {
+        state: 'ordonnance',
+        label: 'Ordonnancé',
+        nextStates: ['paye'],
+        notifyOnEnter: ['TRESORERIE'],
+      },
       { state: 'paye', label: 'Payé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
     initialState: 'brouillon',
@@ -455,8 +540,18 @@ export const WORKFLOW_STEPS = {
       { state: 'note_sef', label: 'Note SEF', nextStates: ['note_aef'], notifyOnEnter: [] },
       { state: 'note_aef', label: 'Note AEF', nextStates: ['engagement'], notifyOnEnter: [] },
       { state: 'engagement', label: 'Engagement', nextStates: ['liquidation'], notifyOnEnter: [] },
-      { state: 'liquidation', label: 'Liquidation', nextStates: ['ordonnancement'], notifyOnEnter: [] },
-      { state: 'ordonnancement', label: 'Ordonnancement', nextStates: ['reglement'], notifyOnEnter: [] },
+      {
+        state: 'liquidation',
+        label: 'Liquidation',
+        nextStates: ['ordonnancement'],
+        notifyOnEnter: [],
+      },
+      {
+        state: 'ordonnancement',
+        label: 'Ordonnancement',
+        nextStates: ['reglement'],
+        notifyOnEnter: [],
+      },
       { state: 'reglement', label: 'Règlement', nextStates: [], notifyOnEnter: ['creator'] },
     ],
     initialState: 'note_sef',
@@ -469,14 +564,14 @@ export const WORKFLOW_STEPS = {
 // ============================================
 
 export const ACTIONS_REQUIRING_MOTIF = [
-  'REJECT',           // Rejet d'une note ou validation
-  'DEFER',            // Report d'une validation
-  'CANCEL',           // Annulation d'un dossier
+  'REJECT', // Rejet d'une note ou validation
+  'DEFER', // Report d'une validation
+  'CANCEL', // Annulation d'un dossier
   'MODIFY_POST_VALIDATION', // Modification après validation
-  'OVERRIDE',         // Dérogation ou contournement de règle
-  'ROLLBACK',         // Retour arrière sur une étape
-  'BUDGET_TRANSFER',  // Virement budgétaire
-  'FORCE_CLOSE',      // Clôture forcée
+  'OVERRIDE', // Dérogation ou contournement de règle
+  'ROLLBACK', // Retour arrière sur une étape
+  'BUDGET_TRANSFER', // Virement budgétaire
+  'FORCE_CLOSE', // Clôture forcée
 ] as const;
 
 // ============================================
@@ -523,7 +618,8 @@ export const NOTIFICATION_CONFIG = {
     },
     BUDGET_INSUFFISANT: {
       type: 'alerte',
-      template: 'Budget insuffisant pour {entity} {reference} - Disponible: {disponible}, Demandé: {demande}',
+      template:
+        'Budget insuffisant pour {entity} {reference} - Disponible: {disponible}, Demandé: {demande}',
       recipients: ['creator', 'CB'],
       priority: 'high',
     },
@@ -581,33 +677,42 @@ export function getWorkflowSteps(entityType: keyof typeof WORKFLOW_STEPS) {
 /**
  * Récupère la prochaine étape possible d'un workflow
  */
-export function getNextWorkflowStates(entityType: keyof typeof WORKFLOW_STEPS, currentState: string): string[] {
+export function getNextWorkflowStates(
+  entityType: keyof typeof WORKFLOW_STEPS,
+  currentState: string
+): string[] {
   const workflow = WORKFLOW_STEPS[entityType];
   if (!workflow) return [];
 
-  const step = workflow.steps.find(s => s.state === currentState);
+  const step = workflow.steps.find((s) => s.state === currentState);
   return step?.nextStates || [];
 }
 
 /**
  * Récupère les destinataires de notification pour une transition
  */
-export function getNotificationRecipients(entityType: keyof typeof WORKFLOW_STEPS, targetState: string): string[] {
+export function getNotificationRecipients(
+  entityType: keyof typeof WORKFLOW_STEPS,
+  targetState: string
+): string[] {
   const workflow = WORKFLOW_STEPS[entityType];
   if (!workflow) return [];
 
-  const step = workflow.steps.find(s => s.state === targetState);
+  const step = workflow.steps.find((s) => s.state === targetState);
   return step?.notifyOnEnter || [];
 }
 
 /**
  * Vérifie si une transition nécessite un motif
  */
-export function transitionRequiresMotif(entityType: keyof typeof WORKFLOW_STEPS, targetState: string): boolean {
+export function transitionRequiresMotif(
+  entityType: keyof typeof WORKFLOW_STEPS,
+  targetState: string
+): boolean {
   const workflow = WORKFLOW_STEPS[entityType];
   if (!workflow) return false;
 
-  const step = workflow.steps.find(s => s.state === targetState);
+  const step = workflow.steps.find((s) => s.state === targetState);
   return step?.requireMotif || false;
 }
 
@@ -616,47 +721,50 @@ export function transitionRequiresMotif(entityType: keyof typeof WORKFLOW_STEPS,
 // Définit qui peut accéder à quelle route
 // ============================================
 
-export const ROUTE_ACCESS_MATRIX: Record<string, {
-  allowedProfiles: string[];
-  allowedHierarchies?: string[];
-  description: string;
-  requiresDirection?: boolean; // Si true, limite aux données de la direction
-}> = {
+export const ROUTE_ACCESS_MATRIX: Record<
+  string,
+  {
+    allowedProfiles: string[];
+    allowedHierarchies?: string[];
+    description: string;
+    requiresDirection?: boolean; // Si true, limite aux données de la direction
+  }
+> = {
   // Routes publiques (tous les connectés)
   '/': {
     allowedProfiles: ['all'],
-    description: 'Tableau de bord'
+    description: 'Tableau de bord',
   },
   '/recherche': {
     allowedProfiles: ['all'],
-    description: 'Recherche de dossiers'
+    description: 'Recherche de dossiers',
   },
   '/notifications': {
     allowedProfiles: ['all'],
-    description: 'Notifications'
+    description: 'Notifications',
   },
   '/alertes': {
     allowedProfiles: ['all'],
-    description: 'Alertes'
+    description: 'Alertes',
   },
   '/mon-profil': {
     allowedProfiles: ['all'],
-    description: 'Mon profil'
+    description: 'Mon profil',
   },
   '/taches': {
     allowedProfiles: ['all'],
-    description: 'Mes tâches'
+    description: 'Mes tâches',
   },
 
   // Chaîne de dépense - Notes SEF
   '/notes-sef': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR', 'AUDITEUR'],
     allowedHierarchies: ['Agent', 'Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'],
-    description: 'Liste des Notes SEF'
+    description: 'Liste des Notes SEF',
   },
   '/notes-sef/validation': {
     allowedProfiles: ['ADMIN', 'DG'],
-    description: 'Validation des Notes SEF'
+    description: 'Validation des Notes SEF',
   },
 
   // Chaîne de dépense - Notes AEF
@@ -664,347 +772,351 @@ export const ROUTE_ACCESS_MATRIX: Record<string, {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR', 'AUDITEUR'],
     allowedHierarchies: ['Agent', 'Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'],
     description: 'Liste des Notes AEF',
-    requiresDirection: true
+    requiresDirection: true,
   },
   '/notes-aef/validation': {
     allowedProfiles: ['ADMIN', 'DG', 'DIRECTEUR'],
-    description: 'Validation des Notes AEF'
+    description: 'Validation des Notes AEF',
   },
 
   // Chaîne de dépense - Imputation
   '/execution/imputation': {
     allowedProfiles: ['ADMIN', 'CB', 'DAAF', 'DG', 'AUDITEUR'],
-    description: 'Imputation budgétaire'
+    description: 'Imputation budgétaire',
   },
 
   // Chaîne de dépense - Expression de besoin
   '/execution/expression-besoin': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
     allowedHierarchies: ['Agent', 'Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'],
-    description: 'Expression de besoin'
+    description: 'Expression de besoin',
   },
 
   // Chaîne de dépense - Passation marché
   '/marches': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Marchés'
+    description: 'Marchés',
   },
   '/execution/passation-marche': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF'],
-    description: 'Passation de marché'
+    description: 'Passation de marché',
+  },
+  '/execution/passation-marche/approbation': {
+    allowedProfiles: ['ADMIN', 'DG'],
+    description: 'Approbation des marchés attribués (DG)',
   },
 
   // Chaîne de dépense - Engagement
   '/engagements': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'AUDITEUR'],
-    description: 'Engagements'
+    description: 'Engagements',
   },
   '/execution/scanning-engagement': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'OPERATEUR', 'AUDITEUR'],
-    description: 'Scanning et numérisation des pièces engagement'
+    description: 'Scanning et numérisation des pièces engagement',
   },
 
   // Chaîne de dépense - Liquidation
   '/liquidations': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Liquidations'
+    description: 'Liquidations',
   },
   '/execution/scanning-liquidation': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'OPERATEUR', 'AUDITEUR'],
-    description: 'Scanning et numérisation des pièces liquidation'
+    description: 'Scanning et numérisation des pièces liquidation',
   },
 
   // Chaîne de dépense - Ordonnancement
   '/ordonnancements': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Ordonnancements'
+    description: 'Ordonnancements',
   },
 
   // Chaîne de dépense - Règlement
   '/reglements': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Règlements'
+    description: 'Règlements',
   },
 
   // Budget
   '/planification/budget': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Planification budgétaire'
+    description: 'Planification budgétaire',
   },
   '/planification/structure': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Structure budgétaire'
+    description: 'Structure budgétaire',
   },
   '/planification/virements': {
     allowedProfiles: ['ADMIN', 'DG', 'CB', 'DAAF'],
-    description: 'Virements budgétaires'
+    description: 'Virements budgétaires',
   },
   '/planification/notifications': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB'],
-    description: 'Notifications budgétaires'
+    description: 'Notifications budgétaires',
   },
   '/planification/import-export': {
     allowedProfiles: ['ADMIN', 'DAAF'],
-    description: 'Import/Export budget'
+    description: 'Import/Export budget',
   },
   '/planification/feuilles-route': {
     allowedProfiles: ['ADMIN', 'DAAF', 'DIRECTEUR'],
-    description: 'Import des feuilles de route par direction'
+    description: 'Import des feuilles de route par direction',
   },
   '/planification/soumissions-feuilles-route': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
-    description: 'Validation des soumissions de feuilles de route'
+    description: 'Validation des soumissions de feuilles de route',
   },
 
   // Trésorerie
   '/tresorerie': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Gestion trésorerie'
+    description: 'Gestion trésorerie',
   },
 
   // Rapports
   '/etats-execution': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'TRESORERIE', 'AUDITEUR'],
-    description: 'États d\'exécution'
+    description: "États d'exécution",
   },
   '/alertes-budgetaires': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB'],
-    description: 'Alertes budgétaires'
+    description: 'Alertes budgétaires',
   },
 
   // Administration
   '/admin/exercices': {
     allowedProfiles: ['ADMIN'],
-    description: 'Gestion des exercices'
+    description: 'Gestion des exercices',
   },
   '/admin/utilisateurs': {
     allowedProfiles: ['ADMIN'],
-    description: 'Gestion des utilisateurs'
+    description: 'Gestion des utilisateurs',
   },
   '/admin/roles': {
     allowedProfiles: ['ADMIN'],
-    description: 'Gestion des rôles'
+    description: 'Gestion des rôles',
   },
   '/admin/autorisations': {
     allowedProfiles: ['ADMIN'],
-    description: 'Autorisations'
+    description: 'Autorisations',
   },
   '/admin/delegations': {
     allowedProfiles: ['ADMIN', 'DG'],
-    description: 'Délégations'
+    description: 'Délégations',
   },
   '/admin/parametres': {
     allowedProfiles: ['ADMIN'],
-    description: 'Paramètres système'
+    description: 'Paramètres système',
   },
   '/admin/journal-audit': {
     allowedProfiles: ['ADMIN', 'DG', 'AUDITEUR'],
-    description: 'Journal d\'audit'
+    description: "Journal d'audit",
   },
   '/admin/parametres-programmatiques': {
     allowedProfiles: ['ADMIN'],
-    description: 'Paramètres programmatiques'
+    description: 'Paramètres programmatiques',
   },
   '/admin/comptes-bancaires': {
     allowedProfiles: ['ADMIN', 'TRESORERIE', 'CB'],
-    description: 'Comptes bancaires'
+    description: 'Comptes bancaires',
   },
   '/admin/origines-fonds': {
     allowedProfiles: ['ADMIN', 'DAAF'],
-    description: 'Origines des fonds'
+    description: 'Origines des fonds',
   },
 
   // Contractualisation
   '/contractualisation/prestataires': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
-    description: 'Prestataires'
+    description: 'Prestataires',
   },
   '/contractualisation/contrats': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Contrats'
+    description: 'Contrats',
   },
   '/contractualisation/comptabilite-matiere': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
-    description: 'Comptabilité matière'
+    description: 'Comptabilité matière',
   },
 
   // Chaîne de dépense - Notes DG
   '/notes-dg': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'AUDITEUR'],
-    description: 'Notes Direction Générale'
+    description: 'Notes Direction Générale',
   },
   '/notes-dg/validation': {
     allowedProfiles: ['ADMIN', 'DG'],
-    description: 'Validation des Notes DG'
+    description: 'Validation des Notes DG',
   },
   '/dg/notes-a-valider': {
     allowedProfiles: ['ADMIN', 'DG'],
-    description: 'Notes en attente de validation DG'
+    description: 'Notes en attente de validation DG',
   },
 
   // Exécution - Dashboards
   '/execution/dashboard': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Dashboard exécution budgétaire'
+    description: 'Dashboard exécution budgétaire',
   },
   '/execution/dashboard-dg': {
     allowedProfiles: ['ADMIN', 'DG'],
-    description: 'Dashboard Directeur Général'
+    description: 'Dashboard Directeur Général',
   },
   '/execution/dashboard-direction': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
     description: 'Dashboard par direction',
-    requiresDirection: true
+    requiresDirection: true,
   },
 
   // Planification - Routes manquantes
   '/planification/physique': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'AUDITEUR'],
-    description: 'Planification physique'
+    description: 'Planification physique',
   },
   '/planification/plan-travail': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'OPERATEUR'],
-    description: 'Plan de travail'
+    description: 'Plan de travail',
   },
   '/planification/documentation-import': {
     allowedProfiles: ['ADMIN', 'DAAF'],
-    description: 'Documentation import budget'
+    description: 'Documentation import budget',
   },
   '/planification/historique-imports': {
     allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
-    description: 'Historique des imports'
+    description: 'Historique des imports',
   },
   '/planification/aide-import': {
     allowedProfiles: ['ADMIN', 'DAAF'],
-    description: 'Aide import budget'
+    description: 'Aide import budget',
   },
   '/planification/execution-physique': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'OPERATEUR'],
-    description: 'Exécution physique des tâches'
+    description: 'Exécution physique des tâches',
   },
   '/planification/maj-feuilles-route': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
-    description: 'Mise à jour des feuilles de route'
+    description: 'Mise à jour des feuilles de route',
   },
 
   // Gestion des tâches
   '/gestion-taches/etat-execution': {
     allowedProfiles: ['all'],
-    description: 'État d\'exécution des tâches'
+    description: "État d'exécution des tâches",
   },
   '/gestion-taches/taches-realisees': {
     allowedProfiles: ['all'],
-    description: 'Tâches réalisées'
+    description: 'Tâches réalisées',
   },
   '/gestion-taches/taches-differees': {
     allowedProfiles: ['all'],
-    description: 'Tâches différées'
+    description: 'Tâches différées',
   },
 
   // Approvisionnement
   '/approvisionnement': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'OPERATEUR'],
-    description: 'Gestion approvisionnement'
+    description: 'Gestion approvisionnement',
   },
 
   // Trésorerie - Sous-routes
   '/tresorerie/approvisionnements/banque': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Approvisionnements bancaires'
+    description: 'Approvisionnements bancaires',
   },
   '/tresorerie/approvisionnements/caisse': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Approvisionnements caisse'
+    description: 'Approvisionnements caisse',
   },
   '/tresorerie/mouvements/banque': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Mouvements bancaires'
+    description: 'Mouvements bancaires',
   },
   '/tresorerie/mouvements/caisse': {
     allowedProfiles: ['ADMIN', 'DG', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Mouvements de caisse'
+    description: 'Mouvements de caisse',
   },
 
   // Recettes
   '/recettes': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'TRESORERIE', 'AUDITEUR'],
-    description: 'Déclaration et suivi des recettes'
+    description: 'Déclaration et suivi des recettes',
   },
 
   // Programmatique
   '/programmatique/charger-budget': {
     allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
-    description: 'Chargement du budget programmatique'
+    description: 'Chargement du budget programmatique',
   },
   '/programmatique/mise-a-jour': {
     allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
-    description: 'Mise à jour du budget programmatique'
+    description: 'Mise à jour du budget programmatique',
   },
   '/programmatique/liste-budget': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'AUDITEUR'],
-    description: 'Liste des budgets programmatiques'
+    description: 'Liste des budgets programmatiques',
   },
   '/programmatique/reamenagement': {
     allowedProfiles: ['ADMIN', 'DAAF', 'CB'],
-    description: 'Réaménagement budgétaire'
+    description: 'Réaménagement budgétaire',
   },
 
   // Administration - Routes manquantes
   '/admin/architecture': {
     allowedProfiles: ['ADMIN'],
-    description: 'Architecture SYGFP'
+    description: 'Architecture SYGFP',
   },
   '/admin/dictionnaire': {
     allowedProfiles: ['ADMIN'],
-    description: 'Dictionnaire des variables'
+    description: 'Dictionnaire des variables',
   },
   '/admin/codification': {
     allowedProfiles: ['ADMIN'],
-    description: 'Référentiel de codification'
+    description: 'Référentiel de codification',
   },
   '/admin/secteurs-activite': {
     allowedProfiles: ['ADMIN'],
-    description: 'Secteurs d\'activité'
+    description: "Secteurs d'activité",
   },
   '/admin/documentation': {
     allowedProfiles: ['ADMIN'],
-    description: 'Documentation des modules'
+    description: 'Documentation des modules',
   },
   '/admin/raci': {
     allowedProfiles: ['ADMIN'],
-    description: 'Matrice RACI'
+    description: 'Matrice RACI',
   },
   '/admin/checklist-production': {
     allowedProfiles: ['ADMIN'],
-    description: 'Checklist de production'
+    description: 'Checklist de production',
   },
   '/admin/liens-lambda': {
     allowedProfiles: ['ADMIN'],
-    description: 'Liens et fonctions Lambda'
+    description: 'Liens et fonctions Lambda',
   },
   '/admin/parametres-exercice': {
     allowedProfiles: ['ADMIN'],
-    description: 'Paramètres de l\'exercice'
+    description: "Paramètres de l'exercice",
   },
   '/admin/doublons': {
     allowedProfiles: ['ADMIN'],
-    description: 'Gestion des doublons'
+    description: 'Gestion des doublons',
   },
   '/admin/compteurs-references': {
     allowedProfiles: ['ADMIN'],
-    description: 'Compteurs et références'
+    description: 'Compteurs et références',
   },
   '/admin/import-budget': {
     allowedProfiles: ['ADMIN'],
-    description: 'Import budget administrateur'
+    description: 'Import budget administrateur',
   },
   '/admin/anomalies': {
     allowedProfiles: ['ADMIN'],
-    description: 'Gestion des anomalies'
+    description: 'Gestion des anomalies',
   },
   '/admin/test-non-regression': {
     allowedProfiles: ['ADMIN'],
-    description: 'Tests de non-régression'
+    description: 'Tests de non-régression',
   },
 };
 
@@ -1040,7 +1152,7 @@ export function canAccessRoute(
 /**
  * Trouve la règle d'accès pour une route (gère les routes dynamiques)
  */
-export function findRouteRule(route: string): typeof ROUTE_ACCESS_MATRIX[string] | undefined {
+export function findRouteRule(route: string): (typeof ROUTE_ACCESS_MATRIX)[string] | undefined {
   // Correspondance exacte
   if (ROUTE_ACCESS_MATRIX[route]) {
     return ROUTE_ACCESS_MATRIX[route];
@@ -1065,7 +1177,7 @@ export function findRouteRule(route: string): typeof ROUTE_ACCESS_MATRIX[string]
 
   // Correspondance par préfixe (route parent)
   const sortedRoutes = Object.keys(ROUTE_ACCESS_MATRIX)
-    .filter(r => route.startsWith(r))
+    .filter((r) => route.startsWith(r))
     .sort((a, b) => b.length - a.length);
 
   if (sortedRoutes.length > 0) {
@@ -1080,7 +1192,7 @@ export function findRouteRule(route: string): typeof ROUTE_ACCESS_MATRIX[string]
  */
 export function getAccessibleRoutes(userProfile: string, userHierarchy?: string): string[] {
   return Object.entries(ROUTE_ACCESS_MATRIX)
-    .filter(([route, rule]) => canAccessRoute(route, userProfile, userHierarchy))
+    .filter(([route, _rule]) => canAccessRoute(route, userProfile, userHierarchy))
     .map(([route]) => route);
 }
 
@@ -1096,7 +1208,7 @@ export function routeRequiresDirectionFilter(route: string): boolean {
 export type RoleHierarchique = keyof typeof ROLES_HIERARCHIQUES;
 export type ProfilFonctionnel = keyof typeof PROFILS_FONCTIONNELS;
 export type ValidationType = keyof typeof VALIDATION_MATRIX;
-export type AuditedAction = typeof AUDITED_ACTIONS[number];
-export type ActionRequiringMotif = typeof ACTIONS_REQUIRING_MOTIF[number];
+export type AuditedAction = (typeof AUDITED_ACTIONS)[number];
+export type ActionRequiringMotif = (typeof ACTIONS_REQUIRING_MOTIF)[number];
 export type RLSEntity = keyof typeof RLS_POLICIES;
 export type WorkflowEntity = keyof typeof WORKFLOW_STEPS;

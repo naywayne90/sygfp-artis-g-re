@@ -155,12 +155,13 @@ export default function PassationApprobation() {
   // Access denied
   if (!canAccess) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
+      <div
+        data-testid="approbation-access-denied"
+        className="flex flex-col items-center justify-center h-64 gap-4"
+      >
         <ShieldCheck className="h-16 w-16 text-muted-foreground opacity-50" />
         <h2 className="text-xl font-semibold text-muted-foreground">Accès restreint</h2>
-        <p className="text-sm text-muted-foreground">
-          Cette page est réservée au Directeur Général et aux administrateurs.
-        </p>
+        <p className="text-sm text-muted-foreground">Accès réservé au Directeur Général</p>
         <Button variant="outline" onClick={() => navigate('/execution/passation-marche')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Retour aux passations
@@ -191,17 +192,25 @@ export default function PassationApprobation() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Approbation des marchés</h1>
+              <h1 data-testid="approbation-title" className="text-2xl font-bold tracking-tight">
+                Approbation des attributions
+              </h1>
               <p className="text-muted-foreground">
                 Marchés en attente de décision du DG - Exercice {exercice}
               </p>
             </div>
           </div>
         </div>
-        <Badge variant="outline" className="text-sm px-3 py-1">
-          <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
-          Espace DG
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge data-testid="pending-count" variant="outline" className="text-sm px-3 py-1">
+            <Clock className="mr-1.5 h-3.5 w-3.5" />
+            {totalEnAttente} en attente
+          </Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1">
+            <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+            Espace DG
+          </Badge>
+        </div>
       </div>
 
       {/* KPIs */}

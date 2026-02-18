@@ -5,6 +5,10 @@ export { PassationDetails } from './PassationDetails';
 export { PassationTimeline } from './PassationTimeline';
 export { EvaluationGrid } from './EvaluationGrid';
 export { WorkflowActionBar } from './WorkflowActionBar';
+export { ComparatifEvaluation } from './ComparatifEvaluation';
+export { TableauComparatif } from './TableauComparatif';
+export { PassationExportButton } from './PassationExportButton';
+export { computeEvaluations, type SoumEval } from './EvaluationCOJO';
 
 // Re-export types from hook for convenience
 export type {

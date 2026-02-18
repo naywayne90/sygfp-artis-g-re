@@ -45,7 +45,9 @@ import {
   Calculator,
   ListOrdered,
   ChevronRight,
+  FileDown,
 } from 'lucide-react';
+import { exportPVCojoPDF } from '@/services/passationExportService';
 
 const SEUIL_TECHNIQUE = 70;
 const POIDS_TECHNIQUE = 0.7;
@@ -59,14 +61,15 @@ const STEPS: { step: EvalStep; label: string; icon: React.ElementType }[] = [
   { step: 3, label: 'Classement', icon: ListOrdered },
 ];
 
-interface SoumEval {
+export interface SoumEval {
   soumissionnaire: Soumissionnaire;
   noteFinale: number | null;
   isQualifie: boolean;
   rang: number | null;
 }
 
-function computeEvaluations(soumissionnaires: Soumissionnaire[]): SoumEval[] {
+// eslint-disable-next-line react-refresh/only-export-components
+export function computeEvaluations(soumissionnaires: Soumissionnaire[]): SoumEval[] {
   const evals: SoumEval[] = soumissionnaires.map((s) => {
     const hasTech = s.note_technique !== null && s.note_technique !== undefined;
     const hasFin = s.note_financiere !== null && s.note_financiere !== undefined;
@@ -716,7 +719,7 @@ export function EvaluationCOJO({
                   </Button>
                 </div>
               ) : (
-                <Table>
+                <Table data-testid="tableau-comparatif">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-16 text-center">Rang</TableHead>
@@ -957,6 +960,25 @@ export function EvaluationCOJO({
               }}
             >
               Copier le texte
+            </Button>
+            <Button
+              variant="outline"
+              data-testid="export-pv-pdf-btn"
+              onClick={() => {
+                const evalData = evaluations.map((e) => ({
+                  raison_sociale: e.soumissionnaire.raison_sociale,
+                  rang: e.rang,
+                  note_technique: e.soumissionnaire.note_technique,
+                  note_financiere: e.soumissionnaire.note_financiere,
+                  note_finale: e.noteFinale,
+                  statut: e.soumissionnaire.statut,
+                  offre_financiere: e.soumissionnaire.offre_financiere,
+                }));
+                exportPVCojoPDF(pvContent, passation, evalData);
+              }}
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              Exporter PDF
             </Button>
             <Button onClick={() => setPvDialogOpen(false)}>Fermer</Button>
           </DialogFooter>
