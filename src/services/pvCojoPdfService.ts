@@ -5,6 +5,9 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { QRCodeCanvas } from 'qrcode.react';
+import { createRoot } from 'react-dom/client';
+import { createElement } from 'react';
 import { generatePDFHeader, loadImageAsDataUrl } from '@/lib/pdf/pdfHeader';
 import { generatePDFFooter, generateSignatureTable } from '@/lib/pdf/pdfFooter';
 import {
@@ -29,6 +32,39 @@ const fmtCurrency = (n: number | null): string =>
 
 const modeName = (v: string): string => MODES_PASSATION.find((m) => m.value === v)?.label || v;
 
+/**
+ * Génère un canvas QR Code et retourne son data URL (PNG)
+ */
+async function generateQRCodeDataUrl(data: string, size: number = 150): Promise<string> {
+  return new Promise((resolve) => {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    document.body.appendChild(container);
+
+    const root = createRoot(container);
+    root.render(
+      createElement(QRCodeCanvas, {
+        value: data,
+        size: size,
+        level: 'H',
+        includeMargin: true,
+      })
+    );
+
+    setTimeout(() => {
+      const canvas = container.querySelector('canvas');
+      if (canvas) {
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        resolve('');
+      }
+      root.unmount();
+      document.body.removeChild(container);
+    }, 100);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Main export function
 // ---------------------------------------------------------------------------
@@ -41,6 +77,24 @@ export async function generatePVCOJO(passation: PassationMarche): Promise<void> 
     logoDataUrl = await loadImageAsDataUrl(logoArtiUrl);
   } catch {
     // continue without logo
+  }
+
+  // QR Code pour marchés signés (contient référence, objet, prestataire, montant, date signature)
+  let qrDataUrl = '';
+  if (passation.statut === 'signe' && passation.reference) {
+    try {
+      const qrPayload = JSON.stringify({
+        ref: passation.reference,
+        objet: passation.expression_besoin?.objet || '',
+        prestataire: passation.prestataire_retenu?.raison_sociale || '',
+        montant: passation.montant_retenu || 0,
+        date_signature: passation.signe_at || '',
+        type: 'PV_COJO',
+      });
+      qrDataUrl = await generateQRCodeDataUrl(qrPayload, 150);
+    } catch {
+      // continue without QR code
+    }
   }
 
   // ── 1. En-tête ARTI ──
@@ -245,6 +299,49 @@ export async function generatePVCOJO(passation: PassationMarche): Promise<void> 
 
   yPos += 6;
 
+  // ── 6b. QR Code de vérification (marchés signés uniquement) ──
+  if (qrDataUrl) {
+    if (yPos > PDF_PAGE.height - 80) {
+      generatePDFFooter({ doc, pageNumber: doc.getNumberOfPages(), totalPages: 0 });
+      doc.addPage();
+      const { endY: newEndY } = generatePDFHeader({ doc, logoDataUrl });
+      yPos = newEndY;
+    }
+
+    doc.setFontSize(PDF_FONTS.size.subtitle);
+    doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.bold);
+    doc.setTextColor(...PDF_COLORS.primary);
+    doc.text('IV. VÉRIFICATION DU DOCUMENT', PDF_MARGINS.left, yPos);
+    yPos += 7;
+
+    try {
+      doc.addImage(qrDataUrl, 'PNG', PDF_MARGINS.left, yPos, 30, 30);
+    } catch {
+      // QR image failed
+    }
+
+    doc.setFontSize(PDF_FONTS.size.small);
+    doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.normal);
+    doc.setTextColor(...PDF_COLORS.text);
+    const qrInfoX = PDF_MARGINS.left + 35;
+    doc.text(`Référence : ${passation.reference || 'N/A'}`, qrInfoX, yPos + 6);
+    if (passation.prestataire_retenu) {
+      doc.text(`Attributaire : ${passation.prestataire_retenu.raison_sociale}`, qrInfoX, yPos + 12);
+    }
+    doc.text(`Montant : ${fmtCurrency(passation.montant_retenu)}`, qrInfoX, yPos + 18);
+    if (passation.signe_at) {
+      doc.text(
+        `Signé le : ${new Date(passation.signe_at).toLocaleDateString('fr-FR')}`,
+        qrInfoX,
+        yPos + 24
+      );
+    }
+    doc.setFontSize(PDF_FONTS.size.small - 1);
+    doc.setTextColor(...PDF_COLORS.secondary);
+    doc.text("Scannez ce QR code pour vérifier l'authenticité du document", qrInfoX, yPos + 30);
+    yPos += 38;
+  }
+
   // ── 7. Signature DG ──
   if (yPos > PDF_PAGE.height - 60) {
     generatePDFFooter({ doc, pageNumber: doc.getNumberOfPages(), totalPages: 0 });
@@ -272,7 +369,13 @@ export async function generatePVCOJO(passation: PassationMarche): Promise<void> 
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    generatePDFFooter({ doc, pageNumber: p, totalPages });
+    generatePDFFooter({
+      doc,
+      pageNumber: p,
+      totalPages,
+      qrCodeDataUrl: qrDataUrl || undefined,
+      showSecurityNote: p === totalPages && !!qrDataUrl,
+    });
   }
 
   doc.save(`PV_COJO_${passation.reference || 'N_A'}_${new Date().toISOString().split('T')[0]}.pdf`);

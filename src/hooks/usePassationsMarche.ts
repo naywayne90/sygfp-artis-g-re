@@ -429,6 +429,70 @@ export function canSign(p: PassationMarche): { ok: boolean; errors: string[] } {
   return { ok: errors.length === 0, errors };
 }
 
+// ─── Notification helper for workflow transitions ──────────────────────────
+
+interface NotifTarget {
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  entityId: string;
+  entityNumero?: string;
+  isUrgent?: boolean;
+}
+
+async function dispatchPassationNotifications(targets: NotifTarget[]) {
+  for (const t of targets) {
+    try {
+      // Insert in-app notification
+      await supabase.from('notifications').insert({
+        user_id: t.userId,
+        type: t.type,
+        title: t.title,
+        message: t.message,
+        entity_type: 'passation_marche',
+        entity_id: t.entityId,
+        is_urgent: t.isUrgent || false,
+      });
+
+      // Fire-and-forget email via Edge Function
+      supabase.functions
+        .invoke('send-notification-email', {
+          body: {
+            user_id: t.userId,
+            type: t.type,
+            title: t.title,
+            message: t.message,
+            entity_type: 'passation_marche',
+            entity_id: t.entityId,
+            entity_numero: t.entityNumero,
+          },
+        })
+        .catch(() => {
+          // Email is best-effort, don't block workflow
+        });
+    } catch {
+      // Notification errors should never block workflow
+    }
+  }
+}
+
+/** Fetch user IDs by role(s) */
+async function getUserIdsByRole(roles: string[]): Promise<string[]> {
+  const { data } = await supabase
+    .from('user_roles')
+    .select('user_id')
+    .in('role', roles)
+    .eq('is_active', true);
+  return data?.map((r) => r.user_id) || [];
+}
+
+/** Fetch user IDs in a given direction */
+async function getUserIdsInDirection(directionId: string): Promise<string[]> {
+  const { data } = await supabase.from('profiles').select('id').eq('direction_id', directionId);
+  return data?.map((p) => p.id) || [];
+}
+
 export function usePassationsMarche() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
@@ -842,6 +906,26 @@ export function usePassationsMarche() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // Notify agents of the direction
+      const pm = passations.find((p) => p.id === id);
+      const dirId = pm?.expression_besoin?.direction_id;
+      if (dirId) {
+        const dirUsers = await getUserIdsInDirection(dirId);
+        const ref = pm?.reference || id.slice(0, 8);
+        await dispatchPassationNotifications(
+          dirUsers
+            .filter((uid) => uid !== user?.id)
+            .map((uid) => ({
+              userId: uid,
+              type: 'info',
+              title: 'Marché publié',
+              message: `La passation ${ref} (${pm?.expression_besoin?.objet || ''}) a été publiée.`,
+              entityId: id,
+              entityNumero: ref,
+            }))
+        );
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
@@ -877,6 +961,23 @@ export function usePassationsMarche() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // Notify DAAF
+      const pm = passations.find((p) => p.id === id);
+      const ref = pm?.reference || id.slice(0, 8);
+      const daafUsers = await getUserIdsByRole(['DAAF', 'DAF']);
+      await dispatchPassationNotifications(
+        daafUsers
+          .filter((uid) => uid !== user?.id)
+          .map((uid) => ({
+            userId: uid,
+            type: 'info',
+            title: 'Marché clôturé',
+            message: `La passation ${ref} a été clôturée. L'évaluation peut débuter.`,
+            entityId: id,
+            entityNumero: ref,
+          }))
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
@@ -947,6 +1048,23 @@ export function usePassationsMarche() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // Notify DG for approval
+      const pm = passations.find((p) => p.id === id);
+      const ref = pm?.reference || id.slice(0, 8);
+      const retenu = pm?.soumissionnaires?.find((s) => s.statut === 'retenu');
+      const dgUsers = await getUserIdsByRole(['DG']);
+      await dispatchPassationNotifications(
+        dgUsers.map((uid) => ({
+          userId: uid,
+          type: 'validation',
+          title: 'Attribution à approuver',
+          message: `La passation ${ref} propose l'attribution à ${retenu?.raison_sociale || 'N/A'}. Votre approbation est requise.`,
+          entityId: id,
+          entityNumero: ref,
+          isUrgent: true,
+        }))
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
@@ -982,6 +1100,60 @@ export function usePassationsMarche() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // Notify DAAF + direction agents + prestataire (if email)
+      const pm = passations.find((p) => p.id === id);
+      const ref = pm?.reference || id.slice(0, 8);
+      const retenu = pm?.soumissionnaires?.find((s) => s.statut === 'retenu');
+      const targets: NotifTarget[] = [];
+
+      // DAAF
+      const daafUsers = await getUserIdsByRole(['DAAF', 'DAF']);
+      for (const uid of daafUsers) {
+        targets.push({
+          userId: uid,
+          type: 'info',
+          title: 'Attribution approuvée par le DG',
+          message: `La passation ${ref} a été approuvée. Attributaire : ${retenu?.raison_sociale || 'N/A'}.`,
+          entityId: id,
+          entityNumero: ref,
+        });
+      }
+
+      // Direction agents
+      const dirId = pm?.expression_besoin?.direction_id;
+      if (dirId) {
+        const dirUsers = await getUserIdsInDirection(dirId);
+        for (const uid of dirUsers.filter((u) => !daafUsers.includes(u) && u !== user?.id)) {
+          targets.push({
+            userId: uid,
+            type: 'info',
+            title: 'Marché approuvé',
+            message: `La passation ${ref} a été approuvée par le DG.`,
+            entityId: id,
+            entityNumero: ref,
+          });
+        }
+      }
+
+      await dispatchPassationNotifications(targets);
+
+      // Notify prestataire by email if they have an email (not an in-app user)
+      if (retenu?.email) {
+        supabase.functions
+          .invoke('send-notification-email', {
+            body: {
+              // Use a special pseudo-user flow: the edge function handles no-user gracefully
+              user_id: retenu.prestataire_id || 'external',
+              type: 'info',
+              title: 'Marché approuvé',
+              message: `Votre offre pour la passation ${ref} a été approuvée.`,
+              entity_type: 'passation_marche',
+              entity_id: id,
+            },
+          })
+          .catch(() => {});
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });
@@ -1007,6 +1179,22 @@ export function usePassationsMarche() {
         })
         .eq('id', id);
       if (error) throw error;
+
+      // Notify DAAF with rejection motif
+      const pm = passations.find((p) => p.id === id);
+      const ref = pm?.reference || id.slice(0, 8);
+      const daafUsers = await getUserIdsByRole(['DAAF', 'DAF']);
+      await dispatchPassationNotifications(
+        daafUsers.map((uid) => ({
+          userId: uid,
+          type: 'rejet',
+          title: 'Attribution rejetée par le DG',
+          message: `La passation ${ref} a été rejetée. Motif : ${motif}`,
+          entityId: id,
+          entityNumero: ref,
+          isUrgent: true,
+        }))
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['passations-marche'] });

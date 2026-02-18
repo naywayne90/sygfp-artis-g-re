@@ -48,11 +48,13 @@ import { EvaluationCOJO } from './EvaluationCOJO';
 import { ComparatifEvaluation } from './ComparatifEvaluation';
 import { TableauComparatif } from './TableauComparatif';
 import { WorkflowActionBar } from './WorkflowActionBar';
+import { PassationChainNav } from './PassationChainNav';
 import { generatePVCOJO } from '@/services/pvCojoPdfService';
 import { usePassationMarcheExport } from '@/hooks/usePassationMarcheExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { format } from 'date-fns';
 import { cn, formatCurrency } from '@/lib/utils';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   Gavel,
   FileText,
@@ -165,6 +167,9 @@ export function PassationDetails({
 
         {/* Workflow action bar */}
         <WorkflowActionBar passation={passation} />
+
+        {/* Chain navigation: ExprBesoin ↔ Passation ↔ Engagement */}
+        <PassationChainNav passation={passation} onCloseDialog={() => onOpenChange(false)} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-7">
@@ -501,6 +506,72 @@ export function PassationDetails({
                       </Button>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* QR Code — visible uniquement pour les marchés signés */}
+            {passation.statut === 'signe' && passation.reference && (
+              <Card className="border-emerald-200 bg-emerald-50/30" data-testid="qrcode-section">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    QR Code de vérification
+                  </CardTitle>
+                  <CardDescription>
+                    Scannez ce code pour vérifier l'authenticité du marché signé
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-6">
+                    <div className="bg-white p-3 rounded-lg border shadow-sm">
+                      <QRCodeSVG
+                        value={JSON.stringify({
+                          ref: passation.reference,
+                          objet: passation.expression_besoin?.objet || '',
+                          prestataire: passation.prestataire_retenu?.raison_sociale || '',
+                          montant: passation.montant_retenu || 0,
+                          date_signature: passation.signe_at || '',
+                        })}
+                        size={120}
+                        level="M"
+                        bgColor="#FFFFFF"
+                        fgColor="#000000"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Référence :</span>{' '}
+                        <Badge variant="outline" className="font-mono">
+                          {passation.reference}
+                        </Badge>
+                      </div>
+                      {passation.prestataire_retenu && (
+                        <div>
+                          <span className="text-muted-foreground">Attributaire :</span>{' '}
+                          <span className="font-medium">
+                            {passation.prestataire_retenu.raison_sociale}
+                          </span>
+                        </div>
+                      )}
+                      {passation.montant_retenu && (
+                        <div>
+                          <span className="text-muted-foreground">Montant :</span>{' '}
+                          <span className="font-bold text-primary">
+                            {formatMontant(passation.montant_retenu)}
+                          </span>
+                        </div>
+                      )}
+                      {passation.signe_at && (
+                        <div>
+                          <span className="text-muted-foreground">Signé le :</span>{' '}
+                          <span className="font-medium">
+                            {format(new Date(passation.signe_at), 'dd/MM/yyyy')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}

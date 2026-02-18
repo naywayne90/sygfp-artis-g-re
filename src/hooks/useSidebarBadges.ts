@@ -97,11 +97,12 @@ export function useSidebarBadges() {
           .eq('exercice', exercice)
           .in('statut', ['soumis', 'verifie']),
 
-        // Marchés en cours
+        // Passations de marché en attente d'action (brouillon + attribué non approuvé)
         supabase
-          .from('marches')
+          .from('passation_marche')
           .select('id', { count: 'exact', head: true })
-          .not('statut', 'in', '("termine","annule")'),
+          .eq('exercice', exercice)
+          .in('statut', ['brouillon', 'attribue']),
 
         // Engagements
         supabase

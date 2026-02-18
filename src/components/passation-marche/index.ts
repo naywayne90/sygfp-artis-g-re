@@ -8,6 +8,7 @@ export { WorkflowActionBar } from './WorkflowActionBar';
 export { ComparatifEvaluation } from './ComparatifEvaluation';
 export { TableauComparatif } from './TableauComparatif';
 export { PassationExportButton } from './PassationExportButton';
+export { PassationChainNav } from './PassationChainNav';
 export { computeEvaluations, type SoumEval } from './EvaluationCOJO';
 
 // Re-export types from hook for convenience

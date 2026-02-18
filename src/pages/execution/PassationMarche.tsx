@@ -308,7 +308,7 @@ export default function PassationMarchePage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <WorkflowStepIndicator currentStep={3} />
+      <WorkflowStepIndicator currentStep={4} />
 
       <div className="page-header flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
