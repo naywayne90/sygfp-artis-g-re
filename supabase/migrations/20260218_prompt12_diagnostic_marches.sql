@@ -1,0 +1,138 @@
+-- ============================================================
+-- Prompt 12 — DIAGNOSTIC des 16 marchés existants
+-- Date: 2026-02-18
+-- Description: Analyse détaillée des données (LECTURE SEULE)
+-- ============================================================
+
+-- ============================================================
+-- 1. INVENTAIRE DES 16 MARCHÉS
+-- ============================================================
+-- | # | Numéro         | Objet (abrégé)                      | Montant      | Statut          | Exercice | Legacy |
+-- |---|----------------|--------------------------------------|-------------|-----------------|----------|--------|
+-- | 1 | MKT-2025-0002  | tablette 252                         |       5 000 | attribue        | 2026     | non    |
+-- | 2 | MKT-2025-0001  | tablette 252                         |       5 000 | en_preparation  | 2026     | non    |
+-- | 3 | MKT-2026-0014  | Travaux réhabilitation aménagement    |  41 738 724 | en_preparation  | 2024     | oui    |
+-- | 4 | MKT-2026-0013  | Travaux construction galerie couverte |   8 333 633 | en_preparation  | 2024     | oui    |
+-- | 5 | MKT-2026-0012  | Travaux construction bureaux          |  22 658 012 | en_preparation  | 2024     | oui    |
+-- | 6 | MKT-2026-0011  | Acquisition véhicules (lot 2)         |  13 000 000 | en_preparation  | 2024     | oui    |
+-- | 7 | MKT-2026-0010  | Acquisition véhicules berline         |  54 000 000 | en_preparation  | 2024     | oui    |
+-- | 8 | MKT-2026-0009  | Entretien extincteurs                 |   1 047 557 | en_preparation  | 2024     | oui    |
+-- | 9 | MKT-2026-0008  | Entretien groupes électrogènes        |   4 482 500 | en_preparation  | 2024     | oui    |
+-- |10 | MKT-2026-0007  | Entretien climatiseurs ARTI           |   1 200 000 | en_preparation  | 2024     | oui    |
+-- |11 | MKT-2026-0006  | Entretien piscine espace vert         |   2 585 000 | en_preparation  | 2024     | oui    |
+-- |12 | MKT-2026-0005  | Entretien locaux ARTI                 |  12 925 000 | en_preparation  | 2024     | oui    |
+-- |13 | MKT-2026-0004  | Restauration ARTI                     |  78 295 360 | en_preparation  | 2024     | oui    |
+-- |14 | MKT-2026-0003  | Sécurité privée locaux ARTI           |  20 012 800 | en_preparation  | 2024     | oui    |
+-- |15 | MKT-2026-0002  | Fourniture bons-valeurs               |  21 580 000 | en_preparation  | 2024     | oui    |
+-- |16 | MKT-2026-0001  | Fourniture rechargement cartes        |  37 800 000 | en_preparation  | 2024     | oui    |
+--
+-- MONTANT TOTAL: 319 668 586 FCFA
+
+-- ============================================================
+-- 2. MARCHÉS SANS EXPRESSION DE BESOIN
+-- ============================================================
+-- Sans EB: 16/16 (100%) ⚠️
+-- Avec EB: 0/16
+-- → AUCUN marché n'est lié à une expression de besoin
+-- → Le flux EB→Passation→Marché n'a jamais été utilisé
+-- → Les 14 legacy ont été importés directement sans EB
+-- → Les 2 test (tablette) ont été créés manuellement
+
+-- ============================================================
+-- 3. MARCHÉS SANS PRESTATAIRE
+-- ============================================================
+-- Sans prestataire: 15/16
+-- Avec prestataire: 1/16 (MKT-2025-0002 "tablette 252" — attribué)
+-- → Normal pour les 15 en_preparation
+-- → Le seul attribué a bien un prestataire ✅
+
+-- ============================================================
+-- 4. LOTS PAR MARCHÉ
+-- ============================================================
+-- Sans lots: 16/16 (100%) ⚠️
+-- Avec lots: 0/16
+-- → La table marche_lots est VIDE
+-- → L'allotissement n'a jamais été utilisé
+-- → Même les marchés legacy n'ont pas de lots
+
+-- ============================================================
+-- 5. SOUMISSIONNAIRES & OFFRES
+-- ============================================================
+-- soumissions: 0 ⚠️ TABLE VIDE
+-- marche_offres: 0 ⚠️ TABLE VIDE
+-- → Aucune soumission, aucune offre enregistrée
+-- → Le processus de mise en concurrence n'a jamais été utilisé
+-- → P0: Le flux complet soumission→évaluation→attribution est inexistant
+
+-- ============================================================
+-- 6. ÉVALUATIONS & NOTES
+-- ============================================================
+-- Offres avec note_technique ou note_financiere: 0
+-- → Aucune évaluation effectuée
+-- → Les colonnes note_technique, note_financiere, note_globale
+--   existent dans marche_offres ET soumissions mais jamais remplies
+-- → Pas de trigger de calcul note_globale automatique
+
+-- ============================================================
+-- 7. COHÉRENCE STATUTS
+-- ============================================================
+-- statut:
+--   en_preparation: 15
+--   attribue: 1
+--   other: 0 ✅ (pas de statut orphelin)
+-- validation_status:
+--   en_attente: 16 (tous, y compris l'attribué)
+--   ⚠️ INCOHÉRENCE: MKT-2025-0002 a statut='attribue' mais validation_status='en_attente'
+--   → Le marché attribué n'a PAS de trace de validation
+--   → marche_validations est VIDE
+--   → Le statut a été changé manuellement sans workflow
+
+-- ============================================================
+-- 8. MONTANTS & COHÉRENCE BUDGÉTAIRE
+-- ============================================================
+-- Montant total: 319 668 586 FCFA
+-- Préfixe numéros: MKT (unique)
+-- created_by NULL: 14 (legacy sans auteur)
+-- note_id renseigné: 2 (MKT-2025-0001 et MKT-2025-0002 liés à une note_dg)
+-- dossier_id: 0 (aucun marché lié à un dossier)
+-- Historique: 14 entrées, toutes type 'creation' (legacy import)
+--
+-- ⚠️ AUCUN lien budget vérifié:
+--   - Pas de FK vers budget_lines
+--   - Pas de vérification montant_marche ≤ montant_imputation
+--   - Les montants legacy ne sont pas recoupés avec les engagements
+
+-- ============================================================
+-- RÉSUMÉ DIAGNOSTIC — PROBLÈMES IDENTIFIÉS
+-- ============================================================
+--
+-- P0 (CRITIQUE):
+--   1. 0 EB liées → flux EB→Passation→Marché jamais utilisé
+--   2. 0 soumissions/offres → processus mise en concurrence inexistant
+--   3. 0 lots → allotissement jamais utilisé
+--   4. Incohérence: marché attribué sans validation (validation_status='en_attente')
+--
+-- P1 (IMPORTANT):
+--   5. 14 marchés legacy sans created_by
+--   6. 0 dossier_id → aucun marché dans la chaîne de dépense
+--   7. Numérotation incohérente: MKT-2025-xxxx pour exercice 2026
+--      et MKT-2026-xxxx pour exercice 2024 (année du numéro ≠ exercice)
+--   8. Pas de vérification budgétaire (montant vs imputation)
+--
+-- P2 (OBSERVATIONS):
+--   9. 100% gré_a_gre — pas de diversité mode_passation
+--  10. 100% fourniture — pas de diversité type_marche
+--  11. Tables passation_marche, validations, attachments, documents VIDES
+--  12. Seul historique: 14 logs 'creation' (import SQL Server)
+--
+-- ============================================================
+-- RECOMMANDATIONS POUR PROMPT 13+
+-- ============================================================
+-- 1. Corriger numérotation: MKT-{exercice}-NNNN (pas année courante)
+-- 2. Supprimer trigger doublon generate_marche_numero
+-- 3. Renforcer RLS soumissions/marche_lots (actuellement ALL=true)
+-- 4. Ajouter trigger calcul note_globale sur soumissions
+-- 5. Ajouter notifications workflow transitions marché
+-- 6. Implémenter lien EB→passation_marche→marché (flux complet)
+-- 7. Vérification cohérence statut/validation_status
+-- 8. Lier les marchés aux dossiers de la chaîne de dépense
