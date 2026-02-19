@@ -87,6 +87,11 @@ export interface Engagement {
   visa_dg_date: string | null;
   visa_dg_commentaire: string | null;
   motif_rejet: string | null;
+  // Colonnes degagement
+  montant_degage: number | null;
+  motif_degagement: string | null;
+  date_degagement: string | null;
+  degagement_user_id: string | null;
   // Joined data
   budget_line?: {
     id: string;
@@ -1145,4 +1150,94 @@ export function useBudgetLineMovements(budgetLineId: string | null, exercice?: n
     },
     enabled: !!budgetLineId,
   });
+}
+
+// ============================================================================
+// Hook: Degagement (Prompt 8)
+// Permet de degager partiellement ou totalement un engagement valide
+// ============================================================================
+export interface DegagementInput {
+  engagementId: string;
+  montant_degage: number;
+  motif_degagement: string;
+}
+
+export function useDegagement() {
+  const queryClient = useQueryClient();
+  const { logAction } = useAuditLog();
+
+  const degagementMutation = useMutation({
+    mutationFn: async ({ engagementId, montant_degage, motif_degagement }: DegagementInput) => {
+      // Fetch current engagement to validate
+      const { data: current, error: fetchError } = await supabase
+        .from('budget_engagements')
+        .select('id, numero, montant, montant_degage, statut, budget_line_id')
+        .eq('id', engagementId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (!current) throw new Error('Engagement introuvable');
+
+      if (current.statut !== 'valide') {
+        throw new Error('Seuls les engagements valides peuvent etre degages');
+      }
+
+      if (montant_degage <= 0) {
+        throw new Error('Le montant de degagement doit etre superieur a 0');
+      }
+
+      if (montant_degage > current.montant) {
+        throw new Error(
+          `Le montant de degagement (${montant_degage}) ne peut pas depasser le montant de l'engagement (${current.montant})`
+        );
+      }
+
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non authentifie');
+
+      // Update engagement with degagement
+      const { data, error } = await supabase
+        .from('budget_engagements')
+        .update({
+          montant_degage,
+          motif_degagement,
+          date_degagement: new Date().toISOString(),
+          degagement_user_id: user.id,
+        })
+        .eq('id', engagementId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      queryClient.invalidateQueries({ queryKey: ['engagement-detail', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['budget-indicators'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-line-movements'] });
+      logAction(
+        'engagement_degagement',
+        'budget_engagements',
+        data.id,
+        { montant_degage: 0 },
+        { montant_degage: data.montant_degage, motif_degagement: data.motif_degagement }
+      );
+      toast.success(
+        `Degagement de ${new Intl.NumberFormat('fr-FR').format(data.montant_degage || 0)} FCFA enregistre`
+      );
+    },
+    onError: (error: Error) => {
+      toast.error(`Erreur degagement: ${error.message}`);
+    },
+  });
+
+  return {
+    degager: degagementMutation.mutate,
+    degagerAsync: degagementMutation.mutateAsync,
+    isDegaging: degagementMutation.isPending,
+  };
 }
