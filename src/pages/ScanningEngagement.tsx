@@ -3,12 +3,12 @@
  * Interface dédiée au scanning et upload de documents pour les engagements
  */
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Table,
   TableBody,
@@ -16,14 +16,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -31,8 +31,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search,
   ScanLine,
@@ -48,19 +48,19 @@ import {
   AlertTriangle,
   RefreshCw,
   Building,
-  Calendar,
   Activity,
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { toast } from "sonner";
-import { EngagementChecklist } from "@/components/engagement/EngagementChecklist";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { ExportButtons } from "@/components/etats/ExportButtons";
-import { ExportColumn } from "@/lib/export";
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
+import { EngagementChecklist } from '@/components/engagement/EngagementChecklist';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { ExportButtons } from '@/components/etats/ExportButtons';
+import { ExportColumn } from '@/lib/export';
 
 // Types
 interface ScanningEngagement {
@@ -99,12 +99,12 @@ interface ActiviteOption {
   libelle: string;
 }
 
-const formatMontant = (montant: number | null | undefined) => {
-  if (montant === null || montant === undefined) return "-";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-};
-
-const getDocumentStatusBadge = (provided: number, total: number, obligatoryProvided: number, obligatoryTotal: number) => {
+const getDocumentStatusBadge = (
+  provided: number,
+  total: number,
+  obligatoryProvided: number,
+  obligatoryTotal: number
+) => {
   if (obligatoryTotal === 0 || obligatoryProvided === obligatoryTotal) {
     return (
       <Badge className="bg-success/10 text-success border-success/20 gap-1">
@@ -135,23 +135,23 @@ export default function ScanningEngagement() {
   const { logAction } = useAuditLog();
 
   // State
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState<string>("all");
-  const [selectedActivite, setSelectedActivite] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDirection, setSelectedDirection] = useState<string>('all');
+  const [selectedActivite, setSelectedActivite] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedEngagement, setSelectedEngagement] = useState<ScanningEngagement | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [isChecklistComplete, setIsChecklistComplete] = useState(false);
-  const [isChecklistVerified, setIsChecklistVerified] = useState(false);
+  const [_isChecklistVerified, _setIsChecklistVerified] = useState(false);
 
   // Fetch directions for filter
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions"],
+    queryKey: ['directions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, code, label")
-        .order("code");
+        .from('directions')
+        .select('id, code, label')
+        .order('code');
       if (error) throw error;
       return data as DirectionOption[];
     },
@@ -159,25 +159,30 @@ export default function ScanningEngagement() {
 
   // Fetch activités for filter
   const { data: activites = [] } = useQuery({
-    queryKey: ["activites-filter"],
+    queryKey: ['activites-filter'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("activites")
-        .select("id, code, libelle")
-        .order("code");
+        .from('activites')
+        .select('id, code, libelle')
+        .order('code');
       if (error) throw error;
       return data as ActiviteOption[];
     },
   });
 
   // Fetch engagements with document stats
-  const { data: engagements = [], isLoading, refetch } = useQuery({
-    queryKey: ["scanning-engagements", exercice],
+  const {
+    data: engagements = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['scanning-engagements', exercice],
     queryFn: async () => {
       // Fetch engagements
       const { data: engData, error: engError } = await supabase
-        .from("budget_engagements")
-        .select(`
+        .from('budget_engagements')
+        .select(
+          `
           id,
           numero,
           objet,
@@ -193,28 +198,32 @@ export default function ScanningEngagement() {
             activite:activites(id, code, libelle),
             os:objectifs_strategiques(id, code, libelle)
           )
-        `)
-        .eq("exercice", exercice)
-        .in("statut", ["brouillon", "soumis"])
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice)
+        .in('statut', ['brouillon', 'soumis'])
+        .order('created_at', { ascending: false });
 
       if (engError) throw engError;
       if (!engData) return [];
 
       // Fetch document counts for each engagement
-      const engIds = engData.map(e => e.id);
+      const engIds = engData.map((e) => e.id);
       const { data: docsData } = await supabase
-        .from("engagement_documents")
-        .select("engagement_id, est_fourni, est_obligatoire")
-        .in("engagement_id", engIds);
+        .from('engagement_documents')
+        .select('engagement_id, est_fourni, est_obligatoire')
+        .in('engagement_id', engIds);
 
       // Calculate document stats per engagement
-      const docStats: Record<string, { total: number; provided: number; obligatory: number; obligatoryProvided: number }> = {};
-      engIds.forEach(id => {
+      const docStats: Record<
+        string,
+        { total: number; provided: number; obligatory: number; obligatoryProvided: number }
+      > = {};
+      engIds.forEach((id) => {
         docStats[id] = { total: 0, provided: 0, obligatory: 0, obligatoryProvided: 0 };
       });
 
-      docsData?.forEach(doc => {
+      docsData?.forEach((doc) => {
         const stats = docStats[doc.engagement_id];
         if (stats) {
           stats.total++;
@@ -227,12 +236,17 @@ export default function ScanningEngagement() {
       });
 
       // Map to result type
-      return engData.map(eng => {
-        const budgetLine = eng.budget_line as any;
+      return engData.map((eng) => {
+        const budgetLine = eng.budget_line as Record<string, unknown>;
         const direction = budgetLine?.direction;
         const activite = budgetLine?.activite;
         const os = budgetLine?.os;
-        const stats = docStats[eng.id] || { total: 0, provided: 0, obligatory: 0, obligatoryProvided: 0 };
+        const stats = docStats[eng.id] || {
+          total: 0,
+          provided: 0,
+          obligatory: 0,
+          obligatoryProvided: 0,
+        };
 
         return {
           id: eng.id,
@@ -266,68 +280,74 @@ export default function ScanningEngagement() {
   const submitMutation = useMutation({
     mutationFn: async (engagementId: string) => {
       const { error } = await supabase
-        .from("budget_engagements")
+        .from('budget_engagements')
         .update({
-          statut: "soumis",
-          workflow_status: "pending",
+          statut: 'soumis',
+          workflow_status: 'pending',
           current_step: 1,
         })
-        .eq("id", engagementId);
+        .eq('id', engagementId);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "engagement",
+        entityType: 'engagement',
         entityId: engagementId,
-        action: "SUBMIT",
-        newValues: { statut: "soumis" },
+        action: 'SUBMIT',
+        newValues: { statut: 'soumis' },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["scanning-engagements"] });
-      queryClient.invalidateQueries({ queryKey: ["engagements"] });
-      toast.success("Engagement soumis pour validation");
+      queryClient.invalidateQueries({ queryKey: ['scanning-engagements'] });
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      toast.success('Engagement soumis pour validation');
       setShowDetailDialog(false);
       setSelectedEngagement(null);
     },
     onError: (error) => {
-      toast.error("Erreur lors de la soumission: " + error.message);
+      toast.error('Erreur lors de la soumission: ' + error.message);
     },
   });
 
   // Filter engagements
   const filteredEngagements = useMemo(() => {
-    return engagements.filter(eng => {
+    return engagements.filter((eng) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         if (
           !eng.numero.toLowerCase().includes(query) &&
           !eng.objet.toLowerCase().includes(query) &&
-          !(eng.fournisseur?.toLowerCase().includes(query))
+          !eng.fournisseur?.toLowerCase().includes(query)
         ) {
           return false;
         }
       }
 
       // Direction filter
-      if (selectedDirection !== "all" && eng.direction_id !== selectedDirection) {
+      if (selectedDirection !== 'all' && eng.direction_id !== selectedDirection) {
         return false;
       }
 
       // Activité filter
-      if (selectedActivite !== "all" && eng.activite_code !== selectedActivite) {
+      if (selectedActivite !== 'all' && eng.activite_code !== selectedActivite) {
         return false;
       }
 
       // Status filter
-      if (selectedStatus !== "all") {
-        if (selectedStatus === "complete") {
-          if (eng.documents_obligatory > 0 && eng.documents_obligatory_provided < eng.documents_obligatory) {
+      if (selectedStatus !== 'all') {
+        if (selectedStatus === 'complete') {
+          if (
+            eng.documents_obligatory > 0 &&
+            eng.documents_obligatory_provided < eng.documents_obligatory
+          ) {
             return false;
           }
-        } else if (selectedStatus === "incomplete") {
-          if (eng.documents_obligatory === 0 || eng.documents_obligatory_provided === eng.documents_obligatory) {
+        } else if (selectedStatus === 'incomplete') {
+          if (
+            eng.documents_obligatory === 0 ||
+            eng.documents_obligatory_provided === eng.documents_obligatory
+          ) {
             return false;
           }
         }
@@ -338,16 +358,18 @@ export default function ScanningEngagement() {
   }, [engagements, searchQuery, selectedDirection, selectedActivite, selectedStatus]);
 
   // Separate brouillon and soumis
-  const brouillonEngagements = filteredEngagements.filter(e => e.statut === "brouillon");
-  const soumisEngagements = filteredEngagements.filter(e => e.statut === "soumis");
+  const brouillonEngagements = filteredEngagements.filter((e) => e.statut === 'brouillon');
+  const soumisEngagements = filteredEngagements.filter((e) => e.statut === 'soumis');
 
   // Stats
   const totalEngagements = filteredEngagements.length;
   const completeEngagements = filteredEngagements.filter(
-    e => e.documents_obligatory === 0 || e.documents_obligatory_provided === e.documents_obligatory
+    (e) =>
+      e.documents_obligatory === 0 || e.documents_obligatory_provided === e.documents_obligatory
   ).length;
   const incompleteEngagements = totalEngagements - completeEngagements;
-  const completionPercentage = totalEngagements > 0 ? Math.round((completeEngagements / totalEngagements) * 100) : 0;
+  const completionPercentage =
+    totalEngagements > 0 ? Math.round((completeEngagements / totalEngagements) * 100) : 0;
 
   const handleOpenDetail = (eng: ScanningEngagement) => {
     setSelectedEngagement(eng);
@@ -366,26 +388,26 @@ export default function ScanningEngagement() {
   };
 
   const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedDirection("all");
-    setSelectedActivite("all");
-    setSelectedStatus("all");
+    setSearchQuery('');
+    setSelectedDirection('all');
+    setSelectedActivite('all');
+    setSelectedStatus('all');
   };
 
   // Export columns definition
   const exportColumns: ExportColumn[] = [
-    { key: "numero", label: "Numéro", type: "text" },
-    { key: "date_engagement", label: "Date", type: "date" },
-    { key: "fournisseur", label: "Fournisseur", type: "text" },
-    { key: "objet", label: "Objet", type: "text" },
-    { key: "montant", label: "Montant", type: "currency" },
-    { key: "dotation_initiale", label: "Dotation", type: "currency" },
-    { key: "cumul_engagements", label: "Cumul", type: "currency" },
-    { key: "disponible", label: "Disponible", type: "currency" },
-    { key: "direction_code", label: "Direction", type: "text" },
-    { key: "activite_code", label: "Code Activité", type: "text" },
-    { key: "os_code", label: "N° OS", type: "text" },
-    { key: "statut", label: "Statut", type: "text" },
+    { key: 'numero', label: 'Numéro', type: 'text' },
+    { key: 'date_engagement', label: 'Date', type: 'date' },
+    { key: 'fournisseur', label: 'Fournisseur', type: 'text' },
+    { key: 'objet', label: 'Objet', type: 'text' },
+    { key: 'montant', label: 'Montant', type: 'currency' },
+    { key: 'dotation_initiale', label: 'Dotation', type: 'currency' },
+    { key: 'cumul_engagements', label: 'Cumul', type: 'currency' },
+    { key: 'disponible', label: 'Disponible', type: 'currency' },
+    { key: 'direction_code', label: 'Direction', type: 'text' },
+    { key: 'activite_code', label: 'Code Activité', type: 'text' },
+    { key: 'os_code', label: 'N° OS', type: 'text' },
+    { key: 'statut', label: 'Statut', type: 'text' },
   ];
 
   return (
@@ -411,7 +433,7 @@ export default function ScanningEngagement() {
             showCopy
             showPrint
             showTotals
-            totalColumns={["montant", "dotation_initiale", "disponible"]}
+            totalColumns={['montant', 'dotation_initiale', 'disponible']}
           />
           <Button variant="outline" onClick={() => refetch()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
@@ -491,7 +513,7 @@ export default function ScanningEngagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes les directions</SelectItem>
-                {directions.map(dir => (
+                {directions.map((dir) => (
                   <SelectItem key={dir.id} value={dir.id}>
                     {dir.code} - {dir.label}
                   </SelectItem>
@@ -507,7 +529,7 @@ export default function ScanningEngagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes les activités</SelectItem>
-                {activites.map(act => (
+                {activites.map((act) => (
                   <SelectItem key={act.id} value={act.code}>
                     {act.code} - {act.libelle.substring(0, 30)}...
                   </SelectItem>
@@ -530,7 +552,10 @@ export default function ScanningEngagement() {
           </div>
 
           {/* Active filters indicator */}
-          {(searchQuery || selectedDirection !== "all" || selectedActivite !== "all" || selectedStatus !== "all") && (
+          {(searchQuery ||
+            selectedDirection !== 'all' ||
+            selectedActivite !== 'all' ||
+            selectedStatus !== 'all') && (
             <div className="mt-4 flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Filtres actifs:</span>
               <Button variant="ghost" size="sm" onClick={resetFilters}>
@@ -596,40 +621,44 @@ export default function ScanningEngagement() {
                           <div>
                             <div className="font-mono text-sm">{eng.numero}</div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(eng.date_engagement), "dd/MM/yyyy", { locale: fr })}
+                              {format(new Date(eng.date_engagement), 'dd/MM/yyyy', { locale: fr })}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {eng.objet || "-"}
-                        </TableCell>
-                        <TableCell>{eng.fournisseur || "-"}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{eng.objet || '-'}</TableCell>
+                        <TableCell>{eng.fournisseur || '-'}</TableCell>
                         <TableCell>
                           {eng.direction_code ? (
                             <Badge variant="outline">{eng.direction_code}</Badge>
                           ) : (
-                            "-"
+                            '-'
                           )}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          {formatMontant(eng.dotation_initiale)}
+                          {formatCurrency(eng.dotation_initiale)}
                         </TableCell>
                         <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
-                          {formatMontant(eng.cumul_engagements)}
+                          {formatCurrency(eng.cumul_engagements)}
                         </TableCell>
                         <TableCell className="text-right hidden lg:table-cell">
-                          <span className={eng.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
-                            {formatMontant(eng.disponible)}
+                          <span
+                            className={
+                              eng.disponible < 0
+                                ? 'text-destructive font-medium'
+                                : 'text-muted-foreground'
+                            }
+                          >
+                            {formatCurrency(eng.disponible)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(eng.montant)}
+                          {formatCurrency(eng.montant)}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.activite_code || "-"}
+                          {eng.activite_code || '-'}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.os_code || "-"}
+                          {eng.os_code || '-'}
                         </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(
@@ -703,40 +732,44 @@ export default function ScanningEngagement() {
                           <div>
                             <div className="font-mono text-sm">{eng.numero}</div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(eng.date_engagement), "dd/MM/yyyy", { locale: fr })}
+                              {format(new Date(eng.date_engagement), 'dd/MM/yyyy', { locale: fr })}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {eng.objet || "-"}
-                        </TableCell>
-                        <TableCell>{eng.fournisseur || "-"}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{eng.objet || '-'}</TableCell>
+                        <TableCell>{eng.fournisseur || '-'}</TableCell>
                         <TableCell>
                           {eng.direction_code ? (
                             <Badge variant="outline">{eng.direction_code}</Badge>
                           ) : (
-                            "-"
+                            '-'
                           )}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
-                          {formatMontant(eng.dotation_initiale)}
+                          {formatCurrency(eng.dotation_initiale)}
                         </TableCell>
                         <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
-                          {formatMontant(eng.cumul_engagements)}
+                          {formatCurrency(eng.cumul_engagements)}
                         </TableCell>
                         <TableCell className="text-right hidden lg:table-cell">
-                          <span className={eng.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
-                            {formatMontant(eng.disponible)}
+                          <span
+                            className={
+                              eng.disponible < 0
+                                ? 'text-destructive font-medium'
+                                : 'text-muted-foreground'
+                            }
+                          >
+                            {formatCurrency(eng.disponible)}
                           </span>
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(eng.montant)}
+                          {formatCurrency(eng.montant)}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.activite_code || "-"}
+                          {eng.activite_code || '-'}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.os_code || "-"}
+                          {eng.os_code || '-'}
                         </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(
@@ -747,11 +780,7 @@ export default function ScanningEngagement() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleOpenDetail(eng)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => handleOpenDetail(eng)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>
@@ -773,9 +802,7 @@ export default function ScanningEngagement() {
               <ScanLine className="h-5 w-5" />
               {selectedEngagement?.numero} - Documents
             </DialogTitle>
-            <DialogDescription>
-              {selectedEngagement?.objet}
-            </DialogDescription>
+            <DialogDescription>{selectedEngagement?.objet}</DialogDescription>
           </DialogHeader>
 
           {selectedEngagement && (
@@ -784,20 +811,22 @@ export default function ScanningEngagement() {
               <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                 <div>
                   <p className="text-sm text-muted-foreground">Fournisseur</p>
-                  <p className="font-medium">{selectedEngagement.fournisseur || "-"}</p>
+                  <p className="font-medium">{selectedEngagement.fournisseur || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Montant</p>
-                  <p className="font-medium">{formatMontant(selectedEngagement.montant)}</p>
+                  <p className="font-medium">{formatCurrency(selectedEngagement.montant)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Direction</p>
-                  <p className="font-medium">{selectedEngagement.direction_libelle || "-"}</p>
+                  <p className="font-medium">{selectedEngagement.direction_libelle || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Date engagement</p>
                   <p className="font-medium">
-                    {format(new Date(selectedEngagement.date_engagement), "dd MMMM yyyy", { locale: fr })}
+                    {format(new Date(selectedEngagement.date_engagement), 'dd MMMM yyyy', {
+                      locale: fr,
+                    })}
                   </p>
                 </div>
               </div>
@@ -805,7 +834,7 @@ export default function ScanningEngagement() {
               {/* Checklist */}
               <EngagementChecklist
                 engagementId={selectedEngagement.id}
-                canEdit={selectedEngagement.statut === "brouillon"}
+                canEdit={selectedEngagement.statut === 'brouillon'}
                 showProgress={true}
                 onCompletenessChange={handleChecklistChange}
                 blockSubmitIfIncomplete={true}
@@ -817,7 +846,7 @@ export default function ScanningEngagement() {
             <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
               Fermer
             </Button>
-            {selectedEngagement?.statut === "brouillon" && (
+            {selectedEngagement?.statut === 'brouillon' && (
               <Button
                 onClick={handleSubmit}
                 disabled={!isChecklistComplete || submitMutation.isPending}

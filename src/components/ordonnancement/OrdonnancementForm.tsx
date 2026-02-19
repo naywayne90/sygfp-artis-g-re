@@ -1,13 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useState, useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -15,33 +10,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { AlertCircle, Calculator, CreditCard, FileText, Building2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useOrdonnancements, MODES_PAIEMENT, OrdonnancementFormData } from "@/hooks/useOrdonnancements";
-import { useImputationValidation } from "@/hooks/useImputationValidation";
-import { ImputationWarning } from "@/components/budget/ImputationWarning";
-import { splitImputation } from "@/lib/budget/imputation-utils";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { AlertCircle, Calculator, CreditCard, FileText, Building2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  useOrdonnancements,
+  MODES_PAIEMENT,
+  OrdonnancementFormData,
+} from '@/hooks/useOrdonnancements';
+import { useImputationValidation } from '@/hooks/useImputationValidation';
+import { ImputationWarning } from '@/components/budget/ImputationWarning';
+import { splitImputation } from '@/lib/budget/imputation-utils';
 
 const formSchema = z.object({
-  liquidation_id: z.string().min(1, "Veuillez sélectionner une liquidation"),
-  beneficiaire: z.string().min(1, "Le bénéficiaire est requis"),
+  liquidation_id: z.string().min(1, 'Veuillez sélectionner une liquidation'),
+  beneficiaire: z.string().min(1, 'Le bénéficiaire est requis'),
   banque: z.string().optional(),
   rib: z.string().optional(),
-  mode_paiement: z.string().min(1, "Le mode de paiement est requis"),
-  montant: z.number().positive("Le montant doit être positif"),
+  mode_paiement: z.string().min(1, 'Le mode de paiement est requis'),
+  montant: z.number().positive('Le montant doit être positif'),
   date_prevue_paiement: z.string().optional(),
   observation: z.string().optional(),
   objet: z.string().min(1, "L'objet est requis"),
@@ -60,39 +59,37 @@ export function OrdonnancementForm({
   preselectedLiquidationId,
   dossierId,
 }: OrdonnancementFormProps) {
-  const {
-    liquidationsValidees,
-    createOrdonnancement,
-    calculateOrdonnancementAvailability,
-  } = useOrdonnancements();
+  const { liquidationsValidees, createOrdonnancement, calculateOrdonnancementAvailability } =
+    useOrdonnancements();
 
   const { validateImputation, logImputationWarning } = useImputationValidation();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedLiquidation, setSelectedLiquidation] = useState<any>(null);
   const [availability, setAvailability] = useState({
     montantLiquide: 0,
     ordonnancementsAnterieurs: 0,
     restantAOrdonnancer: 0,
   });
-  const [imputationJustification, setImputationJustification] = useState("");
+  const [imputationJustification, setImputationJustification] = useState('');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      liquidation_id: preselectedLiquidationId || "",
-      beneficiaire: "",
-      banque: "",
-      rib: "",
-      mode_paiement: "virement",
+      liquidation_id: preselectedLiquidationId || '',
+      beneficiaire: '',
+      banque: '',
+      rib: '',
+      mode_paiement: 'virement',
       montant: 0,
-      date_prevue_paiement: "",
-      observation: "",
-      objet: "",
+      date_prevue_paiement: '',
+      observation: '',
+      objet: '',
     },
   });
 
-  const watchedLiquidationId = form.watch("liquidation_id");
-  const watchedMontant = form.watch("montant");
+  const watchedLiquidationId = form.watch('liquidation_id');
+  const watchedMontant = form.watch('montant');
 
   // Valider l'imputation de la liquidation sélectionnée
   const imputationValidation = useMemo(() => {
@@ -108,21 +105,17 @@ export function OrdonnancementForm({
   // Charger les données de la liquidation sélectionnée
   useEffect(() => {
     if (watchedLiquidationId) {
-      const liquidation = liquidationsValidees.find(
-        (l) => l.id === watchedLiquidationId
-      );
+      const liquidation = liquidationsValidees.find((l) => l.id === watchedLiquidationId);
       setSelectedLiquidation(liquidation);
 
       if (liquidation) {
         // Pré-remplir depuis la liquidation/engagement
         const engagement = liquidation.engagement;
-        form.setValue("beneficiaire", engagement?.fournisseur || "");
-        form.setValue("objet", engagement?.objet || "");
+        form.setValue('beneficiaire', engagement?.fournisseur || '');
+        form.setValue('objet', engagement?.objet || '');
 
         // Calculer la disponibilité
-        calculateOrdonnancementAvailability(watchedLiquidationId).then(
-          setAvailability
-        );
+        calculateOrdonnancementAvailability(watchedLiquidationId).then(setAvailability);
       }
     } else {
       setSelectedLiquidation(null);
@@ -133,8 +126,9 @@ export function OrdonnancementForm({
       });
     }
     // Reset justification quand la liquidation change
-    setImputationJustification("");
-  }, [watchedLiquidationId, liquidationsValidees]);
+    setImputationJustification('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedLiquidationId]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
@@ -147,9 +141,9 @@ export function OrdonnancementForm({
 
       // Logger le warning si imputation non trouvée (avec justification)
       if (needsJustification && result?.id) {
-        const budgetLineCode = selectedLiquidation?.engagement?.budget_line?.code || "";
+        const budgetLineCode = selectedLiquidation?.engagement?.budget_line?.code || '';
         await logImputationWarning(
-          "ordonnancement",
+          'ordonnancement',
           result.id,
           budgetLineCode,
           imputationJustification
@@ -157,15 +151,14 @@ export function OrdonnancementForm({
       }
 
       form.reset();
-      setImputationJustification("");
+      setImputationJustification('');
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };
 
-  const formatMontant = (value: number) =>
-    new Intl.NumberFormat("fr-FR").format(value);
+  const formatMontant = (value: number) => new Intl.NumberFormat('fr-FR').format(value);
 
   const montantActuel = watchedMontant || 0;
   const cumul = availability.ordonnancementsAnterieurs + montantActuel;
@@ -182,7 +175,8 @@ export function OrdonnancementForm({
           </DialogTitle>
           {dossierId && (
             <p className="text-sm text-muted-foreground">
-              Lié au dossier <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
+              Lié au dossier{' '}
+              <code className="bg-muted px-1 rounded text-xs">{dossierId.slice(0, 8)}...</code>
             </p>
           )}
         </DialogHeader>
@@ -204,10 +198,7 @@ export function OrdonnancementForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Liquidation validée *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Sélectionner une liquidation validée..." />
@@ -216,7 +207,8 @@ export function OrdonnancementForm({
                         <SelectContent>
                           {liquidationsValidees.map((liq) => (
                             <SelectItem key={liq.id} value={liq.id}>
-                              {liq.numero} - {liq.engagement?.objet?.substring(0, 50)}... ({formatMontant(liq.montant)} FCFA)
+                              {liq.numero} - {liq.engagement?.objet?.substring(0, 50)}... (
+                              {formatMontant(liq.montant)} FCFA)
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -251,7 +243,7 @@ export function OrdonnancementForm({
                             return (
                               <>
                                 <span className="font-semibold">{imputation_10}</span>
-                                {imputation_suite !== "-" && (
+                                {imputation_suite !== '-' && (
                                   <span className="text-muted-foreground">{imputation_suite}</span>
                                 )}
                               </>
@@ -283,7 +275,7 @@ export function OrdonnancementForm({
 
             {/* Calcul du restant à ordonnancer */}
             {selectedLiquidation && (
-              <Card className={isOverBudget ? "border-destructive" : ""}>
+              <Card className={isOverBudget ? 'border-destructive' : ''}>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Calculator className="h-4 w-4" />
@@ -306,17 +298,19 @@ export function OrdonnancementForm({
                     </div>
                     <div className="p-3 bg-warning/10 rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(C) Actuel</p>
-                      <p className="font-bold text-warning">
-                        {formatMontant(montantActuel)}
-                      </p>
+                      <p className="font-bold text-warning">{formatMontant(montantActuel)}</p>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(D) Cumul (B+C)</p>
                       <p className="font-bold">{formatMontant(cumul)}</p>
                     </div>
-                    <div className={`p-3 rounded-lg ${isOverBudget ? "bg-destructive/10" : "bg-success/10"}`}>
+                    <div
+                      className={`p-3 rounded-lg ${isOverBudget ? 'bg-destructive/10' : 'bg-success/10'}`}
+                    >
                       <p className="text-xs text-muted-foreground mb-1">(E) Restant</p>
-                      <p className={`font-bold ${isOverBudget ? "text-destructive" : "text-success"}`}>
+                      <p
+                        className={`font-bold ${isOverBudget ? 'text-destructive' : 'text-success'}`}
+                      >
                         {formatMontant(restant)}
                       </p>
                     </div>
@@ -326,7 +320,8 @@ export function OrdonnancementForm({
                     <Alert variant="destructive" className="mt-4">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Le montant dépasse le restant à ordonnancer. Maximum autorisé: {formatMontant(availability.restantAOrdonnancer)} FCFA
+                        Le montant dépasse le restant à ordonnancer. Maximum autorisé:{' '}
+                        {formatMontant(availability.restantAOrdonnancer)} FCFA
                       </AlertDescription>
                     </Alert>
                   )}
@@ -394,10 +389,7 @@ export function OrdonnancementForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Mode de paiement *</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
@@ -450,9 +442,7 @@ export function OrdonnancementForm({
                           <Input
                             type="number"
                             {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value) || 0)
-                            }
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                             max={availability.restantAOrdonnancer}
                           />
                         </FormControl>
@@ -483,11 +473,7 @@ export function OrdonnancementForm({
                     <FormItem>
                       <FormLabel>Observation</FormLabel>
                       <FormControl>
-                        <Textarea
-                          {...field}
-                          placeholder="Observations éventuelles..."
-                          rows={3}
-                        />
+                        <Textarea {...field} placeholder="Observations éventuelles..." rows={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -500,11 +486,7 @@ export function OrdonnancementForm({
 
             {/* Actions */}
             <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
               <Button
@@ -516,7 +498,7 @@ export function OrdonnancementForm({
                   !justificationValid
                 }
               >
-                {createOrdonnancement.isPending ? "Création..." : "Créer l'ordonnancement"}
+                {createOrdonnancement.isPending ? 'Création...' : "Créer l'ordonnancement"}
               </Button>
             </div>
           </form>

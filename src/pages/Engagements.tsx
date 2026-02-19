@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,16 +33,14 @@ import {
   Tag,
   MoreHorizontal,
   Eye,
-  Send,
-  FolderOpen,
   Receipt,
   User,
+  ShieldCheck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import { useEngagements, Engagement } from '@/hooks/useEngagements';
 import { EngagementForm } from '@/components/engagement/EngagementForm';
-import { EngagementFromPMForm } from '@/components/engagement/EngagementFromPMForm';
 import { EngagementList } from '@/components/engagement/EngagementList';
 import { EngagementDetails } from '@/components/engagement/EngagementDetails';
 import { EngagementRejectDialog } from '@/components/engagement/EngagementRejectDialog';
@@ -55,12 +52,9 @@ import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
 import { useCanValidateEngagement } from '@/hooks/useDelegations';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
+import { Progress } from '@/components/ui/progress';
+import { getTauxColorClass } from '@/components/engagement/IndicateurBudget';
+import { formatCurrency } from '@/lib/utils';
 
 export default function Engagements() {
   const navigate = useNavigate();
@@ -83,7 +77,7 @@ export default function Engagements() {
   } = useEngagements();
 
   const { canPerform } = usePermissionCheck();
-  const { isReadOnly, getDisabledMessage, checkCanWrite } = useExerciceWriteGuard();
+  const { isReadOnly, getDisabledMessage } = useExerciceWriteGuard();
   const {
     canValidate: canValidateViaDelegation,
     viaDelegation: engagementViaDelegation,
@@ -97,8 +91,7 @@ export default function Engagements() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showCreateFromPM, setShowCreateFromPM] = useState(false);
-  const [selectedPM, setSelectedPM] = useState<any>(null);
+  const [preSelectedPMId, setPreSelectedPMId] = useState<string | null>(null);
   const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
@@ -109,20 +102,17 @@ export default function Engagements() {
   // Handle sourcePM URL parameter
   useEffect(() => {
     const sourcePMId = searchParams.get('sourcePM');
-    if (sourcePMId && passationsValidees.length > 0) {
-      const pm = passationsValidees.find((p: any) => p.id === sourcePMId);
-      if (pm) {
-        setSelectedPM(pm);
-        setShowCreateFromPM(true);
-        searchParams.delete('sourcePM');
-        setSearchParams(searchParams, { replace: true });
-      }
+    if (sourcePMId) {
+      setPreSelectedPMId(sourcePMId);
+      setShowCreateForm(true);
+      searchParams.delete('sourcePM');
+      setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, passationsValidees, setSearchParams]);
+  }, [searchParams, setSearchParams]);
 
-  const handleCreateFromPM = (pm: any) => {
-    setSelectedPM(pm);
-    setShowCreateFromPM(true);
+  const handleCreateFromPM = (pmId: string) => {
+    setPreSelectedPMId(pmId);
+    setShowCreateForm(true);
   };
 
   const handleCreateLiquidation = (engagementId: string) => {
@@ -184,6 +174,20 @@ export default function Engagements() {
 
   const totalMontant = engagements.reduce((acc, e) => acc + e.montant, 0);
 
+  // Taux moyen de consommation : totalMontant / sum(dotation_initiale unique par budget_line)
+  const uniqueBudgetLines = new Map<string, number>();
+  for (const eng of engagements) {
+    if (
+      eng.budget_line?.id &&
+      eng.budget_line.dotation_initiale &&
+      !uniqueBudgetLines.has(eng.budget_line.id)
+    ) {
+      uniqueBudgetLines.set(eng.budget_line.id, eng.budget_line.dotation_initiale);
+    }
+  }
+  const totalDotation = Array.from(uniqueBudgetLines.values()).reduce((acc, d) => acc + d, 0);
+  const tauxMoyen = totalDotation > 0 ? (totalMontant / totalDotation) * 100 : 0;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
@@ -208,6 +212,21 @@ export default function Engagements() {
           </Badge>
         )}
         <BudgetChainExportButton step="engagement" />
+        {(canValidateEngagementFinal || engagementsAValider.length > 0) && (
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => navigate('/engagements/approbation')}
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Espace validation
+            {engagementsAValider.length > 0 && (
+              <Badge variant="secondary" className="ml-1">
+                {engagementsAValider.length}
+              </Badge>
+            )}
+          </Button>
+        )}
         <PermissionGuard permission="engagement.create" showDelegationBadge>
           {isReadOnly ? (
             <Tooltip>
@@ -229,7 +248,7 @@ export default function Engagements() {
       </PageHeader>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -245,7 +264,7 @@ export default function Engagements() {
           <CardContent className="pt-6">
             <div>
               <p className="text-sm text-muted-foreground">Montant total</p>
-              <p className="text-xl font-bold text-primary">{formatMontant(totalMontant)}</p>
+              <p className="text-xl font-bold text-primary">{formatCurrency(totalMontant)}</p>
             </div>
           </CardContent>
         </Card>
@@ -279,6 +298,17 @@ export default function Engagements() {
                 <p className="text-2xl font-bold text-destructive">{engagementsRejetes.length}</p>
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Taux consommation</p>
+              <p className={`text-xl font-bold ${getTauxColorClass(tauxMoyen)}`}>
+                {tauxMoyen.toFixed(1)}%
+              </p>
+              <Progress value={Math.min(tauxMoyen, 100)} className="h-1.5 mt-2" />
             </div>
           </CardContent>
         </Card>
@@ -373,7 +403,7 @@ export default function Engagements() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {passationsValidees.map((pm: any) => (
+                    {passationsValidees.map((pm) => (
                       <TableRow key={pm.id}>
                         <TableCell className="font-mono text-sm">{pm.reference || '-'}</TableCell>
                         <TableCell className="max-w-[200px] truncate">
@@ -384,10 +414,10 @@ export default function Engagements() {
                         </TableCell>
                         <TableCell>{pm.prestataire_retenu?.raison_sociale || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(pm.montant_retenu || 0)}
+                          {formatCurrency(pm.montant_retenu || 0)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" onClick={() => handleCreateFromPM(pm)}>
+                          <Button size="sm" onClick={() => handleCreateFromPM(pm.id)}>
                             <CreditCard className="mr-2 h-4 w-4" />
                             Engager
                           </Button>
@@ -458,7 +488,7 @@ export default function Engagements() {
                         <TableCell className="max-w-[200px] truncate">{eng.objet}</TableCell>
                         <TableCell>{eng.fournisseur || '-'}</TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(eng.montant)}
+                          {formatCurrency(eng.montant)}
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -531,13 +561,13 @@ export default function Engagements() {
       </Tabs>
 
       {/* Dialogs */}
-      <EngagementForm open={showCreateForm} onOpenChange={setShowCreateForm} />
-
-      <EngagementFromPMForm
-        open={showCreateFromPM}
-        onOpenChange={setShowCreateFromPM}
-        passation={selectedPM}
-        onSuccess={() => setSelectedPM(null)}
+      <EngagementForm
+        open={showCreateForm}
+        onOpenChange={(open) => {
+          setShowCreateForm(open);
+          if (!open) setPreSelectedPMId(null);
+        }}
+        preSelectedPassationId={preSelectedPMId}
       />
 
       <EngagementDetails
@@ -551,6 +581,11 @@ export default function Engagements() {
         open={showValidateDialog}
         onOpenChange={setShowValidateDialog}
         onConfirm={confirmValidate}
+        onAutoReject={async (id, reason) => {
+          await rejectEngagement({ id, reason });
+          setShowValidateDialog(false);
+          setSelectedEngagement(null);
+        }}
         isLoading={isValidating}
       />
 

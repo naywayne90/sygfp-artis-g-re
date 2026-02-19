@@ -1,7 +1,9 @@
-import { forwardRef } from "react";
-import { Engagement } from "@/hooks/useEngagements";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { forwardRef } from 'react';
+import { Engagement } from '@/hooks/useEngagements';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { formatCurrency } from '@/lib/utils';
+import { numberToWordsCFA } from '@/lib/utils/numberToWords';
 
 interface PieceEngagementProps {
   engagement: Engagement;
@@ -9,10 +11,6 @@ interface PieceEngagementProps {
 
 export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
   ({ engagement }, ref) => {
-    const formatMontant = (value: number) => {
-      return new Intl.NumberFormat("fr-FR").format(value) + " FCFA";
-    };
-
     const buildImputationCode = () => {
       const parts: string[] = [];
       if (engagement.budget_line?.objectif_strategique?.code) {
@@ -27,25 +25,51 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
       if (engagement.budget_line?.plan_comptable_sysco?.code) {
         parts.push(engagement.budget_line.plan_comptable_sysco.code);
       }
-      return parts.join("-") || engagement.budget_line?.code || "N/A";
+      return parts.join('-') || engagement.budget_line?.code || 'N/A';
     };
 
+    // Résoudre le prestataire depuis les relations ou le champ fournisseur
+    const prestataire =
+      engagement.marche?.prestataire || engagement.expression_besoin?.marche?.prestataire || null;
+
     return (
-      <div ref={ref} className="p-8 bg-white text-black print:p-4" style={{ fontFamily: "Times New Roman, serif" }}>
-        {/* En-tête */}
+      <div
+        ref={ref}
+        className="p-8 bg-white text-black print:p-4"
+        style={{ fontFamily: 'Times New Roman, serif' }}
+      >
+        {/* En-tête ARTI */}
+        <div className="text-center mb-6">
+          <p className="text-sm text-gray-600">RÉPUBLIQUE DE CÔTE D'IVOIRE</p>
+          <p className="text-xs text-gray-500">Union - Discipline - Travail</p>
+          <p className="font-bold text-sm mt-2">AUTORITÉ DE RÉGULATION DU TRANSPORT INTÉRIEUR</p>
+        </div>
+
         <div className="text-center mb-8 border-b-2 border-black pb-4">
-          <h1 className="text-xl font-bold uppercase">Pièce d'Engagement Budgétaire</h1>
+          <h1 className="text-xl font-bold uppercase">Bon d'Engagement Budgétaire</h1>
           <p className="text-lg font-semibold mt-2">N° {engagement.numero}</p>
         </div>
 
         {/* Informations du document */}
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <p><strong>Exercice budgétaire:</strong> {engagement.exercice}</p>
-            <p><strong>Date d'engagement:</strong> {format(new Date(engagement.date_engagement), "dd MMMM yyyy", { locale: fr })}</p>
+            <p>
+              <strong>Exercice budgétaire:</strong> {engagement.exercice}
+            </p>
+            <p>
+              <strong>Date d'engagement:</strong>{' '}
+              {format(new Date(engagement.date_engagement), 'dd MMMM yyyy', { locale: fr })}
+            </p>
+            <p>
+              <strong>Type:</strong>{' '}
+              {engagement.type_engagement === 'sur_marche' ? 'Sur marché' : 'Hors marché'}
+            </p>
           </div>
           <div className="text-right">
-            <p><strong>Statut:</strong> {engagement.statut === "valide" ? "VALIDÉ" : engagement.statut?.toUpperCase()}</p>
+            <p>
+              <strong>Statut:</strong>{' '}
+              {engagement.statut === 'valide' ? 'VALIDÉ' : engagement.statut?.toUpperCase()}
+            </p>
           </div>
         </div>
 
@@ -57,17 +81,36 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
 
         {/* Bénéficiaire/Fournisseur */}
         <div className="mb-6 p-4 border border-black">
-          <h2 className="font-bold text-sm uppercase mb-2">Bénéficiaire / Fournisseur</h2>
+          <h2 className="font-bold text-sm uppercase mb-2">
+            {engagement.type_engagement === 'sur_marche' ? 'Prestataire' : 'Fournisseur'}
+          </h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p><strong>Raison sociale:</strong> {engagement.fournisseur}</p>
+              <p>
+                <strong>Raison sociale:</strong>{' '}
+                {prestataire?.raison_sociale || engagement.fournisseur}
+              </p>
+              {prestataire?.rccm && (
+                <p>
+                  <strong>RCCM:</strong> {prestataire.rccm}
+                </p>
+              )}
+              {prestataire?.adresse && (
+                <p>
+                  <strong>Adresse:</strong> {prestataire.adresse}
+                </p>
+              )}
             </div>
             <div>
               {engagement.marche && (
-                <p><strong>Réf. Marché:</strong> {engagement.marche.numero}</p>
+                <p>
+                  <strong>Réf. Marché:</strong> {engagement.marche.numero}
+                </p>
               )}
               {engagement.expression_besoin && (
-                <p><strong>Réf. Expression besoin:</strong> {engagement.expression_besoin.numero}</p>
+                <p>
+                  <strong>Réf. Expression besoin:</strong> {engagement.expression_besoin.numero}
+                </p>
               )}
             </div>
           </div>
@@ -78,19 +121,34 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
           <h2 className="font-bold text-sm uppercase mb-2">Imputation budgétaire</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p><strong>Code d'imputation:</strong> {buildImputationCode()}</p>
-              <p><strong>Ligne budgétaire:</strong> {engagement.budget_line?.code}</p>
-              <p><strong>Libellé:</strong> {engagement.budget_line?.label}</p>
+              <p>
+                <strong>Code d'imputation:</strong> {buildImputationCode()}
+              </p>
+              <p>
+                <strong>Ligne budgétaire:</strong> {engagement.budget_line?.code}
+              </p>
+              <p>
+                <strong>Libellé:</strong> {engagement.budget_line?.label}
+              </p>
             </div>
             <div>
               {engagement.budget_line?.objectif_strategique && (
-                <p><strong>OS:</strong> {engagement.budget_line.objectif_strategique.code} - {engagement.budget_line.objectif_strategique.libelle}</p>
+                <p>
+                  <strong>OS:</strong> {engagement.budget_line.objectif_strategique.code} -{' '}
+                  {engagement.budget_line.objectif_strategique.libelle}
+                </p>
               )}
               {engagement.budget_line?.mission && (
-                <p><strong>Mission:</strong> {engagement.budget_line.mission.code} - {engagement.budget_line.mission.libelle}</p>
+                <p>
+                  <strong>Mission:</strong> {engagement.budget_line.mission.code} -{' '}
+                  {engagement.budget_line.mission.libelle}
+                </p>
               )}
               {engagement.budget_line?.direction && (
-                <p><strong>Direction:</strong> {engagement.budget_line.direction.sigle || engagement.budget_line.direction.label}</p>
+                <p>
+                  <strong>Direction:</strong>{' '}
+                  {engagement.budget_line.direction.sigle || engagement.budget_line.direction.label}
+                </p>
               )}
             </div>
           </div>
@@ -104,25 +162,28 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
               <tr className="border-b border-black">
                 <td className="py-2">Montant Hors Taxes (HT)</td>
                 <td className="py-2 text-right font-semibold">
-                  {engagement.montant_ht ? formatMontant(engagement.montant_ht) : "N/A"}
+                  {engagement.montant_ht ? formatCurrency(engagement.montant_ht) : 'N/A'}
                 </td>
               </tr>
               <tr className="border-b border-black">
                 <td className="py-2">TVA ({engagement.tva || 0}%)</td>
                 <td className="py-2 text-right font-semibold">
                   {engagement.montant_ht && engagement.tva
-                    ? formatMontant(engagement.montant_ht * (engagement.tva / 100))
-                    : "N/A"}
+                    ? formatCurrency(engagement.montant_ht * (engagement.tva / 100))
+                    : 'N/A'}
                 </td>
               </tr>
               <tr className="bg-gray-100">
                 <td className="py-3 font-bold text-lg">MONTANT TOTAL TTC</td>
                 <td className="py-3 text-right font-bold text-lg">
-                  {formatMontant(engagement.montant)}
+                  {formatCurrency(engagement.montant)}
                 </td>
               </tr>
             </tbody>
           </table>
+          <p className="text-sm italic mt-3 text-gray-600">
+            Arrêté à la somme de : {numberToWordsCFA(engagement.montant)}
+          </p>
         </div>
 
         {/* Dotation et disponible */}
@@ -130,38 +191,67 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
           <h2 className="font-bold text-sm uppercase mb-2">Situation budgétaire</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p><strong>Dotation initiale:</strong> {formatMontant(engagement.budget_line?.dotation_initiale || 0)}</p>
+              <p>
+                <strong>Dotation initiale:</strong>{' '}
+                {formatCurrency(engagement.budget_line?.dotation_initiale || 0)}
+              </p>
             </div>
             <div>
-              <p><strong>Engagement actuel:</strong> {formatMontant(engagement.montant)}</p>
+              <p>
+                <strong>Engagement actuel:</strong> {formatCurrency(engagement.montant)}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Signatures */}
-        <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-black">
+        {/* 4 Signatures */}
+        <div className="grid grid-cols-4 gap-4 mt-12 pt-8 border-t border-black">
           <div className="text-center">
-            <p className="font-bold mb-16">L'Ordonnateur</p>
-            <p className="border-t border-black pt-2">Signature et cachet</p>
+            <p className="font-bold text-xs mb-16">Le SAF</p>
+            <p className="border-t border-black pt-2 text-xs">Visa</p>
+            {engagement.visa_saf_date && (
+              <p className="text-xs text-gray-500 mt-1">
+                {format(new Date(engagement.visa_saf_date), 'dd/MM/yyyy', { locale: fr })}
+              </p>
+            )}
           </div>
           <div className="text-center">
-            <p className="font-bold mb-16">Le Contrôleur Budgétaire</p>
-            <p className="border-t border-black pt-2">Visa</p>
+            <p className="font-bold text-xs mb-16">Le Contrôleur Budgétaire</p>
+            <p className="border-t border-black pt-2 text-xs">Visa</p>
+            {engagement.visa_cb_date && (
+              <p className="text-xs text-gray-500 mt-1">
+                {format(new Date(engagement.visa_cb_date), 'dd/MM/yyyy', { locale: fr })}
+              </p>
+            )}
           </div>
           <div className="text-center">
-            <p className="font-bold mb-16">Le Directeur Financier</p>
-            <p className="border-t border-black pt-2">Signature et cachet</p>
+            <p className="font-bold text-xs mb-16">Le DAAF</p>
+            <p className="border-t border-black pt-2 text-xs">Signature et cachet</p>
+            {engagement.visa_daaf_date && (
+              <p className="text-xs text-gray-500 mt-1">
+                {format(new Date(engagement.visa_daaf_date), 'dd/MM/yyyy', { locale: fr })}
+              </p>
+            )}
+          </div>
+          <div className="text-center">
+            <p className="font-bold text-xs mb-16">Le Directeur Général</p>
+            <p className="border-t border-black pt-2 text-xs">Signature et cachet</p>
+            {engagement.visa_dg_date && (
+              <p className="text-xs text-gray-500 mt-1">
+                {format(new Date(engagement.visa_dg_date), 'dd/MM/yyyy', { locale: fr })}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Pied de page */}
         <div className="mt-8 pt-4 border-t border-gray-300 text-xs text-center text-gray-500">
-          <p>Document généré le {format(new Date(), "dd/MM/yyyy à HH:mm", { locale: fr })}</p>
-          <p>Ce document fait foi de pièce comptable</p>
+          <p>Document généré le {format(new Date(), 'dd/MM/yyyy à HH:mm', { locale: fr })}</p>
+          <p>ARTI — SYGFP — Ce document fait foi de pièce comptable</p>
         </div>
       </div>
     );
   }
 );
 
-PieceEngagement.displayName = "PieceEngagement";
+PieceEngagement.displayName = 'PieceEngagement';

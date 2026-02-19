@@ -108,7 +108,12 @@ export interface Engagement {
     marche?: {
       id: string;
       numero: string | null;
-      prestataire?: { id: string; raison_sociale: string } | null;
+      prestataire?: {
+        id: string;
+        raison_sociale: string;
+        rccm: string | null;
+        adresse: string | null;
+      } | null;
     } | null;
   } | null;
   marche?: {
@@ -116,7 +121,12 @@ export interface Engagement {
     numero: string | null;
     objet: string;
     montant: number;
-    prestataire?: { id: string; raison_sociale: string } | null;
+    prestataire?: {
+      id: string;
+      raison_sociale: string;
+      rccm: string | null;
+      adresse: string | null;
+    } | null;
   } | null;
   creator?: { id: string; full_name: string | null } | null;
 }
@@ -127,6 +137,7 @@ export interface EngagementDetail extends Engagement {
   prestataire_detail?: {
     id: string;
     raison_sociale: string;
+    rccm: string | null;
     adresse: string | null;
     email: string | null;
     telephone: string | null;
@@ -257,12 +268,12 @@ export function useEngagements() {
             id, numero, objet,
             marche:marches!expressions_besoin_marche_id_fkey(
               id, numero,
-              prestataire:prestataires(id, raison_sociale)
+              prestataire:prestataires(id, raison_sociale, rccm, adresse)
             )
           ),
           marche:marches(
             id, numero, objet, montant,
-            prestataire:prestataires(id, raison_sociale)
+            prestataire:prestataires(id, raison_sociale, rccm, adresse)
           ),
           creator:profiles!budget_engagements_created_by_fkey(id, full_name)
         `
@@ -1094,10 +1105,10 @@ export function useEngagementDetail(engagementId: string | null) {
           ),
           marche:marches(
             id, numero, objet, montant,
-            prestataire:prestataires(id, raison_sociale, adresse)
+            prestataire:prestataires(id, raison_sociale, rccm, adresse)
           ),
           prestataire_detail:prestataires!budget_engagements_prestataire_id_fkey(
-            id, raison_sociale, adresse, email, telephone
+            id, raison_sociale, rccm, adresse, email, telephone
           ),
           creator:profiles!budget_engagements_created_by_fkey(id, full_name),
           visa_saf_user:profiles!budget_engagements_visa_saf_user_id_fkey(id, full_name),

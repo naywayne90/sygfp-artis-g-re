@@ -1,22 +1,29 @@
-// @ts-nocheck
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { useEngagements, BudgetAvailability } from "@/hooks/useEngagements";
-import { BudgetLineSelector, SelectedBudgetLine } from "@/components/imputation/BudgetLineSelector";
-import { DocumentUpload, UploadedDocument, DocumentType } from "@/components/shared/DocumentUpload";
-import { Loader2, FileSignature, Building2, CreditCard, AlertCircle, CheckCircle2, Calculator } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useEngagements, BudgetAvailability } from '@/hooks/useEngagements';
+import { BudgetLineSelector, SelectedBudgetLine } from '@/components/imputation/BudgetLineSelector';
+import { DocumentUpload, UploadedDocument, DocumentType } from '@/components/shared/DocumentUpload';
+import { Loader2, FileSignature, Building2, CreditCard, AlertCircle } from 'lucide-react';
+import { IndicateurBudget } from './IndicateurBudget';
+import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
 
-interface PassationMarche {
+export interface PassationMarche {
   id: string;
   reference: string | null;
   mode_passation: string;
@@ -46,11 +53,11 @@ interface EngagementFromPMFormProps {
 }
 
 const DOCUMENTS_ENGAGEMENT: DocumentType[] = [
-  { code: "bon_commande", label: "Bon de commande", obligatoire: true },
-  { code: "contrat", label: "Contrat signé", obligatoire: false },
-  { code: "devis", label: "Devis approuvé", obligatoire: true },
-  { code: "pv_attribution", label: "PV d'attribution", obligatoire: false },
-  { code: "autre", label: "Autre document", obligatoire: false },
+  { code: 'bon_commande', label: 'Bon de commande', obligatoire: true },
+  { code: 'contrat', label: 'Contrat signé', obligatoire: false },
+  { code: 'devis', label: 'Devis approuvé', obligatoire: true },
+  { code: 'pv_attribution', label: "PV d'attribution", obligatoire: false },
+  { code: 'autre', label: 'Autre document', obligatoire: false },
 ];
 
 export function EngagementFromPMForm({
@@ -61,7 +68,7 @@ export function EngagementFromPMForm({
 }: EngagementFromPMFormProps) {
   const { createEngagement, calculateAvailability, isCreating } = useEngagements();
 
-  const [objet, setObjet] = useState("");
+  const [objet, setObjet] = useState('');
   const [montant, setMontant] = useState<number>(0);
   const [montantHT, setMontantHT] = useState<number>(0);
   const [tva, setTva] = useState<number>(0);
@@ -72,8 +79,9 @@ export function EngagementFromPMForm({
 
   useEffect(() => {
     if (passation && open) {
-      setObjet(passation.expression_besoin?.objet || "");
-      const montantRetenu = passation.montant_retenu || passation.expression_besoin?.montant_estime || 0;
+      setObjet(passation.expression_besoin?.objet || '');
+      const montantRetenu =
+        passation.montant_retenu || passation.expression_besoin?.montant_estime || 0;
       setMontant(montantRetenu);
       setMontantHT(montantRetenu);
       setTva(0);
@@ -96,7 +104,7 @@ export function EngagementFromPMForm({
         const result = await calculateAvailability(selectedLines[0].id, montant);
         setAvailability(result);
       } catch (error) {
-        console.error("Error checking budget availability:", error);
+        console.error('Error checking budget availability:', error);
       } finally {
         setIsCheckingBudget(false);
       }
@@ -109,54 +117,55 @@ export function EngagementFromPMForm({
     e.preventDefault();
 
     if (!passation) {
-      toast.error("Aucune passation sélectionnée");
+      toast.error('Aucune passation sélectionnée');
       return;
     }
 
     if (selectedLines.length === 0) {
-      toast.error("Veuillez sélectionner une ligne budgétaire");
+      toast.error('Veuillez sélectionner une ligne budgétaire');
       return;
     }
 
     // Check if budget is sufficient
     if (availability && !availability.is_sufficient) {
-      toast.error("Budget insuffisant pour cet engagement");
+      toast.error('Budget insuffisant pour cet engagement');
       return;
     }
 
     // Check required documents
-    const requiredDocs = DOCUMENTS_ENGAGEMENT.filter(d => d.obligatoire);
-    const providedDocs = documents.filter(d =>
-      requiredDocs.some(rd => rd.code === d.type)
-    );
+    const requiredDocs = DOCUMENTS_ENGAGEMENT.filter((d) => d.obligatoire);
+    const providedDocs = documents.filter((d) => requiredDocs.some((rd) => rd.code === d.type));
 
     if (providedDocs.length < requiredDocs.length) {
-      toast.warning("Certaines pièces obligatoires sont manquantes. L'engagement sera créé mais vous devrez les fournir avant validation.");
+      toast.warning(
+        "Certaines pièces obligatoires sont manquantes. L'engagement sera créé mais vous devrez les fournir avant validation."
+      );
     }
 
     try {
       await createEngagement({
-        expression_besoin_id: passation.expression_besoin?.id || "",
+        type_engagement: 'sur_marche',
+        expression_besoin_id: passation.expression_besoin?.id || '',
         budget_line_id: selectedLines[0].id,
         objet,
         montant,
         montant_ht: montantHT,
         tva,
-        fournisseur: passation.prestataire_retenu?.raison_sociale || "",
-        marche_id: undefined,
+        fournisseur: passation.prestataire_retenu?.raison_sociale || '',
+        passation_marche_id: passation.id,
         dossier_id: passation.dossier_id || undefined,
       });
 
-      toast.success("Engagement créé avec succès");
+      toast.success('Engagement cree avec succes');
       onOpenChange(false);
       onSuccess?.();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      toast.error("Erreur lors de la creation de l'engagement", {
+        description: message,
+      });
     }
   };
-
-  const formatMontant = (val: number) =>
-    new Intl.NumberFormat("fr-FR").format(val) + " FCFA";
 
   const handleMontantHTChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const ht = parseFloat(e.target.value) || 0;
@@ -173,7 +182,7 @@ export function EngagementFromPMForm({
   if (!passation) return null;
 
   const canSubmit =
-    objet.trim() !== "" &&
+    objet.trim() !== '' &&
     montant > 0 &&
     selectedLines.length > 0 &&
     (availability?.is_sufficient ?? true) &&
@@ -203,7 +212,7 @@ export function EngagementFromPMForm({
             <CardContent className="grid gap-3 md:grid-cols-2">
               <div>
                 <Label className="text-xs text-muted-foreground">Référence PM</Label>
-                <p className="font-mono font-medium">{passation.reference || "N/A"}</p>
+                <p className="font-mono font-medium">{passation.reference || 'N/A'}</p>
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Mode de passation</Label>
@@ -212,14 +221,14 @@ export function EngagementFromPMForm({
               <div>
                 <Label className="text-xs text-muted-foreground">Montant retenu</Label>
                 <p className="font-bold text-primary">
-                  {formatMontant(passation.montant_retenu || 0)}
+                  {formatCurrency(passation.montant_retenu || 0)}
                 </p>
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Prestataire</Label>
                 <p className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
-                  {passation.prestataire_retenu?.raison_sociale || "Non défini"}
+                  {passation.prestataire_retenu?.raison_sociale || 'Non défini'}
                 </p>
               </div>
             </CardContent>
@@ -236,11 +245,11 @@ export function EngagementFromPMForm({
               <CardContent className="grid gap-3 md:grid-cols-2">
                 <div>
                   <Label className="text-xs text-muted-foreground">Référence EB</Label>
-                  <p className="font-mono">{passation.expression_besoin.numero || "N/A"}</p>
+                  <p className="font-mono">{passation.expression_besoin.numero || 'N/A'}</p>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Direction</Label>
-                  <p>{passation.expression_besoin.direction?.sigle || "N/A"}</p>
+                  <p>{passation.expression_besoin.direction?.sigle || 'N/A'}</p>
                 </div>
                 <div className="md:col-span-2">
                   <Label className="text-xs text-muted-foreground">Objet</Label>
@@ -254,6 +263,19 @@ export function EngagementFromPMForm({
 
           {/* Formulaire Engagement */}
           <div className="grid gap-4">
+            {/* Fournisseur (hérité de la passation, lecture seule) */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                Fournisseur
+              </Label>
+              <Input
+                value={passation.prestataire_retenu?.raison_sociale || 'Non défini'}
+                readOnly
+                className="bg-muted"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="objet">Objet de l'engagement *</Label>
               <Textarea
@@ -315,79 +337,15 @@ export function EngagementFromPMForm({
 
           {/* Budget Availability Status */}
           {selectedLines.length > 0 && (
-            <Card className={availability?.is_sufficient ? "border-green-500/50" : "border-destructive/50"}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Calculator className="h-4 w-4" />
-                  Contrôle de disponibilité budgétaire
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isCheckingBudget ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Vérification en cours...
-                  </div>
-                ) : availability ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Dotation actuelle</span>
-                        <p className="font-medium">{formatMontant(availability.dotation_actuelle)}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Engagements antérieurs</span>
-                        <p className="font-medium text-orange-600">{formatMontant(availability.engagements_anterieurs)}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Cet engagement</span>
-                        <p className="font-medium text-primary">{formatMontant(availability.engagement_actuel)}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Disponible après</span>
-                        <p className={`font-bold ${availability.is_sufficient ? "text-green-600" : "text-destructive"}`}>
-                          {formatMontant(availability.disponible)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span>Taux d'engagement après opération</span>
-                        <span>{availability.dotation_actuelle > 0 ? ((availability.cumul / availability.dotation_actuelle) * 100).toFixed(1) : "0.0"}%</span>
-                      </div>
-                      <Progress
-                        value={availability.dotation_actuelle > 0 ? (availability.cumul / availability.dotation_actuelle) * 100 : 0}
-                        className="h-2"
-                      />
-                    </div>
-
-                    {availability.is_sufficient ? (
-                      <Alert className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <AlertTitle className="text-green-700">Budget suffisant</AlertTitle>
-                        <AlertDescription>
-                          La ligne budgétaire dispose des crédits nécessaires pour cet engagement.
-                        </AlertDescription>
-                      </Alert>
-                    ) : (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Budget insuffisant</AlertTitle>
-                        <AlertDescription>
-                          <p>Il manque <strong>{formatMontant(Math.abs(availability.disponible))}</strong> pour réaliser cet engagement.</p>
-                          <p className="mt-1 text-sm">Veuillez réduire le montant ou sélectionner une autre ligne budgétaire.</p>
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    Sélectionnez une ligne budgétaire pour vérifier la disponibilité
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+            <IndicateurBudget
+              availability={availability}
+              isLoading={isCheckingBudget}
+              budgetLine={
+                selectedLines[0]
+                  ? { code: selectedLines[0].code, label: selectedLines[0].label }
+                  : null
+              }
+            />
           )}
 
           <Separator />
@@ -397,7 +355,7 @@ export function EngagementFromPMForm({
             <Label className="flex items-center gap-2">
               Pièces justificatives
               <Badge variant="outline" className="text-xs">
-                {DOCUMENTS_ENGAGEMENT.filter(d => d.obligatoire).length} obligatoires
+                {DOCUMENTS_ENGAGEMENT.filter((d) => d.obligatoire).length} obligatoires
               </Badge>
             </Label>
             <DocumentUpload
@@ -405,11 +363,12 @@ export function EngagementFromPMForm({
               documents={documents}
               onDocumentsChange={setDocuments}
             />
-            {documents.length < DOCUMENTS_ENGAGEMENT.filter(d => d.obligatoire).length && (
+            {documents.length < DOCUMENTS_ENGAGEMENT.filter((d) => d.obligatoire).length && (
               <Alert className="border-warning/50 bg-warning/10">
                 <AlertCircle className="h-4 w-4 text-warning" />
                 <AlertDescription className="text-sm text-muted-foreground">
-                  Les pièces obligatoires pourront être ajoutées après création de l'engagement, mais seront requises pour la validation.
+                  Les pièces obligatoires pourront être ajoutées après création de l'engagement,
+                  mais seront requises pour la validation.
                 </AlertDescription>
               </Alert>
             )}

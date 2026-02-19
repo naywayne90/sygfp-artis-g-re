@@ -50,3 +50,6 @@ export {
   type GenerateNotePDFOptions,
   type PDFGenerationResult,
 } from './generateNotePDF';
+
+// Générateur de Bon d'Engagement
+export { generateBonEngagementPDF } from './generateBonEngagementPDF';

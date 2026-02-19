@@ -90,17 +90,20 @@ export function RBACProvider({ children }: RBACProviderProps) {
     }
     return null;
   });
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     // Confirm session and listen for auth state changes (login/logout)
     supabase.auth.getSession().then(({ data }) => {
       setUserId(data.session?.user?.id ?? null);
+      setAuthChecked(true);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user?.id ?? null);
+      setAuthChecked(true);
     });
 
     return () => subscription.unsubscribe();
@@ -262,8 +265,9 @@ export function RBACProvider({ children }: RBACProviderProps) {
     return role?.label || user.roleHierarchique;
   };
 
-  // isLoading is true while user is not identified OR profile query is running
-  const effectiveLoading = !userId || isLoading;
+  // isLoading is true while auth check is pending OR profile query is running
+  // Once authChecked=true and userId=null → not loading, just not authenticated
+  const effectiveLoading = !authChecked || (!!userId && isLoading);
 
   const value: RBACContextValue = {
     user,

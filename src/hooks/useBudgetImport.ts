@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
 import { useCallback, useState } from 'react';
-import type { TablesInsert } from '@/integrations/supabase/types';
+import type { Json, TablesInsert } from '@/integrations/supabase/types';
 
 // ============================================
 // TYPES
@@ -107,18 +107,29 @@ export function useBudgetImport() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('budget_imports')
-        .select(
-          `
-          *,
-          user:profiles!budget_imports_user_id_fkey(full_name)
-        `
-        )
+        .select('*')
         .eq('exercice', exercice || new Date().getFullYear())
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      return data as unknown as BudgetImportRecord[];
+
+      // Resolve user_id to profile names (no FK constraint exists)
+      const items = (data || []) as BudgetImportRecord[];
+      const userIds = [...new Set(items.map((i) => i.user_id).filter(Boolean))] as string[];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        const profileMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
+        for (const item of items) {
+          if (item.user_id) {
+            item.user = { full_name: profileMap.get(item.user_id) || null };
+          }
+        }
+      }
+      return items;
     },
     enabled: !!exercice,
   });
@@ -177,7 +188,7 @@ export function useBudgetImport() {
         .update({
           success_rows: params.successRows,
           error_rows: params.errorRows,
-          errors: (params.errors || null) as any,
+          errors: (params.errors || null) as unknown as Json,
           status,
           completed_at: new Date().toISOString(),
         })
@@ -626,7 +637,7 @@ export function useBudgetImport() {
           .from('budget_imports')
           .update({
             status: 'echec',
-            errors: [{ row: 0, message }] as any,
+            errors: [{ row: 0, message }] as unknown as Json,
             completed_at: new Date().toISOString(),
           })
           .eq('id', importRecord.id);

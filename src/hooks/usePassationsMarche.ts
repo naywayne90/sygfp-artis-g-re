@@ -482,7 +482,8 @@ async function getUserIdsByRole(roles: string[]): Promise<string[]> {
   const { data } = await supabase
     .from('user_roles')
     .select('user_id')
-    .in('role', roles)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .in('role', roles as any)
     .eq('is_active', true);
   return data?.map((r) => r.user_id) || [];
 }
@@ -609,7 +610,8 @@ export function usePassationsMarche() {
   const { data: rpcCounts } = useQuery({
     queryKey: ['passation-counts', exercice],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_passation_counts', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)('get_passation_counts', {
         p_exercice: exercice as number,
       });
       if (error) throw error;
@@ -888,10 +890,14 @@ export function usePassationsMarche() {
         data: { user },
       } = await supabase.auth.getUser();
       // RPC prerequisite check
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'publie',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'publie',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));
@@ -944,10 +950,14 @@ export function usePassationsMarche() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'cloture',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'cloture',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));
@@ -996,10 +1006,14 @@ export function usePassationsMarche() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'en_evaluation',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'en_evaluation',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));
@@ -1031,10 +1045,14 @@ export function usePassationsMarche() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'attribue',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'attribue',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));
@@ -1083,10 +1101,14 @@ export function usePassationsMarche() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'approuve',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'approuve',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));
@@ -1216,14 +1238,19 @@ export function usePassationsMarche() {
       // Set contrat_url first so the RPC check passes
       const { error: urlErr } = await supabase
         .from('passation_marche')
-        .update({ contrat_url: contratUrl })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .update({ contrat_url: contratUrl } as any)
         .eq('id', id);
       if (urlErr) throw urlErr;
 
-      const { data: check, error: rpcErr } = await supabase.rpc('check_passation_transition', {
-        p_id: id,
-        p_new_statut: 'signe',
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: check, error: rpcErr } = await (supabase.rpc as any)(
+        'check_passation_transition',
+        {
+          p_id: id,
+          p_new_statut: 'signe',
+        }
+      );
       if (rpcErr) throw rpcErr;
       const result = check as unknown as { ok: boolean; errors: string[] };
       if (!result.ok) throw new Error(result.errors.join(', '));

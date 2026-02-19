@@ -1,62 +1,27 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Printer } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { MODES_PAIEMENT } from "@/hooks/useOrdonnancements";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Printer } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { MODES_PAIEMENT } from '@/hooks/useOrdonnancements';
+import { numberToWords } from '@/lib/utils/numberToWords';
 
 interface OrdrePayerProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ordonnancement: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant);
-
-const numberToWords = (num: number): string => {
-  const units = ["", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"];
-  const teens = ["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
-  const tens = ["", "", "vingt", "trente", "quarante", "cinquante", "soixante", "soixante-dix", "quatre-vingt", "quatre-vingt-dix"];
-  
-  if (num === 0) return "zéro";
-  if (num < 0) return "moins " + numberToWords(-num);
-  
-  if (num < 10) return units[num];
-  if (num < 20) return teens[num - 10];
-  if (num < 100) {
-    const ten = Math.floor(num / 10);
-    const unit = num % 10;
-    if (ten === 7 || ten === 9) {
-      return tens[ten - 1] + "-" + teens[unit + (ten === 7 ? 0 : 0)];
-    }
-    return tens[ten] + (unit ? "-" + units[unit] : "");
-  }
-  if (num < 1000) {
-    const hundred = Math.floor(num / 100);
-    const rest = num % 100;
-    return (hundred === 1 ? "cent" : units[hundred] + " cent") + (rest ? " " + numberToWords(rest) : "");
-  }
-  if (num < 1000000) {
-    const thousand = Math.floor(num / 1000);
-    const rest = num % 1000;
-    return (thousand === 1 ? "mille" : numberToWords(thousand) + " mille") + (rest ? " " + numberToWords(rest) : "");
-  }
-  if (num < 1000000000) {
-    const million = Math.floor(num / 1000000);
-    const rest = num % 1000000;
-    return numberToWords(million) + " million" + (million > 1 ? "s" : "") + (rest ? " " + numberToWords(rest) : "");
-  }
-  return num.toString();
-};
+const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant);
 
 export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerProps) {
   const printRef = useRef<HTMLDivElement>(null);
@@ -71,7 +36,7 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
     const printContent = printRef.current;
     if (!printContent) return;
 
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
     printWindow.document.write(`
@@ -168,13 +133,15 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
             <p className="text-sm">Union - Discipline - Travail</p>
             <p className="text-sm mt-2">————————</p>
             <p className="font-bold mt-2">[NOM DE L'INSTITUTION]</p>
-            
+
             <div className="mt-6 inline-block border-2 border-black px-8 py-2">
               <p className="font-bold text-xl">ORDRE DE PAYER</p>
             </div>
-            
+
             <p className="mt-4 font-bold text-lg">{ordonnancement?.numero}</p>
-            <p className="text-sm">Exercice {ordonnancement?.exercice || new Date().getFullYear()}</p>
+            <p className="text-sm">
+              Exercice {ordonnancement?.exercice || new Date().getFullYear()}
+            </p>
           </div>
 
           <Separator className="my-6" />
@@ -191,11 +158,11 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
                 </div>
                 <div className="flex">
                   <span className="font-semibold w-32">Banque:</span>
-                  <span>{ordonnancement?.banque || "—"}</span>
+                  <span>{ordonnancement?.banque || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="font-semibold w-32">RIB/Compte:</span>
-                  <span>{ordonnancement?.rib || "—"}</span>
+                  <span>{ordonnancement?.rib || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="font-semibold w-32">Mode de paiement:</span>
@@ -216,15 +183,17 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="flex">
                   <span className="font-semibold w-40">N° Engagement:</span>
-                  <span>{engagement?.numero || "—"}</span>
+                  <span>{engagement?.numero || '—'}</span>
                 </div>
                 <div className="flex">
                   <span className="font-semibold w-40">N° Liquidation:</span>
-                  <span>{liquidation?.numero || "—"}</span>
+                  <span>{liquidation?.numero || '—'}</span>
                 </div>
                 <div className="flex col-span-2">
                   <span className="font-semibold w-40">Imputation:</span>
-                  <span>{engagement?.budget_line?.code} - {engagement?.budget_line?.label}</span>
+                  <span>
+                    {engagement?.budget_line?.code} - {engagement?.budget_line?.label}
+                  </span>
                 </div>
               </div>
             </div>
@@ -232,9 +201,12 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
             {/* Montant */}
             <div className="border-2 border-black p-6 text-center">
               <p className="text-sm mb-2">MONTANT À PAYER</p>
-              <p className="text-3xl font-bold">{formatMontant(ordonnancement?.montant || 0)} FCFA</p>
+              <p className="text-3xl font-bold">
+                {formatMontant(ordonnancement?.montant || 0)} FCFA
+              </p>
               <p className="text-sm italic mt-2">
-                Arrêté à la somme de: {numberToWords(Math.floor(ordonnancement?.montant || 0))} francs CFA
+                Arrêté à la somme de: {numberToWords(Math.floor(ordonnancement?.montant || 0))}{' '}
+                francs CFA
               </p>
             </div>
 
@@ -254,7 +226,7 @@ export function OrdrePayer({ ordonnancement, open, onOpenChange }: OrdrePayerPro
 
             {/* Pied de page */}
             <div className="text-center mt-8 text-xs text-muted-foreground">
-              <p>Document généré le {format(new Date(), "dd MMMM yyyy à HH:mm", { locale: fr })}</p>
+              <p>Document généré le {format(new Date(), 'dd MMMM yyyy à HH:mm', { locale: fr })}</p>
               <p>Référence: {ordonnancement?.numero}</p>
             </div>
           </div>

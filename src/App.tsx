@@ -45,6 +45,7 @@ const NoteSEFDetail = lazy(() => import('./pages/NoteSEFDetail'));
 const NotesAEF = lazy(() => import('./pages/NotesAEF'));
 const NoteAEFDetail = lazy(() => import('./pages/NoteAEFDetail'));
 const Engagements = lazy(() => import('./pages/Engagements'));
+const EngagementApprobation = lazy(() => import('./pages/EngagementApprobation'));
 const Liquidations = lazy(() => import('./pages/Liquidations'));
 const Ordonnancements = lazy(() => import('./pages/Ordonnancements'));
 const Reglements = lazy(() => import('./pages/Reglements'));
@@ -355,6 +356,7 @@ const App = () => (
                 />
                 <Route path="/marches" element={<Marches />} />
                 <Route path="/engagements" element={<Engagements />} />
+                <Route path="/engagements/approbation" element={<EngagementApprobation />} />
                 <Route path="/execution/scanning-engagement" element={<ScanningEngagement />} />
                 <Route path="/liquidations" element={<Liquidations />} />
                 <Route path="/execution/scanning-liquidation" element={<ScanningLiquidation />} />

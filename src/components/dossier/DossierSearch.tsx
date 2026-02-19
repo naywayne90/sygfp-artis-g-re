@@ -1,30 +1,27 @@
-import { useState, useEffect, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  Search, 
-  X, 
-  Filter, 
-  ChevronDown, 
-  ChevronUp, 
-  Calendar, 
-  Star, 
-  Save,
-} from "lucide-react";
-import { DossierFilters } from "@/hooks/useDossiers";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useState, useEffect, useMemo } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Search, X, Filter, ChevronDown, ChevronUp, Calendar, Star, Save } from 'lucide-react';
+import { DossierFilters } from '@/hooks/useDossiers';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -32,8 +29,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+} from '@/components/ui/dialog';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 
 interface DossierSearchProps {
   filters: Partial<DossierFilters>;
@@ -53,72 +57,78 @@ interface SavedFilter {
 }
 
 const STATUTS = [
-  { value: "en_cours", label: "En cours", color: "bg-blue-500" },
-  { value: "termine", label: "Terminé", color: "bg-green-500" },
-  { value: "annule", label: "Annulé", color: "bg-red-500" },
-  { value: "suspendu", label: "Suspendu", color: "bg-yellow-500" },
-  { value: "bloque", label: "Bloqué", color: "bg-orange-500" },
+  { value: 'en_cours', label: 'En cours', color: 'bg-blue-500' },
+  { value: 'termine', label: 'Terminé', color: 'bg-green-500' },
+  { value: 'annule', label: 'Annulé', color: 'bg-red-500' },
+  { value: 'suspendu', label: 'Suspendu', color: 'bg-yellow-500' },
+  { value: 'bloque', label: 'Bloqué', color: 'bg-orange-500' },
 ];
 
 const ETAPES = [
-  { value: "note_sef", label: "Note SEF", step: 1 },
-  { value: "note_aef", label: "Note AEF", step: 2 },
-  { value: "imputation", label: "Imputation", step: 3 },
-  { value: "expression_besoin", label: "Expression besoin", step: 4 },
-  { value: "passation_marche", label: "Passation marché", step: 5 },
-  { value: "engagement", label: "Engagement", step: 6 },
-  { value: "liquidation", label: "Liquidation", step: 7 },
-  { value: "ordonnancement", label: "Ordonnancement", step: 8 },
-  { value: "reglement", label: "Règlement", step: 9 },
+  { value: 'note_sef', label: 'Note SEF', step: 1 },
+  { value: 'note_aef', label: 'Note AEF', step: 2 },
+  { value: 'imputation', label: 'Imputation', step: 3 },
+  { value: 'expression_besoin', label: 'Expression besoin', step: 4 },
+  { value: 'passation_marche', label: 'Passation marché', step: 5 },
+  { value: 'engagement', label: 'Engagement', step: 6 },
+  { value: 'liquidation', label: 'Liquidation', step: 7 },
+  { value: 'ordonnancement', label: 'Ordonnancement', step: 8 },
+  { value: 'reglement', label: 'Règlement', step: 9 },
 ];
 
 const TYPES_DOSSIER = [
-  { value: "AEF", label: "AEF - Achat/Engagement/Facture" },
-  { value: "SEF", label: "SEF - Service/Engagement/Facture" },
-  { value: "MARCHE", label: "Marché public" },
+  { value: 'AEF', label: 'AEF - Achat/Engagement/Facture' },
+  { value: 'SEF', label: 'SEF - Service/Engagement/Facture' },
+  { value: 'MARCHE', label: 'Marché public' },
 ];
 
-export function DossierSearch({ 
-  filters, 
-  onFiltersChange, 
-  directions, 
+export function DossierSearch({
+  filters,
+  onFiltersChange,
+  directions,
   beneficiaires,
   users,
-  exercices 
+  exercices,
 }: DossierSearchProps) {
   const _queryClient = useQueryClient();
   const [showFilters, setShowFilters] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [filterName, setFilterName] = useState("");
-  const [searchDebounce, setSearchDebounce] = useState(filters.search || "");
+  const [filterName, setFilterName] = useState('');
+  const [searchDebounce, setSearchDebounce] = useState(filters.search || '');
   const [openBeneficiairePopover, setOpenBeneficiairePopover] = useState(false);
 
   // Fetch OS (Objectifs Stratégiques)
   const { data: objectifsStrategiquesData } = useQuery({
-    queryKey: ["objectifs-strategiques-search"],
-    queryFn: async (): Promise<Array<{id: string; code: string; libelle: string}>> => {
-      const query = supabase.from("objectifs_strategiques").select("id, code, libelle");
-      const { data } = await (query as any).eq("est_active", true);
-      return (data || []).sort((a: any, b: any) => (a.code || "").localeCompare(b.code || ""));
+    queryKey: ['objectifs-strategiques-search'],
+    queryFn: async (): Promise<Array<{ id: string; code: string; libelle: string }>> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query = supabase.from('objectifs_strategiques').select('id, code, libelle') as any;
+      const { data } = await query.eq('est_actif', true);
+      return (data || []).sort((a: { code?: string }, b: { code?: string }) =>
+        (a.code || '').localeCompare(b.code || '')
+      );
     },
   });
   const objectifsStrategiques = objectifsStrategiquesData || [];
 
   // Fetch Missions
   const { data: missionsData } = useQuery({
-    queryKey: ["missions-search"],
-    queryFn: async (): Promise<Array<{id: string; code: string; libelle: string}>> => {
-      const query = supabase.from("missions").select("id, code, libelle");
-      const { data } = await (query as any).eq("est_active", true);
-      return (data || []).sort((a: any, b: any) => (a.code || "").localeCompare(b.code || ""));
+    queryKey: ['missions-search'],
+    queryFn: async (): Promise<Array<{ id: string; code: string; libelle: string }>> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query = supabase.from('missions').select('id, code, libelle') as any;
+      const { data } = await query.eq('est_active', true);
+      return (data || []).sort((a: { code?: string }, b: { code?: string }) =>
+        (a.code || '').localeCompare(b.code || '')
+      );
     },
   });
   const missions = missionsData || [];
 
   // Fetch saved filters (from localStorage for now, could be DB)
   const savedFilters = useMemo(() => {
-    const stored = localStorage.getItem("sygfp_saved_filters");
+    const stored = localStorage.getItem('sygfp_saved_filters');
     if (stored) {
       try {
         return JSON.parse(stored) as SavedFilter[];
@@ -127,6 +137,7 @@ export function DossierSearch({
       }
     }
     return [];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSaveDialog]); // Re-read when dialog closes
 
   // Debounce search input
@@ -137,37 +148,48 @@ export function DossierSearch({
       }
     }, 300);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchDebounce]);
 
   // Sync search from filters
   useEffect(() => {
-    setSearchDebounce(filters.search || "");
+    setSearchDebounce(filters.search || '');
   }, [filters.search]);
 
   const handleReset = () => {
     onFiltersChange({
-      search: "",
-      direction_id: "",
+      search: '',
+      direction_id: '',
       exercice: null,
-      statut: "",
-      etape: "",
-      type_dossier: "",
-      date_debut: "",
-      date_fin: "",
+      statut: '',
+      etape: '',
+      type_dossier: '',
+      date_debut: '',
+      date_fin: '',
       montant_min: null,
       montant_max: null,
-      beneficiaire_id: "",
-      created_by: "",
+      beneficiaire_id: '',
+      created_by: '',
       en_retard: false,
       mes_dossiers: false,
     });
-    setSearchDebounce("");
+    setSearchDebounce('');
   };
 
-  const hasFilters = filters.search || filters.direction_id || filters.statut || filters.etape || 
-    filters.type_dossier || filters.date_debut || filters.date_fin || 
-    filters.montant_min !== null || filters.montant_max !== null ||
-    filters.beneficiaire_id || filters.created_by || filters.en_retard || filters.mes_dossiers;
+  const hasFilters =
+    filters.search ||
+    filters.direction_id ||
+    filters.statut ||
+    filters.etape ||
+    filters.type_dossier ||
+    filters.date_debut ||
+    filters.date_fin ||
+    filters.montant_min !== null ||
+    filters.montant_max !== null ||
+    filters.beneficiaire_id ||
+    filters.created_by ||
+    filters.en_retard ||
+    filters.mes_dossiers;
 
   const countActiveFilters = () => {
     let count = 0;
@@ -186,7 +208,7 @@ export function DossierSearch({
 
   const handleSaveFilter = () => {
     if (!filterName.trim()) {
-      toast.error("Veuillez saisir un nom pour ce filtre");
+      toast.error('Veuillez saisir un nom pour ce filtre');
       return;
     }
 
@@ -200,12 +222,12 @@ export function DossierSearch({
 
     const existing = [...savedFilters];
     existing.push(newFilter);
-    localStorage.setItem("sygfp_saved_filters", JSON.stringify(existing));
+    localStorage.setItem('sygfp_saved_filters', JSON.stringify(existing));
 
-    toast.success("Filtre sauvegardé", {
+    toast.success('Filtre sauvegardé', {
       description: `Le filtre "${filterName}" a été enregistré.`,
     });
-    setFilterName("");
+    setFilterName('');
     setShowSaveDialog(false);
   };
 
@@ -215,22 +237,22 @@ export function DossierSearch({
   };
 
   const handleDeleteFilter = (filterId: string) => {
-    const updated = savedFilters.filter(f => f.id !== filterId);
-    localStorage.setItem("sygfp_saved_filters", JSON.stringify(updated));
-    toast.success("Filtre supprimé");
+    const updated = savedFilters.filter((f) => f.id !== filterId);
+    localStorage.setItem('sygfp_saved_filters', JSON.stringify(updated));
+    toast.success('Filtre supprimé');
   };
 
   const _handleSetDefaultFilter = (filterId: string) => {
-    const updated = savedFilters.map(f => ({
+    const updated = savedFilters.map((f) => ({
       ...f,
       is_default: f.id === filterId,
     }));
-    localStorage.setItem("sygfp_saved_filters", JSON.stringify(updated));
-    toast.success("Filtre défini par défaut");
+    localStorage.setItem('sygfp_saved_filters', JSON.stringify(updated));
+    toast.success('Filtre défini par défaut');
   };
 
   // Get selected beneficiaire name
-  const selectedBeneficiaire = beneficiaires.find(b => b.id === filters.beneficiaire_id);
+  const selectedBeneficiaire = beneficiaires.find((b) => b.id === filters.beneficiaire_id);
 
   return (
     <div className="space-y-4">
@@ -250,8 +272,8 @@ export function DossierSearch({
               size="icon"
               className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full"
               onClick={() => {
-                setSearchDebounce("");
-                onFiltersChange({ ...filters, search: "" });
+                setSearchDebounce('');
+                onFiltersChange({ ...filters, search: '' });
               }}
             >
               <X className="h-4 w-4" />
@@ -259,7 +281,7 @@ export function DossierSearch({
           )}
         </div>
         <Button
-          variant={showFilters ? "default" : "outline"}
+          variant={showFilters ? 'default' : 'outline'}
           onClick={() => setShowFilters(!showFilters)}
           className="h-12 px-4"
         >
@@ -290,7 +312,7 @@ export function DossierSearch({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Badge
-                    variant={sf.is_default ? "default" : "secondary"}
+                    variant={sf.is_default ? 'default' : 'secondary'}
                     className="cursor-pointer hover:bg-primary/80 transition-colors flex items-center gap-1"
                     onClick={() => handleLoadFilter(sf)}
                   >
@@ -337,8 +359,10 @@ export function DossierSearch({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Type dossier</Label>
               <Select
-                value={filters.type_dossier || "all"}
-                onValueChange={(value) => onFiltersChange({ ...filters, type_dossier: value === "all" ? "" : value })}
+                value={filters.type_dossier || 'all'}
+                onValueChange={(value) =>
+                  onFiltersChange({ ...filters, type_dossier: value === 'all' ? '' : value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous types" />
@@ -358,8 +382,10 @@ export function DossierSearch({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Direction</Label>
               <Select
-                value={filters.direction_id || "all"}
-                onValueChange={(value) => onFiltersChange({ ...filters, direction_id: value === "all" ? "" : value })}
+                value={filters.direction_id || 'all'}
+                onValueChange={(value) =>
+                  onFiltersChange({ ...filters, direction_id: value === 'all' ? '' : value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Toutes" />
@@ -379,8 +405,10 @@ export function DossierSearch({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Statut</Label>
               <Select
-                value={filters.statut || "all"}
-                onValueChange={(value) => onFiltersChange({ ...filters, statut: value === "all" ? "" : value })}
+                value={filters.statut || 'all'}
+                onValueChange={(value) =>
+                  onFiltersChange({ ...filters, statut: value === 'all' ? '' : value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous" />
@@ -403,8 +431,10 @@ export function DossierSearch({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Étape courante</Label>
               <Select
-                value={filters.etape || "all"}
-                onValueChange={(value) => onFiltersChange({ ...filters, etape: value === "all" ? "" : value })}
+                value={filters.etape || 'all'}
+                onValueChange={(value) =>
+                  onFiltersChange({ ...filters, etape: value === 'all' ? '' : value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Toutes" />
@@ -429,8 +459,13 @@ export function DossierSearch({
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Exercice</Label>
               <Select
-                value={filters.exercice?.toString() || "all"}
-                onValueChange={(value) => onFiltersChange({ ...filters, exercice: value === "all" ? null : parseInt(value) })}
+                value={filters.exercice?.toString() || 'all'}
+                onValueChange={(value) =>
+                  onFiltersChange({
+                    ...filters,
+                    exercice: value === 'all' ? null : parseInt(value),
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Courant" />
@@ -452,7 +487,11 @@ export function DossierSearch({
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-full justify-between">
                 <span className="text-sm font-medium">Filtres avancés</span>
-                {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {showAdvanced ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
@@ -463,16 +502,26 @@ export function DossierSearch({
                   <Label className="text-xs font-medium">Date début</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {filters.date_debut ? format(new Date(filters.date_debut), "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
+                        {filters.date_debut
+                          ? format(new Date(filters.date_debut), 'dd/MM/yyyy', { locale: fr })
+                          : 'Sélectionner'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={filters.date_debut ? new Date(filters.date_debut) : undefined}
-                        onSelect={(date) => onFiltersChange({ ...filters, date_debut: date ? format(date, "yyyy-MM-dd") : "" })}
+                        onSelect={(date) =>
+                          onFiltersChange({
+                            ...filters,
+                            date_debut: date ? format(date, 'yyyy-MM-dd') : '',
+                          })
+                        }
                         locale={fr}
                       />
                     </PopoverContent>
@@ -483,16 +532,26 @@ export function DossierSearch({
                   <Label className="text-xs font-medium">Date fin</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {filters.date_fin ? format(new Date(filters.date_fin), "dd/MM/yyyy", { locale: fr }) : "Sélectionner"}
+                        {filters.date_fin
+                          ? format(new Date(filters.date_fin), 'dd/MM/yyyy', { locale: fr })
+                          : 'Sélectionner'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <CalendarComponent
                         mode="single"
                         selected={filters.date_fin ? new Date(filters.date_fin) : undefined}
-                        onSelect={(date) => onFiltersChange({ ...filters, date_fin: date ? format(date, "yyyy-MM-dd") : "" })}
+                        onSelect={(date) =>
+                          onFiltersChange({
+                            ...filters,
+                            date_fin: date ? format(date, 'yyyy-MM-dd') : '',
+                          })
+                        }
                         locale={fr}
                       />
                     </PopoverContent>
@@ -505,11 +564,13 @@ export function DossierSearch({
                   <Input
                     type="number"
                     placeholder="0"
-                    value={filters.montant_min ?? ""}
-                    onChange={(e) => onFiltersChange({ 
-                      ...filters, 
-                      montant_min: e.target.value ? parseFloat(e.target.value) : null 
-                    })}
+                    value={filters.montant_min ?? ''}
+                    onChange={(e) =>
+                      onFiltersChange({
+                        ...filters,
+                        montant_min: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
                   />
                 </div>
 
@@ -518,11 +579,13 @@ export function DossierSearch({
                   <Input
                     type="number"
                     placeholder="∞"
-                    value={filters.montant_max ?? ""}
-                    onChange={(e) => onFiltersChange({ 
-                      ...filters, 
-                      montant_max: e.target.value ? parseFloat(e.target.value) : null 
-                    })}
+                    value={filters.montant_max ?? ''}
+                    onChange={(e) =>
+                      onFiltersChange({
+                        ...filters,
+                        montant_max: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -540,7 +603,7 @@ export function DossierSearch({
                         className="w-full justify-between font-normal"
                       >
                         <span className="truncate">
-                          {selectedBeneficiaire?.raison_sociale || "Tous"}
+                          {selectedBeneficiaire?.raison_sociale || 'Tous'}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
@@ -554,7 +617,7 @@ export function DossierSearch({
                             <CommandItem
                               value="all"
                               onSelect={() => {
-                                onFiltersChange({ ...filters, beneficiaire_id: "" });
+                                onFiltersChange({ ...filters, beneficiaire_id: '' });
                                 setOpenBeneficiairePopover(false);
                               }}
                             >
@@ -563,13 +626,13 @@ export function DossierSearch({
                             {beneficiaires.map((b) => (
                               <CommandItem
                                 key={b.id}
-                                value={b.raison_sociale || ""}
+                                value={b.raison_sociale || ''}
                                 onSelect={() => {
                                   onFiltersChange({ ...filters, beneficiaire_id: b.id });
                                   setOpenBeneficiairePopover(false);
                                 }}
                               >
-                                {b.raison_sociale || "Sans nom"}
+                                {b.raison_sociale || 'Sans nom'}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -583,8 +646,10 @@ export function DossierSearch({
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium">Créé par</Label>
                   <Select
-                    value={filters.created_by || "all"}
-                    onValueChange={(value) => onFiltersChange({ ...filters, created_by: value === "all" ? "" : value })}
+                    value={filters.created_by || 'all'}
+                    onValueChange={(value) =>
+                      onFiltersChange({ ...filters, created_by: value === 'all' ? '' : value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Tous" />
@@ -604,8 +669,13 @@ export function DossierSearch({
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium">Objectif stratégique</Label>
                   <Select
-                    value={(filters as any).os_id || "all"}
-                    onValueChange={(value) => onFiltersChange({ ...filters, os_id: value === "all" ? "" : value } as any)}
+                    value={((filters as Record<string, unknown>).os_id as string) || 'all'}
+                    onValueChange={(value) =>
+                      onFiltersChange({
+                        ...filters,
+                        os_id: value === 'all' ? '' : value,
+                      } as Partial<DossierFilters>)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Tous" />
@@ -625,8 +695,13 @@ export function DossierSearch({
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium">Mission</Label>
                   <Select
-                    value={(filters as any).mission_id || "all"}
-                    onValueChange={(value) => onFiltersChange({ ...filters, mission_id: value === "all" ? "" : value } as any)}
+                    value={((filters as Record<string, unknown>).mission_id as string) || 'all'}
+                    onValueChange={(value) =>
+                      onFiltersChange({
+                        ...filters,
+                        mission_id: value === 'all' ? '' : value,
+                      } as Partial<DossierFilters>)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Toutes" />
@@ -649,7 +724,9 @@ export function DossierSearch({
                   <Checkbox
                     id="mes_dossiers"
                     checked={filters.mes_dossiers || false}
-                    onCheckedChange={(checked) => onFiltersChange({ ...filters, mes_dossiers: !!checked })}
+                    onCheckedChange={(checked) =>
+                      onFiltersChange({ ...filters, mes_dossiers: !!checked })
+                    }
                   />
                   <Label htmlFor="mes_dossiers" className="text-sm cursor-pointer font-medium">
                     Mes dossiers uniquement
@@ -660,7 +737,9 @@ export function DossierSearch({
                   <Checkbox
                     id="en_retard"
                     checked={filters.en_retard || false}
-                    onCheckedChange={(checked) => onFiltersChange({ ...filters, en_retard: !!checked })}
+                    onCheckedChange={(checked) =>
+                      onFiltersChange({ ...filters, en_retard: !!checked })
+                    }
                   />
                   <Label htmlFor="en_retard" className="text-sm cursor-pointer text-destructive">
                     Dossiers en retard

@@ -82,24 +82,44 @@ export function useUrgentLiquidations() {
     queryFn: async () => {
       const { data, error } = await supabaseAny
         .from('budget_liquidations')
-        .select(`
+        .select(
+          `
           id, numero, montant, net_a_payer, date_liquidation, statut,
-          reglement_urgent, urgence_motif, urgence_date, urgence_par,
+          reglement_urgent,
+          urgence_motif:reglement_urgent_motif,
+          urgence_date:reglement_urgent_date,
+          urgence_par:reglement_urgent_par,
           engagement:budget_engagements(
             id, numero, objet, fournisseur,
             budget_line:budget_lines(
               code, label,
               direction:directions(label, sigle)
             )
-          ),
-          urgence_user:profiles!budget_liquidations_urgence_par_fkey(id, full_name)
-        `)
+          )
+        `
+        )
         .eq('exercice', exercice)
         .eq('reglement_urgent', true)
-        .order('urgence_date', { ascending: false });
+        .order('reglement_urgent_date', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as UrgentLiquidation[];
+
+      // Resolve urgence_par UUIDs to profile names (no FK constraint exists)
+      const items = (data || []) as UrgentLiquidation[];
+      const userIds = [...new Set(items.map((i) => i.urgence_par).filter(Boolean))] as string[];
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+        for (const item of items) {
+          if (item.urgence_par) {
+            item.urgence_user = profileMap.get(item.urgence_par) || null;
+          }
+        }
+      }
+      return items;
     },
     enabled: !!exercice,
   });
@@ -130,8 +150,9 @@ export function useUrgentLiquidations() {
 
   const stats: UrgentStats = {
     total: urgentLiquidations.length,
-    enAttente: urgentLiquidations.filter(l => l.statut === 'soumis' || l.statut === 'valide').length,
-    validees: urgentLiquidations.filter(l => l.statut === 'valide').length,
+    enAttente: urgentLiquidations.filter((l) => l.statut === 'soumis' || l.statut === 'valide')
+      .length,
+    validees: urgentLiquidations.filter((l) => l.statut === 'valide').length,
     montantTotal: urgentLiquidations.reduce((acc, l) => acc + (l.net_a_payer || l.montant), 0),
   };
 
@@ -141,13 +162,17 @@ export function useUrgentLiquidations() {
 
   const markUrgentMutation = useMutation({
     mutationFn: async ({ liquidationId, motif }: MarkUrgentParams) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer l'état avant
       const { data: liquidationBefore, error: fetchError } = await supabaseAny
         .from('budget_liquidations')
-        .select('id, numero, reglement_urgent, urgence_motif, urgence_date, urgence_par')
+        .select(
+          'id, numero, reglement_urgent, reglement_urgent_motif, reglement_urgent_date, reglement_urgent_par'
+        )
         .eq('id', liquidationId)
         .single();
 
@@ -155,9 +180,9 @@ export function useUrgentLiquidations() {
 
       const newValues = {
         reglement_urgent: true,
-        urgence_motif: motif,
-        urgence_date: new Date().toISOString(),
-        urgence_par: user.id,
+        reglement_urgent_motif: motif,
+        reglement_urgent_date: new Date().toISOString(),
+        reglement_urgent_par: user.id,
       };
 
       const { error } = await supabaseAny
@@ -175,8 +200,8 @@ export function useUrgentLiquidations() {
         entityCode: liquidationBefore?.numero,
         oldValues: {
           reglement_urgent: liquidationBefore?.reglement_urgent,
-          urgence_motif: liquidationBefore?.urgence_motif,
-          urgence_date: liquidationBefore?.urgence_date,
+          reglement_urgent_motif: liquidationBefore?.reglement_urgent_motif,
+          reglement_urgent_date: liquidationBefore?.reglement_urgent_date,
         },
         newValues,
         justification: motif,
@@ -202,13 +227,17 @@ export function useUrgentLiquidations() {
 
   const removeUrgentMutation = useMutation({
     mutationFn: async (liquidationId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer l'état avant
       const { data: liquidationBefore, error: fetchError } = await supabaseAny
         .from('budget_liquidations')
-        .select('id, numero, reglement_urgent, urgence_motif, urgence_date, urgence_par')
+        .select(
+          'id, numero, reglement_urgent, reglement_urgent_motif, reglement_urgent_date, reglement_urgent_par'
+        )
         .eq('id', liquidationId)
         .single();
 
@@ -216,9 +245,9 @@ export function useUrgentLiquidations() {
 
       const newValues = {
         reglement_urgent: false,
-        urgence_motif: null,
-        urgence_date: null,
-        urgence_par: null,
+        reglement_urgent_motif: null,
+        reglement_urgent_date: null,
+        reglement_urgent_par: null,
       };
 
       const { error } = await supabaseAny
@@ -236,9 +265,9 @@ export function useUrgentLiquidations() {
         entityCode: liquidationBefore?.numero,
         oldValues: {
           reglement_urgent: liquidationBefore?.reglement_urgent,
-          urgence_motif: liquidationBefore?.urgence_motif,
-          urgence_date: liquidationBefore?.urgence_date,
-          urgence_par: liquidationBefore?.urgence_par,
+          reglement_urgent_motif: liquidationBefore?.reglement_urgent_motif,
+          reglement_urgent_date: liquidationBefore?.reglement_urgent_date,
+          reglement_urgent_par: liquidationBefore?.reglement_urgent_par,
         },
         newValues,
         resume: `Retrait marquage urgent de la liquidation ${liquidationBefore?.numero}`,
@@ -262,7 +291,7 @@ export function useUrgentLiquidations() {
   // ────────────────────────────────────────────────────────────────────────────
 
   const isUrgent = (liquidationId: string): boolean => {
-    return urgentLiquidations.some(l => l.id === liquidationId);
+    return urgentLiquidations.some((l) => l.id === liquidationId);
   };
 
   // ────────────────────────────────────────────────────────────────────────────
