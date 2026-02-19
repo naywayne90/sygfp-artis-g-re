@@ -28,7 +28,7 @@ SYGFP (Systeme de Gestion des Finances Publiques) est l'application de gestion d
 | Lignes de code  | 279 872                      |
 | Pages           | 115 fichiers (12 sections)   |
 | Composants      | 417 fichiers (50 modules)    |
-| Hooks           | 166 fichiers (58 733 lignes) |
+| Hooks           | 165 fichiers (58 733 lignes) |
 | Lib/Utils       | 45 fichiers (12 951 lignes)  |
 | Services        | 17 fichiers (5 757 lignes)   |
 | Contextes       | 2 (Exercice, RBAC)           |
@@ -173,7 +173,7 @@ src/
 │   ├── direction/             (1)        # DirectionDashboard
 │   └── roadmap/               (1)        # RoadmapView
 │
-├── hooks/                     (166)      # Hooks TanStack Query (details section F2)
+├── hooks/                     (165)      # Hooks TanStack Query (details section F2)
 │
 ├── pages/                     (115)      # Pages par section (details section F3)
 │   ├── admin/                 (29)

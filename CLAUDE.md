@@ -197,4 +197,4 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 
 ### Metriques cles (19/02/2026)
 
-115 pages | 439 composants/49 modules | 165 hooks | 197 tables | 621 RLS policies | 253 migrations | 12 Edge Functions | 369 tests unitaires | 69 specs E2E
+115 pages | 417 composants/50 modules | 165 hooks | 201 tables | 526 RLS policies | 253 migrations | 12 Edge Functions | 369 tests unitaires | 69 specs E2E

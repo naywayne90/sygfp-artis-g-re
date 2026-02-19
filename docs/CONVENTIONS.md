@@ -95,12 +95,14 @@ Toutes les requetes filtrent par exercice : `.eq('exercice', exercice)`.
 
 ```sql
 -- Fonctions helper (SECURITY DEFINER, dans le schema public)
-is_admin()            -- Verifie role ADMIN via user_roles
-is_dg()               -- Verifie role DG
-is_daaf()             -- Verifie role DAAF
-is_cb()               -- Verifie role CB (Controleur Budgetaire)
-get_user_direction_id() -- Retourne la direction de l'utilisateur courant
-has_role(uid, role)   -- Verifie un role specifique via user_roles
+has_role(uid, role)           -- Verifie un role specifique via user_roles (PATTERN CORRECT)
+has_any_role(uid, roles[])    -- Verifie plusieurs roles
+get_user_direction_id(uid)    -- Retourne la direction de l'utilisateur courant
+
+-- ATTENTION : is_admin(), is_dg(), is_daaf(), is_cb() sont des raccourcis
+-- internes. Le pattern a utiliser dans le code est TOUJOURS :
+--   has_role(auth.uid(), 'ADMIN'::app_role)
+--   has_any_role(auth.uid(), ARRAY['DG','DAAF','CB'])
 ```
 
 ### 2.3 Patterns de policies
