@@ -686,7 +686,7 @@ Niveaux : DG > Directeur > Sous-Directeur > Chef de Service > Agent
 
 - Filtrage par direction (`get_user_direction_id()`)
 - Filtrage par exercice
-- Verification role (`is_admin()`, `is_dg()`, `is_daaf()`, `has_role()`)
+- Verification role (`has_role(auth.uid(), 'ROLE'::app_role)`, `has_any_role()`)
 - Audit trail automatique (triggers)
 
 ## Performance
@@ -930,19 +930,19 @@ ordonnancements.id     <── reglements.ordonnancement_id
 
 ### B5. Tables Transversales
 
-| Table                   | Role                                     | Lignes approx. |
-| ----------------------- | ---------------------------------------- | -------------- |
-| directions              | Structure organisationnelle              | ~15            |
-| profiles                | Utilisateurs (FK dans toutes les tables) | ~30            |
-| budget_lines            | Lignes budgetaires (imputation)          | ~500           |
-| dossiers                | Conteneur reliant toutes les etapes      | ~5 000         |
-| prestataires            | Fournisseurs/beneficiaires               | 431            |
-| pieces_jointes          | Fichiers attaches transversaux           | ~27 000        |
-| audit_logs              | Journal d'audit immutable                | ~10 000        |
-| notification_templates  | Templates de notifications               | ~30            |
-| notification_recipients | Routage notifications par role           | ~50            |
-| user_roles              | Attribution roles aux utilisateurs       | ~50            |
-| role_permissions        | Permissions par role (matrice RBAC)      | 380            |
+| Table                   | Role                                     | Lignes |
+| ----------------------- | ---------------------------------------- | ------ |
+| directions              | Structure organisationnelle              | 25     |
+| profiles                | Utilisateurs (FK dans toutes les tables) | 78     |
+| budget_lines            | Lignes budgetaires (imputation)          | 765    |
+| dossiers                | Conteneur reliant toutes les etapes      | 10     |
+| prestataires            | Fournisseurs/beneficiaires               | 431    |
+| engagement_documents    | Documents engagements (migres)           | 22 648 |
+| audit_logs              | Journal d'audit immutable                | 238    |
+| notification_templates  | Templates de notifications               | 17     |
+| notification_recipients | Routage notifications par role           | 28     |
+| user_roles              | Attribution roles aux utilisateurs       | 80     |
+| role_permissions        | Permissions par role (matrice RBAC)      | 380    |
 
 ### B6. Matrice RBAC (role_permissions — 380 entrees, 15 roles)
 

@@ -272,11 +272,13 @@ src/
 
 | Metrique       | Valeur |
 | -------------- | ------ |
-| Tables         | 197    |
-| Vues           | 42     |
-| Fonctions SQL  | 174    |
-| RLS Policies   | 621    |
+| Tables         | 201    |
+| Vues           | 43     |
+| Fonctions SQL  | 359    |
+| RLS Policies   | 526    |
 | Triggers       | 273    |
+| FK Constraints | 439    |
+| Indexes        | 803    |
 | Edge Functions | 12     |
 | Migrations     | 253    |
 

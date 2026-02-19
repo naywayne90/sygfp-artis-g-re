@@ -1032,7 +1032,7 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 | `notifications`              | 9 904  | Notifications utilisateurs     |
 | `logs_actions`               | 20 592 | Journal d'actions              |
 | `audit_logs`                 | 238    | Piste d'audit                  |
-| `engagement_documents`       | 22 664 | Documents engagements (migres) |
+| `engagement_documents`       | 22 648 | Documents engagements (migres) |
 | `notes_sef_history`          | 4 901  | Historique notes SEF           |
 | `treasury_movements`         | 3 601  | Mouvements tresorerie          |
 | `reamenagements_budgetaires` | 2 007  | Reamenagements                 |
@@ -1040,7 +1040,7 @@ Documentation detaillee : [RAPPORT_MIGRATION_COMPLETE.md](RAPPORT_MIGRATION_COMP
 | `nomenclature_nbe`           | 499    | Nomenclature NBE               |
 | `plan_comptable_sysco`       | 400    | Plan comptable SYSCOA          |
 | `personnel_arti`             | 104    | Personnel ARTI                 |
-| `user_roles`                 | 81     | Roles utilisateurs             |
+| `user_roles`                 | 80     | Roles utilisateurs             |
 | `marche_historique`          | 14     | Historique statuts marches     |
 | `notification_templates`     | 17     | Templates notifications        |
 | `notification_recipients`    | 28     | Destinataires notifications    |
@@ -1083,7 +1083,7 @@ Patterns RLS utilises :
 | V2 Passation       | CRUD nomme (`pm_select_v2`, etc.)           | `passation_marche`, `lots_marche`, `soumissionnaires_lot` |
 | Direction-filtered | Filtre par direction utilisateur            | `marches`, `expressions_besoin`                           |
 
-Helpers RLS : `is_admin()`, `is_dg()`, `is_daaf()`, `is_cb()`, `get_user_direction_id()`
+Helpers RLS : `has_role(auth.uid(), 'ROLE'::app_role)`, `has_any_role(auth.uid(), ARRAY[...])`, `get_user_direction_id(auth.uid())`. **ATTENTION** : `is_admin()`, `is_dg()`, `is_daaf()` n'existent PAS en base — toujours utiliser `has_role()`.
 
 ### 13.6 Triggers (273)
 
