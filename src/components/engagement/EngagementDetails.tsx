@@ -45,6 +45,7 @@ import { DossierGED } from '@/components/ged';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
 import { DossierTimeline } from '@/components/dossier/DossierTimeline';
 import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
+import { EngagementChainNav } from './EngagementChainNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
@@ -303,6 +304,9 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
               )}
             </div>
           </DialogHeader>
+
+          {/* Barre chaîne : Passation ↔ Engagement ↔ Liquidation */}
+          <EngagementChainNav engagement={engagement} onCloseDialog={() => onOpenChange(false)} />
 
           <ScrollArea className="max-h-[70vh] pr-4">
             <Tabs defaultValue="informations" className="w-full">

@@ -9,6 +9,7 @@ import {
   type TypeEngagement,
 } from '@/hooks/useEngagements';
 import { isRoleForStep } from '@/lib/engagement/engagementRbac';
+import { buildChainSteps } from '@/lib/engagement/engagementChainSteps';
 import { numberToWords, numberToWordsCFA } from '@/lib/utils/numberToWords';
 import {
   fmtCurrencyExport,
@@ -1392,5 +1393,117 @@ describe('Notification workflow — logique de dispatch', () => {
     });
     expect(r).toHaveLength(1);
     expect(r[0].reason).toBe('direction_notifiee');
+  });
+});
+
+// ============================================================================
+// 18. EngagementChainNav — buildChainSteps
+// ============================================================================
+describe('EngagementChainNav — buildChainSteps', () => {
+  const baseEngagement = {
+    id: 'eng-1',
+    numero: 'ENG-2026-001',
+    objet: 'Test',
+    montant: 100_000,
+    montant_ht: null,
+    tva: null,
+    fournisseur: null,
+    date_engagement: '2026-01-15',
+    statut: 'brouillon' as string | null,
+    workflow_status: null,
+    current_step: null,
+    budget_line_id: 'bl-1',
+    expression_besoin_id: null,
+    marche_id: null,
+    passation_marche_id: null,
+    dossier_id: null,
+    type_engagement: 'hors_marche' as const,
+    note_id: null,
+    exercice: 2026,
+    created_by: null,
+    created_at: '2026-01-15T10:00:00Z',
+    updated_at: '2026-01-15T10:00:00Z',
+    date_differe: null,
+    motif_differe: null,
+    differe_by: null,
+    deadline_correction: null,
+    required_documents: null,
+    visa_saf_user_id: null,
+    visa_saf_date: null,
+    visa_saf_commentaire: null,
+    visa_cb_user_id: null,
+    visa_cb_date: null,
+    visa_cb_commentaire: null,
+    visa_daaf_user_id: null,
+    visa_daaf_date: null,
+    visa_daaf_commentaire: null,
+    visa_dg_user_id: null,
+    visa_dg_date: null,
+    visa_dg_commentaire: null,
+    motif_rejet: null,
+    montant_degage: null,
+    motif_degage: null,
+    degage_by: null,
+    degage_at: null,
+  };
+
+  it('engagement brouillon sans passation → passation unavailable, liquidation unavailable', () => {
+    const steps = buildChainSteps(baseEngagement);
+    expect(steps).toHaveLength(3);
+    expect(steps[0].key).toBe('passation');
+    expect(steps[0].status).toBe('unavailable');
+    expect(steps[0].url).toBeNull();
+    expect(steps[1].key).toBe('engagement');
+    expect(steps[1].status).toBe('current');
+    expect(steps[2].key).toBe('liquidation');
+    expect(steps[2].status).toBe('unavailable');
+    expect(steps[2].url).toBeNull();
+  });
+
+  it('engagement sur marché → passation completed avec URL', () => {
+    const eng = {
+      ...baseEngagement,
+      passation_marche_id: 'pm-1',
+      marche: { id: 'm-1', numero: 'PM-2026-010', objet: 'IT', montant: 500_000 },
+    };
+    const steps = buildChainSteps(eng);
+    expect(steps[0].status).toBe('completed');
+    expect(steps[0].url).toContain('/execution/passation-marche?detail=pm-1');
+    expect(steps[0].subtitle).toBe('PM-2026-010');
+  });
+
+  it('engagement validé → liquidation pending avec URL', () => {
+    const eng = { ...baseEngagement, statut: 'valide' };
+    const steps = buildChainSteps(eng);
+    expect(steps[2].status).toBe('pending');
+    expect(steps[2].url).toContain(`/liquidations?sourceEngagement=${eng.id}`);
+    expect(steps[2].subtitle).toBe('Créer');
+  });
+
+  it('engagement soumis → liquidation unavailable', () => {
+    const eng = { ...baseEngagement, statut: 'soumis' };
+    const steps = buildChainSteps(eng);
+    expect(steps[2].status).toBe('unavailable');
+    expect(steps[2].url).toBeNull();
+  });
+
+  it('engagement validé + passation → tout accessible', () => {
+    const eng = {
+      ...baseEngagement,
+      statut: 'valide',
+      passation_marche_id: 'pm-1',
+      marche: { id: 'm-1', numero: 'PM-001', objet: 'IT', montant: 100_000 },
+    };
+    const steps = buildChainSteps(eng);
+    expect(steps[0].status).toBe('completed');
+    expect(steps[0].url).not.toBeNull();
+    expect(steps[1].status).toBe('current');
+    expect(steps[2].status).toBe('pending');
+    expect(steps[2].url).not.toBeNull();
+  });
+
+  it('engagement courant a toujours le numéro en subtitle', () => {
+    const steps = buildChainSteps(baseEngagement);
+    expect(steps[1].subtitle).toBe('ENG-2026-001');
   });
 });
