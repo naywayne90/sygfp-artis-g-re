@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -27,8 +28,10 @@ import {
   PlayCircle,
   MinusCircle,
   Pencil,
+  CreditCard,
 } from 'lucide-react';
 import { Engagement, VALIDATION_STEPS, VALIDATION_STATUTS } from '@/hooks/useEngagements';
+import { isRoleForStep } from '@/lib/engagement/engagementRbac';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -45,27 +48,8 @@ interface EngagementListProps {
   onPrint?: (engagement: Engagement) => void;
   userRole?: string | null;
   showActions?: boolean;
-}
-
-/**
- * Détermine si le rôle utilisateur correspond à l'étape de validation courante.
- * ADMIN peut agir sur toutes les étapes.
- */
-function isRoleForStep(statut: string | null, role: string | null): boolean {
-  if (!role) return false;
-  if (role === 'ADMIN') return true;
-  switch (statut) {
-    case 'soumis':
-      return role === 'SAF' || role === 'OPERATEUR';
-    case 'visa_saf':
-      return role === 'CB';
-    case 'visa_cb':
-      return role === 'DAAF' || role === 'DAF';
-    case 'visa_daaf':
-      return role === 'DG';
-    default:
-      return false;
-  }
+  isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 const getStatusBadge = (statut: string | null, _workflowStatus: string | null) => {
@@ -101,6 +85,37 @@ const getValidationProgress = (currentStep: number | null) => {
   ) : null;
 };
 
+function EngagementRowSkeleton() {
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="space-y-1">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <Skeleton className="h-4 w-40" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-28" />
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="h-4 w-24 ml-auto" />
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-6 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-8 rounded" />
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function EngagementList({
   engagements,
   onView,
@@ -114,9 +129,16 @@ export function EngagementList({
   onPrint,
   userRole,
   showActions = true,
+  isLoading = false,
+  emptyMessage = 'Aucun engagement trouvé',
 }: EngagementListProps) {
-  if (engagements.length === 0) {
-    return <div className="text-center py-12 text-muted-foreground">Aucun engagement trouvé</div>;
+  if (!isLoading && engagements.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
+        <p>{emptyMessage}</p>
+      </div>
+    );
   }
 
   return (
@@ -133,143 +155,147 @@ export function EngagementList({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {engagements.map((engagement) => {
-          const statut = engagement.statut;
-          const isInValidation = (VALIDATION_STATUTS as readonly string[]).includes(statut || '');
-          const canActOnStep = isRoleForStep(statut, userRole ?? null);
-          const isDG = userRole === 'DG' || userRole === 'ADMIN';
+        {isLoading
+          ? Array.from({ length: 5 }).map((_, i) => <EngagementRowSkeleton key={i} />)
+          : null}
+        {!isLoading &&
+          engagements.map((engagement) => {
+            const statut = engagement.statut;
+            const isInValidation = (VALIDATION_STATUTS as readonly string[]).includes(statut || '');
+            const canActOnStep = isRoleForStep(statut, userRole ?? null);
+            const isDG = userRole === 'DG' || userRole === 'ADMIN';
 
-          return (
-            <TableRow key={engagement.id}>
-              <TableCell>
-                <div>
-                  <div className="font-medium">{engagement.numero}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {format(new Date(engagement.date_engagement), 'dd/MM/yyyy', { locale: fr })}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-                {engagement.objet}
-              </TableCell>
-              <TableCell>{engagement.fournisseur || 'N/A'}</TableCell>
-              <TableCell className="text-right font-medium">
-                {formatCurrency(engagement.montant)}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {engagement.budget_line?.code || 'N/A'}
-              </TableCell>
-              <TableCell>
-                <div className="space-y-1">
-                  {getStatusBadge(statut, engagement.workflow_status)}
-                  {isInValidation && getValidationProgress(engagement.current_step)}
-                  {statut === 'differe' && engagement.motif_differe && (
-                    <div className="text-xs text-muted-foreground truncate max-w-[150px]">
-                      {engagement.motif_differe}
-                    </div>
-                  )}
-                  {statut === 'rejete' && <div className="text-xs text-destructive">Rejeté</div>}
-                </div>
-              </TableCell>
-              {showActions && (
+            return (
+              <TableRow key={engagement.id}>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {/* Toujours visible */}
-                      <DropdownMenuItem onClick={() => onView(engagement)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Voir détails
-                      </DropdownMenuItem>
-                      {onPrint && (
-                        <DropdownMenuItem onClick={() => onPrint(engagement)}>
-                          <Printer className="mr-2 h-4 w-4" />
-                          Pièce engagement
-                        </DropdownMenuItem>
-                      )}
-
-                      {/* Modifier — brouillon uniquement */}
-                      {statut === 'brouillon' && onEdit && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onEdit(engagement)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Modifier
-                          </DropdownMenuItem>
-                        </>
-                      )}
-
-                      {/* Soumettre — brouillon uniquement */}
-                      {statut === 'brouillon' && onSubmit && (
-                        <DropdownMenuItem onClick={() => onSubmit(engagement.id)}>
-                          <Send className="mr-2 h-4 w-4" />
-                          Soumettre
-                        </DropdownMenuItem>
-                      )}
-
-                      {/* Viser/Valider + Différer + Rejeter — filtré par rôle */}
-                      {isInValidation && canActOnStep && (
-                        <>
-                          <DropdownMenuSeparator />
-                          {onValidate && (
-                            <DropdownMenuItem onClick={() => onValidate(engagement)}>
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              {isDG ? 'Valider' : 'Viser'}
-                            </DropdownMenuItem>
-                          )}
-                          {onDefer && (
-                            <DropdownMenuItem onClick={() => onDefer(engagement)}>
-                              <Clock className="mr-2 h-4 w-4" />
-                              Différer
-                            </DropdownMenuItem>
-                          )}
-                          {onReject && (
-                            <DropdownMenuItem
-                              onClick={() => onReject(engagement)}
-                              className="text-destructive"
-                            >
-                              <XCircle className="mr-2 h-4 w-4" />
-                              Rejeter
-                            </DropdownMenuItem>
-                          )}
-                        </>
-                      )}
-
-                      {/* Reprendre — différé */}
-                      {statut === 'differe' && onResume && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onResume(engagement.id)}>
-                            <PlayCircle className="mr-2 h-4 w-4" />
-                            Reprendre
-                          </DropdownMenuItem>
-                        </>
-                      )}
-
-                      {/* Dégager — validé uniquement */}
-                      {statut === 'valide' && onDegage && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onDegage(engagement)}
-                            className="text-orange-600"
-                          >
-                            <MinusCircle className="mr-2 h-4 w-4" />
-                            Dégager
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div>
+                    <div className="font-medium">{engagement.numero}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(new Date(engagement.date_engagement), 'dd/MM/yyyy', { locale: fr })}
+                    </div>
+                  </div>
                 </TableCell>
-              )}
-            </TableRow>
-          );
-        })}
+                <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+                  {engagement.objet}
+                </TableCell>
+                <TableCell>{engagement.fournisseur || 'N/A'}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {formatCurrency(engagement.montant)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {engagement.budget_line?.code || 'N/A'}
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    {getStatusBadge(statut, engagement.workflow_status)}
+                    {isInValidation && getValidationProgress(engagement.current_step)}
+                    {statut === 'differe' && engagement.motif_differe && (
+                      <div className="text-xs text-muted-foreground truncate max-w-[150px]">
+                        {engagement.motif_differe}
+                      </div>
+                    )}
+                    {statut === 'rejete' && <div className="text-xs text-destructive">Rejeté</div>}
+                  </div>
+                </TableCell>
+                {showActions && (
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {/* Toujours visible */}
+                        <DropdownMenuItem onClick={() => onView(engagement)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Voir détails
+                        </DropdownMenuItem>
+                        {onPrint && (
+                          <DropdownMenuItem onClick={() => onPrint(engagement)}>
+                            <Printer className="mr-2 h-4 w-4" />
+                            Pièce engagement
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* Modifier — brouillon uniquement */}
+                        {statut === 'brouillon' && onEdit && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onEdit(engagement)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* Soumettre — brouillon uniquement */}
+                        {statut === 'brouillon' && onSubmit && (
+                          <DropdownMenuItem onClick={() => onSubmit(engagement.id)}>
+                            <Send className="mr-2 h-4 w-4" />
+                            Soumettre
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* Viser/Valider + Différer + Rejeter — filtré par rôle */}
+                        {isInValidation && canActOnStep && (
+                          <>
+                            <DropdownMenuSeparator />
+                            {onValidate && (
+                              <DropdownMenuItem onClick={() => onValidate(engagement)}>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                {isDG ? 'Valider' : 'Viser'}
+                              </DropdownMenuItem>
+                            )}
+                            {onDefer && (
+                              <DropdownMenuItem onClick={() => onDefer(engagement)}>
+                                <Clock className="mr-2 h-4 w-4" />
+                                Différer
+                              </DropdownMenuItem>
+                            )}
+                            {onReject && (
+                              <DropdownMenuItem
+                                onClick={() => onReject(engagement)}
+                                className="text-destructive"
+                              >
+                                <XCircle className="mr-2 h-4 w-4" />
+                                Rejeter
+                              </DropdownMenuItem>
+                            )}
+                          </>
+                        )}
+
+                        {/* Reprendre — différé */}
+                        {statut === 'differe' && onResume && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onResume(engagement.id)}>
+                              <PlayCircle className="mr-2 h-4 w-4" />
+                              Reprendre
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* Dégager — validé uniquement */}
+                        {statut === 'valide' && onDegage && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onDegage(engagement)}
+                              className="text-orange-600"
+                            >
+                              <MinusCircle className="mr-2 h-4 w-4" />
+                              Dégager
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                )}
+              </TableRow>
+            );
+          })}
       </TableBody>
     </Table>
   );

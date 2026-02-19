@@ -41,6 +41,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import { useEngagements, Engagement } from '@/hooks/useEngagements';
 import { useEngagementExport } from '@/hooks/useEngagementExport';
 import { SuiviBudgetaireEngagements } from '@/components/engagement/SuiviBudgetaireEngagements';
@@ -86,7 +87,7 @@ export default function Engagements() {
     isDegaging,
   } = useEngagements();
 
-  const { exportExcel, exportCSV, isExporting } = useEngagementExport();
+  const { exportExcel, exportCSV, exportPDF, isExporting } = useEngagementExport();
   const { exercice } = useExercice();
 
   const { canPerform } = usePermissionCheck();
@@ -113,6 +114,8 @@ export default function Engagements() {
   const userRole = ROLE_PRIORITY.find((r) => userRoleList.includes(r)) || userRoleList[0] || null;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [preSelectedPMId, setPreSelectedPMId] = useState<string | null>(null);
   const [selectedEngagement, setSelectedEngagement] = useState<Engagement | null>(null);
@@ -152,6 +155,17 @@ export default function Engagements() {
         false
     );
   };
+
+  // Pagination helper — slice client-side data for current page
+  const paginateList = (list: Engagement[]) => {
+    const start = (page - 1) * pageSize;
+    return list.slice(start, start + pageSize);
+  };
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
 
   const handleView = (engagement: Engagement) => {
     setSelectedEngagement(engagement);
@@ -261,6 +275,10 @@ export default function Engagements() {
             <DropdownMenuItem onClick={() => exportExcel(engagements, undefined, exercice)}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Excel (2 feuilles)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportPDF(engagements, undefined, exercice)}>
+              <FileText className="mr-2 h-4 w-4" />
+              PDF (rapport)
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportCSV(engagements, undefined, exercice)}>
               <FileText className="mr-2 h-4 w-4" />
@@ -411,26 +429,38 @@ export default function Engagements() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <EngagementList
-                  engagements={filterEngagements(engagements)}
-                  onView={handleView}
-                  onValidate={canValidateEngagementFinal ? handleValidate : undefined}
-                  onReject={canRejectEngagementFinal ? handleReject : undefined}
-                  onDefer={canDeferEngagementFinal ? handleDefer : undefined}
-                  onSubmit={canPerform('engagement.submit') ? submitEngagement : undefined}
-                  onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
-                  onDegage={canDegageEngagement ? handleDegage : undefined}
-                  onPrint={handlePrint}
-                  userRole={userRole}
-                />
-              )}
+              <EngagementList
+                engagements={paginateList(filterEngagements(engagements))}
+                onView={handleView}
+                onValidate={canValidateEngagementFinal ? handleValidate : undefined}
+                onReject={canRejectEngagementFinal ? handleReject : undefined}
+                onDefer={canDeferEngagementFinal ? handleDefer : undefined}
+                onSubmit={canPerform('engagement.submit') ? submitEngagement : undefined}
+                onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
+                onDegage={canDegageEngagement ? handleDegage : undefined}
+                onPrint={handlePrint}
+                userRole={userRole}
+                isLoading={isLoading}
+              />
             </CardContent>
           </Card>
+          {(() => {
+            const filtered = filterEngagements(engagements);
+            const totalPages = Math.ceil(filtered.length / pageSize);
+            return (
+              <NotesPagination
+                page={page}
+                pageSize={pageSize}
+                total={filtered.length}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
+            );
+          })()}
         </TabsContent>
 
         {/* Onglet À traiter - PM validées */}
@@ -511,6 +541,8 @@ export default function Engagements() {
                 onDefer={canDeferEngagementFinal ? handleDefer : undefined}
                 onPrint={handlePrint}
                 userRole={userRole}
+                isLoading={isLoading}
+                emptyMessage="Aucun engagement en attente de validation"
               />
             </CardContent>
           </Card>
@@ -599,6 +631,8 @@ export default function Engagements() {
                 onView={handleView}
                 onPrint={handlePrint}
                 userRole={userRole}
+                isLoading={isLoading}
+                emptyMessage="Aucun engagement rejeté"
               />
             </CardContent>
           </Card>
@@ -619,6 +653,8 @@ export default function Engagements() {
                 onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
                 onPrint={handlePrint}
                 userRole={userRole}
+                isLoading={isLoading}
+                emptyMessage="Aucun engagement différé"
               />
             </CardContent>
           </Card>

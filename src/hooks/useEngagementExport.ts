@@ -7,7 +7,13 @@
 
 import { useState, useCallback } from 'react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { toast } from 'sonner';
+import { generatePDFHeader, loadImageAsDataUrl } from '@/lib/pdf/pdfHeader';
+import { generatePDFFooter } from '@/lib/pdf/pdfFooter';
+import { PDF_COLORS, PDF_FONTS, PDF_MARGINS, TABLE_STYLES } from '@/lib/pdf/pdfStyles';
+import logoArtiUrl from '@/assets/logo-arti.jpg';
 import type { Engagement } from '@/hooks/useEngagements';
 
 // ---------------------------------------------------------------------------
@@ -526,6 +532,258 @@ function doExportSuiviBudgetaire(
 }
 
 // ---------------------------------------------------------------------------
+// D) PDF — rapport 2 pages (liste + suivi budgetaire)
+// ---------------------------------------------------------------------------
+
+async function doExportPDF(
+  engagements: Engagement[],
+  exercice?: number,
+  filters?: EngagementExportFilters
+): Promise<void> {
+  let data = [...engagements];
+
+  if (filters?.statut) {
+    data = data.filter((e) => e.statut === filters.statut);
+  }
+  if (filters?.direction) {
+    data = data.filter((e) => e.budget_line?.direction?.sigle === filters.direction);
+  }
+
+  if (data.length === 0) {
+    toast.warning('Aucune donnée à exporter');
+    return;
+  }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pageWidth = 297; // A4 landscape
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR');
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  let logoDataUrl: string | undefined;
+  try {
+    logoDataUrl = await loadImageAsDataUrl(logoArtiUrl);
+  } catch {
+    // continue without logo
+  }
+
+  // ========================================================================
+  // PAGE 1 — Liste des engagements
+  // ========================================================================
+
+  const { endY } = generatePDFHeader({ doc, logoDataUrl });
+
+  // Titre centré
+  doc.setFontSize(PDF_FONTS.size.title);
+  doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.bold);
+  doc.setTextColor(...PDF_COLORS.primary);
+  doc.text(`Engagements Budgétaires — Exercice ${exercice || ''}`, pageWidth / 2, endY, {
+    align: 'center',
+  });
+
+  // Sous-titre
+  doc.setFontSize(PDF_FONTS.size.small);
+  doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.normal);
+  doc.setTextColor(...PDF_COLORS.secondary);
+  doc.text(`Généré le ${dateStr} à ${timeStr}`, pageWidth / 2, endY + 6, { align: 'center' });
+
+  // Tableau des engagements
+  const totalMontant = data.reduce((sum, e) => sum + (e.montant || 0), 0);
+
+  const tableBody = data.map((e) => [
+    e.numero || '-',
+    (e.objet || '-').substring(0, 40),
+    e.fournisseur || '-',
+    fmtCurrencyExport(e.montant),
+    e.budget_line?.code || '-',
+    e.budget_line?.direction?.sigle || '-',
+    statutLabel(e.statut),
+  ]);
+
+  // Ligne total
+  tableBody.push([
+    'TOTAL',
+    `${data.length} engagement(s)`,
+    '',
+    fmtCurrencyExport(totalMontant),
+    '',
+    '',
+    '',
+  ]);
+
+  autoTable(doc, {
+    startY: endY + 12,
+    head: [
+      ['Référence', 'Objet', 'Fournisseur', 'Montant TTC', 'Ligne budg.', 'Direction', 'Statut'],
+    ],
+    body: tableBody,
+    styles: {
+      fontSize: TABLE_STYLES.default.fontSize - 2,
+      cellPadding: TABLE_STYLES.default.cellPadding,
+      lineWidth: TABLE_STYLES.default.lineWidth,
+      lineColor: TABLE_STYLES.default.lineColor,
+      textColor: TABLE_STYLES.default.textColor,
+    },
+    headStyles: {
+      fillColor: TABLE_STYLES.head.fillColor,
+      textColor: TABLE_STYLES.head.textColor,
+      fontStyle: TABLE_STYLES.head.fontStyle,
+      halign: TABLE_STYLES.head.halign,
+    },
+    columnStyles: {
+      0: { cellWidth: 35 },
+      1: { cellWidth: 65 },
+      2: { cellWidth: 50 },
+      3: { cellWidth: 40, halign: 'right' },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 25, halign: 'center' },
+      6: { cellWidth: 25, halign: 'center' },
+    },
+    margin: { left: PDF_MARGINS.left, right: PDF_MARGINS.right },
+    didParseCell: (hookData) => {
+      // Style gras pour la ligne total
+      if (hookData.section === 'body' && hookData.row.index === tableBody.length - 1) {
+        hookData.cell.styles.fontStyle = 'bold';
+        hookData.cell.styles.fillColor = PDF_COLORS.headerBg;
+      }
+    },
+  });
+
+  // ========================================================================
+  // PAGE 2 — Suivi budgetaire par ligne
+  // ========================================================================
+
+  doc.addPage('a4', 'landscape');
+  const { endY: endY2 } = generatePDFHeader({ doc, logoDataUrl });
+
+  doc.setFontSize(PDF_FONTS.size.title);
+  doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.bold);
+  doc.setTextColor(...PDF_COLORS.primary);
+  doc.text('Suivi Budgétaire par Ligne', pageWidth / 2, endY2, { align: 'center' });
+
+  doc.setFontSize(PDF_FONTS.size.small);
+  doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.normal);
+  doc.setTextColor(...PDF_COLORS.secondary);
+  doc.text(`Généré le ${dateStr} à ${timeStr}`, pageWidth / 2, endY2 + 6, { align: 'center' });
+
+  const suivi = computeSuiviBudgetaire(data);
+
+  const suiviBody = suivi.map((s) => [
+    s.code,
+    s.libelle.substring(0, 40),
+    s.directionSigle,
+    fmtCurrencyExport(s.dotation),
+    fmtCurrencyExport(s.totalEngage),
+    fmtCurrencyExport(s.disponible),
+    s.taux.toFixed(1) + '%',
+    s.taux > 100 ? 'DEPASSEMENT' : s.taux > 95 ? 'CRITIQUE' : s.taux > 80 ? 'ATTENTION' : 'OK',
+    String(s.nbEngagements),
+  ]);
+
+  // Totaux suivi
+  const totalDot = suivi.reduce((sum, s) => sum + s.dotation, 0);
+  const totalEng = suivi.reduce((sum, s) => sum + s.totalEngage, 0);
+  const totalDisp = suivi.reduce((sum, s) => sum + s.disponible, 0);
+  const tauxGlobal = totalDot > 0 ? (totalEng / totalDot) * 100 : 0;
+  const totalNb = suivi.reduce((sum, s) => sum + s.nbEngagements, 0);
+
+  suiviBody.push([
+    'TOTAL',
+    `${suivi.length} ligne(s)`,
+    '',
+    fmtCurrencyExport(totalDot),
+    fmtCurrencyExport(totalEng),
+    fmtCurrencyExport(totalDisp),
+    tauxGlobal.toFixed(1) + '%',
+    '',
+    String(totalNb),
+  ]);
+
+  autoTable(doc, {
+    startY: endY2 + 12,
+    head: [
+      [
+        'Code',
+        'Libellé',
+        'Direction',
+        'Dotation',
+        'Engagé',
+        'Disponible',
+        'Taux (%)',
+        'Alerte',
+        'Nb eng.',
+      ],
+    ],
+    body: suiviBody,
+    styles: {
+      fontSize: TABLE_STYLES.default.fontSize - 2,
+      cellPadding: TABLE_STYLES.default.cellPadding,
+      lineWidth: TABLE_STYLES.default.lineWidth,
+      lineColor: TABLE_STYLES.default.lineColor,
+      textColor: TABLE_STYLES.default.textColor,
+    },
+    headStyles: {
+      fillColor: TABLE_STYLES.head.fillColor,
+      textColor: TABLE_STYLES.head.textColor,
+      fontStyle: TABLE_STYLES.head.fontStyle,
+      halign: TABLE_STYLES.head.halign,
+    },
+    columnStyles: {
+      0: { cellWidth: 30 },
+      1: { cellWidth: 55 },
+      2: { cellWidth: 25, halign: 'center' },
+      3: { cellWidth: 35, halign: 'right' },
+      4: { cellWidth: 35, halign: 'right' },
+      5: { cellWidth: 35, halign: 'right' },
+      6: { cellWidth: 20, halign: 'center' },
+      7: { cellWidth: 25, halign: 'center' },
+      8: { cellWidth: 18, halign: 'center' },
+    },
+    margin: { left: PDF_MARGINS.left, right: PDF_MARGINS.right },
+    didParseCell: (hookData) => {
+      // Ligne total
+      if (hookData.section === 'body' && hookData.row.index === suiviBody.length - 1) {
+        hookData.cell.styles.fontStyle = 'bold';
+        hookData.cell.styles.fillColor = PDF_COLORS.headerBg;
+      }
+      // Coloration conditionnelle par taux (colonne Taux = index 6, Alerte = index 7)
+      if (hookData.section === 'body' && hookData.row.index < suiviBody.length - 1) {
+        const taux = suivi[hookData.row.index]?.taux ?? 0;
+        if (taux > 100) {
+          if (hookData.column.index === 6 || hookData.column.index === 7) {
+            hookData.cell.styles.fillColor = [254, 226, 226]; // rouge leger
+            hookData.cell.styles.textColor = PDF_COLORS.danger;
+          }
+        } else if (taux > 95) {
+          if (hookData.column.index === 6 || hookData.column.index === 7) {
+            hookData.cell.styles.fillColor = [254, 226, 226]; // rouge leger
+            hookData.cell.styles.textColor = PDF_COLORS.danger;
+          }
+        } else if (taux > 80) {
+          if (hookData.column.index === 6 || hookData.column.index === 7) {
+            hookData.cell.styles.fillColor = [255, 243, 224]; // orange leger
+            hookData.cell.styles.textColor = PDF_COLORS.warning;
+          }
+        }
+      }
+    },
+  });
+
+  // ========================================================================
+  // Footers pagines
+  // ========================================================================
+
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    generatePDFFooter({ doc, pageNumber: p, totalPages });
+  }
+
+  // Download
+  doc.save(`SYGFP_Engagements_${exercice || ''}_${now.toISOString().split('T')[0]}.pdf`);
+}
+
+// ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
 
@@ -562,6 +820,21 @@ export function useEngagementExport() {
     []
   );
 
+  const exportPDF = useCallback(
+    async (engagements: Engagement[], filters?: EngagementExportFilters, exercice?: number) => {
+      setIsExporting(true);
+      try {
+        await doExportPDF(engagements, exercice, filters);
+        toast.success('Export PDF généré');
+      } catch (err) {
+        toast.error('Erreur export PDF : ' + (err instanceof Error ? err.message : String(err)));
+      } finally {
+        setIsExporting(false);
+      }
+    },
+    []
+  );
+
   const exportSuiviBudgetaire = useCallback(
     (engagements: Engagement[], filters?: EngagementExportFilters, exercice?: number) => {
       setIsExporting(true);
@@ -577,5 +850,5 @@ export function useEngagementExport() {
     []
   );
 
-  return { exportExcel, exportCSV, exportSuiviBudgetaire, isExporting };
+  return { exportExcel, exportCSV, exportPDF, exportSuiviBudgetaire, isExporting };
 }

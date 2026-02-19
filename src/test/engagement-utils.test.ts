@@ -8,6 +8,7 @@ import {
   type BudgetAvailability,
   type TypeEngagement,
 } from '@/hooks/useEngagements';
+import { isRoleForStep } from '@/lib/engagement/engagementRbac';
 import { numberToWords, numberToWordsCFA } from '@/lib/utils/numberToWords';
 import {
   fmtCurrencyExport,
@@ -1014,5 +1015,135 @@ describe('computeSuiviBudgetaire', () => {
     expect(result[0].totalEngage).toBe(4_000_000);
     expect(result[0].taux).toBe(20);
     expect(result[0].nbEngagements).toBe(1);
+  });
+});
+
+// ===========================================================================
+// 13. isRoleForStep — RBAC action menu (Prompt 10)
+// ===========================================================================
+describe('isRoleForStep', () => {
+  it('ADMIN peut agir sur toutes les étapes', () => {
+    expect(isRoleForStep('soumis', 'ADMIN')).toBe(true);
+    expect(isRoleForStep('visa_saf', 'ADMIN')).toBe(true);
+    expect(isRoleForStep('visa_cb', 'ADMIN')).toBe(true);
+    expect(isRoleForStep('visa_daaf', 'ADMIN')).toBe(true);
+  });
+
+  it('SAF agit sur soumis', () => {
+    expect(isRoleForStep('soumis', 'SAF')).toBe(true);
+  });
+
+  it('OPERATEUR agit sur soumis', () => {
+    expect(isRoleForStep('soumis', 'OPERATEUR')).toBe(true);
+  });
+
+  it('CB agit sur visa_saf', () => {
+    expect(isRoleForStep('visa_saf', 'CB')).toBe(true);
+  });
+
+  it('DAAF agit sur visa_cb', () => {
+    expect(isRoleForStep('visa_cb', 'DAAF')).toBe(true);
+  });
+
+  it('DAF agit sur visa_cb', () => {
+    expect(isRoleForStep('visa_cb', 'DAF')).toBe(true);
+  });
+
+  it('DG agit sur visa_daaf', () => {
+    expect(isRoleForStep('visa_daaf', 'DG')).toBe(true);
+  });
+
+  it('SAF ne peut pas agir sur visa_saf', () => {
+    expect(isRoleForStep('visa_saf', 'SAF')).toBe(false);
+  });
+
+  it('CB ne peut pas agir sur soumis', () => {
+    expect(isRoleForStep('soumis', 'CB')).toBe(false);
+  });
+
+  it('DG ne peut pas agir sur soumis', () => {
+    expect(isRoleForStep('soumis', 'DG')).toBe(false);
+  });
+
+  it('retourne false si rôle null', () => {
+    expect(isRoleForStep('soumis', null)).toBe(false);
+  });
+
+  it('retourne false si statut brouillon', () => {
+    expect(isRoleForStep('brouillon', 'SAF')).toBe(false);
+  });
+
+  it('retourne false si statut valide', () => {
+    expect(isRoleForStep('valide', 'DG')).toBe(false);
+  });
+
+  it('retourne false si statut rejete', () => {
+    expect(isRoleForStep('rejete', 'SAF')).toBe(false);
+  });
+
+  it('retourne false si statut null', () => {
+    expect(isRoleForStep(null, 'SAF')).toBe(false);
+  });
+});
+
+// ===========================================================================
+// 14. Pagination helper — client-side slicing (Prompt 10)
+// ===========================================================================
+describe('Pagination helper', () => {
+  // Replicate the paginateList function from Engagements.tsx
+  const paginateList = <T>(list: T[], page: number, pageSize: number): T[] => {
+    const start = (page - 1) * pageSize;
+    return list.slice(start, start + pageSize);
+  };
+
+  const items = Array.from({ length: 55 }, (_, i) => i + 1);
+
+  it('page 1 retourne les 20 premiers éléments', () => {
+    const result = paginateList(items, 1, 20);
+    expect(result).toHaveLength(20);
+    expect(result[0]).toBe(1);
+    expect(result[19]).toBe(20);
+  });
+
+  it('page 2 retourne les éléments 21-40', () => {
+    const result = paginateList(items, 2, 20);
+    expect(result).toHaveLength(20);
+    expect(result[0]).toBe(21);
+    expect(result[19]).toBe(40);
+  });
+
+  it('page 3 retourne les éléments 41-55 (dernière page incomplète)', () => {
+    const result = paginateList(items, 3, 20);
+    expect(result).toHaveLength(15);
+    expect(result[0]).toBe(41);
+    expect(result[14]).toBe(55);
+  });
+
+  it('page au-delà des données retourne vide', () => {
+    const result = paginateList(items, 10, 20);
+    expect(result).toHaveLength(0);
+  });
+
+  it('pageSize 50 sur 55 éléments → page 1 a 50 items, page 2 a 5', () => {
+    expect(paginateList(items, 1, 50)).toHaveLength(50);
+    expect(paginateList(items, 2, 50)).toHaveLength(5);
+  });
+
+  it('totalPages calcul correct', () => {
+    expect(Math.ceil(55 / 20)).toBe(3);
+    expect(Math.ceil(20 / 20)).toBe(1);
+    expect(Math.ceil(0 / 20)).toBe(0);
+    expect(Math.ceil(1 / 20)).toBe(1);
+    expect(Math.ceil(21 / 20)).toBe(2);
+  });
+
+  it('liste vide retourne vide', () => {
+    const result = paginateList([], 1, 20);
+    expect(result).toHaveLength(0);
+  });
+
+  it('pageSize 100 sur 55 éléments → tout en page 1', () => {
+    const result = paginateList(items, 1, 100);
+    expect(result).toHaveLength(55);
   });
 });
