@@ -781,6 +781,34 @@ export function useEngagements() {
         }
       }
 
+      // Validation DG → notifier aussi les agents de la direction
+      if (isLastStep && engagement?.budget_line_id) {
+        const { data: blDir } = await supabase
+          .from('budget_lines')
+          .select('direction_id')
+          .eq('id', engagement.budget_line_id)
+          .single();
+        if (blDir?.direction_id) {
+          const { data: dirUsers } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('direction_id', blDir.direction_id)
+            .neq('id', engagement.created_by || '');
+          if (dirUsers?.length) {
+            valNotifs.push(
+              ...dirUsers.map((u) => ({
+                user_id: u.id,
+                type: 'validation',
+                title: 'Engagement validé',
+                message: `L'engagement ${engagement.numero} de votre direction a été validé`,
+                entity_type: 'engagement',
+                entity_id: id,
+              }))
+            );
+          }
+        }
+      }
+
       if (valNotifs.length > 0) {
         await supabase.from('notifications').insert(valNotifs);
       }
@@ -807,7 +835,7 @@ export function useEngagements() {
       // Get current engagement
       const { data: engagement } = await supabase
         .from('budget_engagements')
-        .select('statut, current_step, numero, created_by')
+        .select('statut, current_step, numero, created_by, budget_line_id')
         .eq('id', id)
         .single();
 
@@ -846,9 +874,18 @@ export function useEngagements() {
         newValues: { reason, step: stepNumber, role: stepInfo.role },
       });
 
-      // Notifier le créateur du rejet
+      // Notifier le créateur + direction du rejet
+      const rejectNotifs: Array<{
+        user_id: string;
+        type: string;
+        title: string;
+        message: string;
+        entity_type: string;
+        entity_id: string;
+      }> = [];
+
       if (engagement?.created_by) {
-        await supabase.from('notifications').insert({
+        rejectNotifs.push({
           user_id: engagement.created_by,
           type: 'rejet',
           title: 'Engagement rejeté',
@@ -856,6 +893,38 @@ export function useEngagements() {
           entity_type: 'engagement',
           entity_id: id,
         });
+      }
+
+      // Notifier les agents de la direction
+      if (engagement?.budget_line_id) {
+        const { data: blDir } = await supabase
+          .from('budget_lines')
+          .select('direction_id')
+          .eq('id', engagement.budget_line_id)
+          .single();
+        if (blDir?.direction_id) {
+          const { data: dirUsers } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('direction_id', blDir.direction_id)
+            .neq('id', engagement.created_by || '');
+          if (dirUsers?.length) {
+            rejectNotifs.push(
+              ...dirUsers.map((u) => ({
+                user_id: u.id,
+                type: 'rejet',
+                title: 'Engagement rejeté',
+                message: `L'engagement ${engagement.numero} de votre direction a été rejeté : ${reason}`,
+                entity_type: 'engagement',
+                entity_id: id,
+              }))
+            );
+          }
+        }
+      }
+
+      if (rejectNotifs.length > 0) {
+        await supabase.from('notifications').insert(rejectNotifs);
       }
     },
     onSuccess: () => {

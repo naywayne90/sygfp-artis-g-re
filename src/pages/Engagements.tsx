@@ -39,6 +39,7 @@ import {
   BarChart3,
   FileSpreadsheet,
   FileText,
+  AlertTriangle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -237,6 +238,24 @@ export default function Engagements() {
   const totalDotation = Array.from(uniqueBudgetLines.values()).reduce((acc, d) => acc + d, 0);
   const tauxMoyen = totalDotation > 0 ? (totalMontant / totalDotation) * 100 : 0;
 
+  // Alertes budgétaires : nombre de lignes à >80% de consommation
+  const budgetLineEngages = new Map<string, number>();
+  for (const eng of engagements) {
+    if (eng.budget_line?.id && eng.statut !== 'rejete' && eng.statut !== 'annule') {
+      budgetLineEngages.set(
+        eng.budget_line.id,
+        (budgetLineEngages.get(eng.budget_line.id) || 0) + eng.montant
+      );
+    }
+  }
+  let lignesEnAlerte = 0;
+  for (const [blId, totalEng] of budgetLineEngages) {
+    const dotation = uniqueBudgetLines.get(blId);
+    if (dotation && dotation > 0 && (totalEng / dotation) * 100 > 80) {
+      lignesEnAlerte++;
+    }
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Indicateur de workflow */}
@@ -378,11 +397,27 @@ export default function Engagements() {
         <Card>
           <CardContent className="pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Taux consommation</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Taux consommation</p>
+                {lignesEnAlerte > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="gap-1 text-orange-600 border-orange-300 bg-orange-50"
+                  >
+                    <AlertTriangle className="h-3 w-3" />
+                    {lignesEnAlerte}
+                  </Badge>
+                )}
+              </div>
               <p className={`text-xl font-bold ${getTauxColorClass(tauxMoyen)}`}>
                 {tauxMoyen.toFixed(1)}%
               </p>
               <Progress value={Math.min(tauxMoyen, 100)} className="h-1.5 mt-2" />
+              {lignesEnAlerte > 0 && (
+                <p className="text-xs text-orange-600 mt-1">
+                  {lignesEnAlerte} ligne{lignesEnAlerte > 1 ? 's' : ''} &gt;80%
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

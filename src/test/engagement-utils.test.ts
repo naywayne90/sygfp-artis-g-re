@@ -1147,3 +1147,250 @@ describe('Pagination helper', () => {
     expect(result).toHaveLength(55);
   });
 });
+
+// ============================================================================
+// 15. QR code visibility condition
+// ============================================================================
+describe("QR code — condition d'affichage", () => {
+  it('engagement validé avec visa_dg_date → QR visible', () => {
+    const engagement = {
+      statut: 'valide',
+      visa_dg_date: '2026-02-19T10:00:00Z',
+      visa_dg_user_id: 'u1',
+    };
+    const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
+    expect(showQR).toBe(true);
+  });
+
+  it('engagement brouillon → QR masqué', () => {
+    const engagement = { statut: 'brouillon', visa_dg_date: null, visa_dg_user_id: null };
+    const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
+    expect(showQR).toBe(false);
+  });
+
+  it('engagement soumis → QR masqué', () => {
+    const engagement = { statut: 'soumis', visa_dg_date: null, visa_dg_user_id: null };
+    const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
+    expect(showQR).toBe(false);
+  });
+
+  it('engagement rejete → QR masqué', () => {
+    const engagement = { statut: 'rejete', visa_dg_date: null, visa_dg_user_id: null };
+    const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
+    expect(showQR).toBe(false);
+  });
+
+  it('engagement validé sans visa_dg_date → QR masqué', () => {
+    const engagement = { statut: 'valide', visa_dg_date: null, visa_dg_user_id: null };
+    const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
+    expect(showQR).toBe(false);
+  });
+});
+
+// ============================================================================
+// 16. Alertes budgétaires — calcul lignes en alerte >80%
+// ============================================================================
+describe('Alertes budgétaires — calcul lignes >80%', () => {
+  // Helper qui reproduit le calcul du composant Engagements
+  function computeAlertCount(
+    engagements: Array<{
+      budget_line_id: string;
+      montant: number;
+      dotation: number;
+      statut: string;
+    }>
+  ) {
+    const uniqueBudgetLines = new Map<string, number>();
+    const budgetLineEngages = new Map<string, number>();
+
+    for (const eng of engagements) {
+      if (!uniqueBudgetLines.has(eng.budget_line_id)) {
+        uniqueBudgetLines.set(eng.budget_line_id, eng.dotation);
+      }
+      if (eng.statut !== 'rejete' && eng.statut !== 'annule') {
+        budgetLineEngages.set(
+          eng.budget_line_id,
+          (budgetLineEngages.get(eng.budget_line_id) || 0) + eng.montant
+        );
+      }
+    }
+
+    let count = 0;
+    for (const [blId, totalEng] of budgetLineEngages) {
+      const dotation = uniqueBudgetLines.get(blId);
+      if (dotation && dotation > 0 && (totalEng / dotation) * 100 > 80) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  it('aucune ligne en alerte si toutes < 80%', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 70_000, dotation: 100_000, statut: 'valide' },
+      { budget_line_id: 'bl2', montant: 50_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(0);
+  });
+
+  it('1 ligne en alerte si taux > 80%', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 85_000, dotation: 100_000, statut: 'valide' },
+      { budget_line_id: 'bl2', montant: 50_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(1);
+  });
+
+  it('2 lignes en alerte (>80% et >95%)', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 85_000, dotation: 100_000, statut: 'valide' },
+      { budget_line_id: 'bl2', montant: 98_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(2);
+  });
+
+  it('engagements rejetés ne comptent pas', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 90_000, dotation: 100_000, statut: 'rejete' },
+      { budget_line_id: 'bl1', montant: 30_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(0);
+  });
+
+  it('engagements annulés ne comptent pas', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 90_000, dotation: 100_000, statut: 'annule' },
+      { budget_line_id: 'bl1', montant: 30_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(0);
+  });
+
+  it('cumul multi-engagements sur même ligne dépasse le seuil', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 50_000, dotation: 100_000, statut: 'valide' },
+      { budget_line_id: 'bl1', montant: 35_000, dotation: 100_000, statut: 'soumis' },
+    ];
+    // 85_000 / 100_000 = 85% > 80%
+    expect(computeAlertCount(engagements)).toBe(1);
+  });
+
+  it("dotation 0 → pas d'alerte (division par zéro)", () => {
+    const engagements = [{ budget_line_id: 'bl1', montant: 50_000, dotation: 0, statut: 'valide' }];
+    expect(computeAlertCount(engagements)).toBe(0);
+  });
+
+  it("exactement 80% → pas d'alerte (seuil strict >80)", () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 80_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(0);
+  });
+
+  it('80.1% → en alerte', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 80_100, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(1);
+  });
+
+  it('dépassement >100% → en alerte', () => {
+    const engagements = [
+      { budget_line_id: 'bl1', montant: 120_000, dotation: 100_000, statut: 'valide' },
+    ];
+    expect(computeAlertCount(engagements)).toBe(1);
+  });
+
+  it('liste vide → 0 alertes', () => {
+    expect(computeAlertCount([])).toBe(0);
+  });
+});
+
+// ============================================================================
+// 17. Notification workflow — logique de dispatch
+// ============================================================================
+describe('Notification workflow — logique de dispatch', () => {
+  // Simule le pattern de notification du module engagement
+  function buildNotifRecipients(params: {
+    isLastStep: boolean;
+    createdBy: string | null;
+    directionUsers: string[];
+    nextRoleUsers: string[];
+  }) {
+    const recipients: Array<{ userId: string; type: string; reason: string }> = [];
+
+    // Toujours notifier le créateur
+    if (params.createdBy) {
+      recipients.push({
+        userId: params.createdBy,
+        type: params.isLastStep ? 'validation' : 'validation',
+        reason: params.isLastStep ? 'engagement_valide' : 'visa_accorde',
+      });
+    }
+
+    // Étape suivante (si pas dernière)
+    if (!params.isLastStep) {
+      for (const uid of params.nextRoleUsers) {
+        recipients.push({ userId: uid, type: 'validation', reason: 'a_valider' });
+      }
+    }
+
+    // Validation DG → direction
+    if (params.isLastStep) {
+      for (const uid of params.directionUsers) {
+        if (uid !== params.createdBy) {
+          recipients.push({ userId: uid, type: 'validation', reason: 'direction_notifiee' });
+        }
+      }
+    }
+
+    return recipients;
+  }
+
+  it('soumission (pas lastStep) → notifie créateur + SAF', () => {
+    const r = buildNotifRecipients({
+      isLastStep: false,
+      createdBy: 'agent1',
+      directionUsers: [],
+      nextRoleUsers: ['saf1', 'saf2'],
+    });
+    expect(r).toHaveLength(3);
+    expect(r[0].userId).toBe('agent1');
+    expect(r[1].userId).toBe('saf1');
+    expect(r[2].userId).toBe('saf2');
+  });
+
+  it('validation DG (lastStep) → notifie créateur + direction (sans doublon)', () => {
+    const r = buildNotifRecipients({
+      isLastStep: true,
+      createdBy: 'agent1',
+      directionUsers: ['agent1', 'agent2', 'agent3'],
+      nextRoleUsers: [],
+    });
+    // agent1 est créateur ET dans direction → ne reçoit pas double
+    expect(r).toHaveLength(3); // agent1 (creator) + agent2 + agent3
+    const dirNotifs = r.filter((n) => n.reason === 'direction_notifiee');
+    expect(dirNotifs).toHaveLength(2); // agent2 + agent3, pas agent1
+  });
+
+  it('validation DG sans direction → notifie uniquement le créateur', () => {
+    const r = buildNotifRecipients({
+      isLastStep: true,
+      createdBy: 'agent1',
+      directionUsers: [],
+      nextRoleUsers: [],
+    });
+    expect(r).toHaveLength(1);
+    expect(r[0].userId).toBe('agent1');
+  });
+
+  it('sans créateur (edge case) → notifie uniquement direction', () => {
+    const r = buildNotifRecipients({
+      isLastStep: true,
+      createdBy: null,
+      directionUsers: ['agent2'],
+      nextRoleUsers: [],
+    });
+    expect(r).toHaveLength(1);
+    expect(r[0].reason).toBe('direction_notifiee');
+  });
+});

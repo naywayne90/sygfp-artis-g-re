@@ -44,6 +44,7 @@ import { EngagementChecklist } from './EngagementChecklist';
 import { DossierGED } from '@/components/ged';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
 import { DossierTimeline } from '@/components/dossier/DossierTimeline';
+import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
@@ -266,26 +267,41 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 flex-wrap">
-              <span>Engagement {engagement.numero}</span>
-              {getStatutBadge(engagement.statut)}
-              {isSurMarche ? (
-                <Badge variant="outline" className="gap-1 bg-blue-50">
-                  <FileText className="h-3 w-3" />
-                  Sur marché
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="gap-1">
-                  Hors marché
-                </Badge>
+            <div className="flex items-start justify-between gap-4">
+              <DialogTitle className="flex items-center gap-2 flex-wrap">
+                <span>Engagement {engagement.numero}</span>
+                {getStatutBadge(engagement.statut)}
+                {isSurMarche ? (
+                  <Badge variant="outline" className="gap-1 bg-blue-50">
+                    <FileText className="h-3 w-3" />
+                    Sur marché
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1">
+                    Hors marché
+                  </Badge>
+                )}
+                {isLocked && (
+                  <Badge variant="outline" className="gap-1">
+                    <Lock className="h-3 w-3" />
+                    Verrouillé
+                  </Badge>
+                )}
+              </DialogTitle>
+              {/* QR code pour engagements validés */}
+              {engagement.statut === 'valide' && engagement.visa_dg_date && (
+                <QRCodeGenerator
+                  reference={engagement.numero}
+                  type="ENGAGEMENT"
+                  dateValidation={engagement.visa_dg_date}
+                  validateur={
+                    (engagement.visa_dg_user_id && visaProfiles[engagement.visa_dg_user_id]) || 'DG'
+                  }
+                  size="sm"
+                  showHash
+                />
               )}
-              {isLocked && (
-                <Badge variant="outline" className="gap-1">
-                  <Lock className="h-3 w-3" />
-                  Verrouillé
-                </Badge>
-              )}
-            </DialogTitle>
+            </div>
           </DialogHeader>
 
           <ScrollArea className="max-h-[70vh] pr-4">
