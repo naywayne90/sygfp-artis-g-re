@@ -78,7 +78,9 @@ export function RBACProvider({ children }: RBACProviderProps) {
   // Extract userId synchronously from localStorage, then track via onAuthStateChange
   const [userId, setUserId] = useState<string | null>(() => {
     try {
-      const stored = localStorage.getItem('sb-tjagvgqthlibdpvztvaf-auth-token');
+      const stored = localStorage.getItem(
+        `sb-${import.meta.env.VITE_SUPABASE_PROJECT_ID}-auth-token`
+      );
       if (stored) {
         const parsed = JSON.parse(stored);
         return parsed?.user?.id ?? null;
