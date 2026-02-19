@@ -45,9 +45,12 @@ import { EngagementList } from '@/components/engagement/EngagementList';
 import { EngagementDetails } from '@/components/engagement/EngagementDetails';
 import { EngagementRejectDialog } from '@/components/engagement/EngagementRejectDialog';
 import { EngagementDeferDialog } from '@/components/engagement/EngagementDeferDialog';
+import { EngagementDegageDialog } from '@/components/engagement/EngagementDegageDialog';
 import { EngagementValidateDialog } from '@/components/engagement/EngagementValidateDialog';
 import { EngagementPrintDialog } from '@/components/engagement/EngagementPrintDialog';
 import { PermissionGuard, usePermissionCheck } from '@/components/auth/PermissionGuard';
+import { useRBAC } from '@/contexts/RBACContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
 import { useCanValidateEngagement } from '@/hooks/useDelegations';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
@@ -73,10 +76,14 @@ export default function Engagements() {
     rejectEngagement,
     deferEngagement,
     resumeEngagement,
+    degageEngagement,
     isValidating,
+    isDegaging,
   } = useEngagements();
 
   const { canPerform } = usePermissionCheck();
+  const { isDAF, isAdmin } = useRBAC();
+  const { userRoles: userRoleList } = usePermissions();
   const { isReadOnly, getDisabledMessage } = useExerciceWriteGuard();
   const {
     canValidate: canValidateViaDelegation,
@@ -89,6 +96,13 @@ export default function Engagements() {
   const canRejectEngagementFinal = canPerform('engagement.reject') || canValidateViaDelegation;
   const canDeferEngagementFinal = canPerform('engagement.defer') || canValidateViaDelegation;
 
+  // Dégagement : DAAF ou ADMIN uniquement
+  const canDegageEngagement = isDAF || isAdmin;
+
+  // Rôle principal (codes user_roles) pour filtrage RBAC du menu Actions
+  const ROLE_PRIORITY = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'SAF', 'OPERATEUR'] as const;
+  const userRole = ROLE_PRIORITY.find((r) => userRoleList.includes(r)) || userRoleList[0] || null;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [preSelectedPMId, setPreSelectedPMId] = useState<string | null>(null);
@@ -98,6 +112,7 @@ export default function Engagements() {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeferDialog, setShowDeferDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showDegageDialog, setShowDegageDialog] = useState(false);
 
   // Handle sourcePM URL parameter
   useEffect(() => {
@@ -154,6 +169,11 @@ export default function Engagements() {
     setShowPrintDialog(true);
   };
 
+  const handleDegage = (engagement: Engagement) => {
+    setSelectedEngagement(engagement);
+    setShowDegageDialog(true);
+  };
+
   const confirmValidate = async (id: string, comments?: string) => {
     await validateEngagement({ id, comments });
     setShowValidateDialog(false);
@@ -169,6 +189,12 @@ export default function Engagements() {
   const confirmDefer = async (id: string, motif: string, dateReprise?: string) => {
     await deferEngagement({ id, motif, dateReprise });
     setShowDeferDialog(false);
+    setSelectedEngagement(null);
+  };
+
+  const confirmDegage = async (id: string, montant_degage: number, motif: string) => {
+    await degageEngagement({ id, montant: montant_degage, motif });
+    setShowDegageDialog(false);
     setSelectedEngagement(null);
   };
 
@@ -364,7 +390,9 @@ export default function Engagements() {
                   onDefer={canDeferEngagementFinal ? handleDefer : undefined}
                   onSubmit={canPerform('engagement.submit') ? submitEngagement : undefined}
                   onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
+                  onDegage={canDegageEngagement ? handleDegage : undefined}
                   onPrint={handlePrint}
+                  userRole={userRole}
                 />
               )}
             </CardContent>
@@ -448,6 +476,7 @@ export default function Engagements() {
                 onReject={canRejectEngagementFinal ? handleReject : undefined}
                 onDefer={canDeferEngagementFinal ? handleDefer : undefined}
                 onPrint={handlePrint}
+                userRole={userRole}
               />
             </CardContent>
           </Card>
@@ -535,6 +564,7 @@ export default function Engagements() {
                 engagements={filterEngagements(engagementsRejetes)}
                 onView={handleView}
                 onPrint={handlePrint}
+                userRole={userRole}
               />
             </CardContent>
           </Card>
@@ -554,6 +584,7 @@ export default function Engagements() {
                 onView={handleView}
                 onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
                 onPrint={handlePrint}
+                userRole={userRole}
               />
             </CardContent>
           </Card>
@@ -607,6 +638,14 @@ export default function Engagements() {
         engagement={selectedEngagement}
         open={showPrintDialog}
         onOpenChange={setShowPrintDialog}
+      />
+
+      <EngagementDegageDialog
+        engagement={selectedEngagement}
+        open={showDegageDialog}
+        onOpenChange={setShowDegageDialog}
+        onConfirm={confirmDegage}
+        isLoading={isDegaging}
       />
     </div>
   );

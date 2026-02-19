@@ -26,6 +26,7 @@ import {
   Loader2,
   Receipt,
   Download,
+  MinusCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -395,6 +396,50 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Dégagement (si montant_degage > 0) */}
+                {(engagement.montant_degage || 0) > 0 && (
+                  <Card className="border-orange-500/50">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm text-orange-700 flex items-center gap-2">
+                        <MinusCircle className="h-4 w-4" />
+                        Dégagement
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Montant dégagé :</span>
+                          <span className="ml-2 font-bold text-orange-600">
+                            {formatCurrency(engagement.montant_degage || 0)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Montant net :</span>
+                          <span className="ml-2 font-bold text-primary">
+                            {formatCurrency(engagement.montant - (engagement.montant_degage || 0))}
+                          </span>
+                        </div>
+                        {engagement.motif_degage && (
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Motif :</span>
+                            <p className="mt-1">{engagement.motif_degage}</p>
+                          </div>
+                        )}
+                        {engagement.degage_at && (
+                          <div>
+                            <span className="text-muted-foreground">Date :</span>
+                            <span className="ml-2">
+                              {format(new Date(engagement.degage_at), 'dd MMMM yyyy', {
+                                locale: fr,
+                              })}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Fournisseur / Prestataire */}
                 <Card>

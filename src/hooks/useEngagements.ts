@@ -87,11 +87,11 @@ export interface Engagement {
   visa_dg_date: string | null;
   visa_dg_commentaire: string | null;
   motif_rejet: string | null;
-  // Colonnes degagement
+  // Colonnes dégagement (Prompt 8)
   montant_degage: number | null;
-  motif_degagement: string | null;
-  date_degagement: string | null;
-  degagement_user_id: string | null;
+  motif_degage: string | null;
+  degage_by: string | null;
+  degage_at: string | null;
   // Joined data
   budget_line?: {
     id: string;
@@ -980,6 +980,97 @@ export function useEngagements() {
     },
   });
 
+  // Dégagement (total ou partiel) — DAAF/ADMIN uniquement (Prompt 8)
+  const degageMutation = useMutation({
+    mutationFn: async ({ id, montant, motif }: { id: string; montant: number; motif: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
+
+      // Récupérer l'engagement
+      const { data: engagement, error: fetchError } = await supabase
+        .from('budget_engagements')
+        .select('statut, montant, montant_degage, budget_line_id, numero, created_by')
+        .eq('id', id)
+        .single();
+
+      if (fetchError || !engagement) throw new Error('Engagement introuvable');
+
+      if (engagement.statut !== 'valide')
+        throw new Error('Seuls les engagements validés peuvent être dégagés');
+
+      const montantRestant = engagement.montant - (engagement.montant_degage || 0);
+      if (montant <= 0) throw new Error('Le montant à dégager doit être supérieur à 0');
+      if (montant > montantRestant)
+        throw new Error(
+          `Le montant à dégager (${montant.toLocaleString('fr-FR')} FCFA) dépasse le montant restant (${montantRestant.toLocaleString('fr-FR')} FCFA)`
+        );
+
+      const nouveauMontantDegage = (engagement.montant_degage || 0) + montant;
+
+      // Mettre à jour l'engagement — statut reste 'valide'
+      const { error: updateError } = await supabase
+        .from('budget_engagements')
+        .update({
+          montant_degage: nouveauMontantDegage,
+          motif_degage: motif,
+          degage_by: user.id,
+          degage_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      // Restituer les crédits sur la ligne budgétaire
+      if (engagement.budget_line_id) {
+        const { data: budgetLine } = await supabase
+          .from('budget_lines')
+          .select('total_engage')
+          .eq('id', engagement.budget_line_id)
+          .single();
+
+        if (budgetLine) {
+          const newTotalEngage = Math.max(0, (budgetLine.total_engage || 0) - montant);
+          await supabase
+            .from('budget_lines')
+            .update({ total_engage: newTotalEngage })
+            .eq('id', engagement.budget_line_id);
+        }
+      }
+
+      await logAction({
+        entityType: 'engagement',
+        entityId: id,
+        action: 'degage',
+        newValues: { montant, motif, total: nouveauMontantDegage >= engagement.montant },
+      });
+
+      // Notifier le créateur
+      if (engagement.created_by) {
+        const isTotal = nouveauMontantDegage >= engagement.montant;
+        await supabase.from('notifications').insert({
+          user_id: engagement.created_by,
+          type: 'degagement',
+          title: isTotal ? 'Dégagement total' : 'Dégagement partiel',
+          message: `L'engagement ${engagement.numero} a été ${isTotal ? 'totalement dégagé' : `partiellement dégagé (${montant.toLocaleString('fr-FR')} FCFA)`} : ${motif}`,
+          entity_type: 'engagement',
+          entity_id: id,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['engagements'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success('Dégagement effectué avec succès');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur lors du dégagement', {
+        description: error.message,
+      });
+    },
+  });
+
   // Update engagement (for locked fields with justification)
   const updateMutation = useMutation({
     mutationFn: async ({
@@ -1075,9 +1166,11 @@ export function useEngagements() {
     deferEngagement: deferMutation.mutateAsync,
     resumeEngagement: resumeMutation.mutateAsync,
     updateEngagement: updateMutation.mutateAsync,
+    degageEngagement: degageMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isSubmitting: submitMutation.isPending,
     isValidating: validateMutation.isPending,
+    isDegaging: degageMutation.isPending,
   };
 }
 
