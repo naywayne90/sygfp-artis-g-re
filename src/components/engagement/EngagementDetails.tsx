@@ -35,6 +35,7 @@ import {
   BudgetAvailability,
   VALIDATION_STEPS,
   useEngagements,
+  useEngagementLignes,
 } from '@/hooks/useEngagements';
 import { generateBonEngagementPDF } from '@/lib/pdf/generateBonEngagementPDF';
 import { IndicateurBudget } from './IndicateurBudget';
@@ -127,6 +128,11 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
   const [visaProfiles, setVisaProfiles] = useState<Record<string, string>>({});
   const [isLoadingOthers, setIsLoadingOthers] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  // Fetch multi-lignes
+  const { data: engagementLignes = [] } = useEngagementLignes(
+    engagement?.is_multi_ligne ? engagement.id : null
+  );
 
   // Fetch budget availability
   useEffect(() => {
@@ -638,6 +644,56 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Multi-lignes (Prompt 13) */}
+                {engagement.is_multi_ligne && engagementLignes.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Hash className="h-4 w-4" />
+                        Ventilation multi-lignes
+                        <Badge variant="outline" className="ml-auto">
+                          {engagementLignes.length} ligne{engagementLignes.length > 1 ? 's' : ''}
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {engagementLignes.map((ligne) => {
+                          const pct =
+                            engagement.montant > 0
+                              ? ((ligne.montant / engagement.montant) * 100).toFixed(1)
+                              : '0';
+                          return (
+                            <div
+                              key={ligne.id}
+                              className="flex items-center justify-between p-2 rounded border text-sm"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <span className="font-medium">
+                                  {ligne.budget_line?.code || 'N/A'}
+                                </span>
+                                <span className="text-muted-foreground ml-2 truncate">
+                                  {ligne.budget_line?.label || ''}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                <Badge variant="outline" className="font-mono">
+                                  {pct}%
+                                </Badge>
+                                <span className="font-medium">{formatCurrency(ligne.montant)}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div className="flex items-center justify-between p-2 bg-muted rounded text-sm font-bold">
+                          <span>TOTAL</span>
+                          <span>{formatCurrency(engagement.montant)}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Indicateur de disponibilité budgétaire */}
                 <IndicateurBudget

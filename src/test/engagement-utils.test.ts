@@ -1507,3 +1507,213 @@ describe('EngagementChainNav — buildChainSteps', () => {
     expect(steps[1].subtitle).toBe('ENG-2026-001');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Section 19 : Multi-lignes ventilation (Prompt 13)
+// ---------------------------------------------------------------------------
+
+describe('Section 19 — Multi-lignes ventilation', () => {
+  // Helper to simulate SelectedBudgetLine (from BudgetLineSelector)
+  interface MockSelectedLine {
+    id: string;
+    code: string;
+    label: string;
+    montant: number;
+    disponible_net: number;
+    dotation_actuelle: number;
+    dotation_initiale: number;
+    total_engage: number;
+    montant_reserve: number;
+    pourcentage?: number;
+  }
+
+  const makeLine = (overrides: Partial<MockSelectedLine> = {}): MockSelectedLine => ({
+    id: 'bl-1',
+    code: '622960',
+    label: 'Informatique',
+    montant: 0,
+    disponible_net: 28_000_000,
+    dotation_actuelle: 50_000_000,
+    dotation_initiale: 50_000_000,
+    total_engage: 22_000_000,
+    montant_reserve: 0,
+    ...overrides,
+  });
+
+  // Replicate the form validation logic from EngagementForm
+  function validateMultiLigne(
+    selectedLines: MockSelectedLine[],
+    montantTotal: number
+  ): { isValid: boolean; reason?: string } {
+    if (selectedLines.length <= 1) return { isValid: true };
+
+    // Check every line has montant > 0 and montant <= disponible_net
+    const allLinesSufficient = selectedLines.every(
+      (l) => l.montant > 0 && l.montant <= l.disponible_net
+    );
+    if (!allLinesSufficient) {
+      return { isValid: false, reason: 'budget_insuffisant' };
+    }
+
+    // Check sum matches total (tolerance 1 FCFA)
+    const totalLignes = selectedLines.reduce((sum, l) => sum + l.montant, 0);
+    if (Math.abs(totalLignes - montantTotal) > 1) {
+      return { isValid: false, reason: 'somme_incorrecte' };
+    }
+
+    return { isValid: true };
+  }
+
+  it('détecte multi-ligne quand selectedLines > 1', () => {
+    const lines = [makeLine(), makeLine({ id: 'bl-2' })];
+    expect(lines.length > 1).toBe(true);
+  });
+
+  it('single ligne = pas multi-ligne, toujours valide', () => {
+    const lines = [makeLine({ montant: 5_000_000 })];
+    expect(validateMultiLigne(lines, 5_000_000).isValid).toBe(true);
+  });
+
+  it('2 lignes ventilées correctement = valide', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 9_000_000, disponible_net: 28_000_000 }),
+      makeLine({
+        id: 'bl-2',
+        code: '653220',
+        label: 'Formation',
+        montant: 6_000_000,
+        disponible_net: 15_000_000,
+      }),
+    ];
+    expect(validateMultiLigne(lines, 15_000_000).isValid).toBe(true);
+  });
+
+  it('somme des lignes ≠ montant total → invalide', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 9_000_000 }),
+      makeLine({ id: 'bl-2', montant: 4_000_000 }),
+    ];
+    const result = validateMultiLigne(lines, 15_000_000);
+    expect(result.isValid).toBe(false);
+    expect(result.reason).toBe('somme_incorrecte');
+  });
+
+  it('tolérance 1 FCFA pour les arrondis', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 9_000_000.5 }),
+      makeLine({ id: 'bl-2', montant: 5_999_999.8 }),
+    ];
+    // Sum = 15_000_000.3, total = 15_000_000 → écart 0.3 < 1 → OK
+    expect(validateMultiLigne(lines, 15_000_000).isValid).toBe(true);
+  });
+
+  it('ligne avec montant 0 → invalide', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 15_000_000 }),
+      makeLine({ id: 'bl-2', montant: 0 }),
+    ];
+    const result = validateMultiLigne(lines, 15_000_000);
+    expect(result.isValid).toBe(false);
+    expect(result.reason).toBe('budget_insuffisant');
+  });
+
+  it('une ligne dépasse le disponible → invalide', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 30_000_000, disponible_net: 28_000_000 }),
+      makeLine({ id: 'bl-2', montant: 5_000_000, disponible_net: 15_000_000 }),
+    ];
+    const result = validateMultiLigne(lines, 35_000_000);
+    expect(result.isValid).toBe(false);
+    expect(result.reason).toBe('budget_insuffisant');
+  });
+
+  it('3 lignes ventilées correctement = valide', () => {
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 5_000_000, disponible_net: 10_000_000 }),
+      makeLine({ id: 'bl-2', montant: 7_000_000, disponible_net: 20_000_000 }),
+      makeLine({ id: 'bl-3', montant: 3_000_000, disponible_net: 5_000_000 }),
+    ];
+    expect(validateMultiLigne(lines, 15_000_000).isValid).toBe(true);
+  });
+
+  it('pourcentage auto-calculé par ligne', () => {
+    const montantTotal = 15_000_000;
+    const lines = [
+      makeLine({ id: 'bl-1', montant: 9_000_000 }),
+      makeLine({ id: 'bl-2', montant: 6_000_000 }),
+    ];
+    // Simuler le calcul de pourcentage comme BudgetLineSelector
+    const withPct = lines.map((l) => ({
+      ...l,
+      pourcentage: montantTotal > 0 ? (l.montant / montantTotal) * 100 : 0,
+    }));
+    expect(withPct[0].pourcentage).toBe(60);
+    expect(withPct[1].pourcentage).toBe(40);
+    expect(withPct[0].pourcentage + withPct[1].pourcentage).toBe(100);
+  });
+
+  it('createEngagement params pour multi-ligne', () => {
+    const selectedLines = [
+      makeLine({ id: 'bl-1', montant: 9_000_000 }),
+      makeLine({ id: 'bl-2', montant: 6_000_000 }),
+    ];
+    const isMultiLigne = selectedLines.length > 1;
+
+    // Simuler les params envoyés à createEngagement
+    const params = {
+      type_engagement: 'hors_marche' as TypeEngagement,
+      expression_besoin_id: 'eb-1',
+      budget_line_id: selectedLines[0].id,
+      objet: 'Test multi',
+      montant: 15_000_000,
+      fournisseur: 'Fournisseur Test',
+      is_multi_ligne: isMultiLigne || undefined,
+      lignes: isMultiLigne
+        ? selectedLines.map((l) => ({ budget_line_id: l.id, montant: l.montant }))
+        : undefined,
+    };
+
+    expect(params.is_multi_ligne).toBe(true);
+    expect(params.lignes).toHaveLength(2);
+    expect(params.lignes?.[0]).toEqual({ budget_line_id: 'bl-1', montant: 9_000_000 });
+    expect(params.lignes?.[1]).toEqual({ budget_line_id: 'bl-2', montant: 6_000_000 });
+    expect(params.budget_line_id).toBe('bl-1'); // principal line
+  });
+
+  it('engagement single ligne → pas de params multi-ligne', () => {
+    const selectedLines = [makeLine({ id: 'bl-1', montant: 5_000_000 })];
+    const isMultiLigne = selectedLines.length > 1;
+
+    const params = {
+      budget_line_id: selectedLines[0].id,
+      montant: 5_000_000,
+      is_multi_ligne: isMultiLigne || undefined,
+      lignes: isMultiLigne
+        ? selectedLines.map((l) => ({ budget_line_id: l.id, montant: l.montant }))
+        : undefined,
+    };
+
+    expect(params.is_multi_ligne).toBeUndefined();
+    expect(params.lignes).toBeUndefined();
+  });
+
+  it('is_multi_ligne flag dans Engagement type', () => {
+    const eng: Partial<Engagement> = {
+      id: 'e-1',
+      numero: 'ENG-2026-001',
+      objet: 'Test',
+      montant: 15_000_000,
+      is_multi_ligne: true,
+      budget_line_id: 'bl-1',
+    };
+    expect(eng.is_multi_ligne).toBe(true);
+  });
+
+  it('is_multi_ligne null (legacy) traité comme false', () => {
+    const eng: Partial<Engagement> = {
+      id: 'e-2',
+      is_multi_ligne: null,
+    };
+    expect(!!eng.is_multi_ligne).toBe(false);
+  });
+});

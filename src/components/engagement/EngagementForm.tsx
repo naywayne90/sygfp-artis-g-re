@@ -138,6 +138,12 @@ export function EngagementForm({
         setAvailability(null);
         return;
       }
+      // Multi-lignes : la vérification par ligne est faite par le BudgetLineSelector
+      // et par la mutation côté serveur. Pas besoin de IndicateurBudget global.
+      if (selectedLines.length > 1) {
+        setAvailability(null);
+        return;
+      }
       setIsCheckingBudget(true);
       try {
         const result = await calculateAvailability(selectedLines[0].id, montant);
@@ -204,8 +210,19 @@ export function EngagementForm({
       return;
     }
 
-    if (availability && !availability.is_sufficient) {
+    const isMultiLigne = selectedLines.length > 1;
+
+    // Single line: vérification budgétaire classique
+    if (!isMultiLigne && availability && !availability.is_sufficient) {
       return;
+    }
+
+    // Multi-lignes: vérifier somme et disponibilité par ligne
+    if (isMultiLigne) {
+      const totalLignes = selectedLines.reduce((sum, l) => sum + l.montant, 0);
+      if (Math.abs(totalLignes - montant) > 1) return;
+      const hasInsufficientLine = selectedLines.some((l) => l.montant > l.disponible_net);
+      if (hasInsufficientLine) return;
     }
 
     // Determine expression_besoin_id
@@ -229,6 +246,11 @@ export function EngagementForm({
           typeEngagement === 'sur_marche'
             ? selectedPassation?.dossier_id || dossierId
             : selectedExpression?.dossier_id || dossierId,
+        // Multi-lignes (Prompt 13)
+        is_multi_ligne: isMultiLigne || undefined,
+        lignes: isMultiLigne
+          ? selectedLines.map((l) => ({ budget_line_id: l.id, montant: l.montant }))
+          : undefined,
       });
       onOpenChange(false);
     } catch (error: unknown) {
@@ -240,12 +262,19 @@ export function EngagementForm({
   // --- Validation ---
   const seuilDepasse = typeEngagement === 'hors_marche' && montant >= SEUIL_HORS_MARCHE;
 
+  // Multi-lignes : chaque ligne doit avoir montant > 0, montant ≤ disponible, et somme = total
+  const isMultiLigneForm = selectedLines.length > 1;
+  const multiLigneValid = isMultiLigneForm
+    ? selectedLines.every((l) => l.montant > 0 && l.montant <= l.disponible_net) &&
+      Math.abs(selectedLines.reduce((sum, l) => sum + l.montant, 0) - montant) <= 1
+    : true;
+
   const canSubmit =
     typeEngagement !== '' &&
     objet.trim() !== '' &&
     montant > 0 &&
     selectedLines.length > 0 &&
-    (availability?.is_sufficient ?? true) &&
+    (isMultiLigneForm ? multiLigneValid : (availability?.is_sufficient ?? true)) &&
     !isCreating &&
     !seuilDepasse &&
     (typeEngagement === 'sur_marche' ? !!selectedPassationId : !!selectedExpressionId);
@@ -583,8 +612,8 @@ export function EngagementForm({
                 showFilters={true}
               />
 
-              {/* Budget availability */}
-              {selectedLines.length > 0 && (
+              {/* Budget availability — ligne unique */}
+              {selectedLines.length === 1 && (
                 <IndicateurBudget
                   availability={availability}
                   isLoading={isCheckingBudget}
@@ -594,6 +623,55 @@ export function EngagementForm({
                       : null
                   }
                 />
+              )}
+
+              {/* Budget availability — multi-lignes résumé */}
+              {isMultiLigneForm && (
+                <Card
+                  className={
+                    multiLigneValid
+                      ? 'border-blue-200 bg-blue-50/30'
+                      : 'border-destructive bg-destructive/5'
+                  }
+                >
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        Ventilation multi-lignes
+                      </span>
+                      <Badge variant={multiLigneValid ? 'default' : 'destructive'}>
+                        {selectedLines.length} ligne{selectedLines.length > 1 ? 's' : ''} —{' '}
+                        {multiLigneValid ? 'Conforme' : 'À vérifier'}
+                      </Badge>
+                    </div>
+                    {(() => {
+                      const totalLignes = selectedLines.reduce((sum, l) => sum + l.montant, 0);
+                      const ecart = Math.abs(totalLignes - montant);
+                      const insuffisantes = selectedLines.filter(
+                        (l) => l.montant > l.disponible_net
+                      );
+                      return (
+                        <>
+                          {ecart > 1 && (
+                            <p className="text-xs text-destructive mt-1">
+                              Écart de {formatCurrency(ecart)} entre la somme des lignes (
+                              {formatCurrency(totalLignes)}) et le montant total (
+                              {formatCurrency(montant)}).
+                            </p>
+                          )}
+                          {insuffisantes.length > 0 && (
+                            <p className="text-xs text-destructive mt-1">
+                              {insuffisantes.length} ligne{insuffisantes.length > 1 ? 's' : ''}{' '}
+                              dépasse{insuffisantes.length > 1 ? 'nt' : ''} le disponible
+                              budgétaire.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
               )}
 
               <Separator />

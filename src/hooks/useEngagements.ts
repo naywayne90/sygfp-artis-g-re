@@ -92,6 +92,8 @@ export interface Engagement {
   motif_degage: string | null;
   degage_by: string | null;
   degage_at: string | null;
+  // Multi-lignes (Prompt 13)
+  is_multi_ligne: boolean | null;
   // Joined data
   budget_line?: {
     id: string;
@@ -134,6 +136,21 @@ export interface Engagement {
     } | null;
   } | null;
   creator?: { id: string; full_name: string | null } | null;
+}
+
+// Ligne de ventilation multi-lignes (Prompt 13)
+export interface EngagementLigne {
+  id: string;
+  engagement_id: string;
+  budget_line_id: string;
+  montant: number;
+  created_at: string;
+  budget_line?: {
+    id: string;
+    code: string;
+    label: string;
+    dotation_initiale: number;
+  } | null;
 }
 
 // Extended Engagement with validator profiles and full budget_line (for detail + PDF)
@@ -491,6 +508,9 @@ export function useEngagements() {
       marche_id?: string;
       passation_marche_id?: string;
       dossier_id?: string;
+      // Multi-lignes (Prompt 13)
+      is_multi_ligne?: boolean;
+      lignes?: Array<{ budget_line_id: string; montant: number }>;
     }) => {
       const {
         data: { user },
@@ -498,11 +518,23 @@ export function useEngagements() {
       if (!user) throw new Error('Non authentifié');
 
       // Vérifier la disponibilité budgétaire avant création
-      const availability = await calculateAvailability(data.budget_line_id, data.montant);
-      if (!availability.is_sufficient) {
-        throw new Error(
-          `Disponible insuffisant : ${new Intl.NumberFormat('fr-FR').format(availability.disponible)} FCFA disponibles, ${new Intl.NumberFormat('fr-FR').format(data.montant)} FCFA demandés`
-        );
+      if (data.is_multi_ligne && data.lignes?.length) {
+        // Multi-ligne : vérifier chaque ligne indépendamment
+        for (const ligne of data.lignes) {
+          const avail = await calculateAvailability(ligne.budget_line_id, ligne.montant);
+          if (!avail.is_sufficient) {
+            throw new Error(
+              `Ligne ${ligne.budget_line_id} : disponible insuffisant (${new Intl.NumberFormat('fr-FR').format(avail.disponible)} FCFA)`
+            );
+          }
+        }
+      } else {
+        const availability = await calculateAvailability(data.budget_line_id, data.montant);
+        if (!availability.is_sufficient) {
+          throw new Error(
+            `Disponible insuffisant : ${new Intl.NumberFormat('fr-FR').format(availability.disponible)} FCFA disponibles, ${new Intl.NumberFormat('fr-FR').format(data.montant)} FCFA demandés`
+          );
+        }
       }
 
       const numero = await generateNumero();
@@ -542,11 +574,24 @@ export function useEngagements() {
           workflow_status: 'en_attente',
           current_step: 0,
           created_by: user.id,
+          is_multi_ligne: data.is_multi_ligne || false,
         })
         .select()
         .single();
 
       if (error) throw error;
+
+      // Insérer les lignes de ventilation (multi-lignes)
+      if (data.is_multi_ligne && data.lignes?.length) {
+        const { error: lignesError } = await supabase.from('engagement_lignes').insert(
+          data.lignes.map((l) => ({
+            engagement_id: engagement.id,
+            budget_line_id: l.budget_line_id,
+            montant: l.montant,
+          }))
+        );
+        if (lignesError) throw lignesError;
+      }
 
       // NOTE: Les records engagement_validations sont créés automatiquement
       // par le trigger AFTER fn_audit_engagement_visa à chaque changement de statut.
@@ -1311,6 +1356,32 @@ export function useBudgetLineMovements(budgetLineId: string | null, exercice?: n
       return (data || []) as unknown as BudgetLineMovement[];
     },
     enabled: !!budgetLineId,
+  });
+}
+
+// ============================================================================
+// Hook: Engagement lignes (Prompt 13)
+// Fetches the ventilation lines for a multi-ligne engagement
+// ============================================================================
+export function useEngagementLignes(engagementId: string | null) {
+  return useQuery({
+    queryKey: ['engagement-lignes', engagementId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('engagement_lignes')
+        .select(
+          `
+          id, engagement_id, budget_line_id, montant, created_at,
+          budget_line:budget_lines(id, code, label, dotation_initiale)
+        `
+        )
+        .eq('engagement_id', engagementId as string)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as unknown as EngagementLigne[];
+    },
+    enabled: !!engagementId,
   });
 }
 
