@@ -1,192 +1,200 @@
-# Instructions pour Claude Code - SYGFP
+# SYGFP — Instructions Claude Code
 
-## 🎯 Mission
+## 1. Projet
 
-Tu es un ingénieur Full Stack senior travaillant sur SYGFP (Système de Gestion Financière et de Planification) pour ARTI Gabon.
+**SYGFP** (Systeme de Gestion des Finances Publiques) est l'application de gestion de la chaine de depense de l'**ARTI** (Autorite de Regulation du Transport Interieur, **Cote d'Ivoire**). Elle couvre 9 etapes : Note SEF > Note AEF > Imputation > Expression de Besoin > Passation de Marche > Engagement > Liquidation > Ordonnancement > Reglement.
 
-## 📋 Workflow obligatoire pour CHAQUE tâche
+## 2. Stack technique
 
-### Avant de coder :
+React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query | React Hook Form + Zod | Supabase (PostgreSQL + Auth + RLS + Edge Functions) | Vitest + Playwright
 
-1. [ ] Comprendre la demande à 100%
-2. [ ] Identifier les fichiers à modifier
-3. [ ] Planifier les changements étape par étape
+## 3. Etat des modules
 
-### Pendant le codage :
+| Module               | Statut               | Tests                | Doc                                      |
+| -------------------- | -------------------- | -------------------- | ---------------------------------------- |
+| Note SEF             | Production           | 91+ RBAC             | -                                        |
+| Note AEF             | Production           | E2E                  | -                                        |
+| Imputation           | Production           | E2E                  | -                                        |
+| Expression Besoin    | Production           | E2E                  | -                                        |
+| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E** | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
+| Engagement           | 5 gaps ouverts       | 0 unit               | `docs/TRANSITION_VERS_ENGAGEMENT.md`     |
+| Liquidation          | Production (legacy)  | E2E                  | -                                        |
+| Ordonnancement       | Production (legacy)  | E2E                  | -                                        |
+| Reglement            | Production (legacy)  | 138 E2E              | -                                        |
+| Budget/Planification | Production           | 52 unit              | -                                        |
+| Workflow Engine      | Production           | 95 unit              | -                                        |
+| RBAC                 | Production           | 91 unit              | -                                        |
 
-1. [ ] Écrire du code TypeScript strict (éviter `any`)
-2. [ ] Suivre les conventions existantes du projet
-3. [ ] Ajouter des tests pour chaque nouvelle fonction
+## 4. Conventions de code (resume)
 
-### Après le codage :
+- **TypeScript strict** : zero `any`, zero erreur `tsc --noEmit`
+- **Imports** : React > Routing > shadcn/ui > TanStack > Supabase > Contextes > Hooks > Composants > toast/date-fns > Utils > Icones > Types
+- **Types domaine** : definis dans le hook (`usePassationsMarche.ts` exporte `PassationMarche`)
+- **Montants** : `formatCurrency()` de `@/lib/utils` (jamais de formatteur local)
+- **Textes UI** : tout en francais (labels, erreurs, toasts)
+- **Mutations** : toujours `onSuccess` (invalidate + toast) + `onError` (toast avec description)
+- **RLS** : `has_role(auth.uid(), 'ROLE'::app_role)` via table `user_roles`
+- **References** : `get_next_sequence(p_doc_type, p_exercice, p_scope)` atomique
+- **Backend** : tables `snake_case` pluriel, PK `id UUID`, FK `{table_singulier}_id`, timestamps auto
+- **UI** : shadcn/ui uniquement (`@/components/ui/`), pas de CSS custom
+- **State** : TanStack Query (donnees serveur, staleTime 30s) + useState (UI local)
+- **Formulaires** : state-based (principal) ou react-hook-form + Zod (secondaire)
+- **Nommage** : Composants PascalCase, Hooks use+camelCase, Services camelCase+Service.ts
+- **Exports** : Named exports (pas de default sauf pages)
+- **Responsive** : Tailwind mobile-first (sm:/md:/lg:/xl:)
 
-1. [ ] Lancer `npm run lint` - Corriger les erreurs
-2. [ ] Lancer `npm run typecheck` - ZÉRO erreur
-3. [ ] Lancer `npm run test` - TOUS les tests passent
-4. [ ] Ouvrir le navigateur et tester visuellement
-5. [ ] Vérifier dans Supabase que les données sont correctes
-6. [ ] Si tout est OK : commit + push
-7. [ ] Si erreur : corriger et recommencer la vérification
+### Patterns frontend reutilisables (pour tout nouveau module)
 
-## 🔍 Double vérification obligatoire
+| Pattern            | Composants                                                                               | Exemple de reference                         |
+| ------------------ | ---------------------------------------------------------------------------------------- | -------------------------------------------- |
+| **P1. Page liste** | PageHeader + KPIs (grid) + Tabs + NotesFiltersBar + Table + NotesPagination + EmptyState | `PassationMarche.tsx`, `NotesSEF.tsx`        |
+| **P2. Formulaire** | Dialog/Sheet + useState + validate() + mutation                                          | `PassationMarcheForm.tsx`, `NoteSEFForm.tsx` |
+| **P3. Detail**     | Sheet/Dialog + Tabs internes (Infos/Docs/Historique) + boutons actions                   | `PassationDetails.tsx`                       |
+| **P4. Validation** | Page dediee (KPIs + en attente/historique) + Dialog motif                                | `PassationApprobation.tsx`                   |
+| **P5. Chain nav**  | Navigation horizontale etapes liees (EB ↔ PM ↔ Engagement)                               | `PassationChainNav.tsx`                      |
+| **P6. Export**     | DropdownMenu (Excel/PDF/CSV) + hook useModuleExport                                      | `usePassationExport.ts`                      |
+| **P7. Workflow**   | Timeline visuelle + boutons conditionnels role/statut                                    | `WorkflowActionBar.tsx`                      |
+| **P8. Sidebar**    | useSidebarBadges (10 compteurs, refetch 30s)                                             | `useSidebarBadges.ts`                        |
 
-Après avoir écrit du code, tu DOIS :
+Voir `docs/CONVENTIONS.md` sections 10-19 pour toutes les regles frontend detaillees.
 
-1. Relire ton code ligne par ligne
-2. Vérifier la logique
-3. Tester manuellement dans le navigateur
-4. Vérifier les données dans Supabase
+## 5. Regles de non-regression (CRITIQUES)
 
-## 🌐 Contrôle du navigateur
-
-Tu as accès à Playwright pour :
-
-- Ouvrir des pages
-- Cliquer sur des boutons
-- Remplir des formulaires
-- Prendre des screenshots
-- Vérifier visuellement que l'UI fonctionne
-
-## 📊 Accès Supabase
-
-Tu as accès direct à Supabase pour :
-
-- Lire les données des tables
-- Vérifier les insertions/updates
-- Tester les RLS policies
-- Debugger les problèmes de données
-
-## 🎬 Mode Démo
-
-Quand l'utilisateur demande une démo (ex: "montre-moi comment créer une Note SEF") :
-
-1. Ouvre Chrome sur la bonne page
-2. Effectue les actions étape par étape
-3. Explique ce que tu fais à chaque étape
-4. Prends des screenshots si nécessaire
-5. Vérifie dans Supabase que les données sont créées
-
-## 🚫 Interdictions
-
-- JAMAIS de `any` en TypeScript (utiliser `unknown` ou des types précis)
-- JAMAIS de code non testé
-- JAMAIS de commit si les tests échouent
-- JAMAIS ignorer une erreur TypeScript/ESLint
-
-## 📁 Structure du projet SYGFP
-
-- `/src/components` : Composants React réutilisables (42+ modules)
-- `/src/pages` : Pages de l'application (50+ pages)
-- `/src/hooks` : Hooks personnalisés (130+ hooks)
-- `/src/lib` : Utilitaires, RBAC, workflow, validations
-- `/src/types` : Types TypeScript
-- `/src/contexts` : Contextes React (Exercice, RBAC)
-- `/src/services` : Services (PDF, attachments, storage)
-- `/src/integrations` : Client Supabase et types générés
-- `/supabase/migrations` : Migrations de base de données (151 fichiers)
-- `/supabase/functions` : Edge Functions (4 fonctions)
-
-## 🔄 Workflow Git
-
-Après chaque tâche terminée et vérifiée :
+**AVANT tout commit, ces 3 commandes DOIVENT passer :**
 
 ```bash
-git add .
-git commit -m "type(scope): description"
-git push origin main
+npx tsc --noEmit         # 0 erreurs TypeScript
+npx vite build           # Build OK
+npx vitest run           # 369/369 tests PASS (au 19/02/2026)
 ```
 
-Types de commit : feat, fix, refactor, test, docs, chore
+**INTERDIT :**
 
-## 📝 Commandes utiles
+- Commit si un test echoue
+- Supprimer un test existant sans justification
+- Introduire un `any` TypeScript
+- Ignorer une erreur ESLint
+- Modifier un module certifie (Passation) sans re-executer ses 94 tests
+- Casser une signature de fonction publique exportee
+
+**OBLIGATOIRE apres modification :**
+
+- Ajouter des tests pour toute nouvelle logique pure
+- Verifier visuellement dans le navigateur (Playwright MCP)
+- Verifier les donnees dans Supabase (PostgREST MCP)
+
+## 6. Commandes essentielles
 
 ```bash
-npm run dev          # Démarrer le serveur de développement (port 8080)
-npm run build        # Build de production
-npm run lint         # Vérifier le code avec ESLint
-npm run lint:fix     # Corriger automatiquement les erreurs ESLint
-npm run typecheck    # Vérifier les types TypeScript
-npm run test         # Lancer les tests unitaires (Vitest)
-npm run test:ui      # Lancer Vitest avec interface graphique
-npm run test:coverage # Lancer les tests avec couverture
-npm run test:e2e     # Lancer les tests E2E (Playwright)
-npm run test:e2e:ui  # Lancer Playwright avec interface graphique
-npm run format       # Formater le code avec Prettier
-npm run verify       # Vérifier types + lint + tests
+npm run dev              # Serveur dev (port 8080)
+npm run build            # Build production
+npm run typecheck        # tsc --noEmit
+npx vitest run           # Vitest (CI, une passe)
+npm run test             # Vitest (watch mode)
+npm run test:e2e         # Playwright
+npm run lint             # ESLint
+npm run lint:fix         # ESLint auto-fix
+npm run lint:strict      # ESLint 0 warnings
+npm run format           # Prettier
+npm run format:check     # Prettier check (sans ecrire)
+npm run verify           # typecheck + lint + test
+npm run preview          # Preview build production
 ```
 
-## 🏗️ Architecture technique
+**Git :** `git commit -m "type(scope): description"` — types: feat, fix, refactor, test, docs, chore
 
-- **Frontend** : React 18 + TypeScript + Vite
-- **UI** : Tailwind CSS + shadcn/ui (Radix)
-- **State** : React Query (TanStack Query)
-- **Forms** : React Hook Form + Zod
-- **Backend** : Supabase (PostgreSQL + Auth + RLS)
-- **Tests** : Vitest (unit) + Playwright (E2E)
+## 6b. Commandes rapides
 
-## 🔐 Sécurité (RBAC)
-
-- 5 profils fonctionnels : Admin, Validateur, Opérationnel, Contrôleur, Auditeur
-- 5 niveaux hiérarchiques : DG, Directeur, Sous-Directeur, Chef de Service, Agent
-- Row-Level Security (RLS) sur les tables sensibles
-- Audit trail sur toutes les modifications
-
-## 📊 Chaîne de dépense (9 étapes)
-
-1. Note SEF → 2. Note AEF → 3. Imputation → 4. Expression de besoin
-5. Passation de marché → 6. Engagement → 7. Liquidation
-8. Ordonnancement → 9. Règlement
-
-## 🔑 Credentials et Accès
-
-**IMPORTANT**: Toutes les clés et accès sont documentés dans [docs/CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md)
-
-### Accès rapide aux credentials
-
-| Type               | Fichier source                |
-| ------------------ | ----------------------------- |
-| Variables frontend | `.env`                        |
-| Permissions Claude | `.claude/settings.local.json` |
-| Guide complet      | `docs/CREDENTIALS_GUIDE.md`   |
-| Template           | `.env.example`                |
-
-### Supabase
-
-```
-Project ID: tjagvgqthlibdpvztvaf
-URL: https://tjagvgqthlibdpvztvaf.supabase.co
-Dashboard: https://supabase.com/dashboard/project/tjagvgqthlibdpvztvaf
+```bash
+npm run dev                    # Lance le serveur (port 8080)
+npm run build                  # Verifie le build (0 erreurs = OK)
+npx tsc --noEmit               # Verifie TypeScript (0 erreurs = OK)
+npx vitest run                 # Lance tous les tests unitaires
+npx playwright test            # Lance tous les tests E2E
 ```
 
-### GitHub
+## 6c. Verification rapide
 
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080   # 200 = serveur OK
 ```
-Repo: naywayne90/sygfp-artis-g-re
-URL: https://github.com/naywayne90/sygfp-artis-g-re
-```
 
-### Utilisateurs de test
+**URLs a tester (navigateur ou Playwright) :**
 
-| Email             | Password  | Rôle             |
-| ----------------- | --------- | ---------------- |
-| dg@arti.ci        | Test2026! | DG/Validateur    |
-| daaf@arti.ci      | Test2026! | DAAF/Validateur  |
-| agent.dsi@arti.ci | Test2026! | DSI/Opérationnel |
+| URL                                                            | Page attendue            |
+| -------------------------------------------------------------- | ------------------------ |
+| `http://localhost:8080/auth`                                   | Connexion                |
+| `http://localhost:8080/`                                       | Tableau de Bord DG       |
+| `http://localhost:8080/notes-sef`                              | Notes SEF                |
+| `http://localhost:8080/notes-aef`                              | Notes AEF                |
+| `http://localhost:8080/execution/imputation`                   | Imputation               |
+| `http://localhost:8080/execution/expression-besoin`            | Expressions de Besoin    |
+| `http://localhost:8080/execution/passation-marche`             | Passation de Marche      |
+| `http://localhost:8080/execution/passation-marche/approbation` | Approbation DG           |
+| `http://localhost:8080/engagements`                            | Engagements              |
+| `http://localhost:8080/liquidations`                           | Liquidations             |
+| `http://localhost:8080/ordonnancements`                        | Ordonnancements          |
+| `http://localhost:8080/reglements`                             | Reglements               |
+| `http://localhost:8080/planification/structure`                | Structure Budgetaire     |
+| `http://localhost:8080/planification/budget`                   | Planification Budgetaire |
+| `http://localhost:8080/planification/plan-travail`             | Plan de Travail          |
+| `http://localhost:8080/planification/virements`                | Virements                |
+| `http://localhost:8080/planification/import-export`            | Import / Export          |
+| `http://localhost:8080/recherche`                              | Recherche Dossier        |
+| `http://localhost:8080/notifications`                          | Notifications            |
+| `http://localhost:8080/alertes-budgetaires`                    | Alertes Budgetaires      |
+| `http://localhost:8080/mon-profil`                             | Mon Profil               |
+| `http://localhost:8080/admin/exercices`                        | Exercices Budgetaires    |
+| `http://localhost:8080/admin/utilisateurs`                     | Gestion Utilisateurs     |
+| `http://localhost:8080/contractualisation/prestataires`        | Prestataires             |
+| `http://localhost:8080/contractualisation/contrats`            | Gestion Contrats         |
+| `http://localhost:8080/approvisionnement`                      | Approvisionnement        |
+| `http://localhost:8080/tresorerie`                             | Tresorerie               |
+| `http://localhost:8080/recettes`                               | Declaration Recettes     |
+| `http://localhost:8080/etats-execution`                        | Etats d'Execution        |
+| `http://localhost:8080/suivi-dossiers`                         | Suivi des Dossiers       |
 
-### MCP Servers disponibles
+Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critiques**.
 
-- `supabase` → Requêtes PostgREST
-- `playwright` → Tests browser
-- `filesystem` → Accès fichiers
-- `context7` → Documentation libs
-- `sequential-thinking` → Raisonnement
+## 7. MCP disponibles
 
-## 📚 Documentation
+| MCP                   | Usage                                                 |
+| --------------------- | ----------------------------------------------------- |
+| `supabase`            | Requetes PostgREST (DML: SELECT/INSERT/UPDATE/DELETE) |
+| `playwright`          | Tests navigateur, screenshots, DDL via SQL Editor     |
+| `filesystem`          | Acces fichiers hors projet                            |
+| `context7`            | Documentation librairies a jour                       |
+| `sequential-thinking` | Raisonnement structure                                |
+| `github`              | Issues, PRs, code search                              |
 
-| Document                                                    | Description         |
-| ----------------------------------------------------------- | ------------------- |
-| [CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md)           | Clés, tokens, accès |
-| [ARCHITECTURE_TECHNIQUE.md](docs/ARCHITECTURE_TECHNIQUE.md) | Structure projet    |
-| [GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md)                 | Base de données     |
-| [GUIDE_CODE_SPLITTING.md](docs/GUIDE_CODE_SPLITTING.md)     | Optimisation        |
-| [RELEASE_NOTES_v2.md](docs/RELEASE_NOTES_v2.md)             | Notes de version    |
+**DDL Supabase** (CREATE TABLE, ALTER, migrations) : Playwright MCP > SQL Editor. PostgREST = DML only.
+
+## 8. Comptes test
+
+| Email             | Password  | Role               |
+| ----------------- | --------- | ------------------ |
+| dg@arti.ci        | Test2026! | DG / Validateur    |
+| daaf@arti.ci      | Test2026! | DAAF / Validateur  |
+| agent.dsi@arti.ci | Test2026! | DSI / Operationnel |
+
+**Supabase :** `tjagvgqthlibdpvztvaf.supabase.co` — Dashboard: `artiabidjan@yahoo.com` / `VEGet@9008`
+**GitHub :** `naywayne90/sygfp-artis-g-re`
+
+## 9. Ou trouver les details
+
+| Besoin                          | Fichier                                  |
+| ------------------------------- | ---------------------------------------- |
+| Inventaire complet du projet    | `PROJECT_STATUS.md`                      |
+| Conventions de code detaillees  | `CONVENTIONS.md`                         |
+| Certification passation         | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
+| Spec engagement (gaps, prompts) | `docs/TRANSITION_VERS_ENGAGEMENT.md`     |
+| Architecture technique complete | `ARCHITECTURE.md`                        |
+| Contexte agent universel        | `AGENT_CONTEXT.md`                       |
+| Credentials complet             | `docs/CREDENTIALS_GUIDE.md`              |
+| Guide Supabase                  | `docs/GUIDE_SUPABASE.md`                 |
+| Audit technique                 | `docs/AUDIT_TECHNIQUE_COMPLET.md`        |
+| Migration SQL Server            | `docs/RAPPORT_MIGRATION_COMPLETE.md`     |
+
+### Metriques cles (19/02/2026)
+
+115 pages | 439 composants/49 modules | 165 hooks | 197 tables | 621 RLS policies | 253 migrations | 12 Edge Functions | 369 tests unitaires | 69 specs E2E
