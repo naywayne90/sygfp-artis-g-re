@@ -1,9 +1,49 @@
+import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { checkValidationPermission } from '@/hooks/useCheckValidationPermission';
+import { generateARTIReference, ETAPE_CODES } from '@/lib/notes-sef/referenceService';
+
+export type TypeEngagement = 'sur_marche' | 'hors_marche';
+
+// Extended budget_line with additional physical columns (for detail view)
+export interface BudgetLineDetail {
+  id: string;
+  code: string;
+  label: string;
+  dotation_initiale: number;
+  dotation_modifiee: number | null;
+  total_engage: number | null;
+  disponible_calcule: number | null;
+  direction?: { id: string; label: string; sigle: string | null } | null;
+  objectif_strategique?: { code: string; libelle: string } | null;
+  mission?: { code: string; libelle: string } | null;
+  action?: { code: string; libelle: string } | null;
+  activite?: { code: string; libelle: string } | null;
+  nomenclature_nbe?: { code: string; libelle: string } | null;
+  plan_comptable_sysco?: { code: string; libelle: string } | null;
+}
+
+// Budget line movement (from RPC get_budget_line_movements)
+export interface BudgetLineMovement {
+  id: string;
+  numero: string;
+  objet: string;
+  montant: number;
+  fournisseur: string | null;
+  statut: string;
+  type_engagement: string;
+  date_engagement: string;
+  created_at: string;
+  created_by_name: string | null;
+  visa_saf_date: string | null;
+  visa_cb_date: string | null;
+  visa_daaf_date: string | null;
+  visa_dg_date: string | null;
+}
 
 export interface Engagement {
   id: string;
@@ -20,6 +60,9 @@ export interface Engagement {
   budget_line_id: string;
   expression_besoin_id: string | null;
   marche_id: string | null;
+  passation_marche_id: string | null;
+  dossier_id: string | null;
+  type_engagement: TypeEngagement;
   note_id: string | null;
   exercice: number | null;
   created_by: string | null;
@@ -30,6 +73,20 @@ export interface Engagement {
   differe_by: string | null;
   deadline_correction: string | null;
   required_documents: string[] | null;
+  // Colonnes visa (remplies par trigger fn_audit_engagement_visa)
+  visa_saf_user_id: string | null;
+  visa_saf_date: string | null;
+  visa_saf_commentaire: string | null;
+  visa_cb_user_id: string | null;
+  visa_cb_date: string | null;
+  visa_cb_commentaire: string | null;
+  visa_daaf_user_id: string | null;
+  visa_daaf_date: string | null;
+  visa_daaf_commentaire: string | null;
+  visa_dg_user_id: string | null;
+  visa_dg_date: string | null;
+  visa_dg_commentaire: string | null;
+  motif_rejet: string | null;
   // Joined data
   budget_line?: {
     id: string;
@@ -64,6 +121,22 @@ export interface Engagement {
   creator?: { id: string; full_name: string | null } | null;
 }
 
+// Extended Engagement with validator profiles and full budget_line (for detail + PDF)
+export interface EngagementDetail extends Engagement {
+  budget_line?: BudgetLineDetail | null;
+  prestataire_detail?: {
+    id: string;
+    raison_sociale: string;
+    adresse: string | null;
+    email: string | null;
+    telephone: string | null;
+  } | null;
+  visa_saf_user?: { id: string; full_name: string | null } | null;
+  visa_cb_user?: { id: string; full_name: string | null } | null;
+  visa_daaf_user?: { id: string; full_name: string | null } | null;
+  visa_dg_user?: { id: string; full_name: string | null } | null;
+}
+
 export interface BudgetAvailability {
   dotation_initiale: number;
   virements_recus: number;
@@ -76,12 +149,81 @@ export interface BudgetAvailability {
   is_sufficient: boolean;
 }
 
+// Type for expressions de besoin validated, with nested direction/marche relations
+export interface ExpressionValidee {
+  id: string;
+  numero: string | null;
+  objet: string;
+  montant_estime: number | null;
+  direction_id: string | null;
+  dossier_id: string | null;
+  direction: { id: string; label: string } | null;
+  marche: {
+    id: string;
+    numero: string | null;
+    objet: string;
+    montant: number;
+    mode_passation: string;
+    prestataire: { id: string; raison_sociale: string; adresse: string | null } | null;
+  } | null;
+}
+
 export const VALIDATION_STEPS = [
-  { order: 1, role: 'SAF', label: 'Service Administratif et Financier' },
-  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire' },
-  { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier' },
-  { order: 4, role: 'DG', label: 'Directeur Général' },
+  {
+    order: 1,
+    role: 'SAF',
+    label: 'Service Administratif et Financier',
+    visaStatut: 'visa_saf',
+    visaPrefix: 'visa_saf',
+  },
+  {
+    order: 2,
+    role: 'CB',
+    label: 'Contrôleur Budgétaire',
+    visaStatut: 'visa_cb',
+    visaPrefix: 'visa_cb',
+  },
+  {
+    order: 3,
+    role: 'DAF',
+    label: 'Directeur Administratif et Financier',
+    visaStatut: 'visa_daaf',
+    visaPrefix: 'visa_daaf',
+  },
+  { order: 4, role: 'DG', label: 'Directeur Général', visaStatut: 'valide', visaPrefix: 'visa_dg' },
 ];
+
+// Statuts intermédiaires de validation (avant 'valide')
+export const VALIDATION_STATUTS = ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf'] as const;
+
+// Détermine l'étape courante à partir du statut
+export function getStepFromStatut(statut: string | null): number {
+  switch (statut) {
+    case 'soumis':
+      return 1;
+    case 'visa_saf':
+      return 2;
+    case 'visa_cb':
+      return 3;
+    case 'visa_daaf':
+      return 4;
+    default:
+      return 0;
+  }
+}
+
+// Vérifie la complétude des données obligatoires d'un engagement
+export function checkEngagementCompleteness(engagement: Partial<Engagement>): {
+  isComplete: boolean;
+  missingFields: string[];
+} {
+  const missingFields: string[] = [];
+  if (!engagement.objet) missingFields.push('Objet');
+  if (!engagement.montant || engagement.montant <= 0) missingFields.push('Montant');
+  if (!engagement.fournisseur) missingFields.push('Fournisseur');
+  if (!engagement.budget_line_id) missingFields.push('Ligne budgétaire');
+  return { isComplete: missingFields.length === 0, missingFields };
+}
 
 export function useEngagements() {
   const queryClient = useQueryClient();
@@ -113,7 +255,7 @@ export function useEngagements() {
           ),
           expression_besoin:expressions_besoin(
             id, numero, objet,
-            marche:marches(
+            marche:marches!expressions_besoin_marche_id_fkey(
               id, numero,
               prestataire:prestataires(id, raison_sociale)
             )
@@ -150,13 +292,51 @@ export function useEngagements() {
           prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(id, raison_sociale, adresse)
         `
         )
-        .eq('statut', 'valide')
+        .in('statut', ['approuve', 'signe'])
         .eq('exercice', exercice)
         .order('validated_at', { ascending: false });
 
       if (error) throw error;
 
       // Exclure celles déjà utilisées
+      const { data: usedPMs } = await supabase
+        .from('budget_engagements')
+        .select('passation_marche_id')
+        .not('passation_marche_id', 'is', null)
+        .eq('exercice', exercice);
+
+      const usedIds = new Set(usedPMs?.map((e) => e.passation_marche_id) || []);
+      return pms?.filter((pm) => !usedIds.has(pm.id)) || [];
+    },
+    enabled: !!exercice,
+  });
+
+  // Fetch marchés signés/approuvés (passation_marche) for "sur_marche" engagements
+  const { data: passationsSignees = [] } = useQuery({
+    queryKey: ['passations-signees-pour-engagement', exercice],
+    queryFn: async () => {
+      const { data: pms, error } = await supabase
+        .from('passation_marche')
+        .select(
+          `
+          id, reference, mode_passation, montant_retenu, prestataire_retenu_id, dossier_id,
+          statut, ligne_budgetaire_id,
+          expression_besoin:expressions_besoin(
+            id, numero, objet, montant_estime, direction_id,
+            direction:directions(id, label, sigle)
+          ),
+          prestataire_retenu:prestataires!passation_marche_prestataire_retenu_id_fkey(
+            id, raison_sociale, adresse
+          )
+        `
+        )
+        .in('statut', ['approuve', 'signe'])
+        .eq('exercice', exercice)
+        .order('signe_at', { ascending: false, nullsFirst: false });
+
+      if (error) throw error;
+
+      // Exclure celles déjà utilisées pour un engagement
       const { data: usedPMs } = await supabase
         .from('budget_engagements')
         .select('passation_marche_id')
@@ -179,119 +359,112 @@ export function useEngagements() {
           `
           id, numero, objet, montant_estime, direction_id, dossier_id,
           direction:directions(id, label),
-          marche:marches(
+          marche:marches!expressions_besoin_marche_id_fkey(
             id, numero, objet, montant, mode_passation,
             prestataire:prestataires(id, raison_sociale, adresse)
           )
         `
         )
-        .eq('statut', 'validé')
+        .eq('statut', 'valide')
         .eq('exercice', exercice)
         .order('validated_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return (data || []) as unknown as ExpressionValidee[];
     },
     enabled: !!exercice,
   });
 
   // Calculate budget availability
   // Formula: Disponible = Dotation_initiale + Virements_recus - Virements_emis - Engages
-  const calculateAvailability = async (
-    budgetLineId: string,
-    currentAmount: number,
-    excludeEngagementId?: string
-  ): Promise<BudgetAvailability> => {
-    // Get budget line dotation
-    const { data: line, error: lineError } = await supabase
-      .from('budget_lines')
-      .select('dotation_initiale')
-      .eq('id', budgetLineId)
-      .single();
+  const calculateAvailability = useCallback(
+    async (
+      budgetLineId: string,
+      currentAmount: number,
+      excludeEngagementId?: string
+    ): Promise<BudgetAvailability> => {
+      // Get budget line dotation
+      const { data: line, error: lineError } = await supabase
+        .from('budget_lines')
+        .select('dotation_initiale')
+        .eq('id', budgetLineId)
+        .single();
 
-    if (lineError) throw lineError;
+      if (lineError) throw lineError;
 
-    const dotation_initiale = line?.dotation_initiale || 0;
+      const dotation_initiale = line?.dotation_initiale || 0;
 
-    // Get executed credit transfers received (virements recus)
-    const { data: recus, error: recusError } = await supabase
-      .from('credit_transfers')
-      .select('amount')
-      .eq('to_budget_line_id', budgetLineId)
-      .eq('status', 'execute');
+      // Get executed credit transfers received (virements recus)
+      const { data: recus, error: recusError } = await supabase
+        .from('credit_transfers')
+        .select('amount')
+        .eq('to_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
-    if (recusError) throw recusError;
+      if (recusError) throw recusError;
 
-    const virements_recus = recus?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+      const virements_recus = recus?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
 
-    // Get executed credit transfers sent (virements emis)
-    const { data: emis, error: emisError } = await supabase
-      .from('credit_transfers')
-      .select('amount')
-      .eq('from_budget_line_id', budgetLineId)
-      .eq('status', 'execute');
+      // Get executed credit transfers sent (virements emis)
+      const { data: emis, error: emisError } = await supabase
+        .from('credit_transfers')
+        .select('amount')
+        .eq('from_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
-    if (emisError) throw emisError;
+      if (emisError) throw emisError;
 
-    const virements_emis = emis?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+      const virements_emis = emis?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
 
-    // Dotation actuelle = initiale + recus - emis
-    const dotation_actuelle = dotation_initiale + virements_recus - virements_emis;
+      // Dotation actuelle = initiale + recus - emis
+      const dotation_actuelle = dotation_initiale + virements_recus - virements_emis;
 
-    // Get previous engagements (exclude annule AND rejete from cumul)
-    let query = supabase
-      .from('budget_engagements')
-      .select('id, montant')
-      .eq('budget_line_id', budgetLineId)
-      .eq('exercice', exercice || new Date().getFullYear())
-      .neq('statut', 'annule')
-      .neq('statut', 'rejete');
+      // Get previous engagements (exclude annule AND rejete from cumul)
+      let query = supabase
+        .from('budget_engagements')
+        .select('id, montant')
+        .eq('budget_line_id', budgetLineId)
+        .eq('exercice', exercice || new Date().getFullYear())
+        .neq('statut', 'annule')
+        .neq('statut', 'rejete');
 
-    if (excludeEngagementId) {
-      query = query.neq('id', excludeEngagementId);
-    }
+      if (excludeEngagementId) {
+        query = query.neq('id', excludeEngagementId);
+      }
 
-    const { data: prevEngagements, error: engError } = await query;
-    if (engError) throw engError;
+      const { data: prevEngagements, error: engError } = await query;
+      if (engError) throw engError;
 
-    const engagements_anterieurs =
-      prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-    const cumul = engagements_anterieurs + currentAmount;
-    const disponible = dotation_actuelle - cumul;
+      const engagements_anterieurs =
+        prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+      const cumul = engagements_anterieurs + currentAmount;
+      const disponible = dotation_actuelle - cumul;
 
-    return {
-      dotation_initiale,
-      virements_recus,
-      virements_emis,
-      dotation_actuelle,
-      engagements_anterieurs,
-      engagement_actuel: currentAmount,
-      cumul,
-      disponible,
-      is_sufficient: disponible >= 0,
-    };
-  };
+      return {
+        dotation_initiale,
+        virements_recus,
+        virements_emis,
+        dotation_actuelle,
+        engagements_anterieurs,
+        engagement_actuel: currentAmount,
+        cumul,
+        disponible,
+        is_sufficient: disponible >= 0,
+      };
+    },
+    [exercice]
+  );
 
-  // Generate engagement number using atomic sequence
+  // Generate engagement number using ARTI reference system
+  // Format: ARTI05MMYYNNNN (code étape 05 = Engagement)
   const generateNumero = async (): Promise<string> => {
-    const year = exercice || new Date().getFullYear();
-
-    const { data, error } = await supabase.rpc('get_next_sequence', {
-      p_doc_type: 'ENG',
-      p_exercice: year,
-      p_direction_code: null,
-      p_scope: 'global',
-    });
-
-    if (error) throw error;
-    if (!data || data.length === 0) throw new Error('Échec génération numéro');
-
-    return data[0].full_code;
+    return generateARTIReference(ETAPE_CODES.ENGAGEMENT);
   };
 
   // Create engagement
   const createMutation = useMutation({
     mutationFn: async (data: {
+      type_engagement: TypeEngagement;
       expression_besoin_id: string;
       budget_line_id: string;
       objet: string;
@@ -300,6 +473,7 @@ export function useEngagements() {
       tva?: number;
       fournisseur: string;
       marche_id?: string;
+      passation_marche_id?: string;
       dossier_id?: string;
     }) => {
       const {
@@ -332,6 +506,7 @@ export function useEngagements() {
         .from('budget_engagements')
         .insert({
           numero,
+          type_engagement: data.type_engagement,
           objet: data.objet,
           montant: data.montant,
           montant_ht: data.montant_ht || null,
@@ -341,6 +516,10 @@ export function useEngagements() {
           budget_line_id: data.budget_line_id,
           expression_besoin_id: data.expression_besoin_id,
           marche_id: data.marche_id || null,
+          // NOTE: Les 2805 engagements legacy importés ont passation_marche_id=NULL
+          // car il n'existait pas de mapping PM→Engagement dans l'ancien système.
+          // Seuls les nouveaux engagements (2026+) auront cette FK renseignée.
+          passation_marche_id: data.passation_marche_id || null,
           dossier_id: dossierId || null,
           exercice,
           statut: 'brouillon',
@@ -353,15 +532,8 @@ export function useEngagements() {
 
       if (error) throw error;
 
-      // Create initial validation steps
-      for (const step of VALIDATION_STEPS) {
-        await supabase.from('engagement_validations').insert({
-          engagement_id: engagement.id,
-          step_order: step.order,
-          role: step.role,
-          status: 'en_attente',
-        });
-      }
+      // NOTE: Les records engagement_validations sont créés automatiquement
+      // par le trigger AFTER fn_audit_engagement_visa à chaque changement de statut.
 
       // Si lié à un dossier, créer une entrée dans dossier_etapes
       if (dossierId) {
@@ -399,10 +571,14 @@ export function useEngagements() {
     onSuccess: (engagement) => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       queryClient.invalidateQueries({ queryKey: ['expressions-validees-pour-engagement'] });
+      queryClient.invalidateQueries({ queryKey: ['passations-signees-pour-engagement'] });
+      queryClient.invalidateQueries({ queryKey: ['passations-validees-pour-engagement'] });
       toast.success(`Engagement ${engagement.numero} créé`);
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors de la creation de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
@@ -425,17 +601,44 @@ export function useEngagements() {
         entityId: id,
         action: 'submit',
       });
+
+      // Notifier les validateurs SAF (étape 1)
+      const { data: submittedEng } = await supabase
+        .from('budget_engagements')
+        .select('numero')
+        .eq('id', id)
+        .single();
+
+      const { data: safUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'SAF');
+
+      if (safUsers?.length && submittedEng) {
+        await supabase.from('notifications').insert(
+          safUsers.map((u) => ({
+            user_id: u.user_id,
+            type: 'soumission',
+            title: 'Engagement à valider',
+            message: `L'engagement ${submittedEng.numero} a été soumis pour validation`,
+            entity_type: 'engagement',
+            entity_id: id,
+          }))
+        );
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       toast.success('Engagement soumis pour validation');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors de la soumission de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
-  // Validate engagement step
+  // Validate engagement step — aligned with trigger fn_validate_engagement_workflow
   const validateMutation = useMutation({
     mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
       const {
@@ -443,72 +646,141 @@ export function useEngagements() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Get current engagement
+      // Get current engagement with statut
       const { data: engagement, error: fetchError } = await supabase
         .from('budget_engagements')
-        .select('current_step')
+        .select('statut, current_step, numero, created_by, budget_line_id, montant')
         .eq('id', id)
         .single();
 
       if (fetchError) throw fetchError;
 
-      const currentStep = engagement?.current_step || 1;
-      const isLastStep = currentStep >= VALIDATION_STEPS.length;
+      // Déterminer l'étape depuis le statut (pas current_step)
+      const stepNumber = getStepFromStatut(engagement?.statut);
+      if (stepNumber === 0)
+        throw new Error(`Statut "${engagement?.statut}" ne permet pas de validation`);
 
-      // Vérifier la permission via RPC unifiée pour le rôle de l'étape courante
-      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
-      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
+      const stepInfo = VALIDATION_STEPS[stepNumber - 1];
+      if (!stepInfo) throw new Error(`Étape de validation ${stepNumber} invalide`);
 
-      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
+      const isLastStep = stepNumber >= VALIDATION_STEPS.length;
+
+      // Vérifier la permission via RPC unifiée
+      const permCheck = await checkValidationPermission(user.id, 'engagements', stepInfo.role);
       if (!permCheck.isAllowed) {
         throw new Error(
-          `Permission insuffisante pour l'étape ${requiredRole}. Vous devez avoir le rôle ${requiredRole}, une délégation active ou un intérim actif.`
+          `Permission insuffisante pour l'étape ${stepInfo.role}. Vous devez avoir le rôle ${stepInfo.role}, une délégation active ou un intérim actif.`
         );
       }
 
-      // Update validation record with audit trail
-      await supabase
-        .from('engagement_validations')
-        .update({
-          status: 'valide',
-          validated_by: user.id,
-          validated_at: new Date().toISOString(),
-          comments,
-          validation_mode: permCheck.validationMode,
-          validated_on_behalf_of: permCheck.onBehalfOfId,
-        })
-        .eq('engagement_id', id)
-        .eq('step_order', currentStep);
+      // Étape CB : contrôle des crédits
+      if (stepInfo.role === 'CB' && engagement?.budget_line_id && engagement?.montant) {
+        const availability = await calculateAvailability(
+          engagement.budget_line_id,
+          engagement.montant,
+          id
+        );
+        if (!availability.is_sufficient) {
+          throw new Error(
+            `Crédits insuffisants : ${new Intl.NumberFormat('fr-FR').format(availability.disponible)} FCFA disponibles.`
+          );
+        }
+      }
 
-      // Update engagement
+      // Construire les colonnes visa dynamiquement
+      const now = new Date().toISOString();
+      const visaColumns: Record<string, unknown> = {
+        [`${stepInfo.visaPrefix}_user_id`]: user.id,
+        [`${stepInfo.visaPrefix}_date`]: now,
+        [`${stepInfo.visaPrefix}_commentaire`]: comments || null,
+      };
+
+      // Update engagement — le trigger impose la transition de statut
       const { error } = await supabase
         .from('budget_engagements')
         .update({
-          current_step: isLastStep ? currentStep : currentStep + 1,
-          statut: isLastStep ? 'valide' : 'soumis',
+          statut: stepInfo.visaStatut,
+          current_step: isLastStep ? stepNumber : stepNumber + 1,
           workflow_status: isLastStep ? 'termine' : 'en_validation',
+          ...visaColumns,
         })
         .eq('id', id);
 
       if (error) throw error;
 
+      // NOTE: Le trigger AFTER fn_audit_engagement_visa crée automatiquement
+      // le record engagement_validations + audit_logs. Pas besoin de le faire ici.
+
       await logAction({
         entityType: 'engagement',
         entityId: id,
         action: 'validate',
-        newValues: { step: currentStep, comments },
+        newValues: { step: stepNumber, role: stepInfo.role, comments },
       });
+
+      // Notifications
+      const valNotifs: Array<{
+        user_id: string;
+        type: string;
+        title: string;
+        message: string;
+        entity_type: string;
+        entity_id: string;
+      }> = [];
+
+      // Notifier le créateur
+      if (engagement?.created_by) {
+        valNotifs.push({
+          user_id: engagement.created_by,
+          type: 'validation',
+          title: isLastStep ? 'Engagement validé' : `Visa ${stepInfo.role} accordé`,
+          message: isLastStep
+            ? `L'engagement ${engagement.numero} a été entièrement validé`
+            : `Le visa ${stepInfo.role} de l'engagement ${engagement.numero} a été accordé`,
+          entity_type: 'engagement',
+          entity_id: id,
+        });
+      }
+
+      // Notifier les validateurs de l'étape suivante
+      if (!isLastStep) {
+        const nextRole = VALIDATION_STEPS[stepNumber]?.role;
+        if (nextRole) {
+          const { data: nextUsers } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', nextRole);
+          if (nextUsers?.length) {
+            valNotifs.push(
+              ...nextUsers.map((u) => ({
+                user_id: u.user_id,
+                type: 'validation',
+                title: 'Engagement à valider',
+                message: `L'engagement ${engagement?.numero} est en attente de visa ${nextRole}`,
+                entity_type: 'engagement',
+                entity_id: id,
+              }))
+            );
+          }
+        }
+      }
+
+      if (valNotifs.length > 0) {
+        await supabase.from('notifications').insert(valNotifs);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
-      toast.success('Étape validée');
+      toast.success('Visa accordé');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors de la validation de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
-  // Reject engagement
+  // Reject engagement — aligned with trigger (tout statut → rejete)
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const {
@@ -516,61 +788,68 @@ export function useEngagements() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
-      // Get current step
+      // Get current engagement
       const { data: engagement } = await supabase
         .from('budget_engagements')
-        .select('current_step')
+        .select('statut, current_step, numero, created_by')
         .eq('id', id)
         .single();
 
-      const currentStep = engagement?.current_step || 1;
+      const stepNumber = getStepFromStatut(engagement?.statut);
+      if (stepNumber === 0)
+        throw new Error(`Statut "${engagement?.statut}" ne permet pas de rejet`);
 
-      // Vérifier la permission via RPC unifiée pour le rôle de l'étape courante
-      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
-      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
+      const stepInfo = VALIDATION_STEPS[stepNumber - 1];
+      if (!stepInfo) throw new Error(`Étape de validation ${stepNumber} invalide`);
 
-      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
+      // Vérifier la permission
+      const permCheck = await checkValidationPermission(user.id, 'engagements', stepInfo.role);
       if (!permCheck.isAllowed) {
-        throw new Error(`Permission insuffisante pour rejeter à l'étape ${requiredRole}.`);
+        throw new Error(`Permission insuffisante pour rejeter à l'étape ${stepInfo.role}.`);
       }
 
-      // Update validation record with audit trail
-      await supabase
-        .from('engagement_validations')
-        .update({
-          status: 'rejete',
-          validated_by: user.id,
-          validated_at: new Date().toISOString(),
-          comments: reason,
-          validation_mode: permCheck.validationMode,
-          validated_on_behalf_of: permCheck.onBehalfOfId,
-        })
-        .eq('engagement_id', id)
-        .eq('step_order', currentStep);
-
+      // Update engagement — le trigger exige motif_rejet pour la transition vers rejete
       const { error } = await supabase
         .from('budget_engagements')
         .update({
           statut: 'rejete',
           workflow_status: 'rejete',
+          motif_rejet: reason,
         })
         .eq('id', id);
 
       if (error) throw error;
 
+      // NOTE: Le trigger AFTER fn_audit_engagement_visa crée automatiquement
+      // le record engagement_validations. Pas besoin de le faire ici.
+
       await logAction({
         entityType: 'engagement',
         entityId: id,
         action: 'reject',
-        newValues: { reason },
+        newValues: { reason, step: stepNumber, role: stepInfo.role },
       });
+
+      // Notifier le créateur du rejet
+      if (engagement?.created_by) {
+        await supabase.from('notifications').insert({
+          user_id: engagement.created_by,
+          type: 'rejet',
+          title: 'Engagement rejeté',
+          message: `L'engagement ${engagement.numero} a été rejeté à l'étape ${stepInfo.role} : ${reason}`,
+          entity_type: 'engagement',
+          entity_id: id,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       toast.success('Engagement rejeté');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors du rejet de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
@@ -593,7 +872,7 @@ export function useEngagements() {
       // Get current step pour déterminer le rôle requis
       const { data: engagement } = await supabase
         .from('budget_engagements')
-        .select('current_step')
+        .select('current_step, numero, created_by')
         .eq('id', id)
         .single();
 
@@ -627,13 +906,27 @@ export function useEngagements() {
         action: 'defer',
         newValues: { motif, dateReprise },
       });
+
+      // Notifier le créateur du report
+      if (engagement?.created_by) {
+        await supabase.from('notifications').insert({
+          user_id: engagement.created_by,
+          type: 'differe',
+          title: 'Engagement différé',
+          message: `L'engagement ${engagement.numero} a été différé : ${motif}`,
+          entity_type: 'engagement',
+          entity_id: id,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       toast.success('Engagement différé');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors du report de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
@@ -664,8 +957,10 @@ export function useEngagements() {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       toast.success('Engagement repris');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors de la reprise de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
@@ -711,8 +1006,10 @@ export function useEngagements() {
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
       toast.success('Engagement mis à jour');
     },
-    onError: (error) => {
-      toast.error('Erreur: ' + error.message);
+    onError: (error: Error) => {
+      toast.error("Erreur lors de la mise a jour de l'engagement", {
+        description: error.message,
+      });
     },
   });
 
@@ -733,9 +1030,9 @@ export function useEngagements() {
     return data;
   };
 
-  // Filter helpers
-  const engagementsAValider = engagements.filter(
-    (e) => e.statut === 'soumis' && e.workflow_status === 'en_validation'
+  // Filter helpers — inclut tous les statuts visa intermédiaires
+  const engagementsAValider = engagements.filter((e) =>
+    (VALIDATION_STATUTS as readonly string[]).includes(e.statut || '')
   );
   const engagementsValides = engagements.filter((e) => e.statut === 'valide');
   const engagementsRejetes = engagements.filter((e) => e.statut === 'rejete');
@@ -749,6 +1046,7 @@ export function useEngagements() {
     engagementsDifferes,
     expressionsValidees,
     passationsValidees,
+    passationsSignees,
     isLoading,
     error,
     calculateAvailability,
@@ -765,4 +1063,75 @@ export function useEngagements() {
     isSubmitting: submitMutation.isPending,
     isValidating: validateMutation.isPending,
   };
+}
+
+// ============================================================================
+// Hook: Engagement detail with validator profiles (Prompt 7)
+// JOINs: budget_lines(+direction+OS+mission+action), marches(+prestataire),
+//         prestataire_detail, creator, visa_saf/cb/daaf/dg_user profiles
+// ============================================================================
+export function useEngagementDetail(engagementId: string | null) {
+  return useQuery({
+    queryKey: ['engagement-detail', engagementId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('budget_engagements')
+        .select(
+          `
+          *,
+          budget_line:budget_lines(
+            id, code, label, dotation_initiale, dotation_modifiee, total_engage, disponible_calcule,
+            direction:directions(id, label, sigle),
+            objectif_strategique:objectifs_strategiques(code, libelle),
+            mission:missions(code, libelle),
+            action:actions(code, libelle),
+            activite:activites(code, libelle),
+            nomenclature_nbe(code, libelle),
+            plan_comptable_sysco(code, libelle)
+          ),
+          expression_besoin:expressions_besoin(
+            id, numero, objet
+          ),
+          marche:marches(
+            id, numero, objet, montant,
+            prestataire:prestataires(id, raison_sociale, adresse)
+          ),
+          prestataire_detail:prestataires!budget_engagements_prestataire_id_fkey(
+            id, raison_sociale, adresse, email, telephone
+          ),
+          creator:profiles!budget_engagements_created_by_fkey(id, full_name),
+          visa_saf_user:profiles!budget_engagements_visa_saf_user_id_fkey(id, full_name),
+          visa_cb_user:profiles!budget_engagements_visa_cb_user_id_fkey(id, full_name),
+          visa_daaf_user:profiles!budget_engagements_visa_daaf_user_id_fkey(id, full_name),
+          visa_dg_user:profiles!budget_engagements_visa_dg_user_id_fkey(id, full_name)
+        `
+        )
+        .eq('id', engagementId as string)
+        .single();
+
+      if (error) throw error;
+      return data as unknown as EngagementDetail;
+    },
+    enabled: !!engagementId,
+  });
+}
+
+// ============================================================================
+// Hook: Budget line movement history (Prompt 7)
+// Uses RPC get_budget_line_movements(UUID, INT)
+// ============================================================================
+export function useBudgetLineMovements(budgetLineId: string | null, exercice?: number) {
+  return useQuery({
+    queryKey: ['budget-line-movements', budgetLineId, exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_budget_line_movements', {
+        p_budget_line_id: budgetLineId as string,
+        p_exercice: exercice ?? null,
+      });
+
+      if (error) throw error;
+      return (data || []) as unknown as BudgetLineMovement[];
+    },
+    enabled: !!budgetLineId,
+  });
 }
