@@ -36,10 +36,14 @@ import {
   Receipt,
   User,
   ShieldCheck,
+  BarChart3,
+  FileSpreadsheet,
+  FileText,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
 import { useEngagements, Engagement } from '@/hooks/useEngagements';
+import { useEngagementExport } from '@/hooks/useEngagementExport';
+import { SuiviBudgetaireEngagements } from '@/components/engagement/SuiviBudgetaireEngagements';
 import { EngagementForm } from '@/components/engagement/EngagementForm';
 import { EngagementList } from '@/components/engagement/EngagementList';
 import { EngagementDetails } from '@/components/engagement/EngagementDetails';
@@ -52,6 +56,7 @@ import { PermissionGuard, usePermissionCheck } from '@/components/auth/Permissio
 import { useRBAC } from '@/contexts/RBACContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useExerciceWriteGuard } from '@/hooks/useExerciceWriteGuard';
+import { useExercice } from '@/contexts/ExerciceContext';
 import { useCanValidateEngagement } from '@/hooks/useDelegations';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
@@ -81,6 +86,9 @@ export default function Engagements() {
     isDegaging,
   } = useEngagements();
 
+  const { exportExcel, exportCSV, isExporting } = useEngagementExport();
+  const { exercice } = useExercice();
+
   const { canPerform } = usePermissionCheck();
   const { isDAF, isAdmin } = useRBAC();
   const { userRoles: userRoleList } = usePermissions();
@@ -96,8 +104,9 @@ export default function Engagements() {
   const canRejectEngagementFinal = canPerform('engagement.reject') || canValidateViaDelegation;
   const canDeferEngagementFinal = canPerform('engagement.defer') || canValidateViaDelegation;
 
-  // Dégagement : DAAF ou ADMIN uniquement
-  const canDegageEngagement = isDAF || isAdmin;
+  // Dégagement : DAAF/DAF/DG/ADMIN (profil fonctionnel OU rôle user_roles)
+  const canDegageEngagement =
+    isDAF || isAdmin || ['DAAF', 'DAF', 'DG', 'ADMIN'].some((r) => userRoleList.includes(r));
 
   // Rôle principal (codes user_roles) pour filtrage RBAC du menu Actions
   const ROLE_PRIORITY = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'SAF', 'OPERATEUR'] as const;
@@ -237,7 +246,28 @@ export default function Engagements() {
             {engagementDelegatorInfo ? ` du ${engagementDelegatorInfo.role}` : ''}
           </Badge>
         )}
-        <BudgetChainExportButton step="engagement" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2" disabled={isExporting}>
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )}
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuItem onClick={() => exportExcel(engagements, undefined, exercice)}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Excel (2 feuilles)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportCSV(engagements, undefined, exercice)}>
+              <FileText className="mr-2 h-4 w-4" />
+              CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         {(canValidateEngagementFinal || engagementsAValider.length > 0) && (
           <Button
             variant="outline"
@@ -366,6 +396,10 @@ export default function Engagements() {
           <TabsTrigger value="valides">Validés ({engagementsValides.length})</TabsTrigger>
           <TabsTrigger value="rejetes">Rejetés ({engagementsRejetes.length})</TabsTrigger>
           <TabsTrigger value="differes">Différés ({engagementsDifferes.length})</TabsTrigger>
+          <TabsTrigger value="suivi_budget" className="gap-1">
+            <BarChart3 className="h-3 w-3" />
+            Suivi budgétaire
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="tous">
@@ -588,6 +622,10 @@ export default function Engagements() {
               />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="suivi_budget">
+          <SuiviBudgetaireEngagements engagements={engagements} />
         </TabsContent>
       </Tabs>
 

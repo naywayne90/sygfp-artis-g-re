@@ -9,6 +9,13 @@ import {
   type TypeEngagement,
 } from '@/hooks/useEngagements';
 import { numberToWords, numberToWordsCFA } from '@/lib/utils/numberToWords';
+import {
+  fmtCurrencyExport,
+  fmtDateExport,
+  statutLabel,
+  typeEngagementLabel,
+  computeSuiviBudgetaire,
+} from '@/hooks/useEngagementExport';
 
 // ---------------------------------------------------------------------------
 // Filter helpers — updated to match new hook logic (includes visa statuts)
@@ -715,5 +722,297 @@ describe('numberToWordsCFA', () => {
 
   it('montant négatif (valeur absolue)', () => {
     expect(numberToWordsCFA(-5000)).toBe('cinq mille francs CFA');
+  });
+});
+
+// ===========================================================================
+// 8. Export helpers — fmtCurrencyExport
+// ===========================================================================
+describe('fmtCurrencyExport', () => {
+  it('formate un montant positif avec FCFA', () => {
+    expect(fmtCurrencyExport(1000000)).toContain('FCFA');
+    expect(fmtCurrencyExport(1000000)).toContain('1');
+  });
+
+  it('retourne - pour null', () => {
+    expect(fmtCurrencyExport(null)).toBe('-');
+  });
+
+  it('retourne - pour undefined', () => {
+    expect(fmtCurrencyExport(undefined)).toBe('-');
+  });
+
+  it('retourne - pour NaN', () => {
+    expect(fmtCurrencyExport(NaN)).toBe('-');
+  });
+
+  it('formate zéro', () => {
+    expect(fmtCurrencyExport(0)).toContain('0');
+    expect(fmtCurrencyExport(0)).toContain('FCFA');
+  });
+});
+
+// ===========================================================================
+// 9. Export helpers — fmtDateExport
+// ===========================================================================
+describe('fmtDateExport', () => {
+  it('formate une date ISO', () => {
+    const result = fmtDateExport('2026-02-19T10:00:00Z');
+    expect(result).toMatch(/\d{2}\/\d{2}\/\d{4}/);
+  });
+
+  it('retourne - pour null', () => {
+    expect(fmtDateExport(null)).toBe('-');
+  });
+
+  it('retourne - pour undefined', () => {
+    expect(fmtDateExport(undefined)).toBe('-');
+  });
+
+  it('retourne - pour string vide', () => {
+    expect(fmtDateExport('')).toBe('-');
+  });
+});
+
+// ===========================================================================
+// 10. Export helpers — statutLabel
+// ===========================================================================
+describe('statutLabel', () => {
+  it('traduit brouillon', () => {
+    expect(statutLabel('brouillon')).toBe('Brouillon');
+  });
+
+  it('traduit soumis', () => {
+    expect(statutLabel('soumis')).toBe('Soumis');
+  });
+
+  it('traduit visa_saf', () => {
+    expect(statutLabel('visa_saf')).toBe('Visa SAF');
+  });
+
+  it('traduit visa_cb', () => {
+    expect(statutLabel('visa_cb')).toBe('Visa CB');
+  });
+
+  it('traduit visa_daaf', () => {
+    expect(statutLabel('visa_daaf')).toBe('Visa DAAF');
+  });
+
+  it('traduit valide', () => {
+    expect(statutLabel('valide')).toBe('Validé');
+  });
+
+  it('traduit rejete', () => {
+    expect(statutLabel('rejete')).toBe('Rejeté');
+  });
+
+  it('traduit differe', () => {
+    expect(statutLabel('differe')).toBe('Différé');
+  });
+
+  it('retourne - pour null', () => {
+    expect(statutLabel(null)).toBe('-');
+  });
+
+  it('retourne la valeur brute pour un statut inconnu', () => {
+    expect(statutLabel('inconnu')).toBe('inconnu');
+  });
+});
+
+// ===========================================================================
+// 11. Export helpers — typeEngagementLabel
+// ===========================================================================
+describe('typeEngagementLabel', () => {
+  it('traduit sur_marche', () => {
+    expect(typeEngagementLabel('sur_marche')).toBe('Sur marché');
+  });
+
+  it('traduit hors_marche', () => {
+    expect(typeEngagementLabel('hors_marche')).toBe('Hors marché');
+  });
+
+  it('retourne - pour null', () => {
+    expect(typeEngagementLabel(null)).toBe('-');
+  });
+
+  it('retourne la valeur brute pour un type inconnu', () => {
+    expect(typeEngagementLabel('autre')).toBe('autre');
+  });
+});
+
+// ===========================================================================
+// 12. computeSuiviBudgetaire
+// ===========================================================================
+describe('computeSuiviBudgetaire', () => {
+  const engagementsForSuivi = [
+    createMockEngagement({
+      id: 's1',
+      statut: 'valide',
+      montant: 3_000_000,
+      budget_line_id: 'bl-001',
+      date_engagement: '2026-01-15',
+      budget_line: {
+        id: 'bl-001',
+        code: '60',
+        label: 'Achats',
+        dotation_initiale: 10_000_000,
+        direction: { label: 'DSI', sigle: 'DSI' },
+      },
+    }),
+    createMockEngagement({
+      id: 's2',
+      statut: 'valide',
+      montant: 2_000_000,
+      budget_line_id: 'bl-001',
+      date_engagement: '2026-02-01',
+      budget_line: {
+        id: 'bl-001',
+        code: '60',
+        label: 'Achats',
+        dotation_initiale: 10_000_000,
+        direction: { label: 'DSI', sigle: 'DSI' },
+      },
+    }),
+    createMockEngagement({
+      id: 's3',
+      statut: 'valide',
+      montant: 5_000_000,
+      budget_line_id: 'bl-002',
+      date_engagement: '2026-01-20',
+      budget_line: {
+        id: 'bl-002',
+        code: '61',
+        label: 'Services',
+        dotation_initiale: 8_000_000,
+        direction: { label: 'DRH', sigle: 'DRH' },
+      },
+    }),
+    createMockEngagement({
+      id: 's4',
+      statut: 'rejete',
+      montant: 1_000_000,
+      budget_line_id: 'bl-001',
+      date_engagement: '2026-01-10',
+      budget_line: {
+        id: 'bl-001',
+        code: '60',
+        label: 'Achats',
+        dotation_initiale: 10_000_000,
+        direction: { label: 'DSI', sigle: 'DSI' },
+      },
+    }),
+    createMockEngagement({
+      id: 's5',
+      statut: 'annule',
+      montant: 500_000,
+      budget_line_id: 'bl-002',
+      date_engagement: '2026-01-05',
+      budget_line: {
+        id: 'bl-002',
+        code: '61',
+        label: 'Services',
+        dotation_initiale: 8_000_000,
+        direction: { label: 'DRH', sigle: 'DRH' },
+      },
+    }),
+  ];
+
+  it('groupe par ligne budgétaire', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    expect(result).toHaveLength(2);
+  });
+
+  it('exclut les engagements rejetés et annulés', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    const bl001 = result.find((s) => s.code === '60');
+    // s1 (3M) + s2 (2M) = 5M, s4 (rejete) exclu
+    expect(bl001?.totalEngage).toBe(5_000_000);
+    expect(bl001?.nbEngagements).toBe(2);
+  });
+
+  it('calcule correctement le disponible', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    const bl001 = result.find((s) => s.code === '60');
+    expect(bl001?.disponible).toBe(10_000_000 - 5_000_000); // 5M
+  });
+
+  it('calcule correctement le taux', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    const bl001 = result.find((s) => s.code === '60');
+    expect(bl001?.taux).toBe(50); // 5M / 10M * 100
+  });
+
+  it('trie par taux décroissant', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    // bl-002 : 5M / 8M = 62.5% > bl-001 : 5M / 10M = 50%
+    expect(result[0].code).toBe('61');
+    expect(result[1].code).toBe('60');
+  });
+
+  it('retourne le dernier engagement par ligne', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    const bl001 = result.find((s) => s.code === '60');
+    expect(bl001?.dernierEngagement).toBe('2026-02-01');
+  });
+
+  it('retourne la direction', () => {
+    const result = computeSuiviBudgetaire(engagementsForSuivi);
+    const bl001 = result.find((s) => s.code === '60');
+    expect(bl001?.directionSigle).toBe('DSI');
+  });
+
+  it('gère une liste vide', () => {
+    const result = computeSuiviBudgetaire([]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('gère des engagements sans budget_line_id', () => {
+    const engs = [createMockEngagement({ id: 'x1', statut: 'valide', budget_line_id: '' })];
+    const result = computeSuiviBudgetaire(engs);
+    expect(result).toHaveLength(0);
+  });
+
+  it('gère dotation à zéro (taux = 0)', () => {
+    const engs = [
+      createMockEngagement({
+        id: 'z1',
+        statut: 'valide',
+        montant: 1_000_000,
+        budget_line_id: 'bl-zero',
+        budget_line: {
+          id: 'bl-zero',
+          code: '99',
+          label: 'Test',
+          dotation_initiale: 0,
+          direction: null,
+        },
+      }),
+    ];
+    const result = computeSuiviBudgetaire(engs);
+    expect(result[0].taux).toBe(0);
+    expect(result[0].disponible).toBe(-1_000_000);
+  });
+
+  it('calcule correctement avec une seule ligne', () => {
+    const engs = [
+      createMockEngagement({
+        id: 'u1',
+        statut: 'soumis',
+        montant: 4_000_000,
+        budget_line_id: 'bl-solo',
+        budget_line: {
+          id: 'bl-solo',
+          code: '70',
+          label: 'Solo',
+          dotation_initiale: 20_000_000,
+          direction: { label: 'DG', sigle: 'DG' },
+        },
+      }),
+    ];
+    const result = computeSuiviBudgetaire(engs);
+    expect(result).toHaveLength(1);
+    expect(result[0].totalEngage).toBe(4_000_000);
+    expect(result[0].taux).toBe(20);
+    expect(result[0].nbEngagements).toBe(1);
   });
 });
