@@ -1,44 +1,42 @@
-// @ts-nocheck
 /**
- * LiquidationTimeline - Timeline du workflow de liquidation
+ * LiquidationTimeline - Timeline simplifiée du workflow de liquidation
  *
- * Affiche l'historique des étapes du workflow:
- * CRÉATION → SERVICE FAIT → SOUMISSION → VALIDATION (multi-step SAF→CB→DAF→DG) → VALIDÉ/REJETÉ
- *
+ * Affiche 3 étapes : ○ Certifié SF → ○ DAAF → ○ DG (si requis)
  * Avec dates, acteurs et motifs si applicable
  */
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileEdit,
-  Send,
   CheckCircle2,
   XCircle,
   User,
   Calendar,
-  Users,
-  FileCheck,
   Receipt,
   ClipboardCheck,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { Liquidation, VALIDATION_STEPS, useLiquidations } from "@/hooks/useLiquidations";
+  Shield,
+  Crown,
+  FileCheck,
+  Send,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn, formatCurrency } from '@/lib/utils';
+import {
+  Liquidation,
+  requiresDgValidation,
+  SEUIL_VALIDATION_DG,
+  useLiquidations,
+} from '@/hooks/useLiquidations';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: "completed" | "current" | "pending" | "rejected";
+  status: 'completed' | 'current' | 'pending' | 'rejected' | 'skipped';
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
@@ -72,106 +70,141 @@ export function LiquidationTimeline({
     if (liquidation?.id) {
       getValidationSteps(liquidation.id).then(setValidationSteps);
     }
-  }, [liquidation?.id]);
+  }, [liquidation?.id, getValidationSteps]);
 
-  // Build timeline steps based on liquidation status
+  const needsDG = requiresDgValidation(liquidation.montant);
+
+  // Build simplified 3-step timeline
   const buildTimelineSteps = (): TimelineStep[] => {
     const steps: TimelineStep[] = [];
+    const statut = liquidation.statut || 'brouillon';
 
-    // Step 1: Creation (always completed)
+    // Step 1: Création (always completed)
     steps.push({
-      key: "creation",
-      label: "Création",
+      key: 'creation',
+      label: 'Création',
       icon: FileEdit,
-      status: "completed",
+      status: 'completed',
       date: liquidation.created_at,
       actor: liquidation.creator?.full_name,
     });
 
-    // Step 2: Service fait (attestation)
-    const hasServiceFait = liquidation.date_service_fait != null;
+    // Step 2: Certifié SF
+    const sfCertified =
+      liquidation.service_fait === true ||
+      statut === 'certifié_sf' ||
+      statut === 'soumis' ||
+      statut === 'validé_daaf' ||
+      statut === 'validé_dg';
+    const sfIsCurrent = statut === 'brouillon' || statut === 'certifié_sf';
+
     steps.push({
-      key: "service_fait",
-      label: "Service fait",
+      key: 'certifie_sf',
+      label: 'Certifié SF',
       icon: ClipboardCheck,
-      status: hasServiceFait ? "completed" : liquidation.statut === "brouillon" ? "current" : "completed",
-      date: liquidation.date_service_fait,
-      comment: hasServiceFait ? "Attestation de service fait validée" : undefined,
+      status:
+        sfCertified && !sfIsCurrent
+          ? 'completed'
+          : sfIsCurrent && liquidation.service_fait
+            ? 'completed'
+            : sfIsCurrent
+              ? 'current'
+              : 'pending',
+      date: liquidation.service_fait_date,
+      comment: sfCertified ? 'Service fait certifié' : undefined,
     });
 
-    // Step 3: Documents (facture, PV)
-    const hasDocuments = liquidation.documents && liquidation.documents.length > 0;
+    // Step 3: Soumission
+    const hasBeenSubmitted = !['brouillon', 'certifié_sf'].includes(statut);
     steps.push({
-      key: "documents",
-      label: "Pièces justificatives",
-      icon: FileCheck,
-      status: hasDocuments ? "completed" : "pending",
-      comment: hasDocuments
-        ? `${liquidation.documents?.length} document(s) fourni(s)`
-        : "En attente des pièces",
-    });
-
-    // Step 4: Submission
-    const hasBeenSubmitted = liquidation.statut !== "brouillon";
-    steps.push({
-      key: "soumission",
-      label: "Soumission",
+      key: 'soumission',
+      label: 'Soumission',
       icon: Send,
-      status: hasBeenSubmitted ? "completed" : "pending",
+      status: hasBeenSubmitted ? 'completed' : 'pending',
+      date: liquidation.submitted_at,
     });
 
-    // Step 5: Multi-step validation (only if submitted)
-    if (hasBeenSubmitted && liquidation.statut !== "rejete") {
-      const currentStep = liquidation.current_step || 1;
+    // Step 4: Documents
+    const hasDocuments = liquidation.attachments && liquidation.attachments.length > 0;
+    steps.push({
+      key: 'documents',
+      label: 'Pièces justificatives',
+      icon: FileCheck,
+      status: hasDocuments ? 'completed' : 'pending',
+      comment: hasDocuments
+        ? `${liquidation.attachments?.length} document(s)`
+        : 'En attente des pièces',
+    });
 
-      // Add each validation step
-      VALIDATION_STEPS.forEach((step) => {
-        const validation = validationSteps.find((v) => v.step_order === step.order);
-        const isCompleted = validation?.status === "valide";
-        const isRejected = validation?.status === "rejete";
-        const isCurrent = step.order === currentStep && liquidation.statut === "soumis";
-        const isPending = step.order > currentStep && !isCompleted;
+    // Step 5: Validation DAAF
+    const daafValidation = validationSteps.find((v) => v.role === 'DAAF' || v.role === 'DAF');
+    const daafCompleted = daafValidation?.status === 'valide';
+    const daafRejected = daafValidation?.status === 'rejete';
+    const daafIsCurrent = statut === 'soumis' && !daafCompleted && !daafRejected;
 
-        steps.push({
-          key: `validation_${step.order}`,
-          label: step.label,
-          icon: Users,
-          status: isCompleted
-            ? "completed"
-            : isRejected
-            ? "rejected"
-            : isCurrent
-            ? "current"
-            : isPending
-            ? "pending"
-            : "pending",
-          date: validation?.validated_at,
-          actor: validation?.validator?.full_name,
-          comment: validation?.comments,
-        });
+    steps.push({
+      key: 'daaf',
+      label: 'Validation DAAF',
+      icon: Shield,
+      status: daafCompleted
+        ? 'completed'
+        : daafRejected
+          ? 'rejected'
+          : daafIsCurrent
+            ? 'current'
+            : 'pending',
+      date: daafValidation?.validated_at,
+      actor: daafValidation?.validator?.full_name,
+      comment: daafValidation?.comments,
+    });
+
+    // Step 6: Validation DG (conditionnelle)
+    if (needsDG) {
+      const dgValidation = validationSteps.find((v) => v.role === 'DG');
+      const dgCompleted = dgValidation?.status === 'valide';
+      const dgRejected = dgValidation?.status === 'rejete';
+      const dgIsCurrent = statut === 'validé_daaf' && !dgCompleted && !dgRejected;
+
+      steps.push({
+        key: 'dg',
+        label: 'Validation DG',
+        icon: Crown,
+        status: dgCompleted
+          ? 'completed'
+          : dgRejected
+            ? 'rejected'
+            : dgIsCurrent
+              ? 'current'
+              : 'pending',
+        date: dgValidation?.validated_at,
+        actor: dgValidation?.validator?.full_name,
+        comment:
+          dgValidation?.comments ||
+          (dgIsCurrent
+            ? `Montant ≥ ${formatCurrency(SEUIL_VALIDATION_DG)} — validation DG requise`
+            : undefined),
       });
     }
 
-    // Final status
-    if (liquidation.statut === "valide") {
+    // Final
+    if (statut === 'validé_dg') {
       steps.push({
-        key: "validation_finale",
-        label: "Liquidation validée",
+        key: 'validation_finale',
+        label: 'Liquidation validée',
         icon: CheckCircle2,
-        status: "completed",
-        date: liquidation.date_liquidation,
+        status: 'completed',
+        date: liquidation.validated_at || liquidation.date_liquidation,
       });
-    } else if (liquidation.statut === "rejete") {
-      // Find rejection reason from validation steps
-      const rejectedStep = validationSteps.find((v) => v.status === "rejete");
+    } else if (statut === 'rejete') {
+      const rejectedStep = validationSteps.find((v) => v.status === 'rejete');
       steps.push({
-        key: "rejet",
-        label: "Rejetée",
+        key: 'rejet',
+        label: 'Rejetée',
         icon: XCircle,
-        status: "rejected",
-        comment: rejectedStep?.comments || liquidation.motif_rejet,
+        status: 'rejected',
+        comment: rejectedStep?.comments || liquidation.rejection_reason,
         actor: rejectedStep?.validator?.full_name,
-        date: rejectedStep?.validated_at,
+        date: rejectedStep?.validated_at || liquidation.rejected_at,
       });
     }
 
@@ -180,34 +213,36 @@ export function LiquidationTimeline({
 
   const steps = buildTimelineSteps();
 
-  const getStatusColor = (status: TimelineStep["status"]) => {
+  const getStatusColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500 text-white";
-      case "current":
-        return "bg-primary text-white ring-4 ring-primary/30";
-      case "rejected":
-        return "bg-red-500 text-white";
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'current':
+        return 'bg-primary text-white ring-4 ring-primary/30';
+      case 'rejected':
+        return 'bg-red-500 text-white';
+      case 'skipped':
+        return 'bg-muted/50 text-muted-foreground/50';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLineColor = (status: TimelineStep["status"]) => {
+  const getLineColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
+      case 'completed':
+        return 'bg-green-500';
+      case 'rejected':
+        return 'bg-red-500';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn("flex items-center gap-2 overflow-x-auto", className)}>
+        <div className={cn('flex items-center gap-2 overflow-x-auto', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -216,7 +251,7 @@ export function LiquidationTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
                         getStatusColor(step.status)
                       )}
                     >
@@ -228,20 +263,16 @@ export function LiquidationTimeline({
                       <p className="font-medium">{step.label}</p>
                       {step.date && (
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(step.date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                          {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.actor && (
-                        <p className="text-xs">Par: {step.actor}</p>
-                      )}
-                      {step.comment && (
-                        <p className="text-xs max-w-xs">{step.comment}</p>
-                      )}
+                      {step.actor && <p className="text-xs">Par: {step.actor}</p>}
+                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn("h-0.5 w-4 mx-1 shrink-0", getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-4 mx-1 shrink-0', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -256,7 +287,12 @@ export function LiquidationTimeline({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <Receipt className="h-4 w-4" />
-          Historique du workflow de liquidation
+          Workflow de validation
+          {needsDG && (
+            <Badge variant="outline" className="text-xs ml-auto border-secondary/30 text-secondary">
+              Validation DG requise
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -269,7 +305,7 @@ export function LiquidationTimeline({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full -ml-px",
+                      'absolute left-4 top-8 w-0.5 h-full -ml-px',
                       getLineColor(step.status)
                     )}
                   />
@@ -278,7 +314,7 @@ export function LiquidationTimeline({
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10",
+                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10',
                     getStatusColor(step.status)
                   )}
                 >
@@ -292,17 +328,20 @@ export function LiquidationTimeline({
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-xs",
-                        step.status === "completed" && "border-green-500 text-green-600",
-                        step.status === "current" && "border-primary text-primary",
-                        step.status === "rejected" && "border-red-500 text-red-600",
-                        step.status === "pending" && "border-muted-foreground text-muted-foreground"
+                        'text-xs',
+                        step.status === 'completed' && 'border-green-500 text-green-600',
+                        step.status === 'current' && 'border-primary text-primary',
+                        step.status === 'rejected' && 'border-red-500 text-red-600',
+                        step.status === 'pending' &&
+                          'border-muted-foreground text-muted-foreground',
+                        step.status === 'skipped' && 'border-muted text-muted-foreground/50'
                       )}
                     >
-                      {step.status === "completed" && "Terminé"}
-                      {step.status === "current" && "En cours"}
-                      {step.status === "rejected" && "Rejeté"}
-                      {step.status === "pending" && "En attente"}
+                      {step.status === 'completed' && 'Terminé'}
+                      {step.status === 'current' && 'En cours'}
+                      {step.status === 'rejected' && 'Rejeté'}
+                      {step.status === 'pending' && 'En attente'}
+                      {step.status === 'skipped' && 'Non requis'}
                     </Badge>
                   </div>
 
@@ -311,7 +350,7 @@ export function LiquidationTimeline({
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(step.date), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>

@@ -35,12 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +46,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { cn } from '@/lib/utils';
+import { cn, formatCurrency } from '@/lib/utils';
 
 import { useUrgentLiquidations, type UrgentLiquidation } from '@/hooks/useUrgentLiquidations';
 import { UrgentLiquidationBadge } from './UrgentLiquidationBadge';
@@ -90,14 +85,8 @@ export function UrgentLiquidationList({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [confirmRemove, setConfirmRemove] = useState<UrgentLiquidation | null>(null);
 
-  const {
-    urgentLiquidations,
-    stats,
-    isLoading,
-    removeUrgent,
-    isRemoving,
-    refetch,
-  } = useUrgentLiquidations();
+  const { urgentLiquidations, stats, isLoading, removeUrgent, isRemoving, refetch } =
+    useUrgentLiquidations();
 
   // Filtrer et trier
   const filteredAndSorted = useMemo(() => {
@@ -120,7 +109,8 @@ export function UrgentLiquidationList({
       let comparison = 0;
       switch (sortField) {
         case 'urgence_date':
-          comparison = new Date(a.urgence_date || 0).getTime() - new Date(b.urgence_date || 0).getTime();
+          comparison =
+            new Date(a.urgence_date || 0).getTime() - new Date(b.urgence_date || 0).getTime();
           break;
         case 'montant':
           comparison = (a.net_a_payer || a.montant) - (b.net_a_payer || b.montant);
@@ -129,7 +119,9 @@ export function UrgentLiquidationList({
           comparison = a.numero.localeCompare(b.numero);
           break;
         case 'fournisseur':
-          comparison = (a.engagement?.fournisseur || '').localeCompare(b.engagement?.fournisseur || '');
+          comparison = (a.engagement?.fournisseur || '').localeCompare(
+            b.engagement?.fournisseur || ''
+          );
           break;
       }
       return sortDirection === 'asc' ? comparison : -comparison;
@@ -137,11 +129,6 @@ export function UrgentLiquidationList({
 
     return result;
   }, [urgentLiquidations, searchQuery, sortField, sortDirection]);
-
-  // Formater montant
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  };
 
   // Gérer le tri
   const handleSort = (field: SortField) => {
@@ -176,13 +163,13 @@ export function UrgentLiquidationList({
   // Export Excel
   const handleExportExcel = () => {
     const data = filteredAndSorted.map((l) => ({
-      'Numéro': l.numero,
-      'Engagement': l.engagement?.numero || '-',
-      'Objet': l.engagement?.objet || '-',
-      'Fournisseur': l.engagement?.fournisseur || '-',
-      'Direction': l.engagement?.budget_line?.direction?.sigle || '-',
-      'Montant': l.net_a_payer || l.montant,
-      'Statut': l.statut,
+      Numéro: l.numero,
+      Engagement: l.engagement?.numero || '-',
+      Objet: l.engagement?.objet || '-',
+      Fournisseur: l.engagement?.fournisseur || '-',
+      Direction: l.engagement?.budget_line?.direction?.sigle || '-',
+      Montant: l.net_a_payer || l.montant,
+      Statut: l.statut,
       'Motif urgence': l.urgence_motif || '-',
       'Date urgence': l.urgence_date ? format(new Date(l.urgence_date), 'dd/MM/yyyy HH:mm') : '-',
       'Marqué par': l.urgence_user?.full_name || '-',
@@ -276,7 +263,8 @@ export function UrgentLiquidationList({
               <div>
                 <CardTitle className="text-red-600">Liquidations urgentes</CardTitle>
                 <CardDescription>
-                  {filteredAndSorted.length} liquidation{filteredAndSorted.length !== 1 ? 's' : ''} urgente{filteredAndSorted.length !== 1 ? 's' : ''}
+                  {filteredAndSorted.length} liquidation{filteredAndSorted.length !== 1 ? 's' : ''}{' '}
+                  urgente{filteredAndSorted.length !== 1 ? 's' : ''}
                 </CardDescription>
               </div>
             </div>
@@ -309,7 +297,9 @@ export function UrgentLiquidationList({
                 <p className="text-xs text-muted-foreground">Validées</p>
               </div>
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-2xl font-bold text-blue-600">{formatMontant(stats.montantTotal)}</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {formatCurrency(stats.montantTotal)}
+                </p>
                 <p className="text-xs text-muted-foreground">Montant total</p>
               </div>
             </div>
@@ -402,7 +392,8 @@ export function UrgentLiquidationList({
                                 {liq.engagement?.budget_line && (
                                   <p className="text-xs text-muted-foreground">
                                     <Building2 className="h-3 w-3 inline mr-1" />
-                                    {liq.engagement.budget_line.direction?.sigle || liq.engagement.budget_line.code}
+                                    {liq.engagement.budget_line.direction?.sigle ||
+                                      liq.engagement.budget_line.code}
                                   </p>
                                 )}
                               </div>
@@ -412,13 +403,16 @@ export function UrgentLiquidationList({
                       </TableCell>
                       <TableCell>{liq.engagement?.fournisseur || '-'}</TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatMontant(liq.net_a_payer || liq.montant)}
+                        {formatCurrency(liq.net_a_payer || liq.montant)}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-0.5">
                           <span className="text-xs">
                             {liq.urgence_date
-                              ? formatDistanceToNow(new Date(liq.urgence_date), { addSuffix: true, locale: fr })
+                              ? formatDistanceToNow(new Date(liq.urgence_date), {
+                                  addSuffix: true,
+                                  locale: fr,
+                                })
                               : '-'}
                           </span>
                           {liq.urgence_user?.full_name && (

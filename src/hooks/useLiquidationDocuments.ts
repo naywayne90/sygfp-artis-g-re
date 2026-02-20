@@ -1,7 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuditLog } from '@/hooks/useAuditLog';
+
+// Helper pour la table liquidation_documents non encore dans les types générés Supabase
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabaseAny = supabase as any;
 
 export interface LiquidationDocument {
   id: string;
@@ -34,31 +38,32 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
   const { logAction } = useAuditLog();
 
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["liquidation-documents", liquidationId],
+    queryKey: ['liquidation-documents', liquidationId],
     queryFn: async () => {
       if (!liquidationId) return [];
-      
-      // Using type assertion as the table is newly created and types may not be synced
-      const { data, error } = await (supabase
-        .from("liquidation_documents" as any)
-        .select("*")
-        .eq("liquidation_id", liquidationId)
-        .order("is_required", { ascending: false })
-        .order("document_type") as any);
+
+      const { data, error } = await supabaseAny
+        .from('liquidation_documents')
+        .select('*')
+        .eq('liquidation_id', liquidationId)
+        .order('is_required', { ascending: false })
+        .order('document_type');
       if (error) throw error;
-      return data as LiquidationDocument[];
+      return (data || []) as LiquidationDocument[];
     },
     enabled: !!liquidationId,
   });
 
   // Calculate checklist status
   const checklistStatus: LiquidationDocumentsChecklistStatus = {
-    totalRequired: documents.filter(d => d.is_required).length,
-    providedRequired: documents.filter(d => d.is_required && d.is_provided).length,
-    verifiedRequired: documents.filter(d => d.is_required && d.is_verified).length,
-    isComplete: documents.filter(d => d.is_required).every(d => d.is_provided),
-    isFullyVerified: documents.filter(d => d.is_required).every(d => d.is_verified),
-    missingLabels: documents.filter(d => d.is_required && !d.is_provided).map(d => d.document_label),
+    totalRequired: documents.filter((d) => d.is_required).length,
+    providedRequired: documents.filter((d) => d.is_required && d.is_provided).length,
+    verifiedRequired: documents.filter((d) => d.is_required && d.is_verified).length,
+    isComplete: documents.filter((d) => d.is_required).every((d) => d.is_provided),
+    isFullyVerified: documents.filter((d) => d.is_required).every((d) => d.is_verified),
+    missingLabels: documents
+      .filter((d) => d.is_required && !d.is_provided)
+      .map((d) => d.document_label),
   };
 
   // Mark document as provided
@@ -77,29 +82,29 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
       fileType?: string;
     }) => {
       // Get old values for audit
-      const { data: oldDoc } = await (supabase
-        .from("liquidation_documents" as any)
-        .select("is_provided, file_path, file_name, document_label")
-        .eq("id", documentId)
-        .single() as any);
+      const { data: oldDoc } = await supabaseAny
+        .from('liquidation_documents')
+        .select('is_provided, file_path, file_name, document_label')
+        .eq('id', documentId)
+        .single();
 
-      const { error } = await (supabase
-        .from("liquidation_documents" as any)
+      const { error } = await supabaseAny
+        .from('liquidation_documents')
         .update({
           is_provided: true,
           provided_at: new Date().toISOString(),
           file_path: filePath || null,
           file_name: fileName || null,
         })
-        .eq("id", documentId) as any);
+        .eq('id', documentId);
       if (error) throw error;
 
       // Audit log
       if (liquidationId) {
         await logAction({
-          entityType: "liquidation",
+          entityType: 'liquidation',
           entityId: liquidationId,
-          action: "UPLOAD",
+          action: 'UPLOAD',
           oldValues: { is_provided: oldDoc?.is_provided, file_name: oldDoc?.file_name },
           newValues: {
             is_provided: true,
@@ -113,11 +118,11 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
-      toast.success("Document marqué comme fourni");
+      queryClient.invalidateQueries({ queryKey: ['liquidation-documents', liquidationId] });
+      toast.success('Document marqué comme fourni');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -130,34 +135,36 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
       documentId: string;
       observation?: string;
     }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       // Get document info for audit
-      const { data: doc } = await (supabase
-        .from("liquidation_documents" as any)
-        .select("document_label, file_name")
-        .eq("id", documentId)
-        .single() as any);
+      const { data: doc } = await supabaseAny
+        .from('liquidation_documents')
+        .select('document_label, file_name')
+        .eq('id', documentId)
+        .single();
 
-      const { error } = await (supabase
-        .from("liquidation_documents" as any)
+      const { error } = await supabaseAny
+        .from('liquidation_documents')
         .update({
           is_verified: true,
           verified_at: new Date().toISOString(),
           verified_by: user.id,
           observation: observation || null,
         })
-        .eq("id", documentId) as any);
+        .eq('id', documentId);
 
       if (error) throw error;
 
       // Audit log
       if (liquidationId) {
         await logAction({
-          entityType: "liquidation",
+          entityType: 'liquidation',
           entityId: liquidationId,
-          action: "VALIDATE",
+          action: 'VALIDATE',
           newValues: {
             document_id: documentId,
             document_label: doc?.document_label,
@@ -169,11 +176,11 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
-      toast.success("Document vérifié");
+      queryClient.invalidateQueries({ queryKey: ['liquidation-documents', liquidationId] });
+      toast.success('Document vérifié');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -181,14 +188,14 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
   const unmarkDocumentMutation = useMutation({
     mutationFn: async (documentId: string) => {
       // Get old values for audit
-      const { data: oldDoc } = await (supabase
-        .from("liquidation_documents" as any)
-        .select("document_label, file_name, is_provided, is_verified")
-        .eq("id", documentId)
-        .single() as any);
+      const { data: oldDoc } = await supabaseAny
+        .from('liquidation_documents')
+        .select('document_label, file_name, is_provided, is_verified')
+        .eq('id', documentId)
+        .single();
 
-      const { error } = await (supabase
-        .from("liquidation_documents" as any)
+      const { error } = await supabaseAny
+        .from('liquidation_documents')
         .update({
           is_provided: false,
           is_verified: false,
@@ -198,16 +205,16 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
           file_path: null,
           file_name: null,
         })
-        .eq("id", documentId) as any);
+        .eq('id', documentId);
 
       if (error) throw error;
 
       // Audit log
       if (liquidationId) {
         await logAction({
-          entityType: "liquidation",
+          entityType: 'liquidation',
           entityId: liquidationId,
-          action: "DELETE",
+          action: 'DELETE',
           oldValues: {
             document_id: documentId,
             document_label: oldDoc?.document_label,
@@ -220,11 +227,11 @@ export function useLiquidationDocuments(liquidationId: string | undefined) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["liquidation-documents", liquidationId] });
-      toast.success("Marquage annulé");
+      queryClient.invalidateQueries({ queryKey: ['liquidation-documents', liquidationId] });
+      toast.success('Marquage annulé');
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 

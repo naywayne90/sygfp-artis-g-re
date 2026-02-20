@@ -9,10 +9,6 @@ import { toast } from 'sonner';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
 
-// Helper pour accéder aux colonnes non encore générées dans les types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const supabaseAny = supabase as any;
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -80,7 +76,7 @@ export function useUrgentLiquidations() {
   } = useQuery<UrgentLiquidation[]>({
     queryKey: ['urgent-liquidations', exercice],
     queryFn: async () => {
-      const { data, error } = await supabaseAny
+      const { data, error } = await supabase
         .from('budget_liquidations')
         .select(
           `
@@ -131,7 +127,7 @@ export function useUrgentLiquidations() {
   const { data: urgentCount = 0 } = useQuery<number>({
     queryKey: ['urgent-liquidations-count', exercice],
     queryFn: async () => {
-      const { count, error } = await supabaseAny
+      const { count, error } = await supabase
         .from('budget_liquidations')
         .select('*', { count: 'exact', head: true })
         .eq('exercice', exercice)
@@ -168,7 +164,7 @@ export function useUrgentLiquidations() {
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer l'état avant
-      const { data: liquidationBefore, error: fetchError } = await supabaseAny
+      const { data: liquidationBefore, error: fetchError } = await supabase
         .from('budget_liquidations')
         .select(
           'id, numero, reglement_urgent, reglement_urgent_motif, reglement_urgent_date, reglement_urgent_par'
@@ -185,7 +181,7 @@ export function useUrgentLiquidations() {
         reglement_urgent_par: user.id,
       };
 
-      const { error } = await supabaseAny
+      const { error } = await supabase
         .from('budget_liquidations')
         .update(newValues)
         .eq('id', liquidationId);
@@ -207,6 +203,27 @@ export function useUrgentLiquidations() {
         justification: motif,
         resume: `Marquage urgent de la liquidation ${liquidationBefore?.numero}`,
       });
+
+      // Notifications DAAF + DMG pour règlement prioritaire
+      const { data: daafUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['DAAF', 'DAF', 'DMG']);
+
+      if (daafUsers?.length) {
+        await supabase.from('notifications').insert(
+          daafUsers
+            .filter((u) => u.user_id !== user.id)
+            .map((u) => ({
+              user_id: u.user_id,
+              type: 'alerte',
+              title: 'Liquidation urgente',
+              message: `La liquidation ${liquidationBefore?.numero} a été marquée urgente : ${motif}`,
+              entity_type: 'liquidation',
+              entity_id: liquidationId,
+            }))
+        );
+      }
 
       return liquidationBefore?.numero;
     },
@@ -233,7 +250,7 @@ export function useUrgentLiquidations() {
       if (!user) throw new Error('Non authentifié');
 
       // Récupérer l'état avant
-      const { data: liquidationBefore, error: fetchError } = await supabaseAny
+      const { data: liquidationBefore, error: fetchError } = await supabase
         .from('budget_liquidations')
         .select(
           'id, numero, reglement_urgent, reglement_urgent_motif, reglement_urgent_date, reglement_urgent_par'
@@ -250,7 +267,7 @@ export function useUrgentLiquidations() {
         reglement_urgent_par: null,
       };
 
-      const { error } = await supabaseAny
+      const { error } = await supabase
         .from('budget_liquidations')
         .update(newValues)
         .eq('id', liquidationId);

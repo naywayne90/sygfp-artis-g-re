@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   CheckCircle2,
   XCircle,
@@ -33,13 +33,14 @@ import {
   Loader2,
   FileText,
   Banknote,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { usePermissions } from "@/hooks/usePermissions";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from 'sonner';
+import { formatCurrency } from '@/lib/utils';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const validationDgSchema = z.object({
   observation: z.string().optional(),
@@ -76,42 +77,38 @@ interface ValidationDgFormProps {
   onSuccess?: () => void;
 }
 
-export function ValidationDgForm({
-  liquidationId,
-  liquidation,
-  onSuccess,
-}: ValidationDgFormProps) {
+export function ValidationDgForm({ liquidationId, liquidation, onSuccess }: ValidationDgFormProps) {
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [pendingDecision, setPendingDecision] = useState<"valider" | "rejeter" | null>(null);
+  const [pendingDecision, setPendingDecision] = useState<'valider' | 'rejeter' | null>(null);
   const { logAction } = useAuditLog();
   const { hasAnyRole } = usePermissions();
 
   // Seul DG ou ADMIN peut valider
-  const canValidate = hasAnyRole(["ADMIN", "DG"]);
-  const isWaitingDg = liquidation.statut === "en_validation_dg";
+  const canValidate = hasAnyRole(['ADMIN', 'DG']);
+  const isWaitingDg = liquidation.statut === 'validé_daaf';
 
   const form = useForm<ValidationDgFormData>({
     resolver: zodResolver(validationDgSchema),
     defaultValues: {
-      observation: "",
-      motif_rejet: "",
+      observation: '',
+      motif_rejet: '',
     },
   });
 
   const handleValidate = () => {
-    setPendingDecision("valider");
+    setPendingDecision('valider');
     setShowConfirm(true);
   };
 
   const handleReject = () => {
-    const motif = form.getValues("motif_rejet");
+    const motif = form.getValues('motif_rejet');
     if (!motif) {
-      toast.error("Veuillez indiquer un motif de rejet");
-      form.setFocus("motif_rejet");
+      toast.error('Veuillez indiquer un motif de rejet');
+      form.setFocus('motif_rejet');
       return;
     }
-    setPendingDecision("rejeter");
+    setPendingDecision('rejeter');
     setShowConfirm(true);
   };
 
@@ -120,81 +117,111 @@ export function ValidationDgForm({
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non authentifié');
 
       const formData = form.getValues();
-      const isValidation = pendingDecision === "valider";
+      const isValidation = pendingDecision === 'valider';
 
       const { error } = await supabase
-        .from("budget_liquidations")
+        .from('budget_liquidations')
         .update({
-          statut: isValidation ? "valide" : "rejete",
-          workflow_status: isValidation ? "termine" : "rejete",
+          statut: isValidation ? 'validé_dg' : 'rejete',
+          workflow_status: isValidation ? 'termine' : 'rejete',
           validated_at: isValidation ? new Date().toISOString() : null,
           validated_by: isValidation ? user.id : null,
           rejected_at: !isValidation ? new Date().toISOString() : null,
           rejected_by: !isValidation ? user.id : null,
           rejection_reason: !isValidation ? formData.motif_rejet : null,
-          observation: formData.observation 
+          observation: formData.observation
             ? `${liquidation.engagement?.numero || ''} - DG: ${formData.observation}`
-            : liquidation.engagement?.numero,
+            : undefined,
         })
-        .eq("id", liquidationId);
+        .eq('id', liquidationId);
 
       if (error) throw error;
 
-      // Mettre à jour le total liquidé de la ligne budgétaire si validation
-      if (isValidation && liquidation.engagement?.budget_line) {
-        // Récupérer le budget_line_id depuis l'engagement
-        const { data: engData } = await supabase
-          .from("budget_engagements")
-          .select("budget_line_id")
-          .eq("id", liquidation.engagement.numero.includes("ENG") ? undefined : liquidation.engagement.numero)
+      // Impact budget : total_liquide += net_a_payer sur validation DG
+      let budgetImpact: {
+        budget_line_id: string;
+        old_total_liquide: number;
+        new_total_liquide: number;
+        net_a_payer: number;
+      } | null = null;
+
+      if (isValidation) {
+        // Récupérer l'engagement_id depuis la liquidation
+        const { data: liqData } = await supabase
+          .from('budget_liquidations')
+          .select('engagement_id, net_a_payer, montant')
+          .eq('id', liquidationId)
           .single();
 
-        if (engData?.budget_line_id) {
-          const { data: currentLine } = await supabase
-            .from("budget_lines")
-            .select("total_liquide")
-            .eq("id", engData.budget_line_id)
+        if (liqData?.engagement_id) {
+          const netAPayer = liqData.net_a_payer || liqData.montant;
+          const { data: engData } = await supabase
+            .from('budget_engagements')
+            .select('budget_line_id')
+            .eq('id', liqData.engagement_id)
             .single();
 
-          await supabase
-            .from("budget_lines")
-            .update({
-              total_liquide: (currentLine?.total_liquide || 0) + liquidation.montant,
-            })
-            .eq("id", engData.budget_line_id);
+          if (engData?.budget_line_id) {
+            const { data: currentLine } = await supabase
+              .from('budget_lines')
+              .select('id, total_liquide')
+              .eq('id', engData.budget_line_id)
+              .single();
+
+            if (currentLine) {
+              const oldTotalLiquide = currentLine.total_liquide || 0;
+              const newTotalLiquide = oldTotalLiquide + netAPayer;
+
+              const { error: blError } = await supabase
+                .from('budget_lines')
+                .update({ total_liquide: newTotalLiquide })
+                .eq('id', currentLine.id);
+
+              if (blError) throw blError;
+
+              budgetImpact = {
+                budget_line_id: currentLine.id,
+                old_total_liquide: oldTotalLiquide,
+                new_total_liquide: newTotalLiquide,
+                net_a_payer: netAPayer,
+              };
+            }
+          }
         }
       }
 
       // Logger l'action
       await logAction({
-        entityType: "liquidation",
+        entityType: 'liquidation',
         entityId: liquidationId,
-        action: isValidation ? "validate" : "reject",
+        action: isValidation ? 'validate' : 'reject',
         oldValues: {
           statut: liquidation.statut,
         },
         newValues: {
-          statut: isValidation ? "valide" : "rejete",
-          action_type: "VALIDATION_DG",
+          statut: isValidation ? 'validé_dg' : 'rejete',
+          action_type: 'VALIDATION_DG',
           observation: formData.observation,
           ...(isValidation ? {} : { motif_rejet: formData.motif_rejet }),
+          ...(budgetImpact ? { budget_impact: budgetImpact } : {}),
         },
       });
 
       toast.success(
-        isValidation
-          ? "Liquidation validée par le DG"
-          : "Liquidation rejetée par le DG"
+        isValidation ? 'Liquidation validée par le DG' : 'Liquidation rejetée par le DG'
       );
 
       onSuccess?.();
-    } catch (error: any) {
-      console.error("Erreur:", error);
-      toast.error("Erreur: " + error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      console.error('Erreur:', error);
+      toast.error('Erreur: ' + message);
     } finally {
       setLoading(false);
     }
@@ -231,7 +258,7 @@ export function ValidationDgForm({
                 <div>
                   <span className="text-muted-foreground">Montant engagé:</span>
                   <span className="ml-2 font-medium">
-                    {new Intl.NumberFormat("fr-FR").format(liquidation.engagement?.montant || 0)} FCFA
+                    {formatCurrency(liquidation.engagement?.montant)}
                   </span>
                 </div>
                 <div className="col-span-2">
@@ -240,13 +267,14 @@ export function ValidationDgForm({
                 </div>
                 <div>
                   <span className="text-muted-foreground">Fournisseur:</span>
-                  <span className="ml-2">{liquidation.engagement?.fournisseur || "N/A"}</span>
+                  <span className="ml-2">{liquidation.engagement?.fournisseur || 'N/A'}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Direction:</span>
                   <span className="ml-2">
-                    {liquidation.engagement?.budget_line?.direction?.sigle || 
-                     liquidation.engagement?.budget_line?.direction?.label || "N/A"}
+                    {liquidation.engagement?.budget_line?.direction?.sigle ||
+                      liquidation.engagement?.budget_line?.direction?.label ||
+                      'N/A'}
                   </span>
                 </div>
               </div>
@@ -261,20 +289,16 @@ export function ValidationDgForm({
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-background rounded-lg">
                   <div className="text-xs text-muted-foreground">Montant HT</div>
-                  <div className="font-bold">
-                    {new Intl.NumberFormat("fr-FR").format(liquidation.montant_ht || 0)} FCFA
-                  </div>
+                  <div className="font-bold">{formatCurrency(liquidation.montant_ht)}</div>
                 </div>
                 <div className="text-center p-3 bg-background rounded-lg">
                   <div className="text-xs text-muted-foreground">Montant TTC</div>
-                  <div className="font-bold">
-                    {new Intl.NumberFormat("fr-FR").format(liquidation.montant)} FCFA
-                  </div>
+                  <div className="font-bold">{formatCurrency(liquidation.montant)}</div>
                 </div>
                 <div className="text-center p-3 bg-success/10 rounded-lg">
                   <div className="text-xs text-muted-foreground">Net à payer</div>
                   <div className="font-bold text-success">
-                    {new Intl.NumberFormat("fr-FR").format(liquidation.net_a_payer || liquidation.montant)} FCFA
+                    {formatCurrency(liquidation.net_a_payer || liquidation.montant)}
                   </div>
                 </div>
               </div>
@@ -288,7 +312,10 @@ export function ValidationDgForm({
                   <span className="font-medium">Service fait certifié</span>
                   {liquidation.service_fait_date && (
                     <span className="text-muted-foreground ml-2">
-                      le {format(new Date(liquidation.service_fait_date), "dd MMMM yyyy", { locale: fr })}
+                      le{' '}
+                      {format(new Date(liquidation.service_fait_date), 'dd MMMM yyyy', {
+                        locale: fr,
+                      })}
                     </span>
                   )}
                   {liquidation.reference_facture && (
@@ -331,7 +358,9 @@ export function ValidationDgForm({
                 name="motif_rejet"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-destructive">Motif de rejet (si applicable)</FormLabel>
+                    <FormLabel className="text-destructive">
+                      Motif de rejet (si applicable)
+                    </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
@@ -367,7 +396,7 @@ export function ValidationDgForm({
                     onClick={handleReject}
                     disabled={loading}
                   >
-                    {loading && pendingDecision === "rejeter" && (
+                    {loading && pendingDecision === 'rejeter' && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
                     <XCircle className="h-4 w-4 mr-2" />
@@ -379,7 +408,7 @@ export function ValidationDgForm({
                     disabled={loading}
                     className="bg-success hover:bg-success/90"
                   >
-                    {loading && pendingDecision === "valider" && (
+                    {loading && pendingDecision === 'valider' && (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     )}
                     <Crown className="h-4 w-4 mr-2" />
@@ -397,7 +426,7 @@ export function ValidationDgForm({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              {pendingDecision === "valider" ? (
+              {pendingDecision === 'valider' ? (
                 <>
                   <Crown className="h-5 w-5 text-success" />
                   Confirmer la validation DG
@@ -412,16 +441,16 @@ export function ValidationDgForm({
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 <p>
-                  {pendingDecision === "valider"
-                    ? `En tant que Directeur Général, vous validez définitivement la liquidation ${liquidation.numero} pour un montant de ${new Intl.NumberFormat("fr-FR").format(liquidation.net_a_payer || liquidation.montant)} FCFA.`
+                  {pendingDecision === 'valider'
+                    ? `En tant que Directeur Général, vous validez définitivement la liquidation ${liquidation.numero} pour un montant de ${formatCurrency(liquidation.net_a_payer || liquidation.montant)}.`
                     : `Vous allez rejeter la liquidation ${liquidation.numero}.`}
                 </p>
-                {pendingDecision === "rejeter" && (
+                {pendingDecision === 'rejeter' && (
                   <div className="bg-destructive/10 p-3 rounded-lg">
-                    <strong>Motif:</strong> {form.getValues("motif_rejet")}
+                    <strong>Motif:</strong> {form.getValues('motif_rejet')}
                   </div>
                 )}
-                {pendingDecision === "valider" && (
+                {pendingDecision === 'valider' && (
                   <div className="bg-success/10 p-3 rounded-lg">
                     <p>✓ La liquidation passera à l'étape d'ordonnancement.</p>
                   </div>
@@ -433,7 +462,11 @@ export function ValidationDgForm({
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
-              className={pendingDecision === "rejeter" ? "bg-destructive hover:bg-destructive/90" : "bg-success hover:bg-success/90"}
+              className={
+                pendingDecision === 'rejeter'
+                  ? 'bg-destructive hover:bg-destructive/90'
+                  : 'bg-success hover:bg-success/90'
+              }
             >
               Confirmer
             </AlertDialogAction>

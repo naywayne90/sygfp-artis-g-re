@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -28,9 +29,7 @@ import {
   Search,
   Receipt,
   CheckCircle,
-  XCircle,
   Clock,
-  FileText,
   Tag,
   CreditCard,
   MoreHorizontal,
@@ -38,14 +37,23 @@ import {
   FileSignature,
   Flame,
   User,
+  Shield,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import { BudgetChainExportButton } from '@/components/export/BudgetChainExportButton';
-import { useLiquidations, Liquidation, VALIDATION_STEPS } from '@/hooks/useLiquidations';
+import {
+  useLiquidations,
+  Liquidation,
+  VALIDATION_STEPS,
+  EngagementPourLiquidation,
+} from '@/hooks/useLiquidations';
+import { formatCurrency } from '@/lib/utils';
 import { useUrgentLiquidations } from '@/hooks/useUrgentLiquidations';
 import { LiquidationForm } from '@/components/liquidation/LiquidationForm';
 import { LiquidationList } from '@/components/liquidation/LiquidationList';
 import { LiquidationDetails } from '@/components/liquidation/LiquidationDetails';
+import { LiquidationValidationDAAF } from '@/components/liquidation/LiquidationValidationDAAF';
 import { LiquidationRejectDialog } from '@/components/liquidation/LiquidationRejectDialog';
 import { LiquidationDeferDialog } from '@/components/liquidation/LiquidationDeferDialog';
 import { LiquidationValidateDialog } from '@/components/liquidation/LiquidationValidateDialog';
@@ -54,10 +62,6 @@ import { PermissionGuard, usePermissionCheck } from '@/components/auth/Permissio
 import { useCanValidateLiquidation } from '@/hooks/useDelegations';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
-
-const formatMontant = (montant: number) => {
-  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-};
 
 export default function Liquidations() {
   const navigate = useNavigate();
@@ -71,6 +75,9 @@ export default function Liquidations() {
   const [showValidateDialog, setShowValidateDialog] = useState(false);
   const [actionLiquidationId, setActionLiquidationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('a_traiter');
+  const [urgentOnlyFilter, setUrgentOnlyFilter] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const {
     liquidations,
@@ -81,7 +88,6 @@ export default function Liquidations() {
     rejectLiquidation,
     deferLiquidation,
     resumeLiquidation,
-    isSubmitting,
     isValidating,
     isRejecting,
     isDeferring,
@@ -113,15 +119,40 @@ export default function Liquidations() {
   }, [searchParams, setSearchParams]);
 
   // Filter liquidations
-  const filteredLiquidations = liquidations.filter(
-    (liq) =>
-      liq.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      liq.engagement?.objet?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      liq.engagement?.numero?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredLiquidations = liquidations
+    .filter((liq) => {
+      // Filtre texte
+      const matchesSearch =
+        !searchQuery ||
+        liq.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        liq.engagement?.objet?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        liq.engagement?.numero?.toLowerCase().includes(searchQuery.toLowerCase());
+      // Filtre urgents uniquement
+      const matchesUrgent = !urgentOnlyFilter || liq.reglement_urgent === true;
+      return matchesSearch && matchesUrgent;
+    })
+    // Tri : urgents en premier
+    .sort((a, b) => {
+      const aUrgent = a.reglement_urgent ? 1 : 0;
+      const bUrgent = b.reglement_urgent ? 1 : 0;
+      return bUrgent - aUrgent;
+    });
 
-  const aValider = filteredLiquidations.filter((l) => l.statut === 'soumis');
-  const validees = filteredLiquidations.filter((l) => l.statut === 'valide');
+  // Pagination helper — slice client-side data for current page
+  const paginateList = <T,>(list: T[]) => {
+    const start = (page - 1) * pageSize;
+    return list.slice(start, start + pageSize);
+  };
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const aValider = filteredLiquidations.filter(
+    (l) => l.statut === 'soumis' || l.statut === 'validé_daaf'
+  );
+  const validees = filteredLiquidations.filter((l) => l.statut === 'validé_dg');
   const rejetees = filteredLiquidations.filter((l) => l.statut === 'rejete');
   const differees = filteredLiquidations.filter((l) => l.statut === 'differe');
 
@@ -131,7 +162,6 @@ export default function Liquidations() {
 
   // Stats
   const totalMontant = liquidations.reduce((acc, l) => acc + l.montant, 0);
-  const totalValidees = validees.reduce((acc, l) => acc + l.montant, 0);
   const serviceFaitCount = liquidations.filter((l) => l.service_fait).length;
 
   const handleView = (liquidation: Liquidation) => {
@@ -225,17 +255,38 @@ export default function Liquidations() {
         </Badge>
       )}
 
-      {/* Search */}
+      {/* Search + filtres */}
       <Card>
         <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par numéro, engagement ou objet..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par numéro, engagement ou objet..."
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Switch
+                id="urgent-filter"
+                checked={urgentOnlyFilter}
+                onCheckedChange={setUrgentOnlyFilter}
+                className={urgentOnlyFilter ? 'data-[state=checked]:bg-red-500' : ''}
+              />
+              <Label
+                htmlFor="urgent-filter"
+                className={`text-sm cursor-pointer select-none flex items-center gap-1.5 ${
+                  urgentOnlyFilter ? 'text-red-600 font-medium' : 'text-muted-foreground'
+                }`}
+              >
+                <Flame
+                  className={`h-3.5 w-3.5 ${urgentOnlyFilter ? 'text-red-500 animate-pulse' : ''}`}
+                />
+                Urgents uniquement
+              </Label>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -258,7 +309,7 @@ export default function Liquidations() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Montant total</p>
-                <p className="text-2xl font-bold text-primary">{formatMontant(totalMontant)}</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(totalMontant)}</p>
               </div>
             </div>
           </CardContent>
@@ -320,6 +371,10 @@ export default function Liquidations() {
               <TabsTrigger value="a_valider" className="text-warning">
                 À valider ({aValider.length})
               </TabsTrigger>
+              <TabsTrigger value="validation_daaf" className="text-secondary gap-1">
+                <Shield className="h-3 w-3" />
+                Validation DAAF ({aValider.length})
+              </TabsTrigger>
               <TabsTrigger value="urgentes" className={urgentCount > 0 ? 'text-red-600' : ''}>
                 <Flame className={`h-3 w-3 mr-1 ${urgentCount > 0 ? 'animate-pulse' : ''}`} />
                 Urgentes ({urgentCount})
@@ -342,48 +397,85 @@ export default function Liquidations() {
                   <p className="text-sm">Les engagements validés apparaîtront ici</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Réf. Engagement</TableHead>
-                      <TableHead>Objet</TableHead>
-                      <TableHead>Fournisseur</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {engagementsValides.map((eng: any) => (
-                      <TableRow key={eng.id}>
-                        <TableCell className="font-mono text-sm">{eng.numero || '-'}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">{eng.objet || '-'}</TableCell>
-                        <TableCell>{eng.fournisseur || '-'}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatMontant(eng.montant || 0)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-                            <Receipt className="mr-2 h-4 w-4" />
-                            Liquider
-                          </Button>
-                        </TableCell>
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Réf. Engagement</TableHead>
+                        <TableHead>Objet</TableHead>
+                        <TableHead>Fournisseur</TableHead>
+                        <TableHead className="text-right">Montant</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {paginateList(engagementsValides).map((eng: EngagementPourLiquidation) => (
+                        <TableRow key={eng.id}>
+                          <TableCell className="font-mono text-sm">{eng.numero || '-'}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            {eng.objet || '-'}
+                          </TableCell>
+                          <TableCell>{eng.fournisseur || '-'}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            {formatCurrency(eng.montant || 0)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                              <Receipt className="mr-2 h-4 w-4" />
+                              Liquider
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  {(() => {
+                    const totalPages = Math.ceil(engagementsValides.length / pageSize);
+                    return (
+                      <NotesPagination
+                        page={page}
+                        pageSize={pageSize}
+                        total={engagementsValides.length}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        onPageSizeChange={(size) => {
+                          setPageSize(size);
+                          setPage(1);
+                        }}
+                      />
+                    );
+                  })()}
+                </>
               )}
             </TabsContent>
 
             <TabsContent value="toutes">
               <LiquidationList
-                liquidations={filteredLiquidations}
+                liquidations={paginateList(filteredLiquidations)}
                 onView={handleView}
                 onSubmit={canPerform('liquidation.submit') ? handleSubmit : undefined}
                 onValidate={canValidateLiquidationFinal ? handleValidate : undefined}
                 onReject={canRejectLiquidationFinal ? handleReject : undefined}
                 onDefer={canDeferLiquidationFinal ? handleDefer : undefined}
                 onResume={canPerform('liquidation.resume') ? handleResume : undefined}
+                isLoading={isLoading}
               />
+              {(() => {
+                const totalPages = Math.ceil(filteredLiquidations.length / pageSize);
+                return (
+                  <NotesPagination
+                    page={page}
+                    pageSize={pageSize}
+                    total={filteredLiquidations.length}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                    onPageSizeChange={(size) => {
+                      setPageSize(size);
+                      setPage(1);
+                    }}
+                  />
+                );
+              })()}
             </TabsContent>
 
             <TabsContent value="a_valider">
@@ -393,6 +485,27 @@ export default function Liquidations() {
                 onValidate={canValidateLiquidationFinal ? handleValidate : undefined}
                 onReject={canRejectLiquidationFinal ? handleReject : undefined}
                 onDefer={canDeferLiquidationFinal ? handleDefer : undefined}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+
+            {/* Onglet Validation DAAF */}
+            <TabsContent value="validation_daaf">
+              <LiquidationValidationDAAF
+                liquidations={aValider}
+                onView={handleView}
+                onValidate={(id, comments) => {
+                  if (canValidateLiquidationFinal) {
+                    validateLiquidation({ id, comments });
+                  }
+                }}
+                onReject={(id, reason) => {
+                  if (canRejectLiquidationFinal) {
+                    rejectLiquidation({ id, reason });
+                  }
+                }}
+                isValidating={isValidating}
+                isRejecting={isRejecting}
               />
             </TabsContent>
 
@@ -435,10 +548,10 @@ export default function Liquidations() {
                           {liq.engagement?.objet || '-'}
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatMontant(liq.montant)}
+                          {formatCurrency(liq.montant)}
                         </TableCell>
                         <TableCell className="text-right text-success font-medium">
-                          {formatMontant(liq.net_a_payer || liq.montant)}
+                          {formatCurrency(liq.net_a_payer || liq.montant)}
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -471,7 +584,7 @@ export default function Liquidations() {
             </TabsContent>
 
             <TabsContent value="rejetees">
-              <LiquidationList liquidations={rejetees} onView={handleView} />
+              <LiquidationList liquidations={rejetees} onView={handleView} isLoading={isLoading} />
             </TabsContent>
 
             <TabsContent value="differees">
@@ -479,6 +592,7 @@ export default function Liquidations() {
                 liquidations={differees}
                 onView={handleView}
                 onResume={canPerform('liquidation.resume') ? handleResume : undefined}
+                isLoading={isLoading}
               />
             </TabsContent>
           </Tabs>
