@@ -10,20 +10,20 @@ React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query
 
 ## 3. Etat des modules
 
-| Module               | Statut               | Tests                | Doc                                      |
-| -------------------- | -------------------- | -------------------- | ---------------------------------------- |
-| Note SEF             | Production           | 91+ RBAC             | -                                        |
-| Note AEF             | Production           | E2E                  | -                                        |
-| Imputation           | Production           | E2E                  | -                                        |
-| Expression Besoin    | Production           | E2E                  | -                                        |
-| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E** | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
-| Engagement           | 5 gaps ouverts       | 0 unit               | `docs/TRANSITION_VERS_ENGAGEMENT.md`     |
-| Liquidation          | Production (legacy)  | E2E                  | -                                        |
-| Ordonnancement       | Production (legacy)  | E2E                  | -                                        |
-| Reglement            | Production (legacy)  | 138 E2E              | -                                        |
-| Budget/Planification | Production           | 52 unit              | -                                        |
-| Workflow Engine      | Production           | 95 unit              | -                                        |
-| RBAC                 | Production           | 91 unit              | -                                        |
+| Module               | Statut               | Tests                 | Doc                                      |
+| -------------------- | -------------------- | --------------------- | ---------------------------------------- |
+| Note SEF             | Production           | 91+ RBAC              | -                                        |
+| Note AEF             | Production           | E2E                   | -                                        |
+| Imputation           | Production           | E2E                   | -                                        |
+| Expression Besoin    | Production           | E2E                   | -                                        |
+| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
+| **Engagement**       | **Certifie 100/100** | **171 unit + 60 E2E** | `docs/CERTIFICATION_ENGAGEMENT.md`       |
+| Liquidation          | Production (legacy)  | E2E                   | -                                        |
+| Ordonnancement       | Production (legacy)  | E2E                   | -                                        |
+| Reglement            | Production (legacy)  | 138 E2E               | -                                        |
+| Budget/Planification | Production           | 52 unit               | -                                        |
+| Workflow Engine      | Production           | 95 unit               | -                                        |
+| RBAC                 | Production           | 91 unit               | -                                        |
 
 ## 4. Conventions de code (resume)
 
@@ -187,7 +187,8 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 | Inventaire complet du projet    | `PROJECT_STATUS.md`                      |
 | Conventions de code detaillees  | `CONVENTIONS.md`                         |
 | Certification passation         | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
-| Spec engagement (gaps, prompts) | `docs/TRANSITION_VERS_ENGAGEMENT.md`     |
+| Certification engagement        | `docs/CERTIFICATION_ENGAGEMENT.md`       |
+| Transition liquidation          | `docs/TRANSITION_VERS_LIQUIDATION.md`    |
 | Architecture technique complete | `ARCHITECTURE.md`                        |
 | Contexte agent universel        | `AGENT_CONTEXT.md`                       |
 | Credentials complet             | `docs/CREDENTIALS_GUIDE.md`              |
