@@ -65,7 +65,8 @@ export function useSidebarBadges() {
         ebRes,
         marchesRes,
         engagementsRes,
-        liquidationsRes,
+        liquidationsAValiderRes,
+        liquidationsDifferesRes,
         liquidationsUrgentesRes,
         ordoRes,
         reglementsRes,
@@ -113,12 +114,19 @@ export function useSidebarBadges() {
           .eq('exercice', exercice)
           .in('statut', ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf', 'differe']),
 
-        // Liquidations
+        // Liquidations à valider (head: true — count only)
         supabase
           .from('budget_liquidations')
-          .select('id, statut', { count: 'exact', head: false })
+          .select('id', { count: 'exact', head: true })
           .eq('exercice', exercice)
-          .in('statut', ['soumis', 'validé_daaf', 'en_attente', 'differe']),
+          .in('statut', ['soumis', 'validé_daaf', 'en_attente']),
+
+        // Liquidations différées (head: true — count only)
+        supabase
+          .from('budget_liquidations')
+          .select('id', { count: 'exact', head: true })
+          .eq('exercice', exercice)
+          .eq('statut', 'differe'),
 
         // Liquidations urgentes (non réglées)
         supabase
@@ -178,11 +186,8 @@ export function useSidebarBadges() {
       ).length;
       const engagementsDifferes = engData.filter((e) => e.statut === 'differe').length;
 
-      const liqData = liquidationsRes.data || [];
-      const liquidationsAValider = liqData.filter(
-        (l) => l.statut === 'soumis' || l.statut === 'en_attente'
-      ).length;
-      const liquidationsDifferes = liqData.filter((l) => l.statut === 'differe').length;
+      const liquidationsAValider = liquidationsAValiderRes.count || 0;
+      const liquidationsDifferes = liquidationsDifferesRes.count || 0;
       const liquidationsUrgentes = liquidationsUrgentesRes.count || 0;
 
       const ordoData = ordoRes.data || [];

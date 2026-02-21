@@ -134,6 +134,32 @@ export interface EngagementPourLiquidation {
   } | null;
 }
 
+/** Options de pagination et filtrage pour la requête serveur */
+export interface LiquidationQueryOptions {
+  page?: number;
+  pageSize?: number;
+  statut?: string | string[];
+  search?: string;
+  urgentOnly?: boolean;
+}
+
+/** Compteurs par statut pour KPIs et onglets */
+export interface LiquidationCounts {
+  total: number;
+  brouillon: number;
+  certifie_sf: number;
+  soumis: number;
+  valide_daaf: number;
+  valide_dg: number;
+  rejete: number;
+  differe: number;
+  annule: number;
+  urgent: number;
+  service_fait: number;
+  total_montant: number;
+  a_valider: number;
+}
+
 export const VALIDATION_STEPS = [
   { order: 1, role: 'DAAF', label: 'Directeur Administratif et Financier', statut: 'validé_daaf' },
   { order: 2, role: 'DG', label: 'Directeur Général', statut: 'validé_dg' },
@@ -229,49 +255,84 @@ export function computeEngagementProgress(
   };
 }
 
-export function useLiquidations() {
+export function useLiquidations(options?: LiquidationQueryOptions) {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
   const { logAction } = useAuditLog();
 
-  // Fetch all liquidations
+  const page = options?.page ?? 1;
+  const pageSize = options?.pageSize ?? 20;
+  const statut = options?.statut;
+  const search = options?.search;
+  const urgentOnly = options?.urgentOnly ?? false;
+
+  // ── SELECT string réutilisé par la requête paginée et fetchAllForExport ──
+  const SELECT_FULL = `
+    *,
+    engagement:budget_engagements(
+      id, numero, objet, montant, fournisseur,
+      budget_line:budget_lines(
+        id, code, label,
+        direction:directions(label, sigle)
+      ),
+      marche:marches(
+        id, numero,
+        prestataire:prestataires(id, raison_sociale)
+      )
+    ),
+    creator:profiles!budget_liquidations_created_by_fkey(id, full_name),
+    visa_daaf_user:profiles!budget_liquidations_visa_daaf_user_id_fkey(id, full_name),
+    visa_dg_user:profiles!budget_liquidations_visa_dg_user_id_fkey(id, full_name),
+    validated_by_profile:profiles!budget_liquidations_validated_by_fkey(id, full_name),
+    rejected_by_profile:profiles!budget_liquidations_rejected_by_fkey(id, full_name),
+    sf_certifier:profiles!budget_liquidations_service_fait_certifie_par_fkey(id, full_name)
+  `;
+
+  // Fetch paginated liquidations (serveur-side, 20/page)
   const {
-    data: liquidations = [],
+    data: queryResult,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['liquidations', exercice],
+    queryKey: ['liquidations', exercice, page, pageSize, statut, search, urgentOnly],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('budget_liquidations')
-        .select(
-          `
-          *,
-          engagement:budget_engagements(
-            id, numero, objet, montant, fournisseur,
-            budget_line:budget_lines(
-              id, code, label,
-              direction:directions(label, sigle)
-            ),
-            marche:marches(
-              id, numero,
-              prestataire:prestataires(id, raison_sociale)
-            )
-          ),
-          creator:profiles!budget_liquidations_created_by_fkey(id, full_name),
-          visa_daaf_user:profiles!budget_liquidations_visa_daaf_user_id_fkey(id, full_name),
-          visa_dg_user:profiles!budget_liquidations_visa_dg_user_id_fkey(id, full_name),
-          validated_by_profile:profiles!budget_liquidations_validated_by_fkey(id, full_name),
-          rejected_by_profile:profiles!budget_liquidations_rejected_by_fkey(id, full_name),
-          sf_certifier:profiles!budget_liquidations_service_fait_certifie_par_fkey(id, full_name)
-        `
-        )
-        .eq('exercice', exercice)
+        .select(SELECT_FULL, { count: 'exact' })
+        .eq('exercice', exercice);
+
+      // Filtre par statut (onglet)
+      if (statut) {
+        if (Array.isArray(statut)) {
+          query = query.in('statut', statut);
+        } else {
+          query = query.eq('statut', statut);
+        }
+      }
+
+      // Recherche serveur sur numéro
+      if (search && search.trim()) {
+        query = query.ilike('numero', `%${search.trim()}%`);
+      }
+
+      // Filtre urgents uniquement
+      if (urgentOnly) {
+        query = query.eq('reglement_urgent', true);
+      }
+
+      // Tri urgents en premier + date décroissante
+      query = query
+        .order('reglement_urgent', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      // Pagination serveur
+      const start = (page - 1) * pageSize;
+      query = query.range(start, start + pageSize - 1);
 
-      // Fetch all attachments in one batch (fix N+1)
+      const { data, error: queryError, count } = await query;
+      if (queryError) throw queryError;
+
+      // Fetch attachments batch pour cette page (fix N+1)
       const liquidationIds = (data || []).map((l) => l.id);
       const { data: allAttachments } =
         liquidationIds.length > 0
@@ -281,7 +342,6 @@ export function useLiquidations() {
               .in('liquidation_id', liquidationIds)
           : { data: [] };
 
-      // Map attachments to liquidations
       const attachmentMap = new Map<string, LiquidationAttachment[]>();
       (allAttachments || []).forEach((att) => {
         const list = attachmentMap.get(att.liquidation_id) || [];
@@ -289,13 +349,20 @@ export function useLiquidations() {
         attachmentMap.set(att.liquidation_id, list);
       });
 
-      return (data || []).map((liq) => ({
-        ...liq,
-        attachments: attachmentMap.get(liq.id) || [],
-      })) as Liquidation[];
+      return {
+        data: (data || []).map((liq) => ({
+          ...liq,
+          attachments: attachmentMap.get(liq.id) || [],
+        })) as Liquidation[],
+        total: count ?? 0,
+      };
     },
     enabled: !!exercice,
+    staleTime: 30_000,
   });
+
+  const liquidations = queryResult?.data ?? [];
+  const total = queryResult?.total ?? 0;
 
   // Fetch validated engagements for creating liquidations
   const { data: engagementsValides = [] } = useQuery({
@@ -324,6 +391,7 @@ export function useLiquidations() {
       return (data || []) as EngagementPourLiquidation[];
     },
     enabled: !!exercice,
+    staleTime: 60_000,
   });
 
   // Calculate liquidation availability
@@ -714,49 +782,8 @@ export function useLiquidations() {
 
       if (error) throw error;
 
-      // --- Impact budget : total_liquide += net_a_payer sur validation finale ---
-      let budgetImpact: {
-        budget_line_id: string;
-        old_total_liquide: number;
-        new_total_liquide: number;
-        net_a_payer: number;
-      } | null = null;
-
-      if (isLastStep && liquidationBefore?.engagement_id) {
-        const netAPayer = liquidationBefore.net_a_payer || liquidationBefore.montant;
-        const { data: eng } = await supabase
-          .from('budget_engagements')
-          .select('budget_line_id')
-          .eq('id', liquidationBefore.engagement_id)
-          .single();
-
-        if (eng?.budget_line_id) {
-          const { data: bl } = await supabase
-            .from('budget_lines')
-            .select('id, total_liquide')
-            .eq('id', eng.budget_line_id)
-            .single();
-
-          if (bl) {
-            const oldTotalLiquide = bl.total_liquide || 0;
-            const newTotalLiquide = oldTotalLiquide + netAPayer;
-
-            const { error: blError } = await supabase
-              .from('budget_lines')
-              .update({ total_liquide: newTotalLiquide })
-              .eq('id', bl.id);
-
-            if (blError) throw blError;
-
-            budgetImpact = {
-              budget_line_id: bl.id,
-              old_total_liquide: oldTotalLiquide,
-              new_total_liquide: newTotalLiquide,
-              net_a_payer: netAPayer,
-            };
-          }
-        }
-      }
+      // Impact budget : géré UNIQUEMENT par le trigger backend
+      // trg_recalc_elop_liquidations → _recalculate_single_budget_line()
 
       // Audit trail avec before/after
       await logAction({
@@ -777,10 +804,9 @@ export function useLiquidations() {
           step_label: stepInfo?.label,
           step_role: stepInfo?.role,
           is_final_validation: isLastStep,
-          ...(budgetImpact ? { budget_impact: budgetImpact } : {}),
         },
         resume: isLastStep
-          ? `Validation finale de la liquidation ${liquidationBefore?.numero}${budgetImpact ? ` — impact budget: +${budgetImpact.net_a_payer} FCFA sur ligne ${budgetImpact.budget_line_id}` : ''}`
+          ? `Validation finale de la liquidation ${liquidationBefore?.numero}`
           : `Validation étape ${currentStep} (${stepInfo?.label}) - ${liquidationBefore?.numero}`,
       });
 
@@ -1263,13 +1289,44 @@ export function useLiquidations() {
     return data || [];
   }, []);
 
+  /** Charge TOUTES les liquidations (sans pagination) pour les exports */
+  const fetchAllForExport = useCallback(async (): Promise<Liquidation[]> => {
+    const { data, error: fetchErr } = await supabase
+      .from('budget_liquidations')
+      .select(SELECT_FULL)
+      .eq('exercice', exercice)
+      .order('created_at', { ascending: false });
+
+    if (fetchErr) throw fetchErr;
+
+    const ids = (data || []).map((l) => l.id);
+    const { data: atts } =
+      ids.length > 0
+        ? await supabase.from('liquidation_attachments').select('*').in('liquidation_id', ids)
+        : { data: [] };
+
+    const attMap = new Map<string, LiquidationAttachment[]>();
+    (atts || []).forEach((a) => {
+      const list = attMap.get(a.liquidation_id) || [];
+      list.push(a);
+      attMap.set(a.liquidation_id, list);
+    });
+
+    return (data || []).map((liq) => ({
+      ...liq,
+      attachments: attMap.get(liq.id) || [],
+    })) as Liquidation[];
+  }, [exercice, SELECT_FULL]);
+
   return {
     liquidations,
+    total,
     isLoading,
     error,
     engagementsValides,
     calculateAvailability,
     getValidationSteps,
+    fetchAllForExport,
     createLiquidation: createMutation.mutate,
     submitLiquidation: submitMutation.mutate,
     validateLiquidation: validateMutation.mutate,
@@ -1282,4 +1339,74 @@ export function useLiquidations() {
     isRejecting: rejectMutation.isPending,
     isDeferring: deferMutation.isPending,
   };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Hooks légers pour compteurs et tranches (séparés du query principal)
+// ══════════════════════════════════════════════════════════════
+
+/** Compteurs par statut — requête légère pour KPIs et badges onglets */
+export function useLiquidationCounts() {
+  const { exercice } = useExercice();
+
+  return useQuery({
+    queryKey: ['liquidation-counts', exercice],
+    queryFn: async (): Promise<LiquidationCounts> => {
+      const { data, error } = await supabase
+        .from('budget_liquidations')
+        .select('statut, reglement_urgent, service_fait, montant')
+        .eq('exercice', exercice);
+
+      if (error) throw error;
+
+      const items = data || [];
+      return {
+        total: items.length,
+        brouillon: items.filter((i) => i.statut === 'brouillon').length,
+        certifie_sf: items.filter((i) => i.statut === 'certifié_sf').length,
+        soumis: items.filter((i) => i.statut === 'soumis').length,
+        valide_daaf: items.filter((i) => i.statut === 'validé_daaf').length,
+        valide_dg: items.filter((i) => i.statut === 'validé_dg').length,
+        rejete: items.filter((i) => i.statut === 'rejete').length,
+        differe: items.filter((i) => i.statut === 'differe').length,
+        annule: items.filter((i) => i.statut === 'annule').length,
+        urgent: items.filter(
+          (i) =>
+            i.reglement_urgent && ['soumis', 'validé_daaf', 'validé_dg'].includes(i.statut || '')
+        ).length,
+        service_fait: items.filter((i) => i.service_fait).length,
+        total_montant: items.reduce((s, i) => s + (i.montant || 0), 0),
+        a_valider: items.filter((i) => i.statut === 'soumis' || i.statut === 'validé_daaf').length,
+      };
+    },
+    enabled: !!exercice,
+    staleTime: 30_000,
+  });
+}
+
+/** Données légères (id, engagement_id, statut, montant, created_at) pour tranches et progressions */
+export function useLiquidationLight() {
+  const { exercice } = useExercice();
+
+  return useQuery({
+    queryKey: ['liquidation-light', exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('budget_liquidations')
+        .select('id, engagement_id, statut, created_at, montant')
+        .eq('exercice', exercice)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as Array<{
+        id: string;
+        engagement_id: string;
+        statut: string | null;
+        created_at: string;
+        montant: number;
+      }>;
+    },
+    enabled: !!exercice,
+    staleTime: 60_000,
+  });
 }
