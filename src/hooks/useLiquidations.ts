@@ -57,6 +57,15 @@ export interface Liquidation {
   reglement_urgent_motif: string | null;
   reglement_urgent_date: string | null;
   reglement_urgent_par: string | null;
+  // Visa DAAF/DG (Prompt 7)
+  visa_daaf_user_id: string | null;
+  visa_daaf_date: string | null;
+  visa_daaf_commentaire: string | null;
+  visa_dg_user_id: string | null;
+  visa_dg_date: string | null;
+  visa_dg_commentaire: string | null;
+  motif_rejet: string | null;
+  service_fait_commentaire: string | null;
   // Joined data
   engagement?: {
     id: string;
@@ -77,6 +86,11 @@ export interface Liquidation {
     } | null;
   } | null;
   creator?: { id: string; full_name: string | null } | null;
+  visa_daaf_user?: { id: string; full_name: string | null } | null;
+  visa_dg_user?: { id: string; full_name: string | null } | null;
+  validated_by_profile?: { id: string; full_name: string | null } | null;
+  rejected_by_profile?: { id: string; full_name: string | null } | null;
+  sf_certifier?: { id: string; full_name: string | null } | null;
   attachments?: LiquidationAttachment[];
 }
 
@@ -94,6 +108,7 @@ export interface LiquidationAttachment {
 export interface LiquidationAvailability {
   montant_engage: number;
   liquidations_anterieures: number;
+  nb_liquidations_anterieures: number;
   liquidation_actuelle: number;
   cumul: number;
   restant_a_liquider: number;
@@ -147,6 +162,73 @@ export const DOCUMENTS_REQUIS = [
   { code: 'autre', label: 'Autre document', obligatoire: false },
 ];
 
+/** Info légère sur une liquidation "sœur" du même engagement */
+export interface SiblingLiquidation {
+  id: string;
+  numero: string;
+  montant: number;
+  net_a_payer: number | null;
+  statut: string | null;
+  created_at: string;
+}
+
+/** Synthèse des liquidations partielles d'un engagement */
+export interface EngagementLiquidationProgress {
+  engagement_id: string;
+  montant_engage: number;
+  total_liquide: number;
+  restant: number;
+  count: number;
+  pourcent: number;
+  is_complet: boolean;
+  siblings: SiblingLiquidation[];
+}
+
+/** Récupère les liquidations "sœurs" d'un engagement (hors annulées/rejetées) */
+export async function fetchSiblingLiquidations(
+  engagementId: string,
+  excludeLiquidationId?: string
+): Promise<SiblingLiquidation[]> {
+  let query = supabase
+    .from('budget_liquidations')
+    .select('id, numero, montant, net_a_payer, statut, created_at')
+    .eq('engagement_id', engagementId)
+    .not('statut', 'in', '("annule","rejete")')
+    .order('created_at', { ascending: true });
+
+  if (excludeLiquidationId) {
+    query = query.neq('id', excludeLiquidationId);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []) as SiblingLiquidation[];
+}
+
+/** Calcule la progression de liquidation d'un engagement à partir des liquidations cachées */
+export function computeEngagementProgress(
+  engagementId: string,
+  montantEngage: number,
+  liquidations: Array<{ id: string; engagement_id: string; montant: number; statut: string | null }>
+): Omit<EngagementLiquidationProgress, 'siblings'> {
+  const siblings = liquidations.filter(
+    (l) => l.engagement_id === engagementId && l.statut !== 'annule' && l.statut !== 'rejete'
+  );
+  const totalLiquide = siblings.reduce((s, l) => s + (l.montant || 0), 0);
+  const restant = montantEngage - totalLiquide;
+  const pourcent = montantEngage > 0 ? Math.min((totalLiquide / montantEngage) * 100, 100) : 0;
+
+  return {
+    engagement_id: engagementId,
+    montant_engage: montantEngage,
+    total_liquide: totalLiquide,
+    restant,
+    count: siblings.length,
+    pourcent,
+    is_complet: restant <= 0,
+  };
+}
+
 export function useLiquidations() {
   const queryClient = useQueryClient();
   const { exercice } = useExercice();
@@ -176,7 +258,12 @@ export function useLiquidations() {
               prestataire:prestataires(id, raison_sociale)
             )
           ),
-          creator:profiles!budget_liquidations_created_by_fkey(id, full_name)
+          creator:profiles!budget_liquidations_created_by_fkey(id, full_name),
+          visa_daaf_user:profiles!budget_liquidations_visa_daaf_user_id_fkey(id, full_name),
+          visa_dg_user:profiles!budget_liquidations_visa_dg_user_id_fkey(id, full_name),
+          validated_by_profile:profiles!budget_liquidations_validated_by_fkey(id, full_name),
+          rejected_by_profile:profiles!budget_liquidations_rejected_by_fkey(id, full_name),
+          sf_certifier:profiles!budget_liquidations_service_fait_certifie_par_fkey(id, full_name)
         `
         )
         .eq('exercice', exercice)
@@ -279,6 +366,7 @@ export function useLiquidations() {
     return {
       montant_engage,
       liquidations_anterieures,
+      nb_liquidations_anterieures: prevLiquidations?.length || 0,
       liquidation_actuelle: currentAmount,
       cumul,
       restant_a_liquider,
@@ -351,6 +439,16 @@ export function useLiquidations() {
           .map((d) => d.label)
           .join(', ');
         throw new Error(`Documents obligatoires manquants: ${missingLabels}`);
+      }
+
+      // Vérification serveur: SUM(liquidations) + montant <= engagement.montant
+      const serverAvail = await calculateAvailability(data.engagement_id, data.montant);
+      if (!serverAvail.is_valid) {
+        throw new Error(
+          `Le montant de liquidation dépasse le restant à liquider de l'engagement. ` +
+            `Engagé: ${serverAvail.montant_engage}, Déjà liquidé: ${serverAvail.liquidations_anterieures}, ` +
+            `Cette liquidation: ${data.montant}`
+        );
       }
 
       const { data: liquidation, error } = await supabase
@@ -587,7 +685,10 @@ export function useLiquidations() {
       if (fetchError) throw fetchError;
 
       const currentStep = liquidationBefore?.current_step || 1;
-      const isLastStep = currentStep >= VALIDATION_STEPS.length;
+      const montant = liquidationBefore?.net_a_payer || liquidationBefore?.montant || 0;
+      // Skip DG step if DAAF validates and amount is below threshold
+      const skipDgStep = currentStep === 1 && !requiresDgValidation(montant);
+      const isLastStep = skipDgStep || currentStep >= VALIDATION_STEPS.length;
       const stepInfo = VALIDATION_STEPS.find((s) => s.order === currentStep);
 
       await supabase
@@ -603,7 +704,7 @@ export function useLiquidations() {
 
       const newValues = {
         current_step: isLastStep ? currentStep : currentStep + 1,
-        statut: stepInfo?.statut || (isLastStep ? 'validé_dg' : 'soumis'),
+        statut: isLastStep ? 'validé_dg' : stepInfo?.statut || 'soumis',
         workflow_status: isLastStep ? 'termine' : 'en_validation',
         validated_at: isLastStep ? new Date().toISOString() : null,
         validated_by: isLastStep ? user.id : null,
@@ -776,13 +877,12 @@ export function useLiquidations() {
           // --- Alertes budgétaires ---
           const { data: bl } = await supabase
             .from('budget_lines')
-            .select('id, dotation_initiale, virements_recus, virements_emis')
+            .select('id, dotation_initiale, dotation_modifiee')
             .eq('id', eng.budget_line_id)
             .single();
 
           if (bl) {
-            const dotation =
-              (bl.dotation_initiale || 0) + (bl.virements_recus || 0) - (bl.virements_emis || 0);
+            const dotation = bl.dotation_modifiee || bl.dotation_initiale || 0;
             if (dotation > 0) {
               // Total engaged on this line
               const { data: engSum } = await supabase

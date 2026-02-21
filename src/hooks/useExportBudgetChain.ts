@@ -79,15 +79,61 @@ const ENGAGEMENT_COLUMNS: ExportColumn[] = [
 
 const LIQUIDATION_COLUMNS: ExportColumn[] = [
   { key: 'rowNum', label: 'N°', type: 'number', width: 5 },
-  { key: 'numero', label: 'N° Dépense', type: 'text', width: 18 },
+  { key: 'numero', label: 'N° Liquidation', type: 'text', width: 18 },
   { key: 'date_liquidation', label: 'Date', type: 'date', width: 12 },
-  { key: 'fournisseur', label: 'Fournisseur', type: 'text', width: 30 },
-  { key: 'objet', label: 'Objet', type: 'text', width: 40 },
-  { key: 'montant', label: 'Montant', type: 'currency', width: 15 },
-  { key: 'net_a_payer', label: 'Net à Payer', type: 'currency', width: 15 },
-  { key: 'reference_facture', label: 'Réf. Facture', type: 'text', width: 15 },
   { key: 'engagement_numero', label: 'N° Engagement', type: 'text', width: 18 },
+  { key: 'engagement_objet', label: 'Objet', type: 'text', width: 35 },
+  { key: 'fournisseur', label: 'Fournisseur', type: 'text', width: 25 },
+  { key: 'montant', label: 'Montant TTC', type: 'currency', width: 15 },
+  { key: 'montant_ht', label: 'Montant HT', type: 'currency', width: 15 },
+  { key: 'total_retenues', label: 'Retenues', type: 'currency', width: 13 },
+  { key: 'net_a_payer', label: 'Net à Payer', type: 'currency', width: 15 },
+  { key: 'regime_fiscal', label: 'Régime', type: 'text', width: 10 },
+  { key: 'reference_facture', label: 'Réf. Facture', type: 'text', width: 15 },
+  { key: 'budget_line_code', label: 'Imputation', type: 'text', width: 20 },
+  { key: 'direction_sigle', label: 'Direction', type: 'text', width: 10 },
+  { key: 'service_fait_label', label: 'Service Fait', type: 'text', width: 10 },
+  { key: 'sf_certifie_par', label: 'Certifié par', type: 'text', width: 20 },
+  { key: 'visa_daaf_par', label: 'Visa DAAF', type: 'text', width: 20 },
+  { key: 'visa_dg_par', label: 'Visa DG', type: 'text', width: 20 },
   { key: 'statut', label: 'Statut', type: 'text', width: 12 },
+  { key: 'reglement_urgent_label', label: 'Urgent', type: 'text', width: 8 },
+  { key: 'createur', label: 'Créateur', type: 'text', width: 20 },
+];
+
+const LIQUIDATION_RETENUES_COLUMNS: ExportColumn[] = [
+  { key: 'rowNum', label: 'N°', type: 'number', width: 5 },
+  { key: 'numero', label: 'N° Liquidation', type: 'text', width: 18 },
+  { key: 'fournisseur', label: 'Fournisseur', type: 'text', width: 25 },
+  { key: 'montant', label: 'Montant TTC', type: 'currency', width: 15 },
+  { key: 'montant_ht', label: 'Montant HT', type: 'currency', width: 15 },
+  { key: 'tva_taux', label: 'TVA %', type: 'number', width: 8 },
+  { key: 'tva_montant', label: 'TVA', type: 'currency', width: 13 },
+  { key: 'airsi_taux', label: 'AIRSI %', type: 'number', width: 8 },
+  { key: 'airsi_montant', label: 'AIRSI', type: 'currency', width: 13 },
+  { key: 'retenue_bic_taux', label: 'BIC %', type: 'number', width: 8 },
+  { key: 'retenue_bic_montant', label: 'BIC', type: 'currency', width: 13 },
+  { key: 'retenue_bnc_taux', label: 'BNC %', type: 'number', width: 8 },
+  { key: 'retenue_bnc_montant', label: 'BNC', type: 'currency', width: 13 },
+  { key: 'retenue_source_taux', label: 'Ret. Source %', type: 'number', width: 10 },
+  { key: 'retenue_source_montant', label: 'Ret. Source', type: 'currency', width: 13 },
+  { key: 'penalites_montant', label: 'Pénalités', type: 'currency', width: 13 },
+  { key: 'total_retenues', label: 'Total Retenues', type: 'currency', width: 15 },
+  { key: 'net_a_payer', label: 'Net à Payer', type: 'currency', width: 15 },
+];
+
+const LIQUIDATION_RECAP_COLUMNS: ExportColumn[] = [
+  { key: 'direction', label: 'Direction', type: 'text', width: 15 },
+  { key: 'nb_liquidations', label: 'Nb Liquidations', type: 'number', width: 14 },
+  { key: 'montant_total_ttc', label: 'Montant TTC', type: 'currency', width: 18 },
+  { key: 'montant_total_ht', label: 'Montant HT', type: 'currency', width: 18 },
+  { key: 'total_retenues', label: 'Total Retenues', type: 'currency', width: 18 },
+  { key: 'net_a_payer', label: 'Net à Payer', type: 'currency', width: 18 },
+  { key: 'nb_valide', label: 'Validées', type: 'number', width: 10 },
+  { key: 'nb_soumis', label: 'Soumises', type: 'number', width: 10 },
+  { key: 'nb_brouillon', label: 'Brouillons', type: 'number', width: 10 },
+  { key: 'nb_rejete', label: 'Rejetées', type: 'number', width: 10 },
+  { key: 'nb_urgent', label: 'Urgentes', type: 'number', width: 10 },
 ];
 
 const ORDONNANCEMENT_COLUMNS: ExportColumn[] = [
@@ -241,47 +287,51 @@ export function useExportBudgetChain() {
 
   const fetchLiquidations = useCallback(
     async (filters: ExportFilters) => {
-      let query = supabase
-        .from('budget_liquidations')
-        .select(
-          `
-        id, numero, montant, net_a_payer, date_liquidation, reference_facture, statut,
-        engagement:budget_engagements(
-          numero, objet, fournisseur,
-          budget_line:budget_lines(
-            code,
-            direction:directions(sigle)
-          )
-        )
-      `
-        )
-        .eq('exercice', exercice)
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('rpc_export_liquidations', {
+        p_exercice: exercice,
+        p_statut: filters.statut || null,
+        p_direction_id: filters.directionId || null,
+        p_date_debut: filters.dateDebut || null,
+        p_date_fin: filters.dateFin || null,
+      });
 
-      if (filters.statut) {
-        query = query.eq('statut', filters.statut);
-      }
-      if (filters.dateDebut) {
-        query = query.gte('date_liquidation', filters.dateDebut);
-      }
-      if (filters.dateFin) {
-        query = query.lte('date_liquidation', filters.dateFin);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((item, index) => ({
+      type RpcRow = Record<string, unknown>;
+      return ((data as RpcRow[] | null) || []).map((item: RpcRow, index: number) => ({
         rowNum: index + 1,
-        numero: item.numero || '-',
-        date_liquidation: item.date_liquidation,
-        fournisseur: item.engagement?.fournisseur || '-',
-        objet: item.engagement?.objet || '-',
-        montant: item.montant || 0,
-        net_a_payer: item.net_a_payer || item.montant || 0,
-        reference_facture: item.reference_facture || '-',
-        engagement_numero: item.engagement?.numero || '-',
-        statut: item.statut || '-',
+        numero: (item.numero as string) || '-',
+        date_liquidation: item.date_liquidation as string,
+        engagement_numero: (item.engagement_numero as string) || '-',
+        engagement_objet: (item.engagement_objet as string) || '-',
+        fournisseur: (item.fournisseur as string) || '-',
+        montant: (item.montant as number) || 0,
+        montant_ht: (item.montant_ht as number) || 0,
+        tva_taux: (item.tva_taux as number) || 0,
+        tva_montant: (item.tva_montant as number) || 0,
+        airsi_taux: (item.airsi_taux as number) || 0,
+        airsi_montant: (item.airsi_montant as number) || 0,
+        retenue_bic_taux: (item.retenue_bic_taux as number) || 0,
+        retenue_bic_montant: (item.retenue_bic_montant as number) || 0,
+        retenue_bnc_taux: (item.retenue_bnc_taux as number) || 0,
+        retenue_bnc_montant: (item.retenue_bnc_montant as number) || 0,
+        retenue_source_taux: (item.retenue_source_taux as number) || 0,
+        retenue_source_montant: (item.retenue_source_montant as number) || 0,
+        penalites_montant: (item.penalites_montant as number) || 0,
+        total_retenues: (item.total_retenues as number) || 0,
+        net_a_payer: (item.net_a_payer as number) || (item.montant as number) || 0,
+        regime_fiscal: (item.regime_fiscal as string) || '-',
+        reference_facture: (item.reference_facture as string) || '-',
+        budget_line_code: (item.budget_line_code as string) || '-',
+        direction_sigle: (item.direction_sigle as string) || '-',
+        service_fait_label: item.service_fait ? 'Oui' : 'Non',
+        sf_certifie_par: (item.sf_certifie_par as string) || '-',
+        visa_daaf_par: (item.visa_daaf_par as string) || '-',
+        visa_dg_par: (item.visa_dg_par as string) || '-',
+        statut: (item.statut as string) || '-',
+        reglement_urgent_label: item.reglement_urgent ? 'Oui' : 'Non',
+        reglement_urgent_motif: (item.reglement_urgent_motif as string) || '-',
+        createur: (item.createur as string) || '-',
       }));
     },
     [exercice]
@@ -521,22 +571,90 @@ export function useExportBudgetChain() {
         if (filters.dateFin) filterParts.push(`Au: ${filters.dateFin}`);
         const subtitle = filterParts.length > 0 ? filterParts.join(' | ') : 'Toutes les données';
 
+        const additionalSheets: ExportOptions['additionalSheets'] = [];
+        if (step === 'expression' && expressionArticles.length > 0) {
+          additionalSheets.push({
+            name: 'Articles',
+            data: expressionArticles,
+            columns: EXPRESSION_ARTICLES_COLUMNS,
+          });
+        }
+        if (step === 'liquidation' && data.length > 0) {
+          additionalSheets.push({
+            name: 'Détail Retenues',
+            data,
+            columns: LIQUIDATION_RETENUES_COLUMNS,
+          });
+
+          // Récapitulatif par direction
+          const dirMap = new Map<
+            string,
+            {
+              direction: string;
+              nb_liquidations: number;
+              montant_total_ttc: number;
+              montant_total_ht: number;
+              total_retenues: number;
+              net_a_payer: number;
+              nb_valide: number;
+              nb_soumis: number;
+              nb_brouillon: number;
+              nb_rejete: number;
+              nb_urgent: number;
+            }
+          >();
+          for (const row of data) {
+            const dir = (row.direction_sigle as string) || 'Non affecté';
+            if (!dirMap.has(dir)) {
+              dirMap.set(dir, {
+                direction: dir,
+                nb_liquidations: 0,
+                montant_total_ttc: 0,
+                montant_total_ht: 0,
+                total_retenues: 0,
+                net_a_payer: 0,
+                nb_valide: 0,
+                nb_soumis: 0,
+                nb_brouillon: 0,
+                nb_rejete: 0,
+                nb_urgent: 0,
+              });
+            }
+            const entry = dirMap.get(dir);
+            if (!entry) continue;
+            entry.nb_liquidations += 1;
+            entry.montant_total_ttc += (row.montant as number) || 0;
+            entry.montant_total_ht += (row.montant_ht as number) || 0;
+            entry.total_retenues += (row.total_retenues as number) || 0;
+            entry.net_a_payer += (row.net_a_payer as number) || 0;
+            const statut = ((row.statut as string) || '').toLowerCase();
+            if (statut.includes('valid')) entry.nb_valide += 1;
+            else if (statut === 'soumis') entry.nb_soumis += 1;
+            else if (statut === 'brouillon') entry.nb_brouillon += 1;
+            else if (statut === 'rejete') entry.nb_rejete += 1;
+            if ((row.reglement_urgent_label as string) === 'Oui') entry.nb_urgent += 1;
+          }
+          additionalSheets.push({
+            name: 'Récapitulatif',
+            data: Array.from(dirMap.values()) as unknown as Record<string, unknown>[],
+            columns: LIQUIDATION_RECAP_COLUMNS,
+          });
+        }
+
         const options: ExportOptions = {
           title,
           subtitle,
           filename,
           exercice,
           showTotals: true,
-          totalColumns: ['montant', 'montant_estime', 'net_a_payer'],
-          ...(step === 'expression' && {
-            additionalSheets: [
-              {
-                name: 'Articles',
-                data: expressionArticles,
-                columns: EXPRESSION_ARTICLES_COLUMNS,
-              },
-            ],
-          }),
+          totalColumns: [
+            'montant',
+            'montant_estime',
+            'montant_ht',
+            'total_retenues',
+            'net_a_payer',
+          ],
+          ...(additionalSheets.length > 0 && { additionalSheets }),
         };
 
         const result = exportToExcel(data, columns, options);
