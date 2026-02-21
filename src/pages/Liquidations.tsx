@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,10 @@ import {
   Flame,
   User,
   Shield,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -47,9 +51,14 @@ import {
   Liquidation,
   VALIDATION_STEPS,
   EngagementPourLiquidation,
+  computeEngagementProgress,
 } from '@/hooks/useLiquidations';
+import { TrancheInfo, LiquidationUserRole } from '@/components/liquidation/LiquidationList';
+import { Progress } from '@/components/ui/progress';
 import { formatCurrency } from '@/lib/utils';
 import { useUrgentLiquidations } from '@/hooks/useUrgentLiquidations';
+import { useLiquidationExport } from '@/hooks/useLiquidationExport';
+import { usePermissions } from '@/hooks/usePermissions';
 import { LiquidationForm } from '@/components/liquidation/LiquidationForm';
 import { LiquidationList } from '@/components/liquidation/LiquidationList';
 import { LiquidationDetails } from '@/components/liquidation/LiquidationDetails';
@@ -60,6 +69,7 @@ import { LiquidationValidateDialog } from '@/components/liquidation/LiquidationV
 import { UrgentLiquidationList } from '@/components/liquidations/UrgentLiquidationList';
 import { PermissionGuard, usePermissionCheck } from '@/components/auth/PermissionGuard';
 import { useCanValidateLiquidation } from '@/hooks/useDelegations';
+import { useExercice } from '@/contexts/ExerciceContext';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
 
@@ -94,6 +104,10 @@ export default function Liquidations() {
   } = useLiquidations();
 
   const { urgentCount } = useUrgentLiquidations();
+  const { exercice } = useExercice();
+  const { exportExcel, exportCSV, exportPDF, exportAttestation, isExporting } =
+    useLiquidationExport();
+  const { hasRole, hasAnyRole, isAdmin: isAdminUser } = usePermissions();
 
   const { canPerform } = usePermissionCheck();
   const {
@@ -107,6 +121,17 @@ export default function Liquidations() {
     canPerform('liquidation.validate') || canValidateViaDelegation;
   const canRejectLiquidationFinal = canPerform('liquidation.reject') || canValidateViaDelegation;
   const canDeferLiquidationFinal = canPerform('liquidation.defer') || canValidateViaDelegation;
+
+  // Détermine le rôle effectif pour le menu d'actions
+  const effectiveUserRole: LiquidationUserRole | undefined = useMemo(() => {
+    if (isAdminUser) return 'ADMIN';
+    if (hasRole('DG')) return 'DG';
+    if (hasAnyRole(['DAAF', 'DAF'])) return 'DAAF';
+    if (hasRole('CB')) return 'CB';
+    if (hasAnyRole(['TRESORERIE', 'AGENT_COMPTABLE', 'AC'])) return 'TRESORERIE';
+    // Agent = tout utilisateur non-valideur
+    return 'AGENT';
+  }, [isAdminUser, hasRole, hasAnyRole]);
 
   // Handle sourceEngagement URL parameter
   useEffect(() => {
@@ -156,8 +181,75 @@ export default function Liquidations() {
   const rejetees = filteredLiquidations.filter((l) => l.statut === 'rejete');
   const differees = filteredLiquidations.filter((l) => l.statut === 'differe');
 
+  // ── Calcul tranche map pour badges "T1/3" dans la liste ──
+  const trancheMap: Map<string, TrancheInfo> = (() => {
+    const map = new Map<string, TrancheInfo>();
+    // Grouper par engagement_id (hors annulées/rejetées)
+    const byEngagement = new Map<string, Liquidation[]>();
+    for (const liq of liquidations) {
+      if (liq.statut === 'annule' || liq.statut === 'rejete') continue;
+      const engId = liq.engagement_id;
+      const existing = byEngagement.get(engId);
+      if (existing) {
+        existing.push(liq);
+      } else {
+        byEngagement.set(engId, [liq]);
+      }
+    }
+    for (const [, group] of byEngagement) {
+      if (group.length <= 1) continue; // Pas de badge pour liquidation unique
+      // Trier par date de création
+      group.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      group.forEach((liq, idx) => {
+        map.set(liq.id, { tranche: idx + 1, total: group.length });
+      });
+    }
+    return map;
+  })();
+
+  // ── Progression par engagement pour "À traiter" ──
+  const engagementProgressMap: Map<
+    string,
+    { count: number; total_liquide: number; pourcent: number }
+  > = (() => {
+    const map = new Map<string, { count: number; total_liquide: number; pourcent: number }>();
+    for (const eng of engagementsValides) {
+      const progress = computeEngagementProgress(eng.id, eng.montant, liquidations);
+      if (progress.count > 0) {
+        map.set(eng.id, {
+          count: progress.count,
+          total_liquide: progress.total_liquide,
+          pourcent: progress.pourcent,
+        });
+      }
+    }
+    return map;
+  })();
+
   const handleCreateOrdonnancement = (liquidationId: string) => {
     navigate(`/ordonnancements?sourceLiquidation=${liquidationId}`);
+  };
+
+  // Handler attestation PDF
+  const handleExportAttestation = (liquidation: Liquidation) => {
+    exportAttestation(liquidation);
+  };
+
+  // Handler "Prêt pour ordonnancement" (Trésorerie)
+  const handleMarkReadyForOrdonnancement = (liquidationId: string) => {
+    navigate(`/ordonnancements?sourceLiquidation=${liquidationId}`);
+  };
+
+  // Handler certifier SF — ouvre le détail sur l'onglet service fait
+  const handleCertifySF = (liquidation: Liquidation) => {
+    setSelectedLiquidation(liquidation);
+    setShowDetailsSheet(true);
+  };
+
+  // Handler modifier — ouvre le détail
+  const handleEdit = (liquidation: Liquidation) => {
+    setSelectedLiquidation(liquidation);
+    setShowDetailsSheet(true);
   };
 
   // Stats
@@ -239,6 +331,36 @@ export default function Liquidations() {
         stepNumber={7}
         backUrl="/"
       >
+        {/* Menu export liquidations */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={isExporting || liquidations.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => exportExcel(filteredLiquidations, undefined, exercice)}
+            >
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Excel (3 feuilles)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportCSV(filteredLiquidations, undefined, exercice)}>
+              <FileText className="mr-2 h-4 w-4" />
+              CSV
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => exportPDF(filteredLiquidations, undefined, exercice)}>
+              <FileDown className="mr-2 h-4 w-4" />
+              PDF synthèse
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <BudgetChainExportButton step="liquidation" />
         <PermissionGuard permission="liquidation.create" showDelegationBadge>
           <Button className="gap-2" onClick={() => setShowCreateDialog(true)}>
@@ -405,28 +527,56 @@ export default function Liquidations() {
                         <TableHead>Objet</TableHead>
                         <TableHead>Fournisseur</TableHead>
                         <TableHead className="text-right">Montant</TableHead>
+                        <TableHead className="hidden md:table-cell">Progression</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginateList(engagementsValides).map((eng: EngagementPourLiquidation) => (
-                        <TableRow key={eng.id}>
-                          <TableCell className="font-mono text-sm">{eng.numero || '-'}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {eng.objet || '-'}
-                          </TableCell>
-                          <TableCell>{eng.fournisseur || '-'}</TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatCurrency(eng.montant || 0)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-                              <Receipt className="mr-2 h-4 w-4" />
-                              Liquider
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {paginateList(engagementsValides).map((eng: EngagementPourLiquidation) => {
+                        const progress = engagementProgressMap.get(eng.id);
+                        return (
+                          <TableRow key={eng.id}>
+                            <TableCell className="font-mono text-sm">{eng.numero || '-'}</TableCell>
+                            <TableCell className="max-w-[200px] truncate">
+                              {eng.objet || '-'}
+                            </TableCell>
+                            <TableCell>{eng.fournisseur || '-'}</TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(eng.montant || 0)}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {progress ? (
+                                <div className="space-y-1 min-w-[120px]">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] h-4 px-1 font-mono"
+                                    >
+                                      {progress.count} tranche{progress.count > 1 ? 's' : ''}
+                                    </Badge>
+                                    <span className="text-muted-foreground">
+                                      {progress.pourcent.toFixed(0)}%
+                                    </span>
+                                  </div>
+                                  <Progress value={progress.pourcent} className="h-1.5" />
+                                  <div className="text-[10px] text-muted-foreground">
+                                    {formatCurrency(progress.total_liquide)} /{' '}
+                                    {formatCurrency(eng.montant)}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Aucune</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                                <Receipt className="mr-2 h-4 w-4" />
+                                {progress ? 'Nouvelle tranche' : 'Liquider'}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                   {(() => {
@@ -458,7 +608,13 @@ export default function Liquidations() {
                 onReject={canRejectLiquidationFinal ? handleReject : undefined}
                 onDefer={canDeferLiquidationFinal ? handleDefer : undefined}
                 onResume={canPerform('liquidation.resume') ? handleResume : undefined}
+                onEdit={handleEdit}
+                onCertifySF={handleCertifySF}
+                onExportAttestation={handleExportAttestation}
+                onMarkReadyForOrdonnancement={handleMarkReadyForOrdonnancement}
+                trancheMap={trancheMap}
                 isLoading={isLoading}
+                userRole={effectiveUserRole}
               />
               {(() => {
                 const totalPages = Math.ceil(filteredLiquidations.length / pageSize);
@@ -485,7 +641,10 @@ export default function Liquidations() {
                 onValidate={canValidateLiquidationFinal ? handleValidate : undefined}
                 onReject={canRejectLiquidationFinal ? handleReject : undefined}
                 onDefer={canDeferLiquidationFinal ? handleDefer : undefined}
+                onExportAttestation={handleExportAttestation}
+                trancheMap={trancheMap}
                 isLoading={isLoading}
+                userRole={effectiveUserRole}
               />
             </TabsContent>
 
@@ -584,7 +743,13 @@ export default function Liquidations() {
             </TabsContent>
 
             <TabsContent value="rejetees">
-              <LiquidationList liquidations={rejetees} onView={handleView} isLoading={isLoading} />
+              <LiquidationList
+                liquidations={rejetees}
+                onView={handleView}
+                trancheMap={trancheMap}
+                isLoading={isLoading}
+                userRole={effectiveUserRole}
+              />
             </TabsContent>
 
             <TabsContent value="differees">
@@ -592,7 +757,9 @@ export default function Liquidations() {
                 liquidations={differees}
                 onView={handleView}
                 onResume={canPerform('liquidation.resume') ? handleResume : undefined}
+                trancheMap={trancheMap}
                 isLoading={isLoading}
+                userRole={effectiveUserRole}
               />
             </TabsContent>
           </Tabs>

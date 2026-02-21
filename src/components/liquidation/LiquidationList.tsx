@@ -29,11 +29,23 @@ import {
   FileText,
   Flame,
   Receipt,
+  Edit,
+  ClipboardCheck,
+  FileDown,
+  Truck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { UrgentLiquidationToggle } from '@/components/liquidations/UrgentLiquidationToggle';
 import { UrgentLiquidationBadge } from '@/components/liquidations/UrgentLiquidationBadge';
+
+export interface TrancheInfo {
+  tranche: number;
+  total: number;
+}
+
+/** Rôle effectif de l'utilisateur pour les actions liquidation */
+export type LiquidationUserRole = 'AGENT' | 'DAAF' | 'DG' | 'CB' | 'TRESORERIE' | 'ADMIN';
 
 interface LiquidationListProps {
   liquidations: Liquidation[];
@@ -43,11 +55,19 @@ interface LiquidationListProps {
   onReject?: (id: string) => void;
   onDefer?: (id: string) => void;
   onResume?: (id: string) => void;
+  onEdit?: (liquidation: Liquidation) => void;
+  onCertifySF?: (liquidation: Liquidation) => void;
+  onExportAttestation?: (liquidation: Liquidation) => void;
+  onMarkReadyForOrdonnancement?: (id: string) => void;
   /** Afficher la colonne urgence */
   showUrgentColumn?: boolean;
   /** Callback quand le statut urgent change */
   onUrgentToggle?: (id: string, isUrgent: boolean) => void;
+  /** Map liquidation_id → {tranche, total} pour indicateur tranche */
+  trancheMap?: Map<string, TrancheInfo>;
   isLoading?: boolean;
+  /** Rôle effectif pour filtrer les actions du menu */
+  userRole?: LiquidationUserRole;
 }
 
 const getStatusBadge = (statut: string | null) => {
@@ -126,14 +146,22 @@ export function LiquidationList({
   onReject,
   onDefer,
   onResume,
+  onEdit,
+  onCertifySF,
+  onExportAttestation,
+  onMarkReadyForOrdonnancement,
   showUrgentColumn = true,
   onUrgentToggle,
+  trancheMap,
   isLoading = false,
+  userRole,
 }: LiquidationListProps) {
   const getCurrentStepLabel = (currentStep: number | null) => {
     const step = VALIDATION_STEPS.find((s) => s.order === currentStep);
     return step?.label || 'En attente';
   };
+
+  const isAdmin = userRole === 'ADMIN';
 
   if (!isLoading && liquidations.length === 0) {
     return (
@@ -169,6 +197,15 @@ export function LiquidationList({
               <LiquidationRowSkeleton key={i} showUrgentColumn={showUrgentColumn} />
             ))
           : liquidations.map((liquidation) => {
+              const statut = liquidation.statut;
+              const isBrouillon = statut === 'brouillon';
+              const isCertifieSF = statut === 'certifié_sf';
+              const isSoumis = statut === 'soumis';
+              const isValideDAAF = statut === 'validé_daaf';
+              const isValideDG = statut === 'validé_dg';
+              const isDiffere = statut === 'differe';
+              const canSubmitThis = isBrouillon || isCertifieSF;
+
               return (
                 <TableRow key={liquidation.id}>
                   {showUrgentColumn && (
@@ -191,7 +228,21 @@ export function LiquidationList({
                       )}
                     </TableCell>
                   )}
-                  <TableCell className="font-medium">{liquidation.numero}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-1.5">
+                      {liquidation.numero}
+                      {trancheMap?.has(liquidation.id) &&
+                        (trancheMap.get(liquidation.id)?.total ?? 0) > 1 && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] h-4 px-1 font-mono shrink-0"
+                          >
+                            T{trancheMap.get(liquidation.id)?.tranche}/
+                            {trancheMap.get(liquidation.id)?.total}
+                          </Badge>
+                        )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">{liquidation.engagement?.numero || 'N/A'}</span>
@@ -217,12 +268,10 @@ export function LiquidationList({
                   </TableCell>
                   <TableCell>
                     <span className="text-xs text-muted-foreground">
-                      {liquidation.statut === 'validé_dg'
-                        ? 'Terminé'
-                        : getCurrentStepLabel(liquidation.current_step)}
+                      {isValideDG ? 'Terminé' : getCurrentStepLabel(liquidation.current_step)}
                     </span>
                   </TableCell>
-                  <TableCell>{getStatusBadge(liquidation.statut)}</TableCell>
+                  <TableCell>{getStatusBadge(statut)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -231,6 +280,7 @@ export function LiquidationList({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        {/* ═══ VOIR — tous les rôles ═══ */}
                         <DropdownMenuItem onClick={() => onView(liquidation)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Voir détails
@@ -243,25 +293,42 @@ export function LiquidationList({
                           </DropdownMenuItem>
                         )}
 
-                        {(liquidation.statut === 'brouillon' ||
-                          liquidation.statut === 'certifié_sf') &&
-                          onSubmit && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => onSubmit(liquidation.id)}>
-                                <Send className="mr-2 h-4 w-4" />
-                                Soumettre
-                              </DropdownMenuItem>
-                            </>
-                          )}
+                        {/* ═══ AGENT : Modifier (brouillon) | Certifier SF | Soumettre | Marquer urgent ═══ */}
+                        {(userRole === 'AGENT' || isAdmin) && isBrouillon && onEdit && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onEdit(liquidation)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier
+                            </DropdownMenuItem>
+                          </>
+                        )}
 
-                        {liquidation.statut === 'soumis' && (
+                        {(userRole === 'AGENT' || isAdmin) && isBrouillon && onCertifySF && (
+                          <DropdownMenuItem onClick={() => onCertifySF(liquidation)}>
+                            <ClipboardCheck className="mr-2 h-4 w-4 text-emerald-600" />
+                            Certifier service fait
+                          </DropdownMenuItem>
+                        )}
+
+                        {(userRole === 'AGENT' || isAdmin) && canSubmitThis && onSubmit && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onSubmit(liquidation.id)}>
+                              <Send className="mr-2 h-4 w-4" />
+                              Soumettre
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* ═══ DAAF : Valider/Rejeter | Différer | Export attestation ═══ */}
+                        {(userRole === 'DAAF' || isAdmin) && isSoumis && (
                           <>
                             <DropdownMenuSeparator />
                             {onValidate && (
                               <DropdownMenuItem onClick={() => onValidate(liquidation.id)}>
                                 <CheckCircle className="mr-2 h-4 w-4 text-success" />
-                                Valider
+                                Valider (DAAF)
                               </DropdownMenuItem>
                             )}
                             {onDefer && (
@@ -279,13 +346,126 @@ export function LiquidationList({
                           </>
                         )}
 
-                        {liquidation.statut === 'differe' && onResume && (
+                        {(userRole === 'DAAF' || isAdmin) && isValideDG && onExportAttestation && (
                           <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => onResume(liquidation.id)}>
-                              <Play className="mr-2 h-4 w-4 text-success" />
-                              Reprendre
+                            <DropdownMenuItem onClick={() => onExportAttestation(liquidation)}>
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Attestation PDF
                             </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* ═══ DG : Valider/Rejeter (si étape DG = validé_daaf) ═══ */}
+                        {(userRole === 'DG' || isAdmin) && isValideDAAF && (
+                          <>
+                            <DropdownMenuSeparator />
+                            {onValidate && (
+                              <DropdownMenuItem onClick={() => onValidate(liquidation.id)}>
+                                <CheckCircle className="mr-2 h-4 w-4 text-success" />
+                                Valider (DG)
+                              </DropdownMenuItem>
+                            )}
+                            {onDefer && (
+                              <DropdownMenuItem onClick={() => onDefer(liquidation.id)}>
+                                <Clock className="mr-2 h-4 w-4 text-warning" />
+                                Différer
+                              </DropdownMenuItem>
+                            )}
+                            {onReject && (
+                              <DropdownMenuItem onClick={() => onReject(liquidation.id)}>
+                                <XCircle className="mr-2 h-4 w-4 text-destructive" />
+                                Rejeter
+                              </DropdownMenuItem>
+                            )}
+                          </>
+                        )}
+
+                        {/* ═══ TRESORERIE : flag "Prêt pour ordonnancement" ═══ */}
+                        {(userRole === 'TRESORERIE' || isAdmin) &&
+                          isValideDG &&
+                          onMarkReadyForOrdonnancement && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => onMarkReadyForOrdonnancement(liquidation.id)}
+                              >
+                                <Truck className="mr-2 h-4 w-4 text-primary" />
+                                Prêt pour ordonnancement
+                              </DropdownMenuItem>
+                            </>
+                          )}
+
+                        {/* ═══ Reprendre (différé) — DAAF/DG/ADMIN ═══ */}
+                        {isDiffere &&
+                          onResume &&
+                          (userRole === 'DAAF' || userRole === 'DG' || isAdmin) && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => onResume(liquidation.id)}>
+                                <Play className="mr-2 h-4 w-4 text-success" />
+                                Reprendre
+                              </DropdownMenuItem>
+                            </>
+                          )}
+
+                        {/* ═══ Attestation PDF — tout valideur ou admin ═══ */}
+                        {isValideDG && onExportAttestation && userRole !== 'DAAF' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onExportAttestation(liquidation)}>
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Attestation PDF
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* ═══ Fallback: pas de userRole → ancien comportement ═══ */}
+                        {!userRole && (
+                          <>
+                            {canSubmitThis && onSubmit && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => onSubmit(liquidation.id)}>
+                                  <Send className="mr-2 h-4 w-4" />
+                                  Soumettre
+                                </DropdownMenuItem>
+                              </>
+                            )}
+
+                            {(isSoumis || isValideDAAF) && (
+                              <>
+                                <DropdownMenuSeparator />
+                                {onValidate && (
+                                  <DropdownMenuItem onClick={() => onValidate(liquidation.id)}>
+                                    <CheckCircle className="mr-2 h-4 w-4 text-success" />
+                                    Valider
+                                  </DropdownMenuItem>
+                                )}
+                                {onDefer && (
+                                  <DropdownMenuItem onClick={() => onDefer(liquidation.id)}>
+                                    <Clock className="mr-2 h-4 w-4 text-warning" />
+                                    Différer
+                                  </DropdownMenuItem>
+                                )}
+                                {onReject && (
+                                  <DropdownMenuItem onClick={() => onReject(liquidation.id)}>
+                                    <XCircle className="mr-2 h-4 w-4 text-destructive" />
+                                    Rejeter
+                                  </DropdownMenuItem>
+                                )}
+                              </>
+                            )}
+
+                            {isDiffere && onResume && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => onResume(liquidation.id)}>
+                                  <Play className="mr-2 h-4 w-4 text-success" />
+                                  Reprendre
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </>
                         )}
                       </DropdownMenuContent>
