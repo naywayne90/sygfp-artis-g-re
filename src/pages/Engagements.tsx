@@ -18,7 +18,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -31,9 +30,6 @@ import {
   Loader2,
   Lock,
   Tag,
-  MoreHorizontal,
-  Eye,
-  Receipt,
   User,
   ShieldCheck,
   BarChart3,
@@ -63,6 +59,7 @@ import { useCanValidateEngagement } from '@/hooks/useDelegations';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getTauxColorClass } from '@/components/engagement/IndicateurBudget';
 import { formatCurrency } from '@/lib/utils';
 
@@ -92,7 +89,7 @@ export default function Engagements() {
   const { exercice } = useExercice();
 
   const { canPerform } = usePermissionCheck();
-  const { isDAF, isAdmin } = useRBAC();
+  const { isDAF, isAdmin, user: rbacUser, isDG, isCB, isAuditeur, isTresorerie } = useRBAC();
   const { userRoles: userRoleList } = usePermissions();
   const { isReadOnly, getDisabledMessage } = useExerciceWriteGuard();
   const {
@@ -114,6 +111,35 @@ export default function Engagements() {
   const ROLE_PRIORITY = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'SAF', 'OPERATEUR'] as const;
   const userRole = ROLE_PRIORITY.find((r) => userRoleList.includes(r)) || userRoleList[0] || null;
 
+  // Filtrage par direction : rôles centraux voient tout, agents voient leur direction
+  // Vérifie à la fois profil_fonctionnel (RBAC) et user_roles (table)
+  const CENTRAL_ROLES = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'TRESORERIE', 'AUDITEUR'] as const;
+  const isCentralRole =
+    isAdmin ||
+    isDG ||
+    isCB ||
+    isDAF ||
+    isTresorerie ||
+    isAuditeur ||
+    CENTRAL_ROLES.some((r) => userRoleList.includes(r));
+  const userDirectionId = rbacUser?.directionId ?? null;
+
+  const filterByDirection = (list: Engagement[]) => {
+    if (isCentralRole) return list;
+    if (!userDirectionId) return list;
+    return list.filter(
+      (eng) => !eng.budget_line?.direction_id || eng.budget_line.direction_id === userDirectionId
+    );
+  };
+
+  // Appliquer le filtre direction à toutes les données
+  const dirEngagements = filterByDirection(engagements);
+  const dirAValider = filterByDirection(engagementsAValider);
+  const dirValides = filterByDirection(engagementsValides);
+  const dirRejetes = filterByDirection(engagementsRejetes);
+  const dirDifferes = filterByDirection(engagementsDifferes);
+
+  const [activeTab, setActiveTab] = useState('a_traiter');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -137,6 +163,20 @@ export default function Engagements() {
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
+
+  // Handle detail URL parameter (chain navigation from Liquidation)
+  useEffect(() => {
+    const detailId = searchParams.get('detail');
+    if (detailId && engagements.length > 0) {
+      const found = engagements.find((e) => e.id === detailId);
+      if (found) {
+        setSelectedEngagement(found);
+        setShowDetails(true);
+      }
+      searchParams.delete('detail');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, engagements]);
 
   const handleCreateFromPM = (pmId: string) => {
     setPreSelectedPMId(pmId);
@@ -163,10 +203,10 @@ export default function Engagements() {
     return list.slice(start, start + pageSize);
   };
 
-  // Reset to page 1 when search query changes
+  // Reset to page 1 when search query or tab changes
   useEffect(() => {
     setPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, activeTab]);
 
   const handleView = (engagement: Engagement) => {
     setSelectedEngagement(engagement);
@@ -222,11 +262,11 @@ export default function Engagements() {
     setSelectedEngagement(null);
   };
 
-  const totalMontant = engagements.reduce((acc, e) => acc + e.montant, 0);
+  const totalMontant = dirEngagements.reduce((acc, e) => acc + e.montant, 0);
 
   // Taux moyen de consommation : totalMontant / sum(dotation_initiale unique par budget_line)
   const uniqueBudgetLines = new Map<string, number>();
-  for (const eng of engagements) {
+  for (const eng of dirEngagements) {
     if (
       eng.budget_line?.id &&
       eng.budget_line.dotation_initiale &&
@@ -240,7 +280,7 @@ export default function Engagements() {
 
   // Alertes budgétaires : nombre de lignes à >80% de consommation
   const budgetLineEngages = new Map<string, number>();
-  for (const eng of engagements) {
+  for (const eng of dirEngagements) {
     if (eng.budget_line?.id && eng.statut !== 'rejete' && eng.statut !== 'annule') {
       budgetLineEngages.set(
         eng.budget_line.id,
@@ -291,21 +331,21 @@ export default function Engagements() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-popover">
-            <DropdownMenuItem onClick={() => exportExcel(engagements, undefined, exercice)}>
+            <DropdownMenuItem onClick={() => exportExcel(dirEngagements, undefined, exercice)}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
               Excel (2 feuilles)
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportPDF(engagements, undefined, exercice)}>
+            <DropdownMenuItem onClick={() => exportPDF(dirEngagements, undefined, exercice)}>
               <FileText className="mr-2 h-4 w-4" />
               PDF (rapport)
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportCSV(engagements, undefined, exercice)}>
+            <DropdownMenuItem onClick={() => exportCSV(dirEngagements, undefined, exercice)}>
               <FileText className="mr-2 h-4 w-4" />
               CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {(canValidateEngagementFinal || engagementsAValider.length > 0) && (
+        {(canValidateEngagementFinal || dirAValider.length > 0) && (
           <Button
             variant="outline"
             className="gap-2"
@@ -313,9 +353,9 @@ export default function Engagements() {
           >
             <ShieldCheck className="h-4 w-4" />
             Espace validation
-            {engagementsAValider.length > 0 && (
+            {dirAValider.length > 0 && (
               <Badge variant="secondary" className="ml-1">
-                {engagementsAValider.length}
+                {dirAValider.length}
               </Badge>
             )}
           </Button>
@@ -347,7 +387,11 @@ export default function Engagements() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{engagements.length}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold">{dirEngagements.length}</p>
+                )}
               </div>
               <CreditCard className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -357,7 +401,11 @@ export default function Engagements() {
           <CardContent className="pt-6">
             <div>
               <p className="text-sm text-muted-foreground">Montant total</p>
-              <p className="text-xl font-bold text-primary">{formatCurrency(totalMontant)}</p>
+              {isLoading ? (
+                <Skeleton className="h-7 w-36" />
+              ) : (
+                <p className="text-xl font-bold text-primary">{formatCurrency(totalMontant)}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -366,7 +414,11 @@ export default function Engagements() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">À valider</p>
-                <p className="text-2xl font-bold text-warning">{engagementsAValider.length}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold text-warning">{dirAValider.length}</p>
+                )}
               </div>
               <Clock className="h-8 w-8 text-warning/50" />
             </div>
@@ -377,7 +429,11 @@ export default function Engagements() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Validés</p>
-                <p className="text-2xl font-bold text-success">{engagementsValides.length}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold text-success">{dirValides.length}</p>
+                )}
               </div>
               <CheckCircle className="h-8 w-8 text-success/50" />
             </div>
@@ -388,7 +444,11 @@ export default function Engagements() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Rejetés</p>
-                <p className="text-2xl font-bold text-destructive">{engagementsRejetes.length}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <p className="text-2xl font-bold text-destructive">{dirRejetes.length}</p>
+                )}
               </div>
               <XCircle className="h-8 w-8 text-destructive/50" />
             </div>
@@ -399,7 +459,7 @@ export default function Engagements() {
             <div>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Taux consommation</p>
-                {lignesEnAlerte > 0 && (
+                {!isLoading && lignesEnAlerte > 0 && (
                   <Badge
                     variant="outline"
                     className="gap-1 text-orange-600 border-orange-300 bg-orange-50"
@@ -409,14 +469,20 @@ export default function Engagements() {
                   </Badge>
                 )}
               </div>
-              <p className={`text-xl font-bold ${getTauxColorClass(tauxMoyen)}`}>
-                {tauxMoyen.toFixed(1)}%
-              </p>
-              <Progress value={Math.min(tauxMoyen, 100)} className="h-1.5 mt-2" />
-              {lignesEnAlerte > 0 && (
-                <p className="text-xs text-orange-600 mt-1">
-                  {lignesEnAlerte} ligne{lignesEnAlerte > 1 ? 's' : ''} &gt;80%
-                </p>
+              {isLoading ? (
+                <Skeleton className="h-7 w-20 mt-1" />
+              ) : (
+                <>
+                  <p className={`text-xl font-bold ${getTauxColorClass(tauxMoyen)}`}>
+                    {tauxMoyen.toFixed(1)}%
+                  </p>
+                  <Progress value={Math.min(tauxMoyen, 100)} className="h-1.5 mt-2" />
+                  {lignesEnAlerte > 0 && (
+                    <p className="text-xs text-orange-600 mt-1">
+                      {lignesEnAlerte} ligne{lignesEnAlerte > 1 ? 's' : ''} &gt;80%
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </CardContent>
@@ -439,16 +505,16 @@ export default function Engagements() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="a_traiter" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="a_traiter" className="gap-1">
             <Tag className="h-3 w-3" />À traiter ({passationsValidees.length})
           </TabsTrigger>
-          <TabsTrigger value="tous">Tous ({engagements.length})</TabsTrigger>
-          <TabsTrigger value="a_valider">À valider ({engagementsAValider.length})</TabsTrigger>
-          <TabsTrigger value="valides">Validés ({engagementsValides.length})</TabsTrigger>
-          <TabsTrigger value="rejetes">Rejetés ({engagementsRejetes.length})</TabsTrigger>
-          <TabsTrigger value="differes">Différés ({engagementsDifferes.length})</TabsTrigger>
+          <TabsTrigger value="tous">Tous ({dirEngagements.length})</TabsTrigger>
+          <TabsTrigger value="a_valider">À valider ({dirAValider.length})</TabsTrigger>
+          <TabsTrigger value="valides">Validés ({dirValides.length})</TabsTrigger>
+          <TabsTrigger value="rejetes">Rejetés ({dirRejetes.length})</TabsTrigger>
+          <TabsTrigger value="differes">Différés ({dirDifferes.length})</TabsTrigger>
           <TabsTrigger value="suivi_budget" className="gap-1">
             <BarChart3 className="h-3 w-3" />
             Suivi budgétaire
@@ -460,12 +526,12 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Tous les engagements</CardTitle>
               <CardDescription>
-                {filterEngagements(engagements).length} engagement(s)
+                {filterEngagements(dirEngagements).length} engagement(s)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <EngagementList
-                engagements={paginateList(filterEngagements(engagements))}
+                engagements={paginateList(filterEngagements(dirEngagements))}
                 onView={handleView}
                 onValidate={canValidateEngagementFinal ? handleValidate : undefined}
                 onReject={canRejectEngagementFinal ? handleReject : undefined}
@@ -480,7 +546,7 @@ export default function Engagements() {
             </CardContent>
           </Card>
           {(() => {
-            const filtered = filterEngagements(engagements);
+            const filtered = filterEngagements(dirEngagements);
             const totalPages = Math.ceil(filtered.length / pageSize);
             return (
               <NotesPagination
@@ -511,7 +577,44 @@ export default function Engagements() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {passationsValidees.length === 0 ? (
+              {isLoading ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Réf. PM</TableHead>
+                      <TableHead>Objet (EB)</TableHead>
+                      <TableHead>Mode</TableHead>
+                      <TableHead>Prestataire</TableHead>
+                      <TableHead className="text-right">Montant retenu</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-4 w-28" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-48" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-6 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-20" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-24 ml-auto" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-8 w-20 ml-auto" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : passationsValidees.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Aucune passation de marché à traiter</p>
@@ -563,13 +666,12 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements à valider</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsAValider).length} engagement(s) en attente de
-                validation
+                {filterEngagements(dirAValider).length} engagement(s) en attente de validation
               </CardDescription>
             </CardHeader>
             <CardContent>
               <EngagementList
-                engagements={filterEngagements(engagementsAValider)}
+                engagements={filterEngagements(dirAValider)}
                 onView={handleView}
                 onValidate={canValidateEngagementFinal ? handleValidate : undefined}
                 onReject={canRejectEngagementFinal ? handleReject : undefined}
@@ -589,67 +691,40 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements validés</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsValides).length} engagement(s) validé(s) - prêts pour
+                {filterEngagements(dirValides).length} engagement(s) validé(s) - prêts pour
                 liquidation
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Numéro</TableHead>
-                    <TableHead>Objet</TableHead>
-                    <TableHead>Fournisseur</TableHead>
-                    <TableHead className="text-right">Montant</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filterEngagements(engagementsValides).length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        Aucun engagement validé
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filterEngagements(engagementsValides).map((eng) => (
-                      <TableRow key={eng.id}>
-                        <TableCell className="font-mono text-sm">{eng.numero}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">{eng.objet}</TableCell>
-                        <TableCell>{eng.fournisseur || '-'}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(eng.montant)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-popover">
-                              <DropdownMenuItem onClick={() => handleView(eng)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Voir détails
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleCreateLiquidation(eng.id)}
-                                className="text-primary"
-                              >
-                                <Receipt className="mr-2 h-4 w-4" />
-                                Créer liquidation
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+              <EngagementList
+                engagements={paginateList(filterEngagements(dirValides))}
+                onView={handleView}
+                onDegage={canDegageEngagement ? handleDegage : undefined}
+                onPrint={handlePrint}
+                onCreateLiquidation={handleCreateLiquidation}
+                userRole={userRole}
+                isLoading={isLoading}
+                emptyMessage="Aucun engagement validé"
+              />
             </CardContent>
           </Card>
+          {(() => {
+            const filtered = filterEngagements(dirValides);
+            const totalPages = Math.ceil(filtered.length / pageSize);
+            return (
+              <NotesPagination
+                page={page}
+                pageSize={pageSize}
+                total={filtered.length}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
+            );
+          })()}
         </TabsContent>
 
         <TabsContent value="rejetes">
@@ -657,12 +732,12 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements rejetés</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsRejetes).length} engagement(s) rejeté(s)
+                {filterEngagements(dirRejetes).length} engagement(s) rejeté(s)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <EngagementList
-                engagements={filterEngagements(engagementsRejetes)}
+                engagements={filterEngagements(dirRejetes)}
                 onView={handleView}
                 onPrint={handlePrint}
                 userRole={userRole}
@@ -678,12 +753,12 @@ export default function Engagements() {
             <CardHeader>
               <CardTitle>Engagements différés</CardTitle>
               <CardDescription>
-                {filterEngagements(engagementsDifferes).length} engagement(s) différé(s)
+                {filterEngagements(dirDifferes).length} engagement(s) différé(s)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <EngagementList
-                engagements={filterEngagements(engagementsDifferes)}
+                engagements={filterEngagements(dirDifferes)}
                 onView={handleView}
                 onResume={canPerform('engagement.resume') ? resumeEngagement : undefined}
                 onPrint={handlePrint}
@@ -696,7 +771,7 @@ export default function Engagements() {
         </TabsContent>
 
         <TabsContent value="suivi_budget">
-          <SuiviBudgetaireEngagements engagements={engagements} />
+          <SuiviBudgetaireEngagements engagements={dirEngagements} />
         </TabsContent>
       </Tabs>
 

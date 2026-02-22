@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Download, Printer, Loader2 } from 'lucide-react';
 import { PieceEngagement } from './PieceEngagement';
-import { Engagement } from '@/hooks/useEngagements';
+import { Engagement, useEngagementLignes } from '@/hooks/useEngagements';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateBonEngagementPDF } from '@/lib/pdf/generateBonEngagementPDF';
 import { toast } from 'sonner';
@@ -27,6 +27,9 @@ export function EngagementPrintDialog({
 }: EngagementPrintDialogProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { data: engagementLignes = [] } = useEngagementLignes(
+    engagement?.is_multi_ligne ? engagement.id : null
+  );
 
   const handlePrint = () => {
     if (printRef.current) {
@@ -131,7 +134,11 @@ export function EngagementPrintDialog({
         </DialogHeader>
 
         <ScrollArea className="max-h-[65vh] border rounded-lg">
-          <PieceEngagement ref={printRef} engagement={engagement} />
+          <PieceEngagement
+            ref={printRef}
+            engagement={engagement}
+            engagementLignes={engagementLignes}
+          />
         </ScrollArea>
 
         <DialogFooter className="gap-2 sm:gap-0">

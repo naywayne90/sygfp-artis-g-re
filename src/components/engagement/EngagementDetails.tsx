@@ -50,6 +50,7 @@ import { EngagementChainNav } from './EngagementChainNav';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
 interface EngagementDetailsProps {
@@ -84,6 +85,16 @@ interface CreditTransfer {
   created_at: string;
   from_budget_line_id: string | null;
   to_budget_line_id: string | null;
+}
+
+interface EngagementLiquidation {
+  id: string;
+  numero: string;
+  montant: number;
+  net_a_payer: number | null;
+  reference_facture: string | null;
+  date_liquidation: string;
+  statut: string | null;
 }
 
 interface VisaProfile {
@@ -128,6 +139,8 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
   const [visaProfiles, setVisaProfiles] = useState<Record<string, string>>({});
   const [isLoadingOthers, setIsLoadingOthers] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [engLiquidations, setEngLiquidations] = useState<EngagementLiquidation[]>([]);
+  const [isLoadingLiquidations, setIsLoadingLiquidations] = useState(false);
 
   // Fetch multi-lignes
   const { data: engagementLignes = [] } = useEngagementLignes(
@@ -214,6 +227,25 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
         setCreditTransfers((data || []) as CreditTransfer[]);
       });
   }, [engagement?.budget_line_id]);
+
+  // Fetch liquidations for this engagement
+  useEffect(() => {
+    if (!engagement?.id) {
+      setEngLiquidations([]);
+      return;
+    }
+    setIsLoadingLiquidations(true);
+    supabase
+      .from('budget_liquidations')
+      .select('id, numero, montant, net_a_payer, reference_facture, date_liquidation, statut')
+      .eq('engagement_id', engagement.id)
+      .neq('statut', 'annule')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setEngLiquidations((data || []) as EngagementLiquidation[]);
+        setIsLoadingLiquidations(false);
+      });
+  }, [engagement?.id]);
 
   // Fetch profiles for visa user IDs
   useEffect(() => {
@@ -316,7 +348,7 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
 
           <ScrollArea className="max-h-[70vh] pr-4">
             <Tabs defaultValue="informations" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-4">
+              <TabsList className="grid w-full grid-cols-6 mb-4">
                 <TabsTrigger value="informations" className="gap-1 text-xs">
                   <FileText className="h-3.5 w-3.5" />
                   Informations
@@ -332,6 +364,10 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
                 <TabsTrigger value="documents" className="gap-1 text-xs">
                   <FolderOpen className="h-3.5 w-3.5" />
                   Documents
+                </TabsTrigger>
+                <TabsTrigger value="liquidations" className="gap-1 text-xs">
+                  <Receipt className="h-3.5 w-3.5" />
+                  Liquidations
                 </TabsTrigger>
                 <TabsTrigger value="chaine" className="gap-1 text-xs">
                   <Link2 className="h-3.5 w-3.5" />
@@ -999,7 +1035,179 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
                 )}
               </TabsContent>
 
-              {/* ===== ONGLET 5 — CHAÎNE DE LA DÉPENSE ===== */}
+              {/* ===== ONGLET 5 — LIQUIDATIONS ===== */}
+              <TabsContent value="liquidations" className="space-y-4">
+                {(() => {
+                  const activeLiquidations = engLiquidations.filter((l) => l.statut !== 'rejete');
+                  const totalLiquide = activeLiquidations.reduce((sum, l) => sum + l.montant, 0);
+                  const tauxConsommation =
+                    engagement.montant > 0
+                      ? Math.min(Math.round((totalLiquide / engagement.montant) * 100), 100)
+                      : 0;
+                  const restant = engagement.montant - totalLiquide;
+                  const progressColorClass =
+                    tauxConsommation > 95
+                      ? '[&>div]:bg-destructive'
+                      : tauxConsommation >= 80
+                        ? '[&>div]:bg-warning'
+                        : '';
+
+                  return (
+                    <>
+                      {/* Résumé avec barre de progression */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <Receipt className="h-4 w-4" />
+                            Consommation de l'engagement
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <div className="text-center p-3 bg-muted rounded-lg">
+                              <div className="text-muted-foreground text-xs">Montant engagé</div>
+                              <div className="font-bold">{formatCurrency(engagement.montant)}</div>
+                            </div>
+                            <div className="text-center p-3 bg-primary/10 rounded-lg">
+                              <div className="text-muted-foreground text-xs">Total liquidé</div>
+                              <div className="font-bold text-primary">
+                                {formatCurrency(totalLiquide)}
+                                <span className="text-xs text-muted-foreground ml-1">
+                                  ({tauxConsommation}%) — {activeLiquidations.length} liquidation
+                                  {activeLiquidations.length > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                            </div>
+                            <div
+                              className={`text-center p-3 rounded-lg ${restant <= 0 ? 'bg-green-50 dark:bg-green-950/20' : 'bg-muted'}`}
+                            >
+                              <div className="text-muted-foreground text-xs">Restant</div>
+                              <div className={`font-bold ${restant <= 0 ? 'text-green-600' : ''}`}>
+                                {formatCurrency(Math.max(restant, 0))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <Progress
+                              value={tauxConsommation}
+                              className={`h-3 ${progressColorClass}`}
+                            />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span>0%</span>
+                              <span>100%</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Tableau des liquidations */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Liste des liquidations
+                            <Badge variant="outline" className="ml-auto">
+                              {engLiquidations.length}
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {isLoadingLiquidations ? (
+                            <div className="flex items-center gap-2 text-muted-foreground py-4">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Chargement...
+                            </div>
+                          ) : engLiquidations.length === 0 ? (
+                            <div className="text-center py-6 space-y-3">
+                              <Receipt className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
+                              <p className="text-sm text-muted-foreground">
+                                Aucune liquidation sur cet engagement
+                              </p>
+                              {engagement.statut === 'valide' && (
+                                <Button
+                                  size="sm"
+                                  className="gap-2"
+                                  onClick={() => {
+                                    onOpenChange(false);
+                                    navigate(`/liquidations?sourceEngagement=${engagement.id}`);
+                                  }}
+                                >
+                                  <ArrowRight className="h-4 w-4" />
+                                  Créer une liquidation
+                                </Button>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              {engLiquidations.map((liq) => {
+                                const liqPct =
+                                  engagement.montant > 0
+                                    ? Math.round((liq.montant / engagement.montant) * 100)
+                                    : 0;
+                                return (
+                                  <div
+                                    key={liq.id}
+                                    className="flex items-center justify-between p-2 rounded border text-sm hover:bg-muted/50 cursor-pointer transition-colors"
+                                    onClick={() => {
+                                      onOpenChange(false);
+                                      navigate(`/liquidations?detail=${liq.id}`);
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <span className="font-medium shrink-0">{liq.numero}</span>
+                                      <span className="text-muted-foreground truncate text-xs">
+                                        {liq.reference_facture || '—'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 shrink-0">
+                                      <span className="font-mono text-xs">
+                                        {formatCurrency(liq.montant)}
+                                      </span>
+                                      <Badge variant="outline" className="font-mono text-xs">
+                                        {liqPct}%
+                                      </Badge>
+                                      <span className="text-xs text-muted-foreground">
+                                        {format(new Date(liq.date_liquidation), 'dd/MM/yyyy', {
+                                          locale: fr,
+                                        })}
+                                      </span>
+                                      {getStatutBadge(liq.statut)}
+                                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Bouton créer si engagement validé et restant > 0 */}
+                          {engLiquidations.length > 0 &&
+                            engagement.statut === 'valide' &&
+                            restant > 0 && (
+                              <>
+                                <Separator className="my-3" />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full gap-2"
+                                  onClick={() => {
+                                    onOpenChange(false);
+                                    navigate(`/liquidations?sourceEngagement=${engagement.id}`);
+                                  }}
+                                >
+                                  <ArrowRight className="h-4 w-4" />
+                                  Créer une liquidation ({formatCurrency(restant)} disponible)
+                                </Button>
+                              </>
+                            )}
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </TabsContent>
+
+              {/* ===== ONGLET 6 — CHAÎNE DE LA DÉPENSE ===== */}
               <TabsContent value="chaine" className="space-y-4">
                 {engagement.dossier_id ? (
                   <DossierStepTimeline

@@ -2,18 +2,18 @@
  * Panneau d'information sur le blocage workflow avec guidance
  */
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import {
   WORKFLOW_STEPS,
   checkPrerequisites,
   type WorkflowStep,
   type Statut,
-} from "@/lib/workflow/workflowEngine";
-import { AlertTriangle, ArrowRight, CheckCircle, Info, Lock, XCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+} from '@/lib/workflow/workflowEngine';
+import { AlertTriangle, ArrowRight, CheckCircle, Info, Lock, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface BlockingInfo {
   type: 'prerequis' | 'role' | 'statut' | 'budget' | 'other';
@@ -96,7 +96,9 @@ export function WorkflowGuidancePanel({
     // Prérequis non remplis
     if (!prerequisCheck.valid) {
       const missingStep = stepConfig.prerequisSteps.find(
-        (ps) => !dossierState[ps] || !['valide', 'impute', 'signe', 'paye', 'cloture'].includes(dossierState[ps]!)
+        (ps) =>
+          !dossierState[ps] ||
+          !['valide', 'impute', 'signe', 'paye', 'cloture'].includes(dossierState[ps] as string)
       );
 
       if (missingStep) {
@@ -118,7 +120,8 @@ export function WorkflowGuidancePanel({
         type: 'error' as const,
         title: 'Élément rejeté',
         message: 'Cet élément a été rejeté et nécessite des corrections.',
-        suggestion: 'Consultez le motif de rejet et effectuez les modifications nécessaires avant de resoumettre.',
+        suggestion:
+          'Consultez le motif de rejet et effectuez les modifications nécessaires avant de resoumettre.',
         actionLabel: 'Corriger et resoumettre',
       };
     }
@@ -129,7 +132,8 @@ export function WorkflowGuidancePanel({
         type: 'warning' as const,
         title: 'Élément différé',
         message: 'Le traitement de cet élément a été reporté.',
-        suggestion: 'Consultez le motif du report et resoumettez quand les conditions seront réunies.',
+        suggestion:
+          'Consultez le motif du report et resoumettez quand les conditions seront réunies.',
         actionLabel: 'Resoumettre',
       };
     }
@@ -146,12 +150,12 @@ export function WorkflowGuidancePanel({
     }
 
     // En attente de validation
-    if (['soumis', 'a_valider', 'en_validation_dg'].includes(currentStatus)) {
+    if (['soumis', 'a_valider', 'en_validation_dg', 'validé_daaf'].includes(currentStatus)) {
       return {
         type: 'info' as const,
         title: 'En attente de validation',
         message: `Cet élément est en attente de validation par : ${stepConfig.validators.join(', ')}`,
-        suggestion: 'Vous pouvez suivre l\'avancement dans l\'historique du dossier.',
+        suggestion: "Vous pouvez suivre l'avancement dans l'historique du dossier.",
       };
     }
 
@@ -247,7 +251,7 @@ export function NextStepCard({
   if (['valide', 'impute', 'signe', 'paye'].includes(currentStatus) && stepConfig.nextStep) {
     const nextStepConfig = WORKFLOW_STEPS[stepConfig.nextStep];
     return (
-      <Card className={cn("border-primary/20 bg-primary/5", className)}>
+      <Card className={cn('border-primary/20 bg-primary/5', className)}>
         <CardContent className="pt-4 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -255,9 +259,7 @@ export function NextStepCard({
                 <CheckCircle className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-medium text-primary">
-                  {stepConfig.labelShort} validé
-                </p>
+                <p className="text-sm font-medium text-primary">{stepConfig.labelShort} validé</p>
                 <p className="text-xs text-muted-foreground">
                   Prochaine étape : {nextStepConfig.label}
                 </p>
@@ -278,7 +280,7 @@ export function NextStepCard({
   // Sinon utiliser nextAction si fourni
   if (nextAction) {
     return (
-      <Card className={cn("border-secondary/20 bg-secondary/5", className)}>
+      <Card className={cn('border-secondary/20 bg-secondary/5', className)}>
         <CardContent className="pt-4 pb-4">
           <div className="flex items-center justify-between">
             <div>

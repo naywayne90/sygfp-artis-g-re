@@ -143,58 +143,8 @@ export function ValidationDgForm({ liquidationId, liquidation, onSuccess }: Vali
 
       if (error) throw error;
 
-      // Impact budget : total_liquide += net_a_payer sur validation DG
-      let budgetImpact: {
-        budget_line_id: string;
-        old_total_liquide: number;
-        new_total_liquide: number;
-        net_a_payer: number;
-      } | null = null;
-
-      if (isValidation) {
-        // Récupérer l'engagement_id depuis la liquidation
-        const { data: liqData } = await supabase
-          .from('budget_liquidations')
-          .select('engagement_id, net_a_payer, montant')
-          .eq('id', liquidationId)
-          .single();
-
-        if (liqData?.engagement_id) {
-          const netAPayer = liqData.net_a_payer || liqData.montant;
-          const { data: engData } = await supabase
-            .from('budget_engagements')
-            .select('budget_line_id')
-            .eq('id', liqData.engagement_id)
-            .single();
-
-          if (engData?.budget_line_id) {
-            const { data: currentLine } = await supabase
-              .from('budget_lines')
-              .select('id, total_liquide')
-              .eq('id', engData.budget_line_id)
-              .single();
-
-            if (currentLine) {
-              const oldTotalLiquide = currentLine.total_liquide || 0;
-              const newTotalLiquide = oldTotalLiquide + netAPayer;
-
-              const { error: blError } = await supabase
-                .from('budget_lines')
-                .update({ total_liquide: newTotalLiquide })
-                .eq('id', currentLine.id);
-
-              if (blError) throw blError;
-
-              budgetImpact = {
-                budget_line_id: currentLine.id,
-                old_total_liquide: oldTotalLiquide,
-                new_total_liquide: newTotalLiquide,
-                net_a_payer: netAPayer,
-              };
-            }
-          }
-        }
-      }
+      // Impact budget : géré UNIQUEMENT par le trigger backend
+      // trg_recalc_elop_liquidations → _recalculate_single_budget_line()
 
       // Logger l'action
       await logAction({
@@ -209,7 +159,6 @@ export function ValidationDgForm({ liquidationId, liquidation, onSuccess }: Vali
           action_type: 'VALIDATION_DG',
           observation: formData.observation,
           ...(isValidation ? {} : { motif_rejet: formData.motif_rejet }),
-          ...(budgetImpact ? { budget_impact: budgetImpact } : {}),
         },
       });
 

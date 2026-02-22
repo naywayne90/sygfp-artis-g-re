@@ -25,6 +25,14 @@ interface NotificationEmailRequest {
   beneficiaire?: string;
   reference_paiement?: string;
   motif_rejet?: string;
+  // Engagement-specific fields (Prompt 11)
+  objet?: string;
+  fournisseur?: string;
+  ligne_budgetaire?: string;
+  direction?: string;
+  etape_visa?: string;
+  montant_degage?: number;
+  motif_degagement?: string;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -38,6 +46,13 @@ const TYPE_LABELS: Record<string, string> = {
   reglement_validation: 'Règlement à valider',
   reglement_rejet: 'Règlement rejeté',
   reglement_paiement: 'Paiement effectué',
+  // Engagement types (Prompt 11)
+  engagement_soumis: 'Engagement soumis',
+  engagement_visa: 'Visa engagement',
+  engagement_valide: 'Engagement validé',
+  engagement_rejete: 'Engagement rejeté',
+  engagement_degage: 'Dégagement engagement',
+  engagement_differe: 'Engagement différé',
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -172,11 +187,75 @@ const handler = async (req: Request): Promise<Response> => {
       </table>`;
     }
 
+    // Build engagement-specific detail block (Prompt 11)
+    const isEngagementType = payload.type.startsWith('engagement_');
+    let engagementDetailBlock = '';
+    if (isEngagementType && (payload.montant || payload.objet || payload.fournisseur)) {
+      const rows: string[] = [];
+      if (payload.entity_numero)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">N&deg; Engagement</td><td style="padding:6px 10px;">${payload.entity_numero}</td></tr>`
+        );
+      if (payload.objet)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Objet</td><td style="padding:6px 10px;">${payload.objet}</td></tr>`
+        );
+      if (payload.fournisseur)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Fournisseur</td><td style="padding:6px 10px;">${payload.fournisseur}</td></tr>`
+        );
+      if (payload.montant)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant TTC</td><td style="padding:6px 10px;font-weight:bold;color:#1e40af;">${formatMontant(payload.montant)}</td></tr>`
+        );
+      if (payload.ligne_budgetaire)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Ligne budg&eacute;taire</td><td style="padding:6px 10px;">${payload.ligne_budgetaire}</td></tr>`
+        );
+      if (payload.direction)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Direction</td><td style="padding:6px 10px;">${payload.direction}</td></tr>`
+        );
+      if (payload.etape_visa)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">&Eacute;tape</td><td style="padding:6px 10px;">${payload.etape_visa}</td></tr>`
+        );
+      if (payload.montant_degage)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant d&eacute;gag&eacute;</td><td style="padding:6px 10px;font-weight:bold;color:#dc2626;">${formatMontant(payload.montant_degage)}</td></tr>`
+        );
+      if (payload.motif_degagement)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Motif d&eacute;gagement</td><td style="padding:6px 10px;">${payload.motif_degagement}</td></tr>`
+        );
+      if (payload.motif_rejet)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Motif de rejet</td><td style="padding:6px 10px;color:#dc2626;">${payload.motif_rejet}</td></tr>`
+        );
+
+      engagementDetailBlock = `
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e5e7eb;border-radius:8px;">
+        ${rows.join('')}
+      </table>`;
+    }
+
     // Choose badge color based on reglement type
     let badgeBg = '#dbeafe';
     let badgeColor = '#1e40af';
     let borderColor = '#3b82f6';
-    if (payload.type === 'reglement_rejet') {
+    if (payload.type === 'engagement_rejete') {
+      badgeBg = '#fee2e2';
+      badgeColor = '#dc2626';
+      borderColor = '#ef4444';
+    } else if (payload.type === 'engagement_valide') {
+      badgeBg = '#d1fae5';
+      badgeColor = '#059669';
+      borderColor = '#10b981';
+    } else if (payload.type === 'engagement_degage') {
+      badgeBg = '#fef3c7';
+      badgeColor = '#d97706';
+      borderColor = '#f59e0b';
+    } else if (payload.type === 'reglement_rejet') {
       badgeBg = '#fee2e2';
       badgeColor = '#dc2626';
       borderColor = '#ef4444';
@@ -217,6 +296,7 @@ const handler = async (req: Request): Promise<Response> => {
         <p style="margin: 0; color: #4b5563;">${payload.message}</p>
       </div>
       ${reglementDetailBlock}
+      ${engagementDetailBlock}
       <p style="text-align: center; margin-top: 24px;">
         <a href="#" class="btn">Acc&eacute;der &agrave; l'application</a>
       </p>

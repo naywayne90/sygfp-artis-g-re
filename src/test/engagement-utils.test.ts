@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect } from 'vitest';
 import {
   VALIDATION_STEPS,
@@ -5,6 +6,7 @@ import {
   getStepFromStatut,
   checkEngagementCompleteness,
   type Engagement,
+  type EngagementLigne,
   type BudgetAvailability,
   type TypeEngagement,
 } from '@/hooks/useEngagements';
@@ -105,6 +107,23 @@ const createMockEngagement = (overrides: Partial<Engagement> = {}): Engagement =
   visa_dg_date: null,
   visa_dg_commentaire: null,
   motif_rejet: null,
+  // Colonnes dégagement (Prompt 8)
+  montant_degage: null,
+  motif_degage: null,
+  degage_by: null,
+  degage_at: null,
+  // Multi-lignes (Prompt 13)
+  is_multi_ligne: null,
+  ...overrides,
+});
+
+// Helper — mock engagement ligne factory
+const createMockLigne = (overrides: Partial<EngagementLigne> = {}): EngagementLigne => ({
+  id: 'ligne-1',
+  engagement_id: 'eng-1',
+  budget_line_id: 'bl-1',
+  montant: 1_000_000,
+  created_at: '2026-01-15T10:00:00Z',
   ...overrides,
 });
 
@@ -1715,5 +1734,733 @@ describe('Section 19 — Multi-lignes ventilation', () => {
       is_multi_ligne: null,
     };
     expect(!!eng.is_multi_ligne).toBe(false);
+  });
+});
+
+// ===========================================================================
+// 20. computeSuiviBudgetaire — Multi-lignes budgétaires (Gap 5)
+// ===========================================================================
+describe('computeSuiviBudgetaire — multi-lignes', () => {
+  it('distribue un engagement multi-lignes sur les sous-lignes', () => {
+    const eng = createMockEngagement({
+      id: 'eng-multi-1',
+      montant: 10_000_000,
+      budget_line_id: 'bl-main',
+      is_multi_ligne: true,
+      statut: 'valide',
+      budget_line: {
+        id: 'bl-main',
+        code: 'BL-MAIN',
+        label: 'Principale',
+        dotation_initiale: 50_000_000,
+      },
+      lignes: [
+        createMockLigne({
+          id: 'l1',
+          engagement_id: 'eng-multi-1',
+          budget_line_id: 'bl-a',
+          montant: 6_000_000,
+          budget_line: {
+            id: 'bl-a',
+            code: 'BL-A',
+            label: 'Ligne A',
+            dotation_initiale: 20_000_000,
+          },
+        }),
+        createMockLigne({
+          id: 'l2',
+          engagement_id: 'eng-multi-1',
+          budget_line_id: 'bl-b',
+          montant: 4_000_000,
+          budget_line: {
+            id: 'bl-b',
+            code: 'BL-B',
+            label: 'Ligne B',
+            dotation_initiale: 30_000_000,
+          },
+        }),
+      ],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(2);
+    const lineA = result.find((r) => r.budgetLineId === 'bl-a');
+    const lineB = result.find((r) => r.budgetLineId === 'bl-b');
+    expect(lineA?.totalEngage).toBe(6_000_000);
+    expect(lineB?.totalEngage).toBe(4_000_000);
+    // La ligne principale bl-main ne doit PAS apparaître
+    expect(result.find((r) => r.budgetLineId === 'bl-main')).toBeUndefined();
+  });
+
+  it('single-ligne utilise budget_line_id (comportement existant)', () => {
+    const eng = createMockEngagement({
+      id: 'eng-single',
+      montant: 5_000_000,
+      budget_line_id: 'bl-s',
+      is_multi_ligne: false,
+      statut: 'valide',
+      budget_line: { id: 'bl-s', code: 'BL-S', label: 'Single', dotation_initiale: 20_000_000 },
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(1);
+    expect(result[0].budgetLineId).toBe('bl-s');
+    expect(result[0].totalEngage).toBe(5_000_000);
+  });
+
+  it('mix multi + single agrège correctement', () => {
+    const engMulti = createMockEngagement({
+      id: 'eng-m',
+      montant: 10_000_000,
+      budget_line_id: 'bl-x',
+      is_multi_ligne: true,
+      statut: 'valide',
+      budget_line: { id: 'bl-x', code: 'BL-X', label: 'X', dotation_initiale: 50_000_000 },
+      lignes: [
+        createMockLigne({
+          id: 'lm1',
+          engagement_id: 'eng-m',
+          budget_line_id: 'bl-a',
+          montant: 7_000_000,
+          budget_line: { id: 'bl-a', code: 'BL-A', label: 'A', dotation_initiale: 30_000_000 },
+        }),
+        createMockLigne({
+          id: 'lm2',
+          engagement_id: 'eng-m',
+          budget_line_id: 'bl-b',
+          montant: 3_000_000,
+          budget_line: { id: 'bl-b', code: 'BL-B', label: 'B', dotation_initiale: 20_000_000 },
+        }),
+      ],
+    });
+    const engSingle = createMockEngagement({
+      id: 'eng-s',
+      montant: 2_000_000,
+      budget_line_id: 'bl-a',
+      is_multi_ligne: false,
+      statut: 'valide',
+      budget_line: { id: 'bl-a', code: 'BL-A', label: 'A', dotation_initiale: 30_000_000 },
+    });
+    const result = computeSuiviBudgetaire([engMulti, engSingle]);
+    const lineA = result.find((r) => r.budgetLineId === 'bl-a');
+    expect(lineA?.totalEngage).toBe(9_000_000); // 7M multi + 2M single
+    expect(lineA?.nbEngagements).toBe(2);
+  });
+
+  it('somme sous-lignes correspond au total engagement', () => {
+    const eng = createMockEngagement({
+      id: 'eng-sum',
+      montant: 15_000_000,
+      budget_line_id: 'bl-main',
+      is_multi_ligne: true,
+      statut: 'valide',
+      lignes: [
+        createMockLigne({ id: 'ls1', budget_line_id: 'bl-1', montant: 5_000_000 }),
+        createMockLigne({ id: 'ls2', budget_line_id: 'bl-2', montant: 4_000_000 }),
+        createMockLigne({ id: 'ls3', budget_line_id: 'bl-3', montant: 6_000_000 }),
+      ],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    const totalDistribue = result.reduce((sum, r) => sum + r.totalEngage, 0);
+    expect(totalDistribue).toBe(15_000_000);
+  });
+
+  it('engagement multi-lignes rejeté → exclu du suivi', () => {
+    const eng = createMockEngagement({
+      id: 'eng-rej',
+      montant: 8_000_000,
+      statut: 'rejete',
+      is_multi_ligne: true,
+      lignes: [createMockLigne({ id: 'lr1', budget_line_id: 'bl-1', montant: 8_000_000 })],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('engagement multi-lignes annulé → exclu du suivi', () => {
+    const eng = createMockEngagement({
+      id: 'eng-ann',
+      montant: 3_000_000,
+      statut: 'annule',
+      is_multi_ligne: true,
+      lignes: [createMockLigne({ id: 'la1', budget_line_id: 'bl-1', montant: 3_000_000 })],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(0);
+  });
+
+  it('multi-lignes sans lignes → fallback single', () => {
+    const eng = createMockEngagement({
+      id: 'eng-fallback',
+      montant: 5_000_000,
+      budget_line_id: 'bl-fb',
+      is_multi_ligne: true,
+      statut: 'valide',
+      budget_line: { id: 'bl-fb', code: 'BL-FB', label: 'Fallback', dotation_initiale: 20_000_000 },
+      // lignes undefined → fallback
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(1);
+    expect(result[0].budgetLineId).toBe('bl-fb');
+    expect(result[0].totalEngage).toBe(5_000_000);
+  });
+
+  it('multi-lignes avec lignes vides → fallback single', () => {
+    const eng = createMockEngagement({
+      id: 'eng-empty',
+      montant: 4_000_000,
+      budget_line_id: 'bl-e',
+      is_multi_ligne: true,
+      statut: 'valide',
+      lignes: [],
+      budget_line: { id: 'bl-e', code: 'BL-E', label: 'Empty', dotation_initiale: 20_000_000 },
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result).toHaveLength(1);
+    expect(result[0].budgetLineId).toBe('bl-e');
+  });
+
+  it('dotation depuis budget_line override dans sous-ligne', () => {
+    const eng = createMockEngagement({
+      id: 'eng-dot',
+      montant: 6_000_000,
+      budget_line_id: 'bl-main',
+      is_multi_ligne: true,
+      statut: 'valide',
+      lignes: [
+        createMockLigne({
+          id: 'ld1',
+          budget_line_id: 'bl-sub',
+          montant: 6_000_000,
+          budget_line: {
+            id: 'bl-sub',
+            code: 'BL-SUB',
+            label: 'Sub',
+            dotation_initiale: 25_000_000,
+          },
+        }),
+      ],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    expect(result[0].dotation).toBe(25_000_000);
+    expect(result[0].code).toBe('BL-SUB');
+  });
+
+  it('direction sigle vient du parent engagement', () => {
+    const eng = createMockEngagement({
+      id: 'eng-dir',
+      montant: 3_000_000,
+      budget_line_id: 'bl-main',
+      is_multi_ligne: true,
+      statut: 'valide',
+      budget_line: {
+        id: 'bl-main',
+        code: 'BL-M',
+        label: 'M',
+        dotation_initiale: 10_000_000,
+        direction: { label: 'DSI', sigle: 'DSI' },
+      },
+      lignes: [
+        createMockLigne({
+          id: 'ld1',
+          budget_line_id: 'bl-sub',
+          montant: 3_000_000,
+          budget_line: {
+            id: 'bl-sub',
+            code: 'BL-SUB',
+            label: 'Sub',
+            dotation_initiale: 10_000_000,
+          },
+        }),
+      ],
+    });
+    const result = computeSuiviBudgetaire([eng]);
+    // La direction vient du parent (budget_line.direction)
+    expect(result[0].directionSigle).toBe('DSI');
+  });
+
+  it('dernierEngagement tracké par sous-ligne', () => {
+    const eng1 = createMockEngagement({
+      id: 'eng-d1',
+      montant: 2_000_000,
+      budget_line_id: 'bl-main',
+      is_multi_ligne: true,
+      statut: 'valide',
+      date_engagement: '2026-01-15',
+      lignes: [createMockLigne({ id: 'ld1', budget_line_id: 'bl-a', montant: 2_000_000 })],
+    });
+    const eng2 = createMockEngagement({
+      id: 'eng-d2',
+      montant: 3_000_000,
+      budget_line_id: 'bl-main2',
+      is_multi_ligne: true,
+      statut: 'valide',
+      date_engagement: '2026-02-10',
+      lignes: [createMockLigne({ id: 'ld2', budget_line_id: 'bl-a', montant: 3_000_000 })],
+    });
+    const result = computeSuiviBudgetaire([eng1, eng2]);
+    const lineA = result.find((r) => r.budgetLineId === 'bl-a');
+    expect(lineA?.dernierEngagement).toBe('2026-02-10');
+  });
+
+  it('nbEngagements compte chaque sous-ligne séparément', () => {
+    const eng1 = createMockEngagement({
+      id: 'eng-n1',
+      montant: 5_000_000,
+      is_multi_ligne: true,
+      statut: 'valide',
+      lignes: [
+        createMockLigne({ id: 'ln1a', budget_line_id: 'bl-a', montant: 3_000_000 }),
+        createMockLigne({ id: 'ln1b', budget_line_id: 'bl-b', montant: 2_000_000 }),
+      ],
+    });
+    const eng2 = createMockEngagement({
+      id: 'eng-n2',
+      montant: 4_000_000,
+      is_multi_ligne: true,
+      statut: 'valide',
+      lignes: [createMockLigne({ id: 'ln2a', budget_line_id: 'bl-a', montant: 4_000_000 })],
+    });
+    const result = computeSuiviBudgetaire([eng1, eng2]);
+    const lineA = result.find((r) => r.budgetLineId === 'bl-a');
+    const lineB = result.find((r) => r.budgetLineId === 'bl-b');
+    expect(lineA?.nbEngagements).toBe(2); // ln1a + ln2a
+    expect(lineB?.nbEngagements).toBe(1); // ln1b
+  });
+});
+
+// ===========================================================================
+// 21. isCBBlocked — logique multi-lignes pour validation CB (Gap 2)
+// ===========================================================================
+describe('isCBBlocked — logique multi-lignes', () => {
+  // Pure logic: isCBBlocked = stepNumber === 2 && (single insuffisant || multi quelconque insuffisant)
+  const computeIsCBBlocked = (
+    stepNumber: number,
+    availability: BudgetAvailability | null,
+    multiAvailabilities: Array<{ availability: BudgetAvailability }>
+  ): boolean => {
+    return (
+      stepNumber === 2 &&
+      ((availability !== null && !availability.is_sufficient) ||
+        multiAvailabilities.some((ma) => !ma.availability.is_sufficient))
+    );
+  };
+
+  const sufficientAvail = calculateBudgetAvailability(100_000_000, 0, 0, 20_000_000, 10_000_000);
+  const insufficientAvail = calculateBudgetAvailability(10_000_000, 0, 0, 8_000_000, 5_000_000);
+
+  it('single suffisant → pas bloqué', () => {
+    expect(computeIsCBBlocked(2, sufficientAvail, [])).toBe(false);
+  });
+
+  it('single insuffisant → bloqué', () => {
+    expect(computeIsCBBlocked(2, insufficientAvail, [])).toBe(true);
+  });
+
+  it('multi tout suffisant → pas bloqué', () => {
+    expect(
+      computeIsCBBlocked(2, null, [
+        { availability: sufficientAvail },
+        { availability: sufficientAvail },
+      ])
+    ).toBe(false);
+  });
+
+  it('multi un insuffisant → bloqué', () => {
+    expect(
+      computeIsCBBlocked(2, null, [
+        { availability: sufficientAvail },
+        { availability: insufficientAvail },
+      ])
+    ).toBe(true);
+  });
+
+  it('multi tout insuffisant → bloqué', () => {
+    expect(
+      computeIsCBBlocked(2, null, [
+        { availability: insufficientAvail },
+        { availability: insufficientAvail },
+      ])
+    ).toBe(true);
+  });
+
+  it('step 1 (SAF) → jamais bloqué par budget', () => {
+    expect(computeIsCBBlocked(1, insufficientAvail, [])).toBe(false);
+  });
+
+  it('step 3 (DAAF) → jamais bloqué par budget', () => {
+    expect(computeIsCBBlocked(3, insufficientAvail, [])).toBe(false);
+  });
+
+  it('step 4 (DG) → jamais bloqué par budget', () => {
+    expect(computeIsCBBlocked(4, insufficientAvail, [])).toBe(false);
+  });
+
+  it('multi 3 lignes toutes suffisantes → pas bloqué', () => {
+    expect(
+      computeIsCBBlocked(2, null, [
+        { availability: sufficientAvail },
+        { availability: sufficientAvail },
+        { availability: sufficientAvail },
+      ])
+    ).toBe(false);
+  });
+
+  it('multi montant zéro → suffisant', () => {
+    const zeroAvail = calculateBudgetAvailability(50_000_000, 0, 0, 0, 0);
+    expect(zeroAvail.is_sufficient).toBe(true);
+    expect(computeIsCBBlocked(2, null, [{ availability: zeroAvail }])).toBe(false);
+  });
+
+  it('multiAvailabilities vide + availability null → pas bloqué', () => {
+    expect(computeIsCBBlocked(2, null, [])).toBe(false);
+  });
+
+  it('single null + multi vide → pas bloqué (step 2)', () => {
+    expect(computeIsCBBlocked(2, null, [])).toBe(false);
+  });
+});
+
+// ===========================================================================
+// 22. Badge multi-lignes — conditions de visibilité (Gap 1)
+// ===========================================================================
+describe('Badge multi-lignes — conditions de visibilité', () => {
+  // Pure logic: !!engagement.is_multi_ligne → show badge
+  const shouldShowMultiBadge = (isMultiLigne: boolean | null | undefined): boolean =>
+    !!isMultiLigne;
+
+  it('is_multi_ligne true → badge visible', () => {
+    expect(shouldShowMultiBadge(true)).toBe(true);
+  });
+
+  it('is_multi_ligne false → badge invisible', () => {
+    expect(shouldShowMultiBadge(false)).toBe(false);
+  });
+
+  it('is_multi_ligne null → badge invisible', () => {
+    expect(shouldShowMultiBadge(null)).toBe(false);
+  });
+
+  it('is_multi_ligne undefined → badge invisible', () => {
+    expect(shouldShowMultiBadge(undefined)).toBe(false);
+  });
+
+  it('!! coercion null === false', () => {
+    expect(!!null).toBe(false);
+  });
+
+  it('!! coercion true === true', () => {
+    expect(!!true).toBe(true);
+  });
+
+  it('badge uniquement sur multi dans une liste mixte', () => {
+    const engagements = [
+      createMockEngagement({ id: 'e1', is_multi_ligne: true }),
+      createMockEngagement({ id: 'e2', is_multi_ligne: false }),
+      createMockEngagement({ id: 'e3', is_multi_ligne: null }),
+      createMockEngagement({ id: 'e4', is_multi_ligne: true }),
+    ];
+    const withBadge = engagements.filter((e) => shouldShowMultiBadge(e.is_multi_ligne));
+    expect(withBadge).toHaveLength(2);
+    expect(withBadge.map((e) => e.id)).toEqual(['e1', 'e4']);
+  });
+
+  it('compteur multi-lignes dans une liste', () => {
+    const engagements = [
+      createMockEngagement({ is_multi_ligne: true }),
+      createMockEngagement({ is_multi_ligne: true }),
+      createMockEngagement({ is_multi_ligne: false }),
+      createMockEngagement({ is_multi_ligne: null }),
+      createMockEngagement({ is_multi_ligne: true }),
+    ];
+    const multiCount = engagements.filter((e) => !!e.is_multi_ligne).length;
+    expect(multiCount).toBe(3);
+  });
+});
+
+// ===========================================================================
+// 23. EngagementFromPMForm — logique multi-lignes params (Gap 3)
+// ===========================================================================
+describe('EngagementFromPMForm — logique multi-lignes', () => {
+  // Types reproduits du composant
+  interface SelectedLine {
+    id: string;
+    code: string;
+    label: string;
+    montant?: number;
+  }
+
+  const buildMultiParams = (selectedLines: SelectedLine[], montant: number) => {
+    const isMulti = selectedLines.length > 1;
+    return {
+      budget_line_id: selectedLines[0]?.id || '',
+      montant,
+      is_multi_ligne: isMulti || undefined,
+      lignes: isMulti
+        ? selectedLines.map((l) => ({ budget_line_id: l.id, montant: l.montant || 0 }))
+        : undefined,
+    };
+  };
+
+  it('1 ligne → isMultiLigne false', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-1', code: 'BL1', label: 'Ligne 1', montant: 5_000_000 },
+    ];
+    expect(lines.length > 1).toBe(false);
+  });
+
+  it('2 lignes → isMultiLigne true', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-1', code: 'BL1', label: 'L1', montant: 3_000_000 },
+      { id: 'bl-2', code: 'BL2', label: 'L2', montant: 2_000_000 },
+    ];
+    expect(lines.length > 1).toBe(true);
+  });
+
+  it('3 lignes → isMultiLigne true', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-1', code: 'BL1', label: 'L1', montant: 2_000_000 },
+      { id: 'bl-2', code: 'BL2', label: 'L2', montant: 2_000_000 },
+      { id: 'bl-3', code: 'BL3', label: 'L3', montant: 1_000_000 },
+    ];
+    expect(lines.length > 1).toBe(true);
+  });
+
+  it('0 lignes → isMultiLigne false', () => {
+    const lines: SelectedLine[] = [];
+    expect(lines.length > 1).toBe(false);
+  });
+
+  it('single params: pas de is_multi_ligne/lignes', () => {
+    const lines: SelectedLine[] = [{ id: 'bl-1', code: 'BL1', label: 'L1', montant: 5_000_000 }];
+    const params = buildMultiParams(lines, 5_000_000);
+    expect(params.is_multi_ligne).toBeUndefined();
+    expect(params.lignes).toBeUndefined();
+  });
+
+  it('multi params: is_multi_ligne + lignes[]', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-1', code: 'BL1', label: 'L1', montant: 3_000_000 },
+      { id: 'bl-2', code: 'BL2', label: 'L2', montant: 2_000_000 },
+    ];
+    const params = buildMultiParams(lines, 5_000_000);
+    expect(params.is_multi_ligne).toBe(true);
+    expect(params.lignes).toHaveLength(2);
+  });
+
+  it('lignes[].budget_line_id correspond à la sélection', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-alpha', code: 'A', label: 'Alpha', montant: 6_000_000 },
+      { id: 'bl-beta', code: 'B', label: 'Beta', montant: 4_000_000 },
+    ];
+    const params = buildMultiParams(lines, 10_000_000);
+    expect(params.lignes![0].budget_line_id).toBe('bl-alpha');
+    expect(params.lignes![1].budget_line_id).toBe('bl-beta');
+  });
+
+  it('lignes[].montant correspond à la sélection', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-1', code: 'A', label: 'A', montant: 7_500_000 },
+      { id: 'bl-2', code: 'B', label: 'B', montant: 2_500_000 },
+    ];
+    const params = buildMultiParams(lines, 10_000_000);
+    expect(params.lignes![0].montant).toBe(7_500_000);
+    expect(params.lignes![1].montant).toBe(2_500_000);
+  });
+
+  it('budget_line_id toujours = selectedLines[0].id', () => {
+    const lines: SelectedLine[] = [
+      { id: 'bl-first', code: 'F', label: 'First', montant: 6_000_000 },
+      { id: 'bl-second', code: 'S', label: 'Second', montant: 4_000_000 },
+    ];
+    const params = buildMultiParams(lines, 10_000_000);
+    expect(params.budget_line_id).toBe('bl-first');
+  });
+
+  it('multi budget insuffisance: isBudgetSufficient false si au moins un false', () => {
+    const multiAvailabilities = [
+      { availability: { is_sufficient: true } },
+      { availability: { is_sufficient: false } },
+    ];
+    const isBudgetSufficient =
+      multiAvailabilities.length > 0 &&
+      multiAvailabilities.every((ma) => ma.availability.is_sufficient);
+    expect(isBudgetSufficient).toBe(false);
+  });
+});
+
+// ===========================================================================
+// 24. PieceEngagement — ventilation multi-lignes (Gap 4)
+// ===========================================================================
+describe('PieceEngagement — ventilation multi-lignes', () => {
+  // Pure logic: show ventilation if is_multi_ligne && engagementLignes.length > 0
+  const shouldShowVentilation = (isMultiLigne: boolean | null, lignesCount: number): boolean =>
+    !!isMultiLigne && lignesCount > 0;
+
+  const computePercentage = (ligneMontant: number, totalMontant: number): string => {
+    if (totalMontant <= 0) return '0';
+    return ((ligneMontant / totalMontant) * 100).toFixed(1);
+  };
+
+  it('multi + lignes → affiche ventilation', () => {
+    expect(shouldShowVentilation(true, 2)).toBe(true);
+  });
+
+  it('multi + 0 lignes → pas de ventilation', () => {
+    expect(shouldShowVentilation(true, 0)).toBe(false);
+  });
+
+  it('not multi → pas de ventilation', () => {
+    expect(shouldShowVentilation(false, 3)).toBe(false);
+  });
+
+  it('null multi → pas de ventilation', () => {
+    expect(shouldShowVentilation(null, 2)).toBe(false);
+  });
+
+  it('pourcentage 50/50', () => {
+    expect(computePercentage(5_000_000, 10_000_000)).toBe('50.0');
+    expect(computePercentage(5_000_000, 10_000_000)).toBe('50.0');
+  });
+
+  it('pourcentage 60/40', () => {
+    expect(computePercentage(6_000_000, 10_000_000)).toBe('60.0');
+    expect(computePercentage(4_000_000, 10_000_000)).toBe('40.0');
+  });
+
+  it('pourcentage 3 lignes 40/35/25', () => {
+    const total = 20_000_000;
+    expect(computePercentage(8_000_000, total)).toBe('40.0');
+    expect(computePercentage(7_000_000, total)).toBe('35.0');
+    expect(computePercentage(5_000_000, total)).toBe('25.0');
+  });
+
+  it('montant total 0 → 0%', () => {
+    expect(computePercentage(5_000_000, 0)).toBe('0');
+  });
+
+  it('total lignes correspond au montant engagement', () => {
+    const lignes = [
+      createMockLigne({ montant: 6_000_000 }),
+      createMockLigne({ id: 'l2', montant: 4_000_000 }),
+    ];
+    const sum = lignes.reduce((acc, l) => acc + l.montant, 0);
+    expect(sum).toBe(10_000_000);
+  });
+
+  it('code et label depuis budget_line de la sous-ligne', () => {
+    const ligne = createMockLigne({
+      budget_line: {
+        id: 'bl-1',
+        code: 'OS1-M2-ACT3',
+        label: 'Maintenance informatique',
+        dotation_initiale: 15_000_000,
+      },
+    });
+    expect(ligne.budget_line?.code).toBe('OS1-M2-ACT3');
+    expect(ligne.budget_line?.label).toBe('Maintenance informatique');
+  });
+});
+
+// ===========================================================================
+// 25. EngagementLigne type + structure (Gap 6)
+// ===========================================================================
+describe('EngagementLigne — type et structure', () => {
+  it('EngagementLigne a tous les champs requis', () => {
+    const ligne = createMockLigne();
+    expect(ligne.id).toBeDefined();
+    expect(ligne.engagement_id).toBeDefined();
+    expect(ligne.budget_line_id).toBeDefined();
+    expect(typeof ligne.montant).toBe('number');
+    expect(ligne.created_at).toBeDefined();
+  });
+
+  it('budget_line est une relation optionnelle', () => {
+    const sansRelation = createMockLigne();
+    expect(sansRelation.budget_line).toBeUndefined();
+    const avecRelation = createMockLigne({
+      budget_line: { id: 'bl-1', code: 'BL-1', label: 'Test', dotation_initiale: 10_000_000 },
+    });
+    expect(avecRelation.budget_line).toBeDefined();
+    expect(avecRelation.budget_line!.code).toBe('BL-1');
+  });
+
+  it('engagement multi → lignes non-vides', () => {
+    const eng = createMockEngagement({
+      is_multi_ligne: true,
+      lignes: [
+        createMockLigne({ id: 'l1', montant: 3_000_000 }),
+        createMockLigne({ id: 'l2', montant: 2_000_000 }),
+      ],
+    });
+    expect(eng.is_multi_ligne).toBe(true);
+    expect(eng.lignes).toHaveLength(2);
+  });
+
+  it('engagement single → lignes undefined', () => {
+    const eng = createMockEngagement({ is_multi_ligne: false });
+    expect(eng.lignes).toBeUndefined();
+  });
+
+  it('somme lignes = montant engagement', () => {
+    const lignes = [
+      createMockLigne({ montant: 6_000_000 }),
+      createMockLigne({ id: 'l2', montant: 4_000_000 }),
+    ];
+    const montant = 10_000_000;
+    const sum = lignes.reduce((acc, l) => acc + l.montant, 0);
+    expect(sum).toBe(montant);
+  });
+
+  it('somme lignes — tolérance ±1 FCFA (trigger DB)', () => {
+    // Le trigger trg_check_engagement_lignes_sum autorise ±1 FCFA
+    const lignes = [
+      createMockLigne({ montant: 3_333_333 }),
+      createMockLigne({ id: 'l2', montant: 3_333_334 }),
+      createMockLigne({ id: 'l3', montant: 3_333_333 }),
+    ];
+    const montant = 10_000_000;
+    const sum = lignes.reduce((acc, l) => acc + l.montant, 0);
+    const diff = Math.abs(sum - montant);
+    expect(diff).toBeLessThanOrEqual(1);
+  });
+
+  it('budget_line relation a code/label/dotation_initiale', () => {
+    const ligne = createMockLigne({
+      budget_line: {
+        id: 'bl-1',
+        code: 'OS2-M1-NBE4',
+        label: 'Formation personnel',
+        dotation_initiale: 25_000_000,
+      },
+    });
+    expect(ligne.budget_line!.code).toBe('OS2-M1-NBE4');
+    expect(ligne.budget_line!.label).toBe('Formation personnel');
+    expect(ligne.budget_line!.dotation_initiale).toBe(25_000_000);
+  });
+
+  it('plusieurs lignes avec budget_lines différentes', () => {
+    const lignes = [
+      createMockLigne({
+        id: 'l1',
+        budget_line_id: 'bl-a',
+        montant: 5_000_000,
+        budget_line: { id: 'bl-a', code: 'BL-A', label: 'Ligne A', dotation_initiale: 20_000_000 },
+      }),
+      createMockLigne({
+        id: 'l2',
+        budget_line_id: 'bl-b',
+        montant: 3_000_000,
+        budget_line: { id: 'bl-b', code: 'BL-B', label: 'Ligne B', dotation_initiale: 15_000_000 },
+      }),
+      createMockLigne({
+        id: 'l3',
+        budget_line_id: 'bl-c',
+        montant: 2_000_000,
+        budget_line: { id: 'bl-c', code: 'BL-C', label: 'Ligne C', dotation_initiale: 10_000_000 },
+      }),
+    ];
+    const uniqueLineIds = new Set(lignes.map((l) => l.budget_line_id));
+    expect(uniqueLineIds.size).toBe(3);
+    const totalMontant = lignes.reduce((acc, l) => acc + l.montant, 0);
+    expect(totalMontant).toBe(10_000_000);
   });
 });

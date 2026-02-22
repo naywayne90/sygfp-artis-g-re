@@ -145,9 +145,9 @@ export function usePermissions() {
     return isAdmin || hasRole('CB') || hasPermission('engagement_validate');
   };
 
-  // Vérifier si l'utilisateur peut valider une liquidation (DAAF)
+  // Vérifier si l'utilisateur peut valider une liquidation (DAAF uniquement, CB lecture seule)
   const canValidateLiquidation = (): boolean => {
-    return isAdmin || hasAnyRole(['DAAF', 'CB']) || hasPermission('liquidation_validate');
+    return isAdmin || hasRole('DAAF') || hasPermission('liquidation_validate');
   };
 
   // Vérifier si l'utilisateur peut signer un ordonnancement (DG uniquement)

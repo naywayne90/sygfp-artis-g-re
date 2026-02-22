@@ -18,7 +18,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEngagements, BudgetAvailability } from '@/hooks/useEngagements';
 import { BudgetLineSelector, SelectedBudgetLine } from '@/components/imputation/BudgetLineSelector';
 import { DocumentUpload, UploadedDocument, DocumentType } from '@/components/shared/DocumentUpload';
-import { Loader2, FileSignature, Building2, CreditCard, AlertCircle } from 'lucide-react';
+import {
+  Loader2,
+  FileSignature,
+  Building2,
+  CreditCard,
+  AlertCircle,
+  Calculator,
+} from 'lucide-react';
 import { IndicateurBudget } from './IndicateurBudget';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
@@ -91,18 +98,43 @@ export function EngagementFromPMForm({
     }
   }, [passation, open]);
 
+  const [multiAvailabilities, setMultiAvailabilities] = useState<
+    Array<{ lineId: string; code: string; label: string; availability: BudgetAvailability }>
+  >([]);
+
+  const isMultiLigne = selectedLines.length > 1;
+
   // Check budget availability when line selected or amount changes
   useEffect(() => {
     const checkAvailability = async () => {
       if (selectedLines.length === 0 || montant <= 0) {
         setAvailability(null);
+        setMultiAvailabilities([]);
         return;
       }
 
       setIsCheckingBudget(true);
       try {
-        const result = await calculateAvailability(selectedLines[0].id, montant);
-        setAvailability(result);
+        if (selectedLines.length > 1) {
+          // Multi-lignes : vérifier chaque sous-ligne
+          const results = [];
+          for (const line of selectedLines) {
+            const result = await calculateAvailability(line.id, line.montant || 0);
+            results.push({
+              lineId: line.id,
+              code: line.code,
+              label: line.label,
+              availability: result,
+            });
+          }
+          setMultiAvailabilities(results);
+          setAvailability(null);
+        } else {
+          // Single : comportement existant
+          const result = await calculateAvailability(selectedLines[0].id, montant);
+          setAvailability(result);
+          setMultiAvailabilities([]);
+        }
       } catch (error) {
         console.error('Error checking budget availability:', error);
       } finally {
@@ -126,8 +158,13 @@ export function EngagementFromPMForm({
       return;
     }
 
-    // Check if budget is sufficient
-    if (availability && !availability.is_sufficient) {
+    // Check if budget is sufficient (single or multi)
+    if (isMultiLigne) {
+      if (multiAvailabilities.some((ma) => !ma.availability.is_sufficient)) {
+        toast.error('Budget insuffisant sur au moins une ligne budgétaire');
+        return;
+      }
+    } else if (availability && !availability.is_sufficient) {
       toast.error('Budget insuffisant pour cet engagement');
       return;
     }
@@ -154,6 +191,13 @@ export function EngagementFromPMForm({
         fournisseur: passation.prestataire_retenu?.raison_sociale || '',
         passation_marche_id: passation.id,
         dossier_id: passation.dossier_id || undefined,
+        is_multi_ligne: isMultiLigne,
+        ...(isMultiLigne && {
+          lignes: selectedLines.map((l) => ({
+            budget_line_id: l.id,
+            montant: l.montant || 0,
+          })),
+        }),
       });
 
       toast.success('Engagement cree avec succes');
@@ -181,11 +225,16 @@ export function EngagementFromPMForm({
 
   if (!passation) return null;
 
+  const isBudgetSufficient = isMultiLigne
+    ? multiAvailabilities.length > 0 &&
+      multiAvailabilities.every((ma) => ma.availability.is_sufficient)
+    : (availability?.is_sufficient ?? true);
+
   const canSubmit =
     objet.trim() !== '' &&
     montant > 0 &&
     selectedLines.length > 0 &&
-    (availability?.is_sufficient ?? true) &&
+    isBudgetSufficient &&
     !isCreating;
 
   return (
@@ -336,17 +385,37 @@ export function EngagementFromPMForm({
           />
 
           {/* Budget Availability Status */}
-          {selectedLines.length > 0 && (
-            <IndicateurBudget
-              availability={availability}
-              isLoading={isCheckingBudget}
-              budgetLine={
-                selectedLines[0]
-                  ? { code: selectedLines[0].code, label: selectedLines[0].label }
-                  : null
-              }
-            />
-          )}
+          {selectedLines.length > 0 &&
+            (isMultiLigne ? (
+              <div className="space-y-3">
+                <div className="text-sm font-medium flex items-center gap-2">
+                  <Calculator className="h-4 w-4" />
+                  Disponibilité budgétaire ({selectedLines.length} lignes)
+                </div>
+                {multiAvailabilities.map((ma) => (
+                  <IndicateurBudget
+                    key={ma.lineId}
+                    compact
+                    availability={ma.availability}
+                    isLoading={isCheckingBudget}
+                    budgetLine={{ code: ma.code, label: ma.label }}
+                  />
+                ))}
+                {isCheckingBudget && multiAvailabilities.length === 0 && (
+                  <IndicateurBudget availability={null} isLoading={true} budgetLine={null} />
+                )}
+              </div>
+            ) : (
+              <IndicateurBudget
+                availability={availability}
+                isLoading={isCheckingBudget}
+                budgetLine={
+                  selectedLines[0]
+                    ? { code: selectedLines[0].code, label: selectedLines[0].label }
+                    : null
+                }
+              />
+            ))}
 
           <Separator />
 

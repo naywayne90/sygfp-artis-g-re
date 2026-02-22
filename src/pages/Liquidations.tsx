@@ -115,6 +115,7 @@ export default function Liquidations() {
     total,
     engagementsValides,
     isLoading,
+    isFetching,
     fetchAllForExport,
     submitLiquidation,
     validateLiquidation,
@@ -641,6 +642,7 @@ export default function Liquidations() {
                 onMarkReadyForOrdonnancement={handleMarkReadyForOrdonnancement}
                 trancheMap={trancheMap}
                 isLoading={isLoading}
+                isFetching={isFetching}
                 userRole={effectiveUserRole}
               />
               <NotesPagination
@@ -667,6 +669,7 @@ export default function Liquidations() {
                 onExportAttestation={handleExportAttestation}
                 trancheMap={trancheMap}
                 isLoading={isLoading}
+                isFetching={isFetching}
                 userRole={effectiveUserRole}
               />
               <NotesPagination
@@ -805,6 +808,7 @@ export default function Liquidations() {
                 onView={handleView}
                 trancheMap={trancheMap}
                 isLoading={isLoading}
+                isFetching={isFetching}
                 userRole={effectiveUserRole}
               />
               <NotesPagination
@@ -828,6 +832,7 @@ export default function Liquidations() {
                 onResume={canPerform('liquidation.resume') ? handleResume : undefined}
                 trancheMap={trancheMap}
                 isLoading={isLoading}
+                isFetching={isFetching}
                 userRole={effectiveUserRole}
               />
               <NotesPagination

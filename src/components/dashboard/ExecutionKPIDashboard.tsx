@@ -1,26 +1,20 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { format, subMonths } from "date-fns";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format, subMonths } from 'date-fns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -28,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   AreaChart,
   Area,
@@ -41,7 +35,7 @@ import {
   PieChart,
   Pie,
   Cell,
-} from "recharts";
+} from 'recharts';
 import {
   FileText,
   CreditCard,
@@ -52,124 +46,136 @@ import {
   CheckCircle,
   Filter,
   RefreshCw,
-} from "lucide-react";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from 'lucide-react';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 interface ExecutionKPIDashboardProps {
   compact?: boolean;
 }
 
-const MOIS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+const MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 const COLORS = {
-  engagement: "hsl(var(--chart-1))",
-  liquidation: "hsl(var(--chart-2))",
-  ordonnancement: "hsl(var(--chart-3))",
-  reglement: "hsl(var(--chart-4))",
+  engagement: 'hsl(var(--chart-1))',
+  liquidation: 'hsl(var(--chart-2))',
+  ordonnancement: 'hsl(var(--chart-3))',
+  reglement: 'hsl(var(--chart-4))',
 };
 
-const PIE_COLORS = ["#10b981", "#f59e0b", "#ef4444", "#6b7280"];
+const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
 
-const formatMontant = (montant: number) =>
-  new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
 const formatMontantCompact = (montant: number) => {
   if (montant >= 1_000_000_000) {
-    return (montant / 1_000_000_000).toFixed(1) + " Mrd";
+    return (montant / 1_000_000_000).toFixed(1) + ' Mrd';
   }
   if (montant >= 1_000_000) {
-    return (montant / 1_000_000).toFixed(1) + " M";
+    return (montant / 1_000_000).toFixed(1) + ' M';
   }
-  return new Intl.NumberFormat("fr-FR").format(montant);
+  return new Intl.NumberFormat('fr-FR').format(montant);
 };
 
 interface FilterState {
   directionId: string;
-  periode: "ytd" | "q1" | "q2" | "q3" | "q4" | "last3" | "last6";
+  periode: 'ytd' | 'q1' | 'q2' | 'q3' | 'q4' | 'last3' | 'last6';
 }
 
 export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboardProps) {
   const { exercice } = useExercice();
   const [filters, setFilters] = useState<FilterState>({
-    directionId: "all",
-    periode: "ytd",
+    directionId: 'all',
+    periode: 'ytd',
   });
 
   // Fetch directions
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions-list"],
+    queryKey: ['directions-list'],
     queryFn: async () => {
       const { data } = await supabase
-        .from("directions")
-        .select("id, code, sigle, label")
-        .order("sigle");
+        .from('directions')
+        .select('id, code, sigle, label')
+        .order('sigle');
       return data || [];
     },
   });
 
   // Fetch KPIs data
-  const { data: kpiData, isLoading, refetch } = useQuery({
-    queryKey: ["execution-kpis", exercice, filters],
+  const {
+    data: kpiData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['execution-kpis', exercice, filters],
     queryFn: async () => {
       // Déterminer la période
-      let dateStart: string | null = null;
-      let dateEnd = new Date().toISOString();
-      
+      let _dateStart: string | null = null;
+      let _dateEnd = new Date().toISOString();
+
       const now = new Date();
       switch (filters.periode) {
-        case "q1":
-          dateStart = `${exercice}-01-01`;
-          dateEnd = `${exercice}-03-31`;
+        case 'q1':
+          _dateStart = `${exercice}-01-01`;
+          _dateEnd = `${exercice}-03-31`;
           break;
-        case "q2":
-          dateStart = `${exercice}-04-01`;
-          dateEnd = `${exercice}-06-30`;
+        case 'q2':
+          _dateStart = `${exercice}-04-01`;
+          _dateEnd = `${exercice}-06-30`;
           break;
-        case "q3":
-          dateStart = `${exercice}-07-01`;
-          dateEnd = `${exercice}-09-30`;
+        case 'q3':
+          _dateStart = `${exercice}-07-01`;
+          _dateEnd = `${exercice}-09-30`;
           break;
-        case "q4":
-          dateStart = `${exercice}-10-01`;
-          dateEnd = `${exercice}-12-31`;
+        case 'q4':
+          _dateStart = `${exercice}-10-01`;
+          _dateEnd = `${exercice}-12-31`;
           break;
-        case "last3":
-          dateStart = format(subMonths(now, 3), "yyyy-MM-dd");
+        case 'last3':
+          _dateStart = format(subMonths(now, 3), 'yyyy-MM-dd');
           break;
-        case "last6":
-          dateStart = format(subMonths(now, 6), "yyyy-MM-dd");
+        case 'last6':
+          _dateStart = format(subMonths(now, 6), 'yyyy-MM-dd');
           break;
         default: // ytd
-          dateStart = `${exercice}-01-01`;
+          _dateStart = `${exercice}-01-01`;
       }
 
       // Fetch all data in parallel
-      const [engagementsRes, liquidationsRes, ordonnancementsRes, reglementsRes, dossiersRes, budgetRes] = await Promise.all([
+      const [
+        engagementsRes,
+        liquidationsRes,
+        ordonnancementsRes,
+        reglementsRes,
+        dossiersRes,
+        budgetRes,
+      ] = await Promise.all([
         supabase
-          .from("budget_engagements")
-          .select("id, numero, statut, montant, date_engagement, dossier_id, budget_line_id")
-          .eq("exercice", exercice),
+          .from('budget_engagements')
+          .select('id, numero, statut, montant, date_engagement, dossier_id, budget_line_id')
+          .eq('exercice', exercice),
         supabase
-          .from("budget_liquidations")
-          .select("id, numero, statut, montant, date_liquidation, engagement_id")
-          .eq("exercice", exercice),
+          .from('budget_liquidations')
+          .select('id, numero, statut, montant, date_liquidation, engagement_id')
+          .eq('exercice', exercice),
         supabase
-          .from("ordonnancements")
-          .select("id, numero, statut, montant, montant_paye, created_at, dossier_id")
-          .eq("exercice", exercice),
+          .from('ordonnancements')
+          .select('id, numero, statut, montant, montant_paye, created_at, dossier_id')
+          .eq('exercice', exercice),
         supabase
-          .from("reglements")
-          .select("id, numero, statut, montant, date_paiement, ordonnancement_id")
-          .eq("exercice", exercice),
+          .from('reglements')
+          .select('id, numero, statut, montant, date_paiement, ordonnancement_id')
+          .eq('exercice', exercice),
         supabase
-          .from("dossiers")
-          .select("id, numero, objet, statut_global, montant_estime, etape_courante, direction_id")
-          .eq("exercice", exercice),
+          .from('dossiers')
+          .select('id, numero, objet, statut_global, montant_estime, etape_courante, direction_id')
+          .eq('exercice', exercice),
         supabase
-          .from("budget_lines")
-          .select("id, dotation_initiale, dotation_modifiee, total_engage, disponible_calcule, direction_id")
-          .eq("exercice", exercice)
-          .eq("is_active", true),
+          .from('budget_lines')
+          .select(
+            'id, dotation_initiale, dotation_modifiee, total_engage, disponible_calcule, direction_id'
+          )
+          .eq('exercice', exercice)
+          .eq('is_active', true),
       ]);
 
       const engagements = engagementsRes.data || [];
@@ -182,26 +188,40 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
       // Filtrer par direction si nécessaire
       let filteredDossiers = dossiers;
       let filteredBudgetLines = budgetLines;
-      if (filters.directionId !== "all") {
-        filteredDossiers = dossiers.filter(d => d.direction_id === filters.directionId);
-        filteredBudgetLines = budgetLines.filter(b => b.direction_id === filters.directionId);
+      if (filters.directionId !== 'all') {
+        filteredDossiers = dossiers.filter((d) => d.direction_id === filters.directionId);
+        filteredBudgetLines = budgetLines.filter((b) => b.direction_id === filters.directionId);
       }
 
       // Calculs KPIs
-      const engValides = engagements.filter(e => e.statut === "valide");
-      const engEnAttente = engagements.filter(e => ["soumis", "en_attente", "differe"].includes(e.statut || ""));
-      const liqValides = liquidations.filter(l => l.statut === "valide");
-      const liqEnAttente = liquidations.filter(l => ["soumis", "en_attente", "differe"].includes(l.statut || ""));
-      const ordValides = ordonnancements.filter(o => o.statut === "valide" || o.statut === "signe");
-      const ordEnSignature = ordonnancements.filter(o => o.statut === "en_signature" || o.statut === "soumis");
-      const regPaies = reglements.filter(r => r.statut === "paye" || r.statut === "valide");
+      const engValides = engagements.filter((e) => e.statut === 'valide');
+      const engEnAttente = engagements.filter((e) =>
+        ['soumis', 'en_attente', 'differe'].includes(e.statut || '')
+      );
+      const liqValides = liquidations.filter((l) => l.statut === 'validé_dg');
+      const liqEnAttente = liquidations.filter((l) =>
+        ['soumis', 'validé_daaf', 'en_attente', 'differe'].includes(l.statut || '')
+      );
+      const ordValides = ordonnancements.filter(
+        (o) => o.statut === 'valide' || o.statut === 'signe'
+      );
+      const ordEnSignature = ordonnancements.filter(
+        (o) => o.statut === 'en_signature' || o.statut === 'soumis'
+      );
+      const regPaies = reglements.filter((r) => r.statut === 'paye' || r.statut === 'valide');
 
       const totalEngage = engValides.reduce((sum, e) => sum + (e.montant || 0), 0);
       const totalLiquide = liqValides.reduce((sum, l) => sum + (l.montant || 0), 0);
       const totalOrdonnance = ordValides.reduce((sum, o) => sum + (o.montant || 0), 0);
       const totalPaye = regPaies.reduce((sum, r) => sum + (r.montant || 0), 0);
-      const totalDotation = filteredBudgetLines.reduce((sum, b) => sum + (b.dotation_modifiee || b.dotation_initiale || 0), 0);
-      const totalDisponible = filteredBudgetLines.reduce((sum, b) => sum + (b.disponible_calcule || 0), 0);
+      const totalDotation = filteredBudgetLines.reduce(
+        (sum, b) => sum + (b.dotation_modifiee || b.dotation_initiale || 0),
+        0
+      );
+      const totalDisponible = filteredBudgetLines.reduce(
+        (sum, b) => sum + (b.disponible_calcule || 0),
+        0
+      );
 
       // Taux
       const tauxEngagement = totalDotation > 0 ? (totalEngage / totalDotation) * 100 : 0;
@@ -214,8 +234,8 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
         const monthStart = new Date(exercice, index, 1);
         const monthEnd = new Date(exercice, index + 1, 0);
 
-        const filterByMonth = (items: any[], dateField: string) => {
-          return items.filter(item => {
+        const filterByMonth = (items: Record<string, unknown>[], dateField: string) => {
+          return items.filter((item) => {
             if (!item[dateField]) return false;
             const date = new Date(item[dateField]);
             return date >= monthStart && date <= monthEnd;
@@ -224,29 +244,45 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
 
         return {
           mois,
-          engagements: filterByMonth(engValides, "date_engagement")
-            .reduce((sum, e) => sum + (e.montant || 0), 0),
-          liquidations: filterByMonth(liqValides, "date_liquidation")
-            .reduce((sum, l) => sum + (l.montant || 0), 0),
-          ordonnancements: filterByMonth(ordValides, "created_at")
-            .reduce((sum, o) => sum + (o.montant || 0), 0),
-          reglements: filterByMonth(regPaies, "date_paiement")
-            .reduce((sum, r) => sum + (r.montant || 0), 0),
+          engagements: filterByMonth(engValides, 'date_engagement').reduce(
+            (sum, e) => sum + (e.montant || 0),
+            0
+          ),
+          liquidations: filterByMonth(liqValides, 'date_liquidation').reduce(
+            (sum, l) => sum + (l.montant || 0),
+            0
+          ),
+          ordonnancements: filterByMonth(ordValides, 'created_at').reduce(
+            (sum, o) => sum + (o.montant || 0),
+            0
+          ),
+          reglements: filterByMonth(regPaies, 'date_paiement').reduce(
+            (sum, r) => sum + (r.montant || 0),
+            0
+          ),
         };
       });
 
       // Top dossiers en attente
       const dossiersEnAttente = filteredDossiers
-        .filter(d => !["solde", "cloture", "annule"].includes(d.statut_global || ""))
+        .filter((d) => !['solde', 'cloture', 'annule'].includes(d.statut_global || ''))
         .sort((a, b) => (b.montant_estime || 0) - (a.montant_estime || 0))
         .slice(0, 10);
 
       // Répartition par statut
       const repartitionEngagements = [
-        { name: "Validés", value: engValides.length, color: PIE_COLORS[0] },
-        { name: "En attente", value: engEnAttente.length, color: PIE_COLORS[1] },
-        { name: "Rejetés", value: engagements.filter(e => e.statut === "rejete").length, color: PIE_COLORS[2] },
-        { name: "Brouillons", value: engagements.filter(e => e.statut === "brouillon").length, color: PIE_COLORS[3] },
+        { name: 'Validés', value: engValides.length, color: PIE_COLORS[0] },
+        { name: 'En attente', value: engEnAttente.length, color: PIE_COLORS[1] },
+        {
+          name: 'Rejetés',
+          value: engagements.filter((e) => e.statut === 'rejete').length,
+          color: PIE_COLORS[2],
+        },
+        {
+          name: 'Brouillons',
+          value: engagements.filter((e) => e.statut === 'brouillon').length,
+          color: PIE_COLORS[3],
+        },
       ];
 
       return {
@@ -327,10 +363,10 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Filtres :</span>
             </div>
-            
+
             <Select
               value={filters.directionId}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, directionId: value }))}
+              onValueChange={(value) => setFilters((prev) => ({ ...prev, directionId: value }))}
             >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Toutes les directions" />
@@ -347,7 +383,9 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
 
             <Select
               value={filters.periode}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, periode: value as FilterState["periode"] }))}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, periode: value as FilterState['periode'] }))
+              }
             >
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
@@ -377,13 +415,13 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
         <Card className="relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Engagements
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Engagements</CardTitle>
             <CreditCard className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontantCompact(kpis?.engagements.montantTotal || 0)}</div>
+            <div className="text-2xl font-bold">
+              {formatMontantCompact(kpis?.engagements.montantTotal || 0)}
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="bg-success/10 text-success">
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -416,7 +454,9 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
             <Receipt className="h-5 w-5 text-secondary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontantCompact(kpis?.liquidations.montantTotal || 0)}</div>
+            <div className="text-2xl font-bold">
+              {formatMontantCompact(kpis?.liquidations.montantTotal || 0)}
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="bg-success/10 text-success">
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -449,14 +489,19 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
             <FileCheck className="h-5 w-5 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontantCompact(kpis?.ordonnancements.montantTotal || 0)}</div>
+            <div className="text-2xl font-bold">
+              {formatMontantCompact(kpis?.ordonnancements.montantTotal || 0)}
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="bg-success/10 text-success">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 {kpis?.ordonnancements.valides || 0} validés
               </Badge>
               {(kpis?.ordonnancements.enSignature || 0) > 0 && (
-                <Badge variant="outline" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                <Badge
+                  variant="outline"
+                  className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                >
                   <FileText className="h-3 w-3 mr-1" />
                   {kpis?.ordonnancements.enSignature} en signature
                 </Badge>
@@ -476,13 +521,13 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
         <Card className="relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-full" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Règlements
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Règlements</CardTitle>
             <Banknote className="h-5 w-5 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{formatMontantCompact(kpis?.reglements.montantTotal || 0)}</div>
+            <div className="text-2xl font-bold text-success">
+              {formatMontantCompact(kpis?.reglements.montantTotal || 0)}
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="outline" className="bg-success/10 text-success">
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -512,9 +557,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
             <Card>
               <CardHeader>
                 <CardTitle>Évolution mensuelle de l'exécution budgétaire</CardTitle>
-                <CardDescription>
-                  Montants validés par mois - Exercice {exercice}
-                </CardDescription>
+                <CardDescription>Montants validés par mois - Exercice {exercice}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[400px]">
@@ -627,13 +670,17 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Dotation totale</span>
-                        <span className="font-bold">{formatMontant(kpis?.budget.dotation || 0)}</span>
+                        <span className="font-bold">
+                          {formatMontant(kpis?.budget.dotation || 0)}
+                        </span>
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm text-muted-foreground">Montant engagé</span>
-                        <span className="font-medium">{formatMontant(kpis?.budget.engage || 0)}</span>
+                        <span className="font-medium">
+                          {formatMontant(kpis?.budget.engage || 0)}
+                        </span>
                       </div>
                       <Progress value={kpis?.budget.tauxExecution || 0} className="h-3" />
                       <p className="text-xs text-muted-foreground mt-1">
@@ -658,9 +705,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
             <Card>
               <CardHeader>
                 <CardTitle>Top 10 dossiers en attente</CardTitle>
-                <CardDescription>
-                  Dossiers non soldés triés par montant décroissant
-                </CardDescription>
+                <CardDescription>Dossiers non soldés triés par montant décroissant</CardDescription>
               </CardHeader>
               <CardContent>
                 {dossiersEnAttente.length === 0 ? (
@@ -682,23 +727,23 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
                     <TableBody>
                       {dossiersEnAttente.map((dossier) => (
                         <TableRow key={dossier.id}>
-                          <TableCell className="font-mono">{dossier.numero || "-"}</TableCell>
+                          <TableCell className="font-mono">{dossier.numero || '-'}</TableCell>
                           <TableCell className="max-w-[200px] truncate">
-                            {dossier.objet || "-"}
+                            {dossier.objet || '-'}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{dossier.etape_courante || "-"}</Badge>
+                            <Badge variant="outline">{dossier.etape_courante || '-'}</Badge>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="outline"
                               className={
-                                dossier.statut_global === "en_cours"
-                                  ? "bg-warning/10 text-warning"
-                                  : "bg-muted"
+                                dossier.statut_global === 'en_cours'
+                                  ? 'bg-warning/10 text-warning'
+                                  : 'bg-muted'
                               }
                             >
-                              {dossier.statut_global || "-"}
+                              {dossier.statut_global || '-'}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right font-bold">

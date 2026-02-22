@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export interface EtatFilters {
   exercice?: number;
@@ -78,24 +79,24 @@ async function queryTable<T>(
   filters: Record<string, any> = {}
 ): Promise<T[]> {
   let query = supabase.from(table as any).select(select);
-  
+
   Object.entries(filters).forEach(([key, value]) => {
-    if (key === "order") {
+    if (key === 'order') {
       query = query.order(value as string);
-    } else if (key.startsWith("neq_")) {
-      query = query.neq(key.replace("neq_", ""), value);
-    } else if (key.startsWith("gte_")) {
-      query = query.gte(key.replace("gte_", ""), value);
-    } else if (key.startsWith("lte_")) {
-      query = query.lte(key.replace("lte_", ""), value);
-    } else if (key.startsWith("in_")) {
-      query = query.in(key.replace("in_", ""), value);
+    } else if (key.startsWith('neq_')) {
+      query = query.neq(key.replace('neq_', ''), value);
+    } else if (key.startsWith('gte_')) {
+      query = query.gte(key.replace('gte_', ''), value);
+    } else if (key.startsWith('lte_')) {
+      query = query.lte(key.replace('lte_', ''), value);
+    } else if (key.startsWith('in_')) {
+      query = query.in(key.replace('in_', ''), value);
     } else {
       query = query.eq(key, value);
     }
   });
 
-  const { data, error } = await query as any;
+  const { data, error } = (await query) as any;
   if (error) throw error;
   return (data || []) as T[];
 }
@@ -106,54 +107,61 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
   // Fetch referential data
   const { data: directions = [] } = useQuery<DirectionRef[]>({
-    queryKey: ["directions-ref-etats"],
-    queryFn: () => queryTable<DirectionRef>("directions", "id, code, label, sigle", { 
-      est_active: true, 
-      order: "label" 
-    }),
+    queryKey: ['directions-ref-etats'],
+    queryFn: () =>
+      queryTable<DirectionRef>('directions', 'id, code, label, sigle', {
+        est_active: true,
+        order: 'label',
+      }),
   });
 
   const { data: objectifsStrategiques = [] } = useQuery<RefItem[]>({
-    queryKey: ["os-ref-etats"],
-    queryFn: () => queryTable<RefItem>("objectifs_strategiques", "id, code, libelle", {
-      est_actif: true,
-      order: "code"
-    }),
+    queryKey: ['os-ref-etats'],
+    queryFn: () =>
+      queryTable<RefItem>('objectifs_strategiques', 'id, code, libelle', {
+        est_actif: true,
+        order: 'code',
+      }),
   });
 
   const { data: missions = [] } = useQuery<RefItem[]>({
-    queryKey: ["missions-ref-etats"],
-    queryFn: () => queryTable<RefItem>("missions", "id, code, libelle", { 
-      est_active: true, 
-      order: "code" 
-    }),
+    queryKey: ['missions-ref-etats'],
+    queryFn: () =>
+      queryTable<RefItem>('missions', 'id, code, libelle', {
+        est_active: true,
+        order: 'code',
+      }),
   });
 
   const { data: nomenclaturesNBE = [] } = useQuery<RefItem[]>({
-    queryKey: ["nbe-ref-etats"],
-    queryFn: () => queryTable<RefItem>("nomenclature_nbe", "id, code, libelle", { 
-      est_active: true, 
-      order: "code" 
-    }),
+    queryKey: ['nbe-ref-etats'],
+    queryFn: () =>
+      queryTable<RefItem>('nomenclature_nbe', 'id, code, libelle', {
+        est_active: true,
+        order: 'code',
+      }),
   });
 
   const { data: planComptableSYSCO = [] } = useQuery<RefItem[]>({
-    queryKey: ["sysco-ref-etats"],
-    queryFn: () => queryTable<RefItem>("plan_comptable_sysco", "id, code, libelle", { 
-      est_active: true, 
-      order: "code" 
-    }),
+    queryKey: ['sysco-ref-etats'],
+    queryFn: () =>
+      queryTable<RefItem>('plan_comptable_sysco', 'id, code, libelle', {
+        est_active: true,
+        order: 'code',
+      }),
   });
 
   // Fetch budget lines with execution data
-  const { data: budgetLinesExecution = [], isLoading: isLoadingBudgetLines } = useQuery<BudgetLineExecution[]>({
-    queryKey: ["etats-execution-budget-lines", exercice, filters],
+  const { data: budgetLinesExecution = [], isLoading: isLoadingBudgetLines } = useQuery<
+    BudgetLineExecution[]
+  >({
+    queryKey: ['etats-execution-budget-lines', exercice, filters],
     queryFn: async () => {
       // Get budget lines
       const lineFilters: Record<string, any> = {
         exercice,
         is_active: true,
-        order: "code",
+        order: 'code',
       };
       if (filters.direction_id) lineFilters.direction_id = filters.direction_id;
       if (filters.os_id) lineFilters.os_id = filters.os_id;
@@ -171,23 +179,27 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         mission_id: string | null;
         nbe_id: string | null;
         sysco_id: string | null;
-      }>("budget_lines", "id, code, label, dotation_initiale, direction_id, os_id, mission_id, nbe_id, sysco_id", lineFilters);
+      }>(
+        'budget_lines',
+        'id, code, label, dotation_initiale, direction_id, os_id, mission_id, nbe_id, sysco_id',
+        lineFilters
+      );
 
       // Get engagements
-      const engFilters: Record<string, any> = { exercice, neq_statut: "annule" };
+      const engFilters: Record<string, any> = { exercice, neq_statut: 'annule' };
       if (filters.periode_debut) engFilters.gte_date_engagement = filters.periode_debut;
       if (filters.periode_fin) engFilters.lte_date_engagement = filters.periode_fin;
-      
+
       const engagements = await queryTable<{ budget_line_id: string; montant: number; id: string }>(
-        "budget_engagements", 
-        "id, budget_line_id, montant", 
+        'budget_engagements',
+        'id, budget_line_id, montant',
         engFilters
       );
 
       // Build engagement map
       const engByLine: Record<string, number> = {};
       const engBudgetMap: Record<string, string> = {};
-      engagements.forEach(e => {
+      engagements.forEach((e) => {
         if (e.budget_line_id) {
           engByLine[e.budget_line_id] = (engByLine[e.budget_line_id] || 0) + (e.montant || 0);
           engBudgetMap[e.id] = e.budget_line_id;
@@ -195,15 +207,15 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       });
 
       // Get liquidations
-      const liqFilters: Record<string, any> = { exercice, neq_statut: "annule" };
+      const liqFilters: Record<string, any> = { exercice, neq_statut: 'annule' };
       const liquidations = await queryTable<{ engagement_id: string; montant: number }>(
-        "budget_liquidations",
-        "engagement_id, montant",
+        'budget_liquidations',
+        'engagement_id, montant',
         liqFilters
       );
 
       const liqByLine: Record<string, number> = {};
-      liquidations.forEach(l => {
+      liquidations.forEach((l) => {
         const lineId = engBudgetMap[l.engagement_id];
         if (lineId) {
           liqByLine[lineId] = (liqByLine[lineId] || 0) + (l.montant || 0);
@@ -212,25 +224,27 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
       // Get ordonnancements
       const ordonnancements = await queryTable<{ liquidation_id: string; montant: number }>(
-        "ordonnancements",
-        "liquidation_id, montant",
-        { exercice, neq_statut: "annule" }
+        'ordonnancements',
+        'liquidation_id, montant',
+        { exercice, neq_statut: 'annule' }
       );
 
       // Build liquidation to engagement map
       const liqEngMap: Record<string, string> = {};
-      const liqIds = [...new Set(ordonnancements.map(o => o.liquidation_id).filter(Boolean))];
+      const liqIds = [...new Set(ordonnancements.map((o) => o.liquidation_id).filter(Boolean))];
       if (liqIds.length > 0) {
         const liqData = await queryTable<{ id: string; engagement_id: string }>(
-          "budget_liquidations",
-          "id, engagement_id",
+          'budget_liquidations',
+          'id, engagement_id',
           { in_id: liqIds }
         );
-        liqData.forEach(l => { liqEngMap[l.id] = l.engagement_id; });
+        liqData.forEach((l) => {
+          liqEngMap[l.id] = l.engagement_id;
+        });
       }
 
       const ordByLine: Record<string, number> = {};
-      ordonnancements.forEach(o => {
+      ordonnancements.forEach((o) => {
         const engId = liqEngMap[o.liquidation_id];
         const lineId = engId ? engBudgetMap[engId] : null;
         if (lineId) {
@@ -240,25 +254,27 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
       // Get reglements
       const reglements = await queryTable<{ ordonnancement_id: string; montant: number }>(
-        "reglements",
-        "ordonnancement_id, montant",
-        { exercice, neq_statut: "annule" }
+        'reglements',
+        'ordonnancement_id, montant',
+        { exercice, neq_statut: 'annule' }
       );
 
       // Build ordonnancement to liquidation map
       const ordLiqMap: Record<string, string> = {};
-      const ordIds = [...new Set(reglements.map(r => r.ordonnancement_id).filter(Boolean))];
+      const ordIds = [...new Set(reglements.map((r) => r.ordonnancement_id).filter(Boolean))];
       if (ordIds.length > 0) {
         const ordData = await queryTable<{ id: string; liquidation_id: string }>(
-          "ordonnancements",
-          "id, liquidation_id",
+          'ordonnancements',
+          'id, liquidation_id',
           { in_id: ordIds }
         );
-        ordData.forEach(o => { ordLiqMap[o.id] = o.liquidation_id; });
+        ordData.forEach((o) => {
+          ordLiqMap[o.id] = o.liquidation_id;
+        });
       }
 
       const regByLine: Record<string, number> = {};
-      reglements.forEach(r => {
+      reglements.forEach((r) => {
         const liqId = ordLiqMap[r.ordonnancement_id];
         const engId = liqId ? liqEngMap[liqId] : null;
         const lineId = engId ? engBudgetMap[engId] : null;
@@ -267,7 +283,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         }
       });
 
-      return lines.map(line => ({
+      return lines.map((line) => ({
         ...line,
         engagements: engByLine[line.id] || 0,
         liquidations: liqByLine[line.id] || 0,
@@ -280,101 +296,101 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
   // Fetch etapes stats
   const { data: etapesStats = [], isLoading: isLoadingEtapes } = useQuery<EtapeStats[]>({
-    queryKey: ["etats-execution-etapes", exercice, filters],
+    queryKey: ['etats-execution-etapes', exercice, filters],
     queryFn: async () => {
       const stats: EtapeStats[] = [];
 
       // Notes AEF
-      const notes = await queryTable<{ id: string; statut: string | null; montant_estime: number | null }>(
-        "notes_dg",
-        "id, statut, montant_estime",
-        { exercice }
-      );
-      
+      const notes = await queryTable<{
+        id: string;
+        statut: string | null;
+        montant_estime: number | null;
+      }>('notes_dg', 'id, statut, montant_estime', { exercice });
+
       stats.push({
-        etape: "notes_aef",
-        label: "Notes AEF",
+        etape: 'notes_aef',
+        label: 'Notes AEF',
         total: notes.length,
-        brouillon: notes.filter(n => n.statut === "brouillon").length,
-        soumis: notes.filter(n => n.statut === "soumis").length,
-        valide: notes.filter(n => n.statut === "valide" || n.statut === "impute").length,
-        rejete: notes.filter(n => n.statut === "rejete").length,
-        differe: notes.filter(n => n.statut === "differe").length,
+        brouillon: notes.filter((n) => n.statut === 'brouillon').length,
+        soumis: notes.filter((n) => n.statut === 'soumis').length,
+        valide: notes.filter((n) => n.statut === 'valide' || n.statut === 'impute').length,
+        rejete: notes.filter((n) => n.statut === 'rejete').length,
+        differe: notes.filter((n) => n.statut === 'differe').length,
         montant_total: notes.reduce((sum, n) => sum + (n.montant_estime || 0), 0),
       });
 
       // Engagements
       const engagements = await queryTable<{ id: string; statut: string | null; montant: number }>(
-        "budget_engagements",
-        "id, statut, montant",
+        'budget_engagements',
+        'id, statut, montant',
         { exercice }
       );
-      
+
       stats.push({
-        etape: "engagements",
-        label: "Engagements",
+        etape: 'engagements',
+        label: 'Engagements',
         total: engagements.length,
-        brouillon: engagements.filter(e => e.statut === "brouillon").length,
-        soumis: engagements.filter(e => e.statut === "soumis").length,
-        valide: engagements.filter(e => e.statut === "valide").length,
-        rejete: engagements.filter(e => e.statut === "rejete").length,
-        differe: engagements.filter(e => e.statut === "differe").length,
+        brouillon: engagements.filter((e) => e.statut === 'brouillon').length,
+        soumis: engagements.filter((e) => e.statut === 'soumis').length,
+        valide: engagements.filter((e) => e.statut === 'valide').length,
+        rejete: engagements.filter((e) => e.statut === 'rejete').length,
+        differe: engagements.filter((e) => e.statut === 'differe').length,
         montant_total: engagements.reduce((sum, e) => sum + (e.montant || 0), 0),
       });
 
       // Liquidations
       const liquidations = await queryTable<{ id: string; statut: string | null; montant: number }>(
-        "budget_liquidations",
-        "id, statut, montant",
+        'budget_liquidations',
+        'id, statut, montant',
         { exercice }
       );
-      
+
       stats.push({
-        etape: "liquidations",
-        label: "Liquidations",
+        etape: 'liquidations',
+        label: 'Liquidations',
         total: liquidations.length,
-        brouillon: liquidations.filter(l => l.statut === "brouillon").length,
-        soumis: liquidations.filter(l => l.statut === "soumis").length,
-        valide: liquidations.filter(l => l.statut === "valide").length,
-        rejete: liquidations.filter(l => l.statut === "rejete").length,
-        differe: liquidations.filter(l => l.statut === "differe").length,
+        brouillon: liquidations.filter((l) => l.statut === 'brouillon').length,
+        soumis: liquidations.filter((l) => l.statut === 'soumis').length,
+        valide: liquidations.filter((l) => l.statut === 'validé_dg').length,
+        rejete: liquidations.filter((l) => l.statut === 'rejete').length,
+        differe: liquidations.filter((l) => l.statut === 'differe').length,
         montant_total: liquidations.reduce((sum, l) => sum + (l.montant || 0), 0),
       });
 
       // Ordonnancements
-      const ordonnancements = await queryTable<{ id: string; statut: string | null; montant: number }>(
-        "ordonnancements",
-        "id, statut, montant",
-        { exercice }
-      );
-      
+      const ordonnancements = await queryTable<{
+        id: string;
+        statut: string | null;
+        montant: number;
+      }>('ordonnancements', 'id, statut, montant', { exercice });
+
       stats.push({
-        etape: "ordonnancements",
-        label: "Ordonnancements",
+        etape: 'ordonnancements',
+        label: 'Ordonnancements',
         total: ordonnancements.length,
-        brouillon: ordonnancements.filter(o => o.statut === "brouillon").length,
-        soumis: ordonnancements.filter(o => o.statut === "soumis").length,
-        valide: ordonnancements.filter(o => o.statut === "valide").length,
-        rejete: ordonnancements.filter(o => o.statut === "rejete").length,
-        differe: ordonnancements.filter(o => o.statut === "differe").length,
+        brouillon: ordonnancements.filter((o) => o.statut === 'brouillon').length,
+        soumis: ordonnancements.filter((o) => o.statut === 'soumis').length,
+        valide: ordonnancements.filter((o) => o.statut === 'valide').length,
+        rejete: ordonnancements.filter((o) => o.statut === 'rejete').length,
+        differe: ordonnancements.filter((o) => o.statut === 'differe').length,
         montant_total: ordonnancements.reduce((sum, o) => sum + (o.montant || 0), 0),
       });
 
       // Règlements
       const reglements = await queryTable<{ id: string; statut: string | null; montant: number }>(
-        "reglements",
-        "id, statut, montant",
+        'reglements',
+        'id, statut, montant',
         { exercice }
       );
-      
+
       stats.push({
-        etape: "reglements",
-        label: "Règlements",
+        etape: 'reglements',
+        label: 'Règlements',
         total: reglements.length,
         brouillon: 0,
         soumis: 0,
-        valide: reglements.filter(r => r.statut === "valide" || r.statut === "enregistre").length,
-        rejete: reglements.filter(r => r.statut === "annule").length,
+        valide: reglements.filter((r) => r.statut === 'valide' || r.statut === 'enregistre').length,
+        rejete: reglements.filter((r) => r.statut === 'annule').length,
         differe: 0,
         montant_total: reglements.reduce((sum, r) => sum + (r.montant || 0), 0),
       });
@@ -405,28 +421,35 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   summary.reste_a_liquider = summary.montant_engage - summary.montant_liquide;
   summary.reste_a_ordonnancer = summary.montant_liquide - summary.montant_ordonnance;
   summary.reste_a_payer = summary.montant_ordonnance - summary.montant_paye;
-  summary.taux_engagement = summary.dotation_totale > 0 ? (summary.montant_engage / summary.dotation_totale) * 100 : 0;
-  summary.taux_liquidation = summary.montant_engage > 0 ? (summary.montant_liquide / summary.montant_engage) * 100 : 0;
-  summary.taux_ordonnancement = summary.montant_liquide > 0 ? (summary.montant_ordonnance / summary.montant_liquide) * 100 : 0;
-  summary.taux_paiement = summary.montant_ordonnance > 0 ? (summary.montant_paye / summary.montant_ordonnance) * 100 : 0;
+  summary.taux_engagement =
+    summary.dotation_totale > 0 ? (summary.montant_engage / summary.dotation_totale) * 100 : 0;
+  summary.taux_liquidation =
+    summary.montant_engage > 0 ? (summary.montant_liquide / summary.montant_engage) * 100 : 0;
+  summary.taux_ordonnancement =
+    summary.montant_liquide > 0 ? (summary.montant_ordonnance / summary.montant_liquide) * 100 : 0;
+  summary.taux_paiement =
+    summary.montant_ordonnance > 0 ? (summary.montant_paye / summary.montant_ordonnance) * 100 : 0;
 
   // Aggregation functions
   const getEtatByDirection = () => {
-    const grouped: Record<string, { 
-      direction: DirectionRef; 
-      dotation: number; 
-      engage: number; 
-      liquide: number; 
-      ordonnance: number; 
-      paye: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        direction: DirectionRef;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }
+    > = {};
 
-    budgetLinesExecution.forEach(line => {
-      const dirId = line.direction_id || "non_affecte";
+    budgetLinesExecution.forEach((line) => {
+      const dirId = line.direction_id || 'non_affecte';
       if (!grouped[dirId]) {
-        const dir = directions.find(d => d.id === line.direction_id);
+        const dir = directions.find((d) => d.id === line.direction_id);
         grouped[dirId] = {
-          direction: dir || { id: "non_affecte", code: "-", label: "Non affecté", sigle: null },
+          direction: dir || { id: 'non_affecte', code: '-', label: 'Non affecté', sigle: null },
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -445,21 +468,24 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   };
 
   const getEtatByOS = () => {
-    const grouped: Record<string, { 
-      os: RefItem; 
-      dotation: number; 
-      engage: number; 
-      liquide: number; 
-      ordonnance: number; 
-      paye: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        os: RefItem;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }
+    > = {};
 
-    budgetLinesExecution.forEach(line => {
-      const osId = line.os_id || "non_affecte";
+    budgetLinesExecution.forEach((line) => {
+      const osId = line.os_id || 'non_affecte';
       if (!grouped[osId]) {
-        const os = objectifsStrategiques.find(o => o.id === line.os_id);
+        const os = objectifsStrategiques.find((o) => o.id === line.os_id);
         grouped[osId] = {
-          os: os || { id: "non_affecte", code: "-", libelle: "Non affecté" },
+          os: os || { id: 'non_affecte', code: '-', libelle: 'Non affecté' },
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -478,21 +504,24 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   };
 
   const getEtatByMission = () => {
-    const grouped: Record<string, { 
-      mission: RefItem; 
-      dotation: number; 
-      engage: number; 
-      liquide: number; 
-      ordonnance: number; 
-      paye: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        mission: RefItem;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }
+    > = {};
 
-    budgetLinesExecution.forEach(line => {
-      const missionId = line.mission_id || "non_affecte";
+    budgetLinesExecution.forEach((line) => {
+      const missionId = line.mission_id || 'non_affecte';
       if (!grouped[missionId]) {
-        const mission = missions.find(m => m.id === line.mission_id);
+        const mission = missions.find((m) => m.id === line.mission_id);
         grouped[missionId] = {
-          mission: mission || { id: "non_affecte", code: "-", libelle: "Non affecté" },
+          mission: mission || { id: 'non_affecte', code: '-', libelle: 'Non affecté' },
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -511,21 +540,24 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   };
 
   const getEtatByNBE = () => {
-    const grouped: Record<string, { 
-      nbe: RefItem; 
-      dotation: number; 
-      engage: number; 
-      liquide: number; 
-      ordonnance: number; 
-      paye: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        nbe: RefItem;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }
+    > = {};
 
-    budgetLinesExecution.forEach(line => {
-      const nbeId = line.nbe_id || "non_affecte";
+    budgetLinesExecution.forEach((line) => {
+      const nbeId = line.nbe_id || 'non_affecte';
       if (!grouped[nbeId]) {
-        const nbe = nomenclaturesNBE.find(n => n.id === line.nbe_id);
+        const nbe = nomenclaturesNBE.find((n) => n.id === line.nbe_id);
         grouped[nbeId] = {
-          nbe: nbe || { id: "non_affecte", code: "-", libelle: "Non affecté" },
+          nbe: nbe || { id: 'non_affecte', code: '-', libelle: 'Non affecté' },
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -544,21 +576,24 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   };
 
   const getEtatBySYSCO = () => {
-    const grouped: Record<string, {
-      sysco: RefItem;
-      dotation: number;
-      engage: number;
-      liquide: number;
-      ordonnance: number;
-      paye: number;
-    }> = {};
+    const grouped: Record<
+      string,
+      {
+        sysco: RefItem;
+        dotation: number;
+        engage: number;
+        liquide: number;
+        ordonnance: number;
+        paye: number;
+      }
+    > = {};
 
-    budgetLinesExecution.forEach(line => {
-      const syscoId = line.sysco_id || "non_affecte";
+    budgetLinesExecution.forEach((line) => {
+      const syscoId = line.sysco_id || 'non_affecte';
       if (!grouped[syscoId]) {
-        const sysco = planComptableSYSCO.find(s => s.id === line.sysco_id);
+        const sysco = planComptableSYSCO.find((s) => s.id === line.sysco_id);
         grouped[syscoId] = {
-          sysco: sysco || { id: "non_affecte", code: "-", libelle: "Non affecté" },
+          sysco: sysco || { id: 'non_affecte', code: '-', libelle: 'Non affecté' },
           dotation: 0,
           engage: 0,
           liquide: 0,
@@ -578,7 +613,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
 
   // Fetch projets data for project-based aggregation
   const { data: projetsData = [] } = useQuery({
-    queryKey: ["etats-projets-execution", exercice, filters],
+    queryKey: ['etats-projets-execution', exercice, filters],
     queryFn: async () => {
       // Get dossiers (projets) with their execution chain
       const dossierFilters: Record<string, any> = { exercice };
@@ -591,14 +626,18 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         direction_id: string | null;
         statut_global: string | null;
         montant_estime: number;
-      }>("dossiers", "id, numero, objet, direction_id, statut_global, montant_estime", dossierFilters);
+      }>(
+        'dossiers',
+        'id, numero, objet, direction_id, statut_global, montant_estime',
+        dossierFilters
+      );
 
       // Get expressions de besoin linked to dossiers
       const expBesoins = await queryTable<{
         id: string;
         dossier_id: string;
         montant_estime: number | null;
-      }>("expressions_besoin", "id, dossier_id, montant_estime", { exercice });
+      }>('expressions_besoin', 'id, dossier_id, montant_estime', { exercice });
 
       // Get engagements linked to expressions de besoin
       const engagements = await queryTable<{
@@ -606,17 +645,20 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         expression_besoin_id: string;
         montant: number;
         statut: string | null;
-      }>("budget_engagements", "id, expression_besoin_id, montant, statut", { exercice, neq_statut: "annule" });
+      }>('budget_engagements', 'id, expression_besoin_id, montant, statut', {
+        exercice,
+        neq_statut: 'annule',
+      });
 
       // Build expression → dossier map
       const expDossierMap: Record<string, string> = {};
-      expBesoins.forEach(exp => {
+      expBesoins.forEach((exp) => {
         if (exp.dossier_id) expDossierMap[exp.id] = exp.dossier_id;
       });
 
       // Build engagement → dossier map
       const engDossierMap: Record<string, string> = {};
-      engagements.forEach(eng => {
+      engagements.forEach((eng) => {
         const dossierId = expDossierMap[eng.expression_besoin_id];
         if (dossierId) engDossierMap[eng.id] = dossierId;
       });
@@ -627,11 +669,14 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         engagement_id: string;
         montant: number;
         statut: string | null;
-      }>("budget_liquidations", "id, engagement_id, montant, statut", { exercice, neq_statut: "annule" });
+      }>('budget_liquidations', 'id, engagement_id, montant, statut', {
+        exercice,
+        neq_statut: 'annule',
+      });
 
       // Build liquidation → dossier map
       const liqDossierMap: Record<string, string> = {};
-      liquidations.forEach(liq => {
+      liquidations.forEach((liq) => {
         const dossierId = engDossierMap[liq.engagement_id];
         if (dossierId) liqDossierMap[liq.id] = dossierId;
       });
@@ -642,11 +687,14 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         liquidation_id: string;
         montant: number;
         statut: string | null;
-      }>("ordonnancements", "id, liquidation_id, montant, statut", { exercice, neq_statut: "annule" });
+      }>('ordonnancements', 'id, liquidation_id, montant, statut', {
+        exercice,
+        neq_statut: 'annule',
+      });
 
       // Build ordonnancement → dossier map
       const ordDossierMap: Record<string, string> = {};
-      ordonnancements.forEach(ord => {
+      ordonnancements.forEach((ord) => {
         const dossierId = liqDossierMap[ord.liquidation_id];
         if (dossierId) ordDossierMap[ord.id] = dossierId;
       });
@@ -657,24 +705,30 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
         ordonnancement_id: string;
         montant: number;
         statut: string | null;
-      }>("reglements", "id, ordonnancement_id, montant, statut", { exercice, neq_statut: "annule" });
+      }>('reglements', 'id, ordonnancement_id, montant, statut', {
+        exercice,
+        neq_statut: 'annule',
+      });
 
       // Aggregate by dossier
-      const projetData: Record<string, {
-        dossier: { id: string; code: string; libelle: string };
-        direction_id: string | null;
-        statut: string | null;
-        dotation: number;
-        engage: number;
-        liquide: number;
-        ordonnance: number;
-        paye: number;
-      }> = {};
+      const projetData: Record<
+        string,
+        {
+          dossier: { id: string; code: string; libelle: string };
+          direction_id: string | null;
+          statut: string | null;
+          dotation: number;
+          engage: number;
+          liquide: number;
+          ordonnance: number;
+          paye: number;
+        }
+      > = {};
 
       // Initialize with dossiers
-      dossiers.forEach(d => {
+      dossiers.forEach((d) => {
         projetData[d.id] = {
-          dossier: { id: d.id, code: d.numero || "-", libelle: d.objet || "Sans objet" },
+          dossier: { id: d.id, code: d.numero || '-', libelle: d.objet || 'Sans objet' },
           direction_id: d.direction_id,
           statut: d.statut_global,
           dotation: d.montant_estime || 0,
@@ -686,7 +740,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       });
 
       // Sum engagements
-      engagements.forEach(eng => {
+      engagements.forEach((eng) => {
         const dossierId = engDossierMap[eng.id];
         if (dossierId && projetData[dossierId]) {
           projetData[dossierId].engage += eng.montant || 0;
@@ -694,7 +748,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       });
 
       // Sum liquidations
-      liquidations.forEach(liq => {
+      liquidations.forEach((liq) => {
         const dossierId = liqDossierMap[liq.id];
         if (dossierId && projetData[dossierId]) {
           projetData[dossierId].liquide += liq.montant || 0;
@@ -702,7 +756,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       });
 
       // Sum ordonnancements
-      ordonnancements.forEach(ord => {
+      ordonnancements.forEach((ord) => {
         const dossierId = ordDossierMap[ord.id];
         if (dossierId && projetData[dossierId]) {
           projetData[dossierId].ordonnance += ord.montant || 0;
@@ -710,7 +764,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
       });
 
       // Sum reglements
-      reglements.forEach(reg => {
+      reglements.forEach((reg) => {
         const dossierId = ordDossierMap[reg.ordonnancement_id];
         if (dossierId && projetData[dossierId]) {
           projetData[dossierId].paye += reg.montant || 0;
@@ -723,7 +777,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
   });
 
   const getEtatByProjet = () => {
-    return projetsData.map(p => ({
+    return projetsData.map((p) => ({
       item: p.dossier,
       direction_id: p.direction_id,
       statut: p.statut,
@@ -740,7 +794,7 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
     budgetLinesExecution,
     etapesStats,
     summary,
-    
+
     // Aggregations
     getEtatByDirection,
     getEtatByOS,
@@ -748,14 +802,14 @@ export function useEtatsExecution(filters: EtatFilters = {}) {
     getEtatByNBE,
     getEtatBySYSCO,
     getEtatByProjet,
-    
+
     // Referential
     directions,
     objectifsStrategiques,
     missions,
     nomenclaturesNBE,
     planComptableSYSCO,
-    
+
     // Loading states
     isLoading: isLoadingBudgetLines || isLoadingEtapes,
     exercice,

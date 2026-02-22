@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import {
   Engagement,
+  EngagementLigne,
   VALIDATION_STEPS,
   getStepFromStatut,
   checkEngagementCompleteness,
@@ -153,46 +154,83 @@ function SAFPanel({ engagement }: { engagement: Engagement }) {
   );
 }
 
+// Ligne de disponibilité multi-lignes pour le panneau CB
+interface MultiLineAvailability {
+  lineId: string;
+  code: string;
+  label: string;
+  montant: number;
+  availability: BudgetAvailability;
+}
+
 // Panneau CB — Contrôle crédits budgétaires
 function CBPanel({
   engagement,
   availability,
+  multiAvailabilities,
   isLoadingBudget,
   onAutoReject,
 }: {
   engagement: Engagement;
   availability: BudgetAvailability | null;
+  multiAvailabilities: MultiLineAvailability[];
   isLoadingBudget: boolean;
   onAutoReject?: (id: string, reason: string) => void;
 }) {
   const isInsufficient = availability && !availability.is_sufficient;
+  const hasMulti = multiAvailabilities.length > 0;
+  const anyMultiInsufficient = multiAvailabilities.some((ma) => !ma.availability.is_sufficient);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm font-medium">
         <Calculator className="h-4 w-4 text-blue-500" />
         Contrôle de disponibilité budgétaire
+        {hasMulti && (
+          <Badge variant="outline" className="text-[10px] h-4 px-1 font-mono">
+            {multiAvailabilities.length} lignes
+          </Badge>
+        )}
       </div>
 
-      <IndicateurBudget
-        compact
-        availability={availability}
-        isLoading={isLoadingBudget}
-        budgetLine={
-          engagement.budget_line
-            ? { code: engagement.budget_line.code, label: engagement.budget_line.label }
-            : null
-        }
-      />
+      {hasMulti ? (
+        <div className="space-y-3">
+          {multiAvailabilities.map((ma) => (
+            <div key={ma.lineId} className="space-y-1">
+              <div className="text-xs font-medium text-muted-foreground">
+                [{ma.code}] — {ma.label} — {formatCurrency(ma.montant)}
+              </div>
+              <IndicateurBudget
+                compact
+                availability={ma.availability}
+                isLoading={false}
+                budgetLine={{ code: ma.code, label: ma.label }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <IndicateurBudget
+          compact
+          availability={availability}
+          isLoading={isLoadingBudget}
+          budgetLine={
+            engagement.budget_line
+              ? { code: engagement.budget_line.code, label: engagement.budget_line.label }
+              : null
+          }
+        />
+      )}
 
-      {isInsufficient && (
+      {(isInsufficient || anyMultiInsufficient) && (
         <div className="space-y-2">
           <Alert variant="destructive">
             <Ban className="h-4 w-4" />
             <AlertTitle>Visa impossible</AlertTitle>
             <AlertDescription>
-              Les crédits sont insuffisants pour cet engagement. Vous pouvez rejeter
-              automatiquement.
+              {hasMulti
+                ? 'Les crédits sont insuffisants sur au moins une ligne budgétaire.'
+                : 'Les crédits sont insuffisants pour cet engagement. Vous pouvez rejeter automatiquement.'}
             </AlertDescription>
           </Alert>
           {onAutoReject && (
@@ -200,12 +238,25 @@ function CBPanel({
               variant="destructive"
               size="sm"
               className="w-full"
-              onClick={() =>
-                onAutoReject(
-                  engagement.id,
-                  `Crédits insuffisants : ${formatCurrency(Math.abs(availability.disponible))} manquants`
-                )
-              }
+              onClick={() => {
+                if (hasMulti) {
+                  const insuffLines = multiAvailabilities
+                    .filter((ma) => !ma.availability.is_sufficient)
+                    .map(
+                      (ma) =>
+                        `${ma.code}: ${formatCurrency(Math.abs(ma.availability.disponible))} manquants`
+                    );
+                  onAutoReject(
+                    engagement.id,
+                    `Crédits insuffisants sur ${insuffLines.length} ligne(s) : ${insuffLines.join(', ')}`
+                  );
+                } else if (availability) {
+                  onAutoReject(
+                    engagement.id,
+                    `Crédits insuffisants : ${formatCurrency(Math.abs(availability.disponible))} manquants`
+                  );
+                }
+              }}
             >
               <Ban className="mr-2 h-4 w-4" />
               Rejeter (crédits insuffisants)
@@ -364,76 +415,122 @@ export function EngagementValidateDialog({
 }: EngagementValidateDialogProps) {
   const [comments, setComments] = useState('');
   const [availability, setAvailability] = useState<BudgetAvailability | null>(null);
+  const [multiAvailabilities, setMultiAvailabilities] = useState<MultiLineAvailability[]>([]);
   const [isLoadingBudget, setIsLoadingBudget] = useState(false);
 
   const stepNumber = getStepFromStatut(engagement?.statut ?? null);
   const stepInfo = VALIDATION_STEPS[stepNumber - 1];
   const isLastStep = stepNumber >= VALIDATION_STEPS.length;
 
+  // Helper: compute budget availability for a single budget line
+  const computeLineAvailability = async (
+    budgetLineId: string,
+    montant: number,
+    eng: Engagement
+  ): Promise<BudgetAvailability> => {
+    const { data: line } = await supabase
+      .from('budget_lines')
+      .select('dotation_initiale')
+      .eq('id', budgetLineId)
+      .single();
+
+    const dotation_initiale = line?.dotation_initiale || 0;
+
+    const { data: recus } = await supabase
+      .from('credit_transfers')
+      .select('amount')
+      .eq('to_budget_line_id', budgetLineId)
+      .eq('status', 'execute');
+
+    const virements_recus = recus?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+
+    const { data: emis } = await supabase
+      .from('credit_transfers')
+      .select('amount')
+      .eq('from_budget_line_id', budgetLineId)
+      .eq('status', 'execute');
+
+    const virements_emis = emis?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
+
+    const dotation_actuelle = dotation_initiale + virements_recus - virements_emis;
+
+    const { data: prevEngagements } = await supabase
+      .from('budget_engagements')
+      .select('id, montant')
+      .eq('budget_line_id', budgetLineId)
+      .eq('exercice', eng.exercice || new Date().getFullYear())
+      .neq('statut', 'annule')
+      .neq('statut', 'rejete')
+      .neq('id', eng.id);
+
+    const engagements_anterieurs =
+      prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+    const cumul = engagements_anterieurs + montant;
+    const disponible = dotation_actuelle - cumul;
+
+    return {
+      dotation_initiale,
+      virements_recus,
+      virements_emis,
+      dotation_actuelle,
+      engagements_anterieurs,
+      engagement_actuel: montant,
+      cumul,
+      disponible,
+      is_sufficient: disponible >= 0,
+    };
+  };
+
   // Calcul disponibilité budgétaire pour le panneau CB
   useEffect(() => {
     if (!engagement || stepNumber !== 2 || !open) {
       setAvailability(null);
+      setMultiAvailabilities([]);
       return;
     }
 
     const fetchAvailability = async () => {
       setIsLoadingBudget(true);
       try {
-        // Get budget line dotation
-        const { data: line } = await supabase
-          .from('budget_lines')
-          .select('dotation_initiale')
-          .eq('id', engagement.budget_line_id)
-          .single();
+        // Multi-lignes : vérifier chaque sous-ligne indépendamment
+        if (engagement.is_multi_ligne) {
+          const { data: lignes } = await supabase
+            .from('engagement_lignes')
+            .select(
+              'id, budget_line_id, montant, budget_line:budget_lines(id, code, label, dotation_initiale)'
+            )
+            .eq('engagement_id', engagement.id);
 
-        const dotation_initiale = line?.dotation_initiale || 0;
-
-        const { data: recus } = await supabase
-          .from('credit_transfers')
-          .select('amount')
-          .eq('to_budget_line_id', engagement.budget_line_id)
-          .eq('status', 'execute');
-
-        const virements_recus = recus?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
-
-        const { data: emis } = await supabase
-          .from('credit_transfers')
-          .select('amount')
-          .eq('from_budget_line_id', engagement.budget_line_id)
-          .eq('status', 'execute');
-
-        const virements_emis = emis?.reduce((sum, ct) => sum + (ct.amount || 0), 0) || 0;
-
-        const dotation_actuelle = dotation_initiale + virements_recus - virements_emis;
-
-        const { data: prevEngagements } = await supabase
-          .from('budget_engagements')
-          .select('id, montant')
-          .eq('budget_line_id', engagement.budget_line_id)
-          .eq('exercice', engagement.exercice || new Date().getFullYear())
-          .neq('statut', 'annule')
-          .neq('statut', 'rejete')
-          .neq('id', engagement.id);
-
-        const engagements_anterieurs =
-          prevEngagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
-        const cumul = engagements_anterieurs + engagement.montant;
-        const disponible = dotation_actuelle - cumul;
-
-        setAvailability({
-          dotation_initiale,
-          virements_recus,
-          virements_emis,
-          dotation_actuelle,
-          engagements_anterieurs,
-          engagement_actuel: engagement.montant,
-          cumul,
-          disponible,
-          is_sufficient: disponible >= 0,
-        });
+          const results: MultiLineAvailability[] = [];
+          for (const ligne of (lignes || []) as unknown as EngagementLigne[]) {
+            const avail = await computeLineAvailability(
+              ligne.budget_line_id,
+              ligne.montant,
+              engagement
+            );
+            results.push({
+              lineId: ligne.budget_line_id,
+              code: ligne.budget_line?.code || '-',
+              label: ligne.budget_line?.label || '-',
+              montant: ligne.montant,
+              availability: avail,
+            });
+          }
+          setMultiAvailabilities(results);
+          setAvailability(null);
+        } else {
+          // Single-ligne : code existant
+          const avail = await computeLineAvailability(
+            engagement.budget_line_id,
+            engagement.montant,
+            engagement
+          );
+          setAvailability(avail);
+          setMultiAvailabilities([]);
+        }
       } catch {
         setAvailability(null);
+        setMultiAvailabilities([]);
       } finally {
         setIsLoadingBudget(false);
       }
@@ -448,8 +545,11 @@ export function EngagementValidateDialog({
 
   // Bloquer le visa SAF si données incomplètes
   const isSAFBlocked = stepNumber === 1 && !completeness.isComplete;
-  // Bloquer le visa CB si crédits insuffisants
-  const isCBBlocked = stepNumber === 2 && availability !== null && !availability.is_sufficient;
+  // Bloquer le visa CB si crédits insuffisants (single ou multi-lignes)
+  const isCBBlocked =
+    stepNumber === 2 &&
+    ((availability !== null && !availability.is_sufficient) ||
+      multiAvailabilities.some((ma) => !ma.availability.is_sufficient));
 
   const canVisa = !isSAFBlocked && !isCBBlocked;
 
@@ -464,6 +564,7 @@ export function EngagementValidateDialog({
     if (!isOpen) {
       setComments('');
       setAvailability(null);
+      setMultiAvailabilities([]);
     }
     onOpenChange(isOpen);
   };
@@ -491,6 +592,7 @@ export function EngagementValidateDialog({
               <CBPanel
                 engagement={engagement}
                 availability={availability}
+                multiAvailabilities={multiAvailabilities}
                 isLoadingBudget={isLoadingBudget}
                 onAutoReject={onAutoReject}
               />
@@ -527,7 +629,7 @@ export function EngagementValidateDialog({
                 Validation...
               </>
             ) : isLastStep ? (
-              'Valider definitivement'
+              'Valider définitivement'
             ) : (
               `Viser (${stepInfo?.role})`
             )}

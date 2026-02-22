@@ -3,17 +3,17 @@
  * Helpers pour canViewDossier, canValidateStep, canUploadPiece
  */
 
-import { ETAPES_CHAINE_DEPENSE, type EtapeChaineType } from "@/lib/config/sygfp-constants";
+import { ETAPES_CHAINE_DEPENSE, type EtapeChaineType } from '@/lib/config/sygfp-constants';
 
 // ============================================
 // TYPES
 // ============================================
 
-export type RoleCode = 
-  | 'ADMIN' 
-  | 'DG' 
-  | 'DAAF' 
-  | 'CB' 
+export type RoleCode =
+  | 'ADMIN'
+  | 'DG'
+  | 'DAAF'
+  | 'CB'
   | 'DIRECTEUR'
   | 'SOUS_DIRECTEUR'
   | 'CHEF_SERVICE'
@@ -45,26 +45,63 @@ export interface EntityContext {
 // MATRICE DES DROITS PAR ÉTAPE
 // ============================================
 
-export const STEP_PERMISSIONS: Record<EtapeChaineType, {
-  createRoles: RoleCode[];
-  submitRoles: RoleCode[];
-  validateRoles: RoleCode[];
-  rejectRoles: RoleCode[];
-  deferRoles: RoleCode[];
-  imputeRoles?: RoleCode[];
-  signRoles?: RoleCode[];
-  executeRoles?: RoleCode[];
-}> = {
+export const STEP_PERMISSIONS: Record<
+  EtapeChaineType,
+  {
+    createRoles: RoleCode[];
+    submitRoles: RoleCode[];
+    validateRoles: RoleCode[];
+    rejectRoles: RoleCode[];
+    deferRoles: RoleCode[];
+    imputeRoles?: RoleCode[];
+    signRoles?: RoleCode[];
+    executeRoles?: RoleCode[];
+  }
+> = {
   [ETAPES_CHAINE_DEPENSE.NOTE_SEF]: {
-    createRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF', 'DG'],
-    submitRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF'],
+    createRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+      'DG',
+    ],
+    submitRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+    ],
     validateRoles: ['ADMIN', 'DG'],
     rejectRoles: ['ADMIN', 'DG'],
     deferRoles: ['ADMIN', 'DG'],
   },
   [ETAPES_CHAINE_DEPENSE.NOTE_AEF]: {
-    createRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF', 'DG'],
-    submitRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF'],
+    createRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+      'DG',
+    ],
+    submitRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+    ],
     validateRoles: ['ADMIN', 'DG', 'DIRECTEUR'],
     rejectRoles: ['ADMIN', 'DG', 'DIRECTEUR'],
     deferRoles: ['ADMIN', 'DG', 'DIRECTEUR'],
@@ -78,8 +115,24 @@ export const STEP_PERMISSIONS: Record<EtapeChaineType, {
     imputeRoles: ['ADMIN', 'CB'],
   },
   [ETAPES_CHAINE_DEPENSE.EXPRESSION_BESOIN]: {
-    createRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF'],
-    submitRoles: ['ADMIN', 'OPERATEUR', 'AGENT', 'CHEF_SERVICE', 'SOUS_DIRECTEUR', 'DIRECTEUR', 'DAAF'],
+    createRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+    ],
+    submitRoles: [
+      'ADMIN',
+      'OPERATEUR',
+      'AGENT',
+      'CHEF_SERVICE',
+      'SOUS_DIRECTEUR',
+      'DIRECTEUR',
+      'DAAF',
+    ],
     validateRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
     rejectRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
     deferRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
@@ -99,11 +152,11 @@ export const STEP_PERMISSIONS: Record<EtapeChaineType, {
     deferRoles: ['ADMIN', 'CB'],
   },
   [ETAPES_CHAINE_DEPENSE.LIQUIDATION]: {
-    createRoles: ['ADMIN', 'DAAF', 'CB'],
+    createRoles: ['ADMIN', 'DAAF'],
     submitRoles: ['ADMIN', 'DAAF'],
-    validateRoles: ['ADMIN', 'DAAF', 'CB'],
-    rejectRoles: ['ADMIN', 'DAAF', 'CB'],
-    deferRoles: ['ADMIN', 'DAAF', 'CB'],
+    validateRoles: ['ADMIN', 'DAAF'],
+    rejectRoles: ['ADMIN', 'DAAF'],
+    deferRoles: ['ADMIN', 'DAAF'],
   },
   [ETAPES_CHAINE_DEPENSE.ORDONNANCEMENT]: {
     createRoles: ['ADMIN', 'DAAF'],
@@ -146,24 +199,21 @@ export function getVisibilityScope(roles: RoleCode[]): VisibilityScope {
 /**
  * Vérifie si un utilisateur peut voir un dossier
  */
-export function canViewDossier(
-  userContext: UserContext,
-  entity: EntityContext
-): boolean {
+export function canViewDossier(userContext: UserContext, entity: EntityContext): boolean {
   // Admin bypass
   if (userContext.isAdmin) return true;
-  
+
   const scope = getVisibilityScope(userContext.roles);
-  
+
   switch (scope) {
     case 'all':
       return true;
     case 'direction':
-      return entity.directionId === userContext.directionId || 
-             entity.createdBy === userContext.userId;
+      return (
+        entity.directionId === userContext.directionId || entity.createdBy === userContext.userId
+      );
     case 'service':
-      return entity.serviceId === userContext.serviceId || 
-             entity.createdBy === userContext.userId;
+      return entity.serviceId === userContext.serviceId || entity.createdBy === userContext.userId;
     case 'own':
     default:
       return entity.createdBy === userContext.userId;
@@ -180,53 +230,45 @@ export function canValidateStep(
 ): boolean {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return false;
-  
+
   // Vérifier si le statut permet la validation
   const validatableStatuts = ['soumis', 'a_valider', 'en_attente', 'en_validation', 'a_valider_dg'];
   if (statut && !validatableStatuts.includes(statut)) {
     return false;
   }
-  
+
   // Vérifier si l'utilisateur a un rôle autorisé
-  return permissions.validateRoles.some(role => roles.includes(role));
+  return permissions.validateRoles.some((role) => roles.includes(role));
 }
 
 /**
  * Vérifie si un utilisateur peut rejeter une étape
  */
-export function canRejectStep(
-  roles: RoleCode[],
-  step: EtapeChaineType,
-  statut?: string
-): boolean {
+export function canRejectStep(roles: RoleCode[], step: EtapeChaineType, statut?: string): boolean {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return false;
-  
+
   const rejectableStatuts = ['soumis', 'a_valider', 'en_attente', 'en_validation'];
   if (statut && !rejectableStatuts.includes(statut)) {
     return false;
   }
-  
-  return permissions.rejectRoles.some(role => roles.includes(role));
+
+  return permissions.rejectRoles.some((role) => roles.includes(role));
 }
 
 /**
  * Vérifie si un utilisateur peut différer une étape
  */
-export function canDeferStep(
-  roles: RoleCode[],
-  step: EtapeChaineType,
-  statut?: string
-): boolean {
+export function canDeferStep(roles: RoleCode[], step: EtapeChaineType, statut?: string): boolean {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return false;
-  
+
   const deferrableStatuts = ['soumis', 'a_valider', 'en_attente', 'en_validation'];
   if (statut && !deferrableStatuts.includes(statut)) {
     return false;
   }
-  
-  return permissions.deferRoles.some(role => roles.includes(role));
+
+  return permissions.deferRoles.some((role) => roles.includes(role));
 }
 
 /**
@@ -240,53 +282,47 @@ export function canSubmitStep(
 ): boolean {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return false;
-  
+
   // Seul le créateur peut soumettre
   if (!isOwner && !roles.includes('ADMIN')) {
     return false;
   }
-  
+
   // Vérifier le statut
   if (statut && statut !== 'brouillon') {
     return false;
   }
-  
-  return permissions.submitRoles.some(role => roles.includes(role));
+
+  return permissions.submitRoles.some((role) => roles.includes(role));
 }
 
 /**
  * Vérifie si un utilisateur peut créer une entrée pour une étape
  */
-export function canCreateStep(
-  roles: RoleCode[],
-  step: EtapeChaineType
-): boolean {
+export function canCreateStep(roles: RoleCode[], step: EtapeChaineType): boolean {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return false;
-  
-  return permissions.createRoles.some(role => roles.includes(role));
+
+  return permissions.createRoles.some((role) => roles.includes(role));
 }
 
 /**
  * Vérifie si un utilisateur peut uploader une pièce jointe
  */
-export function canUploadPiece(
-  userContext: UserContext,
-  entity: EntityContext
-): boolean {
+export function canUploadPiece(userContext: UserContext, entity: EntityContext): boolean {
   // Admin bypass
   if (userContext.isAdmin) return true;
-  
+
   // Vérifier si l'entité est modifiable
   const editableStatuts = ['brouillon', 'differe', 'en_correction'];
   if (entity.statut && !editableStatuts.includes(entity.statut)) {
     // Seuls certains rôles peuvent ajouter des pièces après soumission
     const canAddAfterSubmit = ['CB', 'DAAF', 'DG'] as RoleCode[];
-    if (!canAddAfterSubmit.some(role => userContext.roles.includes(role))) {
+    if (!canAddAfterSubmit.some((role) => userContext.roles.includes(role))) {
       return false;
     }
   }
-  
+
   // Vérifier la visibilité
   return canViewDossier(userContext, entity);
 }
@@ -294,23 +330,20 @@ export function canUploadPiece(
 /**
  * Vérifie si un utilisateur peut modifier un dossier
  */
-export function canEditDossier(
-  userContext: UserContext,
-  entity: EntityContext
-): boolean {
+export function canEditDossier(userContext: UserContext, entity: EntityContext): boolean {
   // Admin bypass
   if (userContext.isAdmin) return true;
-  
+
   // Seul le créateur peut modifier un brouillon
   if (entity.statut === 'brouillon') {
     return entity.createdBy === userContext.userId;
   }
-  
+
   // Après soumission, seuls les rôles autorisés peuvent modifier
   if (entity.statut === 'differe' || entity.statut === 'en_correction') {
     return entity.createdBy === userContext.userId;
   }
-  
+
   // Les autres statuts ne sont pas modifiables (sauf admin)
   return false;
 }
@@ -318,18 +351,15 @@ export function canEditDossier(
 /**
  * Vérifie si un utilisateur peut supprimer un dossier
  */
-export function canDeleteDossier(
-  userContext: UserContext,
-  entity: EntityContext
-): boolean {
+export function canDeleteDossier(userContext: UserContext, entity: EntityContext): boolean {
   // Admin peut tout supprimer
   if (userContext.isAdmin) return true;
-  
+
   // Seuls les brouillons peuvent être supprimés par leur créateur
   if (entity.statut === 'brouillon' && entity.createdBy === userContext.userId) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -356,7 +386,7 @@ export function canValidateNoteAEF(roles: RoleCode[]): boolean {
  */
 export function canImputeNoteAEF(roles: RoleCode[]): boolean {
   const permissions = STEP_PERMISSIONS[ETAPES_CHAINE_DEPENSE.IMPUTATION];
-  return permissions.imputeRoles?.some(role => roles.includes(role)) ?? false;
+  return permissions.imputeRoles?.some((role) => roles.includes(role)) ?? false;
 }
 
 /**
@@ -364,7 +394,7 @@ export function canImputeNoteAEF(roles: RoleCode[]): boolean {
  */
 export function canSignOrdonnancement(roles: RoleCode[]): boolean {
   const permissions = STEP_PERMISSIONS[ETAPES_CHAINE_DEPENSE.ORDONNANCEMENT];
-  return permissions.signRoles?.some(role => roles.includes(role)) ?? false;
+  return permissions.signRoles?.some((role) => roles.includes(role)) ?? false;
 }
 
 /**
@@ -372,7 +402,7 @@ export function canSignOrdonnancement(roles: RoleCode[]): boolean {
  */
 export function canExecuteReglement(roles: RoleCode[]): boolean {
   const permissions = STEP_PERMISSIONS[ETAPES_CHAINE_DEPENSE.REGLEMENT];
-  return permissions.executeRoles?.some(role => roles.includes(role)) ?? false;
+  return permissions.executeRoles?.some((role) => roles.includes(role)) ?? false;
 }
 
 // ============================================
@@ -385,7 +415,7 @@ export function getRequiredRoleForAction(
 ): string {
   const permissions = STEP_PERMISSIONS[step];
   if (!permissions) return 'ADMIN';
-  
+
   switch (action) {
     case 'validate':
       return permissions.validateRoles[0] || 'ADMIN';
@@ -414,7 +444,7 @@ export function getAccessDeniedMessage(
   action: 'validate' | 'reject' | 'defer' | 'submit' | 'create' | 'sign' | 'execute'
 ): string {
   const requiredRole = getRequiredRoleForAction(step, action);
-  
+
   const roleLabels: Record<string, string> = {
     ADMIN: 'Administrateur',
     DG: 'Directeur Général',
@@ -423,7 +453,7 @@ export function getAccessDeniedMessage(
     DIRECTEUR: 'Directeur de département',
     TRESORERIE: 'Trésorerie',
   };
-  
+
   const actionLabels: Record<string, string> = {
     validate: 'valider',
     reject: 'rejeter',
@@ -433,6 +463,6 @@ export function getAccessDeniedMessage(
     sign: 'signer',
     execute: 'exécuter',
   };
-  
+
   return `Le rôle ${roleLabels[requiredRole] || requiredRole} est requis pour ${actionLabels[action]} cette entité.`;
 }

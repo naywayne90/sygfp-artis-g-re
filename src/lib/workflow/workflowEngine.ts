@@ -1,12 +1,12 @@
 /**
  * SYGFP - Workflow Engine (Fonctions pures)
- * 
+ *
  * Gère la chaîne de la dépense en 9 étapes avec:
  * - Statuts standardisés
  * - Règles de transition
  * - Owners/Validators par étape
  * - Prérequis entre étapes
- * 
+ *
  * @version 2.0
  * @date 2026-01-17
  */
@@ -20,6 +20,8 @@ export const STATUTS = {
   SOUMIS: 'soumis',
   A_VALIDER: 'a_valider',
   EN_VALIDATION_DG: 'en_validation_dg',
+  VALIDE_DAAF: 'validé_daaf',
+  VALIDE_DG: 'validé_dg',
   VALIDE: 'valide',
   REJETE: 'rejete',
   DIFFERE: 'differe',
@@ -31,7 +33,7 @@ export const STATUTS = {
   ANNULE: 'annule',
 } as const;
 
-export type Statut = typeof STATUTS[keyof typeof STATUTS];
+export type Statut = (typeof STATUTS)[keyof typeof STATUTS];
 
 // ============================================
 // DÉFINITION DES 9 ÉTAPES
@@ -45,15 +47,15 @@ export interface StepConfig {
   label: string;
   labelShort: string;
   table: string;
-  owners: string[];        // Rôles pouvant créer/modifier
-  validators: string[];    // Rôles pouvant valider
-  prerequisSteps: WorkflowStep[];  // Étapes devant être validées avant
-  prerequisOptional?: boolean;     // Si true, prérequis seulement sous conditions
+  owners: string[]; // Rôles pouvant créer/modifier
+  validators: string[]; // Rôles pouvant valider
+  prerequisSteps: WorkflowStep[]; // Étapes devant être validées avant
+  prerequisOptional?: boolean; // Si true, prérequis seulement sous conditions
   validStatuts: readonly Statut[]; // Statuts possibles pour cette étape
   nextStep?: WorkflowStep;
   previousStep?: WorkflowStep;
   description: string;
-  seuilDG?: number;        // Seuil pour validation DG (en FCFA)
+  seuilDG?: number; // Seuil pour validation DG (en FCFA)
 }
 
 export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
@@ -66,7 +68,13 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['AGENT', 'OPERATEUR', 'CHEF_SERVICE', 'DIRECTEUR', 'ADMIN'],
     validators: ['DG', 'ADMIN'],
     prerequisSteps: [],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     nextStep: 2,
     description: 'Demande sans impact budgétaire immédiat',
   },
@@ -80,7 +88,14 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     validators: ['DIRECTEUR', 'DG', 'ADMIN'],
     prerequisSteps: [1],
     prerequisOptional: true, // SEF optionnelle selon montant
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.A_VALIDER, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.A_VALIDER,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     previousStep: 1,
     nextStep: 3,
     description: 'Demande avec engagement financier prévu',
@@ -108,7 +123,13 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['AGENT', 'CHEF_SERVICE', 'DAAF', 'ADMIN'],
     validators: ['CHEF_SERVICE', 'DIRECTEUR', 'ADMIN'],
     prerequisSteps: [3],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     previousStep: 3,
     nextStep: 5,
     description: 'Formalisation détaillée du besoin',
@@ -123,7 +144,14 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     validators: ['DG', 'COMMISSION_MARCHES', 'ADMIN'],
     prerequisSteps: [4],
     prerequisOptional: true, // Marché seulement si montant > seuil
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE, STATUTS.ANNULE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+      STATUTS.ANNULE,
+    ],
     previousStep: 4,
     nextStep: 6,
     description: 'Procédure de passation si montant > seuil',
@@ -138,7 +166,13 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['DAAF', 'CB', 'ADMIN'],
     validators: ['CB', 'ADMIN'],
     prerequisSteps: [4], // Après expression de besoin (marché optionnel)
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     previousStep: 5,
     nextStep: 7,
     description: 'Réservation des crédits budgétaires',
@@ -153,7 +187,14 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['DAAF', 'SDCT', 'ADMIN'],
     validators: ['SDCT', 'DAAF', 'DG', 'ADMIN'],
     prerequisSteps: [6],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.EN_VALIDATION_DG, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.EN_VALIDATION_DG,
+      STATUTS.VALIDE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     previousStep: 6,
     nextStep: 8,
     description: 'Constatation du service fait',
@@ -168,7 +209,14 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['DAAF', 'ADMIN'],
     validators: ['DG', 'ADMIN'],
     prerequisSteps: [7],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.EN_SIGNATURE, STATUTS.SIGNE, STATUTS.REJETE, STATUTS.DIFFERE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.EN_SIGNATURE,
+      STATUTS.SIGNE,
+      STATUTS.REJETE,
+      STATUTS.DIFFERE,
+    ],
     previousStep: 7,
     nextStep: 9,
     description: 'Ordre de paiement',
@@ -183,7 +231,13 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['TRESORERIE', 'AGENT_COMPTABLE', 'ADMIN'],
     validators: ['TRESORERIE', 'AGENT_COMPTABLE', 'ADMIN'],
     prerequisSteps: [8],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.SOUMIS, STATUTS.PAYE, STATUTS.REJETE, STATUTS.CLOTURE],
+    validStatuts: [
+      STATUTS.BROUILLON,
+      STATUTS.SOUMIS,
+      STATUTS.PAYE,
+      STATUTS.REJETE,
+      STATUTS.CLOTURE,
+    ],
     previousStep: 8,
     description: 'Exécution du paiement effectif',
   },
@@ -407,7 +461,7 @@ export function checkPrerequisites(
   montant?: number
 ): ValidationResult {
   const config = WORKFLOW_STEPS[step];
-  
+
   // Pas de prérequis
   if (config.prerequisSteps.length === 0) {
     return { valid: true, message: '' };
@@ -445,7 +499,13 @@ export function checkPrerequisites(
  * Vérifie si un statut indique une validation réussie
  */
 export function isValidatedStatus(statut: Statut | string): boolean {
-  const validatedStatuts: string[] = [STATUTS.VALIDE, STATUTS.IMPUTE, STATUTS.SIGNE, STATUTS.PAYE, STATUTS.CLOTURE];
+  const validatedStatuts: string[] = [
+    STATUTS.VALIDE,
+    STATUTS.IMPUTE,
+    STATUTS.SIGNE,
+    STATUTS.PAYE,
+    STATUTS.CLOTURE,
+  ];
   return validatedStatuts.includes(statut);
 }
 
@@ -470,10 +530,7 @@ export function getAvailableTransitions(
   if (!step) return [];
 
   // Combiner les transitions communes et spécifiques
-  const allTransitions = [
-    ...COMMON_TRANSITIONS,
-    ...(MODULE_TRANSITIONS[moduleCode] || []),
-  ];
+  const allTransitions = [...COMMON_TRANSITIONS, ...(MODULE_TRANSITIONS[moduleCode] || [])];
 
   // Filtrer par statut actuel et rôles
   return allTransitions.filter((transition) => {
@@ -483,7 +540,8 @@ export function getAvailableTransitions(
 
     // Vérifier les rôles
     if (transition.requiredRoles.length > 0) {
-      const hasRole = transition.requiredRoles.some((r) => userRoles.includes(r)) || userRoles.includes('ADMIN');
+      const hasRole =
+        transition.requiredRoles.some((r) => userRoles.includes(r)) || userRoles.includes('ADMIN');
       if (!hasRole) return false;
     }
 
@@ -545,7 +603,7 @@ export function getNextAction(
   context?: Partial<TransitionContext>
 ): NextAction | null {
   const transitions = getAvailableTransitions(moduleCode, currentStatus, userRoles, context);
-  
+
   if (transitions.length === 0) return null;
 
   // Prioriser certaines actions
@@ -716,11 +774,13 @@ export const STATUT_UI_CONFIG: Record<Statut, StatutUIConfig> = {
 };
 
 export function getStatutUIConfig(statut: string): StatutUIConfig {
-  return STATUT_UI_CONFIG[statut as Statut] || {
-    label: statut,
-    color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-    borderColor: 'border-muted',
-    icon: 'Circle',
-  };
+  return (
+    STATUT_UI_CONFIG[statut as Statut] || {
+      label: statut,
+      color: 'text-muted-foreground',
+      bgColor: 'bg-muted',
+      borderColor: 'border-muted',
+      icon: 'Circle',
+    }
+  );
 }

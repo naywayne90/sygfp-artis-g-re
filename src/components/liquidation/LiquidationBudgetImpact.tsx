@@ -75,7 +75,7 @@ export function LiquidationBudgetImpact({ liquidation }: LiquidationBudgetImpact
           .from('budget_liquidations')
           .select('id, montant, net_a_payer')
           .eq('engagement_id', liquidation.engagement_id)
-          .eq('statut', 'valide')
+          .eq('statut', 'validé_dg')
           .neq('id', liquidation.id);
 
         const liquideBefore = (liqSum || []).reduce(
@@ -113,7 +113,7 @@ export function LiquidationBudgetImpact({ liquidation }: LiquidationBudgetImpact
 
   if (loading || !impact) return null;
 
-  const isAlreadyValidated = liquidation.statut === 'valide';
+  const isAlreadyValidated = liquidation.statut === 'validé_dg';
   const tauxApresIsDanger = impact.tauxApres > 95;
   const tauxApresIsWarning = impact.tauxApres > 80;
 

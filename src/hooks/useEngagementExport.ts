@@ -96,16 +96,16 @@ export function computeSuiviBudgetaire(engagements: Engagement[]): SuiviBudgetai
     }
   >();
 
-  for (const eng of engagements) {
-    // Exclure les rejetes et annules du suivi
-    if (eng.statut === 'rejete' || eng.statut === 'annule') continue;
-
-    const blId = eng.budget_line_id;
-    if (!blId) continue;
-
+  // Helper to accumulate engagement amount on a budget line
+  const accumulate = (
+    blId: string,
+    montant: number,
+    eng: Engagement,
+    budgetLineOverride?: { code: string; label: string; dotation_initiale: number }
+  ) => {
     const existing = map.get(blId);
     if (existing) {
-      existing.totalEngage += eng.montant || 0;
+      existing.totalEngage += montant;
       existing.nbEngagements += 1;
       if (
         eng.date_engagement &&
@@ -115,14 +115,42 @@ export function computeSuiviBudgetaire(engagements: Engagement[]): SuiviBudgetai
       }
     } else {
       map.set(blId, {
-        code: eng.budget_line?.code || '-',
-        libelle: eng.budget_line?.label || '-',
+        code: budgetLineOverride?.code || eng.budget_line?.code || '-',
+        libelle: budgetLineOverride?.label || eng.budget_line?.label || '-',
         directionSigle: eng.budget_line?.direction?.sigle || '-',
-        dotation: eng.budget_line?.dotation_initiale || 0,
-        totalEngage: eng.montant || 0,
+        dotation: budgetLineOverride?.dotation_initiale || eng.budget_line?.dotation_initiale || 0,
+        totalEngage: montant,
         nbEngagements: 1,
         dernierEngagement: eng.date_engagement || null,
       });
+    }
+  };
+
+  for (const eng of engagements) {
+    // Exclure les rejetes et annules du suivi
+    if (eng.statut === 'rejete' || eng.statut === 'annule') continue;
+
+    // Multi-lignes : distribuer le montant par sous-ligne
+    if (eng.is_multi_ligne && eng.lignes?.length) {
+      for (const ligne of eng.lignes) {
+        accumulate(
+          ligne.budget_line_id,
+          ligne.montant,
+          eng,
+          ligne.budget_line
+            ? {
+                code: ligne.budget_line.code,
+                label: ligne.budget_line.label,
+                dotation_initiale: ligne.budget_line.dotation_initiale,
+              }
+            : undefined
+        );
+      }
+    } else {
+      // Single-ligne : tout sur budget_line_id
+      const blId = eng.budget_line_id;
+      if (!blId) continue;
+      accumulate(blId, eng.montant || 0, eng);
     }
   }
 

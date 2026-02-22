@@ -17,7 +17,7 @@ export interface LiquidationChainStep {
 export function buildLiquidationChainSteps(liquidation: Liquidation): LiquidationChainStep[] {
   const hasPassation = !!liquidation.engagement?.marche?.id;
   const hasEngagement = !!liquidation.engagement_id;
-  const isValide = liquidation.statut === 'valide';
+  const isValide = liquidation.statut === 'validé_dg';
 
   return [
     {

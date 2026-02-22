@@ -1,15 +1,29 @@
-import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState, useEffect, useMemo } from 'react';
+import { formatCurrency } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Search,
   CreditCard,
@@ -21,11 +35,11 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
-  Loader2
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+  Loader2,
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export interface SelectedBudgetLine {
   id: string;
@@ -98,8 +112,8 @@ export function BudgetLineSelector({
   onFiltersChange,
 }: BudgetLineSelectorProps) {
   const { exercice } = useExercice();
-  const [search, setSearch] = useState("");
-  const [ventilationMode, setVentilationMode] = useState<"single" | "multi">("single");
+  const [search, setSearch] = useState('');
+  const [ventilationMode, setVentilationMode] = useState<'single' | 'multi'>('single');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Filtres locaux
@@ -115,7 +129,7 @@ export function BudgetLineSelector({
 
   // Sync filters from props
   useEffect(() => {
-    setLocalFilters(prev => ({
+    setLocalFilters((prev) => ({
       ...prev,
       direction_id: directionId,
       os_id: osId,
@@ -128,66 +142,66 @@ export function BudgetLineSelector({
 
   // Référentiels pour les filtres
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions-filter"],
+    queryKey: ['directions-filter'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, label, sigle")
-        .eq("est_active", true)
-        .order("label");
+        .from('directions')
+        .select('id, label, sigle')
+        .eq('est_active', true)
+        .order('label');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: objectifsStrategiques = [] } = useQuery({
-    queryKey: ["os-filter"],
+    queryKey: ['os-filter'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("objectifs_strategiques")
-        .select("id, code, libelle")
-        .eq("est_actif", true)
-        .order("code");
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .eq('est_actif', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: nomenclaturesNBE = [] } = useQuery({
-    queryKey: ["nbe-filter"],
+    queryKey: ['nbe-filter'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("nomenclature_nbe")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
+        .from('nomenclature_nbe')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: planComptableSYSCO = [] } = useQuery({
-    queryKey: ["sysco-filter"],
+    queryKey: ['sysco-filter'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("plan_comptable_sysco")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
+        .from('plan_comptable_sysco')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
       if (error) throw error;
       return data;
     },
   });
 
   const { data: actions = [] } = useQuery({
-    queryKey: ["actions-filter", localFilters.os_id],
+    queryKey: ['actions-filter', localFilters.os_id],
     queryFn: async () => {
       let query = supabase
-        .from("actions")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
-      if (localFilters.os_id) query = query.eq("os_id", localFilters.os_id);
+        .from('actions')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
+      if (localFilters.os_id) query = query.eq('os_id', localFilters.os_id);
       const { data, error } = await query;
       if (error) throw error;
       return data;
@@ -195,14 +209,14 @@ export function BudgetLineSelector({
   });
 
   const { data: activites = [] } = useQuery({
-    queryKey: ["activites-filter", localFilters.action_id],
+    queryKey: ['activites-filter', localFilters.action_id],
     queryFn: async () => {
       let query = supabase
-        .from("activites")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
-      if (localFilters.action_id) query = query.eq("action_id", localFilters.action_id);
+        .from('activites')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
+      if (localFilters.action_id) query = query.eq('action_id', localFilters.action_id);
       const { data, error } = await query;
       if (error) throw error;
       return data;
@@ -210,12 +224,17 @@ export function BudgetLineSelector({
   });
 
   // Récupérer les lignes budgétaires disponibles avec filtres améliorés
-  const { data: budgetLines = [], isLoading, refetch } = useQuery({
-    queryKey: ["budget-lines-available", exercice, localFilters],
+  const {
+    data: budgetLines = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['budget-lines-available', exercice, localFilters],
     queryFn: async () => {
       let query = supabase
-        .from("budget_lines")
-        .select(`
+        .from('budget_lines')
+        .select(
+          `
           id,
           code,
           label,
@@ -229,48 +248,51 @@ export function BudgetLineSelector({
           sysco:plan_comptable_sysco(id, code, libelle),
           action:actions(id, code, libelle),
           activite:activites(id, code, libelle)
-        `)
-        .eq("exercice", exercice || new Date().getFullYear())
-        .eq("is_active", true)
-        .order("code");
+        `
+        )
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('is_active', true)
+        .order('code');
 
       // Appliquer les filtres
-      if (localFilters.direction_id) query = query.eq("direction_id", localFilters.direction_id);
-      if (localFilters.os_id) query = query.eq("os_id", localFilters.os_id);
-      if (localFilters.nbe_id) query = query.eq("nbe_id", localFilters.nbe_id);
-      if (localFilters.sysco_id) query = query.eq("sysco_id", localFilters.sysco_id);
-      if (localFilters.action_id) query = query.eq("action_id", localFilters.action_id);
-      if (localFilters.activite_id) query = query.eq("activite_id", localFilters.activite_id);
+      if (localFilters.direction_id) query = query.eq('direction_id', localFilters.direction_id);
+      if (localFilters.os_id) query = query.eq('os_id', localFilters.os_id);
+      if (localFilters.nbe_id) query = query.eq('nbe_id', localFilters.nbe_id);
+      if (localFilters.sysco_id) query = query.eq('sysco_id', localFilters.sysco_id);
+      if (localFilters.action_id) query = query.eq('action_id', localFilters.action_id);
+      if (localFilters.activite_id) query = query.eq('activite_id', localFilters.activite_id);
 
       const { data: lines, error } = await query;
       if (error) throw error;
 
       // Calculer les disponibilités en batch pour éviter trop de requêtes
-      const lineIds = (lines || []).map(l => l.id);
+      const lineIds = (lines || []).map((l) => l.id);
 
       // Fetch virements en batch
       const { data: allVirementsRecus } = await supabase
-        .from("credit_transfers")
-        .select("to_budget_line_id, amount")
-        .in("to_budget_line_id", lineIds)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('to_budget_line_id, amount')
+        .in('to_budget_line_id', lineIds)
+        .eq('status', 'execute');
 
       const { data: allVirementsEmis } = await supabase
-        .from("credit_transfers")
-        .select("from_budget_line_id, amount")
-        .in("from_budget_line_id", lineIds)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('from_budget_line_id, amount')
+        .in('from_budget_line_id', lineIds)
+        .eq('status', 'execute');
 
       // Grouper les virements par ligne
       const virementsRecusParLigne: Record<string, number> = {};
       const virementsEmisParLigne: Record<string, number> = {};
 
-      allVirementsRecus?.forEach(v => {
-        virementsRecusParLigne[v.to_budget_line_id] = (virementsRecusParLigne[v.to_budget_line_id] || 0) + (v.amount || 0);
+      allVirementsRecus?.forEach((v) => {
+        virementsRecusParLigne[v.to_budget_line_id] =
+          (virementsRecusParLigne[v.to_budget_line_id] || 0) + (v.amount || 0);
       });
 
-      allVirementsEmis?.forEach(v => {
-        virementsEmisParLigne[v.from_budget_line_id] = (virementsEmisParLigne[v.from_budget_line_id] || 0) + (v.amount || 0);
+      allVirementsEmis?.forEach((v) => {
+        virementsEmisParLigne[v.from_budget_line_id] =
+          (virementsEmisParLigne[v.from_budget_line_id] || 0) + (v.amount || 0);
       });
 
       const linesWithAvailability: BudgetLineWithAvailability[] = (lines || []).map((line) => {
@@ -281,7 +303,8 @@ export function BudgetLineSelector({
         const total_engage = line.total_engage || 0;
         const montant_reserve = line.montant_reserve || 0;
         const disponible_net = dotation_actuelle - total_engage - montant_reserve;
-        const taux_engagement = dotation_actuelle > 0 ? (total_engage / dotation_actuelle) * 100 : 0;
+        const taux_engagement =
+          dotation_actuelle > 0 ? (total_engage / dotation_actuelle) * 100 : 0;
 
         return {
           id: line.id,
@@ -293,12 +316,12 @@ export function BudgetLineSelector({
           montant_reserve,
           disponible_net,
           taux_engagement,
-          direction: line.direction as BudgetLineWithAvailability["direction"],
-          os: line.os as BudgetLineWithAvailability["os"],
-          nbe: line.nbe as BudgetLineWithAvailability["nbe"],
-          sysco: line.sysco as BudgetLineWithAvailability["sysco"],
-          action: line.action as BudgetLineWithAvailability["action"],
-          activite: line.activite as BudgetLineWithAvailability["activite"],
+          direction: line.direction as BudgetLineWithAvailability['direction'],
+          os: line.os as BudgetLineWithAvailability['os'],
+          nbe: line.nbe as BudgetLineWithAvailability['nbe'],
+          sysco: line.sysco as BudgetLineWithAvailability['sysco'],
+          action: line.action as BudgetLineWithAvailability['action'],
+          activite: line.activite as BudgetLineWithAvailability['activite'],
         };
       });
 
@@ -312,11 +335,11 @@ export function BudgetLineSelector({
     const newFilters = { ...localFilters, [key]: value || null };
 
     // Reset dependent filters
-    if (key === "os_id") {
+    if (key === 'os_id') {
       newFilters.action_id = null;
       newFilters.activite_id = null;
     }
-    if (key === "action_id") {
+    if (key === 'action_id') {
       newFilters.activite_id = null;
     }
 
@@ -366,19 +389,21 @@ export function BudgetLineSelector({
 
     if (checked) {
       // En mode single, remplacer la sélection
-      if (ventilationMode === "single") {
-        onSelectionChange([{
-          id: line.id,
-          code: line.code,
-          label: line.label,
-          montant: montantTotal,
-          disponible_net: line.disponible_net,
-          dotation_actuelle: line.dotation_actuelle,
-          dotation_initiale: line.dotation_initiale,
-          total_engage: line.total_engage,
-          montant_reserve: line.montant_reserve,
-          pourcentage: 100,
-        }]);
+      if (ventilationMode === 'single') {
+        onSelectionChange([
+          {
+            id: line.id,
+            code: line.code,
+            label: line.label,
+            montant: montantTotal,
+            disponible_net: line.disponible_net,
+            dotation_actuelle: line.dotation_actuelle,
+            dotation_initiale: line.dotation_initiale,
+            total_engage: line.total_engage,
+            montant_reserve: line.montant_reserve,
+            pourcentage: 100,
+          },
+        ]);
       } else {
         // En mode multi, ajouter
         onSelectionChange([
@@ -423,14 +448,11 @@ export function BudgetLineSelector({
     return line.disponible_net >= amount;
   };
 
-  const formatMontant = (montant: number) =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  const formatMontant = (montant: number) => formatCurrency(montant);
 
-  const isLineSelected = (lineId: string) =>
-    selectedLines.some((l) => l.id === lineId);
+  const isLineSelected = (lineId: string) => selectedLines.some((l) => l.id === lineId);
 
-  const getSelectedLine = (lineId: string) =>
-    selectedLines.find((l) => l.id === lineId);
+  const getSelectedLine = (lineId: string) => selectedLines.find((l) => l.id === lineId);
 
   return (
     <Card>
@@ -445,25 +467,25 @@ export function BudgetLineSelector({
               Montant à imputer: <strong>{formatMontant(montantTotal)}</strong>
               {budgetLines.length > 0 && (
                 <span className="ml-2 text-muted-foreground">
-                  ({budgetLines.length} ligne{budgetLines.length > 1 ? "s" : ""} disponible{budgetLines.length > 1 ? "s" : ""})
+                  ({budgetLines.length} ligne{budgetLines.length > 1 ? 's' : ''} disponible
+                  {budgetLines.length > 1 ? 's' : ''})
                 </span>
               )}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isLoading}
-            >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
             </Button>
             <Button
-              variant={ventilationMode === "single" ? "default" : "outline"}
+              variant={ventilationMode === 'single' ? 'default' : 'outline'}
               size="sm"
               onClick={() => {
-                setVentilationMode("single");
+                setVentilationMode('single');
                 if (selectedLines.length > 1) {
                   onSelectionChange([selectedLines[0]]);
                 }
@@ -473,9 +495,9 @@ export function BudgetLineSelector({
               Ligne unique
             </Button>
             <Button
-              variant={ventilationMode === "multi" ? "default" : "outline"}
+              variant={ventilationMode === 'multi' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setVentilationMode("multi")}
+              onClick={() => setVentilationMode('multi')}
               disabled={disabled}
             >
               Multi-lignes
@@ -498,7 +520,11 @@ export function BudgetLineSelector({
                     </Badge>
                   )}
                 </span>
-                {filtersOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {filtersOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4">
@@ -507,8 +533,10 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Direction</Label>
                   <Select
-                    value={localFilters.direction_id || "all"}
-                    onValueChange={(v) => handleFilterChange("direction_id", v === "all" ? null : v)}
+                    value={localFilters.direction_id || 'all'}
+                    onValueChange={(v) =>
+                      handleFilterChange('direction_id', v === 'all' ? null : v)
+                    }
                     disabled={disabled}
                   >
                     <SelectTrigger className="mt-1">
@@ -529,8 +557,8 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Objectif Strat.</Label>
                   <Select
-                    value={localFilters.os_id || "all"}
-                    onValueChange={(v) => handleFilterChange("os_id", v === "all" ? null : v)}
+                    value={localFilters.os_id || 'all'}
+                    onValueChange={(v) => handleFilterChange('os_id', v === 'all' ? null : v)}
                     disabled={disabled}
                   >
                     <SelectTrigger className="mt-1">
@@ -551,8 +579,8 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Nature NBE</Label>
                   <Select
-                    value={localFilters.nbe_id || "all"}
-                    onValueChange={(v) => handleFilterChange("nbe_id", v === "all" ? null : v)}
+                    value={localFilters.nbe_id || 'all'}
+                    onValueChange={(v) => handleFilterChange('nbe_id', v === 'all' ? null : v)}
                     disabled={disabled}
                   >
                     <SelectTrigger className="mt-1">
@@ -573,8 +601,8 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Compte SYSCO</Label>
                   <Select
-                    value={localFilters.sysco_id || "all"}
-                    onValueChange={(v) => handleFilterChange("sysco_id", v === "all" ? null : v)}
+                    value={localFilters.sysco_id || 'all'}
+                    onValueChange={(v) => handleFilterChange('sysco_id', v === 'all' ? null : v)}
                     disabled={disabled}
                   >
                     <SelectTrigger className="mt-1">
@@ -595,8 +623,8 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Action</Label>
                   <Select
-                    value={localFilters.action_id || "all"}
-                    onValueChange={(v) => handleFilterChange("action_id", v === "all" ? null : v)}
+                    value={localFilters.action_id || 'all'}
+                    onValueChange={(v) => handleFilterChange('action_id', v === 'all' ? null : v)}
                     disabled={disabled || actions.length === 0}
                   >
                     <SelectTrigger className="mt-1">
@@ -617,8 +645,8 @@ export function BudgetLineSelector({
                 <div>
                   <Label className="text-xs">Activité</Label>
                   <Select
-                    value={localFilters.activite_id || "all"}
-                    onValueChange={(v) => handleFilterChange("activite_id", v === "all" ? null : v)}
+                    value={localFilters.activite_id || 'all'}
+                    onValueChange={(v) => handleFilterChange('activite_id', v === 'all' ? null : v)}
                     disabled={disabled || activites.length === 0}
                   >
                     <SelectTrigger className="mt-1">
@@ -657,12 +685,18 @@ export function BudgetLineSelector({
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span>Montant réparti:</span>
-              <span className={totalSelected === montantTotal ? "text-green-600 font-medium" : "text-orange-600 font-medium"}>
+              <span
+                className={
+                  totalSelected === montantTotal
+                    ? 'text-green-600 font-medium'
+                    : 'text-orange-600 font-medium'
+                }
+              >
                 {formatMontant(totalSelected)} / {formatMontant(montantTotal)}
               </span>
             </div>
             <Progress value={(totalSelected / montantTotal) * 100} className="h-2" />
-            
+
             {remainingAmount > 0 && (
               <Alert variant="default" className="mt-2">
                 <AlertTriangle className="h-4 w-4" />
@@ -673,54 +707,123 @@ export function BudgetLineSelector({
               </Alert>
             )}
 
-            {/* Lignes sélectionnées */}
+            {/* Lignes sélectionnées — tableau dynamique */}
             <div className="space-y-2 mt-4">
               <h4 className="font-medium text-sm">Lignes sélectionnées:</h4>
-              {selectedLines.map((line) => {
-                const isInsufficient = line.montant > line.disponible_net;
-                return (
-                  <div
-                    key={line.id}
-                    className={`flex items-center gap-3 p-2 rounded-md border ${
-                      isInsufficient ? "border-destructive bg-destructive/5" : "border-border"
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-mono text-sm">{line.code}</div>
-                      <div className="text-xs text-muted-foreground truncate">{line.label}</div>
-                      <div className="text-xs">
-                        Disponible: <span className={isInsufficient ? "text-destructive" : "text-green-600"}>
-                          {formatMontant(line.disponible_net)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {ventilationMode === "multi" && (
-                        <Input
-                          type="number"
-                          value={line.montant}
-                          onChange={(e) => handleMontantChange(line.id, Number(e.target.value))}
-                          className="w-32 text-right"
-                          disabled={disabled}
-                        />
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Ligne</TableHead>
+                      {ventilationMode === 'multi' && (
+                        <>
+                          <TableHead className="text-right">Montant</TableHead>
+                          <TableHead className="text-right w-[70px]">%</TableHead>
+                        </>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onSelectionChange(selectedLines.filter((l) => l.id !== line.id))}
-                        disabled={disabled}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {isInsufficient && (
-                      <Badge variant="destructive" className="shrink-0">
-                        Insuffisant
-                      </Badge>
-                    )}
-                  </div>
-                );
-              })}
+                      <TableHead className="text-right">Disponible</TableHead>
+                      <TableHead>Indicateur</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="w-[40px]" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedLines.map((line) => {
+                      const isInsufficient = line.montant > line.disponible_net;
+                      const pct = montantTotal > 0 ? (line.montant / montantTotal) * 100 : 0;
+                      const tauxUtilisation =
+                        line.dotation_actuelle > 0
+                          ? ((line.total_engage + line.montant) / line.dotation_actuelle) * 100
+                          : 0;
+                      return (
+                        <TableRow
+                          key={line.id}
+                          className={isInsufficient ? 'bg-destructive/5' : ''}
+                        >
+                          <TableCell>
+                            <div className="font-mono text-sm">{line.code}</div>
+                            <div className="text-xs text-muted-foreground truncate max-w-[180px]">
+                              {line.label}
+                            </div>
+                          </TableCell>
+                          {ventilationMode === 'multi' && (
+                            <>
+                              <TableCell className="text-right">
+                                <Input
+                                  type="number"
+                                  value={line.montant}
+                                  onChange={(e) =>
+                                    handleMontantChange(line.id, Number(e.target.value))
+                                  }
+                                  className="w-32 text-right ml-auto"
+                                  disabled={disabled}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right font-medium text-sm">
+                                {pct.toFixed(1)}%
+                              </TableCell>
+                            </>
+                          )}
+                          <TableCell
+                            className={`text-right text-sm font-medium ${
+                              isInsufficient ? 'text-destructive' : 'text-green-600'
+                            }`}
+                          >
+                            {formatMontant(line.disponible_net)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 min-w-[100px]">
+                              <Progress
+                                value={Math.min(tauxUtilisation, 100)}
+                                className={`w-16 h-2 ${tauxUtilisation > 100 ? '[&>div]:bg-destructive' : tauxUtilisation > 80 ? '[&>div]:bg-orange-500' : ''}`}
+                              />
+                              <span
+                                className={`text-xs ${
+                                  tauxUtilisation > 100
+                                    ? 'text-destructive'
+                                    : tauxUtilisation > 80
+                                      ? 'text-orange-600'
+                                      : 'text-muted-foreground'
+                                }`}
+                              >
+                                {tauxUtilisation.toFixed(0)}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {isInsufficient ? (
+                              <Badge variant="destructive" className="text-xs">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                Insuffisant
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="text-green-600 border-green-600 text-xs"
+                              >
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                OK
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                onSelectionChange(selectedLines.filter((l) => l.id !== line.id))
+                              }
+                              disabled={disabled}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         )}
@@ -766,13 +869,14 @@ export function BudgetLineSelector({
                   const isSelected = isLineSelected(line.id);
                   const selectedLine = getSelectedLine(line.id);
                   const canReceive = canReceiveAmount(line, montantTotal);
-                  const _isInsufficient = selectedLine && selectedLine.montant > line.disponible_net;
+                  const _isInsufficient =
+                    selectedLine && selectedLine.montant > line.disponible_net;
 
                   return (
                     <TableRow
                       key={line.id}
-                      className={`cursor-pointer ${isSelected ? "bg-primary/5" : ""} ${
-                        !canReceive && !isSelected ? "opacity-50" : ""
+                      className={`cursor-pointer ${isSelected ? 'bg-primary/5' : ''} ${
+                        !canReceive && !isSelected ? 'opacity-50' : ''
                       }`}
                       onClick={() => {
                         if (!disabled && (canReceive || isSelected)) {
@@ -795,17 +899,19 @@ export function BudgetLineSelector({
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {line.label}
-                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate">{line.label}</TableCell>
                       <TableCell className="text-right">
                         {formatMontant(line.dotation_actuelle)}
                       </TableCell>
-                      <TableCell className={`text-right font-medium ${
-                        line.disponible_net < 0 ? "text-destructive" :
-                        line.disponible_net < montantTotal ? "text-orange-600" :
-                        "text-green-600"
-                      }`}>
+                      <TableCell
+                        className={`text-right font-medium ${
+                          line.disponible_net < 0
+                            ? 'text-destructive'
+                            : line.disponible_net < montantTotal
+                              ? 'text-orange-600'
+                              : 'text-green-600'
+                        }`}
+                      >
                         {formatMontant(line.disponible_net)}
                       </TableCell>
                       <TableCell>
@@ -844,8 +950,8 @@ export function BudgetLineSelector({
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>Disponible net</strong> = Dotation actuelle − Engagements − Réservations.
-            La réservation bloque le montant jusqu'à la création de l'engagement.
+            <strong>Disponible net</strong> = Dotation actuelle − Engagements − Réservations. La
+            réservation bloque le montant jusqu'à la création de l'engagement.
           </AlertDescription>
         </Alert>
       </CardContent>

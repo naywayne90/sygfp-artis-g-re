@@ -36,6 +36,7 @@ import {
   useLiquidations,
   DOCUMENTS_REQUIS,
   LiquidationAvailability,
+  fetchSiblingLiquidations,
 } from '@/hooks/useLiquidations';
 import { formatCurrency } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
@@ -132,6 +133,7 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
   const [fileError, setFileError] = useState<string | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<FileUpload | null>(null);
+  const [existingTrancheCount, setExistingTrancheCount] = useState(0);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -202,6 +204,17 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
     },
     [form]
   );
+
+  // Récupérer le nombre de tranches existantes quand on sélectionne un engagement
+  useEffect(() => {
+    if (selectedEngagement) {
+      fetchSiblingLiquidations(selectedEngagement.id)
+        .then((siblings) => setExistingTrancheCount(siblings.length))
+        .catch(() => setExistingTrancheCount(0));
+    } else {
+      setExistingTrancheCount(0);
+    }
+  }, [selectedEngagement]);
 
   const handleEngagementSelect = (engagementId: string) => {
     const engagement = engagementsValides.find((e) => e.id === engagementId);
@@ -471,6 +484,16 @@ export function LiquidationForm({ onSuccess, onCancel, dossierId }: LiquidationF
                   </div>
                 </div>
               </div>
+              {existingTrancheCount > 0 && (
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <Badge variant="outline" className="font-mono">
+                    Tranche {existingTrancheCount + 1}
+                  </Badge>
+                  <span className="text-muted-foreground">
+                    {existingTrancheCount} liquidation(s) existante(s) sur cet engagement
+                  </span>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

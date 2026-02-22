@@ -1,16 +1,18 @@
 import { forwardRef } from 'react';
-import { Engagement } from '@/hooks/useEngagements';
+import { Engagement, EngagementLigne } from '@/hooks/useEngagements';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
 import { numberToWordsCFA } from '@/lib/utils/numberToWords';
+import { QRCodePrint } from '@/components/qrcode/QRCodePrint';
 
 interface PieceEngagementProps {
   engagement: Engagement;
+  engagementLignes?: EngagementLigne[];
 }
 
 export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
-  ({ engagement }, ref) => {
+  ({ engagement, engagementLignes = [] }, ref) => {
     const buildImputationCode = () => {
       const parts: string[] = [];
       if (engagement.budget_line?.objectif_strategique?.code) {
@@ -154,6 +156,47 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
           </div>
         </div>
 
+        {/* Ventilation multi-lignes budgétaires */}
+        {engagement.is_multi_ligne && engagementLignes.length > 0 && (
+          <div className="mb-6 p-4 border border-black">
+            <h2 className="font-bold text-sm uppercase mb-2">
+              Ventilation multi-lignes budgétaires
+            </h2>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-black">
+                  <th className="text-left py-1 text-xs">Code</th>
+                  <th className="text-left py-1 text-xs">Libellé</th>
+                  <th className="text-right py-1 text-xs">Montant</th>
+                  <th className="text-right py-1 text-xs">%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {engagementLignes.map((ligne) => (
+                  <tr key={ligne.id} className="border-b border-gray-300">
+                    <td className="py-1 text-xs font-mono">{ligne.budget_line?.code}</td>
+                    <td className="py-1 text-xs">{ligne.budget_line?.label}</td>
+                    <td className="py-1 text-xs text-right">{formatCurrency(ligne.montant)}</td>
+                    <td className="py-1 text-xs text-right">
+                      {engagement.montant > 0
+                        ? ((ligne.montant / engagement.montant) * 100).toFixed(1)
+                        : '0'}
+                      %
+                    </td>
+                  </tr>
+                ))}
+                <tr className="border-t border-black font-bold">
+                  <td className="py-1 text-xs" colSpan={2}>
+                    TOTAL
+                  </td>
+                  <td className="py-1 text-xs text-right">{formatCurrency(engagement.montant)}</td>
+                  <td className="py-1 text-xs text-right">100%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
         {/* Montants */}
         <div className="mb-6 p-4 border-2 border-black">
           <h2 className="font-bold text-sm uppercase mb-4">Détail financier</h2>
@@ -243,6 +286,19 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
             )}
           </div>
         </div>
+
+        {/* QR Code de vérification — engagements validés uniquement */}
+        {engagement.statut === 'valide' && engagement.visa_dg_date && (
+          <div className="mt-8 flex justify-end">
+            <QRCodePrint
+              reference={engagement.numero}
+              type="ENGAGEMENT"
+              dateValidation={engagement.visa_dg_date}
+              validateur="DG"
+              showDetails
+            />
+          </div>
+        )}
 
         {/* Pied de page */}
         <div className="mt-8 pt-4 border-t border-gray-300 text-xs text-center text-gray-500">

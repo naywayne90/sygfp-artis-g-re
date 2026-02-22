@@ -1,6 +1,6 @@
 /**
  * Statuts unifiés pour la chaîne de la dépense SYGFP
- * 
+ *
  * RÈGLE: Ne jamais supprimer ou renommer un statut existant.
  * Pour déprécier, ajouter un commentaire @deprecated.
  */
@@ -9,40 +9,40 @@
 
 export const STATUTS_WORKFLOW = {
   // Phase création
-  BROUILLON: 'brouillon',        // En cours de saisie
-  
+  BROUILLON: 'brouillon', // En cours de saisie
+
   // Phase validation
-  SOUMIS: 'soumis',              // Soumis pour validation
-  EN_ATTENTE: 'en_attente',      // En attente d'action
-  EN_COURS: 'en_cours',          // Traitement en cours
-  
+  SOUMIS: 'soumis', // Soumis pour validation
+  EN_ATTENTE: 'en_attente', // En attente d'action
+  EN_COURS: 'en_cours', // Traitement en cours
+
   // Phase décision
-  VALIDE: 'valide',              // Validé/Approuvé
-  REJETE: 'rejete',              // Rejeté
-  DIFFERE: 'differe',            // Reporté à une date ultérieure
-  
+  VALIDE: 'valide', // Validé/Approuvé
+  REJETE: 'rejete', // Rejeté
+  DIFFERE: 'differe', // Reporté à une date ultérieure
+
   // Phase terminale
-  CLOS: 'clos',                  // Terminé normalement
-  ANNULE: 'annule',              // Annulé
-  
+  CLOS: 'clos', // Terminé normalement
+  ANNULE: 'annule', // Annulé
+
   // Spécifiques imputation
-  IMPUTE: 'impute',              // Imputation réalisée
-  
+  IMPUTE: 'impute', // Imputation réalisée
+
   // Spécifiques marchés
-  ATTRIBUE: 'attribue',          // Marché attribué
-  INFRUCTUEUX: 'infructueux',    // Marché infructueux
-  
+  ATTRIBUE: 'attribue', // Marché attribué
+  INFRUCTUEUX: 'infructueux', // Marché infructueux
+
   // Spécifiques ordonnancement
-  VISE: 'vise',                  // Visé par CB
-  SIGNE: 'signe',                // Signé par DG
-  A_SIGNER: 'a_signer',          // En attente signature DG
-  
+  VISE: 'vise', // Visé par CB
+  SIGNE: 'signe', // Signé par DG
+  A_SIGNER: 'a_signer', // En attente signature DG
+
   // Spécifiques règlements
-  PAYE: 'paye',                  // Paiement effectué
-  REFUSE: 'refuse',              // Paiement refusé
+  PAYE: 'paye', // Paiement effectué
+  REFUSE: 'refuse', // Paiement refusé
 } as const;
 
-export type StatutWorkflow = typeof STATUTS_WORKFLOW[keyof typeof STATUTS_WORKFLOW];
+export type StatutWorkflow = (typeof STATUTS_WORKFLOW)[keyof typeof STATUTS_WORKFLOW];
 
 // ===== Mapping statuts par table =====
 
@@ -53,7 +53,15 @@ export const STATUTS_PAR_TABLE = {
   expressions_besoin: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
   marches: ['brouillon', 'en_cours', 'attribue', 'infructueux', 'annule'] as const,
   budget_engagements: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
-  budget_liquidations: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
+  budget_liquidations: [
+    'brouillon',
+    'certifié_sf',
+    'soumis',
+    'validé_daaf',
+    'validé_dg',
+    'rejete',
+    'differe',
+  ] as const,
   ordonnancements: ['en_attente', 'vise', 'a_signer', 'signe', 'rejete', 'differe'] as const,
   reglements: ['en_cours', 'paye', 'refuse', 'annule'] as const,
 } as const;
@@ -90,11 +98,13 @@ export const STATUT_CONFIG: Record<string, StatutConfig> = {
 // ===== Helpers =====
 
 export function getStatutConfig(statut: string): StatutConfig {
-  return STATUT_CONFIG[statut] || { 
-    label: statut, 
-    color: 'text-gray-600', 
-    bgColor: 'bg-gray-100' 
-  };
+  return (
+    STATUT_CONFIG[statut] || {
+      label: statut,
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-100',
+    }
+  );
 }
 
 export function getStatutLabel(statut: string): string {

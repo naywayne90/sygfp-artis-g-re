@@ -35,7 +35,6 @@ import {
   Truck,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { UrgentLiquidationToggle } from '@/components/liquidations/UrgentLiquidationToggle';
 import { UrgentLiquidationBadge } from '@/components/liquidations/UrgentLiquidationBadge';
 
@@ -66,6 +65,8 @@ interface LiquidationListProps {
   /** Map liquidation_id → {tranche, total} pour indicateur tranche */
   trancheMap?: Map<string, TrancheInfo>;
   isLoading?: boolean;
+  /** True pendant le refetch (changement de page) — affiche opacité réduite */
+  isFetching?: boolean;
   /** Rôle effectif pour filtrer les actions du menu */
   userRole?: LiquidationUserRole;
 }
@@ -154,6 +155,7 @@ export function LiquidationList({
   onUrgentToggle,
   trancheMap,
   isLoading = false,
+  isFetching = false,
   userRole,
 }: LiquidationListProps) {
   const getCurrentStepLabel = (currentStep: number | null) => {
@@ -173,7 +175,13 @@ export function LiquidationList({
   }
 
   return (
-    <Table>
+    <Table
+      className={
+        isFetching
+          ? 'opacity-50 transition-opacity duration-200'
+          : 'transition-opacity duration-200'
+      }
+    >
       <TableHeader>
         <TableRow>
           {showUrgentColumn && (
@@ -261,9 +269,7 @@ export function LiquidationList({
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     {liquidation.service_fait_date
-                      ? format(new Date(liquidation.service_fait_date), 'dd MMM yyyy', {
-                          locale: fr,
-                        })
+                      ? format(new Date(liquidation.service_fait_date), 'dd/MM/yyyy')
                       : 'N/A'}
                   </TableCell>
                   <TableCell>

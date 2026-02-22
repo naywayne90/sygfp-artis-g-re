@@ -94,12 +94,14 @@ export interface Engagement {
   degage_at: string | null;
   // Multi-lignes (Prompt 13)
   is_multi_ligne: boolean | null;
+  lignes?: EngagementLigne[];
   // Joined data
   budget_line?: {
     id: string;
     code: string;
     label: string;
     dotation_initiale: number;
+    direction_id?: string | null;
     direction?: { label: string; sigle: string | null } | null;
     objectif_strategique?: { code: string; libelle: string } | null;
     mission?: { code: string; libelle: string } | null;
@@ -277,7 +279,7 @@ export function useEngagements() {
           `
           *,
           budget_line:budget_lines(
-            id, code, label, dotation_initiale,
+            id, code, label, dotation_initiale, direction_id,
             direction:directions(label, sigle),
             objectif_strategique:objectifs_strategiques(code, libelle),
             mission:missions(code, libelle),
@@ -304,7 +306,37 @@ export function useEngagements() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as unknown as Engagement[];
+
+      const engagements = data as unknown as Engagement[];
+
+      // Fetch engagement_lignes for multi-ligne engagements
+      const multiIds = engagements.filter((e) => e.is_multi_ligne).map((e) => e.id);
+
+      if (multiIds.length > 0) {
+        const { data: allLignes } = await supabase
+          .from('engagement_lignes')
+          .select(
+            'id, engagement_id, budget_line_id, montant, created_at, budget_line:budget_lines(id, code, label, dotation_initiale)'
+          )
+          .in('engagement_id', multiIds)
+          .order('created_at', { ascending: true });
+
+        if (allLignes) {
+          const lignesMap = new Map<string, EngagementLigne[]>();
+          for (const l of allLignes as unknown as EngagementLigne[]) {
+            const arr = lignesMap.get(l.engagement_id) || [];
+            arr.push(l);
+            lignesMap.set(l.engagement_id, arr);
+          }
+          for (const eng of engagements) {
+            if (eng.is_multi_ligne) {
+              eng.lignes = lignesMap.get(eng.id) || [];
+            }
+          }
+        }
+      }
+
+      return engagements;
     },
     enabled: !!exercice,
   });
@@ -1136,22 +1168,9 @@ export function useEngagements() {
 
       if (updateError) throw updateError;
 
-      // Restituer les crédits sur la ligne budgétaire
-      if (engagement.budget_line_id) {
-        const { data: budgetLine } = await supabase
-          .from('budget_lines')
-          .select('total_engage')
-          .eq('id', engagement.budget_line_id)
-          .single();
-
-        if (budgetLine) {
-          const newTotalEngage = Math.max(0, (budgetLine.total_engage || 0) - montant);
-          await supabase
-            .from('budget_lines')
-            .update({ total_engage: newTotalEngage })
-            .eq('id', engagement.budget_line_id);
-        }
-      }
+      // Impact budget : géré automatiquement par le trigger DB
+      // trg_recalc_elop_engagements recalcule budget_lines.total_engage
+      // quand montant_degage change sur budget_engagements
 
       await logAction({
         entityType: 'engagement',
@@ -1191,10 +1210,12 @@ export function useEngagements() {
       id,
       data,
       justification,
+      lignes,
     }: {
       id: string;
       data: Partial<Engagement>;
       justification?: string;
+      lignes?: Array<{ budget_line_id: string; montant: number }>;
     }) => {
       const {
         data: { user },
@@ -1204,7 +1225,7 @@ export function useEngagements() {
       // Get old values for audit
       const { data: oldEngagement } = await supabase
         .from('budget_engagements')
-        .select('montant, fournisseur, budget_line_id')
+        .select('montant, fournisseur, budget_line_id, statut')
         .eq('id', id)
         .single();
 
@@ -1214,6 +1235,30 @@ export function useEngagements() {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Update multi-lignes if provided and engagement is brouillon
+      if (lignes && oldEngagement?.statut === 'brouillon') {
+        // Delete old lignes
+        await supabase.from('engagement_lignes').delete().eq('engagement_id', id);
+
+        // Insert new lignes if multi
+        if (lignes.length > 0) {
+          const { error: lignesError } = await supabase.from('engagement_lignes').insert(
+            lignes.map((l) => ({
+              engagement_id: id,
+              budget_line_id: l.budget_line_id,
+              montant: l.montant,
+            }))
+          );
+          if (lignesError) throw lignesError;
+        }
+
+        // Update is_multi_ligne flag
+        await supabase
+          .from('budget_engagements')
+          .update({ is_multi_ligne: lignes.length > 1 })
+          .eq('id', id);
+      }
 
       await logAction({
         entityType: 'engagement',

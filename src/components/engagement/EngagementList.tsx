@@ -29,6 +29,7 @@ import {
   MinusCircle,
   Pencil,
   CreditCard,
+  Receipt,
 } from 'lucide-react';
 import { Engagement, VALIDATION_STEPS, VALIDATION_STATUTS } from '@/hooks/useEngagements';
 import { isRoleForStep } from '@/lib/engagement/engagementRbac';
@@ -46,6 +47,7 @@ interface EngagementListProps {
   onResume?: (id: string) => void;
   onDegage?: (engagement: Engagement) => void;
   onPrint?: (engagement: Engagement) => void;
+  onCreateLiquidation?: (engagementId: string) => void;
   userRole?: string | null;
   showActions?: boolean;
   isLoading?: boolean;
@@ -127,6 +129,7 @@ export function EngagementList({
   onResume,
   onDegage,
   onPrint,
+  onCreateLiquidation,
   userRole,
   showActions = true,
   isLoading = false,
@@ -169,7 +172,14 @@ export function EngagementList({
               <TableRow key={engagement.id}>
                 <TableCell>
                   <div>
-                    <div className="font-medium">{engagement.numero}</div>
+                    <div className="font-medium flex items-center gap-1">
+                      {engagement.numero}
+                      {engagement.is_multi_ligne && (
+                        <Badge variant="outline" className="text-[10px] h-4 px-1 font-mono">
+                          Multi
+                        </Badge>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {format(new Date(engagement.date_engagement), 'dd/MM/yyyy', { locale: fr })}
                     </div>
@@ -286,6 +296,20 @@ export function EngagementList({
                             >
                               <MinusCircle className="mr-2 h-4 w-4" />
                               Dégager
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* Créer liquidation — validé uniquement */}
+                        {statut === 'valide' && onCreateLiquidation && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onCreateLiquidation(engagement.id)}
+                              className="text-primary"
+                            >
+                              <Receipt className="mr-2 h-4 w-4" />
+                              Créer liquidation
                             </DropdownMenuItem>
                           </>
                         )}

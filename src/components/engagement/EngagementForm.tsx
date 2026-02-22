@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -85,6 +85,17 @@ export function EngagementForm({
   const [isCheckingBudget, setIsCheckingBudget] = useState(false);
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
 
+  // Deferred selection change handler — breaks the synchronous setState → commit →
+  // Radix Presence/composeRefs → setState infinite loop that occurs when DOM changes
+  // significantly inside a Dialog (e.g. adding selected lines summary).
+  const rafRef = useRef(0);
+  const handleSelectionChange = useCallback((lines: SelectedBudgetLine[]) => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setSelectedLines(lines);
+    });
+  }, []);
+
   // Derived state
   const selectedPassation = passationsSignees.find((p) => p.id === selectedPassationId);
   const selectedExpression = expressionsValidees.find((e) => e.id === selectedExpressionId);
@@ -105,9 +116,12 @@ export function EngagementForm({
   }, [open, preSelectedPassationId, passationsSignees]);
 
   // --- Pre-fill from passation (sur_marche) ---
+  // Depend on selectedPassationId (primitive) instead of selectedPassation (object)
+  // to avoid infinite re-render loops when TanStack Query returns new references.
   useEffect(() => {
-    if (typeEngagement !== 'sur_marche' || !selectedPassation) return;
-    const pm = selectedPassation;
+    if (typeEngagement !== 'sur_marche' || !selectedPassationId) return;
+    const pm = passationsSignees.find((p) => p.id === selectedPassationId);
+    if (!pm) return;
     const eb = pm.expression_besoin;
     setObjet(eb?.objet || '');
     const montantRetenu = pm.montant_retenu || eb?.montant_estime || 0;
@@ -117,19 +131,25 @@ export function EngagementForm({
     setFournisseur(pm.prestataire_retenu?.raison_sociale || '');
     setSelectedLines([]);
     setAvailability(null);
-  }, [typeEngagement, selectedPassation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeEngagement, selectedPassationId]);
 
   // --- Pre-fill from expression (hors_marche) ---
+  // Depend on selectedExpressionId (primitive) instead of selectedExpression (object)
+  // to avoid infinite re-render loops when TanStack Query returns new references.
   useEffect(() => {
-    if (typeEngagement !== 'hors_marche' || !selectedExpression) return;
-    setObjet(selectedExpression.objet);
-    setMontant(selectedExpression.montant_estime || 0);
-    setMontantHT(selectedExpression.montant_estime || 0);
+    if (typeEngagement !== 'hors_marche' || !selectedExpressionId) return;
+    const expr = expressionsValidees.find((e) => e.id === selectedExpressionId);
+    if (!expr) return;
+    setObjet(expr.objet);
+    setMontant(expr.montant_estime || 0);
+    setMontantHT(expr.montant_estime || 0);
     setTva(0);
     setFournisseur('');
     setSelectedLines([]);
     setAvailability(null);
-  }, [typeEngagement, selectedExpression]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [typeEngagement, selectedExpressionId]);
 
   // --- Budget availability check ---
   useEffect(() => {
@@ -607,7 +627,7 @@ export function EngagementForm({
               <BudgetLineSelector
                 montantTotal={montant}
                 selectedLines={selectedLines}
-                onSelectionChange={setSelectedLines}
+                onSelectionChange={handleSelectionChange}
                 directionId={directionId}
                 showFilters={true}
               />

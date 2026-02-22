@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useExercice } from '@/contexts/ExerciceContext';
@@ -292,6 +292,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
   const {
     data: queryResult,
     isLoading,
+    isFetching,
     error,
   } = useQuery({
     queryKey: ['liquidations', exercice, page, pageSize, statut, search, urgentOnly],
@@ -310,9 +311,23 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
         }
       }
 
-      // Recherche serveur sur numéro
+      // Recherche serveur : numéro liquidation + engagement (numéro/objet)
       if (search && search.trim()) {
-        query = query.ilike('numero', `%${search.trim()}%`);
+        const term = search.trim();
+        const like = `%${term}%`;
+        // Chercher engagements correspondants (numéro ou objet)
+        const { data: matchEng } = await supabase
+          .from('budget_engagements')
+          .select('id')
+          .or(`numero.ilike.${like},objet.ilike.${like}`)
+          .eq('exercice', exercice as number)
+          .limit(200);
+        const engIds = (matchEng || []).map((e) => e.id);
+        if (engIds.length > 0) {
+          query = query.or(`numero.ilike.${like},engagement_id.in.(${engIds.join(',')})`);
+        } else {
+          query = query.ilike('numero', like);
+        }
       }
 
       // Filtre urgents uniquement
@@ -358,6 +373,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
       };
     },
     enabled: !!exercice,
+    placeholderData: keepPreviousData,
     staleTime: 30_000,
   });
 
@@ -628,6 +644,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: (liquidation) => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       queryClient.invalidateQueries({ queryKey: ['engagements-valides-pour-liquidation'] });
       queryClient.invalidateQueries({ queryKey: ['urgent-liquidations'] });
       queryClient.invalidateQueries({ queryKey: ['urgent-liquidations-count'] });
@@ -726,6 +744,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       toast.success('Liquidation soumise pour validation');
     },
     onError: (error) => {
@@ -992,6 +1012,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       toast.success('Étape validée');
     },
     onError: (error) => {
@@ -1137,6 +1159,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       toast.success('Liquidation rejetée');
     },
     onError: (error) => {
@@ -1208,6 +1232,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       toast.success('Liquidation différée');
     },
     onError: (error) => {
@@ -1265,6 +1291,8 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidation-light'] });
       toast.success('Liquidation reprise');
     },
     onError: (error) => {
@@ -1322,6 +1350,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
     liquidations,
     total,
     isLoading,
+    isFetching,
     error,
     engagementsValides,
     calculateAvailability,
