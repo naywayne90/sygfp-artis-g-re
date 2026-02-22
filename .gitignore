@@ -60,6 +60,8 @@ migration_finale_log.txt
 # Agent/session temp files
 agent-team*.txt
 snapshot-structure.md
+*-snapshot.md
+eb-dropdown.md
 
 # Supabase temp
 supabase/.temp/
