@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { generateHash } from '@/lib/qrcode-utils';
+import { formatCurrency } from '@/lib/utils';
 
 export interface Liquidation {
   id: string;
@@ -741,6 +743,53 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
           }))
         );
       }
+
+      // Email dispatch — liquidation_soumise (non-bloquant)
+      try {
+        const { data: liqEmail } = await supabase
+          .from('budget_liquidations')
+          .select(
+            `
+            numero, montant, net_a_payer, reference_facture,
+            engagement:budget_engagements(numero, objet, fournisseur,
+              budget_line:budget_lines(code, label, direction:directions(label))
+            ),
+            creator:profiles!budget_liquidations_created_by_fkey(full_name)
+          `
+          )
+          .eq('id', id)
+          .single();
+
+        if (liqEmail && daafValidators?.length) {
+          const eng = liqEmail.engagement as Record<string, unknown> | null;
+          const bl = eng?.budget_line as Record<string, unknown> | null;
+          const dir = bl?.direction as Record<string, unknown> | null;
+          for (const u of daafValidators) {
+            supabase.functions
+              .invoke('send-notification-email', {
+                body: {
+                  user_id: u.user_id,
+                  type: 'liquidation_soumise',
+                  title: `Liquidation soumise — ${liqEmail.numero}`,
+                  message: `La liquidation ${liqEmail.numero} a été soumise pour validation DAAF`,
+                  entity_type: 'liquidation',
+                  entity_id: id,
+                  entity_numero: liqEmail.numero,
+                  montant: liqEmail.montant,
+                  net_a_payer: liqEmail.net_a_payer,
+                  objet_engagement: eng?.objet || '',
+                  fournisseur: eng?.fournisseur || '',
+                  direction: dir?.label || '',
+                  ligne_budgetaire: bl?.code || '',
+                  reference_facture: liqEmail.reference_facture,
+                },
+              })
+              .catch(() => {});
+          }
+        }
+      } catch {
+        // Email failure does not block workflow
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
@@ -884,6 +933,54 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
         }
       }
 
+      // Gap 1 — QR Code traçabilité dans documents_generes
+      if (isLastStep && liqFull) {
+        try {
+          const qrHash = await generateHash({
+            reference: liqFull.numero,
+            type: 'LIQUIDATION',
+            dateValidation: new Date().toISOString(),
+            validateur: 'DG',
+          });
+
+          await supabase.from('documents_generes').insert({
+            entity_type: 'budget_liquidations',
+            entity_id: id,
+            type_document: 'pdf_liquidation',
+            reference: liqFull.numero,
+            nom_fichier: `liquidation_${liqFull.numero}.pdf`,
+            qr_code_hash: qrHash,
+            qr_code_data: `${window.location.origin}/verify/${qrHash.slice(0, 12)}`,
+            exercice,
+            genere_par: user.id,
+          });
+        } catch (qrErr) {
+          // Non-bloquant : ne pas empêcher la validation si le QR échoue
+          console.error('Erreur enregistrement QR documents_generes:', qrErr);
+        }
+      }
+
+      // Gap 4 — Notification validation finale → Trésorerie (DAF/TRESORIER)
+      if (isLastStep) {
+        const { data: tresoUsers } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['TRESORIER', 'DAF']);
+
+        if (tresoUsers?.length) {
+          valNotifs.push(
+            ...tresoUsers.map((u) => ({
+              user_id: u.user_id,
+              type: 'validation',
+              title: 'Liquidation validée — Ordonnancement à créer',
+              message: `La liquidation ${liqFull?.numero} (${formatCurrency(montant)} FCFA) a été validée. Un ordonnancement peut être créé.`,
+              entity_type: 'liquidation',
+              entity_id: id,
+            }))
+          );
+        }
+      }
+
       // DG approval: notify direction agents
       if (isLastStep && liqFull?.engagement_id) {
         const { data: eng } = await supabase
@@ -1008,6 +1105,101 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
 
       if (valNotifs.length > 0) {
         await supabase.from('notifications').insert(valNotifs);
+      }
+
+      // Email dispatch — visa DAAF ou validation finale (non-bloquant)
+      try {
+        const { data: liqEmail } = await supabase
+          .from('budget_liquidations')
+          .select(
+            `
+            numero, montant, net_a_payer, reference_facture, created_by,
+            engagement:budget_engagements(numero, objet, fournisseur,
+              budget_line:budget_lines(code, label, direction:directions(label))
+            )
+          `
+          )
+          .eq('id', id)
+          .single();
+
+        if (liqEmail) {
+          const eng = liqEmail.engagement as Record<string, unknown> | null;
+          const bl = eng?.budget_line as Record<string, unknown> | null;
+          const dir = bl?.direction as Record<string, unknown> | null;
+          const { data: _validatorProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          const emailType = isLastStep
+            ? 'liquidation_validee'
+            : currentStep === 1
+              ? 'liquidation_visa_daaf'
+              : 'liquidation_visa_dg';
+          const emailTitle = isLastStep
+            ? `Liquidation validée — ${liqEmail.numero}`
+            : `Visa ${stepInfo?.role} accordé — ${liqEmail.numero}`;
+          const emailMsg = isLastStep
+            ? `La liquidation ${liqEmail.numero} a été entièrement validée`
+            : `Le visa ${stepInfo?.role} de la liquidation ${liqEmail.numero} a été accordé`;
+
+          // Email to creator
+          if (liqEmail.created_by) {
+            supabase.functions
+              .invoke('send-notification-email', {
+                body: {
+                  user_id: liqEmail.created_by,
+                  type: emailType,
+                  title: emailTitle,
+                  message: emailMsg,
+                  entity_type: 'liquidation',
+                  entity_id: id,
+                  entity_numero: liqEmail.numero,
+                  montant: liqEmail.montant,
+                  net_a_payer: liqEmail.net_a_payer,
+                  objet_engagement: eng?.objet || '',
+                  fournisseur: eng?.fournisseur || '',
+                  direction: dir?.label || '',
+                  ligne_budgetaire: bl?.code || '',
+                  reference_facture: liqEmail.reference_facture,
+                  etape_liquidation: stepInfo?.label || '',
+                },
+              })
+              .catch(() => {});
+          }
+
+          // If DAAF step, also email DG
+          if (!isLastStep && currentStep === 1) {
+            const { data: dgUsers } = await supabase
+              .from('user_roles')
+              .select('user_id')
+              .eq('role', 'DG');
+            if (dgUsers?.length) {
+              for (const u of dgUsers) {
+                supabase.functions
+                  .invoke('send-notification-email', {
+                    body: {
+                      user_id: u.user_id,
+                      type: 'liquidation_visa_daaf',
+                      title: emailTitle,
+                      message: emailMsg,
+                      entity_type: 'liquidation',
+                      entity_id: id,
+                      entity_numero: liqEmail.numero,
+                      montant: liqEmail.montant,
+                      net_a_payer: liqEmail.net_a_payer,
+                      direction: dir?.label || '',
+                      etape_liquidation: 'DAAF',
+                    },
+                  })
+                  .catch(() => {});
+              }
+            }
+          }
+        }
+      } catch {
+        // Email failure does not block workflow
       }
     },
     onSuccess: () => {
@@ -1156,6 +1348,36 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
       if (rejectNotifs.length > 0) {
         await supabase.from('notifications').insert(rejectNotifs);
       }
+
+      // Email dispatch — liquidation_rejetee (non-bloquant)
+      try {
+        if (liquidationBefore?.created_by) {
+          const { data: _validatorProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          supabase.functions
+            .invoke('send-notification-email', {
+              body: {
+                user_id: liquidationBefore.created_by,
+                type: 'liquidation_rejetee',
+                title: `Liquidation rejetée — ${liquidationBefore.numero}`,
+                message: `La liquidation ${liquidationBefore.numero} a été rejetée à l'étape ${stepInfo?.role || ''} : ${reason}`,
+                entity_type: 'liquidation',
+                entity_id: id,
+                entity_numero: liquidationBefore.numero,
+                montant: liquidationBefore.montant,
+                motif_rejet: reason,
+                etape_liquidation: stepInfo?.role || '',
+              },
+            })
+            .catch(() => {});
+        }
+      } catch {
+        // Email failure does not block workflow
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
@@ -1229,6 +1451,42 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
         justification: motif,
         resume: `Report de la liquidation ${liquidationBefore?.numero}`,
       });
+
+      // Email dispatch — liquidation_differee (non-bloquant)
+      try {
+        const { data: liqCreator } = await supabase
+          .from('budget_liquidations')
+          .select('created_by')
+          .eq('id', id)
+          .single();
+
+        if (liqCreator?.created_by) {
+          const { data: _validatorProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          supabase.functions
+            .invoke('send-notification-email', {
+              body: {
+                user_id: liqCreator.created_by,
+                type: 'liquidation_differee',
+                title: `Liquidation différée — ${liquidationBefore?.numero}`,
+                message: `La liquidation ${liquidationBefore?.numero} a été différée. Motif : ${motif}`,
+                entity_type: 'liquidation',
+                entity_id: id,
+                entity_numero: liquidationBefore?.numero,
+                montant: liquidationBefore?.montant,
+                motif_differe: motif,
+                deadline_correction: dateReprise || '',
+              },
+            })
+            .catch(() => {});
+        }
+      } catch {
+        // Email failure does not block workflow
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['liquidations'] });
@@ -1437,5 +1695,71 @@ export function useLiquidationLight() {
     },
     enabled: !!exercice,
     staleTime: 60_000,
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// Gap 7b — Liquidations urgentes en retard > 48h (RPC polling)
+// ══════════════════════════════════════════════════════════════
+
+export interface OverdueUrgentLiquidation {
+  id: string;
+  numero: string;
+  montant: number;
+  fournisseur: string | null;
+  reglement_urgent_date: string;
+  heures_en_attente: number;
+}
+
+export function useOverdueUrgentLiquidations() {
+  const { exercice } = useExercice();
+
+  return useQuery<OverdueUrgentLiquidation[]>({
+    queryKey: ['overdue-urgent-liquidations', exercice],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_overdue_urgent_liquidations', {
+        p_exercice: exercice as string,
+      });
+
+      if (error) throw error;
+      return (data || []) as OverdueUrgentLiquidation[];
+    },
+    enabled: !!exercice,
+    staleTime: 5 * 60_000, // 5 min
+    refetchInterval: 5 * 60_000, // 5 min
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// Gap 8b — Engagements validés sans liquidation > 30 jours
+// ══════════════════════════════════════════════════════════════
+
+export interface EngagementSansLiquidation {
+  id: string;
+  numero: string;
+  objet: string;
+  montant: number;
+  fournisseur: string | null;
+  validated_at: string;
+  jours_depuis_validation: number;
+}
+
+export function useEngagementsSansLiquidation(jours: number = 30) {
+  const { exercice } = useExercice();
+
+  return useQuery<EngagementSansLiquidation[]>({
+    queryKey: ['engagements-sans-liquidation', exercice, jours],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_engagements_sans_liquidation', {
+        p_exercice: exercice as string,
+        p_jours: jours,
+      });
+
+      if (error) throw error;
+      return (data || []) as EngagementSansLiquidation[];
+    },
+    enabled: !!exercice,
+    staleTime: 5 * 60_000, // 5 min
+    refetchInterval: 5 * 60_000, // 5 min
   });
 }

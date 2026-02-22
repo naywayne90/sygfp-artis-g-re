@@ -1,18 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDAFDashboard } from "@/hooks/useDashboardByRole";
-import { useDashboardAlerts } from "@/hooks/useDashboardAlerts";
-import { 
-  FileText, 
-  CreditCard, 
-  Receipt, 
-  AlertTriangle, 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useDAFDashboard } from '@/hooks/useDashboardByRole';
+import { useDashboardAlerts } from '@/hooks/useDashboardAlerts';
+import { useDAAFLiquidationStats } from '@/hooks/useDAAFLiquidationStats';
+import {
+  FileText,
+  CreditCard,
+  Receipt,
+  AlertTriangle,
   ArrowRight,
   TrendingUp,
-  Wallet
-} from "lucide-react";
-import { Link } from "react-router-dom";
+  Wallet,
+  Flame,
+  Shield,
+  CheckCircle,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const formatMontant = (montant: number): string => {
   if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
@@ -24,16 +28,24 @@ const formatMontant = (montant: number): string => {
 export function DashboardDAF() {
   const { data: stats, isLoading } = useDAFDashboard();
   const { data: alerts } = useDashboardAlerts();
+  const { data: liqStats } = useDAAFLiquidationStats();
 
-  const warningAlerts = alerts?.filter(a => a.severity === "warning" || a.severity === "critical") || [];
+  const warningAlerts =
+    alerts?.filter((a) => a.severity === 'warning' || a.severity === 'critical') || [];
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i}><CardContent className="p-6"><Skeleton className="h-20" /></CardContent></Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-20" />
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </div>
     );
@@ -88,7 +100,7 @@ export function DashboardDAF() {
           </Card>
         </Link>
 
-        <Card className={stats?.depassementsBudgetaires ? "border-destructive/50" : ""}>
+        <Card className={stats?.depassementsBudgetaires ? 'border-destructive/50' : ''}>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-destructive/10">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -122,7 +134,9 @@ export function DashboardDAF() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Validés</span>
-                <Badge className="bg-success/10 text-success border-success/20">{stats?.engagementsValides || 0}</Badge>
+                <Badge className="bg-success/10 text-success border-success/20">
+                  {stats?.engagementsValides || 0}
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -210,6 +224,169 @@ export function DashboardDAF() {
         </CardContent>
       </Card>
 
+      {/* Liquidations à traiter */}
+      {liqStats && (
+        <>
+          {/* KPI Cards liquidations */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              Liquidations à traiter
+            </h3>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Link to="/liquidations?filter=a_valider">
+                <Card className="hover:border-primary/30 transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Receipt className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-2xl font-bold">{liqStats.enAttente}</p>
+                        <p className="text-xs text-muted-foreground">En attente validation</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground mt-2">
+                      {formatMontant(liqStats.montantEnAttente)} FCFA
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Link to="/liquidations?filter=urgent">
+                <Card
+                  className={`hover:border-primary/30 transition-colors cursor-pointer h-full ${liqStats.urgents > 0 ? 'border-destructive/50' : ''}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-destructive/10">
+                        <Flame className="h-5 w-5 text-destructive" />
+                      </div>
+                      <div className="flex-1 flex items-center gap-2">
+                        <p className="text-2xl font-bold">{liqStats.urgents}</p>
+                        {liqStats.urgents > 0 && (
+                          <Badge variant="destructive" className="animate-pulse text-xs">
+                            Urgent
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">Urgentes</p>
+                  </CardContent>
+                </Card>
+              </Link>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-warning/10">
+                      <Shield className="h-5 w-5 text-warning" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-2xl font-bold">{liqStats.certifiesSF}</p>
+                      <p className="text-xs text-muted-foreground">Certifiées SF</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">Prêtes à soumettre</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-success/10">
+                      <CheckCircle className="h-5 w-5 text-success" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-2xl font-bold">{liqStats.valideesDG}</p>
+                      <p className="text-xs text-muted-foreground">Validées DG</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">Terminées</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Ventilation par prestataire et par direction */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Par prestataire */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Par prestataire (Top 10)</CardTitle>
+                <CardDescription>Ventilation des liquidations par fournisseur</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {liqStats.parPrestataire.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucune liquidation</p>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                      <span>Fournisseur</span>
+                      <span className="text-right">Nb</span>
+                      <span className="text-right min-w-[80px]">Montant</span>
+                    </div>
+                    {liqStats.parPrestataire.map((p) => (
+                      <div
+                        key={p.fournisseur}
+                        className="grid grid-cols-[1fr_auto_auto] gap-2 text-sm items-center"
+                      >
+                        <span className="truncate" title={p.fournisseur}>
+                          {p.fournisseur}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {p.count}
+                        </Badge>
+                        <span className="text-right font-medium text-xs">
+                          {formatMontant(p.montant)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Par direction */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Par direction</CardTitle>
+                <CardDescription>Ventilation des liquidations par direction</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {liqStats.parDirection.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucune liquidation</p>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                      <span>Direction</span>
+                      <span className="text-right">Nb</span>
+                      <span className="text-right min-w-[80px]">Montant</span>
+                    </div>
+                    {liqStats.parDirection.map((d) => (
+                      <div
+                        key={d.direction}
+                        className="grid grid-cols-[1fr_auto_auto] gap-2 text-sm items-center"
+                      >
+                        <span className="truncate" title={d.direction}>
+                          {d.sigle ? `${d.sigle}` : d.direction}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {d.count}
+                        </Badge>
+                        <span className="text-right font-medium text-xs">
+                          {formatMontant(d.montant)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
+
       {/* Alertes */}
       {warningAlerts.length > 0 && (
         <Card className="border-warning/50">
@@ -221,10 +398,13 @@ export function DashboardDAF() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {warningAlerts.slice(0, 5).map(alert => (
-                <Link key={alert.id} to={alert.link || "#"} className="block">
+              {warningAlerts.slice(0, 5).map((alert) => (
+                <Link key={alert.id} to={alert.link || '#'} className="block">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-card border hover:bg-muted/50 transition-colors">
-                    <Badge variant={alert.severity === "critical" ? "destructive" : "outline"} className="text-xs">
+                    <Badge
+                      variant={alert.severity === 'critical' ? 'destructive' : 'outline'}
+                      className="text-xs"
+                    >
                       {alert.type}
                     </Badge>
                     <span className="text-sm flex-1 truncate">{alert.title}</span>

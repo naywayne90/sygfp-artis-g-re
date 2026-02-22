@@ -204,25 +204,80 @@ export function useUrgentLiquidations() {
         resume: `Marquage urgent de la liquidation ${liquidationBefore?.numero}`,
       });
 
-      // Notifications DAAF + DMG pour règlement prioritaire
-      const { data: daafUsers } = await supabase
+      // Gap 3 — Notifications DMG + DG + DAAF + DAF pour règlement prioritaire (exigence TOURÉ)
+      const { data: urgentTargets } = await supabase
         .from('user_roles')
         .select('user_id')
-        .in('role', ['DAAF', 'DAF', 'DMG']);
+        .in('role', ['DMG', 'DG', 'DAAF', 'DAF']);
 
-      if (daafUsers?.length) {
+      if (urgentTargets?.length) {
         await supabase.from('notifications').insert(
-          daafUsers
+          urgentTargets
             .filter((u) => u.user_id !== user.id)
             .map((u) => ({
               user_id: u.user_id,
-              type: 'alerte',
-              title: 'Liquidation urgente',
-              message: `La liquidation ${liquidationBefore?.numero} a été marquée urgente : ${motif}`,
+              type: 'urgence',
+              title: 'Liquidation urgente signalée',
+              message: `La liquidation ${liquidationBefore?.numero} a été marquée comme urgente : ${motif}`,
               entity_type: 'liquidation',
               entity_id: liquidationId,
+              is_urgent: true,
             }))
         );
+      }
+
+      // Email dispatch — liquidation_urgente (non-bloquant)
+      try {
+        const { data: liqEmail } = await supabase
+          .from('budget_liquidations')
+          .select(
+            `
+            numero, montant, net_a_payer,
+            engagement:budget_engagements(numero, objet, fournisseur,
+              budget_line:budget_lines(code, label, direction:directions(label))
+            )
+          `
+          )
+          .eq('id', liquidationId)
+          .single();
+
+        if (liqEmail) {
+          const eng = liqEmail.engagement as Record<string, unknown> | null;
+          const bl = eng?.budget_line as Record<string, unknown> | null;
+          const dir = bl?.direction as Record<string, unknown> | null;
+
+          const { data: urgentEmailTargets } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .in('role', ['DG', 'DMG', 'DAAF']);
+
+          if (urgentEmailTargets?.length) {
+            for (const u of urgentEmailTargets.filter((t) => t.user_id !== user.id)) {
+              supabase.functions
+                .invoke('send-notification-email', {
+                  body: {
+                    user_id: u.user_id,
+                    type: 'liquidation_urgente',
+                    title: `Liquidation urgente — ${liqEmail.numero}`,
+                    message: `La liquidation ${liqEmail.numero} a été marquée urgente. Motif : ${motif}`,
+                    entity_type: 'liquidation',
+                    entity_id: liquidationId,
+                    entity_numero: liqEmail.numero,
+                    montant: liqEmail.montant,
+                    net_a_payer: liqEmail.net_a_payer,
+                    objet_engagement: (eng?.objet as string) || '',
+                    fournisseur: (eng?.fournisseur as string) || '',
+                    direction: (dir?.label as string) || '',
+                    ligne_budgetaire: (bl?.code as string) || '',
+                    reglement_urgent_motif: motif,
+                  },
+                })
+                .catch(() => {});
+            }
+          }
+        }
+      } catch {
+        // Email failure does not block workflow
       }
 
       return liquidationBefore?.numero;

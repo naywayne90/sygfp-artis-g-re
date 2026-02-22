@@ -119,7 +119,7 @@ export function useSidebarBadges() {
           .from('budget_liquidations')
           .select('id', { count: 'exact', head: true })
           .eq('exercice', exercice)
-          .in('statut', ['soumis', 'validé_daaf', 'en_attente']),
+          .in('statut', ['soumis', 'certifié_sf']),
 
         // Liquidations différées (head: true — count only)
         supabase

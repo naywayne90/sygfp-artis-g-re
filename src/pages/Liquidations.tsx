@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Plus,
   Search,
@@ -42,6 +43,7 @@ import {
   FileSpreadsheet,
   FileText,
   FileDown,
+  AlertTriangle,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -50,6 +52,8 @@ import {
   useLiquidations,
   useLiquidationCounts,
   useLiquidationLight,
+  useOverdueUrgentLiquidations,
+  useEngagementsSansLiquidation,
   Liquidation,
   VALIDATION_STEPS,
   EngagementPourLiquidation,
@@ -137,6 +141,8 @@ export default function Liquidations() {
   const { data: lightData } = useLiquidationLight();
 
   const { urgentCount } = useUrgentLiquidations();
+  const { data: overdueUrgent = [] } = useOverdueUrgentLiquidations();
+  const { data: engSansLiq = [] } = useEngagementsSansLiquidation();
   const { exercice } = useExercice();
   const { exportExcel, exportCSV, exportPDF, exportAttestation, isExporting } =
     useLiquidationExport();
@@ -343,6 +349,46 @@ export default function Liquidations() {
 
       {/* Aide contextuelle */}
       <ModuleHelp {...MODULE_HELP_CONFIG.liquidations} />
+
+      {/* Gap 7c — Alerte liquidations urgentes en retard > 48h */}
+      {overdueUrgent.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>
+            {overdueUrgent.length} liquidation(s) urgente(s) non traitée(s) depuis plus de 48h
+          </AlertTitle>
+          <AlertDescription>
+            {overdueUrgent.slice(0, 5).map((l) => (
+              <span key={l.id} className="mr-3 font-mono text-sm">
+                {l.numero} ({Math.round(l.heures_en_attente)}h)
+              </span>
+            ))}
+            {overdueUrgent.length > 5 && (
+              <span className="text-sm">et {overdueUrgent.length - 5} autre(s)...</span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Gap 8c — Alerte engagements validés sans liquidation > 30 jours */}
+      {engSansLiq.length > 0 && (
+        <Alert className="border-orange-300 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
+          <Clock className="h-4 w-4 text-orange-600" />
+          <AlertTitle className="text-orange-800 dark:text-orange-300">
+            {engSansLiq.length} engagement(s) validé(s) sans liquidation depuis plus de 30 jours
+          </AlertTitle>
+          <AlertDescription className="text-orange-700 dark:text-orange-400">
+            {engSansLiq.slice(0, 5).map((e) => (
+              <span key={e.id} className="mr-3 font-mono text-sm">
+                {e.numero} ({e.jours_depuis_validation}j)
+              </span>
+            ))}
+            {engSansLiq.length > 5 && (
+              <span className="text-sm">et {engSansLiq.length - 5} autre(s)...</span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Page Header */}
       <PageHeader

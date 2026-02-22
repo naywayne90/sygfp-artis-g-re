@@ -5,7 +5,7 @@
  * résumé fiscal par item (HT, TVA, retenues, net), boutons Valider/Rejeter.
  */
 
-import { useState } from 'react';
+import { Fragment, useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,11 +46,12 @@ import {
   AlertTriangle,
   Loader2,
   TrendingUp,
+  Building2,
+  Users,
 } from 'lucide-react';
 import { Liquidation, requiresDgValidation, SEUIL_VALIDATION_DG } from '@/hooks/useLiquidations';
 import { formatCurrency } from '@/lib/utils';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { UrgentLiquidationBadge } from '@/components/liquidations/UrgentLiquidationBadge';
 
 interface LiquidationValidationDAAFProps {
@@ -69,6 +77,7 @@ export function LiquidationValidationDAAF({
   const [targetId, setTargetId] = useState<string | null>(null);
   const [rejectMotif, setRejectMotif] = useState('');
   const [validateComment, setValidateComment] = useState('');
+  const [groupBy, setGroupBy] = useState<'none' | 'prestataire' | 'direction'>('none');
 
   // Tri : urgents en premier, puis par date de liquidation (plus récents d'abord)
   const sorted = [...liquidations].sort((a, b) => {
@@ -114,6 +123,82 @@ export function LiquidationValidationDAAF({
   };
 
   const targetLiq = sorted.find((l) => l.id === targetId);
+
+  // ── Agrégation par prestataire ──
+  const byPrestataire = sorted.reduce<
+    Record<
+      string,
+      { nom: string; count: number; montant: number; netAPayer: number; urgents: number }
+    >
+  >((acc, liq) => {
+    const nom =
+      liq.engagement?.marche?.prestataire?.raison_sociale ||
+      liq.engagement?.fournisseur ||
+      'Non renseigné';
+    if (!acc[nom]) acc[nom] = { nom, count: 0, montant: 0, netAPayer: 0, urgents: 0 };
+    acc[nom].count += 1;
+    acc[nom].montant += liq.montant;
+    acc[nom].netAPayer += liq.net_a_payer || liq.montant;
+    if (liq.reglement_urgent) acc[nom].urgents += 1;
+    return acc;
+  }, {});
+  const prestataireRows = Object.values(byPrestataire).sort((a, b) => b.netAPayer - a.netAPayer);
+
+  // ── Agrégation par direction ──
+  const byDirection = sorted.reduce<
+    Record<
+      string,
+      {
+        nom: string;
+        sigle: string;
+        count: number;
+        montant: number;
+        netAPayer: number;
+        urgents: number;
+      }
+    >
+  >((acc, liq) => {
+    const dir = liq.engagement?.budget_line?.direction;
+    const sigle = dir?.sigle || '';
+    const nom = dir?.label || 'Non renseignée';
+    const key = sigle || nom;
+    if (!acc[key]) acc[key] = { nom, sigle, count: 0, montant: 0, netAPayer: 0, urgents: 0 };
+    acc[key].count += 1;
+    acc[key].montant += liq.montant;
+    acc[key].netAPayer += liq.net_a_payer || liq.montant;
+    if (liq.reglement_urgent) acc[key].urgents += 1;
+    return acc;
+  }, {});
+  const directionRows = Object.values(byDirection).sort((a, b) => b.netAPayer - a.netAPayer);
+
+  // ── Groupement dynamique pour le tableau principal ──
+  const groupedEntries = useMemo(() => {
+    if (groupBy === 'none') return [{ key: 'all', label: '', items: sorted, total: 0 }];
+
+    const groups: Record<
+      string,
+      { key: string; label: string; items: Liquidation[]; total: number }
+    > = {};
+    for (const liq of sorted) {
+      let key: string;
+      let label: string;
+      if (groupBy === 'prestataire') {
+        label =
+          liq.engagement?.marche?.prestataire?.raison_sociale ||
+          liq.engagement?.fournisseur ||
+          'Non renseigné';
+        key = label;
+      } else {
+        const dir = liq.engagement?.budget_line?.direction;
+        key = dir?.sigle || dir?.label || 'Non renseignée';
+        label = dir?.sigle ? `${dir.sigle} — ${dir.label}` : dir?.label || 'Non renseignée';
+      }
+      if (!groups[key]) groups[key] = { key, label, items: [], total: 0 };
+      groups[key].items.push(liq);
+      groups[key].total += liq.net_a_payer || liq.montant;
+    }
+    return Object.values(groups).sort((a, b) => b.total - a.total);
+  }, [sorted, groupBy]);
 
   return (
     <div className="space-y-4">
@@ -171,6 +256,96 @@ export function LiquidationValidationDAAF({
         </Card>
       </div>
 
+      {/* Agrégations prestataire + direction */}
+      {sorted.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Par prestataire */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Par prestataire ({prestataireRows.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Prestataire</TableHead>
+                    <TableHead className="text-center w-[50px]">Nb</TableHead>
+                    <TableHead className="text-right">Net à payer</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {prestataireRows.map((row) => (
+                    <TableRow key={row.nom}>
+                      <TableCell className="text-sm">
+                        <span className="truncate block max-w-[180px]">{row.nom}</span>
+                        {row.urgents > 0 && (
+                          <Badge variant="destructive" className="text-[10px] px-1 py-0 ml-1">
+                            {row.urgents} urg.
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center font-medium">{row.count}</TableCell>
+                      <TableCell className="text-right font-bold text-sm">
+                        {formatCurrency(row.netAPayer)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Par direction */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Par direction ({directionRows.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Direction</TableHead>
+                    <TableHead className="text-center w-[50px]">Nb</TableHead>
+                    <TableHead className="text-right">Net à payer</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {directionRows.map((row) => (
+                    <TableRow key={row.sigle || row.nom}>
+                      <TableCell className="text-sm">
+                        {row.sigle ? (
+                          <>
+                            <span className="font-medium">{row.sigle}</span>
+                            <span className="text-muted-foreground ml-1 text-xs">— {row.nom}</span>
+                          </>
+                        ) : (
+                          <span>{row.nom}</span>
+                        )}
+                        {row.urgents > 0 && (
+                          <Badge variant="destructive" className="text-[10px] px-1 py-0 ml-1">
+                            {row.urgents} urg.
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center font-medium">{row.count}</TableCell>
+                      <TableCell className="text-right font-bold text-sm">
+                        {formatCurrency(row.netAPayer)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Liste */}
       {sorted.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
@@ -180,9 +355,24 @@ export function LiquidationValidationDAAF({
       ) : (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">
-              Liquidations en attente de validation ({enAttente})
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">
+                Liquidations en attente de validation ({enAttente})
+              </CardTitle>
+              <Select
+                value={groupBy}
+                onValueChange={(v) => setGroupBy(v as 'none' | 'prestataire' | 'direction')}
+              >
+                <SelectTrigger className="w-[200px] h-8 text-xs">
+                  <SelectValue placeholder="Grouper par..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sans groupement</SelectItem>
+                  <SelectItem value="prestataire">Par prestataire</SelectItem>
+                  <SelectItem value="direction">Par direction</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -200,117 +390,145 @@ export function LiquidationValidationDAAF({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sorted.map((liq) => {
-                  const totalRetenues =
-                    (liq.airsi_montant || 0) +
-                    (liq.retenue_source_montant || 0) +
-                    (liq.retenue_bic_montant || 0) +
-                    (liq.retenue_bnc_montant || 0) +
-                    (liq.penalites_montant || liq.penalites_retard || 0);
-                  const needsDG = requiresDgValidation(liq.montant);
+                {groupedEntries.map((group) => (
+                  <Fragment key={group.key}>
+                    {groupBy !== 'none' && (
+                      <TableRow className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={9} className="py-2 font-medium text-sm">
+                          <div className="flex items-center justify-between">
+                            <span>
+                              {groupBy === 'prestataire' ? (
+                                <Users className="h-4 w-4 inline mr-2" />
+                              ) : (
+                                <Building2 className="h-4 w-4 inline mr-2" />
+                              )}
+                              {group.label}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {group.items.length} liq. — {formatCurrency(group.total)}
+                            </span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {group.items.map((liq) => {
+                      const totalRetenues =
+                        (liq.airsi_montant || 0) +
+                        (liq.retenue_source_montant || 0) +
+                        (liq.retenue_bic_montant || 0) +
+                        (liq.retenue_bnc_montant || 0) +
+                        (liq.penalites_montant || liq.penalites_retard || 0);
+                      const needsDG = requiresDgValidation(liq.montant);
 
-                  return (
-                    <TableRow
-                      key={liq.id}
-                      className={liq.reglement_urgent ? 'bg-red-50/50 dark:bg-red-950/10' : ''}
-                    >
-                      {/* Urgence */}
-                      <TableCell>
-                        {liq.reglement_urgent && (
-                          <UrgentLiquidationBadge
-                            variant="icon"
-                            motif={liq.reglement_urgent_motif}
-                            date={liq.reglement_urgent_date}
-                          />
-                        )}
-                      </TableCell>
-                      {/* Numéro */}
-                      <TableCell>
-                        <Button
-                          variant="link"
-                          className="h-auto p-0 font-mono text-sm"
-                          onClick={() => onView(liq)}
+                      return (
+                        <TableRow
+                          key={liq.id}
+                          className={liq.reglement_urgent ? 'bg-red-50/50 dark:bg-red-950/10' : ''}
                         >
-                          {liq.numero}
-                        </Button>
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(liq.date_liquidation), 'dd MMM yyyy', { locale: fr })}
-                        </div>
-                      </TableCell>
-                      {/* Engagement */}
-                      <TableCell>
-                        <div className="text-sm font-medium">{liq.engagement?.numero || 'N/A'}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          {liq.engagement?.objet}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {liq.engagement?.marche?.prestataire?.raison_sociale ||
-                            liq.engagement?.fournisseur ||
-                            ''}
-                        </div>
-                      </TableCell>
-                      {/* HT */}
-                      <TableCell className="text-right text-sm">
-                        {formatCurrency(liq.montant_ht)}
-                      </TableCell>
-                      {/* TVA */}
-                      <TableCell className="text-right text-sm">
-                        {liq.tva_montant ? formatCurrency(liq.tva_montant) : '-'}
-                      </TableCell>
-                      {/* Retenues */}
-                      <TableCell className="text-right text-sm">
-                        {totalRetenues > 0 ? (
-                          <span className="text-orange-600 dark:text-orange-400">
-                            -{formatCurrency(totalRetenues)}
-                          </span>
-                        ) : (
-                          '-'
-                        )}
-                      </TableCell>
-                      {/* Net à payer */}
-                      <TableCell className="text-right font-bold text-success">
-                        {formatCurrency(liq.net_a_payer || liq.montant)}
-                      </TableCell>
-                      {/* DG requis */}
-                      <TableCell className="text-center">
-                        {needsDG ? (
-                          <Badge variant="outline" className="text-secondary border-secondary/30">
-                            Oui
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Non</span>
-                        )}
-                      </TableCell>
-                      {/* Actions */}
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => onView(liq)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleValidateClick(liq.id)}
-                            disabled={isValidating}
-                            className="gap-1"
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                            Valider
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleRejectClick(liq.id)}
-                            disabled={isRejecting}
-                            className="gap-1"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Rejeter
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                          {/* Urgence */}
+                          <TableCell>
+                            {liq.reglement_urgent && (
+                              <UrgentLiquidationBadge
+                                variant="icon"
+                                motif={liq.reglement_urgent_motif}
+                                date={liq.reglement_urgent_date}
+                              />
+                            )}
+                          </TableCell>
+                          {/* Numéro */}
+                          <TableCell>
+                            <Button
+                              variant="link"
+                              className="h-auto p-0 font-mono text-sm"
+                              onClick={() => onView(liq)}
+                            >
+                              {liq.numero}
+                            </Button>
+                            <div className="text-xs text-muted-foreground">
+                              {format(new Date(liq.date_liquidation), 'dd/MM/yyyy')}
+                            </div>
+                          </TableCell>
+                          {/* Engagement */}
+                          <TableCell>
+                            <div className="text-sm font-medium">
+                              {liq.engagement?.numero || 'N/A'}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {liq.engagement?.objet}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {liq.engagement?.marche?.prestataire?.raison_sociale ||
+                                liq.engagement?.fournisseur ||
+                                ''}
+                            </div>
+                          </TableCell>
+                          {/* HT */}
+                          <TableCell className="text-right text-sm">
+                            {formatCurrency(liq.montant_ht)}
+                          </TableCell>
+                          {/* TVA */}
+                          <TableCell className="text-right text-sm">
+                            {liq.tva_montant ? formatCurrency(liq.tva_montant) : '-'}
+                          </TableCell>
+                          {/* Retenues */}
+                          <TableCell className="text-right text-sm">
+                            {totalRetenues > 0 ? (
+                              <span className="text-orange-600 dark:text-orange-400">
+                                -{formatCurrency(totalRetenues)}
+                              </span>
+                            ) : (
+                              '-'
+                            )}
+                          </TableCell>
+                          {/* Net à payer */}
+                          <TableCell className="text-right font-bold text-success">
+                            {formatCurrency(liq.net_a_payer || liq.montant)}
+                          </TableCell>
+                          {/* DG requis */}
+                          <TableCell className="text-center">
+                            {needsDG ? (
+                              <Badge
+                                variant="outline"
+                                className="text-secondary border-secondary/30"
+                              >
+                                Oui
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Non</span>
+                            )}
+                          </TableCell>
+                          {/* Actions */}
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button size="sm" variant="ghost" onClick={() => onView(liq)}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleValidateClick(liq.id)}
+                                disabled={isValidating}
+                                className="gap-1"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                                Valider
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleRejectClick(liq.id)}
+                                disabled={isRejecting}
+                                className="gap-1"
+                              >
+                                <XCircle className="h-4 w-4" />
+                                Rejeter
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </Fragment>
+                ))}
               </TableBody>
             </Table>
 

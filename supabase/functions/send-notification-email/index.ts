@@ -33,6 +33,19 @@ interface NotificationEmailRequest {
   etape_visa?: string;
   montant_degage?: number;
   motif_degagement?: string;
+  // Liquidation-specific fields (Prompt 12)
+  net_a_payer?: number;
+  total_retenues?: number;
+  regime_fiscal?: string;
+  objet_engagement?: string;
+  reference_facture?: string;
+  reglement_urgent_motif?: string;
+  etape_liquidation?: string;
+  motif_differe?: string;
+  deadline_correction?: string;
+  // Ordonnancement-specific fields (Prompt 12 — exigence TOURÉ)
+  montant_regle?: number;
+  montant_restant?: number;
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -53,6 +66,18 @@ const TYPE_LABELS: Record<string, string> = {
   engagement_rejete: 'Engagement rejeté',
   engagement_degage: 'Dégagement engagement',
   engagement_differe: 'Engagement différé',
+  // Liquidation types (Prompt 12)
+  liquidation_soumise: 'Liquidation soumise',
+  liquidation_visa_daaf: 'Visa DAAF liquidation',
+  liquidation_visa_dg: 'Visa DG liquidation',
+  liquidation_validee: 'Liquidation validée',
+  liquidation_rejetee: 'Liquidation rejetée',
+  liquidation_differee: 'Liquidation différée',
+  liquidation_urgente: 'Liquidation urgente',
+  liquidation_certifiee_sf: 'Service fait certifié',
+  // Ordonnancement types (Prompt 12 — exigence TOURÉ)
+  ordonnancement_cree: 'Ordonnancement créé',
+  ordonnancement_valide: 'Ordonnancement validé',
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -239,7 +264,111 @@ const handler = async (req: Request): Promise<Response> => {
       </table>`;
     }
 
-    // Choose badge color based on reglement type
+    // Build liquidation-specific detail block (Prompt 12)
+    const isLiquidationType = payload.type.startsWith('liquidation_');
+    let liquidationDetailBlock = '';
+    if (isLiquidationType && (payload.montant || payload.net_a_payer || payload.objet_engagement)) {
+      const rows: string[] = [];
+      if (payload.entity_numero)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">N&deg; Liquidation</td><td style="padding:6px 10px;">${payload.entity_numero}</td></tr>`
+        );
+      if (payload.objet_engagement)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Engagement</td><td style="padding:6px 10px;">${payload.objet_engagement}</td></tr>`
+        );
+      if (payload.fournisseur)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Fournisseur</td><td style="padding:6px 10px;">${payload.fournisseur}</td></tr>`
+        );
+      if (payload.montant)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant TTC</td><td style="padding:6px 10px;font-weight:bold;color:#1e40af;">${formatMontant(payload.montant)}</td></tr>`
+        );
+      if (payload.net_a_payer)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Net &agrave; payer</td><td style="padding:6px 10px;font-weight:bold;color:#059669;">${formatMontant(payload.net_a_payer)}</td></tr>`
+        );
+      if (payload.total_retenues)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Total retenues</td><td style="padding:6px 10px;color:#dc2626;">${formatMontant(payload.total_retenues)}</td></tr>`
+        );
+      if (payload.regime_fiscal)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">R&eacute;gime fiscal</td><td style="padding:6px 10px;">${payload.regime_fiscal}</td></tr>`
+        );
+      if (payload.ligne_budgetaire)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Ligne budg&eacute;taire</td><td style="padding:6px 10px;">${payload.ligne_budgetaire}</td></tr>`
+        );
+      if (payload.direction)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Direction</td><td style="padding:6px 10px;">${payload.direction}</td></tr>`
+        );
+      if (payload.reference_facture)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">R&eacute;f. facture</td><td style="padding:6px 10px;">${payload.reference_facture}</td></tr>`
+        );
+      if (payload.etape_liquidation)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">&Eacute;tape</td><td style="padding:6px 10px;">${payload.etape_liquidation}</td></tr>`
+        );
+      if (payload.motif_rejet)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Motif de rejet</td><td style="padding:6px 10px;color:#dc2626;">${payload.motif_rejet}</td></tr>`
+        );
+      if (payload.motif_differe)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Motif du report</td><td style="padding:6px 10px;color:#d97706;">${payload.motif_differe}</td></tr>`
+        );
+      if (payload.reglement_urgent_motif)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Motif urgence</td><td style="padding:6px 10px;color:#dc2626;font-weight:bold;">${payload.reglement_urgent_motif}</td></tr>`
+        );
+      if (payload.deadline_correction)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Date de reprise</td><td style="padding:6px 10px;">${payload.deadline_correction}</td></tr>`
+        );
+
+      liquidationDetailBlock = `
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e5e7eb;border-radius:8px;">
+        ${rows.join('')}
+      </table>`;
+    }
+
+    // Build ordonnancement-specific detail block (Prompt 12 — exigence TOURÉ)
+    const isOrdonnancementType = payload.type.startsWith('ordonnancement_');
+    let ordonnancementDetailBlock = '';
+    if (isOrdonnancementType && (payload.montant || payload.fournisseur || payload.entity_numero)) {
+      const rows: string[] = [];
+      if (payload.entity_numero)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">R&eacute;f&eacute;rence</td><td style="padding:6px 10px;">${payload.entity_numero}</td></tr>`
+        );
+      if (payload.fournisseur)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Fournisseur</td><td style="padding:6px 10px;">${payload.fournisseur}</td></tr>`
+        );
+      if (payload.net_a_payer)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant net</td><td style="padding:6px 10px;font-weight:bold;color:#1e40af;">${formatMontant(payload.net_a_payer)}</td></tr>`
+        );
+      if (payload.montant_regle !== undefined)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant r&eacute;gl&eacute;</td><td style="padding:6px 10px;font-weight:bold;color:#059669;">${formatMontant(payload.montant_regle)}</td></tr>`
+        );
+      if (payload.montant_restant !== undefined)
+        rows.push(
+          `<tr><td style="padding:6px 10px;color:#666;font-weight:500;">Montant restant</td><td style="padding:6px 10px;font-weight:bold;color:#d97706;">${formatMontant(payload.montant_restant)}</td></tr>`
+        );
+
+      ordonnancementDetailBlock = `
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;border:1px solid #e5e7eb;border-radius:8px;">
+        ${rows.join('')}
+      </table>`;
+    }
+
+    // Choose badge color based on type
     let badgeBg = '#dbeafe';
     let badgeColor = '#1e40af';
     let borderColor = '#3b82f6';
@@ -263,6 +392,30 @@ const handler = async (req: Request): Promise<Response> => {
       badgeBg = '#d1fae5';
       badgeColor = '#059669';
       borderColor = '#10b981';
+    } else if (payload.type === 'liquidation_rejetee' || payload.type === 'liquidation_urgente') {
+      badgeBg = '#fee2e2';
+      badgeColor = '#dc2626';
+      borderColor = '#ef4444';
+    } else if (payload.type === 'liquidation_validee' || payload.type === 'liquidation_visa_dg') {
+      badgeBg = '#d1fae5';
+      badgeColor = '#059669';
+      borderColor = '#10b981';
+    } else if (payload.type === 'liquidation_differee') {
+      badgeBg = '#fef3c7';
+      badgeColor = '#d97706';
+      borderColor = '#f59e0b';
+    } else if (payload.type === 'liquidation_soumise' || payload.type === 'liquidation_visa_daaf') {
+      badgeBg = '#dbeafe';
+      badgeColor = '#1e40af';
+      borderColor = '#3b82f6';
+    } else if (payload.type === 'ordonnancement_valide') {
+      badgeBg = '#d1fae5';
+      badgeColor = '#059669';
+      borderColor = '#10b981';
+    } else if (payload.type === 'ordonnancement_cree') {
+      badgeBg = '#dbeafe';
+      badgeColor = '#1e40af';
+      borderColor = '#3b82f6';
     }
 
     const htmlContent = `
@@ -297,6 +450,8 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
       ${reglementDetailBlock}
       ${engagementDetailBlock}
+      ${liquidationDetailBlock}
+      ${ordonnancementDetailBlock}
       <p style="text-align: center; margin-top: 24px;">
         <a href="#" class="btn">Acc&eacute;der &agrave; l'application</a>
       </p>

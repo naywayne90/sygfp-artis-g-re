@@ -206,6 +206,31 @@ export function ServiceFaitForm({
         },
       });
 
+      // Gap 2 — Notification DAAF après certification du service fait
+      if (formData.service_fait && liquidation.statut === 'brouillon') {
+        try {
+          const { data: daafUsers } = await supabase
+            .from('user_roles')
+            .select('user_id')
+            .eq('role', 'DAAF');
+
+          if (daafUsers?.length) {
+            await supabase.from('notifications').insert(
+              daafUsers.map((u) => ({
+                user_id: u.user_id,
+                type: 'validation',
+                title: 'Service fait certifié',
+                message: `Le service fait de la liquidation ${liquidation.numero} a été certifié. La liquidation est prête pour soumission.`,
+                entity_type: 'liquidation',
+                entity_id: liquidationId,
+              }))
+            );
+          }
+        } catch (notifErr) {
+          console.error('Erreur notification DAAF SF:', notifErr);
+        }
+      }
+
       toast.success(
         formData.service_fait
           ? 'Service fait certifié avec succès'
