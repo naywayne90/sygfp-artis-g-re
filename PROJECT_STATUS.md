@@ -1,9 +1,9 @@
 # INVENTAIRE COMPLET DU PROJET SYGFP
 
-**Date :** 19 fevrier 2026
-**Version :** v2.0
+**Date :** 22 fevrier 2026
+**Version :** v2.1
 **Branche :** main
-**Dernier commit :** d24e7df (feat(passation): Prompt 11 - Edge Function generate-export)
+**Dernier commit :** d1451b1 (feat(liquidation): Prompts 5-13 complet + Prompt 10 RLS/TRESORERIE/indexes)
 
 > Ce document est la memoire permanente du projet. Si on perd tmux, ce fichier suffit a tout reprendre.
 
@@ -27,9 +27,9 @@
 | **Vues**            | 37+ (types) / ~42 (avec vues SQL Editor)      |
 | **Fonctions SQL**   | 174                                           |
 | **RLS Policies**    | 621                                           |
-| **Tests unitaires** | 369 (Vitest)                                  |
-| **Tests E2E**       | 69 spec files (Playwright)                    |
-| **Build**           | OK (24.73s)                                   |
+| **Tests unitaires** | 704 (Vitest)                                  |
+| **Tests E2E**       | 69 spec files + 104 liquidation (Playwright)  |
+| **Build**           | OK (58s)                                      |
 | **TypeScript**      | 0 erreurs                                     |
 
 ---
@@ -70,8 +70,8 @@ URL  : https://github.com/naywayne90/sygfp-artis-g-re
 ```
 PREPARATION                           EXECUTION
 ---------                             ---------
-1. Note SEF                           6. Engagement
-2. Note AEF                           7. Liquidation
+1. Note SEF                           6. Engagement (CERTIFIE)
+2. Note AEF                           7. Liquidation (CERTIFIE)
 3. Imputation                         8. Ordonnancement
 4. Expression de Besoin               9. Reglement
 5. Passation de Marche (CERTIFIE)
@@ -537,14 +537,14 @@ Screenshots : only-on-failure
 
 ---
 
-## 6. QA — ETAT AU 19 FEVRIER 2026
+## 6. QA — ETAT AU 22 FEVRIER 2026
 
-| Verification       | Resultat                      |
-| ------------------ | ----------------------------- |
-| `npx tsc --noEmit` | 0 erreurs                     |
-| `npx vite build`   | Succes (24.73s, 4884 modules) |
-| `npx vitest run`   | 369/369 PASS                  |
-| ESLint             | 0 warnings (pre-commit hook)  |
+| Verification       | Resultat                     |
+| ------------------ | ---------------------------- |
+| `npx tsc --noEmit` | 0 erreurs                    |
+| `npx vite build`   | Succes (58s)                 |
+| `npx vitest run`   | 704/704 PASS                 |
+| ESLint             | 0 warnings (pre-commit hook) |
 
 ---
 
@@ -577,25 +577,44 @@ passation_marche, lots_marche, soumissionnaires_lot, soumissions, marche_attachm
 
 ---
 
-## 8. MODULE ENGAGEMENT — ETAT ACTUEL
+## 8. MODULE ENGAGEMENT — CERTIFIE 100/100
 
+**Score : 100/100** (voir `docs/CERTIFICATION_ENGAGEMENT.md`)
 **Table :** `budget_engagements` (2,805 enregistrements migres)
-**FK passation :** `passation_marche_id` existe mais NON peuple
 **Workflow :** 4 etapes (SAF→CB→DAF→DG) via `engagement_validations`
 **Reference :** ENG-YYYY-NNNN via `get_next_sequence()`
 **Impact budget :** `budget_lines.total_engage += montant` quand `statut='valide'`
-
-### 5 Gaps identifies (voir `docs/TRANSITION_VERS_ENGAGEMENT.md`)
-
-1. FK passation_marche_id non peuple dans EngagementFromPMForm
-2. Pas de navigation retour Engagement → Passation
-3. Notifications workflow non implementees
-4. Pre-remplissage depuis passation incomplet
-5. 0 tests unitaires engagement
+**Tests :** 171 unitaires + 60 E2E
 
 ---
 
-## 9. UTILISATEURS TEST
+## 9. MODULE LIQUIDATION — CERTIFIE 22/02/2026
+
+- 15 prompts executes
+- 704 tests vitest PASS (+ 260 depuis Engagement)
+- 104 tests Playwright (e2e/liquidation-complet.spec.ts)
+- tsc 0 errors, build OK (58s), ESLint 0 warnings
+- Commit : d1451b1
+
+### Fonctionnalites
+
+- Calculs fiscaux temps reel (TVA 18%, AIRSI 5%, retenues BIC/BNC, penalites)
+- Net a payer = TTC - retenues (calcule automatiquement)
+- Certification service fait (date, certificateur, PJ obligatoires)
+- Flag reglement_urgent + motif (exigence TOURE)
+- Liquidations partielles multi-tranches (controle SUM <= engagement)
+- Validation DAAF + DG (si seuil)
+- Impact budget : trigger liquide += net_a_payer
+- Detail 6 onglets (Infos, Calculs, Service fait, Validation, Documents, Chaine)
+- Attestation de liquidation PDF
+- Dashboard DAAF (groupement prestataire/direction)
+- Notifications urgence → DMG + Directeurs operationnels
+- QR code, exports Excel 3 feuilles
+- Composants : LiquidationTimeline(380L), ServiceFaitForm, CalculsFiscaux
+
+---
+
+## 10. UTILISATEURS TEST
 
 | Email             | Password  | Role               |
 | ----------------- | --------- | ------------------ |
@@ -605,7 +624,7 @@ passation_marche, lots_marche, soumissionnaires_lot, soumissions, marche_attachm
 
 ---
 
-## 10. ACCES SERVEURS
+## 11. ACCES SERVEURS
 
 ### Supabase
 
@@ -625,7 +644,7 @@ Bases  : eARTI_DB2, eARTIDB_2025, eARTIDB_2026
 
 ---
 
-## 11. DOCUMENTS CLES
+## 12. DOCUMENTS CLES
 
 | Document                               | Description                           |
 | -------------------------------------- | ------------------------------------- |
@@ -644,7 +663,7 @@ Bases  : eARTI_DB2, eARTIDB_2025, eARTIDB_2026
 
 ---
 
-## 12. SCRIPTS UTILES
+## 13. SCRIPTS UTILES
 
 ```bash
 npm run dev          # Serveur dev (port 8080)
@@ -663,14 +682,12 @@ npm run verify       # typecheck + lint + test
 
 ---
 
-## 13. PROCHAINES ETAPES
+## 14. PROCHAINES ETAPES
 
-1. **Engagement (10 prompts)** : Corriger FK, calcul disponibilite, formulaire enrichi, workflow 4 etapes, detail 6 onglets, RLS/RBAC, notifications, exports, performance, certification
-2. **Liquidation** : Apres certification engagement
-3. **Ordonnancement** : Apres certification liquidation
-4. **Reglement** : Apres certification ordonnancement
+1. **Ordonnancement** : Apres certification liquidation
+2. **Reglement** : Apres certification ordonnancement
 
 ---
 
-_Document genere le 19/02/2026 — SYGFP v2.0_
+_Document genere le 22/02/2026 — SYGFP v2.1_
 _ARTI = Autorite de Regulation du Transport Interieur (Cote d'Ivoire)_
