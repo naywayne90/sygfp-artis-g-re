@@ -82,8 +82,7 @@ export const notesAefService = {
       }
 
       // 3. Enrichir avec les relations (inclut reference_pivot de la note_sef)
-      const { data: enrichedData, error: enrichError } = await supabase
-        .from('notes_dg')
+      const { data: enrichedData, error: enrichError } = await (supabase.from('notes_dg') as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         .select(
           `
           *,
@@ -163,8 +162,7 @@ export const notesAefService = {
    */
   async getById(id: string): Promise<ServiceResult<NoteAEFEntity>> {
     try {
-      const { data, error } = await supabase
-        .from('notes_dg')
+      const { data, error } = await (supabase.from('notes_dg') as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         .select(
           `
           *,

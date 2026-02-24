@@ -7,7 +7,7 @@
  */
 
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { type CellHookData } from 'jspdf-autotable';
 import { QRCodeCanvas } from 'qrcode.react';
 import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
@@ -269,11 +269,7 @@ async function generatePage1(
       0: { cellWidth: 100 },
       1: { cellWidth: 60, halign: 'right' as const },
     },
-    didParseCell: (data: {
-      row: { index: number };
-      cell: { styles: Record<string, unknown> };
-      section: string;
-    }) => {
+    didParseCell: (data: CellHookData) => {
       if (data.section === 'body' && data.row.index === 2) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = colors.ttcBg;
@@ -337,11 +333,7 @@ async function generatePage1(
       0: { cellWidth: 100 },
       1: { cellWidth: 60, halign: 'right' as const },
     },
-    didParseCell: (data: {
-      row: { index: number };
-      cell: { styles: Record<string, unknown> };
-      section: string;
-    }) => {
+    didParseCell: (data: CellHookData) => {
       if (data.section === 'body' && data.row.index === retenueRows.length - 1) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = colors.successBg;
@@ -503,11 +495,7 @@ async function generatePage2(
       4: { cellWidth: 22, halign: 'center' as const },
       5: { cellWidth: 33 },
     },
-    didParseCell: (data: {
-      section: string;
-      column: { index: number };
-      cell: { raw: unknown; styles: Record<string, unknown> };
-    }) => {
+    didParseCell: (data: CellHookData) => {
       if (data.section === 'body' && data.column.index === 2) {
         const val = data.cell.raw as string;
         if (val === 'ACCORDÉ') {

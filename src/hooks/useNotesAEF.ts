@@ -93,8 +93,10 @@ export function useNotesAEF() {
   } = useQuery({
     queryKey: ['notes-aef', exercice],
     queryFn: async () => {
-      let query = supabase
-        .from('notes_dg')
+      let query: any = (
+        supabase // eslint-disable-line @typescript-eslint/no-explicit-any
+          .from('notes_dg') as any
+      ) // eslint-disable-line @typescript-eslint/no-explicit-any
         .select(
           `
           *,

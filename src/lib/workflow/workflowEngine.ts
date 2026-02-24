@@ -708,6 +708,20 @@ export const STATUT_UI_CONFIG: Record<Statut, StatutUIConfig> = {
     borderColor: 'border-purple-200',
     icon: 'UserCheck',
   },
+  [STATUTS.VALIDE_DAAF]: {
+    label: 'Validé DAAF',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+    icon: 'UserCheck',
+  },
+  [STATUTS.VALIDE_DG]: {
+    label: 'Validé DG',
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    icon: 'CheckCircle',
+  },
   [STATUTS.VALIDE]: {
     label: 'Validé',
     color: 'text-green-600',

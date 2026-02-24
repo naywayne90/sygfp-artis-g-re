@@ -38,6 +38,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { usePermissions } from '@/hooks/usePermissions';
 import { formatCurrency } from '@/lib/utils';
+import { requiresDgValidation } from '@/hooks/useLiquidations';
 import { toast } from 'sonner';
 
 const controleSdctSchema = z
@@ -164,6 +165,7 @@ export function ControleSdctForm({ liquidationId, liquidation, onSuccess }: Cont
 
       const formData = form.getValues();
       const isValidation = pendingDecision === 'valider';
+      const needsDgValidation = requiresDgValidation(liquidation.montant);
 
       // Déterminer le nouveau statut
       // Après validation DAAF → validé_daaf (DG valide ensuite)

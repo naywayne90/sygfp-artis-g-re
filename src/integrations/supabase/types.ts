@@ -763,7 +763,21 @@ export type Database = {
             foreignKeyName: 'budg_alerts_ligne_budgetaire_id_fkey';
             columns: ['ligne_budgetaire_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budg_alerts_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budg_alerts_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -872,7 +886,21 @@ export type Database = {
             foreignKeyName: 'budget_activities_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_activities_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_activities_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -961,10 +989,14 @@ export type Database = {
           created_at: string;
           created_by: string | null;
           current_step: number | null;
+          date_degagement: string | null;
           date_differe: string | null;
           date_engagement: string;
           date_entree_etape: string | null;
           deadline_correction: string | null;
+          degage_at: string | null;
+          degage_by: string | null;
+          degagement_user_id: string | null;
           delai_validation_jours: number | null;
           differe_by: string | null;
           dossier_id: string | null;
@@ -972,20 +1004,39 @@ export type Database = {
           expression_besoin_id: string | null;
           fournisseur: string | null;
           id: string;
+          is_multi_ligne: boolean | null;
           legacy_import: boolean | null;
           marche_id: string | null;
           montant: number;
+          montant_degage: number | null;
           montant_ht: number | null;
+          motif_degage: string | null;
+          motif_degagement: string | null;
           motif_differe: string | null;
+          motif_rejet: string | null;
           note_id: string | null;
           numero: string;
           objet: string;
           passation_marche_id: string | null;
+          prestataire_id: string | null;
           project_id: string | null;
           required_documents: string[] | null;
           statut: string | null;
           tva: number | null;
+          type_engagement: string | null;
           updated_at: string;
+          visa_cb_commentaire: string | null;
+          visa_cb_date: string | null;
+          visa_cb_user_id: string | null;
+          visa_daaf_commentaire: string | null;
+          visa_daaf_date: string | null;
+          visa_daaf_user_id: string | null;
+          visa_dg_commentaire: string | null;
+          visa_dg_date: string | null;
+          visa_dg_user_id: string | null;
+          visa_saf_commentaire: string | null;
+          visa_saf_date: string | null;
+          visa_saf_user_id: string | null;
           workflow_status: string | null;
         };
         Insert: {
@@ -997,10 +1048,14 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           current_step?: number | null;
+          date_degagement?: string | null;
           date_differe?: string | null;
           date_engagement?: string;
           date_entree_etape?: string | null;
           deadline_correction?: string | null;
+          degage_at?: string | null;
+          degage_by?: string | null;
+          degagement_user_id?: string | null;
           delai_validation_jours?: number | null;
           differe_by?: string | null;
           dossier_id?: string | null;
@@ -1008,20 +1063,39 @@ export type Database = {
           expression_besoin_id?: string | null;
           fournisseur?: string | null;
           id?: string;
+          is_multi_ligne?: boolean | null;
           legacy_import?: boolean | null;
           marche_id?: string | null;
           montant: number;
+          montant_degage?: number | null;
           montant_ht?: number | null;
+          motif_degage?: string | null;
+          motif_degagement?: string | null;
           motif_differe?: string | null;
+          motif_rejet?: string | null;
           note_id?: string | null;
           numero: string;
           objet: string;
           passation_marche_id?: string | null;
+          prestataire_id?: string | null;
           project_id?: string | null;
           required_documents?: string[] | null;
           statut?: string | null;
           tva?: number | null;
+          type_engagement?: string | null;
           updated_at?: string;
+          visa_cb_commentaire?: string | null;
+          visa_cb_date?: string | null;
+          visa_cb_user_id?: string | null;
+          visa_daaf_commentaire?: string | null;
+          visa_daaf_date?: string | null;
+          visa_daaf_user_id?: string | null;
+          visa_dg_commentaire?: string | null;
+          visa_dg_date?: string | null;
+          visa_dg_user_id?: string | null;
+          visa_saf_commentaire?: string | null;
+          visa_saf_date?: string | null;
+          visa_saf_user_id?: string | null;
           workflow_status?: string | null;
         };
         Update: {
@@ -1033,10 +1107,14 @@ export type Database = {
           created_at?: string;
           created_by?: string | null;
           current_step?: number | null;
+          date_degagement?: string | null;
           date_differe?: string | null;
           date_engagement?: string;
           date_entree_etape?: string | null;
           deadline_correction?: string | null;
+          degage_at?: string | null;
+          degage_by?: string | null;
+          degagement_user_id?: string | null;
           delai_validation_jours?: number | null;
           differe_by?: string | null;
           dossier_id?: string | null;
@@ -1044,20 +1122,39 @@ export type Database = {
           expression_besoin_id?: string | null;
           fournisseur?: string | null;
           id?: string;
+          is_multi_ligne?: boolean | null;
           legacy_import?: boolean | null;
           marche_id?: string | null;
           montant?: number;
+          montant_degage?: number | null;
           montant_ht?: number | null;
+          motif_degage?: string | null;
+          motif_degagement?: string | null;
           motif_differe?: string | null;
+          motif_rejet?: string | null;
           note_id?: string | null;
           numero?: string;
           objet?: string;
           passation_marche_id?: string | null;
+          prestataire_id?: string | null;
           project_id?: string | null;
           required_documents?: string[] | null;
           statut?: string | null;
           tva?: number | null;
+          type_engagement?: string | null;
           updated_at?: string;
+          visa_cb_commentaire?: string | null;
+          visa_cb_date?: string | null;
+          visa_cb_user_id?: string | null;
+          visa_daaf_commentaire?: string | null;
+          visa_daaf_date?: string | null;
+          visa_daaf_user_id?: string | null;
+          visa_dg_commentaire?: string | null;
+          visa_dg_date?: string | null;
+          visa_dg_user_id?: string | null;
+          visa_saf_commentaire?: string | null;
+          visa_saf_date?: string | null;
+          visa_saf_user_id?: string | null;
           workflow_status?: string | null;
         };
         Relationships: [
@@ -1093,7 +1190,21 @@ export type Database = {
             foreignKeyName: 'budget_engagements_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -1113,6 +1224,34 @@ export type Database = {
           {
             foreignKeyName: 'budget_engagements_created_by_fkey';
             columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_degage_by_fkey';
+            columns: ['degage_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_degage_by_fkey';
+            columns: ['degage_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_degagement_user_id_fkey';
+            columns: ['degagement_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_degagement_user_id_fkey';
+            columns: ['degagement_user_id'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
@@ -1146,6 +1285,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'budget_engagements_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'budget_engagements_marche_id_fkey';
             columns: ['marche_id'];
             isOneToOne: false;
@@ -1167,10 +1313,38 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'budget_engagements_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'budget_engagements_passation_marche_id_fkey';
             columns: ['passation_marche_id'];
             isOneToOne: false;
             referencedRelation: 'passation_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires_actifs';
             referencedColumns: ['id'];
           },
           {
@@ -1185,6 +1359,62 @@ export type Database = {
             columns: ['project_id'];
             isOneToOne: false;
             referencedRelation: 'projects_with_financial';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_cb_user_id_fkey';
+            columns: ['visa_cb_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_cb_user_id_fkey';
+            columns: ['visa_cb_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_daaf_user_id_fkey';
+            columns: ['visa_daaf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_daaf_user_id_fkey';
+            columns: ['visa_daaf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_dg_user_id_fkey';
+            columns: ['visa_dg_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_dg_user_id_fkey';
+            columns: ['visa_dg_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_saf_user_id_fkey';
+            columns: ['visa_saf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_engagements_visa_saf_user_id_fkey';
+            columns: ['visa_saf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
           },
         ];
@@ -1268,7 +1498,21 @@ export type Database = {
             foreignKeyName: 'budget_history_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_history_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_history_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -1447,7 +1691,21 @@ export type Database = {
             foreignKeyName: 'budget_line_history_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_line_history_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_line_history_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -1770,7 +2028,21 @@ export type Database = {
             foreignKeyName: 'budget_lines_parent_id_fkey';
             columns: ['parent_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -1844,11 +2116,17 @@ export type Database = {
           id: string;
           legacy_import: boolean | null;
           montant: number;
-          montant_ht: number | null;
+          montant_ht: number;
           motif_differe: string | null;
+          motif_rejet: string | null;
           net_a_payer: number | null;
           numero: string;
           observation: string | null;
+          penalites: number | null;
+          penalites_montant: number | null;
+          penalites_nb_jours: number | null;
+          penalites_retard: number | null;
+          penalites_taux_journalier: number | null;
           reference_facture: string | null;
           regime_fiscal: string | null;
           reglement_urgent: boolean | null;
@@ -1858,17 +2136,32 @@ export type Database = {
           rejected_at: string | null;
           rejected_by: string | null;
           rejection_reason: string | null;
+          retenue_bic: number | null;
+          retenue_bic_montant: number | null;
+          retenue_bic_taux: number | null;
+          retenue_bnc: number | null;
+          retenue_bnc_montant: number | null;
+          retenue_bnc_taux: number | null;
           retenue_source_montant: number | null;
           retenue_source_taux: number | null;
           service_fait: boolean | null;
           service_fait_certifie_par: string | null;
+          service_fait_commentaire: string | null;
           service_fait_date: string | null;
           statut: string | null;
           submitted_at: string | null;
+          total_retenues: number | null;
+          tva_applicable: boolean | null;
           tva_montant: number | null;
           tva_taux: number | null;
           validated_at: string | null;
           validated_by: string | null;
+          visa_daaf_commentaire: string | null;
+          visa_daaf_date: string | null;
+          visa_daaf_user_id: string | null;
+          visa_dg_commentaire: string | null;
+          visa_dg_date: string | null;
+          visa_dg_user_id: string | null;
           workflow_status: string | null;
         };
         Insert: {
@@ -1890,11 +2183,17 @@ export type Database = {
           id?: string;
           legacy_import?: boolean | null;
           montant: number;
-          montant_ht?: number | null;
+          montant_ht?: number;
           motif_differe?: string | null;
+          motif_rejet?: string | null;
           net_a_payer?: number | null;
           numero: string;
           observation?: string | null;
+          penalites?: number | null;
+          penalites_montant?: number | null;
+          penalites_nb_jours?: number | null;
+          penalites_retard?: number | null;
+          penalites_taux_journalier?: number | null;
           reference_facture?: string | null;
           regime_fiscal?: string | null;
           reglement_urgent?: boolean | null;
@@ -1904,17 +2203,32 @@ export type Database = {
           rejected_at?: string | null;
           rejected_by?: string | null;
           rejection_reason?: string | null;
+          retenue_bic?: number | null;
+          retenue_bic_montant?: number | null;
+          retenue_bic_taux?: number | null;
+          retenue_bnc?: number | null;
+          retenue_bnc_montant?: number | null;
+          retenue_bnc_taux?: number | null;
           retenue_source_montant?: number | null;
           retenue_source_taux?: number | null;
           service_fait?: boolean | null;
           service_fait_certifie_par?: string | null;
+          service_fait_commentaire?: string | null;
           service_fait_date?: string | null;
           statut?: string | null;
           submitted_at?: string | null;
+          total_retenues?: number | null;
+          tva_applicable?: boolean | null;
           tva_montant?: number | null;
           tva_taux?: number | null;
           validated_at?: string | null;
           validated_by?: string | null;
+          visa_daaf_commentaire?: string | null;
+          visa_daaf_date?: string | null;
+          visa_daaf_user_id?: string | null;
+          visa_dg_commentaire?: string | null;
+          visa_dg_date?: string | null;
+          visa_dg_user_id?: string | null;
           workflow_status?: string | null;
         };
         Update: {
@@ -1936,11 +2250,17 @@ export type Database = {
           id?: string;
           legacy_import?: boolean | null;
           montant?: number;
-          montant_ht?: number | null;
+          montant_ht?: number;
           motif_differe?: string | null;
+          motif_rejet?: string | null;
           net_a_payer?: number | null;
           numero?: string;
           observation?: string | null;
+          penalites?: number | null;
+          penalites_montant?: number | null;
+          penalites_nb_jours?: number | null;
+          penalites_retard?: number | null;
+          penalites_taux_journalier?: number | null;
           reference_facture?: string | null;
           regime_fiscal?: string | null;
           reglement_urgent?: boolean | null;
@@ -1950,17 +2270,32 @@ export type Database = {
           rejected_at?: string | null;
           rejected_by?: string | null;
           rejection_reason?: string | null;
+          retenue_bic?: number | null;
+          retenue_bic_montant?: number | null;
+          retenue_bic_taux?: number | null;
+          retenue_bnc?: number | null;
+          retenue_bnc_montant?: number | null;
+          retenue_bnc_taux?: number | null;
           retenue_source_montant?: number | null;
           retenue_source_taux?: number | null;
           service_fait?: boolean | null;
           service_fait_certifie_par?: string | null;
+          service_fait_commentaire?: string | null;
           service_fait_date?: string | null;
           statut?: string | null;
           submitted_at?: string | null;
+          total_retenues?: number | null;
+          tva_applicable?: boolean | null;
           tva_montant?: number | null;
           tva_taux?: number | null;
           validated_at?: string | null;
           validated_by?: string | null;
+          visa_daaf_commentaire?: string | null;
+          visa_daaf_date?: string | null;
+          visa_daaf_user_id?: string | null;
+          visa_dg_commentaire?: string | null;
+          visa_dg_date?: string | null;
+          visa_dg_user_id?: string | null;
           workflow_status?: string | null;
         };
         Relationships: [
@@ -2007,6 +2342,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'budget_liquidations_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
+          },
+          {
             foreignKeyName: 'budget_liquidations_rejected_by_fkey';
             columns: ['rejected_by'];
             isOneToOne: false;
@@ -2044,6 +2386,34 @@ export type Database = {
           {
             foreignKeyName: 'budget_liquidations_validated_by_fkey';
             columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_liquidations_visa_daaf_user_id_fkey';
+            columns: ['visa_daaf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_liquidations_visa_daaf_user_id_fkey';
+            columns: ['visa_daaf_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_liquidations_visa_dg_user_id_fkey';
+            columns: ['visa_dg_user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_liquidations_visa_dg_user_id_fkey';
+            columns: ['visa_dg_user_id'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
@@ -2153,7 +2523,21 @@ export type Database = {
             foreignKeyName: 'budget_movements_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_movements_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_movements_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -2737,6 +3121,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'contrats_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
+          },
+          {
             foreignKeyName: 'contrats_lot_id_fkey';
             columns: ['lot_id'];
             isOneToOne: false;
@@ -2935,7 +3326,21 @@ export type Database = {
             foreignKeyName: 'credit_transfers_from_budget_line_id_fkey';
             columns: ['from_budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'credit_transfers_from_budget_line_id_fkey';
+            columns: ['from_budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'credit_transfers_from_budget_line_id_fkey';
+            columns: ['from_budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -2991,7 +3396,21 @@ export type Database = {
             foreignKeyName: 'credit_transfers_to_budget_line_id_fkey';
             columns: ['to_budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'credit_transfers_to_budget_line_id_fkey';
+            columns: ['to_budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'credit_transfers_to_budget_line_id_fkey';
+            columns: ['to_budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -3375,6 +3794,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'budget_engagements';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'demandes_achat_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
           },
           {
             foreignKeyName: 'demandes_achat_validated_by_fkey';
@@ -4105,7 +4531,21 @@ export type Database = {
             foreignKeyName: 'dossiers_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'dossiers_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'dossiers_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -4314,6 +4754,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'engagement_attachments_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
+          },
+          {
             foreignKeyName: 'engagement_attachments_uploaded_by_fkey';
             columns: ['uploaded_by'];
             isOneToOne: false;
@@ -4392,6 +4839,108 @@ export type Database = {
             referencedRelation: 'budget_engagements';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'engagement_documents_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
+          },
+        ];
+      };
+      engagement_lignes: {
+        Row: {
+          budget_line_id: string;
+          created_at: string | null;
+          engagement_id: string;
+          id: string;
+          montant: number;
+        };
+        Insert: {
+          budget_line_id: string;
+          created_at?: string | null;
+          engagement_id: string;
+          id?: string;
+          montant: number;
+        };
+        Update: {
+          budget_line_id?: string;
+          created_at?: string | null;
+          engagement_id?: string;
+          id?: string;
+          montant?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_engagements';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_lignes_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
+          },
         ];
       };
       engagement_validations: {
@@ -4406,6 +4955,8 @@ export type Database = {
           step_order: number;
           validated_at: string | null;
           validated_by: string | null;
+          validated_on_behalf_of: string | null;
+          validation_mode: string | null;
         };
         Insert: {
           comments?: string | null;
@@ -4418,6 +4969,8 @@ export type Database = {
           step_order: number;
           validated_at?: string | null;
           validated_by?: string | null;
+          validated_on_behalf_of?: string | null;
+          validation_mode?: string | null;
         };
         Update: {
           comments?: string | null;
@@ -4430,6 +4983,8 @@ export type Database = {
           step_order?: number;
           validated_at?: string | null;
           validated_by?: string | null;
+          validated_on_behalf_of?: string | null;
+          validation_mode?: string | null;
         };
         Relationships: [
           {
@@ -4438,6 +4993,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'budget_engagements';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_validations_engagement_id_fkey';
+            columns: ['engagement_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['engagement_id'];
           },
           {
             foreignKeyName: 'engagement_validations_validated_by_fkey';
@@ -4451,6 +5013,107 @@ export type Database = {
             columns: ['validated_by'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_validations_validated_on_behalf_of_fkey';
+            columns: ['validated_on_behalf_of'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'engagement_validations_validated_on_behalf_of_fkey';
+            columns: ['validated_on_behalf_of'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      evaluations_offre: {
+        Row: {
+          created_at: string | null;
+          date_evaluation: string | null;
+          evaluateur_id: string | null;
+          id: string;
+          lot_id: string | null;
+          marche_id: string;
+          note_finale: number | null;
+          note_financiere: number | null;
+          note_technique: number | null;
+          observations: string | null;
+          qualifie_techniquement: boolean | null;
+          rang: number | null;
+          soumission_id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          date_evaluation?: string | null;
+          evaluateur_id?: string | null;
+          id?: string;
+          lot_id?: string | null;
+          marche_id: string;
+          note_finale?: number | null;
+          note_financiere?: number | null;
+          note_technique?: number | null;
+          observations?: string | null;
+          qualifie_techniquement?: boolean | null;
+          rang?: number | null;
+          soumission_id: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          date_evaluation?: string | null;
+          evaluateur_id?: string | null;
+          id?: string;
+          lot_id?: string | null;
+          marche_id?: string;
+          note_finale?: number | null;
+          note_financiere?: number | null;
+          note_technique?: number | null;
+          observations?: string | null;
+          qualifie_techniquement?: boolean | null;
+          rang?: number | null;
+          soumission_id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'evaluations_offre_evaluateur_id_fkey';
+            columns: ['evaluateur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_offre_evaluateur_id_fkey';
+            columns: ['evaluateur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_offre_lot_id_fkey';
+            columns: ['lot_id'];
+            isOneToOne: false;
+            referencedRelation: 'marche_lots';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_offre_marche_id_fkey';
+            columns: ['marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'marches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'evaluations_offre_soumission_id_fkey';
+            columns: ['soumission_id'];
+            isOneToOne: true;
+            referencedRelation: 'soumissions';
             referencedColumns: ['id'];
           },
         ];
@@ -4603,6 +5266,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'expression_besoin_attachments_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'expression_besoin_attachments_uploaded_by_fkey';
             columns: ['uploaded_by'];
             isOneToOne: false;
@@ -4614,6 +5284,63 @@ export type Database = {
             columns: ['uploaded_by'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      expression_besoin_lignes: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          designation: string;
+          expression_besoin_id: string;
+          id: string;
+          numero: number;
+          prix_total: number | null;
+          prix_unitaire: number;
+          quantite: number;
+          unite: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          designation: string;
+          expression_besoin_id: string;
+          id?: string;
+          numero?: number;
+          prix_total?: number | null;
+          prix_unitaire?: number;
+          quantite?: number;
+          unite?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          designation?: string;
+          expression_besoin_id?: string;
+          id?: string;
+          numero?: number;
+          prix_total?: number | null;
+          prix_unitaire?: number;
+          quantite?: number;
+          unite?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'expression_besoin_lignes_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'expressions_besoin';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expression_besoin_lignes_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
             referencedColumns: ['id'];
           },
         ];
@@ -4685,6 +5412,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'expression_besoin_validations_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'expression_besoin_validations_validated_by_fkey';
             columns: ['validated_by'];
             isOneToOne: false;
@@ -4733,6 +5467,8 @@ export type Database = {
           numero_lot: number | null;
           objet: string;
           quantite: number | null;
+          rejected_at: string | null;
+          rejected_by: string | null;
           rejection_reason: string | null;
           specifications: string | null;
           statut: string | null;
@@ -4744,6 +5480,8 @@ export type Database = {
           validated_at: string | null;
           validated_by: string | null;
           validation_status: string | null;
+          verified_at: string | null;
+          verified_by: string | null;
         };
         Insert: {
           calendrier_debut?: string | null;
@@ -4777,6 +5515,8 @@ export type Database = {
           numero_lot?: number | null;
           objet: string;
           quantite?: number | null;
+          rejected_at?: string | null;
+          rejected_by?: string | null;
           rejection_reason?: string | null;
           specifications?: string | null;
           statut?: string | null;
@@ -4788,6 +5528,8 @@ export type Database = {
           validated_at?: string | null;
           validated_by?: string | null;
           validation_status?: string | null;
+          verified_at?: string | null;
+          verified_by?: string | null;
         };
         Update: {
           calendrier_debut?: string | null;
@@ -4821,6 +5563,8 @@ export type Database = {
           numero_lot?: number | null;
           objet?: string;
           quantite?: number | null;
+          rejected_at?: string | null;
+          rejected_by?: string | null;
           rejection_reason?: string | null;
           specifications?: string | null;
           statut?: string | null;
@@ -4832,6 +5576,8 @@ export type Database = {
           validated_at?: string | null;
           validated_by?: string | null;
           validation_status?: string | null;
+          verified_at?: string | null;
+          verified_by?: string | null;
         };
         Relationships: [
           {
@@ -4919,6 +5665,20 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'expressions_besoin_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['imputation_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputations_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
             columns: ['ligne_budgetaire_id'];
             isOneToOne: false;
@@ -4950,7 +5710,21 @@ export type Database = {
             foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
             columns: ['ligne_budgetaire_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -4979,6 +5753,20 @@ export type Database = {
             columns: ['note_id'];
             isOneToOne: false;
             referencedRelation: 'notes_imputees_disponibles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
             referencedColumns: ['id'];
           },
           {
@@ -5076,7 +5864,21 @@ export type Database = {
             foreignKeyName: 'historique_libelles_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'historique_libelles_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'historique_libelles_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -5227,7 +6029,21 @@ export type Database = {
             foreignKeyName: 'import_budget_staging_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'import_budget_staging_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'import_budget_staging_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -5675,7 +6491,21 @@ export type Database = {
             foreignKeyName: 'imputation_lignes_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputation_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputation_lignes_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -5690,6 +6520,20 @@ export type Database = {
             columns: ['imputation_id'];
             isOneToOne: false;
             referencedRelation: 'imputations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputation_lignes_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['imputation_id'];
+          },
+          {
+            foreignKeyName: 'imputation_lignes_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputations_detail';
             referencedColumns: ['id'];
           },
           {
@@ -5719,6 +6563,7 @@ export type Database = {
           exercice: number;
           forcer_imputation: boolean | null;
           id: string;
+          is_migrated: boolean | null;
           is_multi_ligne: boolean | null;
           justification_depassement: string | null;
           mission_id: string | null;
@@ -5760,6 +6605,7 @@ export type Database = {
           exercice: number;
           forcer_imputation?: boolean | null;
           id?: string;
+          is_migrated?: boolean | null;
           is_multi_ligne?: boolean | null;
           justification_depassement?: string | null;
           mission_id?: string | null;
@@ -5801,6 +6647,7 @@ export type Database = {
           exercice?: number;
           forcer_imputation?: boolean | null;
           id?: string;
+          is_migrated?: boolean | null;
           is_multi_ligne?: boolean | null;
           justification_depassement?: string | null;
           mission_id?: string | null;
@@ -5872,7 +6719,21 @@ export type Database = {
             foreignKeyName: 'imputations_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -5985,6 +6846,20 @@ export type Database = {
             columns: ['note_aef_id'];
             isOneToOne: true;
             referencedRelation: 'notes_imputees_disponibles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_notes_aef_detail';
             referencedColumns: ['id'];
           },
           {
@@ -6661,6 +7536,70 @@ export type Database = {
         };
         Relationships: [];
       };
+      lots_marche: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          designation: string;
+          id: string;
+          montant_estime: number | null;
+          montant_retenu: number | null;
+          numero: number;
+          passation_marche_id: string;
+          prestataire_retenu_id: string | null;
+          statut: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          designation?: string;
+          id?: string;
+          montant_estime?: number | null;
+          montant_retenu?: number | null;
+          numero?: number;
+          passation_marche_id: string;
+          prestataire_retenu_id?: string | null;
+          statut?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          designation?: string;
+          id?: string;
+          montant_estime?: number | null;
+          montant_retenu?: number | null;
+          numero?: number;
+          passation_marche_id?: string;
+          prestataire_retenu_id?: string | null;
+          statut?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'lots_marche_passation_marche_id_fkey';
+            columns: ['passation_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'passation_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lots_marche_prestataire_retenu_id_fkey';
+            columns: ['prestataire_retenu_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'lots_marche_prestataire_retenu_id_fkey';
+            columns: ['prestataire_retenu_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires_actifs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       marche_attachments: {
         Row: {
           created_at: string;
@@ -7057,6 +7996,7 @@ export type Database = {
         Row: {
           annee: number | null;
           autorisation_path: string | null;
+          budget_line_id: string | null;
           calendrier_attribution: string | null;
           calendrier_lancement: string | null;
           calendrier_notification: string | null;
@@ -7067,12 +8007,15 @@ export type Database = {
           created_by: string | null;
           current_validation_step: number | null;
           date_attribution: string | null;
+          date_cloture: string | null;
           date_lancement: string | null;
+          date_publication: string | null;
           date_signature: string | null;
           differe_at: string | null;
           differe_by: string | null;
           differe_date_reprise: string | null;
           differe_motif: string | null;
+          direction_id: string | null;
           dossier_id: string | null;
           duree_execution: number | null;
           exercice: number | null;
@@ -7084,6 +8027,8 @@ export type Database = {
           mode_force: boolean | null;
           mode_passation: string;
           montant: number;
+          montant_attribue: number | null;
+          montant_estime: number | null;
           nombre_lots: number | null;
           note_id: string | null;
           numero: string | null;
@@ -7091,6 +8036,7 @@ export type Database = {
           objet: string;
           observations: string | null;
           prestataire_id: string | null;
+          procedure_recommandee: string | null;
           pv_attribution_path: string | null;
           rejected_at: string | null;
           rejected_by: string | null;
@@ -7106,6 +8052,7 @@ export type Database = {
         Insert: {
           annee?: number | null;
           autorisation_path?: string | null;
+          budget_line_id?: string | null;
           calendrier_attribution?: string | null;
           calendrier_lancement?: string | null;
           calendrier_notification?: string | null;
@@ -7116,12 +8063,15 @@ export type Database = {
           created_by?: string | null;
           current_validation_step?: number | null;
           date_attribution?: string | null;
+          date_cloture?: string | null;
           date_lancement?: string | null;
+          date_publication?: string | null;
           date_signature?: string | null;
           differe_at?: string | null;
           differe_by?: string | null;
           differe_date_reprise?: string | null;
           differe_motif?: string | null;
+          direction_id?: string | null;
           dossier_id?: string | null;
           duree_execution?: number | null;
           exercice?: number | null;
@@ -7133,6 +8083,8 @@ export type Database = {
           mode_force?: boolean | null;
           mode_passation: string;
           montant: number;
+          montant_attribue?: number | null;
+          montant_estime?: number | null;
           nombre_lots?: number | null;
           note_id?: string | null;
           numero?: string | null;
@@ -7140,6 +8092,7 @@ export type Database = {
           objet: string;
           observations?: string | null;
           prestataire_id?: string | null;
+          procedure_recommandee?: string | null;
           pv_attribution_path?: string | null;
           rejected_at?: string | null;
           rejected_by?: string | null;
@@ -7155,6 +8108,7 @@ export type Database = {
         Update: {
           annee?: number | null;
           autorisation_path?: string | null;
+          budget_line_id?: string | null;
           calendrier_attribution?: string | null;
           calendrier_lancement?: string | null;
           calendrier_notification?: string | null;
@@ -7165,12 +8119,15 @@ export type Database = {
           created_by?: string | null;
           current_validation_step?: number | null;
           date_attribution?: string | null;
+          date_cloture?: string | null;
           date_lancement?: string | null;
+          date_publication?: string | null;
           date_signature?: string | null;
           differe_at?: string | null;
           differe_by?: string | null;
           differe_date_reprise?: string | null;
           differe_motif?: string | null;
+          direction_id?: string | null;
           dossier_id?: string | null;
           duree_execution?: number | null;
           exercice?: number | null;
@@ -7182,6 +8139,8 @@ export type Database = {
           mode_force?: boolean | null;
           mode_passation?: string;
           montant?: number;
+          montant_attribue?: number | null;
+          montant_estime?: number | null;
           nombre_lots?: number | null;
           note_id?: string | null;
           numero?: string | null;
@@ -7189,6 +8148,7 @@ export type Database = {
           objet?: string;
           observations?: string | null;
           prestataire_id?: string | null;
+          procedure_recommandee?: string | null;
           pv_attribution_path?: string | null;
           rejected_at?: string | null;
           rejected_by?: string | null;
@@ -7203,6 +8163,62 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'marches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
             foreignKeyName: 'marches_created_by_fkey';
             columns: ['created_by'];
             isOneToOne: false;
@@ -7215,6 +8231,34 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'marches_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'marches_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
           },
           {
             foreignKeyName: 'marches_dossier_id_fkey';
@@ -7245,6 +8289,13 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'marches_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'marches_note_id_fkey';
             columns: ['note_id'];
             isOneToOne: false;
@@ -7256,6 +8307,20 @@ export type Database = {
             columns: ['note_id'];
             isOneToOne: false;
             referencedRelation: 'notes_imputees_disponibles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'marches_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'marches_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
             referencedColumns: ['id'];
           },
           {
@@ -7776,6 +8841,20 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'note_attachments_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'note_attachments_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'note_attachments_uploaded_by_fkey';
             columns: ['uploaded_by'];
             isOneToOne: false;
@@ -7790,6 +8869,48 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      note_templates: {
+        Row: {
+          category: string;
+          contenu_html: string;
+          created_at: string | null;
+          description: string | null;
+          en_tete_arti: boolean | null;
+          est_actif: boolean | null;
+          id: string;
+          label: string;
+          signature_zone: boolean | null;
+          sort_order: number | null;
+          variables: Json | null;
+        };
+        Insert: {
+          category?: string;
+          contenu_html?: string;
+          created_at?: string | null;
+          description?: string | null;
+          en_tete_arti?: boolean | null;
+          est_actif?: boolean | null;
+          id: string;
+          label: string;
+          signature_zone?: boolean | null;
+          sort_order?: number | null;
+          variables?: Json | null;
+        };
+        Update: {
+          category?: string;
+          contenu_html?: string;
+          created_at?: string | null;
+          description?: string | null;
+          en_tete_arti?: boolean | null;
+          est_actif?: boolean | null;
+          id?: string;
+          label?: string;
+          signature_zone?: boolean | null;
+          sort_order?: number | null;
+          variables?: Json | null;
+        };
+        Relationships: [];
       };
       notes_aef_history: {
         Row: {
@@ -7844,6 +8965,20 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'notes_aef_history_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'notes_aef_history_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'notes_aef_history_performed_by_fkey';
             columns: ['performed_by'];
             isOneToOne: false;
@@ -7883,6 +9018,7 @@ export type Database = {
           imputed_by: string | null;
           initiales_redacteur: string | null;
           is_direct_aef: boolean | null;
+          is_migrated: boolean | null;
           justification: string | null;
           justification_depassement: string | null;
           legacy_import: boolean | null;
@@ -7911,6 +9047,7 @@ export type Database = {
           updated_at: string;
           validated_at: string | null;
           validated_by: string | null;
+          validation_comment: string | null;
         };
         Insert: {
           action_id?: string | null;
@@ -7935,6 +9072,7 @@ export type Database = {
           imputed_by?: string | null;
           initiales_redacteur?: string | null;
           is_direct_aef?: boolean | null;
+          is_migrated?: boolean | null;
           justification?: string | null;
           justification_depassement?: string | null;
           legacy_import?: boolean | null;
@@ -7963,6 +9101,7 @@ export type Database = {
           updated_at?: string;
           validated_at?: string | null;
           validated_by?: string | null;
+          validation_comment?: string | null;
         };
         Update: {
           action_id?: string | null;
@@ -7987,6 +9126,7 @@ export type Database = {
           imputed_by?: string | null;
           initiales_redacteur?: string | null;
           is_direct_aef?: boolean | null;
+          is_migrated?: boolean | null;
           justification?: string | null;
           justification_depassement?: string | null;
           legacy_import?: boolean | null;
@@ -8015,6 +9155,7 @@ export type Database = {
           updated_at?: string;
           validated_at?: string | null;
           validated_by?: string | null;
+          validation_comment?: string | null;
         };
         Relationships: [
           {
@@ -8077,7 +9218,21 @@ export type Database = {
             foreignKeyName: 'notes_dg_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -8196,7 +9351,21 @@ export type Database = {
             foreignKeyName: 'notes_dg_ligne_budgetaire_id_fkey';
             columns: ['ligne_budgetaire_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -8370,6 +9539,20 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'notes_dg_attachments_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_attachments_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'notes_dg_attachments_uploaded_by_fkey';
             columns: ['uploaded_by'];
             isOneToOne: false;
@@ -8387,60 +9570,119 @@ export type Database = {
       };
       notes_direction: {
         Row: {
+          action_rattachement: string | null;
+          budget_previsionnel: string | null;
           contenu: string | null;
           contenu_brut: string | null;
           created_at: string;
           created_by: string | null;
+          date_decision: string | null;
+          date_note: string | null;
+          decision_dg: string | null;
+          destinataire: string | null;
           direction_id: string;
           exercice_id: string | null;
+          expediteur: string | null;
           fichier_original_nom: string | null;
           fichier_original_url: string | null;
           id: string;
+          metadata: Json | null;
+          objectifs_strategiques: string | null;
+          objet: string | null;
+          observations_dg: string | null;
           priorite: string;
+          reference: string | null;
+          signataire_nom: string | null;
+          signataire_titre: string | null;
           statut: string;
           tags: string[] | null;
+          template_id: string | null;
           titre: string;
           type_note: string;
           updated_at: string;
           updated_by: string | null;
         };
         Insert: {
+          action_rattachement?: string | null;
+          budget_previsionnel?: string | null;
           contenu?: string | null;
           contenu_brut?: string | null;
           created_at?: string;
           created_by?: string | null;
+          date_decision?: string | null;
+          date_note?: string | null;
+          decision_dg?: string | null;
+          destinataire?: string | null;
           direction_id: string;
           exercice_id?: string | null;
+          expediteur?: string | null;
           fichier_original_nom?: string | null;
           fichier_original_url?: string | null;
           id?: string;
+          metadata?: Json | null;
+          objectifs_strategiques?: string | null;
+          objet?: string | null;
+          observations_dg?: string | null;
           priorite?: string;
+          reference?: string | null;
+          signataire_nom?: string | null;
+          signataire_titre?: string | null;
           statut?: string;
           tags?: string[] | null;
+          template_id?: string | null;
           titre: string;
           type_note?: string;
           updated_at?: string;
           updated_by?: string | null;
         };
         Update: {
+          action_rattachement?: string | null;
+          budget_previsionnel?: string | null;
           contenu?: string | null;
           contenu_brut?: string | null;
           created_at?: string;
           created_by?: string | null;
+          date_decision?: string | null;
+          date_note?: string | null;
+          decision_dg?: string | null;
+          destinataire?: string | null;
           direction_id?: string;
           exercice_id?: string | null;
+          expediteur?: string | null;
           fichier_original_nom?: string | null;
           fichier_original_url?: string | null;
           id?: string;
+          metadata?: Json | null;
+          objectifs_strategiques?: string | null;
+          objet?: string | null;
+          observations_dg?: string | null;
           priorite?: string;
+          reference?: string | null;
+          signataire_nom?: string | null;
+          signataire_titre?: string | null;
           statut?: string;
           tags?: string[] | null;
+          template_id?: string | null;
           titre?: string;
           type_note?: string;
           updated_at?: string;
           updated_by?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'notes_direction_created_by_profile_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_created_by_profile_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'notes_direction_direction_id_fkey';
             columns: ['direction_id'];
@@ -8476,6 +9718,20 @@ export type Database = {
             referencedRelation: 'exercices_budgetaires';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'notes_direction_updated_by_profile_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_direction_updated_by_profile_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
         ];
       };
       notes_sef: {
@@ -8506,6 +9762,7 @@ export type Database = {
           id: string;
           initiales_redacteur: string | null;
           is_deleted: boolean | null;
+          is_migrated: boolean | null;
           justification: string | null;
           mission_id: string | null;
           montant_estime: number | null;
@@ -8529,6 +9786,8 @@ export type Database = {
           urgence: string | null;
           validated_at: string | null;
           validated_by: string | null;
+          validated_on_behalf_of: string | null;
+          validation_mode: string | null;
         };
         Insert: {
           beneficiaire_id?: string | null;
@@ -8557,6 +9816,7 @@ export type Database = {
           id?: string;
           initiales_redacteur?: string | null;
           is_deleted?: boolean | null;
+          is_migrated?: boolean | null;
           justification?: string | null;
           mission_id?: string | null;
           montant_estime?: number | null;
@@ -8580,6 +9840,8 @@ export type Database = {
           urgence?: string | null;
           validated_at?: string | null;
           validated_by?: string | null;
+          validated_on_behalf_of?: string | null;
+          validation_mode?: string | null;
         };
         Update: {
           beneficiaire_id?: string | null;
@@ -8608,6 +9870,7 @@ export type Database = {
           id?: string;
           initiales_redacteur?: string | null;
           is_deleted?: boolean | null;
+          is_migrated?: boolean | null;
           justification?: string | null;
           mission_id?: string | null;
           montant_estime?: number | null;
@@ -8631,6 +9894,8 @@ export type Database = {
           urgence?: string | null;
           validated_at?: string | null;
           validated_by?: string | null;
+          validated_on_behalf_of?: string | null;
+          validation_mode?: string | null;
         };
         Relationships: [
           {
@@ -8860,6 +10125,20 @@ export type Database = {
           {
             foreignKeyName: 'notes_sef_validated_by_fkey';
             columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_sef_validated_on_behalf_of_fkey';
+            columns: ['validated_on_behalf_of'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_sef_validated_on_behalf_of_fkey';
+            columns: ['validated_on_behalf_of'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
@@ -10282,185 +11561,30 @@ export type Database = {
           },
         ];
       };
-      lots_marche: {
-        Row: {
-          id: string;
-          passation_marche_id: string;
-          numero: number;
-          designation: string;
-          description: string | null;
-          montant_estime: number | null;
-          montant_retenu: number | null;
-          prestataire_retenu_id: string | null;
-          statut: string;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          passation_marche_id: string;
-          numero?: number;
-          designation?: string;
-          description?: string | null;
-          montant_estime?: number | null;
-          montant_retenu?: number | null;
-          prestataire_retenu_id?: string | null;
-          statut?: string;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          passation_marche_id?: string;
-          numero?: number;
-          designation?: string;
-          description?: string | null;
-          montant_estime?: number | null;
-          montant_retenu?: number | null;
-          prestataire_retenu_id?: string | null;
-          statut?: string;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'lots_marche_passation_marche_id_fkey';
-            columns: ['passation_marche_id'];
-            isOneToOne: false;
-            referencedRelation: 'passation_marche';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'lots_marche_prestataire_retenu_id_fkey';
-            columns: ['prestataire_retenu_id'];
-            isOneToOne: false;
-            referencedRelation: 'prestataires';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      soumissionnaires_lot: {
-        Row: {
-          id: string;
-          passation_marche_id: string;
-          lot_marche_id: string | null;
-          prestataire_id: string | null;
-          is_manual_entry: boolean;
-          raison_sociale: string;
-          contact_nom: string | null;
-          email: string | null;
-          telephone: string | null;
-          rccm: string | null;
-          offre_technique_url: string | null;
-          offre_financiere: number | null;
-          date_depot: string | null;
-          note_technique: number | null;
-          note_financiere: number | null;
-          statut: string;
-          motif_elimination: string | null;
-          observations: string | null;
-          qualifie_technique: boolean;
-          note_finale: number | null;
-          rang_classement: number | null;
-          created_by: string | null;
-          created_at: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          passation_marche_id: string;
-          lot_marche_id?: string | null;
-          prestataire_id?: string | null;
-          is_manual_entry?: boolean;
-          raison_sociale: string;
-          contact_nom?: string | null;
-          email?: string | null;
-          telephone?: string | null;
-          rccm?: string | null;
-          offre_technique_url?: string | null;
-          offre_financiere?: number | null;
-          date_depot?: string | null;
-          note_technique?: number | null;
-          note_financiere?: number | null;
-          statut?: string;
-          motif_elimination?: string | null;
-          observations?: string | null;
-          qualifie_technique?: boolean;
-          note_finale?: number | null;
-          rang_classement?: number | null;
-          created_by?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          passation_marche_id?: string;
-          lot_marche_id?: string | null;
-          prestataire_id?: string | null;
-          is_manual_entry?: boolean;
-          raison_sociale?: string;
-          contact_nom?: string | null;
-          email?: string | null;
-          telephone?: string | null;
-          rccm?: string | null;
-          offre_technique_url?: string | null;
-          offre_financiere?: number | null;
-          date_depot?: string | null;
-          note_technique?: number | null;
-          note_financiere?: number | null;
-          statut?: string;
-          motif_elimination?: string | null;
-          observations?: string | null;
-          qualifie_technique?: boolean;
-          note_finale?: number | null;
-          rang_classement?: number | null;
-          created_by?: string | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'soumissionnaires_lot_passation_marche_id_fkey';
-            columns: ['passation_marche_id'];
-            isOneToOne: false;
-            referencedRelation: 'passation_marche';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'soumissionnaires_lot_lot_marche_id_fkey';
-            columns: ['lot_marche_id'];
-            isOneToOne: false;
-            referencedRelation: 'lots_marche';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'soumissionnaires_lot_prestataire_id_fkey';
-            columns: ['prestataire_id'];
-            isOneToOne: false;
-            referencedRelation: 'prestataires';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'soumissionnaires_lot_created_by_fkey';
-            columns: ['created_by'];
-            isOneToOne: false;
-            referencedRelation: 'profiles';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       passation_marche: {
         Row: {
           allotissement: boolean | null;
           analyse_offres: Json | null;
+          approuve_at: string | null;
+          approuve_by: string | null;
+          attribue_at: string | null;
+          attribue_by: string | null;
+          cloture_at: string | null;
+          cloture_by: string | null;
+          contrat_url: string | null;
           created_at: string | null;
           created_by: string | null;
           criteres_evaluation: Json | null;
+          date_cloture: string | null;
+          date_publication: string | null;
           date_reprise: string | null;
           decision: string | null;
           differed_at: string | null;
           differed_by: string | null;
+          direction_id: string | null;
           dossier_id: string | null;
+          evaluation_at: string | null;
+          evaluation_by: string | null;
           exercice: number | null;
           expression_besoin_id: string | null;
           id: string;
@@ -10468,10 +11592,13 @@ export type Database = {
           mode_passation: string;
           montant_retenu: number | null;
           motif_differe: string | null;
+          motif_rejet_attribution: string | null;
           motif_selection: string | null;
           pieces_jointes: Json | null;
           prestataire_retenu_id: string | null;
           prestataires_sollicites: Json | null;
+          publie_at: string | null;
+          publie_by: string | null;
           pv_evaluation: string | null;
           pv_ouverture: string | null;
           rapport_analyse: string | null;
@@ -10480,6 +11607,8 @@ export type Database = {
           rejected_by: string | null;
           rejection_reason: string | null;
           seuil_montant: string | null;
+          signe_at: string | null;
+          signe_by: string | null;
           statut: string | null;
           submitted_at: string | null;
           submitted_by: string | null;
@@ -10491,14 +11620,26 @@ export type Database = {
         Insert: {
           allotissement?: boolean | null;
           analyse_offres?: Json | null;
+          approuve_at?: string | null;
+          approuve_by?: string | null;
+          attribue_at?: string | null;
+          attribue_by?: string | null;
+          cloture_at?: string | null;
+          cloture_by?: string | null;
+          contrat_url?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           criteres_evaluation?: Json | null;
+          date_cloture?: string | null;
+          date_publication?: string | null;
           date_reprise?: string | null;
           decision?: string | null;
           differed_at?: string | null;
           differed_by?: string | null;
+          direction_id?: string | null;
           dossier_id?: string | null;
+          evaluation_at?: string | null;
+          evaluation_by?: string | null;
           exercice?: number | null;
           expression_besoin_id?: string | null;
           id?: string;
@@ -10506,10 +11647,13 @@ export type Database = {
           mode_passation?: string;
           montant_retenu?: number | null;
           motif_differe?: string | null;
+          motif_rejet_attribution?: string | null;
           motif_selection?: string | null;
           pieces_jointes?: Json | null;
           prestataire_retenu_id?: string | null;
           prestataires_sollicites?: Json | null;
+          publie_at?: string | null;
+          publie_by?: string | null;
           pv_evaluation?: string | null;
           pv_ouverture?: string | null;
           rapport_analyse?: string | null;
@@ -10518,6 +11662,8 @@ export type Database = {
           rejected_by?: string | null;
           rejection_reason?: string | null;
           seuil_montant?: string | null;
+          signe_at?: string | null;
+          signe_by?: string | null;
           statut?: string | null;
           submitted_at?: string | null;
           submitted_by?: string | null;
@@ -10529,14 +11675,26 @@ export type Database = {
         Update: {
           allotissement?: boolean | null;
           analyse_offres?: Json | null;
+          approuve_at?: string | null;
+          approuve_by?: string | null;
+          attribue_at?: string | null;
+          attribue_by?: string | null;
+          cloture_at?: string | null;
+          cloture_by?: string | null;
+          contrat_url?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           criteres_evaluation?: Json | null;
+          date_cloture?: string | null;
+          date_publication?: string | null;
           date_reprise?: string | null;
           decision?: string | null;
           differed_at?: string | null;
           differed_by?: string | null;
+          direction_id?: string | null;
           dossier_id?: string | null;
+          evaluation_at?: string | null;
+          evaluation_by?: string | null;
           exercice?: number | null;
           expression_besoin_id?: string | null;
           id?: string;
@@ -10544,10 +11702,13 @@ export type Database = {
           mode_passation?: string;
           montant_retenu?: number | null;
           motif_differe?: string | null;
+          motif_rejet_attribution?: string | null;
           motif_selection?: string | null;
           pieces_jointes?: Json | null;
           prestataire_retenu_id?: string | null;
           prestataires_sollicites?: Json | null;
+          publie_at?: string | null;
+          publie_by?: string | null;
           pv_evaluation?: string | null;
           pv_ouverture?: string | null;
           rapport_analyse?: string | null;
@@ -10556,6 +11717,8 @@ export type Database = {
           rejected_by?: string | null;
           rejection_reason?: string | null;
           seuil_montant?: string | null;
+          signe_at?: string | null;
+          signe_by?: string | null;
           statut?: string | null;
           submitted_at?: string | null;
           submitted_by?: string | null;
@@ -10592,6 +11755,34 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'profiles_display';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
           },
           {
             foreignKeyName: 'passation_marche_dossier_id_fkey';
@@ -10620,6 +11811,69 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'expressions_besoin';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_expression_besoin_id_fkey';
+            columns: ['expression_besoin_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_expressions_besoin_detail';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'passation_marche_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
           },
           {
             foreignKeyName: 'passation_marche_prestataire_retenu_id_fkey';
@@ -10843,6 +12097,133 @@ export type Database = {
           updated_at?: string | null;
         };
         Relationships: [];
+      };
+      plans_travail: {
+        Row: {
+          budget_alloue: number | null;
+          budget_consomme: number | null;
+          code: string;
+          created_at: string;
+          created_by: string | null;
+          date_debut: string | null;
+          date_fin: string | null;
+          date_validation: string | null;
+          description: string | null;
+          direction_id: string;
+          est_actif: boolean;
+          exercice_id: string | null;
+          id: string;
+          libelle: string;
+          responsable_id: string | null;
+          statut: string;
+          updated_at: string;
+          validateur_id: string | null;
+        };
+        Insert: {
+          budget_alloue?: number | null;
+          budget_consomme?: number | null;
+          code: string;
+          created_at?: string;
+          created_by?: string | null;
+          date_debut?: string | null;
+          date_fin?: string | null;
+          date_validation?: string | null;
+          description?: string | null;
+          direction_id: string;
+          est_actif?: boolean;
+          exercice_id?: string | null;
+          id?: string;
+          libelle: string;
+          responsable_id?: string | null;
+          statut?: string;
+          updated_at?: string;
+          validateur_id?: string | null;
+        };
+        Update: {
+          budget_alloue?: number | null;
+          budget_consomme?: number | null;
+          code?: string;
+          created_at?: string;
+          created_by?: string | null;
+          date_debut?: string | null;
+          date_fin?: string | null;
+          date_validation?: string | null;
+          description?: string | null;
+          direction_id?: string;
+          est_actif?: boolean;
+          exercice_id?: string | null;
+          id?: string;
+          libelle?: string;
+          responsable_id?: string | null;
+          statut?: string;
+          updated_at?: string;
+          validateur_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'plans_travail_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_exercice_id_fkey';
+            columns: ['exercice_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercices_budgetaires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_responsable_id_fkey';
+            columns: ['responsable_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_responsable_id_fkey';
+            columns: ['responsable_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_validateur_id_fkey';
+            columns: ['validateur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_validateur_id_fkey';
+            columns: ['validateur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       positions: {
         Row: {
@@ -11874,7 +13255,21 @@ export type Database = {
             foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
             columns: ['budget_line_destination_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
+            columns: ['budget_line_destination_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
+            columns: ['budget_line_destination_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -11916,7 +13311,21 @@ export type Database = {
             foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
             columns: ['budget_line_source_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
+            columns: ['budget_line_source_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
+            columns: ['budget_line_source_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -13227,58 +14636,209 @@ export type Database = {
         };
         Relationships: [];
       };
+      soumissionnaires_lot: {
+        Row: {
+          contact_nom: string | null;
+          created_at: string | null;
+          created_by: string | null;
+          date_depot: string | null;
+          email: string | null;
+          id: string;
+          is_manual_entry: boolean | null;
+          lot_marche_id: string | null;
+          motif_elimination: string | null;
+          note_finale: number | null;
+          note_financiere: number | null;
+          note_technique: number | null;
+          observations: string | null;
+          offre_financiere: number | null;
+          offre_technique_url: string | null;
+          passation_marche_id: string;
+          prestataire_id: string | null;
+          qualifie_technique: boolean | null;
+          raison_sociale: string;
+          rang_classement: number | null;
+          rccm: string | null;
+          statut: string;
+          telephone: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          contact_nom?: string | null;
+          created_at?: string | null;
+          created_by?: string | null;
+          date_depot?: string | null;
+          email?: string | null;
+          id?: string;
+          is_manual_entry?: boolean | null;
+          lot_marche_id?: string | null;
+          motif_elimination?: string | null;
+          note_finale?: number | null;
+          note_financiere?: number | null;
+          note_technique?: number | null;
+          observations?: string | null;
+          offre_financiere?: number | null;
+          offre_technique_url?: string | null;
+          passation_marche_id: string;
+          prestataire_id?: string | null;
+          qualifie_technique?: boolean | null;
+          raison_sociale: string;
+          rang_classement?: number | null;
+          rccm?: string | null;
+          statut?: string;
+          telephone?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          contact_nom?: string | null;
+          created_at?: string | null;
+          created_by?: string | null;
+          date_depot?: string | null;
+          email?: string | null;
+          id?: string;
+          is_manual_entry?: boolean | null;
+          lot_marche_id?: string | null;
+          motif_elimination?: string | null;
+          note_finale?: number | null;
+          note_financiere?: number | null;
+          note_technique?: number | null;
+          observations?: string | null;
+          offre_financiere?: number | null;
+          offre_technique_url?: string | null;
+          passation_marche_id?: string;
+          prestataire_id?: string | null;
+          qualifie_technique?: boolean | null;
+          raison_sociale?: string;
+          rang_classement?: number | null;
+          rccm?: string | null;
+          statut?: string;
+          telephone?: string | null;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'soumissionnaires_lot_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_lot_marche_id_fkey';
+            columns: ['lot_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'lots_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_passation_marche_id_fkey';
+            columns: ['passation_marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'passation_marche';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissionnaires_lot_prestataire_id_fkey';
+            columns: ['prestataire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires_actifs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       soumissions: {
         Row: {
           classement: number | null;
+          contact_email: string | null;
+          contact_nom: string | null;
+          contact_telephone: string | null;
           created_at: string | null;
           created_by: string | null;
           date_soumission: string;
           delai_execution: number | null;
+          document_administratif_url: string | null;
+          document_offre_url: string | null;
+          document_technique_url: string | null;
           id: string;
           lot_id: string;
+          marche_id: string | null;
           montant_offre: number;
           motif_rejet: string | null;
+          nom_entreprise: string | null;
           note_financiere: number | null;
           note_globale: number | null;
           note_technique: number | null;
           observations: string | null;
           prestataire_id: string;
+          rccm: string | null;
           statut: string | null;
           updated_at: string | null;
         };
         Insert: {
           classement?: number | null;
+          contact_email?: string | null;
+          contact_nom?: string | null;
+          contact_telephone?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           date_soumission?: string;
           delai_execution?: number | null;
+          document_administratif_url?: string | null;
+          document_offre_url?: string | null;
+          document_technique_url?: string | null;
           id?: string;
           lot_id: string;
+          marche_id?: string | null;
           montant_offre: number;
           motif_rejet?: string | null;
+          nom_entreprise?: string | null;
           note_financiere?: number | null;
           note_globale?: number | null;
           note_technique?: number | null;
           observations?: string | null;
           prestataire_id: string;
+          rccm?: string | null;
           statut?: string | null;
           updated_at?: string | null;
         };
         Update: {
           classement?: number | null;
+          contact_email?: string | null;
+          contact_nom?: string | null;
+          contact_telephone?: string | null;
           created_at?: string | null;
           created_by?: string | null;
           date_soumission?: string;
           delai_execution?: number | null;
+          document_administratif_url?: string | null;
+          document_offre_url?: string | null;
+          document_technique_url?: string | null;
           id?: string;
           lot_id?: string;
+          marche_id?: string | null;
           montant_offre?: number;
           motif_rejet?: string | null;
+          nom_entreprise?: string | null;
           note_financiere?: number | null;
           note_globale?: number | null;
           note_technique?: number | null;
           observations?: string | null;
           prestataire_id?: string;
+          rccm?: string | null;
           statut?: string | null;
           updated_at?: string | null;
         };
@@ -13302,6 +14862,13 @@ export type Database = {
             columns: ['lot_id'];
             isOneToOne: false;
             referencedRelation: 'marche_lots';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'soumissions_marche_id_fkey';
+            columns: ['marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'marches';
             referencedColumns: ['id'];
           },
           {
@@ -13831,7 +15398,21 @@ export type Database = {
             foreignKeyName: 'taches_budget_line_id_fkey';
             columns: ['budget_line_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'taches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'taches_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -15365,6 +16946,20 @@ export type Database = {
         };
         Relationships: [];
       };
+      expression_besoin_stats: {
+        Row: {
+          brouillon: number | null;
+          differe: number | null;
+          exercice: number | null;
+          rejete: number | null;
+          satisfaite: number | null;
+          soumis: number | null;
+          total: number | null;
+          valide: number | null;
+          verifie: number | null;
+        };
+        Relationships: [];
+      };
       notes_imputees_disponibles: {
         Row: {
           beneficiaire_id: string | null;
@@ -16080,7 +17675,6 @@ export type Database = {
           disponible_net: number | null;
           dotation_actuelle: number | null;
           dotation_initiale: number | null;
-          dotation_modifiee: number | null;
           exercice: number | null;
           id: string | null;
           label: string | null;
@@ -16234,6 +17828,216 @@ export type Database = {
           },
         ];
       };
+      v_budget_lines_execution: {
+        Row: {
+          action_code: string | null;
+          action_id: string | null;
+          action_libelle: string | null;
+          activite_code: string | null;
+          activite_id: string | null;
+          activite_libelle: string | null;
+          calc_disponible: number | null;
+          calc_dotation_actuelle: number | null;
+          calc_total_engage: number | null;
+          calc_total_liquide: number | null;
+          calc_total_ordonnance: number | null;
+          calc_total_paye: number | null;
+          calc_virements_emis: number | null;
+          calc_virements_recus: number | null;
+          code: string | null;
+          code_budgetaire: string | null;
+          code_budgetaire_v2: string | null;
+          code_version: string | null;
+          commentaire: string | null;
+          created_at: string | null;
+          date_cloture: string | null;
+          date_ouverture: string | null;
+          dir_code: string | null;
+          dir_label: string | null;
+          direction_id: string | null;
+          dotation_initiale: number | null;
+          exercice: number | null;
+          id: string | null;
+          is_active: boolean | null;
+          label: string | null;
+          level: string | null;
+          mission_code: string | null;
+          mission_id: string | null;
+          mission_libelle: string | null;
+          montant_reserve: number | null;
+          nbe_code: string | null;
+          nbe_id: string | null;
+          nbe_libelle: string | null;
+          numero_ligne: string | null;
+          nve_code_nve: string | null;
+          nve_id: string | null;
+          nve_libelle: string | null;
+          os_code: string | null;
+          os_id: string | null;
+          os_libelle: string | null;
+          parent_id: string | null;
+          seq_code: number | null;
+          source_financement: string | null;
+          sous_activite_code: string | null;
+          sous_activite_id: string | null;
+          sous_activite_libelle: string | null;
+          statut: string | null;
+          statut_execution: string | null;
+          sysco_code: string | null;
+          sysco_id: string | null;
+          sysco_libelle: string | null;
+          updated_at: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'budget_lines_action_id_fkey';
+            columns: ['action_id'];
+            isOneToOne: false;
+            referencedRelation: 'actions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_activite_id_fkey';
+            columns: ['activite_id'];
+            isOneToOne: false;
+            referencedRelation: 'activites';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_mission_id_fkey';
+            columns: ['mission_id'];
+            isOneToOne: false;
+            referencedRelation: 'missions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_nbe_id_fkey';
+            columns: ['nbe_id'];
+            isOneToOne: false;
+            referencedRelation: 'nomenclature_nbe';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_nve_id_fkey';
+            columns: ['nve_id'];
+            isOneToOne: false;
+            referencedRelation: 'ref_nve';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_os_id_fkey';
+            columns: ['os_id'];
+            isOneToOne: false;
+            referencedRelation: 'objectifs_strategiques';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_os_id_fkey';
+            columns: ['os_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_os_imputations';
+            referencedColumns: ['os_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_sous_activite_id_fkey';
+            columns: ['sous_activite_id'];
+            isOneToOne: false;
+            referencedRelation: 'sous_activites';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'budget_lines_sysco_id_fkey';
+            columns: ['sysco_id'];
+            isOneToOne: false;
+            referencedRelation: 'plan_comptable_sysco';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       v_dashboard_dmg: {
         Row: {
           engagements_a_liquider_count: number | null;
@@ -16372,18 +18176,708 @@ export type Database = {
         };
         Relationships: [];
       };
+      v_expressions_besoin_detail: {
+        Row: {
+          budget_line_code: string | null;
+          budget_line_libelle: string | null;
+          calendrier_debut: string | null;
+          calendrier_fin: string | null;
+          code_locked: boolean | null;
+          contact_livraison: string | null;
+          created_at: string | null;
+          created_by: string | null;
+          criteres_evaluation: string | null;
+          current_validation_step: number | null;
+          date_differe: string | null;
+          deadline_correction: string | null;
+          delai_livraison: string | null;
+          demandeur_nom: string | null;
+          description: string | null;
+          differe_by: string | null;
+          direction_id: string | null;
+          direction_nom: string | null;
+          direction_sigle: string | null;
+          disponible: number | null;
+          dossier_id: string | null;
+          engage: number | null;
+          exercice: number | null;
+          id: string | null;
+          imputation_id: string | null;
+          imputation_reference: string | null;
+          intitule_lot: string | null;
+          justification: string | null;
+          lieu_livraison: string | null;
+          ligne_budgetaire_id: string | null;
+          liste_articles: Json | null;
+          marche_id: string | null;
+          montant_estime: number | null;
+          motif_differe: string | null;
+          naef_reference: string | null;
+          nb_articles: number | null;
+          note_id: string | null;
+          numero: string | null;
+          numero_lot: number | null;
+          objet: string | null;
+          quantite: number | null;
+          rejection_reason: string | null;
+          specifications: string | null;
+          statut: string | null;
+          submitted_at: string | null;
+          total_articles: number | null;
+          type_procedure: string | null;
+          unite: string | null;
+          updated_at: string | null;
+          urgence: string | null;
+          validated_at: string | null;
+          validated_by: string | null;
+          validation_status: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'expressions_besoin_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_differe_by_fkey';
+            columns: ['differe_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_differe_by_fkey';
+            columns: ['differe_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'dossiers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_dossier_chaine';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_paiements_a_venir';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'imputations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['imputation_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_imputation_id_fkey';
+            columns: ['imputation_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputations_detail';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_ligne_budgetaire_id_fkey';
+            columns: ['ligne_budgetaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_marche_id_fkey';
+            columns: ['marche_id'];
+            isOneToOne: false;
+            referencedRelation: 'marches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'notes_dg';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'notes_imputees_disponibles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_note_id_fkey';
+            columns: ['note_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'expressions_besoin_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       v_expressions_besoin_stats: {
         Row: {
-          brouillon: number | null;
-          differe: number | null;
+          brouillons: number | null;
+          differes: number | null;
           exercice: number | null;
-          montant_valide_total: number | null;
-          rejete: number | null;
+          montant_total: number | null;
+          montant_valides: number | null;
+          rejetes: number | null;
+          satisfaites: number | null;
           soumis: number | null;
           total: number | null;
-          valide: number | null;
+          valides: number | null;
         };
         Relationships: [];
+      };
+      v_imputation_chain_diagnostic: {
+        Row: {
+          check_budget_line: string | null;
+          check_montant: string | null;
+          check_statut: string | null;
+          imputation_budget_line: string | null;
+          imputation_id: string | null;
+          imputation_montant: number | null;
+          imputation_ref: string | null;
+          imputation_statut: string | null;
+          naef_budget_line: string | null;
+          naef_id: string | null;
+          naef_montant: number | null;
+          naef_numero: string | null;
+          naef_statut: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['imputation_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['naef_budget_line'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+        ];
+      };
+      v_imputations_detail: {
+        Row: {
+          action_code: string | null;
+          action_libelle: string | null;
+          activite_code: string | null;
+          activite_libelle: string | null;
+          budget_line_code: string | null;
+          budget_line_id: string | null;
+          budget_line_libelle: string | null;
+          code_imputation: string | null;
+          commentaire: string | null;
+          created_at: string | null;
+          created_by: string | null;
+          createur_nom: string | null;
+          date_differe: string | null;
+          differed_at: string | null;
+          differed_by: string | null;
+          direction_code: string | null;
+          direction_id: string | null;
+          direction_nom: string | null;
+          direction_sigle: string | null;
+          disponible: number | null;
+          disponible_au_moment: number | null;
+          dossier_id: string | null;
+          dossier_numero: string | null;
+          dossier_statut: string | null;
+          dotation: number | null;
+          engage_avant: number | null;
+          exercice: number | null;
+          forcer_imputation: boolean | null;
+          id: string | null;
+          is_migrated: boolean | null;
+          is_multi_ligne: boolean | null;
+          justification_depassement: string | null;
+          mission_code: string | null;
+          mission_libelle: string | null;
+          montant: number | null;
+          motif_differe: string | null;
+          motif_rejet: string | null;
+          naef_montant: number | null;
+          naef_note_sef_id: string | null;
+          naef_numero: string | null;
+          naef_objet: string | null;
+          naef_reference_pivot: string | null;
+          naef_statut: string | null;
+          nbe_code: string | null;
+          nbe_libelle: string | null;
+          note_aef_id: string | null;
+          nsef_numero: string | null;
+          nsef_objet: string | null;
+          objet: string | null;
+          os_code: string | null;
+          os_libelle: string | null;
+          pieces_jointes: string[] | null;
+          reference: string | null;
+          rejected_at: string | null;
+          rejected_by: string | null;
+          source_financement: string | null;
+          statut: string | null;
+          submitted_at: string | null;
+          submitted_by: string | null;
+          sysco_code: string | null;
+          sysco_libelle: string | null;
+          updated_at: string | null;
+          validated_at: string | null;
+          validated_by: string | null;
+          validateur_nom: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'imputations_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_differed_by_fkey';
+            columns: ['differed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_differed_by_fkey';
+            columns: ['differed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'imputations_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'imputations_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'imputations_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'dossiers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_dossier_chaine';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'imputations_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_paiements_a_venir';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'notes_dg';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'notes_imputees_disponibles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_imputation_chain_diagnostic';
+            referencedColumns: ['naef_id'];
+          },
+          {
+            foreignKeyName: 'imputations_note_aef_id_fkey';
+            columns: ['note_aef_id'];
+            isOneToOne: true;
+            referencedRelation: 'v_notes_aef_detail';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_rejected_by_fkey';
+            columns: ['rejected_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_rejected_by_fkey';
+            columns: ['rejected_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_submitted_by_fkey';
+            columns: ['submitted_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_submitted_by_fkey';
+            columns: ['submitted_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'imputations_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['naef_note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'notes_sef';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['naef_note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_activite_recente';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['naef_note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_dossiers_urgents';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       v_kpi_paiement: {
         Row: {
@@ -16399,6 +18893,38 @@ export type Database = {
           total_liquide: number | null;
           total_ordonnance: number | null;
           total_paye: number | null;
+        };
+        Relationships: [];
+      };
+      v_liquidations_par_engagement: {
+        Row: {
+          budget_line_code: string | null;
+          budget_line_id: string | null;
+          budget_line_label: string | null;
+          derniere_liquidation: string | null;
+          direction_label: string | null;
+          direction_sigle: string | null;
+          engagement_id: string | null;
+          engagement_montant: number | null;
+          engagement_numero: string | null;
+          engagement_objet: string | null;
+          engagement_statut: string | null;
+          exercice: number | null;
+          fournisseur: string | null;
+          has_urgent: boolean | null;
+          is_complet: boolean | null;
+          montant_en_cours: number | null;
+          montant_valide: number | null;
+          nb_annulees: number | null;
+          nb_en_cours: number | null;
+          nb_liquidations: number | null;
+          nb_rejetees: number | null;
+          nb_valides: number | null;
+          premiere_liquidation: string | null;
+          restant_a_liquider: number | null;
+          taux_liquidation: number | null;
+          total_liquide: number | null;
+          total_net_a_payer: number | null;
         };
         Relationships: [];
       };
@@ -16524,6 +19050,304 @@ export type Database = {
           },
         ];
       };
+      v_notes_aef_detail: {
+        Row: {
+          beneficiaire_id: string | null;
+          budget_bloque: boolean | null;
+          budget_bloque_raison: string | null;
+          budget_code: string | null;
+          budget_disponible: number | null;
+          budget_disponible_soumission: number | null;
+          budget_dotation: number | null;
+          budget_label: string | null;
+          budget_line_id: string | null;
+          contenu: string | null;
+          created_at: string | null;
+          created_by: string | null;
+          creator_email: string | null;
+          creator_first_name: string | null;
+          creator_last_name: string | null;
+          date_differe: string | null;
+          deadline_correction: string | null;
+          depassement_budget: boolean | null;
+          differe_by: string | null;
+          differer_first_name: string | null;
+          differer_last_name: string | null;
+          direction_code: string | null;
+          direction_id: string | null;
+          direction_label: string | null;
+          direction_sigle: string | null;
+          dossier_id: string | null;
+          exercice: number | null;
+          id: string | null;
+          imputed_at: string | null;
+          imputed_by: string | null;
+          imputer_first_name: string | null;
+          imputer_last_name: string | null;
+          initiales_redacteur: string | null;
+          is_direct_aef: boolean | null;
+          is_migrated: boolean | null;
+          justification: string | null;
+          justification_depassement: string | null;
+          montant_autorise: number | null;
+          montant_depassement: number | null;
+          montant_estime: number | null;
+          motif_differe: string | null;
+          note_sef_id: string | null;
+          numero: string | null;
+          objet: string | null;
+          origin: string | null;
+          priorite: string | null;
+          redacteur_id: string | null;
+          reference_pivot: string | null;
+          rejected_at: string | null;
+          rejected_by: string | null;
+          rejecter_first_name: string | null;
+          rejecter_last_name: string | null;
+          rejection_reason: string | null;
+          sef_numero: string | null;
+          sef_objet: string | null;
+          sef_reference_pivot: string | null;
+          sef_statut: string | null;
+          statut: string | null;
+          submitted_at: string | null;
+          submitted_by: string | null;
+          submitter_first_name: string | null;
+          submitter_last_name: string | null;
+          type_depense: string | null;
+          updated_at: string | null;
+          validated_at: string | null;
+          validated_by: string | null;
+          validator_first_name: string | null;
+          validator_last_name: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notes_dg_beneficiaire_id_fkey';
+            columns: ['beneficiaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_beneficiaire_id_fkey';
+            columns: ['beneficiaire_id'];
+            isOneToOne: false;
+            referencedRelation: 'prestataires_actifs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'budget_lines';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_alertes_financieres';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_disponibilite_complet';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_budget_line_id_fkey';
+            columns: ['budget_line_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_reglement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'directions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_stats_par_direction';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_tableau_financier';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_direction_id_fkey';
+            columns: ['direction_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_directions_imputations';
+            referencedColumns: ['direction_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'dossiers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_dossier_chaine';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_dossier_id_fkey';
+            columns: ['dossier_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_paiements_a_venir';
+            referencedColumns: ['dossier_id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_imputed_by_fkey';
+            columns: ['imputed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_imputed_by_fkey';
+            columns: ['imputed_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'notes_sef';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_activite_recente';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_note_sef_id_fkey';
+            columns: ['note_sef_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_dossiers_urgents';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_redacteur_id_fkey';
+            columns: ['redacteur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_redacteur_id_fkey';
+            columns: ['redacteur_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_rejected_by_fkey';
+            columns: ['rejected_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_rejected_by_fkey';
+            columns: ['rejected_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_submitted_by_fkey';
+            columns: ['submitted_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_submitted_by_fkey';
+            columns: ['submitted_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notes_dg_validated_by_fkey';
+            columns: ['validated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       v_paiements_a_venir: {
         Row: {
           banque_beneficiaire: string | null;
@@ -16625,7 +19449,21 @@ export type Database = {
             foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
             columns: ['budget_line_destination_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
+            columns: ['budget_line_destination_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_destination_id_fkey';
+            columns: ['budget_line_destination_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -16667,7 +19505,21 @@ export type Database = {
             foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
             columns: ['budget_line_source_id'];
             isOneToOne: false;
+            referencedRelation: 'v_budget_lines_execution';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
+            columns: ['budget_line_source_id'];
+            isOneToOne: false;
             referencedRelation: 'v_engagement_stats';
+            referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'reamenagements_budgetaires_budget_line_source_id_fkey';
+            columns: ['budget_line_source_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_liquidations_par_engagement';
             referencedColumns: ['budget_line_id'];
           },
           {
@@ -16868,6 +19720,10 @@ export type Database = {
       };
     };
     Functions: {
+      _recalculate_single_budget_line: {
+        Args: { p_budget_line_id: string };
+        Returns: undefined;
+      };
       acknowledge_budget_alert: {
         Args: { p_alert_id: string };
         Returns: boolean;
@@ -16978,7 +19834,11 @@ export type Database = {
         Returns: boolean;
       };
       check_marche_prerequisites: {
-        Args: { p_expression_besoin_id: string };
+        Args: { p_marche_id: string };
+        Returns: boolean;
+      };
+      check_passation_transition: {
+        Args: { p_id: string; p_new_statut: string };
         Returns: Json;
       };
       check_permission_with_conditions: {
@@ -17000,6 +19860,15 @@ export type Database = {
         };
         Returns: Json;
       };
+      check_validation_permission: {
+        Args: { p_module: string; p_required_role: string; p_user_id: string };
+        Returns: {
+          is_allowed: boolean;
+          on_behalf_of_id: string;
+          on_behalf_of_name: string;
+          validation_mode: string;
+        }[];
+      };
       cleanup_old_notifications: { Args: never; Returns: number };
       close_workflow_task: {
         Args: {
@@ -17020,12 +19889,7 @@ export type Database = {
         };
         Returns: Json;
       };
-      count_notes_aef_by_statut: {
-        Args: {
-          p_exercice: number;
-        };
-        Returns: Json;
-      };
+      count_notes_aef_by_statut: { Args: { p_exercice: number }; Returns: Json };
       count_search_notes_aef: {
         Args: {
           p_date_from?: string;
@@ -17176,6 +20040,9 @@ export type Database = {
         Args: { p_type_depense_id: string };
         Returns: number;
       };
+      fn_cron_check_budget_alerts: { Args: never; Returns: undefined };
+      fn_cron_check_liquidation_echeances: { Args: never; Returns: undefined };
+      fn_cron_check_liquidation_urgentes: { Args: never; Returns: undefined };
       fn_detecter_type_demande: {
         Args: { p_description?: string; p_objet: string };
         Returns: string;
@@ -17193,7 +20060,9 @@ export type Database = {
           priorite: number;
         }[];
       };
+      fn_get_marche_detail: { Args: { p_marche_id: string }; Returns: Json };
       fn_get_user_initiales: { Args: { p_user_id: string }; Returns: string };
+      fn_marches_a_approuver: { Args: never; Returns: Json };
       fn_marquer_affectation_lue: {
         Args: { p_affectation_id: string; p_user_id?: string };
         Returns: boolean;
@@ -17205,6 +20074,15 @@ export type Database = {
           p_user_id?: string;
         };
         Returns: boolean;
+      };
+      fn_transition_marche: {
+        Args: {
+          p_marche_id: string;
+          p_motif?: string;
+          p_nouveau_statut: string;
+          p_user_id: string;
+        };
+        Returns: Json;
       };
       fn_verifier_budget_disponible: {
         Args: { p_ligne_budgetaire_id: string; p_montant: number };
@@ -17268,6 +20146,11 @@ export type Database = {
         Args: { p_date_ref?: string; p_etape: string };
         Returns: string;
       };
+      generate_reference_engagement: {
+        Args: { p_date?: string };
+        Returns: string;
+      };
+      generate_reference_imp: { Args: { p_date?: string }; Returns: string };
       generate_reference_with_initiales: {
         Args: { p_date_ref?: string; p_etape: string; p_initiales?: string };
         Returns: string;
@@ -17309,6 +20192,71 @@ export type Database = {
           titulaire_nom: string;
         }[];
       };
+      get_alertes_engagement_budget: {
+        Args: { p_exercice?: number; p_seuil?: number };
+        Returns: {
+          budget_line_id: string;
+          code: string;
+          dernier_engagement: string;
+          direction_code: string;
+          direction_label: string;
+          disponible_net: number;
+          dotation_actuelle: number;
+          label: string;
+          nb_engagements_valides: number;
+          taux: number;
+          total_engage: number;
+        }[];
+      };
+      get_alertes_liquidation_budget: {
+        Args: { p_exercice?: number; p_seuil?: number };
+        Returns: {
+          budget_line_id: string;
+          code: string;
+          derniere_liquidation: string;
+          direction_code: string;
+          direction_label: string;
+          dotation_actuelle: number;
+          label: string;
+          nb_liquidations_validees: number;
+          taux_liquidation: number;
+          total_engage: number;
+          total_liquide: number;
+        }[];
+      };
+      get_alertes_liquidation_echeance: {
+        Args: { p_exercice?: number };
+        Returns: {
+          created_by: string;
+          date_differe: string;
+          deadline_correction: string;
+          direction_label: string;
+          engagement_numero: string;
+          engagement_objet: string;
+          jours_depasses: number;
+          liquidation_id: string;
+          montant: number;
+          motif_differe: string;
+          numero: string;
+        }[];
+      };
+      get_alertes_liquidation_urgentes: {
+        Args: { p_age_heures?: number; p_exercice?: number };
+        Returns: {
+          created_by: string;
+          date_urgence: string;
+          direction_label: string;
+          engagement_numero: string;
+          engagement_objet: string;
+          heures_attente: number;
+          liquidation_id: string;
+          montant: number;
+          motif_urgence: string;
+          net_a_payer: number;
+          numero: string;
+          statut: string;
+        }[];
+      };
       get_available_transitions: {
         Args: { p_current_status: string; p_module: string; p_user_id?: string };
         Returns: {
@@ -17317,6 +20265,50 @@ export type Database = {
           requires_budget_check: boolean;
           requires_motif: boolean;
           to_status: string;
+        }[];
+      };
+      get_budget_impact_preview: {
+        Args: { p_imputation_id: string };
+        Returns: Json;
+      };
+      get_budget_indicator: {
+        Args: { p_budget_line_id: string };
+        Returns: {
+          disponible: number;
+          dotation: number;
+          engage: number;
+          taux_consommation: number;
+        }[];
+      };
+      get_budget_indicator_complet: {
+        Args: { p_budget_line_id: string };
+        Returns: {
+          disponible_brut: number;
+          disponible_net: number;
+          dotation_actuelle: number;
+          dotation_initiale: number;
+          engage: number;
+          montant_reserve: number;
+          taux_consommation: number;
+        }[];
+      };
+      get_budget_line_movements: {
+        Args: { p_budget_line_id: string; p_exercice?: number };
+        Returns: {
+          created_at: string;
+          created_by_name: string;
+          date_engagement: string;
+          fournisseur: string;
+          id: string;
+          montant: number;
+          numero: string;
+          objet: string;
+          statut: string;
+          type_engagement: string;
+          visa_cb_date: string;
+          visa_daaf_date: string;
+          visa_dg_date: string;
+          visa_saf_date: string;
         }[];
       };
       get_dashboard_data: { Args: { p_exercice?: number }; Returns: Json };
@@ -17352,6 +20344,55 @@ export type Database = {
           etape_libelle: string;
           etape_ordre: number;
           statut: string;
+        }[];
+      };
+      get_engagement_export_data: {
+        Args: {
+          p_direction_id?: string;
+          p_exercice?: number;
+          p_statut?: string;
+        };
+        Returns: {
+          budget_line_code: string;
+          budget_line_label: string;
+          created_at: string;
+          created_by_name: string;
+          date_engagement: string;
+          direction_sigle: string;
+          exercice: number;
+          fournisseur: string;
+          id: string;
+          montant: number;
+          montant_degage: number;
+          montant_ht: number;
+          motif_degage: string;
+          numero: string;
+          objet: string;
+          prestataire_nom: string;
+          statut: string;
+          tva: number;
+          type_engagement: string;
+          visa_cb_date: string;
+          visa_cb_user: string;
+          visa_daaf_date: string;
+          visa_daaf_user: string;
+          visa_dg_date: string;
+          visa_dg_user: string;
+          visa_saf_date: string;
+          visa_saf_user: string;
+          workflow_status: string;
+        }[];
+      };
+      get_engagements_sans_liquidation: {
+        Args: { p_exercice: string; p_jours?: number };
+        Returns: {
+          fournisseur: string;
+          id: string;
+          jours_depuis_validation: number;
+          montant: number;
+          numero: string;
+          objet: string;
+          validated_at: string;
         }[];
       };
       get_entity_transition_history: {
@@ -17401,6 +20442,7 @@ export type Database = {
           nouvelle_valeur: string;
         }[];
       };
+      get_liquidation_counts: { Args: { p_exercice: number }; Returns: Json };
       get_next_budget_code_seq: {
         Args: { p_direction_id: string; p_exercice: number };
         Returns: number;
@@ -17430,6 +20472,20 @@ export type Database = {
         }[];
       };
       get_notification_summary: { Args: { p_entity_id: string }; Returns: Json };
+      get_overdue_urgent_liquidations: {
+        Args: { p_exercice: string };
+        Returns: {
+          created_at: string;
+          fournisseur: string;
+          heures_en_attente: number;
+          id: string;
+          montant: number;
+          numero: string;
+          objet: string;
+          reglement_urgent_date: string;
+        }[];
+      };
+      get_passation_counts: { Args: { p_exercice: number }; Returns: Json };
       get_pending_workflows: {
         Args: { p_user_id?: string };
         Returns: {
@@ -17464,6 +20520,45 @@ export type Database = {
       };
       get_stats_utilisateurs: { Args: { p_exercice?: number }; Returns: Json };
       get_statut_paiement: { Args: { p_reglement_id: string }; Returns: string };
+      get_suivi_engagements_par_ligne: {
+        Args: { p_direction_id?: string; p_exercice?: number };
+        Returns: {
+          budget_line_id: string;
+          code: string;
+          dernier_engagement: string;
+          direction_code: string;
+          direction_label: string;
+          disponible_net: number;
+          dotation_actuelle: number;
+          label: string;
+          montant_total_engagements: number;
+          nb_engagements: number;
+          taux_engagement: number;
+          total_engage: number;
+        }[];
+      };
+      get_suivi_liquidations_par_engagement: {
+        Args: { p_engagement_id?: string; p_exercice: number };
+        Returns: {
+          budget_line_code: string;
+          budget_line_label: string;
+          derniere_liquidation: string;
+          direction_sigle: string;
+          engagement_id: string;
+          engagement_montant: number;
+          engagement_numero: string;
+          engagement_objet: string;
+          fournisseur: string;
+          is_complet: boolean;
+          nb_en_cours: number;
+          nb_liquidations: number;
+          nb_rejetees: number;
+          nb_valides: number;
+          restant_a_liquider: number;
+          taux_liquidation: number;
+          total_liquide: number;
+        }[];
+      };
       get_tableau_financier: {
         Args: { p_direction_id?: string; p_exercice_id?: string };
         Returns: {
@@ -17488,7 +20583,9 @@ export type Database = {
       get_urgent_liquidations_count: { Args: never; Returns: number };
       get_urgent_liquidations_stats: { Args: never; Returns: Json };
       get_user_direction: { Args: { _user_id: string }; Returns: string };
-      get_user_direction_id: { Args: { p_user_id: string }; Returns: string };
+      get_user_direction_id:
+        | { Args: never; Returns: string }
+        | { Args: { p_user_id: string }; Returns: string };
       get_user_exercice_actif: { Args: { _user_id: string }; Returns: number };
       get_user_permissions: {
         Args: { p_user_id: string };
@@ -17500,6 +20597,12 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string };
         Returns: Database['public']['Enums']['app_role'][];
+      };
+      get_users_who_can_act_as_role: {
+        Args: { p_role: string; p_scope?: string };
+        Returns: {
+          user_id: string;
+        }[];
       };
       get_workflow_config: { Args: { p_entity_type?: string }; Returns: Json };
       get_workflow_status: {
@@ -17546,6 +20649,10 @@ export type Database = {
         Args: { p_exercice: number };
         Returns: undefined;
       };
+      is_admin: { Args: never; Returns: boolean };
+      is_cb: { Args: never; Returns: boolean };
+      is_daaf: { Args: never; Returns: boolean };
+      is_dg: { Args: never; Returns: boolean };
       is_expression_besoin_validated: {
         Args: { eb_id: string };
         Returns: boolean;
@@ -17655,6 +20762,10 @@ export type Database = {
           year: number;
         }[];
       };
+      recalculate_ranking: {
+        Args: { p_lot_id?: string; p_passation_id: string };
+        Returns: undefined;
+      };
       recalculer_montants_dossier: {
         Args: { p_dossier_id: string };
         Returns: undefined;
@@ -17720,6 +20831,62 @@ export type Database = {
         Returns: Json;
       };
       revert_libelle: { Args: { p_id: string; p_table: string }; Returns: Json };
+      rpc_export_liquidations: {
+        Args: {
+          p_date_debut?: string;
+          p_date_fin?: string;
+          p_direction_id?: string;
+          p_exercice: number;
+          p_statut?: string;
+        };
+        Returns: {
+          airsi_montant: number;
+          airsi_taux: number;
+          budget_line_code: string;
+          budget_line_label: string;
+          created_at: string;
+          createur: string;
+          date_liquidation: string;
+          direction_label: string;
+          direction_sigle: string;
+          engagement_montant: number;
+          engagement_numero: string;
+          engagement_objet: string;
+          fournisseur: string;
+          montant: number;
+          montant_ht: number;
+          motif_rejet: string;
+          net_a_payer: number;
+          numero: string;
+          penalites_montant: number;
+          penalites_nb_jours: number;
+          reference_facture: string;
+          regime_fiscal: string;
+          reglement_urgent: boolean;
+          reglement_urgent_motif: string;
+          retenue_bic_montant: number;
+          retenue_bic_taux: number;
+          retenue_bnc_montant: number;
+          retenue_bnc_taux: number;
+          retenue_source_montant: number;
+          retenue_source_taux: number;
+          service_fait: boolean;
+          service_fait_date: string;
+          sf_certifie_par: string;
+          statut: string;
+          submitted_at: string;
+          total_retenues: number;
+          tva_montant: number;
+          tva_taux: number;
+          validated_at: string;
+          visa_daaf_commentaire: string;
+          visa_daaf_date: string;
+          visa_daaf_par: string;
+          visa_dg_commentaire: string;
+          visa_dg_date: string;
+          visa_dg_par: string;
+        }[];
+      };
       search_notes_aef: {
         Args: {
           p_date_from?: string;
@@ -17814,6 +20981,10 @@ export type Database = {
         Args: { p_entity_id: string; p_entity_type: string };
         Returns: string;
       };
+      submit_note_sef_with_reference: {
+        Args: { p_note_id: string };
+        Returns: string;
+      };
       sync_arti_counter_from_import: {
         Args: {
           p_annee: number;
@@ -17905,6 +21076,7 @@ export type Database = {
         Returns: Json;
       };
       validate_import_run: { Args: { p_run_id: string }; Returns: Json };
+      validate_imputation: { Args: { p_imputation_id: string }; Returns: Json };
       validate_prestataire_request: {
         Args: { p_request_id: string; p_validator_id: string };
         Returns: string;
@@ -18049,7 +21221,14 @@ export type Database = {
         | 'CANCEL';
       migration_staging_status: 'PENDING' | 'READY' | 'IMPORTED' | 'ERROR';
       profil_fonctionnel: 'Admin' | 'Validateur' | 'Operationnel' | 'Controleur' | 'Auditeur';
-      role_hierarchique: 'Agent' | 'Chef de Service' | 'Sous-Directeur' | 'Directeur' | 'DG';
+      role_hierarchique:
+        | 'Agent'
+        | 'Chef de Service'
+        | 'Sous-Directeur'
+        | 'Directeur'
+        | 'DG'
+        | 'Tresorier'
+        | 'DMG';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -18214,7 +21393,15 @@ export const Constants = {
       ],
       migration_staging_status: ['PENDING', 'READY', 'IMPORTED', 'ERROR'],
       profil_fonctionnel: ['Admin', 'Validateur', 'Operationnel', 'Controleur', 'Auditeur'],
-      role_hierarchique: ['Agent', 'Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'],
+      role_hierarchique: [
+        'Agent',
+        'Chef de Service',
+        'Sous-Directeur',
+        'Directeur',
+        'DG',
+        'Tresorier',
+        'DMG',
+      ],
     },
   },
 } as const;

@@ -114,17 +114,7 @@ export function OrdonnancementDetails({
         </DialogHeader>
 
         {/* Dossier step timeline for expense chain visualization */}
-        <DossierStepTimeline
-          currentStep="ordonnancement"
-          engagementId={engagement?.id}
-          liquidationId={liquidation?.id}
-          ordonnancementId={ordonnancement?.id}
-          engagementStatus={engagement ? 'valide' : undefined}
-          liquidationStatus={liquidation ? 'validé_dg' : undefined}
-          ordonnancementStatus={ordonnancement?.statut}
-          reglementStatus={ordonnancement?.montant_paye > 0 ? 'en_cours' : undefined}
-          compact
-        />
+        <DossierStepTimeline currentStep="ordonnancement" compact />
 
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-5">

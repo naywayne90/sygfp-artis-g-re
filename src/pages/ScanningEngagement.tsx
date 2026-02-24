@@ -238,9 +238,9 @@ export default function ScanningEngagement() {
       // Map to result type
       return engData.map((eng) => {
         const budgetLine = eng.budget_line as Record<string, unknown>;
-        const direction = budgetLine?.direction;
-        const activite = budgetLine?.activite;
-        const os = budgetLine?.os;
+        const direction = budgetLine?.direction as Record<string, unknown> | null;
+        const activite = budgetLine?.activite as Record<string, unknown> | null;
+        const os = budgetLine?.os as Record<string, unknown> | null;
         const stats = docStats[eng.id] || {
           total: 0,
           provided: 0,
@@ -378,7 +378,7 @@ export default function ScanningEngagement() {
 
   const handleChecklistChange = (isComplete: boolean, isVerified: boolean) => {
     setIsChecklistComplete(isComplete);
-    setIsChecklistVerified(isVerified);
+    _setIsChecklistVerified(isVerified);
   };
 
   const handleSubmit = () => {

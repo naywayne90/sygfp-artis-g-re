@@ -208,7 +208,7 @@ export function useUrgentLiquidations() {
       const { data: urgentTargets } = await supabase
         .from('user_roles')
         .select('user_id')
-        .in('role', ['DMG', 'DG', 'DAAF', 'DAF']);
+        .in('role', ['SDMG', 'DG', 'DAAF', 'DAF'] as never);
 
       if (urgentTargets?.length) {
         await supabase.from('notifications').insert(
@@ -249,7 +249,7 @@ export function useUrgentLiquidations() {
           const { data: urgentEmailTargets } = await supabase
             .from('user_roles')
             .select('user_id')
-            .in('role', ['DG', 'DMG', 'DAAF']);
+            .in('role', ['DG', 'SDMG', 'DAAF'] as never);
 
           if (urgentEmailTargets?.length) {
             for (const u of urgentEmailTargets.filter((t) => t.user_id !== user.id)) {

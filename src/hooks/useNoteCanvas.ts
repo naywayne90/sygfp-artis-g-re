@@ -173,7 +173,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
           ...input,
           created_by: user.id,
           updated_by: user.id,
-        })
+        } as never)
         .select()
         .single();
 
@@ -196,7 +196,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
         .update({
           ...updates,
           updated_by: user.id,
-        })
+        } as never)
         .eq('id', id)
         .select()
         .single();

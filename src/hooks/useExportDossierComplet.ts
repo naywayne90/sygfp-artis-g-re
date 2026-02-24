@@ -34,8 +34,11 @@ export function useExportDossierComplet() {
   const fetchDossierComplet = useCallback(
     async (dossierId: string): Promise<DossierCompletData | null> => {
       // Dossier principal
-      const { data: dossier, error: dossierError } = await supabase
-        .from('dossiers')
+      const { data: dossier, error: dossierError } = await (
+        supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from('dossiers') as any
+      )
         .select(
           `
         *,
@@ -121,8 +124,11 @@ export function useExportDossierComplet() {
       }
 
       // Timeline / Historique
-      const { data: timeline } = await supabase
-        .from('dossier_etapes')
+      const { data: timeline } = await (
+        supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from('dossier_etapes') as any
+      )
         .select(
           `
         *,

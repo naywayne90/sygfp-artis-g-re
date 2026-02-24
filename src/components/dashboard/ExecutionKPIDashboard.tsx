@@ -237,7 +237,7 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
         const filterByMonth = (items: Record<string, unknown>[], dateField: string) => {
           return items.filter((item) => {
             if (!item[dateField]) return false;
-            const date = new Date(item[dateField]);
+            const date = new Date(item[dateField] as string);
             return date >= monthStart && date <= monthEnd;
           });
         };
@@ -245,19 +245,19 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
         return {
           mois,
           engagements: filterByMonth(engValides, 'date_engagement').reduce(
-            (sum, e) => sum + (e.montant || 0),
+            (sum, e) => sum + ((e.montant as number) || 0),
             0
           ),
           liquidations: filterByMonth(liqValides, 'date_liquidation').reduce(
-            (sum, l) => sum + (l.montant || 0),
+            (sum, l) => sum + ((l.montant as number) || 0),
             0
           ),
           ordonnancements: filterByMonth(ordValides, 'created_at').reduce(
-            (sum, o) => sum + (o.montant || 0),
+            (sum, o) => sum + ((o.montant as number) || 0),
             0
           ),
           reglements: filterByMonth(regPaies, 'date_paiement').reduce(
-            (sum, r) => sum + (r.montant || 0),
+            (sum, r) => sum + ((r.montant as number) || 0),
             0
           ),
         };

@@ -211,8 +211,11 @@ export function useMarches() {
   const { data: notesImputees = [] } = useQuery({
     queryKey: ['notes-imputees-for-marche', exercice],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('notes_dg')
+      const { data, error } = await (
+        supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .from('notes_dg') as any
+      )
         .select('id, numero, objet, montant_estime, direction:directions(sigle)')
         .eq('statut', 'impute')
         .eq('exercice', exercice || new Date().getFullYear());

@@ -47,9 +47,7 @@ export function LiquidationBudgetImpact({ liquidation }: LiquidationBudgetImpact
         // 1. Récupérer la ligne budgétaire
         const { data: bl } = await supabase
           .from('budget_lines')
-          .select(
-            'id, code, label, dotation_initiale, virements_recus, virements_emis, total_liquide'
-          )
+          .select('id, code, label, dotation_initiale, dotation_modifiee, total_liquide')
           .eq('id', budgetLineId)
           .single();
 
@@ -58,8 +56,7 @@ export function LiquidationBudgetImpact({ liquidation }: LiquidationBudgetImpact
           return;
         }
 
-        const dotation =
-          (bl.dotation_initiale || 0) + (bl.virements_recus || 0) - (bl.virements_emis || 0);
+        const dotation = bl.dotation_modifiee || bl.dotation_initiale || 0;
 
         // 2. Calculer le total engagé sur cette ligne
         const { data: engSum } = await supabase

@@ -289,8 +289,8 @@ describe('VALIDATION_FLOW_STEPS', () => {
   });
 
   it('les 2 premières étapes ne sont pas conditionnelles', () => {
-    expect(VALIDATION_FLOW_STEPS[0].conditional).toBeUndefined();
-    expect(VALIDATION_FLOW_STEPS[1].conditional).toBeUndefined();
+    expect((VALIDATION_FLOW_STEPS[0] as Record<string, unknown>).conditional).toBeUndefined();
+    expect((VALIDATION_FLOW_STEPS[1] as Record<string, unknown>).conditional).toBeUndefined();
   });
 });
 

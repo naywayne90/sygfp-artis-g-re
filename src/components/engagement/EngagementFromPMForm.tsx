@@ -171,7 +171,9 @@ export function EngagementFromPMForm({
 
     // Check required documents
     const requiredDocs = DOCUMENTS_ENGAGEMENT.filter((d) => d.obligatoire);
-    const providedDocs = documents.filter((d) => requiredDocs.some((rd) => rd.code === d.type));
+    const providedDocs = documents.filter((d) =>
+      requiredDocs.some((rd) => rd.code === d.document_type)
+    );
 
     if (providedDocs.length < requiredDocs.length) {
       toast.warning(

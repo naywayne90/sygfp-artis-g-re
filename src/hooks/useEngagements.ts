@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import type { Json } from '@/integrations/supabase/types';
 import { checkValidationPermission } from '@/hooks/useCheckValidationPermission';
 import { generateARTIReference, ETAPE_CODES } from '@/lib/notes-sef/referenceService';
 
@@ -842,7 +843,7 @@ export function useEngagements() {
           const { data: nextUsers } = await supabase
             .from('user_roles')
             .select('user_id')
-            .eq('role', nextRole);
+            .eq('role', nextRole as never);
           if (nextUsers?.length) {
             valNotifs.push(
               ...nextUsers.map((u) => ({
@@ -1265,7 +1266,7 @@ export function useEngagements() {
         entityId: id,
         action: 'update_locked_field',
         oldValues: oldEngagement,
-        newValues: { ...data, justification },
+        newValues: { ...data, justification } as unknown as Json,
       });
     },
     onSuccess: () => {
@@ -1497,13 +1498,16 @@ export function useDegagement() {
       queryClient.invalidateQueries({ queryKey: ['engagement-detail', data.id] });
       queryClient.invalidateQueries({ queryKey: ['budget-indicators'] });
       queryClient.invalidateQueries({ queryKey: ['budget-line-movements'] });
-      logAction(
-        'engagement_degagement',
-        'budget_engagements',
-        data.id,
-        { montant_degage: 0 },
-        { montant_degage: data.montant_degage, motif_degagement: data.motif_degagement }
-      );
+      logAction({
+        entityType: 'engagement',
+        entityId: data.id,
+        action: 'engagement_degagement',
+        oldValues: { montant_degage: 0 },
+        newValues: {
+          montant_degage: data.montant_degage,
+          motif_degagement: data.motif_degagement,
+        } as unknown as Json,
+      });
       toast.success(
         `Degagement de ${new Intl.NumberFormat('fr-FR').format(data.montant_degage || 0)} FCFA enregistre`
       );

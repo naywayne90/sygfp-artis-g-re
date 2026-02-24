@@ -216,15 +216,15 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
     }
     supabase
       .from('credit_transfers')
-      .select('id, amount, status, motif, created_at, from_budget_line_id, to_budget_line_id')
+      .select('id, amount, status, motif, requested_at, from_budget_line_id, to_budget_line_id')
       .or(
         `from_budget_line_id.eq.${engagement.budget_line_id},to_budget_line_id.eq.${engagement.budget_line_id}`
       )
       .eq('status', 'execute')
-      .order('created_at', { ascending: false })
+      .order('requested_at', { ascending: false })
       .limit(10)
       .then(({ data }) => {
-        setCreditTransfers((data || []) as CreditTransfer[]);
+        setCreditTransfers((data || []) as unknown as CreditTransfer[]);
       });
   }, [engagement?.budget_line_id]);
 

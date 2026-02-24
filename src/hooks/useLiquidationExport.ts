@@ -629,7 +629,6 @@ async function doExportAttestationPDF(liquidation: Liquidation): Promise<void> {
       textColor: PDF_COLORS.white,
       fontStyle: 'bold',
       halign: 'left',
-      colSpan: 2,
     },
     columnStyles: {
       0: { cellWidth: 60, fontStyle: 'bold' },

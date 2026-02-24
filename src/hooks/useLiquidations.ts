@@ -163,8 +163,14 @@ export interface LiquidationCounts {
 }
 
 export const VALIDATION_STEPS = [
-  { order: 1, role: 'DAAF', label: 'Directeur Administratif et Financier', statut: 'validé_daaf' },
-  { order: 2, role: 'DG', label: 'Directeur Général', statut: 'validé_dg' },
+  {
+    order: 1,
+    role: 'DAAF',
+    label: 'Directeur Administratif et Financier',
+    statut: 'validé_daaf',
+    visaPrefix: 'visa_daaf',
+  },
+  { order: 2, role: 'DG', label: 'Directeur Général', statut: 'validé_dg', visaPrefix: 'visa_dg' },
 ];
 
 /** Seuil de validation DG en FCFA — au-delà, la liquidation requiert la signature DG */
@@ -626,7 +632,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
         const { data: urgentTargets } = await supabase
           .from('user_roles')
           .select('user_id')
-          .in('role', ['DAAF', 'DAF', 'DMG']);
+          .in('role', ['DAAF', 'DAF', 'DG'] as never);
 
         if (urgentTargets?.length) {
           await supabase.from('notifications').insert(
@@ -917,7 +923,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
           const { data: nextUsers } = await supabase
             .from('user_roles')
             .select('user_id')
-            .eq('role', nextStepInfo.role);
+            .eq('role', nextStepInfo.role as never);
           if (nextUsers?.length) {
             valNotifs.push(
               ...nextUsers.map((u) => ({
@@ -1718,7 +1724,7 @@ export function useOverdueUrgentLiquidations() {
     queryKey: ['overdue-urgent-liquidations', exercice],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_overdue_urgent_liquidations', {
-        p_exercice: exercice as string,
+        p_exercice: String(exercice),
       });
 
       if (error) throw error;
@@ -1751,7 +1757,7 @@ export function useEngagementsSansLiquidation(jours: number = 30) {
     queryKey: ['engagements-sans-liquidation', exercice, jours],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_engagements_sans_liquidation', {
-        p_exercice: exercice as string,
+        p_exercice: String(exercice),
         p_jours: jours,
       });
 

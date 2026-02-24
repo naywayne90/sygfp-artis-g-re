@@ -1464,6 +1464,7 @@ describe('EngagementChainNav — buildChainSteps', () => {
     motif_degage: null,
     degage_by: null,
     degage_at: null,
+    is_multi_ligne: null,
   };
 
   it('engagement brouillon sans passation → passation unavailable, liquidation unavailable', () => {
@@ -2144,7 +2145,8 @@ describe('Badge multi-lignes — conditions de visibilité', () => {
   });
 
   it('!! coercion null === false', () => {
-    expect(!!null).toBe(false);
+    const val: boolean | null = null;
+    expect(!!val).toBe(false);
   });
 
   it('!! coercion true === true', () => {

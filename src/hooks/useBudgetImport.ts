@@ -115,7 +115,7 @@ export function useBudgetImport() {
       if (error) throw error;
 
       // Resolve user_id to profile names (no FK constraint exists)
-      const items = (data || []) as BudgetImportRecord[];
+      const items = (data || []) as unknown as BudgetImportRecord[];
       const userIds = [...new Set(items.map((i) => i.user_id).filter(Boolean))] as string[];
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
