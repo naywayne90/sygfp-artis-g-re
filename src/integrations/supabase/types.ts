@@ -4669,6 +4669,42 @@ export type Database = {
           },
         ];
       };
+      doublon_reviews: {
+        Row: {
+          action: string;
+          created_at: string | null;
+          exercice: number;
+          group_id: string;
+          id: string;
+          item_ids: string[] | null;
+          notes: string | null;
+          reviewed_by: string | null;
+          type: string;
+        };
+        Insert: {
+          action: string;
+          created_at?: string | null;
+          exercice: number;
+          group_id: string;
+          id?: string;
+          item_ids?: string[] | null;
+          notes?: string | null;
+          reviewed_by?: string | null;
+          type: string;
+        };
+        Update: {
+          action?: string;
+          created_at?: string | null;
+          exercice?: number;
+          group_id?: string;
+          id?: string;
+          item_ids?: string[] | null;
+          notes?: string | null;
+          reviewed_by?: string | null;
+          type?: string;
+        };
+        Relationships: [];
+      };
       email_templates: {
         Row: {
           body_html: string;
@@ -21053,6 +21089,16 @@ export type Database = {
           p_table: string;
         };
         Returns: Json;
+      };
+      update_sequence_counter: {
+        Args: {
+          p_direction_code?: string;
+          p_doc_type: string;
+          p_exercice: number;
+          p_new_number: number;
+          p_scope?: string;
+        };
+        Returns: boolean;
       };
       update_supplier_document_statuses: { Args: never; Returns: number };
       user_can_access_exercice: {

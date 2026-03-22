@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Hash,
   RefreshCw,
@@ -48,79 +48,90 @@ import {
   Banknote,
   ShoppingCart,
   Briefcase,
-} from "lucide-react";
-import { useExercice } from "@/contexts/ExerciceContext";
+} from 'lucide-react';
+import { useExercice } from '@/contexts/ExerciceContext';
 
-import { toast } from "sonner";
-import { DocType } from "@/hooks/useSequenceGenerator";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { DocType, useSequenceGenerator } from '@/hooks/useSequenceGenerator';
 
 interface SequenceCounter {
   id: string;
-  doc_type: DocType;
+  doc_type: string;
   exercice: number;
   direction_code: string | null;
   scope: string;
-  current_number: number;
-  prefix: string;
-  updated_at: string;
+  last_number: number;
+  prefix_override: string | null;
+  updated_at: string | null;
+  created_at: string | null;
 }
 
-const DOC_TYPE_CONFIG: Record<DocType, { label: string; icon: React.ComponentType<{ className?: string }>; format: string }> = {
-  SEF: { label: "Notes SEF", icon: FileText, format: "SEF/{ANNEE}/{SEQ:5}" },
-  AEF: { label: "Notes AEF", icon: FileText, format: "AEF/{ANNEE}/{SEQ:5}" },
-  EB: { label: "Expression Besoin", icon: Briefcase, format: "EB/{ANNEE}/{SEQ:5}" },
-  ENG: { label: "Engagements", icon: CreditCard, format: "ENG/{ANNEE}/{SEQ:5}" },
-  LIQ: { label: "Liquidations", icon: Receipt, format: "LIQ/{ANNEE}/{SEQ:5}" },
-  ORD: { label: "Ordonnancements", icon: FileCheck, format: "ORD/{ANNEE}/{SEQ:5}" },
-  PAY: { label: "Règlements", icon: Banknote, format: "PAY/{ANNEE}/{SEQ:5}" },
-  MARCHE: { label: "Marchés", icon: ShoppingCart, format: "MARCH/{ANNEE}/{SEQ:4}" },
-  CONTRAT: { label: "Contrats", icon: FileCheck, format: "CTR/{ANNEE}/{SEQ:4}" },
-  DOSSIER: { label: "Dossiers", icon: Briefcase, format: "DOS/{ANNEE}/{SEQ:5}" },
-  DA: { label: "Demandes Achat", icon: ShoppingCart, format: "DA/{ANNEE}/{SEQ:4}" },
-  VIR: { label: "Virements", icon: RefreshCw, format: "VIR/{ANNEE}/{SEQ:4}" },
+const DOC_TYPE_CONFIG: Record<
+  DocType,
+  { label: string; icon: React.ComponentType<{ className?: string }>; format: string }
+> = {
+  SEF: { label: 'Notes SEF', icon: FileText, format: 'SEF/{ANNEE}/{SEQ:5}' },
+  AEF: { label: 'Notes AEF', icon: FileText, format: 'AEF/{ANNEE}/{SEQ:5}' },
+  EB: { label: 'Expression Besoin', icon: Briefcase, format: 'EB/{ANNEE}/{SEQ:5}' },
+  ENG: { label: 'Engagements', icon: CreditCard, format: 'ENG/{ANNEE}/{SEQ:5}' },
+  LIQ: { label: 'Liquidations', icon: Receipt, format: 'LIQ/{ANNEE}/{SEQ:5}' },
+  ORD: { label: 'Ordonnancements', icon: FileCheck, format: 'ORD/{ANNEE}/{SEQ:5}' },
+  PAY: { label: 'Règlements', icon: Banknote, format: 'PAY/{ANNEE}/{SEQ:5}' },
+  MARCHE: { label: 'Marchés', icon: ShoppingCart, format: 'MARCH/{ANNEE}/{SEQ:4}' },
+  CONTRAT: { label: 'Contrats', icon: FileCheck, format: 'CTR/{ANNEE}/{SEQ:4}' },
+  DOSSIER: { label: 'Dossiers', icon: Briefcase, format: 'DOS/{ANNEE}/{SEQ:5}' },
+  DA: { label: 'Demandes Achat', icon: ShoppingCart, format: 'DA/{ANNEE}/{SEQ:4}' },
+  VIR: { label: 'Virements', icon: RefreshCw, format: 'VIR/{ANNEE}/{SEQ:4}' },
 };
 
 export default function CompteursReferences() {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
-  const [selectedCounter, setSelectedCounter] = useState<SequenceCounter | null>(null);
-  const [newValue, setNewValue] = useState("");
+  const [_selectedCounter, setSelectedCounter] = useState<SequenceCounter | null>(null);
+  const [newValue, setNewValue] = useState('');
 
-  // Fetch sequence counters - use static data since table may not exist
+  const { updateSequenceCounter } = useSequenceGenerator();
+
+  // Fetch sequence counters from database
   const { data: counters, isLoading } = useQuery({
-    queryKey: ["sequence-counters", exercice],
+    queryKey: ['sequence-counters', exercice],
     queryFn: async (): Promise<SequenceCounter[]> => {
-      // Return empty array - counters are managed by RPC functions
-      return [];
+      const { data, error } = await supabase
+        .from('sequence_counters')
+        .select('*')
+        .eq('exercice', exercice)
+        .eq('scope', 'global');
+      if (error) throw error;
+      return (data || []) as SequenceCounter[];
     },
+    enabled: !!exercice,
   });
 
   // Reset counter mutation
   const resetMutation = useMutation({
     mutationFn: async ({ docType, newNumber }: { docType: DocType; newNumber: number }) => {
-      // TODO: implement counter reset via RPC
-      void docType; void newNumber;
-      toast.info("Cette fonctionnalité sera disponible prochainement");
+      await updateSequenceCounter(docType, newNumber);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sequence-counters", exercice] });
+      queryClient.invalidateQueries({ queryKey: ['sequence-counters', exercice] });
       setSelectedCounter(null);
-      setNewValue("");
+      setNewValue('');
+      toast.success('Compteur mis à jour avec succès');
     },
-    onError: (error) => {
-      toast.error("Erreur lors de la mise à jour du compteur");
-      console.error(error);
+    onError: (error: Error) => {
+      toast.error('Erreur lors de la mise à jour', { description: error.message });
     },
   });
 
   // Generate preview
   const generatePreview = (docType: DocType, number: number) => {
     const config = DOC_TYPE_CONFIG[docType];
-    const paddedNum = String(number).padStart(5, "0");
+    const paddedNum = String(number).padStart(5, '0');
     return config.format
-      .replace("{ANNEE}", String(exercice))
-      .replace("{SEQ:5}", paddedNum)
-      .replace("{SEQ:4}", String(number).padStart(4, "0"));
+      .replace('{ANNEE}', String(exercice))
+      .replace('{SEQ:5}', paddedNum)
+      .replace('{SEQ:4}', String(number).padStart(4, '0'));
   };
 
   if (isLoading) {
@@ -133,17 +144,17 @@ export default function CompteursReferences() {
   }
 
   // Group by doc_type and aggregate
-  const countersByType = Object.keys(DOC_TYPE_CONFIG).map(docType => {
-    const matching = counters?.filter(c => c.doc_type === docType) || [];
-    const globalCounter = matching.find(c => !c.direction_code);
-    const directionCounters = matching.filter(c => c.direction_code);
+  const countersByType = Object.keys(DOC_TYPE_CONFIG).map((docType) => {
+    const matching = counters?.filter((c) => c.doc_type === docType) || [];
+    const globalCounter = matching.find((c) => !c.direction_code);
+    const directionCounters = matching.filter((c) => c.direction_code);
 
     return {
       docType: docType as DocType,
       config: DOC_TYPE_CONFIG[docType as DocType],
       globalCounter,
       directionCounters,
-      currentNumber: globalCounter?.current_number || 0,
+      currentNumber: globalCounter?.last_number || 0,
     };
   });
 
@@ -176,15 +187,15 @@ export default function CompteursReferences() {
         <CardContent>
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="secondary">{"{ANNEE}"}</Badge>
+              <Badge variant="secondary">{'{ANNEE}'}</Badge>
               <span className="text-muted-foreground">→ Année de l'exercice</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="secondary">{"{SEQ:5}"}</Badge>
+              <Badge variant="secondary">{'{SEQ:5}'}</Badge>
               <span className="text-muted-foreground">→ Séquence sur 5 chiffres</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <Badge variant="secondary">{"{DIR}"}</Badge>
+              <Badge variant="secondary">{'{DIR}'}</Badge>
               <span className="text-muted-foreground">→ Code direction (optionnel)</span>
             </div>
           </div>
@@ -195,9 +206,7 @@ export default function CompteursReferences() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">État des compteurs</CardTitle>
-          <CardDescription>
-            Dernière valeur générée pour chaque type de document
-          </CardDescription>
+          <CardDescription>Dernière valeur générée pour chaque type de document</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -226,12 +235,10 @@ export default function CompteursReferences() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {config.format}
-                      </code>
+                      <code className="text-xs bg-muted px-2 py-1 rounded">{config.format}</code>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={currentNumber > 0 ? "default" : "secondary"}>
+                      <Badge variant={currentNumber > 0 ? 'default' : 'secondary'}>
                         {currentNumber}
                       </Badge>
                     </TableCell>
@@ -242,9 +249,9 @@ export default function CompteursReferences() {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {globalCounter?.updated_at 
-                        ? new Date(globalCounter.updated_at).toLocaleString("fr-FR")
-                        : "-"}
+                      {globalCounter?.updated_at
+                        ? new Date(globalCounter.updated_at).toLocaleString('fr-FR')
+                        : '-'}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
@@ -265,8 +272,8 @@ export default function CompteursReferences() {
                             <DialogHeader>
                               <DialogTitle>Modifier le compteur</DialogTitle>
                               <DialogDescription>
-                                Modifier la valeur du compteur pour {config.label}. 
-                                Cette action est irréversible.
+                                Modifier la valeur du compteur pour {config.label}. Cette action est
+                                irréversible.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
@@ -276,8 +283,8 @@ export default function CompteursReferences() {
                               </div>
                               <div className="space-y-2">
                                 <Label>Nouvelle valeur</Label>
-                                <Input 
-                                  type="number" 
+                                <Input
+                                  type="number"
                                   min={0}
                                   value={newValue}
                                   onChange={(e) => setNewValue(e.target.value)}
@@ -286,7 +293,9 @@ export default function CompteursReferences() {
                               </div>
                               {newValue && parseInt(newValue) > 0 && (
                                 <div className="p-3 bg-muted rounded-lg">
-                                  <p className="text-sm text-muted-foreground">Prochain code généré :</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Prochain code généré :
+                                  </p>
                                   <code className="text-primary font-mono">
                                     {generatePreview(docType, parseInt(newValue) + 1)}
                                   </code>
@@ -298,7 +307,7 @@ export default function CompteursReferences() {
                                 variant="outline"
                                 onClick={() => {
                                   setSelectedCounter(null);
-                                  setNewValue("");
+                                  setNewValue('');
                                 }}
                               >
                                 Annuler
@@ -313,8 +322,9 @@ export default function CompteursReferences() {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Le compteur pour {config.label} sera modifié de {currentNumber} à {newValue}.
-                                      Cette action peut causer des conflits de numérotation si mal utilisée.
+                                      Le compteur pour {config.label} sera modifié de{' '}
+                                      {currentNumber} à {newValue}. Cette action peut causer des
+                                      conflits de numérotation si mal utilisée.
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -355,9 +365,10 @@ export default function CompteursReferences() {
             <div>
               <h4 className="font-medium text-blue-900">Information importante</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Les compteurs sont automatiquement incrémentés lors de la création de nouveaux documents.
-                La modification manuelle doit être réservée aux cas de synchronisation avec des données importées
-                ou de correction d'erreurs. Une mauvaise manipulation peut entraîner des doublons de références.
+                Les compteurs sont automatiquement incrémentés lors de la création de nouveaux
+                documents. La modification manuelle doit être réservée aux cas de synchronisation
+                avec des données importées ou de correction d'erreurs. Une mauvaise manipulation
+                peut entraîner des doublons de références.
               </p>
             </div>
           </div>
