@@ -30,10 +30,8 @@ import {
   BarChart3,
   Target,
   Calendar,
-  Database,
   Hash,
   Layers,
-  BookOpen,
   Users,
   Shield,
   Lock,
@@ -172,10 +170,8 @@ const PARAMETRAGE_REFERENTIELS = [
   { title: 'Exercices', url: '/admin/exercices', icon: Calendar },
   { title: "Paramètres d'Exercice", url: '/admin/parametres-exercice', icon: CalendarCog },
   { title: 'Paramètres Programmatiques', url: '/admin/parametres-programmatiques', icon: Target },
-  { title: 'Architecture SYGFP', url: '/admin/architecture', icon: Database },
   { title: 'Codification', url: '/admin/codification', icon: Hash },
   { title: "Secteurs d'Activité", url: '/admin/secteurs-activite', icon: Layers },
-  { title: 'Dictionnaire Variables', url: '/admin/dictionnaire', icon: BookOpen },
 ];
 
 const PARAMETRAGE_UTILISATEURS = [

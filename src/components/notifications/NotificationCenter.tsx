@@ -43,17 +43,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
 import { NotificationCard, type NotificationData } from './NotificationCard';
-import { useNotificationsEnhanced, type NotificationCategory } from '@/hooks/useNotificationsEnhanced';
+import {
+  useNotificationsEnhanced,
+  type NotificationCategory,
+} from '@/hooks/useNotificationsEnhanced';
 
 // ============================================================================
 // TYPES
@@ -75,11 +74,26 @@ type ReadFilter = 'all' | 'unread' | 'read';
 // CONFIGURATION
 // ============================================================================
 
-const CATEGORY_CONFIG: Record<NotificationCategory | 'all', { label: string; icon: React.ReactNode; color: string }> = {
+const CATEGORY_CONFIG: Record<
+  NotificationCategory | 'all',
+  { label: string; icon: React.ReactNode; color: string }
+> = {
   all: { label: 'Toutes', icon: <Bell className="h-4 w-4" />, color: '' },
-  ordonnancements: { label: 'Ordonnancements', icon: <FileCheck className="h-4 w-4" />, color: 'text-blue-600' },
-  reglements: { label: 'Règlements', icon: <CreditCard className="h-4 w-4" />, color: 'text-green-600' },
-  autres: { label: 'Autres', icon: <MoreHorizontal className="h-4 w-4" />, color: 'text-muted-foreground' },
+  ordonnancements: {
+    label: 'Ordonnancements',
+    icon: <FileCheck className="h-4 w-4" />,
+    color: 'text-blue-600',
+  },
+  reglements: {
+    label: 'Règlements',
+    icon: <CreditCard className="h-4 w-4" />,
+    color: 'text-green-600',
+  },
+  autres: {
+    label: 'Autres',
+    icon: <MoreHorizontal className="h-4 w-4" />,
+    color: 'text-muted-foreground',
+  },
 };
 
 // ============================================================================
@@ -148,7 +162,9 @@ export function NotificationCenter({
     } else if (dateFilter === 'custom' && customDateRange.from) {
       result = result.filter((n) => {
         const date = new Date(n.created_at);
-        const afterFrom = customDateRange.from ? isAfter(date, startOfDay(customDateRange.from)) : true;
+        const afterFrom = customDateRange.from
+          ? isAfter(date, startOfDay(customDateRange.from))
+          : true;
         const beforeTo = customDateRange.to ? isBefore(date, startOfDay(customDateRange.to)) : true;
         return afterFrom && beforeTo;
       });
@@ -158,9 +174,7 @@ export function NotificationCenter({
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       result = result.filter(
-        (n) =>
-          n.title.toLowerCase().includes(search) ||
-          n.message.toLowerCase().includes(search)
+        (n) => n.title.toLowerCase().includes(search) || n.message.toLowerCase().includes(search)
       );
     }
 
@@ -168,12 +182,15 @@ export function NotificationCenter({
   }, [notifications, activeCategory, readFilter, dateFilter, customDateRange, searchTerm]);
 
   // Stats par catégorie
-  const categoryStats = useMemo(() => ({
-    all: notifications.length,
-    ordonnancements: countByCategory.ordonnancements,
-    reglements: countByCategory.reglements,
-    autres: countByCategory.autres,
-  }), [notifications.length, countByCategory]);
+  const categoryStats = useMemo(
+    () => ({
+      all: notifications.length,
+      ordonnancements: countByCategory.ordonnancements,
+      reglements: countByCategory.reglements,
+      autres: countByCategory.autres,
+    }),
+    [notifications.length, countByCategory]
+  );
 
   const handleMarkAsRead = async (id: string) => {
     await markAsRead(id);
@@ -193,9 +210,11 @@ export function NotificationCenter({
         <CardContent>
           <Skeleton className="h-10 w-full mb-4" />
           <div className="space-y-3">
-            {Array(5).fill(0).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
           </div>
         </CardContent>
       </Card>
@@ -251,7 +270,7 @@ export function NotificationCenter({
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/admin/notifications">
+                      <Link to="/notifications">
                         <Settings className="h-4 w-4 mr-2" />
                         Paramètres
                       </Link>
@@ -266,7 +285,10 @@ export function NotificationCenter({
 
       <CardContent className="pt-0">
         {/* Onglets par catégorie */}
-        <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as NotificationCategory | 'all')}>
+        <Tabs
+          value={activeCategory}
+          onValueChange={(v) => setActiveCategory(v as NotificationCategory | 'all')}
+        >
           <TabsList className="grid w-full grid-cols-4 mb-4">
             {(Object.keys(CATEGORY_CONFIG) as (NotificationCategory | 'all')[]).map((cat) => {
               const config = CATEGORY_CONFIG[cat];
@@ -359,7 +381,9 @@ export function NotificationCenter({
           {/* Contenu par onglet */}
           {(Object.keys(CATEGORY_CONFIG) as (NotificationCategory | 'all')[]).map((cat) => (
             <TabsContent key={cat} value={cat} className="mt-0">
-              <ScrollArea style={{ maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }}>
+              <ScrollArea
+                style={{ maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }}
+              >
                 {filteredNotifications.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground">
                     <Bell className="h-10 w-10 mx-auto mb-3 opacity-30" />

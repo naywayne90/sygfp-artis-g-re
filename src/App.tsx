@@ -84,8 +84,6 @@ const GestionAutorisations = lazy(() => import('./pages/admin/GestionAutorisatio
 const GestionDelegations = lazy(() => import('./pages/admin/GestionDelegations'));
 const ParametresSysteme = lazy(() => import('./pages/admin/ParametresSysteme'));
 const JournalAudit = lazy(() => import('./pages/admin/JournalAudit'));
-const ArchitectureSYGFP = lazy(() => import('./pages/admin/ArchitectureSYGFP'));
-const DictionnaireVariables = lazy(() => import('./pages/admin/DictionnaireVariables'));
 const ReferentielCodification = lazy(() => import('./pages/admin/ReferentielCodification'));
 const SecteursActivite = lazy(() => import('./pages/admin/SecteursActivite'));
 const DocumentationModules = lazy(() => import('./pages/admin/DocumentationModules'));
@@ -98,9 +96,6 @@ const CompteursReferences = lazy(() => import('./pages/admin/CompteursReferences
 const ImportBudgetAdmin = lazy(() => import('./pages/admin/ImportBudgetAdmin'));
 const CompteBancaires = lazy(() => import('./pages/admin/CompteBancaires'));
 const OriginesFonds = lazy(() => import('./pages/admin/OriginesFonds'));
-const GestionAnomalies = lazy(() => import('./pages/admin/GestionAnomalies'));
-const WorkflowAdmin = lazy(() => import('./pages/admin/WorkflowAdmin'));
-const NotificationSettings = lazy(() => import('./pages/admin/NotificationSettings'));
 const Interims = lazy(() => import('./pages/admin/Interims'));
 const GestionLibellesBudget = lazy(() => import('./pages/admin/GestionLibellesBudget'));
 const HistoriqueLibelles = lazy(() => import('./pages/admin/HistoriqueLibelles'));
@@ -274,8 +269,6 @@ const App = () => (
                 <Route path="/admin/delegations" element={<GestionDelegations />} />
                 <Route path="/admin/parametres" element={<ParametresSysteme />} />
                 <Route path="/admin/journal-audit" element={<JournalAudit />} />
-                <Route path="/admin/architecture" element={<ArchitectureSYGFP />} />
-                <Route path="/admin/dictionnaire" element={<DictionnaireVariables />} />
                 <Route path="/admin/codification" element={<ReferentielCodification />} />
                 <Route path="/admin/secteurs-activite" element={<SecteursActivite />} />
                 <Route path="/admin/documentation" element={<DocumentationModules />} />
@@ -288,10 +281,7 @@ const App = () => (
                 <Route path="/admin/import-budget" element={<ImportBudgetAdmin />} />
                 <Route path="/admin/comptes-bancaires" element={<CompteBancaires />} />
                 <Route path="/admin/origines-fonds" element={<OriginesFonds />} />
-                <Route path="/admin/anomalies" element={<GestionAnomalies />} />
                 <Route path="/admin/test-non-regression" element={<TestNonRegression />} />
-                <Route path="/admin/workflows" element={<WorkflowAdmin />} />
-                <Route path="/admin/notifications" element={<NotificationSettings />} />
                 <Route path="/admin/interims" element={<Interims />} />
                 <Route path="/admin/libelles-budget" element={<GestionLibellesBudget />} />
                 <Route path="/admin/historique-libelles" element={<HistoriqueLibelles />} />

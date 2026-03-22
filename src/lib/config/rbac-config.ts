@@ -1061,15 +1061,7 @@ export const ROUTE_ACCESS_MATRIX: Record<
     description: 'Réaménagement budgétaire',
   },
 
-  // Administration - Routes manquantes
-  '/admin/architecture': {
-    allowedProfiles: ['ADMIN'],
-    description: 'Architecture SYGFP',
-  },
-  '/admin/dictionnaire': {
-    allowedProfiles: ['ADMIN'],
-    description: 'Dictionnaire des variables',
-  },
+  // Administration
   '/admin/codification': {
     allowedProfiles: ['ADMIN'],
     description: 'Référentiel de codification',
@@ -1109,10 +1101,6 @@ export const ROUTE_ACCESS_MATRIX: Record<
   '/admin/import-budget': {
     allowedProfiles: ['ADMIN'],
     description: 'Import budget administrateur',
-  },
-  '/admin/anomalies': {
-    allowedProfiles: ['ADMIN'],
-    description: 'Gestion des anomalies',
   },
   '/admin/test-non-regression': {
     allowedProfiles: ['ADMIN'],
