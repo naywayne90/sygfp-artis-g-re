@@ -43,6 +43,9 @@ import {
   Copy,
   ChevronRight,
   CircleDollarSign,
+  UserCheck,
+  CalendarCog,
+  Building,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -167,6 +170,7 @@ const RAPPORTS_ITEMS = [
 
 const PARAMETRAGE_REFERENTIELS = [
   { title: 'Exercices', url: '/admin/exercices', icon: Calendar },
+  { title: "Paramètres d'Exercice", url: '/admin/parametres-exercice', icon: CalendarCog },
   { title: 'Paramètres Programmatiques', url: '/admin/parametres-programmatiques', icon: Target },
   { title: 'Architecture SYGFP', url: '/admin/architecture', icon: Database },
   { title: 'Codification', url: '/admin/codification', icon: Hash },
@@ -179,13 +183,15 @@ const PARAMETRAGE_UTILISATEURS = [
   { title: 'Profils & Rôles', url: '/admin/roles', icon: Shield },
   { title: 'Autorisations', url: '/admin/autorisations', icon: Lock },
   { title: 'Délégations', url: '/admin/delegations', icon: UserCog },
+  { title: 'Intérims', url: '/admin/interims', icon: UserCheck },
 ];
 
 const PARAMETRAGE_SYSTEME = [
   { title: 'Paramètres Système', url: '/admin/parametres', icon: Settings },
+  { title: 'Comptes Bancaires', url: '/admin/comptes-bancaires', icon: Building },
+  { title: 'Compteurs Références', url: '/admin/compteurs-references', icon: Hash },
   { title: "Journal d'Audit", url: '/admin/journal-audit', icon: ClipboardList },
   { title: 'Gestion Doublons', url: '/admin/doublons', icon: Copy },
-  { title: 'Compteurs Références', url: '/admin/compteurs-references', icon: Hash },
 ];
 
 // ============================================

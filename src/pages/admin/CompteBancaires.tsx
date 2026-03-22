@@ -9,13 +9,13 @@
  * - Activer/Désactiver (pas de suppression)
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,14 +33,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -48,15 +48,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import {
   Landmark,
   Plus,
@@ -72,41 +72,41 @@ import {
   Wallet,
   Building2,
   AlertTriangle,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   useCompteBancaires,
   TYPES_COMPTE,
   DEVISES,
   CompteBancaire,
   CreateCompteBancaireData,
-} from "@/hooks/useCompteBancaires";
-import { toast } from "sonner";
+} from '@/hooks/useCompteBancaires';
+import { toast } from 'sonner';
 
 export default function CompteBancaires() {
   // State
-  const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<"actif" | "inactif" | "all">("actif");
-  const [filterType, setFilterType] = useState<string>("");
-  const [filterBanque, setFilterBanque] = useState<string>("");
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<'actif' | 'inactif' | 'all'>('actif');
+  const [filterType, setFilterType] = useState<string>('');
+  const [filterBanque, setFilterBanque] = useState<string>('');
 
   // Dialog states
   const [showForm, setShowForm] = useState(false);
   const [editingCompte, setEditingCompte] = useState<CompteBancaire | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<CompteBancaire | null>(null);
-  const [deactivateReason, setDeactivateReason] = useState("");
+  const [deactivateReason, setDeactivateReason] = useState('');
   const [reactivateTarget, setReactivateTarget] = useState<CompteBancaire | null>(null);
 
   // Form state
   const [form, setForm] = useState<CreateCompteBancaireData>({
-    code: "",
-    libelle: "",
-    banque: "",
-    numero_compte: "",
-    iban: "",
-    bic: "",
+    code: '',
+    libelle: '',
+    banque: '',
+    numero_compte: '',
+    iban: '',
+    bic: '',
     solde_initial: 0,
-    devise: "XAF",
-    type_compte: "courant",
+    devise: 'XAF',
+    type_compte: 'courant',
     est_actif: true,
   });
 
@@ -136,23 +136,23 @@ export default function CompteBancaires() {
 
   // Filter comptes by tab
   const filteredComptes = comptes?.filter((c) => {
-    if (activeTab === "actif") return c.est_actif;
-    if (activeTab === "inactif") return !c.est_actif;
+    if (activeTab === 'actif') return c.est_actif;
+    if (activeTab === 'inactif') return !c.est_actif;
     return true;
   });
 
   // Reset form
   const resetForm = () => {
     setForm({
-      code: "",
-      libelle: "",
-      banque: "",
-      numero_compte: "",
-      iban: "",
-      bic: "",
+      code: '',
+      libelle: '',
+      banque: '',
+      numero_compte: '',
+      iban: '',
+      bic: '',
       solde_initial: 0,
-      devise: "XAF",
-      type_compte: "courant",
+      devise: 'XAF',
+      type_compte: 'courant',
       est_actif: true,
     });
     setEditingCompte(null);
@@ -164,13 +164,13 @@ export default function CompteBancaires() {
     setForm({
       code: compte.code,
       libelle: compte.libelle,
-      banque: compte.banque || "",
-      numero_compte: compte.numero_compte || "",
-      iban: compte.iban || "",
-      bic: compte.bic || "",
+      banque: compte.banque || '',
+      numero_compte: compte.numero_compte || '',
+      iban: compte.iban || '',
+      bic: compte.bic || '',
       solde_initial: compte.solde_initial,
-      devise: compte.devise || "XAF",
-      type_compte: compte.type_compte || "courant",
+      devise: compte.devise || 'XAF',
+      type_compte: compte.type_compte || 'courant',
       est_actif: compte.est_actif,
     });
     setShowForm(true);
@@ -179,7 +179,7 @@ export default function CompteBancaires() {
   // Handle submit
   const handleSubmit = async () => {
     if (!form.code || !form.libelle) {
-      toast.error("Code et libellé sont requis");
+      toast.error('Code et libellé sont requis');
       return;
     }
 
@@ -191,7 +191,7 @@ export default function CompteBancaires() {
       }
       setShowForm(false);
       resetForm();
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
   };
@@ -203,7 +203,7 @@ export default function CompteBancaires() {
     // Vérifier les mouvements
     const hasMovements = await checkHasMovements(deactivateTarget.id);
     if (hasMovements && !deactivateReason) {
-      toast.error("Ce compte a des mouvements. Veuillez fournir un motif de désactivation.");
+      toast.error('Ce compte a des mouvements. Veuillez fournir un motif de désactivation.');
       return;
     }
 
@@ -213,7 +213,7 @@ export default function CompteBancaires() {
     });
 
     setDeactivateTarget(null);
-    setDeactivateReason("");
+    setDeactivateReason('');
   };
 
   // Handle reactivate
@@ -230,9 +230,7 @@ export default function CompteBancaires() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="page-title">Comptes Bancaires</h1>
-            <p className="page-description">
-              Gestion des comptes bancaires et caisses
-            </p>
+            <p className="page-description">Gestion des comptes bancaires et caisses</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={exportToCSV}>
@@ -281,17 +279,13 @@ export default function CompteBancaires() {
             <Wallet className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {formatMontant(stats.soldeTotal)}
-            </div>
+            <div className="text-2xl font-bold text-primary">{formatMontant(stats.soldeTotal)}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Banques
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Banques</CardTitle>
             <Building2 className="h-4 w-4 text-secondary" />
           </CardHeader>
           <CardContent>
@@ -315,12 +309,15 @@ export default function CompteBancaires() {
                 />
               </div>
             </div>
-            <Select value={filterType} onValueChange={setFilterType}>
+            <Select
+              value={filterType || '__all__'}
+              onValueChange={(v) => setFilterType(v === '__all__' ? '' : v)}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Type de compte" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les types</SelectItem>
+                <SelectItem value="__all__">Tous les types</SelectItem>
                 {TYPES_COMPTE.map((t) => (
                   <SelectItem key={t.value} value={t.value}>
                     {t.label}
@@ -328,12 +325,15 @@ export default function CompteBancaires() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filterBanque} onValueChange={setFilterBanque}>
+            <Select
+              value={filterBanque || '__all__'}
+              onValueChange={(v) => setFilterBanque(v === '__all__' ? '' : v)}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Banque" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les banques</SelectItem>
+                <SelectItem value="__all__">Toutes les banques</SelectItem>
                 {banquesUniques.map((b) => (
                   <SelectItem key={b} value={b}>
                     {b}
@@ -371,9 +371,7 @@ export default function CompteBancaires() {
                 <Landmark className="h-5 w-5" />
                 Liste des comptes
               </CardTitle>
-              <CardDescription>
-                {filteredComptes?.length || 0} compte(s) trouvé(s)
-              </CardDescription>
+              <CardDescription>{filteredComptes?.length || 0} compte(s) trouvé(s)</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -401,30 +399,23 @@ export default function CompteBancaires() {
                   </TableHeader>
                   <TableBody>
                     {filteredComptes.map((compte) => (
-                      <TableRow
-                        key={compte.id}
-                        className={!compte.est_actif ? "opacity-60" : ""}
-                      >
-                        <TableCell className="font-mono font-medium">
-                          {compte.code}
-                        </TableCell>
+                      <TableRow key={compte.id} className={!compte.est_actif ? 'opacity-60' : ''}>
+                        <TableCell className="font-mono font-medium">{compte.code}</TableCell>
                         <TableCell>{compte.libelle}</TableCell>
-                        <TableCell>{compte.banque || "-"}</TableCell>
+                        <TableCell>{compte.banque || '-'}</TableCell>
                         <TableCell className="font-mono text-sm">
-                          {compte.numero_compte || "-"}
+                          {compte.numero_compte || '-'}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            {TYPES_COMPTE.find((t) => t.value === compte.type_compte)
-                              ?.label || compte.type_compte}
+                            {TYPES_COMPTE.find((t) => t.value === compte.type_compte)?.label ||
+                              compte.type_compte}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           <span
                             className={
-                              compte.solde_actuel < 0
-                                ? "text-destructive"
-                                : "text-green-600"
+                              compte.solde_actuel < 0 ? 'text-destructive' : 'text-green-600'
                             }
                           >
                             {formatMontant(compte.solde_actuel, compte.devise)}
@@ -432,9 +423,7 @@ export default function CompteBancaires() {
                         </TableCell>
                         <TableCell>
                           {compte.est_actif ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              Actif
-                            </Badge>
+                            <Badge className="bg-green-100 text-green-800">Actif</Badge>
                           ) : (
                             <Badge variant="secondary">Inactif</Badge>
                           )}
@@ -493,12 +482,12 @@ export default function CompteBancaires() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingCompte ? "Modifier le compte" : "Nouveau compte bancaire"}
+              {editingCompte ? 'Modifier le compte' : 'Nouveau compte bancaire'}
             </DialogTitle>
             <DialogDescription>
               {editingCompte
-                ? "Modifiez les informations du compte"
-                : "Renseignez les informations du nouveau compte"}
+                ? 'Modifiez les informations du compte'
+                : 'Renseignez les informations du nouveau compte'}
             </DialogDescription>
           </DialogHeader>
 
@@ -559,9 +548,7 @@ export default function CompteBancaires() {
                 <Input
                   id="numero_compte"
                   value={form.numero_compte}
-                  onChange={(e) =>
-                    setForm({ ...form, numero_compte: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, numero_compte: e.target.value })}
                   placeholder="01234567890"
                 />
               </div>
@@ -595,18 +582,13 @@ export default function CompteBancaires() {
                   id="solde_initial"
                   type="number"
                   value={form.solde_initial}
-                  onChange={(e) =>
-                    setForm({ ...form, solde_initial: Number(e.target.value) })
-                  }
+                  onChange={(e) => setForm({ ...form, solde_initial: Number(e.target.value) })}
                   disabled={!!editingCompte}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="devise">Devise</Label>
-                <Select
-                  value={form.devise}
-                  onValueChange={(v) => setForm({ ...form, devise: v })}
-                >
+                <Select value={form.devise} onValueChange={(v) => setForm({ ...form, devise: v })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -645,20 +627,15 @@ export default function CompteBancaires() {
               onClick={handleSubmit}
               disabled={!form.code || !form.libelle || isCreating || isUpdating}
             >
-              {(isCreating || isUpdating) && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              {editingCompte ? "Modifier" : "Créer"}
+              {(isCreating || isUpdating) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {editingCompte ? 'Modifier' : 'Créer'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Deactivate Dialog */}
-      <AlertDialog
-        open={!!deactivateTarget}
-        onOpenChange={() => setDeactivateTarget(null)}
-      >
+      <AlertDialog open={!!deactivateTarget} onOpenChange={() => setDeactivateTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -667,18 +644,15 @@ export default function CompteBancaires() {
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               <p>
-                Vous allez désactiver le compte{" "}
-                <strong>{deactivateTarget?.code}</strong> -{" "}
+                Vous allez désactiver le compte <strong>{deactivateTarget?.code}</strong> -{' '}
                 {deactivateTarget?.libelle}.
               </p>
               <p>
-                Ce compte ne sera plus sélectionnable dans les formulaires, mais
-                restera visible pour consultation et historique.
+                Ce compte ne sera plus sélectionnable dans les formulaires, mais restera visible
+                pour consultation et historique.
               </p>
               <div className="space-y-2 pt-2">
-                <Label htmlFor="deactivate-reason">
-                  Motif de désactivation (optionnel)
-                </Label>
+                <Label htmlFor="deactivate-reason">Motif de désactivation (optionnel)</Label>
                 <Input
                   id="deactivate-reason"
                   value={deactivateReason}
@@ -689,9 +663,7 @@ export default function CompteBancaires() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeactivating}>
-              Annuler
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeactivating}>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeactivate}
               disabled={isDeactivating}
@@ -714,10 +686,7 @@ export default function CompteBancaires() {
       </AlertDialog>
 
       {/* Reactivate Dialog */}
-      <AlertDialog
-        open={!!reactivateTarget}
-        onOpenChange={() => setReactivateTarget(null)}
-      >
+      <AlertDialog open={!!reactivateTarget} onOpenChange={() => setReactivateTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -726,20 +695,17 @@ export default function CompteBancaires() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               <p>
-                Voulez-vous réactiver le compte{" "}
-                <strong>{reactivateTarget?.code}</strong> -{" "}
+                Voulez-vous réactiver le compte <strong>{reactivateTarget?.code}</strong> -{' '}
                 {reactivateTarget?.libelle} ?
               </p>
               <p className="mt-2">
-                Ce compte sera à nouveau disponible dans les sélecteurs et
-                pourra recevoir des mouvements.
+                Ce compte sera à nouveau disponible dans les sélecteurs et pourra recevoir des
+                mouvements.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isReactivating}>
-              Annuler
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isReactivating}>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReactivate}
               disabled={isReactivating}
