@@ -1,73 +1,102 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCodification } from "@/hooks/useCodification";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { 
-  Plus, Pencil, Trash2, Hash, CheckCircle2, XCircle, 
-  Layers, Code, Play, Copy, RefreshCw, Settings2, BarChart3 
-} from "lucide-react";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCodification } from '@/hooks/useCodification';
+import { useExercice } from '@/contexts/ExerciceContext';
+import {
+  Pencil,
+  Hash,
+  CheckCircle2,
+  Code,
+  Play,
+  Copy,
+  RefreshCw,
+  Settings2,
+  BarChart3,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 const _CODE_TYPES = [
-  "LIGNE_BUDGETAIRE", "PRESTATAIRE", "CONTRAT", "MARCHE", "NOTE_AEF", "NOTE_SEF",
-  "ENGAGEMENT", "LIQUIDATION", "ORDONNANCEMENT", "REGLEMENT", "VIREMENT", 
-  "DOSSIER", "EXPRESSION_BESOIN"
+  'LIGNE_BUDGETAIRE',
+  'PRESTATAIRE',
+  'CONTRAT',
+  'MARCHE',
+  'NOTE_AEF',
+  'NOTE_SEF',
+  'ENGAGEMENT',
+  'LIQUIDATION',
+  'ORDONNANCEMENT',
+  'REGLEMENT',
+  'VIREMENT',
+  'DOSSIER',
+  'EXPRESSION_BESOIN',
+  'DEMANDE_ACHAT',
 ];
 
 const RESET_OPTIONS = [
-  { value: "par_exercice", label: "Par exercice" },
-  { value: "par_annee", label: "Par année" },
-  { value: "jamais", label: "Jamais (global)" },
+  { value: 'par_exercice', label: 'Par exercice' },
+  { value: 'par_annee', label: 'Par année' },
+  { value: 'jamais', label: 'Jamais (global)' },
 ];
 
 export default function ReferentielCodification() {
   const { exercice } = useExercice();
-  const {
-    rules,
-    sequences,
-    loadingRules,
-    loadingSequences,
-    testRule,
-    toggleRule,
-    updateRule,
-  } = useCodification();
+  const { rules, sequences, loadingRules, loadingSequences, testRule, toggleRule, updateRule } =
+    useCodification();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingRule, setEditingRule] = useState<any>(null);
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [testRuleId, setTestRuleId] = useState<string | null>(null);
   const [testExercice, setTestExercice] = useState<number>(exercice || 2026);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [isTestPending, setIsTestPending] = useState(false);
+  const [editPrefixe, setEditPrefixe] = useState('');
+  const [editFormatNumero, setEditFormatNumero] = useState('');
+  const [editSeparateur, setEditSeparateur] = useState('-');
+  const [editLongueurSeq, setEditLongueurSeq] = useState(4);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const champsStr = formData.get("champs_contexte") as string;
-    
+    const champsStr = formData.get('champs_contexte') as string;
+
     const rule = {
-      code_type: formData.get("code_type") as string,
-      objet: formData.get("objet") as string,
-      prefixe: formData.get("prefixe") as string,
-      format: formData.get("format") as string,
-      format_numero: formData.get("format_numero") as string,
-      separateur: formData.get("separateur") as string || "-",
-      longueur_seq: parseInt(formData.get("longueur_seq") as string) || 4,
-      reset_seq: formData.get("reset_seq") as 'par_exercice' | 'par_annee' | 'jamais',
-      champs_contexte: champsStr ? champsStr.split(",").map((s) => s.trim()) : [],
-      exemple: formData.get("exemple") as string || null,
-      description: formData.get("description") as string || null,
-      actif: formData.get("actif") === "on",
+      code_type: formData.get('code_type') as string,
+      objet: formData.get('objet') as string,
+      prefixe: formData.get('prefixe') as string,
+      format: formData.get('format') as string,
+      format_numero: formData.get('format_numero') as string,
+      separateur: (formData.get('separateur') as string) || '-',
+      longueur_seq: parseInt(formData.get('longueur_seq') as string) || 4,
+      reset_seq: formData.get('reset_seq') as 'par_exercice' | 'par_annee' | 'jamais',
+      champs_contexte: champsStr ? champsStr.split(',').map((s) => s.trim()) : [],
+      exemple: (formData.get('exemple') as string) || null,
+      description: (formData.get('description') as string) || null,
+      actif: formData.get('actif') === 'on',
     };
 
     if (editingRule) {
@@ -78,19 +107,35 @@ export default function ReferentielCodification() {
   };
 
   const handleEdit = (rule: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     setEditingRule(rule);
+    setEditPrefixe(rule.prefixe || '');
+    setEditFormatNumero(rule.format_numero || '');
+    setEditSeparateur(rule.separateur || '-');
+    setEditLongueurSeq(rule.longueur_seq || 4);
     setDialogOpen(true);
+  };
+
+  const generateEditPreview = () => {
+    const year = exercice || 2026;
+    const seq = '1'.padStart(editLongueurSeq, '0');
+    let preview = editFormatNumero || `{YYYY}${editSeparateur}{SEQ${editLongueurSeq}}`;
+    preview = preview
+      .replace('{YYYY}', String(year))
+      .replace(/{SEQ\d*}/, seq)
+      .replace('{MM}', '01');
+    return editPrefixe ? `${editPrefixe}${editSeparateur}${preview}` : preview;
   };
 
   const handleTest = async () => {
     if (!testRuleId) return;
-    
+
     setIsTestPending(true);
     try {
       const result = await testRule(testRuleId, testExercice);
       setTestResult(result);
-    } catch (error) {
-      toast.error("Erreur lors du test");
+    } catch {
+      toast.error('Erreur lors du test');
     } finally {
       setIsTestPending(false);
     }
@@ -104,11 +149,11 @@ export default function ReferentielCodification() {
 
   const handleCopyCode = async (code: string) => {
     await navigator.clipboard.writeText(code);
-    toast.success("Code copié");
+    toast.success('Code copié');
   };
 
   // Statistics
-  const activeRules = rules.filter(r => r.actif).length;
+  const activeRules = rules.filter((r) => r.actif).length;
   const totalSequences = sequences.reduce((sum, s) => sum + s.last_value, 0);
 
   return (
@@ -192,17 +237,13 @@ export default function ReferentielCodification() {
                 <Code className="h-5 w-5" />
                 Règles de Codification ({rules.length})
               </CardTitle>
-              <CardDescription>
-                Format des codes pour chaque type d'objet
-              </CardDescription>
+              <CardDescription>Format des codes pour chaque type d'objet</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingRules ? (
                 <p className="text-muted-foreground">Chargement...</p>
               ) : rules.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  Aucune règle définie.
-                </p>
+                <p className="text-muted-foreground text-center py-8">Aucune règle définie.</p>
               ) : (
                 <Table>
                   <TableHeader>
@@ -233,17 +274,18 @@ export default function ReferentielCodification() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            {RESET_OPTIONS.find(r => r.value === rule.reset_seq)?.label || rule.reset_seq}
+                            {RESET_OPTIONS.find((r) => r.value === rule.reset_seq)?.label ||
+                              rule.reset_seq}
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
                             <code className="font-mono text-primary">{rule.exemple}</code>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-6 w-6"
-                              onClick={() => handleCopyCode(rule.exemple || "")}
+                              onClick={() => handleCopyCode(rule.exemple || '')}
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
@@ -252,13 +294,15 @@ export default function ReferentielCodification() {
                         <TableCell>
                           <Switch
                             checked={rule.actif}
-                            onCheckedChange={(checked) => toggleRule.mutate({ id: rule.id, actif: checked })}
+                            onCheckedChange={(checked) =>
+                              toggleRule.mutate({ id: rule.id, actif: checked })
+                            }
                           />
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => openTestDialog(rule.id)}
                             >
@@ -286,19 +330,27 @@ export default function ReferentielCodification() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono">{"{YYYY}"}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {'{YYYY}'}
+                  </Badge>
                   <span className="text-muted-foreground">Année/Exercice</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono">{"{MM}"}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {'{MM}'}
+                  </Badge>
                   <span className="text-muted-foreground">Mois (01-12)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono">{"{SEQ4}"}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {'{SEQ4}'}
+                  </Badge>
                   <span className="text-muted-foreground">Séquence 4 digits</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="font-mono">{"{SEQ6}"}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {'{SEQ6}'}
+                  </Badge>
                   <span className="text-muted-foreground">Séquence 6 digits</span>
                 </div>
               </div>
@@ -313,9 +365,7 @@ export default function ReferentielCodification() {
                 <BarChart3 className="h-5 w-5" />
                 Séquences pour l'exercice {exercice}
               </CardTitle>
-              <CardDescription>
-                État des compteurs de numérotation
-              </CardDescription>
+              <CardDescription>État des compteurs de numérotation</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingSequences ? (
@@ -336,29 +386,25 @@ export default function ReferentielCodification() {
                   </TableHeader>
                   <TableBody>
                     {sequences.map((seq) => {
-                      const rule = rules.find(r => r.objet === seq.objet);
+                      const rule = rules.find((r) => r.objet === seq.objet);
                       const nextSeq = seq.last_value + 1;
-                      const nextCode = rule 
+                      const nextCode = rule
                         ? `${rule.prefixe}-${exercice}-${String(nextSeq).padStart(rule.longueur_seq, '0')}`
                         : '-';
-                      
+
                       return (
                         <TableRow key={seq.id}>
                           <TableCell>
                             <Badge>{seq.objet}</Badge>
                           </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {seq.scope_key}
-                          </TableCell>
+                          <TableCell className="font-mono text-sm">{seq.scope_key}</TableCell>
                           <TableCell>
                             <span className="text-2xl font-bold text-primary">
                               {seq.last_value}
                             </span>
                           </TableCell>
                           <TableCell>
-                            <code className="bg-muted px-2 py-1 rounded font-mono">
-                              {nextCode}
-                            </code>
+                            <code className="bg-muted px-2 py-1 rounded font-mono">{nextCode}</code>
                           </TableCell>
                         </TableRow>
                       );
@@ -372,7 +418,13 @@ export default function ReferentielCodification() {
       </Tabs>
 
       {/* Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setEditingRule(null); }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setEditingRule(null);
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Modifier la règle de codification</DialogTitle>
@@ -382,22 +434,42 @@ export default function ReferentielCodification() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Type de code</Label>
-                  <Input name="code_type" defaultValue={editingRule.code_type} readOnly className="bg-muted" />
+                  <Input
+                    name="code_type"
+                    defaultValue={editingRule.code_type}
+                    readOnly
+                    className="bg-muted"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Table (objet)</Label>
-                  <Input name="objet" defaultValue={editingRule.objet} readOnly className="bg-muted" />
+                  <Input
+                    name="objet"
+                    defaultValue={editingRule.objet}
+                    readOnly
+                    className="bg-muted"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Préfixe</Label>
-                  <Input name="prefixe" defaultValue={editingRule.prefixe} required />
+                  <Input
+                    name="prefixe"
+                    value={editPrefixe}
+                    onChange={(e) => setEditPrefixe(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Séparateur</Label>
-                  <Input name="separateur" defaultValue={editingRule.separateur || "-"} maxLength={2} />
+                  <Input
+                    name="separateur"
+                    value={editSeparateur}
+                    onChange={(e) => setEditSeparateur(e.target.value)}
+                    maxLength={2}
+                  />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Format</Label>
@@ -405,59 +477,91 @@ export default function ReferentielCodification() {
                 </div>
                 <div className="space-y-2">
                   <Label>Format numéro</Label>
-                  <Input name="format_numero" defaultValue={editingRule.format_numero} placeholder="{YYYY}-{SEQ4}" />
+                  <Input
+                    name="format_numero"
+                    value={editFormatNumero}
+                    onChange={(e) => setEditFormatNumero(e.target.value)}
+                    placeholder="{YYYY}-{SEQ4}"
+                  />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Longueur séquence</Label>
-                  <Input name="longueur_seq" type="number" defaultValue={editingRule.longueur_seq || 4} min={1} max={10} />
+                  <Input
+                    name="longueur_seq"
+                    type="number"
+                    value={editLongueurSeq}
+                    onChange={(e) => setEditLongueurSeq(Number(e.target.value) || 4)}
+                    min={1}
+                    max={10}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Reset séquence</Label>
-                  <Select name="reset_seq" defaultValue={editingRule.reset_seq || "par_exercice"}>
+                  <Select name="reset_seq" defaultValue={editingRule.reset_seq || 'par_exercice'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {RESET_OPTIONS.map(opt => (
-                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      {RESET_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Exemple</Label>
-                  <Input name="exemple" defaultValue={editingRule.exemple || ""} />
+                  <Label>Aperçu en temps réel</Label>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <code className="text-lg font-mono font-bold text-primary">
+                      {generateEditPreview()}
+                    </code>
+                  </div>
+                  <Input name="exemple" type="hidden" value={generateEditPreview()} />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Champs contexte (séparés par virgule)</Label>
                 <Input
                   name="champs_contexte"
-                  defaultValue={editingRule.champs_contexte?.join(", ") || "exercice"}
+                  defaultValue={editingRule.champs_contexte?.join(', ') || 'exercice'}
                   placeholder="exercice, annee, mois"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea name="description" defaultValue={editingRule.description || ""} rows={2} />
+                <Textarea
+                  name="description"
+                  defaultValue={editingRule.description || ''}
+                  rows={2}
+                />
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Switch name="actif" id="actif" defaultChecked={editingRule.actif ?? true} />
                 <Label htmlFor="actif">Règle active</Label>
               </div>
-              
+
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); setEditingRule(null); }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setDialogOpen(false);
+                    setEditingRule(null);
+                  }}
+                >
                   Annuler
                 </Button>
                 <Button type="submit" disabled={updateRule.isPending}>
-                  {updateRule.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+                  {updateRule.isPending ? (
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
                   Mettre à jour
                 </Button>
               </div>
@@ -472,42 +576,84 @@ export default function ReferentielCodification() {
           <DialogHeader>
             <DialogTitle>Tester la règle de codification</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Exercice / Année</Label>
-              <Input
-                type="number"
-                value={testExercice}
-                onChange={(e) => setTestExercice(Number(e.target.value))}
-                min={2020}
-                max={2050}
-              />
-            </div>
-            
-            <Button onClick={handleTest} disabled={isTestPending} className="w-full">
-              {isTestPending ? (
-                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Play className="h-4 w-4 mr-2" />
-              )}
-              Générer un aperçu
-            </Button>
-            
-            {testResult && (
-              <div className="p-4 bg-muted rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-2">Aperçu du prochain code :</p>
-                <div className="flex items-center justify-center gap-2">
-                  <code className="text-2xl font-mono font-bold text-primary">{testResult}</code>
-                  <Button variant="ghost" size="icon" onClick={() => handleCopyCode(testResult)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
+          {(() => {
+            const testingRule = rules.find((r: { id: string }) => r.id === testRuleId);
+            const hasDirection =
+              testingRule?.format?.includes('{DIRECTION}') ||
+              testingRule?.format_numero?.includes('{DIRECTION}');
+            return (
+              <div className="space-y-4">
+                {testingRule && (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium">{testingRule.code_type}</p>
+                    <code className="text-xs text-muted-foreground">
+                      {testingRule.format || testingRule.format_numero}
+                    </code>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Exercice / Année</Label>
+                    <Input
+                      type="number"
+                      value={testExercice}
+                      onChange={(e) => setTestExercice(Number(e.target.value))}
+                      min={2020}
+                      max={2050}
+                    />
+                  </div>
+                  {hasDirection && (
+                    <div className="space-y-2">
+                      <Label>Direction</Label>
+                      <Input placeholder="Ex: DSI, DAAF, DG" defaultValue="DSI" disabled />
+                    </div>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Ce code ne sera pas réservé (aperçu uniquement)
-                </p>
+                {hasDirection && (
+                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                    Les variables de contexte ({'{DIRECTION}'}, {'{MISSION}'}, etc.) sont remplies
+                    automatiquement lors de la creation du document. L&apos;aperçu ci-dessous montre
+                    le format simplifie.
+                  </p>
+                )}
+
+                <Button onClick={handleTest} disabled={isTestPending} className="w-full">
+                  {isTestPending ? (
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Play className="h-4 w-4 mr-2" />
+                  )}
+                  Générer un aperçu
+                </Button>
+
+                {testResult && (
+                  <div className="p-4 bg-muted rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground mb-2">Aperçu du prochain code :</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <code className="text-2xl font-mono font-bold text-primary">
+                        {testResult}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCopyCode(testResult)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {hasDirection && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Format complet : {testingRule?.exemple || 'N/A'}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ce code ne sera pas réservé (aperçu uniquement)
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
