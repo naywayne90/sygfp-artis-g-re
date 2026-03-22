@@ -10,20 +10,20 @@ React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query
 
 ## 3. Etat des modules
 
-| Module               | Statut               | Tests                 | Doc                                      |
-| -------------------- | -------------------- | --------------------- | ---------------------------------------- |
-| Note SEF             | Production           | 91+ RBAC              | -                                        |
-| Note AEF             | Production           | E2E                   | -                                        |
-| Imputation           | Production           | E2E                   | -                                        |
-| Expression Besoin    | Production           | E2E                   | -                                        |
-| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
-| **Engagement**       | **Certifie 100/100** | **171 unit + 60 E2E** | `docs/CERTIFICATION_ENGAGEMENT.md`       |
-| Liquidation          | Production (legacy)  | E2E                   | -                                        |
-| Ordonnancement       | Production (legacy)  | E2E                   | -                                        |
-| Reglement            | Production (legacy)  | 138 E2E               | -                                        |
-| Budget/Planification | Production           | 52 unit               | -                                        |
-| Workflow Engine      | Production           | 95 unit               | -                                        |
-| RBAC                 | Production           | 91 unit               | -                                        |
+| Module               | Statut               | Tests                 | Doc                                       |
+| -------------------- | -------------------- | --------------------- | ----------------------------------------- |
+| Note SEF             | Production           | 91+ RBAC              | -                                         |
+| Note AEF             | Production           | E2E                   | `docs/CERTIFICATION_NOTES_AEF.md`         |
+| Imputation           | Production           | E2E                   | `docs/CERTIFICATION_IMPUTATION.md`        |
+| Expression Besoin    | Production           | E2E                   | `docs/CERTIFICATION_EXPRESSION_BESOIN.md` |
+| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/CERTIFICATION_PASSATION_MARCHE.md`  |
+| **Engagement**       | **Certifie 100/100** | **231 unit + 60 E2E** | `docs/CERTIFICATION_ENGAGEMENT.md`        |
+| **Liquidation**      | **Certifie 100/100** | **104 unit + 60 E2E** | `docs/CERTIFICATION_LIQUIDATION.md`       |
+| Ordonnancement       | Production (legacy)  | E2E                   | -                                         |
+| Reglement            | Production (legacy)  | 138 E2E               | -                                         |
+| Budget/Planification | Production           | 52 unit               | -                                         |
+| Workflow Engine      | Production           | 95 unit               | -                                         |
+| RBAC                 | Production           | 91 unit               | -                                         |
 
 ## 4. Conventions de code (resume)
 
@@ -65,7 +65,7 @@ Voir `docs/CONVENTIONS.md` sections 10-19 pour toutes les regles frontend detail
 ```bash
 npx tsc --noEmit         # 0 erreurs TypeScript
 npx vite build           # Build OK
-npx vitest run           # 369/369 tests PASS (au 19/02/2026)
+npx vitest run           # 704/704 tests PASS (au 22/03/2026)
 ```
 
 **INTERDIT :**
@@ -188,7 +188,8 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 | Conventions de code detaillees  | `CONVENTIONS.md`                         |
 | Certification passation         | `docs/CERTIFICATION_PASSATION_MARCHE.md` |
 | Certification engagement        | `docs/CERTIFICATION_ENGAGEMENT.md`       |
-| Transition liquidation          | `docs/TRANSITION_VERS_LIQUIDATION.md`    |
+| Certification liquidation       | `docs/CERTIFICATION_LIQUIDATION.md`      |
+| Transition ordonnancement       | `docs/TRANSITION_VERS_ORDONNANCEMENT.md` |
 | Architecture technique complete | `ARCHITECTURE.md`                        |
 | Contexte agent universel        | `AGENT_CONTEXT.md`                       |
 | Credentials complet             | `docs/CREDENTIALS_GUIDE.md`              |
@@ -196,6 +197,6 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 | Audit technique                 | `docs/AUDIT_TECHNIQUE_COMPLET.md`        |
 | Migration SQL Server            | `docs/RAPPORT_MIGRATION_COMPLETE.md`     |
 
-### Metriques cles (19/02/2026)
+### Metriques cles (22/03/2026)
 
-115 pages | 417 composants/50 modules | 165 hooks | 201 tables | 526 RLS policies | 253 migrations | 12 Edge Functions | 369 tests unitaires | 69 specs E2E
+116 pages | 426 composants/50 modules | 169 hooks | 201 tables | 526 RLS policies | 277 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E

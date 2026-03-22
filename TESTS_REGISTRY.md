@@ -1,7 +1,7 @@
 # TESTS_REGISTRY.md — SYGFP
 
-**Derniere MAJ :** 19 fevrier 2026
-**Total : 76 fichiers | 1 468 tests (370 unit + 1 098 E2E)**
+**Derniere MAJ :** 22 mars 2026
+**Total : 80 fichiers | 704 unit + 71 E2E specs**
 
 ---
 
@@ -9,22 +9,24 @@
 
 | Type             | Fichiers | Tests | Commande              |
 | ---------------- | -------- | ----- | --------------------- |
-| Unit (Vitest)    | 7        | 370   | `npx vitest run`      |
-| E2E (Playwright) | 69       | 1 098 | `npx playwright test` |
+| Unit (Vitest)    | 9        | 704   | `npx vitest run`      |
+| E2E (Playwright) | 71       | -     | `npx playwright test` |
 
 ---
 
 ## 1. TESTS UNITAIRES (Vitest)
 
-| #   | Fichier                                             | Module    | Tests | MAJ        | Commande                                                           |
-| --- | --------------------------------------------------- | --------- | ----- | ---------- | ------------------------------------------------------------------ |
-| 1   | `src/lib/workflow/__tests__/workflowEngine.test.ts` | Workflow  | 95    | 2026-02-12 | `npx vitest run src/lib/workflow/__tests__/workflowEngine.test.ts` |
-| 2   | `src/lib/rbac/__tests__/permissions.test.ts`        | RBAC      | 91    | 2026-02-12 | `npx vitest run src/lib/rbac/__tests__/permissions.test.ts`        |
-| 3   | `src/test/passation-utils.test.ts`                  | Passation | 74    | 2026-02-18 | `npx vitest run src/test/passation-utils.test.ts`                  |
-| 4   | `src/lib/budget/__tests__/imputation-utils.test.ts` | Budget    | 52    | 2026-02-12 | `npx vitest run src/lib/budget/__tests__/imputation-utils.test.ts` |
-| 5   | `src/test/qrcode-utils.test.ts`                     | Documents | 34    | 2026-02-04 | `npx vitest run src/test/qrcode-utils.test.ts`                     |
-| 6   | `src/test/passation-evaluation.test.ts`             | Passation | 20    | 2026-02-18 | `npx vitest run src/test/passation-evaluation.test.ts`             |
-| 7   | `src/test/example.test.ts`                          | Smoke     | 4     | 2026-01-29 | `npx vitest run src/test/example.test.ts`                          |
+| #   | Fichier                                             | Module      | Tests | MAJ        | Commande                                                           |
+| --- | --------------------------------------------------- | ----------- | ----- | ---------- | ------------------------------------------------------------------ |
+| 1   | `src/test/engagement-utils.test.ts`                 | Engagement  | 231   | 2026-02-20 | `npx vitest run src/test/engagement-utils.test.ts`                 |
+| 2   | `src/test/liquidation-utils.test.ts`                | Liquidation | 104   | 2026-02-22 | `npx vitest run src/test/liquidation-utils.test.ts`                |
+| 3   | `src/lib/workflow/__tests__/workflowEngine.test.ts` | Workflow    | 95    | 2026-02-12 | `npx vitest run src/lib/workflow/__tests__/workflowEngine.test.ts` |
+| 4   | `src/lib/rbac/__tests__/permissions.test.ts`        | RBAC        | 91    | 2026-02-12 | `npx vitest run src/lib/rbac/__tests__/permissions.test.ts`        |
+| 5   | `src/test/passation-utils.test.ts`                  | Passation   | 74    | 2026-02-18 | `npx vitest run src/test/passation-utils.test.ts`                  |
+| 6   | `src/lib/budget/__tests__/imputation-utils.test.ts` | Budget      | 52    | 2026-02-12 | `npx vitest run src/lib/budget/__tests__/imputation-utils.test.ts` |
+| 7   | `src/test/qrcode-utils.test.ts`                     | Documents   | 33    | 2026-02-04 | `npx vitest run src/test/qrcode-utils.test.ts`                     |
+| 8   | `src/test/passation-evaluation.test.ts`             | Passation   | 20    | 2026-02-18 | `npx vitest run src/test/passation-evaluation.test.ts`             |
+| 9   | `src/test/example.test.ts`                          | Smoke       | 4     | 2026-01-29 | `npx vitest run src/test/example.test.ts`                          |
 
 ---
 

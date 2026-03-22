@@ -1,222 +1,182 @@
-# SYGFP - Système de Gestion des Finances Publiques
+# SYGFP - Systeme de Gestion des Finances Publiques
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-blue)](https://reactjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-blue)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/Tests-704%20PASS-brightgreen)]()
 
-Application web moderne de gestion budgétaire et financière pour **ARTI Côte d'Ivoire**.
+Application web moderne de gestion budgetaire et financiere pour **ARTI** (Autorite de Regulation du Transport Interieur, **Cote d'Ivoire**).
 
-## 🎯 Fonctionnalités Principales
-
-### Chaîne de Dépense (9 étapes)
+## Chaine de Depense (9 etapes)
 
 ```
-1. Note SEF → 2. Note AEF → 3. Imputation → 4. Expression Besoin
-       ↓            ↓            ↓              ↓
-5. Passation Marché → 6. Engagement → 7. Liquidation
-                            ↓              ↓
-                    8. Ordonnancement → 9. Règlement
+1. Note SEF > 2. Note AEF > 3. Imputation > 4. Expression Besoin
+       |            |            |              |
+5. Passation Marche > 6. Engagement > 7. Liquidation
+                            |              |
+                    8. Ordonnancement > 9. Reglement
 ```
 
-### Modules
+## Etat des modules
 
-- **Planification** - Budget prévisionnel, missions, objectifs
-- **Exécution** - Notes SEF/AEF, engagements, liquidations
-- **Trésorerie** - Caisses, mouvements, approvisionnements
-- **Administration** - Utilisateurs, rôles, permissions
+| Module               | Statut               | Tests                 |
+| -------------------- | -------------------- | --------------------- |
+| Note SEF             | Production           | 91+ RBAC              |
+| Note AEF             | Production           | E2E                   |
+| Imputation           | Production           | E2E                   |
+| Expression Besoin    | Production           | E2E                   |
+| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  |
+| **Engagement**       | **Certifie 100/100** | **231 unit + 60 E2E** |
+| **Liquidation**      | **Certifie 100/100** | **104 unit + 60 E2E** |
+| Ordonnancement       | Production (legacy)  | E2E                   |
+| Reglement            | Production (legacy)  | 138 E2E               |
+| Budget/Planification | Production           | 52 unit               |
+| Workflow Engine      | Production           | 95 unit               |
+| RBAC                 | Production           | 91 unit               |
 
-### Sécurité (RBAC)
+## Metriques
 
-- 5 profils fonctionnels : Admin, Validateur, Opérationnel, Contrôleur, Auditeur
-- 5 niveaux hiérarchiques : DG, Directeur, Sous-Directeur, Chef de Service, Agent
-- Row-Level Security (RLS) sur toutes les tables sensibles
+| Metrique        | Valeur   |
+| --------------- | -------- |
+| Pages           | 116      |
+| Composants      | 426      |
+| Hooks           | 169      |
+| Services        | 19       |
+| Routes          | 114      |
+| Migrations SQL  | 277      |
+| Edge Functions  | 12       |
+| Tests unitaires | 704 PASS |
+| Specs E2E       | 71       |
+| Tables          | 201      |
+| Policies RLS    | 526      |
 
----
-
-## 🔔 Système de Notifications (v3.0)
-
-### Fonctionnalités
-
-- **Notifications en temps réel** via Supabase Realtime
-- **Centre de notifications** avec historique et filtres
-- **Templates personnalisables** par type d'événement
-- **Préférences utilisateur** (email, in-app)
-- **Notifications automatiques** sur changement de statut
-
-### Types supportés
-
-| Type                 | Description           |
-| -------------------- | --------------------- |
-| `validation`         | Demande de validation |
-| `rejet`              | Document rejeté       |
-| `echeance`           | Échéance proche       |
-| `budget_insuffisant` | Alerte budget         |
-| `dossier_a_valider`  | Nouveau dossier       |
-
-### Routes
-
-- `/notifications` - Centre de notifications
-- `/admin/notifications` - Administration
-
-Voir [NOTIFICATIONS_GUIDE.md](docs/NOTIFICATIONS_GUIDE.md) pour la documentation complète.
-
----
-
-## 📊 Dashboard DMG (v3.0)
-
-### Dashboard Direction des Moyens Généraux
-
-Route: `/dashboard-dmg`
-
-#### Fonctionnalités
-
-- **KPIs dédiés** aux achats et approvisionnements
-- **Alertes configurables** par seuil
-- **Vue temps réel** des dépenses en cours
-- **Statistiques** par catégorie de dépense
-
-#### Configuration
-
-Les alertes sont configurables via la table `dmg_alert_config`.
-
----
-
-## 🛠️ Stack Technique
+## Stack technique
 
 | Composant | Technologie                        |
 | --------- | ---------------------------------- |
-| Frontend  | React 18 + TypeScript 5.6          |
-| Build     | Vite 5.4                           |
+| Frontend  | React 18 + TypeScript 5.8          |
+| Build     | Vite 5.4 (port 8080)               |
 | UI        | Tailwind CSS + shadcn/ui (Radix)   |
 | State     | TanStack Query                     |
 | Forms     | React Hook Form + Zod              |
 | Backend   | Supabase (PostgreSQL + Auth + RLS) |
 | Tests     | Vitest (unit) + Playwright (E2E)   |
 
-## 📁 Structure du Projet
+## Structure du projet
 
 ```
 src/
-├── components/          # Composants React (42+ modules)
-│   ├── ui/              # Composants shadcn/ui
+├── components/          # 426 composants React (47 modules)
+│   ├── ui/              # shadcn/ui
 │   ├── layout/          # AppLayout, Sidebar, Header
-│   ├── notifications/   # Système de notifications
-│   ├── shared/          # PageLoader, PermissionGuard
+│   ├── engagement/      # Module engagement
+│   ├── liquidation/     # Module liquidation
 │   └── ...
-├── pages/               # Pages de l'application (50+)
-├── hooks/               # Hooks personnalisés (130+)
+├── pages/               # 116 pages
+├── hooks/               # 169 hooks personnalises
 ├── contexts/            # ExerciceContext, RBACContext
-├── lib/                 # Utilitaires, workflow, exports
-├── integrations/        # Client Supabase + types
-└── types/               # Types TypeScript globaux
+├── services/            # 19 services (PDF, export, storage)
+├── lib/                 # Utilitaires, workflow, RBAC, budget
+├── integrations/        # Client Supabase + types generes
+└── test/                # 9 fichiers de tests unitaires
 
 supabase/
-├── migrations/          # 180+ fichiers de migration
-└── functions/           # 4 Edge Functions
+├── migrations/          # 277 fichiers de migration
+└── functions/           # 12 Edge Functions
 ```
 
-## 🚀 Démarrage Rapide
-
-### Prérequis
-
-- Node.js 18+ (recommandé: utiliser [nvm](https://github.com/nvm-sh/nvm))
-- npm ou yarn
-
-### Installation
+## Demarrage rapide
 
 ```bash
 # Cloner le repository
 git clone https://github.com/naywayne90/sygfp-artis-g-re.git
 cd sygfp-artis-g-re
 
-# Installer les dépendances
+# Installer les dependances
 npm install
 
-# Démarrer le serveur de développement
+# Copier les variables d'environnement
+cp .env.example .env
+# Remplir les cles Supabase dans .env
+
+# Demarrer le serveur de developpement
 npm run dev
 ```
 
 L'application sera disponible sur `http://localhost:8080`
 
-### Variables d'environnement
-
-Créer un fichier `.env` à la racine (voir `.env.example`):
-
-```env
-VITE_SUPABASE_URL=https://tjagvgqthlibdpvztvaf.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key
-```
-
-## 📝 Scripts Disponibles
+## Scripts disponibles
 
 ```bash
-# Développement
 npm run dev              # Serveur dev (port 8080)
-
-# Vérification
-npm run typecheck        # Vérifier TypeScript
-npm run lint             # Vérifier ESLint
-npm run lint:fix         # Corriger ESLint auto
-
-# Tests
-npm run test             # Tests unitaires (Vitest)
-npm run test:ui          # Tests avec interface
-npm run test:coverage    # Tests avec couverture
-npm run test:e2e         # Tests E2E (Playwright)
-npm run test:e2e:ui      # Playwright avec interface
-
-# Build
 npm run build            # Build production
+npm run typecheck        # tsc --noEmit
+npx vitest run           # Tests unitaires (704 tests)
+npm run test:e2e         # Tests E2E Playwright
+npm run lint             # ESLint
+npm run lint:fix         # ESLint auto-fix
 npm run verify           # typecheck + lint + test
 ```
 
-## 📊 Performance
+## Performance
 
-Le projet utilise le code-splitting pour optimiser les temps de chargement :
-
-| Métrique          | Valeur    |
+| Metrique          | Valeur    |
 | ----------------- | --------- |
-| Bundle initial    | ~427 KB   |
-| Pages lazy-loaded | 85+       |
-| Vendors séparés   | 10 chunks |
+| Bundle initial    | ~425 KB   |
+| Pages lazy-loaded | 110+      |
+| Vendors separes   | 11 chunks |
 
-## 📚 Documentation
+## Documentation
 
-| Document                                                    | Description                   |
-| ----------------------------------------------------------- | ----------------------------- |
-| [ARCHITECTURE_TECHNIQUE.md](docs/ARCHITECTURE_TECHNIQUE.md) | Structure et patterns         |
-| [GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md)                 | Base de données               |
-| [NOTIFICATIONS_GUIDE.md](docs/NOTIFICATIONS_GUIDE.md)       | Système de notifications      |
-| [GUIDE_CODE_SPLITTING.md](docs/GUIDE_CODE_SPLITTING.md)     | Optimisation                  |
-| [RELEASE_NOTES_v3.md](docs/RELEASE_NOTES_v3.md)             | Notes de version v3           |
-| [CREDENTIALS_GUIDE.md](docs/CREDENTIALS_GUIDE.md)           | Guide des accès               |
-| [CLAUDE.md](CLAUDE.md)                                      | Instructions pour Claude Code |
+| Document                                                                         | Description               |
+| -------------------------------------------------------------------------------- | ------------------------- |
+| [CLAUDE.md](CLAUDE.md)                                                           | Instructions Claude Code  |
+| [ARCHITECTURE.md](ARCHITECTURE.md)                                               | Architecture technique    |
+| [CONVENTIONS.md](CONVENTIONS.md)                                                 | Conventions de code       |
+| [PROJECT_STATUS.md](PROJECT_STATUS.md)                                           | Inventaire complet        |
+| [docs/GUIDE_SUPABASE.md](docs/GUIDE_SUPABASE.md)                                 | Guide Supabase            |
+| [docs/NOTIFICATIONS_GUIDE.md](docs/NOTIFICATIONS_GUIDE.md)                       | Notifications             |
+| [docs/CERTIFICATION_PASSATION_MARCHE.md](docs/CERTIFICATION_PASSATION_MARCHE.md) | Certification Passation   |
+| [docs/CERTIFICATION_ENGAGEMENT.md](docs/CERTIFICATION_ENGAGEMENT.md)             | Certification Engagement  |
+| [docs/CERTIFICATION_LIQUIDATION.md](docs/CERTIFICATION_LIQUIDATION.md)           | Certification Liquidation |
 
-## 📋 Changelog
+## Changelog
+
+### v4.0.0 (22/02/2026)
+
+- Liquidation certifiee 100/100 (104 unit + 60 E2E)
+- Calculs fiscaux temps reel (TVA 18%, AIRSI 5%)
+- Liquidations partielles multi-tranche
+- 704 tests unitaires PASS
+
+### v3.1.0 (20/02/2026)
+
+- Engagement certifie 100/100 (231 unit + 60 E2E)
+- Support multi-ligne (ventilation budgetaire)
+- Degagement partiel
 
 ### v3.0.0 (04/02/2026)
 
-- Système de notifications avancé avec temps réel
-- Dashboard DMG dédié
-- Système de workflow configurable
-- Gestion des intérims
-- 20+ nouvelles tables
-- 30+ nouvelles fonctions RPC
+- Notifications temps reel via Supabase Realtime
+- Dashboard DMG dedie
+- Workflow configurable
+- Gestion des interims et delegations
+- Code-splitting (bundle -91%)
 
 ### v2.0.0 (03/02/2026)
 
-- Code-splitting (bundle -91%)
+- Migration SQL Server vers Supabase
 - 85+ pages lazy-loaded
-- Documentation technique complète
+- Documentation technique complete
 
 ### v1.0.0
 
 - Version initiale
-- Chaîne de dépense complète
+- Chaine de depense complete
 - RBAC et RLS
 
-## 🔧 Conventions
+## Conventions
 
 ### Commits
 
@@ -230,13 +190,13 @@ Types: feat, fix, refactor, test, docs, chore
 
 - Components: `PascalCase.tsx`
 - Hooks: `useCamelCase.ts`
-- Utils: `camelCase.ts`
+- Services: `camelCaseService.ts`
 
-## 📄 Licence
+## Licence
 
-Propriété de ARTI Côte d'Ivoire. Tous droits réservés.
+Propriete de ARTI Cote d'Ivoire. Tous droits reserves.
 
 ---
 
-**Version:** 3.0.0
-**Dernière mise à jour:** 04/02/2026
+**Version:** 4.0.0
+**Derniere mise a jour:** 22/03/2026

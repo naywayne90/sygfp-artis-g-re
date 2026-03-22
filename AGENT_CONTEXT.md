@@ -1,32 +1,34 @@
-# AGENT_CONTEXT.md — Prochaine séance : Ordonnancement
+# AGENT_CONTEXT.md — Prochaine seance : Ordonnancement
 
-## État au 22/02/2026
+## Etat au 22/03/2026
 
-- ✅ Structure Budgétaire CERTIFIÉ (8p)
-- ✅ Notes SEF CERTIFIÉ (8p, 191 notes)
-- ✅ Notes AEF CERTIFIÉ (8p)
-- ✅ Imputation CERTIFIÉ (10p)
-- ✅ Expression de Besoin CERTIFIÉ (15p)
-- ✅ Passation / Marché CERTIFIÉ (15p, 65 tests PW)
-- ✅ Documentation & Résilience FAIT (5p)
-- ✅ Engagement CERTIFIÉ (15p, 444 vitest, commit 0cf1d5a)
-- ✅ Liquidation CERTIFIÉ (15p, 704 vitest, 104 PW, commit d1451b1, certif 100/100)
-- 🔄 ORDONNANCEMENT — PROCHAIN MODULE (~10 prompts)
-- ⏳ Règlement (~10 prompts)
+- Structure Budgetaire CERTIFIE (8p)
+- Notes SEF CERTIFIE (8p, 191 notes)
+- Notes AEF CERTIFIE (8p)
+- Imputation CERTIFIE (10p)
+- Expression de Besoin CERTIFIE (15p)
+- Passation / Marche CERTIFIE (15p, 65 tests PW)
+- Documentation & Resilience FAIT (5p)
+- Engagement CERTIFIE (15p, 231 unit + 60 E2E, commit 0cf1d5a)
+- Liquidation CERTIFIE (15p, 104 unit + 60 E2E, commit d1451b1, certif 100/100)
+- Types Supabase REGENERES (22/03, commit a031905, 106 erreurs corrigees)
+- ORDONNANCEMENT — PROCHAIN MODULE (~10 prompts)
+- Reglement (~10 prompts)
 
-## Prochain démarrage
+## Prochain demarrage
 
-1. ./RECOVERY.sh ou recréer tmux manuellement
-2. Coller AGENT_CONTEXT.md du module Ordonnancement (à générer sur Claude.ai)
-3. Lancer Prompt 1 (audit, ne modifie rien)
+1. ./RECOVERY.sh ou recreer tmux manuellement
+2. Lancer Prompt 1 Ordonnancement (audit, ne modifie rien)
+3. Voir `docs/TRANSITION_VERS_ORDONNANCEMENT.md` pour la spec complete
 
 ## Rappels techniques
 
-- Build OK | TSC 0 | Vitest 704 PASS | Playwright 104
-- Commits : 0cf1d5a (Engagement) → d1451b1 (Liquidation)
+- Build OK | TSC 0 | Vitest 704 PASS | Playwright 71 specs
+- Commits : 0cf1d5a (Engagement) > d1451b1 (Liquidation) > a031905 (Types Supabase)
 - Hook : useOrdonnancements (~461 lignes, mature)
-- Table : ordonnancements
-- L'ordonnancement = ordre de payer donné au comptable/trésorier
-- Exigence MBAYE EX-01 : notif → DMG + DirOp (réf, fournisseur, montant_net, montant_réglé, montant_restant)
-- FK : liquidation_id → budget_liquidations (validées uniquement)
-- Étape ELOP 3
+- Table : ordonnancements (50+ colonnes, 3 363 records migres)
+- L'ordonnancement = ordre de payer donne au comptable/tresorier
+- Exigence MBAYE EX-01 : notif > DMG + DirOp (ref, fournisseur, montant_net, montant_regle, montant_restant)
+- FK : liquidation_id > budget_liquidations (validees uniquement)
+- Etape ELOP 3
+- Workflow : CB > DAF > DG > AC (4 signatures avec hash cryptographique + QR)
