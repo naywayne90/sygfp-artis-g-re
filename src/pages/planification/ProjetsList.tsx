@@ -76,7 +76,7 @@ export default function ProjetsList() {
   const [searchParams] = useSearchParams();
   const directionFilter = searchParams.get('direction') || undefined;
 
-  const { exerciceId } = useExercice();
+  const { exerciceId, exercice } = useExercice();
   const { plans, isLoading, createPlan, updatePlan, deletePlan, isCreating } =
     usePlansTravail(directionFilter);
 
@@ -208,8 +208,10 @@ export default function ProjetsList() {
 
   const handleOpenCreate = () => {
     setEditingPlan(null);
+    const nextNum = String(plans.length + 1).padStart(3, '0');
+    const autoCode = `PT-${exercice || 2026}-${nextNum}`;
     setFormData({
-      code: '',
+      code: autoCode,
       libelle: '',
       description: '',
       direction_id: directionFilter || '',
@@ -249,6 +251,10 @@ export default function ProjetsList() {
     }
     if (!exerciceId) {
       toast.error('Aucun exercice selectionne');
+      return;
+    }
+    if (formData.date_debut && formData.date_fin && formData.date_fin < formData.date_debut) {
+      toast.error('La date de fin doit etre posterieure a la date de debut');
       return;
     }
 
@@ -507,7 +513,14 @@ export default function ProjetsList() {
             <DialogTitle>
               {editingPlan ? 'Modifier le plan' : 'Nouveau plan de travail'}
             </DialogTitle>
-            <DialogDescription>Remplissez les informations du plan de travail.</DialogDescription>
+            <DialogDescription>
+              Remplissez les informations du plan de travail.
+              {exercice && (
+                <Badge variant="outline" className="ml-2">
+                  Exercice {exercice}
+                </Badge>
+              )}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
