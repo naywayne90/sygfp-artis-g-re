@@ -35,7 +35,18 @@ import {
 import { usePlansTravail } from '@/hooks/usePlansTravail';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
-import { FolderKanban, Plus, Search, Eye, Pencil, Trash2 } from 'lucide-react';
+import {
+  FolderKanban,
+  Plus,
+  Search,
+  Eye,
+  Pencil,
+  Trash2,
+  Download,
+  TrendingUp,
+  PlayCircle,
+  Wallet,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import type { PlanTravailStatut } from '@/types/roadmap';
 
@@ -134,6 +145,19 @@ export default function ProjetsList() {
     statut: 'brouillon' as PlanTravailStatut,
   });
 
+  const stats = useMemo(
+    () => ({
+      total: plans.length,
+      enCours: plans.filter((p) => p.statut === 'en_cours').length,
+      budgetTotal: plans.reduce((s, p) => s + (p.budget_alloue || 0), 0),
+      budgetConsomme: plans.reduce((s, p) => s + (p.budget_consomme || 0), 0),
+    }),
+    [plans]
+  );
+
+  const tauxExecution =
+    stats.budgetTotal > 0 ? Math.round((stats.budgetConsomme / stats.budgetTotal) * 100) : 0;
+
   const filteredPlans = useMemo(() => {
     let result = plans;
     if (search) {
@@ -147,6 +171,40 @@ export default function ProjetsList() {
     }
     return result;
   }, [plans, search, statutFilter]);
+
+  const handleExport = () => {
+    const headers = [
+      'Code',
+      'Libelle',
+      'Direction',
+      'Statut',
+      'Budget Alloue',
+      'Budget Consomme',
+      'Date Debut',
+      'Date Fin',
+    ];
+    const rows = filteredPlans.map((p) => [
+      p.code,
+      p.libelle,
+      p.direction?.code ?? p.direction_id.slice(0, 8),
+      p.statut,
+      String(p.budget_alloue),
+      String(p.budget_consomme),
+      p.date_debut ?? '',
+      p.date_fin ?? '',
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plans_travail.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Export CSV genere avec succes');
+  };
 
   const handleOpenCreate = () => {
     setEditingPlan(null);
@@ -259,10 +317,64 @@ export default function ProjetsList() {
           </h1>
           <p className="text-muted-foreground">{plans.length} plan(s) de travail</p>
         </div>
-        <Button onClick={handleOpenCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau Plan
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Exporter
+          </Button>
+          <Button onClick={handleOpenCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau Plan
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total plans</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+              <FolderKanban className="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">En cours</p>
+                <p className="text-2xl font-bold">{stats.enCours}</p>
+              </div>
+              <PlayCircle className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Budget total</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.budgetTotal)}</p>
+              </div>
+              <Wallet className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Taux d'execution</p>
+                <p className="text-2xl font-bold">{tauxExecution}%</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-orange-500" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}

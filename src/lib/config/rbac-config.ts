@@ -860,15 +860,15 @@ export const ROUTE_ACCESS_MATRIX: Record<
     description: 'Import/Export budget',
   },
   '/planification/roadmap-dashboard': {
-    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB'],
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'CHARGE_MISSION'],
     description: 'Tableau de bord feuille de route',
   },
   '/planification/roadmap-direction': {
-    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'OPERATEUR'],
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'CHARGE_MISSION', 'OPERATEUR'],
     description: 'Espace direction feuille de route',
   },
   '/planification/projets': {
-    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'OPERATEUR'],
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'CHARGE_MISSION', 'OPERATEUR'],
     description: 'Projets et plans de travail',
   },
   '/planification/feuilles-route': {
@@ -876,8 +876,8 @@ export const ROUTE_ACCESS_MATRIX: Record<
     description: 'Import des feuilles de route par direction',
   },
   '/planification/soumissions-feuilles-route': {
-    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR'],
-    description: 'Validation des soumissions de feuilles de route',
+    allowedProfiles: ['ADMIN', 'CB', 'CHARGE_MISSION', 'DIRECTEUR'],
+    description: 'Validation des soumissions de feuilles de route (CB + Charge de Mission)',
   },
 
   // Trésorerie
