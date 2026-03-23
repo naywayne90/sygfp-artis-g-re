@@ -13,13 +13,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { usePlansTravail } from '@/hooks/usePlansTravail';
 import { useProjetTaches } from '@/hooks/useProjetTaches';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { TacheForm } from '@/components/roadmap/TacheForm';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
 import { Slider } from '@/components/ui/slider';
-import { ArrowLeft, Pencil, Plus, Trash2, ListChecks, Wallet, Users } from 'lucide-react';
+import { toast } from 'sonner';
+import { ArrowLeft, Pencil, Plus, Send, Trash2, ListChecks, Wallet, Users } from 'lucide-react';
 import type { Tache, TacheInput } from '@/types/roadmap';
 
 const formatCurrency = (amount: number) =>
@@ -49,7 +63,7 @@ export default function ProjetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { exercice } = useExercice();
-  const { plans, isLoading: plansLoading } = usePlansTravail();
+  const { plans, isLoading: plansLoading, updatePlan, deletePlan } = usePlansTravail();
   const {
     taches,
     stats,
@@ -65,6 +79,54 @@ export default function ProjetDetail() {
   const [editingTache, setEditingTache] = useState<Tache | null>(null);
 
   const plan = plans.find((p) => p.id === id);
+
+  // Fallback: fetch direction separately if join didn't populate it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabaseUntyped = supabase as any;
+  const { data: directionData } = useQuery({
+    queryKey: ['direction-detail', plan?.direction_id],
+    queryFn: async () => {
+      if (!plan?.direction_id) return null;
+      const { data } = await supabaseUntyped
+        .from('directions')
+        .select('id, code, label, sigle')
+        .eq('id', plan.direction_id)
+        .single();
+      return data as { id: string; code: string; label: string; sigle: string } | null;
+    },
+    enabled: !!plan?.direction_id && !plan?.direction?.label,
+  });
+
+  // Fallback: fetch responsable separately if join didn't populate it
+  const { data: responsableData } = useQuery({
+    queryKey: ['responsable-detail', plan?.responsable_id],
+    queryFn: async () => {
+      if (!plan?.responsable_id) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, full_name')
+        .eq('id', plan.responsable_id)
+        .single();
+      return data;
+    },
+    enabled: !!plan?.responsable_id && !plan?.responsable?.full_name,
+  });
+
+  const directionDisplay =
+    plan?.direction?.label ||
+    plan?.direction?.sigle ||
+    directionData?.label ||
+    directionData?.sigle ||
+    '-';
+  const responsableDisplay = plan?.responsable
+    ? plan.responsable.full_name ||
+      `${plan.responsable.first_name || ''} ${plan.responsable.last_name || ''}`.trim() ||
+      '-'
+    : responsableData
+      ? responsableData.full_name ||
+        `${responsableData.first_name || ''} ${responsableData.last_name || ''}`.trim() ||
+        '-'
+      : '-';
 
   if (plansLoading || tachesLoading) {
     return (
@@ -99,6 +161,26 @@ export default function ProjetDetail() {
       });
     }
   }
+
+  const handleSoumettre = async () => {
+    if (!plan) return;
+    try {
+      await updatePlan({ id: plan.id, statut: 'soumis' });
+      toast.success('Plan soumis pour validation');
+    } catch {
+      toast.error('Erreur lors de la soumission');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!plan) return;
+    try {
+      await deletePlan(plan.id);
+      navigate('/planification/plan-travail');
+    } catch {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
 
   const handleCreateTache = async (data: TacheInput) => {
     if (editingTache) {
@@ -139,15 +221,51 @@ export default function ProjetDetail() {
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
             <span>Code: {plan.code}</span>
-            <span>Direction: {plan.direction?.nom ?? '-'}</span>
-            <span>
-              Responsable:{' '}
-              {plan.responsable ? `${plan.responsable.prenom} ${plan.responsable.nom}` : '-'}
-            </span>
+            <span>Direction: {directionDisplay}</span>
+            <span>Responsable: {responsableDisplay}</span>
             <span>
               {plan.date_debut ?? '?'} - {plan.date_fin ?? '?'}
             </span>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/planification/plan-travail')}
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Modifier
+          </Button>
+          {plan.statut === 'brouillon' && (
+            <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleSoumettre}>
+              <Send className="h-4 w-4 mr-2" />
+              Soumettre
+            </Button>
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Supprimer ce plan ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Cette action va desactiver le plan &quot;{plan.libelle}&quot;. Les taches
+                  associees seront conservees.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
@@ -164,6 +282,16 @@ export default function ProjetDetail() {
           <Progress value={pctBudget} />
         </CardContent>
       </Card>
+
+      {/* Audit info */}
+      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+        {plan.created_at && (
+          <span>Cree le {new Date(plan.created_at).toLocaleDateString('fr-FR')}</span>
+        )}
+        {plan.updated_at && (
+          <span>Modifie le {new Date(plan.updated_at).toLocaleDateString('fr-FR')}</span>
+        )}
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="taches">
@@ -249,8 +377,10 @@ export default function ProjetDetail() {
                         </TableCell>
                         <TableCell className="text-sm">
                           {tache.responsable
-                            ? `${tache.responsable.prenom} ${tache.responsable.nom}`
-                            : (tache.raci_responsable ?? '-')}
+                            ? tache.responsable.full_name ||
+                              `${tache.responsable.first_name || ''} ${tache.responsable.last_name || ''}`.trim() ||
+                              '-'
+                            : '-'}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">

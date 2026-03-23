@@ -83,7 +83,7 @@ export function useRoadmapDashboard() {
     if (!directionMap.has(dirId)) {
       directionMap.set(dirId, {
         code: plan.direction?.code ?? '?',
-        nom: plan.direction?.nom ?? 'Direction inconnue',
+        nom: plan.direction?.label ?? plan.direction?.sigle ?? 'Direction inconnue',
         plans: [],
       });
     }

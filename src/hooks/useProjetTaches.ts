@@ -28,7 +28,7 @@ export function useProjetTaches(sousActiviteId?: string, planTravailId?: string)
       let q = supabase
         .from('taches')
         .select(
-          '*, responsable:profiles!responsable_id(id, nom, prenom), sous_activite:sous_activites(id, code, libelle)'
+          '*, responsable:profiles!responsable_id(id, first_name, last_name, full_name), sous_activite:sous_activites(id, code, libelle)'
         )
         .eq('est_active', true);
 

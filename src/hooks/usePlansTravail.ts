@@ -18,7 +18,7 @@ export function usePlansTravail(directionId?: string) {
       let q = supabaseUntyped
         .from('plans_travail')
         .select(
-          '*, direction:directions(id, code, nom), responsable:profiles!plans_travail_responsable_id_fkey(id, nom, prenom), objectif_strategique:objectifs_strategiques!plans_travail_os_id_fkey(id, code, libelle)'
+          '*, direction:directions(id, code, label, sigle), responsable:profiles!plans_travail_responsable_id_fkey(id, first_name, last_name, full_name), objectif_strategique:objectifs_strategiques!plans_travail_os_id_fkey(id, code, libelle)'
         )
         .eq('est_actif', true);
 

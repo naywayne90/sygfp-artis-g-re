@@ -25,8 +25,13 @@ export interface PlanTravail {
   updated_at: string;
   created_by: string | null;
   // Jointures
-  direction?: { id: string; code: string; nom: string };
-  responsable?: { id: string; nom: string; prenom: string };
+  direction?: { id: string; code: string; label: string; sigle?: string };
+  responsable?: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+  };
   objectif_strategique?: { id: string; code: string; libelle: string };
 }
 
@@ -74,7 +79,12 @@ export interface Tache {
   created_at: string;
   updated_at: string;
   // Jointures
-  responsable?: { id: string; nom: string; prenom: string };
+  responsable?: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    full_name: string | null;
+  };
   sous_activite?: { id: string; code: string; libelle: string };
 }
 
