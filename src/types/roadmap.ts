@@ -61,6 +61,7 @@ export interface Tache {
   priorite: TachePriorite;
   avancement: number;
   budget_line_id: string | null;
+  plan_travail_id: string | null;
   budget_prevu: number;
   livrables: string[] | null;
   exercice: number;
@@ -92,6 +93,7 @@ export interface TacheInput {
   priorite?: TachePriorite;
   avancement?: number;
   budget_line_id?: string | null;
+  plan_travail_id?: string | null;
   budget_prevu?: number;
   livrables?: string[] | null;
   exercice: number;

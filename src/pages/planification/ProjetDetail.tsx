@@ -18,8 +18,9 @@ import { useProjetTaches } from '@/hooks/useProjetTaches';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { TacheForm } from '@/components/roadmap/TacheForm';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
-import { ArrowLeft, Plus, Trash2, ListChecks, Wallet, Users } from 'lucide-react';
-import type { TacheInput } from '@/types/roadmap';
+import { Slider } from '@/components/ui/slider';
+import { ArrowLeft, Pencil, Plus, Trash2, ListChecks, Wallet, Users } from 'lucide-react';
+import type { Tache, TacheInput } from '@/types/roadmap';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('fr-FR', {
@@ -54,10 +55,14 @@ export default function ProjetDetail() {
     stats,
     isLoading: tachesLoading,
     createTache,
+    updateTache,
+    updateAvancement,
     deleteTache,
     isCreating,
-  } = useProjetTaches();
+    isUpdating,
+  } = useProjetTaches(undefined, id);
   const [tacheFormOpen, setTacheFormOpen] = useState(false);
+  const [editingTache, setEditingTache] = useState<Tache | null>(null);
 
   const plan = plans.find((p) => p.id === id);
 
@@ -96,7 +101,21 @@ export default function ProjetDetail() {
   }
 
   const handleCreateTache = async (data: TacheInput) => {
-    await createTache(data);
+    if (editingTache) {
+      await updateTache({ id: editingTache.id, ...data });
+      setEditingTache(null);
+    } else {
+      await createTache({ ...data, plan_travail_id: id });
+    }
+  };
+
+  const handleEditTache = (tache: Tache) => {
+    setEditingTache(tache);
+    setTacheFormOpen(true);
+  };
+
+  const handleAvancementChange = async (tacheId: string, value: number[]) => {
+    await updateAvancement({ id: tacheId, avancement: value[0] });
   };
 
   const handleDeleteTache = async (tacheId: string) => {
@@ -215,8 +234,14 @@ export default function ProjetDetail() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Progress value={tache.avancement} className="w-16" />
-                            <span className="text-sm">{tache.avancement}%</span>
+                            <Slider
+                              value={[tache.avancement]}
+                              onValueCommit={(val) => handleAvancementChange(tache.id, val)}
+                              max={100}
+                              step={5}
+                              className="w-20"
+                            />
+                            <span className="text-sm whitespace-nowrap">{tache.avancement}%</span>
                           </div>
                         </TableCell>
                         <TableCell className="text-xs">
@@ -228,13 +253,22 @@ export default function ProjetDetail() {
                             : (tache.raci_responsable ?? '-')}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteTache(tache.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditTache(tache)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteTache(tache.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -340,10 +374,14 @@ export default function ProjetDetail() {
       {/* Tache Form Dialog */}
       <TacheForm
         open={tacheFormOpen}
-        onOpenChange={setTacheFormOpen}
+        onOpenChange={(open) => {
+          setTacheFormOpen(open);
+          if (!open) setEditingTache(null);
+        }}
         onSubmit={handleCreateTache}
+        defaultValues={editingTache ?? undefined}
         exercice={exercice ?? new Date().getFullYear()}
-        isLoading={isCreating}
+        isLoading={isCreating || isUpdating}
       />
     </div>
   );

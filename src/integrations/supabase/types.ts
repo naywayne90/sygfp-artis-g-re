@@ -15339,6 +15339,7 @@ export type Database = {
           id: string;
           libelle: string;
           livrables: string[] | null;
+          plan_travail_id: string | null;
           priorite: string | null;
           raci_accountable: string | null;
           raci_consulted: string[] | null;
@@ -15365,6 +15366,7 @@ export type Database = {
           id?: string;
           libelle: string;
           livrables?: string[] | null;
+          plan_travail_id?: string | null;
           priorite?: string | null;
           raci_accountable?: string | null;
           raci_consulted?: string[] | null;
@@ -15391,6 +15393,7 @@ export type Database = {
           id?: string;
           libelle?: string;
           livrables?: string[] | null;
+          plan_travail_id?: string | null;
           priorite?: string | null;
           raci_accountable?: string | null;
           raci_consulted?: string[] | null;
@@ -15457,6 +15460,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'v_reglement_stats';
             referencedColumns: ['budget_line_id'];
+          },
+          {
+            foreignKeyName: 'taches_plan_travail_id_fkey';
+            columns: ['plan_travail_id'];
+            isOneToOne: false;
+            referencedRelation: 'plans_travail';
+            referencedColumns: ['id'];
           },
           {
             foreignKeyName: 'taches_raci_accountable_fkey';

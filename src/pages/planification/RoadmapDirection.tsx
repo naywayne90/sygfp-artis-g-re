@@ -36,9 +36,40 @@ export default function RoadmapDirection() {
   const { directionId: rbacDirectionId, profile } = useRBAC();
   const directionId = rbacDirectionId ?? undefined;
   const { plans, isLoading: plansLoading } = usePlansTravail(directionId);
-  const { stats, tachesEnRetard, isLoading: tachesLoading } = useProjetTaches();
+  const { taches: allTaches, isLoading: tachesLoading } = useProjetTaches();
 
   const isLoading = plansLoading || tachesLoading;
+
+  // Filter tasks to only those belonging to this direction's plans
+  const directionPlanIds = new Set(plans?.map((p) => p.id) || []);
+  const directionTaches = (allTaches || []).filter(
+    (t) => t.plan_travail_id && directionPlanIds.has(t.plan_travail_id)
+  );
+
+  // Compute stats from filtered tasks
+  const stats = {
+    total: directionTaches.length,
+    planifie: directionTaches.filter((t) => t.statut === 'planifie').length,
+    en_cours: directionTaches.filter((t) => t.statut === 'en_cours').length,
+    termine: directionTaches.filter((t) => t.statut === 'termine').length,
+    en_retard: directionTaches.filter((t) => t.statut === 'en_retard').length,
+    suspendu: directionTaches.filter((t) => t.statut === 'suspendu').length,
+    annule: directionTaches.filter((t) => t.statut === 'annule').length,
+    avancementMoyen:
+      directionTaches.length > 0
+        ? Math.round(
+            directionTaches.reduce((sum, t) => sum + (t.avancement || 0), 0) /
+              directionTaches.length
+          )
+        : 0,
+  };
+
+  // Tasks overdue: date_fin < today AND statut not termine/annule
+  const tachesEnRetard = directionTaches.filter((t) => {
+    if (!t.date_fin) return false;
+    if (t.statut === 'termine' || t.statut === 'annule') return false;
+    return new Date(t.date_fin) < new Date();
+  });
 
   const budgetTotal = plans.reduce((s, p) => s + (p.budget_alloue || 0), 0);
   const budgetConsomme = plans.reduce((s, p) => s + (p.budget_consomme || 0), 0);

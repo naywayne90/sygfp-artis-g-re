@@ -18,12 +18,12 @@ interface TacheStats {
   avancementMoyen: number;
 }
 
-export function useProjetTaches(sousActiviteId?: string) {
+export function useProjetTaches(sousActiviteId?: string, planTravailId?: string) {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['projet-taches', exercice, sousActiviteId],
+    queryKey: ['projet-taches', exercice, sousActiviteId, planTravailId],
     queryFn: async () => {
       let q = supabase
         .from('taches')
@@ -37,6 +37,9 @@ export function useProjetTaches(sousActiviteId?: string) {
       }
       if (sousActiviteId) {
         q = q.eq('sous_activite_id', sousActiviteId);
+      }
+      if (planTravailId) {
+        q = q.eq('plan_travail_id', planTravailId);
       }
 
       q = q.order('created_at', { ascending: false });

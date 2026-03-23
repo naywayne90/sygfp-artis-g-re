@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { X } from 'lucide-react';
 import type { Tache, TacheInput, TacheStatut, TachePriorite } from '@/types/roadmap';
 
 const tacheSchema = z.object({
@@ -44,7 +46,6 @@ const tacheSchema = z.object({
   avancement: z.coerce.number().min(0).max(100).default(0),
   budget_line_id: z.string().nullable().optional(),
   budget_prevu: z.coerce.number().min(0).default(0),
-  livrables_text: z.string().optional(),
 });
 
 type TacheFormValues = z.infer<typeof tacheSchema>;
@@ -85,6 +86,8 @@ export function TacheForm({
   isLoading,
 }: TacheFormProps) {
   const [avancement, setAvancement] = useState(defaultValues?.avancement ?? 0);
+  const [livrables, setLivrables] = useState<string[]>(defaultValues?.livrables ?? []);
+  const [newLivrable, setNewLivrable] = useState('');
 
   const {
     register,
@@ -112,7 +115,6 @@ export function TacheForm({
       priorite: defaultValues?.priorite ?? 'normale',
       avancement: defaultValues?.avancement ?? 0,
       budget_prevu: defaultValues?.budget_prevu ?? 0,
-      livrables_text: defaultValues?.livrables?.join(', ') ?? '',
     },
   });
 
@@ -132,13 +134,6 @@ export function TacheForm({
           .map((s) => s.trim())
           .filter(Boolean)
       : null;
-    const livrables = values.livrables_text
-      ? values.livrables_text
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : null;
-
     await onSubmit({
       code: values.code,
       libelle: values.libelle,
@@ -157,12 +152,14 @@ export function TacheForm({
       avancement: avancement,
       budget_line_id: values.budget_line_id || null,
       budget_prevu: values.budget_prevu,
-      livrables,
+      livrables: livrables.length > 0 ? livrables : null,
       exercice,
     });
 
     reset();
     setAvancement(0);
+    setLivrables([]);
+    setNewLivrable('');
     onOpenChange(false);
   };
 
@@ -317,12 +314,47 @@ export function TacheForm({
 
           {/* Livrables */}
           <div className="space-y-2">
-            <Label htmlFor="livrables_text">Livrables (separes par virgule)</Label>
-            <Input
-              id="livrables_text"
-              {...register('livrables_text')}
-              placeholder="Rapport final, Presentation"
-            />
+            <Label>Livrables</Label>
+            {livrables.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {livrables.map((l, i) => (
+                  <Badge key={i} variant="secondary" className="gap-1">
+                    {l}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setLivrables(livrables.filter((_, idx) => idx !== i))}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={newLivrable}
+                onChange={(e) => setNewLivrable(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newLivrable.trim()) {
+                    e.preventDefault();
+                    setLivrables([...livrables, newLivrable.trim()]);
+                    setNewLivrable('');
+                  }
+                }}
+                placeholder="Nouveau livrable..."
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  if (newLivrable.trim()) {
+                    setLivrables([...livrables, newLivrable.trim()]);
+                    setNewLivrable('');
+                  }
+                }}
+              >
+                Ajouter
+              </Button>
+            </div>
           </div>
 
           <DialogFooter>

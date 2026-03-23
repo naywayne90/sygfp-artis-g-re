@@ -92,12 +92,18 @@ export function useRoadmapDashboard() {
   }
 
   const directionStats: DirectionRoadmapStats[] = Array.from(directionMap.entries()).map(
-    ([dirId, info]) => ({
-      direction_id: dirId,
-      direction_code: info.code,
-      direction_nom: info.nom,
-      stats: computeStats(info.plans, []),
-    })
+    ([dirId, info]) => {
+      const directionPlanIds = new Set(info.plans.map((p) => p.id));
+      const directionTaches = taches.filter(
+        (t) => t.plan_travail_id && directionPlanIds.has(t.plan_travail_id)
+      );
+      return {
+        direction_id: dirId,
+        direction_code: info.code,
+        direction_nom: info.nom,
+        stats: computeStats(info.plans, directionTaches),
+      };
+    }
   );
 
   // Top overdue tasks

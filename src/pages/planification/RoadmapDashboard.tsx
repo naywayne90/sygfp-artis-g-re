@@ -1,7 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -19,6 +26,9 @@ import {
   AlertTriangle,
   TrendingUp,
   Wallet,
+  Download,
+  FileSpreadsheet,
+  FileText,
 } from 'lucide-react';
 
 const formatCurrency = (amount: number) =>
@@ -31,6 +41,51 @@ const formatCurrency = (amount: number) =>
 function daysBetween(dateStr: string): number {
   const diff = new Date().getTime() - new Date(dateStr).getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function exportDashboardCSV(
+  directionStats: {
+    direction_code: string;
+    direction_nom: string;
+    stats: {
+      totalPlans: number;
+      totalTaches: number;
+      avancementGlobal: number;
+      budgetTotal: number;
+      budgetConsomme: number;
+    };
+  }[],
+  format: 'csv' | 'excel'
+) {
+  const separator = format === 'excel' ? ';' : ',';
+  const headers = [
+    'Direction',
+    'Code',
+    'Plans',
+    'Taches',
+    'Avancement (%)',
+    'Budget Alloue',
+    'Budget Consomme',
+  ];
+  const rows = directionStats.map((ds) => [
+    ds.direction_nom,
+    ds.direction_code,
+    ds.stats.totalPlans,
+    ds.stats.totalTaches,
+    ds.stats.avancementGlobal,
+    ds.stats.budgetTotal,
+    ds.stats.budgetConsomme,
+  ]);
+  const csv = [headers.join(separator), ...rows.map((r) => r.join(separator))].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `dashboard_feuille_de_route_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 export default function RoadmapDashboard() {
@@ -55,6 +110,24 @@ export default function RoadmapDashboard() {
           </h1>
           <p className="text-muted-foreground">Vue consolidee de toutes les directions</p>
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Exporter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'csv')}>
+              <FileText className="h-4 w-4 mr-2" />
+              Exporter CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'excel')}>
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Exporter Excel (CSV)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* KPI Cards */}

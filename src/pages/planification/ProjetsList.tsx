@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +61,20 @@ export default function ProjetsList() {
   const { exerciceId } = useExercice();
   const { plans, isLoading, createPlan, updatePlan, deletePlan, isCreating } =
     usePlansTravail(directionFilter);
+
+  const { data: directions = [] } = useQuery({
+    queryKey: ['directions-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('directions')
+        .select('id, code, label, sigle')
+        .eq('est_active', true)
+        .order('code');
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 30_000,
+  });
 
   const [search, setSearch] = useState('');
   const [statutFilter, setStatutFilter] = useState<string>('all');
@@ -369,12 +385,22 @@ export default function ProjetsList() {
             </div>
 
             <div className="space-y-2">
-              <Label>Direction ID *</Label>
-              <Input
+              <Label>Direction *</Label>
+              <Select
                 value={formData.direction_id}
-                onChange={(e) => setFormData((prev) => ({ ...prev, direction_id: e.target.value }))}
-                placeholder="UUID de la direction"
-              />
+                onValueChange={(v) => setFormData((prev) => ({ ...prev, direction_id: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner une direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  {directions.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.sigle || d.code} — {d.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
