@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import { useRoadmapDashboard } from '@/hooks/useRoadmapDashboard';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
 import {
@@ -29,7 +43,11 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  Plus,
+  Clock,
+  Percent,
 } from 'lucide-react';
+import type { TacheStatut } from '@/types/roadmap';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('fr-FR', {
@@ -38,10 +56,35 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount) + ' FCFA';
 
+const formatCurrencyShort = (amount: number) => {
+  if (amount >= 1_000_000_000) return (amount / 1_000_000_000).toFixed(1) + ' Md';
+  if (amount >= 1_000_000) return (amount / 1_000_000).toFixed(1) + ' M';
+  if (amount >= 1_000) return (amount / 1_000).toFixed(0) + ' k';
+  return amount.toString();
+};
+
 function daysBetween(dateStr: string): number {
   const diff = new Date().getTime() - new Date(dateStr).getTime();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
+
+const STATUT_COLORS: Record<string, string> = {
+  planifie: '#94a3b8',
+  en_cours: '#3b82f6',
+  termine: '#22c55e',
+  en_retard: '#ef4444',
+  suspendu: '#f59e0b',
+  annule: '#6b7280',
+};
+
+const STATUT_LABELS: Record<string, string> = {
+  planifie: 'Planifie',
+  en_cours: 'En cours',
+  termine: 'Termine',
+  en_retard: 'En retard',
+  suspendu: 'Suspendu',
+  annule: 'Annule',
+};
 
 function exportDashboardCSV(
   directionStats: {
@@ -88,9 +131,74 @@ function exportDashboardCSV(
   URL.revokeObjectURL(url);
 }
 
+function getStatutBadgeVariant(
+  statut: string
+): 'default' | 'secondary' | 'destructive' | 'outline' {
+  switch (statut) {
+    case 'termine':
+      return 'default';
+    case 'en_retard':
+      return 'destructive';
+    case 'en_cours':
+      return 'secondary';
+    default:
+      return 'outline';
+  }
+}
+
+function getExecutionColor(rate: number): string {
+  if (rate > 100) return 'text-destructive';
+  if (rate >= 80) return 'text-orange-500';
+  return 'text-green-600';
+}
+
+function getExecutionProgressClass(rate: number): string {
+  if (rate > 100) return '[&>div]:bg-destructive';
+  if (rate >= 80) return '[&>div]:bg-orange-500';
+  return '[&>div]:bg-green-600';
+}
+
 export default function RoadmapDashboard() {
   const navigate = useNavigate();
-  const { globalStats, directionStats, topTachesEnRetard, isLoading } = useRoadmapDashboard();
+  const { globalStats, directionStats, topTachesEnRetard, taches, isLoading } =
+    useRoadmapDashboard();
+
+  const tauxExecution = useMemo(() => {
+    if (globalStats.budgetTotal === 0) return 0;
+    return Math.round((globalStats.budgetConsomme / globalStats.budgetTotal) * 100);
+  }, [globalStats.budgetConsomme, globalStats.budgetTotal]);
+
+  // Pie chart data: count taches by statut
+  const statutPieData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const t of taches) {
+      const s = t.statut as string;
+      counts[s] = (counts[s] || 0) + 1;
+    }
+    return Object.entries(counts)
+      .map(([statut, value]) => ({
+        name: STATUT_LABELS[statut] || statut,
+        value,
+        statut,
+      }))
+      .filter((d) => d.value > 0);
+  }, [taches]);
+
+  // Bar chart data: budget per direction
+  const budgetBarData = useMemo(() => {
+    return directionStats.map((ds) => ({
+      name: ds.direction_code,
+      alloue: ds.stats.budgetTotal,
+      consomme: ds.stats.budgetConsomme,
+    }));
+  }, [directionStats]);
+
+  // Recent activity: last 5 tasks by updated_at
+  const activiteRecente = useMemo(() => {
+    return [...taches]
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .slice(0, 5);
+  }, [taches]);
 
   if (isLoading) {
     return (
@@ -102,6 +210,7 @@ export default function RoadmapDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -110,24 +219,30 @@ export default function RoadmapDashboard() {
           </h1>
           <p className="text-muted-foreground">Vue consolidee de toutes les directions</p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exporter
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'csv')}>
-              <FileText className="h-4 w-4 mr-2" />
-              Exporter CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'excel')}>
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Exporter Excel (CSV)
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => navigate('/planification/projets')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouveau Plan
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Exporter
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'csv')}>
+                <FileText className="h-4 w-4 mr-2" />
+                Exporter CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportDashboardCSV(directionStats, 'excel')}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Exporter Excel (CSV)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -183,15 +298,101 @@ export default function RoadmapDashboard() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Wallet className="h-4 w-4" />
-              Consomme
+              <Percent className="h-4 w-4" />
+              Taux execution
             </div>
-            <p className="text-lg font-bold">{formatCurrency(globalStats.budgetConsomme)}</p>
+            <p className={`text-2xl font-bold ${getExecutionColor(tauxExecution)}`}>
+              {tauxExecution}%
+            </p>
             {globalStats.budgetTotal > 0 && (
               <Progress
-                value={Math.round((globalStats.budgetConsomme / globalStats.budgetTotal) * 100)}
-                className="mt-1"
+                value={Math.min(tauxExecution, 100)}
+                className={`mt-1 ${getExecutionProgressClass(tauxExecution)}`}
               />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Taux d'execution global bar */}
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              <span className="font-semibold">Taux d&apos;execution budgetaire global</span>
+            </div>
+            <span className={`text-xl font-bold ${getExecutionColor(tauxExecution)}`}>
+              {tauxExecution}%
+            </span>
+          </div>
+          <Progress
+            value={Math.min(tauxExecution, 100)}
+            className={`h-4 ${getExecutionProgressClass(tauxExecution)}`}
+          />
+          <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+            <span>Consomme: {formatCurrency(globalStats.budgetConsomme)}</span>
+            <span>Alloue: {formatCurrency(globalStats.budgetTotal)}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Charts: Pie + Bar */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Pie Chart - Repartition par statut */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold">Repartition par statut</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {statutPieData.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">Aucune tache</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={statutPieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, value }: { name: string; value: number }) =>
+                      `${name}: ${value}`
+                    }
+                  >
+                    {statutPieData.map((entry) => (
+                      <Cell key={entry.statut} fill={STATUT_COLORS[entry.statut] || '#94a3b8'} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Bar Chart - Budget par direction */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold">Budget par direction</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {budgetBarData.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">Aucune direction</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={budgetBarData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis tickFormatter={(v: number) => formatCurrencyShort(v)} />
+                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Legend />
+                  <Bar dataKey="alloue" name="Alloue" fill="#3b82f6" />
+                  <Bar dataKey="consomme" name="Consomme" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
@@ -256,6 +457,7 @@ export default function RoadmapDashboard() {
                   <TableRow>
                     <TableHead>Code</TableHead>
                     <TableHead>Libelle</TableHead>
+                    <TableHead>Responsable</TableHead>
                     <TableHead>Date fin</TableHead>
                     <TableHead>Retard (j)</TableHead>
                     <TableHead>Avancement</TableHead>
@@ -267,6 +469,11 @@ export default function RoadmapDashboard() {
                     <TableRow key={tache.id}>
                       <TableCell className="font-mono text-sm">{tache.code}</TableCell>
                       <TableCell>{tache.libelle}</TableCell>
+                      <TableCell className="text-sm">
+                        {tache.responsable
+                          ? `${tache.responsable.prenom ?? ''} ${tache.responsable.nom}`.trim()
+                          : '-'}
+                      </TableCell>
                       <TableCell>{tache.date_fin}</TableCell>
                       <TableCell>
                         <Badge variant="destructive">{daysBetween(tache.date_fin ?? '')} j</Badge>
@@ -288,6 +495,59 @@ export default function RoadmapDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Activite recente */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Activite recente
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {activiteRecente.length === 0 ? (
+            <p className="text-center text-muted-foreground py-4">Aucune activite recente</p>
+          ) : (
+            <div className="space-y-3">
+              {activiteRecente.map((tache) => (
+                <div
+                  key={tache.id}
+                  className="flex items-start gap-3 border-l-2 border-muted pl-3 py-1"
+                >
+                  <Badge variant={getStatutBadgeVariant(tache.statut)} className="shrink-0 mt-0.5">
+                    {STATUT_LABELS[tache.statut as TacheStatut] || tache.statut}
+                  </Badge>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{tache.libelle}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                      <span>
+                        {new Date(tache.updated_at).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      {tache.responsable && (
+                        <>
+                          <span>-</span>
+                          <span>
+                            {tache.responsable.prenom ?? ''} {tache.responsable.nom}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {tache.avancement}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
