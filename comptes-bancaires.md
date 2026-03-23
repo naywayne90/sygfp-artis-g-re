@@ -1,0 +1,342 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e269]:
+            - generic [ref=e270]:
+              - heading "Comptes Bancaires" [level=1] [ref=e271]
+              - paragraph [ref=e272]: Gestion des comptes bancaires et caisses
+            - generic [ref=e273]:
+              - button "Exporter CSV" [ref=e274] [cursor=pointer]:
+                - img
+                - text: Exporter CSV
+              - button "Nouveau compte" [ref=e275] [cursor=pointer]:
+                - img
+                - text: Nouveau compte
+          - generic [ref=e276]:
+            - generic [ref=e277]:
+              - generic [ref=e278]:
+                - heading "Comptes actifs" [level=3] [ref=e279]
+                - img [ref=e280]
+              - generic [ref=e284]: "4"
+            - generic [ref=e285]:
+              - generic [ref=e286]:
+                - heading "Comptes inactifs" [level=3] [ref=e287]
+                - img [ref=e288]
+              - generic [ref=e293]: "0"
+            - generic [ref=e294]:
+              - generic [ref=e295]:
+                - heading "Solde total (actifs)" [level=3] [ref=e296]
+                - img [ref=e297]
+              - generic [ref=e301]: 0 FCFA
+            - generic [ref=e302]:
+              - generic [ref=e303]:
+                - heading "Banques" [level=3] [ref=e304]
+                - img [ref=e305]
+              - generic [ref=e310]: "4"
+          - generic [ref=e313]:
+            - generic [ref=e315]:
+              - img [ref=e316]
+              - textbox "Rechercher par code, libellé, banque..." [ref=e319]
+            - combobox [ref=e320] [cursor=pointer]:
+              - generic: Tous les types
+              - img [ref=e321]
+            - combobox [ref=e323] [cursor=pointer]:
+              - generic: Toutes les banques
+              - img [ref=e324]
+          - generic [ref=e326]:
+            - tablist [ref=e327]:
+              - tab "Comptes actifs 4" [selected] [ref=e328] [cursor=pointer]:
+                - img [ref=e329]
+                - text: Comptes actifs
+                - generic [ref=e332]: "4"
+              - tab "Comptes inactifs 0" [ref=e333] [cursor=pointer]:
+                - img [ref=e334]
+                - text: Comptes inactifs
+                - generic [ref=e338]: "0"
+              - tab "Tous 4" [ref=e339] [cursor=pointer]:
+                - text: Tous
+                - generic [ref=e340]: "4"
+            - tabpanel "Comptes actifs 4" [ref=e341]:
+              - generic [ref=e342]:
+                - generic [ref=e343]:
+                  - heading "Liste des comptes" [level=3] [ref=e344]:
+                    - img [ref=e345]
+                    - text: Liste des comptes
+                  - paragraph [ref=e347]: 4 compte(s) trouvé(s)
+                - table [ref=e350]:
+                  - rowgroup [ref=e351]:
+                    - row "Code Libellé Banque N° Compte Type Solde actuel Statut" [ref=e352]:
+                      - columnheader "Code" [ref=e353]
+                      - columnheader "Libellé" [ref=e354]
+                      - columnheader "Banque" [ref=e355]
+                      - columnheader "N° Compte" [ref=e356]
+                      - columnheader "Type" [ref=e357]
+                      - columnheader "Solde actuel" [ref=e358]
+                      - columnheader "Statut" [ref=e359]
+                      - columnheader [ref=e360]
+                  - rowgroup [ref=e361]:
+                    - row "BICICI-001 Compte Courant BICICI BICICI 0009876543210 Compte courant 0 XOF Actif" [ref=e362]:
+                      - cell "BICICI-001" [ref=e363]
+                      - cell "Compte Courant BICICI" [ref=e364]
+                      - cell "BICICI" [ref=e365]
+                      - cell "0009876543210" [ref=e366]
+                      - cell "Compte courant" [ref=e367]:
+                        - generic [ref=e368]: Compte courant
+                      - cell "0 XOF" [ref=e369]
+                      - cell "Actif" [ref=e370]:
+                        - generic [ref=e371]: Actif
+                      - cell [ref=e372]:
+                        - button [ref=e373] [cursor=pointer]:
+                          - img
+                    - row "BOA-001 Compte Trésorerie BOA BOA 0004444333322 tresorerie 0 XOF Actif" [ref=e374]:
+                      - cell "BOA-001" [ref=e375]
+                      - cell "Compte Trésorerie BOA" [ref=e376]
+                      - cell "BOA" [ref=e377]
+                      - cell "0004444333322" [ref=e378]
+                      - cell "tresorerie" [ref=e379]:
+                        - generic [ref=e380]: tresorerie
+                      - cell "0 XOF" [ref=e381]
+                      - cell "Actif" [ref=e382]:
+                        - generic [ref=e383]: Actif
+                      - cell [ref=e384]:
+                        - button [ref=e385] [cursor=pointer]:
+                          - img
+                    - row "ECOBANK-001 Compte Opérations ECOBANK ECOBANK 0005555666677 Compte courant 0 XOF Actif" [ref=e386]:
+                      - cell "ECOBANK-001" [ref=e387]
+                      - cell "Compte Opérations ECOBANK" [ref=e388]
+                      - cell "ECOBANK" [ref=e389]
+                      - cell "0005555666677" [ref=e390]
+                      - cell "Compte courant" [ref=e391]:
+                        - generic [ref=e392]: Compte courant
+                      - cell "0 XOF" [ref=e393]
+                      - cell "Actif" [ref=e394]:
+                        - generic [ref=e395]: Actif
+                      - cell [ref=e396]:
+                        - button [ref=e397] [cursor=pointer]:
+                          - img
+                    - row "SGBCI-001 Compte Principal SGBCI SGBCI 0001234567890 Compte courant 0 XOF Actif" [ref=e398]:
+                      - cell "SGBCI-001" [ref=e399]
+                      - cell "Compte Principal SGBCI" [ref=e400]
+                      - cell "SGBCI" [ref=e401]
+                      - cell "0001234567890" [ref=e402]
+                      - cell "Compte courant" [ref=e403]:
+                        - generic [ref=e404]: Compte courant
+                      - cell "0 XOF" [ref=e405]
+                      - cell "Actif" [ref=e406]:
+                        - generic [ref=e407]: Actif
+                      - cell [ref=e408]:
+                        - button [ref=e409] [cursor=pointer]:
+                          - img

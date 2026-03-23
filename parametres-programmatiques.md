@@ -1,0 +1,358 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - heading "Référentiels" [level=1] [ref=e270]
+              - generic [ref=e271]: 10 référentiels
+            - paragraph [ref=e272]: Gérez la structure programmatique, les nomenclatures et les fournisseurs. Import/Export disponible pour chaque référentiel.
+          - button "Comprendre les référentiels programmatiques" [ref=e274] [cursor=pointer]:
+            - generic [ref=e275]:
+              - img
+              - generic [ref=e276]: Comprendre les référentiels programmatiques
+            - img
+          - generic [ref=e277]:
+            - tablist [ref=e281]:
+              - tab "OS" [selected] [ref=e282] [cursor=pointer]:
+                - img [ref=e283]
+                - generic [ref=e287]: OS
+              - tab "Missions" [ref=e288] [cursor=pointer]:
+                - img [ref=e289]
+                - generic [ref=e292]: Missions
+              - tab "Actions" [ref=e293] [cursor=pointer]:
+                - img [ref=e294]
+                - generic [ref=e298]: Actions
+              - tab "Activités" [ref=e299] [cursor=pointer]:
+                - img [ref=e300]
+                - generic [ref=e302]: Activités
+              - tab "Sous-Act." [ref=e303] [cursor=pointer]:
+                - img [ref=e304]
+                - generic [ref=e308]: Sous-Act.
+              - tab "Tâches" [ref=e309] [cursor=pointer]:
+                - img [ref=e310]
+                - generic [ref=e313]: Tâches
+              - tab "Directions" [ref=e314] [cursor=pointer]:
+                - img [ref=e315]
+                - generic [ref=e319]: Directions
+              - tab "NBE" [ref=e320] [cursor=pointer]:
+                - img [ref=e321]
+                - generic [ref=e323]: NBE
+              - tab "SYSCO" [ref=e324] [cursor=pointer]:
+                - img [ref=e325]
+                - generic [ref=e327]: SYSCO
+              - tab "Prestataires" [ref=e328] [cursor=pointer]:
+                - img [ref=e329]
+                - generic [ref=e334]: Prestataires
+            - tabpanel "OS" [ref=e335]:
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]:
+                    - heading "Objectifs Stratégiques" [level=3] [ref=e339]
+                    - paragraph [ref=e340]: Gérez les objectifs stratégiques de l'ARTI
+                  - generic [ref=e341]:
+                    - button "Import/Export" [ref=e343] [cursor=pointer]:
+                      - img
+                      - text: Import/Export
+                    - button "Nouvel Objectif" [ref=e344] [cursor=pointer]:
+                      - img
+                      - text: Nouvel Objectif
+                - generic [ref=e345]:
+                  - alert [ref=e346]:
+                    - img [ref=e347]
+                    - generic [ref=e350]:
+                      - paragraph [ref=e351]: Objectifs Stratégiques (OS)
+                      - paragraph [ref=e352]: "Les OS représentent les grandes orientations stratégiques de l'ARTI sur une période pluriannuelle (ex: 2026-2030). Ils définissent la vision à long terme."
+                      - generic [ref=e354]:
+                        - strong [ref=e355]: "Enfants :"
+                        - text: Missions et Actions
+                      - paragraph [ref=e356]:
+                        - strong [ref=e357]: "Exemple :"
+                        - text: "OS11 : Construire la structure fonctionnelle et de pilotage de l'autorité"
+                      - paragraph [ref=e358]: 💡 Chaque ligne budgétaire sera rattachée à un OS pour assurer l'alignement stratégique des dépenses.
+                  - table [ref=e361]:
+                    - rowgroup [ref=e362]:
+                      - row "Code Libellé Période Statut Actions" [ref=e363]:
+                        - columnheader "Code" [ref=e364]
+                        - columnheader "Libellé" [ref=e365]
+                        - columnheader "Période" [ref=e366]
+                        - columnheader "Statut" [ref=e367]
+                        - columnheader "Actions" [ref=e368]
+                    - rowgroup [ref=e369]:
+                      - row "11 Construire la structure fonctionnelle et de pilotage de l'autorité 2026 - 2026 Actif" [ref=e370]:
+                        - cell "11" [ref=e371]
+                        - cell "Construire la structure fonctionnelle et de pilotage de l'autorité" [ref=e372]:
+                          - paragraph [ref=e374]: Construire la structure fonctionnelle et de pilotage de l'autorité
+                        - cell "2026 - 2026" [ref=e375]
+                        - cell "Actif" [ref=e376]:
+                          - generic [ref=e377]: Actif
+                        - cell [ref=e378]:
+                          - generic [ref=e379]:
+                            - button [ref=e380] [cursor=pointer]:
+                              - img
+                            - button [ref=e381] [cursor=pointer]:
+                              - img
+                      - row "12 Construire les outils de collectes, de traitement et de production de données statistiques fiables 2026 - 2026 Actif" [ref=e382]:
+                        - cell "12" [ref=e383]
+                        - cell "Construire les outils de collectes, de traitement et de production de données statistiques fiables" [ref=e384]:
+                          - paragraph [ref=e386]: Construire les outils de collectes, de traitement et de production de données statistiques fiables
+                        - cell "2026 - 2026" [ref=e387]
+                        - cell "Actif" [ref=e388]:
+                          - generic [ref=e389]: Actif
+                        - cell [ref=e390]:
+                          - generic [ref=e391]:
+                            - button [ref=e392] [cursor=pointer]:
+                              - img
+                            - button [ref=e393] [cursor=pointer]:
+                              - img
+                      - row "13 Renforcer le contrôle et la Régulation des acteurs du transport intérieur et continuer de construire l'organisation des secteurs à réguler 2026 - 2026 Actif" [ref=e394]:
+                        - cell "13" [ref=e395]
+                        - cell "Renforcer le contrôle et la Régulation des acteurs du transport intérieur et continuer de construire l'organisation des secteurs à réguler" [ref=e396]:
+                          - paragraph [ref=e398]: Renforcer le contrôle et la Régulation des acteurs du transport intérieur et continuer de construire l'organisation des secteurs à réguler
+                        - cell "2026 - 2026" [ref=e399]
+                        - cell "Actif" [ref=e400]:
+                          - generic [ref=e401]: Actif
+                        - cell [ref=e402]:
+                          - generic [ref=e403]:
+                            - button [ref=e404] [cursor=pointer]:
+                              - img
+                            - button [ref=e405] [cursor=pointer]:
+                              - img
+                      - row "14 Faire mieux appliquer le cadre régulatoire actuel dans le secteur du transport intérieur et élaborer une vision prospective de l'évolution des secteurs et de leur régulation 2026 - 2026 Actif" [ref=e406]:
+                        - cell "14" [ref=e407]
+                        - cell "Faire mieux appliquer le cadre régulatoire actuel dans le secteur du transport intérieur et élaborer une vision prospective de l'évolution des secteurs et de leur régulation" [ref=e408]:
+                          - paragraph [ref=e410]: Faire mieux appliquer le cadre régulatoire actuel dans le secteur du transport intérieur et élaborer une vision prospective de l'évolution des secteurs et de leur régulation
+                        - cell "2026 - 2026" [ref=e411]
+                        - cell "Actif" [ref=e412]:
+                          - generic [ref=e413]: Actif
+                        - cell [ref=e414]:
+                          - generic [ref=e415]:
+                            - button [ref=e416] [cursor=pointer]:
+                              - img
+                            - button [ref=e417] [cursor=pointer]:
+                              - img
+                      - row "15 Utiliser plus efficacement l'ensemble des pouvoirs dévolus au régulateur et contribuer à l'évolution des textes et leur interprétation au service de la mission de régulation de l'autorité 2026 - 2026 Actif" [ref=e418]:
+                        - cell "15" [ref=e419]
+                        - cell "Utiliser plus efficacement l'ensemble des pouvoirs dévolus au régulateur et contribuer à l'évolution des textes et leur interprétation au service de la mission de régulation de l'autorité" [ref=e420]:
+                          - paragraph [ref=e422]: Utiliser plus efficacement l'ensemble des pouvoirs dévolus au régulateur et contribuer à l'évolution des textes et leur interprétation au service de la mission de régulation de l'autorité
+                        - cell "2026 - 2026" [ref=e423]
+                        - cell "Actif" [ref=e424]:
+                          - generic [ref=e425]: Actif
+                        - cell [ref=e426]:
+                          - generic [ref=e427]:
+                            - button [ref=e428] [cursor=pointer]:
+                              - img
+                            - button [ref=e429] [cursor=pointer]:
+                              - img

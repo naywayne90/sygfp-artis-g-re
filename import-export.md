@@ -1,0 +1,290 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - heading "Import / Export" [level=1] [ref=e269]:
+              - img [ref=e270]
+              - text: Import / Export
+            - paragraph [ref=e273]: Importez ou exportez les données budgétaires et référentiels - Exercice 2026
+          - generic [ref=e274]:
+            - tablist [ref=e275]:
+              - tab "Import Budget" [selected] [ref=e276] [cursor=pointer]:
+                - img [ref=e277]
+                - text: Import Budget
+              - tab "Export" [ref=e280] [cursor=pointer]:
+                - img [ref=e281]
+                - text: Export
+              - tab "Templates" [ref=e284] [cursor=pointer]:
+                - img [ref=e285]
+                - text: Templates
+            - tabpanel "Import Budget" [ref=e289]:
+              - generic [ref=e290]:
+                - generic [ref=e292]:
+                  - generic [ref=e293]:
+                    - heading "Import de données budgétaires" [level=3] [ref=e294]
+                    - paragraph [ref=e295]: Utilisez l'assistant pour importer votre structure budgétaire depuis un fichier Excel
+                  - button "Télécharger le template Excel" [ref=e296] [cursor=pointer]:
+                    - img
+                    - text: Télécharger le template Excel
+                - generic [ref=e298]:
+                  - generic [ref=e299]:
+                    - generic [ref=e300]:
+                      - generic [ref=e301]:
+                        - generic [ref=e303]: "1"
+                        - generic [ref=e304]:
+                          - paragraph [ref=e305]: Exercice & Fichier
+                          - paragraph [ref=e306]: Choix exercice et upload
+                      - generic [ref=e307]:
+                        - generic [ref=e309]: "2"
+                        - generic [ref=e310]:
+                          - paragraph [ref=e311]: Sélection Onglet
+                          - paragraph [ref=e312]: Choisir l'onglet à importer
+                      - generic [ref=e313]:
+                        - generic [ref=e315]: "3"
+                        - generic [ref=e316]:
+                          - paragraph [ref=e317]: Aperçu & Mapping
+                          - paragraph [ref=e318]: Mapper les colonnes
+                      - generic [ref=e319]:
+                        - generic [ref=e321]: "4"
+                        - generic [ref=e322]:
+                          - paragraph [ref=e323]: Validation & Import
+                          - paragraph [ref=e324]: Vérifier et importer
+                    - progressbar [ref=e325]
+                  - generic [ref=e328]:
+                    - generic [ref=e329]:
+                      - generic [ref=e330]:
+                        - heading "Exercice budgétaire" [level=3] [ref=e331]
+                        - paragraph [ref=e332]: Sélectionnez l'exercice pour lequel vous souhaitez importer le budget
+                      - generic [ref=e334]:
+                        - text: Exercice
+                        - combobox "Exercice" [ref=e335] [cursor=pointer]:
+                          - generic: 2026 (actif)
+                          - img [ref=e336]
+                    - generic [ref=e338]:
+                      - generic [ref=e339]:
+                        - heading "Fichier Excel" [level=3] [ref=e340]
+                        - paragraph [ref=e341]: Glissez-déposez votre fichier Excel ou cliquez pour parcourir
+                      - generic [ref=e343] [cursor=pointer]:
+                        - img [ref=e344]
+                        - paragraph [ref=e347]: Glissez-déposez votre fichier Excel
+                        - paragraph [ref=e348]: "ou cliquez pour parcourir (formats: .xlsx, .xls)"
+                  - generic [ref=e349]:
+                    - button "Précédent" [disabled]:
+                      - img
+                      - text: Précédent
+                    - button "Suivant" [disabled]:
+                      - text: Suivant
+                      - img

@@ -99,6 +99,14 @@ const OriginesFonds = lazy(() => import('./pages/admin/OriginesFonds'));
 const Interims = lazy(() => import('./pages/admin/Interims'));
 const GestionLibellesBudget = lazy(() => import('./pages/admin/GestionLibellesBudget'));
 const HistoriqueLibelles = lazy(() => import('./pages/admin/HistoriqueLibelles'));
+const SeuilsValidation = lazy(() => import('./pages/admin/SeuilsValidation'));
+const EmailTemplates = lazy(() => import('./pages/admin/EmailTemplates'));
+const DocumentsRequis = lazy(() => import('./pages/admin/DocumentsRequis'));
+const BanquesFournisseurs = lazy(() => import('./pages/admin/BanquesFournisseurs'));
+const NotificationParRole = lazy(() => import('./pages/admin/NotificationParRole'));
+const RappelsAutomatiques = lazy(() => import('./pages/admin/RappelsAutomatiques'));
+const AlertesDMG = lazy(() => import('./pages/admin/AlertesDMG'));
+const ParametresFiscaux = lazy(() => import('./pages/admin/ParametresFiscaux'));
 
 // Pages Planification
 const PlanificationBudgetaire = lazy(() => import('./pages/planification/PlanificationBudgetaire'));
@@ -285,6 +293,14 @@ const App = () => (
                 <Route path="/admin/interims" element={<Interims />} />
                 <Route path="/admin/libelles-budget" element={<GestionLibellesBudget />} />
                 <Route path="/admin/historique-libelles" element={<HistoriqueLibelles />} />
+                <Route path="/admin/seuils-validation" element={<SeuilsValidation />} />
+                <Route path="/admin/email-templates" element={<EmailTemplates />} />
+                <Route path="/admin/documents-requis" element={<DocumentsRequis />} />
+                <Route path="/admin/banques-fournisseurs" element={<BanquesFournisseurs />} />
+                <Route path="/admin/notification-roles" element={<NotificationParRole />} />
+                <Route path="/admin/rappels" element={<RappelsAutomatiques />} />
+                <Route path="/admin/alertes-dmg" element={<AlertesDMG />} />
+                <Route path="/admin/parametres-fiscaux" element={<ParametresFiscaux />} />
 
                 {/* Planification */}
                 <Route path="/planification/budget" element={<PlanificationBudgetaire />} />

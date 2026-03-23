@@ -1,0 +1,4380 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Paramétrage" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Autorisations" [disabled] [ref=e282]
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - button "Retour" [ref=e285] [cursor=pointer]:
+                  - img
+                - img [ref=e288]
+                - generic [ref=e291]:
+                  - heading "Autorisations" [level=1] [ref=e292]
+                  - paragraph [ref=e293]: Gestion des permissions par rôle (400 permissions actives sur 1200 possibles)
+              - generic [ref=e294]:
+                - button "Enregistrer" [disabled]:
+                  - img
+                  - text: Enregistrer
+          - alert [ref=e296]:
+            - img [ref=e297]
+            - heading "Aide – Module Autorisations d'Accès Réduire" [level=5] [ref=e300]:
+              - generic [ref=e301]: Aide – Module Autorisations d'Accès
+              - button "Réduire" [expanded] [ref=e302] [cursor=pointer]
+            - generic [ref=e304]:
+              - paragraph [ref=e306]:
+                - text: Ce module permet de
+                - strong [ref=e307]: configurer les permissions
+                - text: accordées à chaque rôle dans SYGFP via une matrice visuelle. Chaque ligne représente une action (voir, créer, modifier, valider...) et chaque colonne un rôle. Cochez les cases pour accorder les droits correspondants. Les modifications sont appliquées immédiatement après enregistrement.
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - generic [ref=e310]:
+                    - img [ref=e311]
+                    - generic [ref=e313]: Matrice Rôle × Permission
+                  - paragraph [ref=e314]:
+                    - text: La matrice croise les
+                    - strong [ref=e315]: rôles
+                    - text: (en colonnes) avec les
+                    - strong [ref=e316]: actions
+                    - text: (en lignes). Une case cochée signifie que le rôle dispose de cette permission.
+                - generic [ref=e317]:
+                  - generic [ref=e318]:
+                    - img [ref=e319]
+                    - generic [ref=e323]: Catégories de Permissions
+                  - paragraph [ref=e324]:
+                    - text: "Les permissions sont regroupées par module :"
+                    - strong [ref=e325]: Budget
+                    - text: ","
+                    - strong [ref=e326]: Engagement
+                    - text: ","
+                    - strong [ref=e327]: Liquidation
+                    - text: ","
+                    - strong [ref=e328]: Ordonnancement
+                    - text: ","
+                    - strong [ref=e329]: Règlement
+                    - text: ","
+                    - strong [ref=e330]: Administration
+                    - text: ","
+                    - strong [ref=e331]: Export
+                    - text: .
+                - generic [ref=e332]:
+                  - generic [ref=e333]:
+                    - img [ref=e334]
+                    - generic [ref=e337]: Types de Rôles
+                  - paragraph [ref=e338]:
+                    - text: Les
+                    - strong [ref=e339]: rôles système
+                    - text: (ADMIN, CB, DAF...) ont un badge coloré plein. Les
+                    - strong [ref=e340]: rôles personnalisés
+                    - text: ont un badge contour. Tous peuvent recevoir des permissions.
+                - generic [ref=e341]:
+                  - generic [ref=e342]:
+                    - img [ref=e343]
+                    - generic [ref=e346]: Modifications en Attente
+                  - paragraph [ref=e347]: Les cases modifiées sont surlignées en jaune. Cliquez sur "Enregistrer" pour appliquer les changements ou "Annuler" pour revenir en arrière.
+              - generic [ref=e348]:
+                - heading "Types d'actions disponibles" [level=4] [ref=e349]
+                - generic [ref=e350]:
+                  - generic [ref=e351]:
+                    - img [ref=e352]
+                    - generic [ref=e355]:
+                      - strong [ref=e356]: Voir
+                      - text: – Consulter les données
+                  - generic [ref=e357]:
+                    - img [ref=e358]
+                    - generic [ref=e359]:
+                      - strong [ref=e360]: Créer
+                      - text: – Ajouter de nouvelles entrées
+                  - generic [ref=e361]:
+                    - img [ref=e362]
+                    - generic [ref=e365]:
+                      - strong [ref=e366]: Modifier
+                      - text: – Éditer les données
+                  - generic [ref=e367]:
+                    - img [ref=e368]
+                    - generic [ref=e371]:
+                      - strong [ref=e372]: Valider
+                      - text: – Approuver les étapes
+                  - generic [ref=e373]:
+                    - img [ref=e374]
+                    - generic [ref=e378]:
+                      - strong [ref=e379]: Rejeter
+                      - text: – Refuser une validation
+                  - generic [ref=e380]:
+                    - img [ref=e381]
+                    - generic [ref=e384]:
+                      - strong [ref=e385]: Signer
+                      - text: – Apposer une signature
+              - generic [ref=e386]:
+                - heading "Points d'attention" [level=4] [ref=e387]:
+                  - img [ref=e388]
+                  - text: Points d'attention
+                - list [ref=e390]:
+                  - listitem [ref=e391]:
+                    - text: Le rôle
+                    - strong [ref=e392]: ADMIN
+                    - text: doit conserver toutes les permissions d'administration.
+                  - listitem [ref=e393]: Utilisez le filtre par module pour naviguer plus facilement dans la matrice.
+                  - listitem [ref=e394]: Les modifications prennent effet immédiatement après enregistrement.
+                  - listitem [ref=e395]: Toutes les modifications sont tracées dans le Journal d'Audit.
+          - generic [ref=e396]:
+            - generic [ref=e398]:
+              - generic [ref=e399]:
+                - heading "Matrice des Permissions" [level=3] [ref=e400]:
+                  - img [ref=e401]
+                  - text: Matrice des Permissions
+                - paragraph [ref=e403]: Cochez les cases pour accorder les permissions aux rôles. Les modifications en attente sont surlignées.
+              - combobox [ref=e404] [cursor=pointer]:
+                - generic: Tous les modules
+                - img [ref=e405]
+            - table [ref=e412]:
+              - rowgroup [ref=e413]:
+                - row "Action / Permission ADMIN APPRO CB DAAF DG DGPEC LECTEUR OPERATEUR SDMG TRESORERIE" [ref=e414]:
+                  - columnheader "Action / Permission" [ref=e415]
+                  - columnheader "ADMIN" [ref=e416]:
+                    - generic [ref=e417]: ADMIN
+                  - columnheader "APPRO" [ref=e418]:
+                    - generic [ref=e419]: APPRO
+                  - columnheader "CB" [ref=e420]:
+                    - generic [ref=e421]: CB
+                  - columnheader "DAAF" [ref=e422]:
+                    - generic [ref=e423]: DAAF
+                  - columnheader "DG" [ref=e424]:
+                    - generic [ref=e425]: DG
+                  - columnheader "DGPEC" [ref=e426]:
+                    - generic [ref=e427]: DGPEC
+                  - columnheader "LECTEUR" [ref=e428]:
+                    - generic [ref=e429]: LECTEUR
+                  - columnheader "OPERATEUR" [ref=e430]:
+                    - generic [ref=e431]: OPERATEUR
+                  - columnheader "SDMG" [ref=e432]:
+                    - generic [ref=e433]: SDMG
+                  - columnheader "TRESORERIE" [ref=e434]:
+                    - generic [ref=e435]: TRESORERIE
+              - rowgroup [ref=e436]:
+                - row "Administration" [ref=e437]:
+                  - cell "Administration" [ref=e438]:
+                    - generic [ref=e439]:
+                      - img [ref=e440]
+                      - text: Administration
+                - row "Accès Administration view_admin" [ref=e445]:
+                  - cell "Accès Administration view_admin" [ref=e446]:
+                    - generic [ref=e447]:
+                      - img [ref=e448]
+                      - generic [ref=e451]:
+                        - paragraph [ref=e452]: Accès Administration
+                        - paragraph [ref=e453]: view_admin
+                  - cell [ref=e454]:
+                    - checkbox [checked] [ref=e455] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e456]:
+                    - checkbox [ref=e457] [cursor=pointer]
+                  - cell [ref=e458]:
+                    - checkbox [ref=e459] [cursor=pointer]
+                  - cell [ref=e460]:
+                    - checkbox [ref=e461] [cursor=pointer]
+                  - cell [ref=e462]:
+                    - checkbox [ref=e463] [cursor=pointer]
+                  - cell [ref=e464]:
+                    - checkbox [ref=e465] [cursor=pointer]
+                  - cell [ref=e466]:
+                    - checkbox [ref=e467] [cursor=pointer]
+                  - cell [ref=e468]:
+                    - checkbox [ref=e469] [cursor=pointer]
+                  - cell [ref=e470]:
+                    - checkbox [ref=e471] [cursor=pointer]
+                  - cell [ref=e472]:
+                    - checkbox [ref=e473] [cursor=pointer]
+                - row "Config. Système manage_system" [ref=e474]:
+                  - cell "Config. Système manage_system" [ref=e475]:
+                    - generic [ref=e476]:
+                      - img [ref=e477]
+                      - generic [ref=e480]:
+                        - paragraph [ref=e481]: Config. Système
+                        - paragraph [ref=e482]: manage_system
+                  - cell [ref=e483]:
+                    - checkbox [checked] [ref=e484] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e485]:
+                    - checkbox [ref=e486] [cursor=pointer]
+                  - cell [ref=e487]:
+                    - checkbox [ref=e488] [cursor=pointer]
+                  - cell [ref=e489]:
+                    - checkbox [ref=e490] [cursor=pointer]
+                  - cell [ref=e491]:
+                    - checkbox [ref=e492] [cursor=pointer]
+                  - cell [ref=e493]:
+                    - checkbox [ref=e494] [cursor=pointer]
+                  - cell [ref=e495]:
+                    - checkbox [ref=e496] [cursor=pointer]
+                  - cell [ref=e497]:
+                    - checkbox [ref=e498] [cursor=pointer]
+                  - cell [ref=e499]:
+                    - checkbox [ref=e500] [cursor=pointer]
+                  - cell [ref=e501]:
+                    - checkbox [ref=e502] [cursor=pointer]
+                - row "Configuration Système admin.system" [ref=e503]:
+                  - cell "Configuration Système admin.system" [ref=e504]:
+                    - generic [ref=e505]:
+                      - img [ref=e506]
+                      - generic [ref=e509]:
+                        - paragraph [ref=e510]: Configuration Système
+                        - paragraph [ref=e511]: admin.system
+                  - cell [ref=e512]:
+                    - checkbox [checked] [ref=e513] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e514]:
+                    - checkbox [ref=e515] [cursor=pointer]
+                  - cell [ref=e516]:
+                    - checkbox [ref=e517] [cursor=pointer]
+                  - cell [ref=e518]:
+                    - checkbox [ref=e519] [cursor=pointer]
+                  - cell [ref=e520]:
+                    - checkbox [ref=e521] [cursor=pointer]
+                  - cell [ref=e522]:
+                    - checkbox [ref=e523] [cursor=pointer]
+                  - cell [ref=e524]:
+                    - checkbox [ref=e525] [cursor=pointer]
+                  - cell [ref=e526]:
+                    - checkbox [ref=e527] [cursor=pointer]
+                  - cell [ref=e528]:
+                    - checkbox [ref=e529] [cursor=pointer]
+                  - cell [ref=e530]:
+                    - checkbox [ref=e531] [cursor=pointer]
+                - row "Configurer Workflows admin.workflows" [ref=e532]:
+                  - cell "Configurer Workflows admin.workflows" [ref=e533]:
+                    - generic [ref=e534]:
+                      - img [ref=e535]
+                      - generic [ref=e538]:
+                        - paragraph [ref=e539]: Configurer Workflows
+                        - paragraph [ref=e540]: admin.workflows
+                  - cell [ref=e541]:
+                    - checkbox [checked] [ref=e542] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e543]:
+                    - checkbox [ref=e544] [cursor=pointer]
+                  - cell [ref=e545]:
+                    - checkbox [ref=e546] [cursor=pointer]
+                  - cell [ref=e547]:
+                    - checkbox [ref=e548] [cursor=pointer]
+                  - cell [ref=e549]:
+                    - checkbox [ref=e550] [cursor=pointer]
+                  - cell [ref=e551]:
+                    - checkbox [ref=e552] [cursor=pointer]
+                  - cell [ref=e553]:
+                    - checkbox [ref=e554] [cursor=pointer]
+                  - cell [ref=e555]:
+                    - checkbox [ref=e556] [cursor=pointer]
+                  - cell [ref=e557]:
+                    - checkbox [ref=e558] [cursor=pointer]
+                  - cell [ref=e559]:
+                    - checkbox [ref=e560] [cursor=pointer]
+                - row "Consulter le journal d'audit admin_audit" [ref=e561]:
+                  - cell "Consulter le journal d'audit admin_audit" [ref=e562]:
+                    - generic [ref=e563]:
+                      - img [ref=e564]
+                      - generic [ref=e567]:
+                        - paragraph [ref=e568]: Consulter le journal d'audit
+                        - paragraph [ref=e569]: admin_audit
+                  - cell [ref=e570]:
+                    - checkbox [checked] [ref=e571] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e572]:
+                    - checkbox [ref=e573] [cursor=pointer]
+                  - cell [ref=e574]:
+                    - checkbox [ref=e575] [cursor=pointer]
+                  - cell [ref=e576]:
+                    - checkbox [ref=e577] [cursor=pointer]
+                  - cell [ref=e578]:
+                    - checkbox [ref=e579] [cursor=pointer]
+                  - cell [ref=e580]:
+                    - checkbox [ref=e581] [cursor=pointer]
+                  - cell [ref=e582]:
+                    - checkbox [ref=e583] [cursor=pointer]
+                  - cell [ref=e584]:
+                    - checkbox [ref=e585] [cursor=pointer]
+                  - cell [ref=e586]:
+                    - checkbox [ref=e587] [cursor=pointer]
+                  - cell [ref=e588]:
+                    - checkbox [ref=e589] [cursor=pointer]
+                - row "Gérer la Structure admin.structure" [ref=e590]:
+                  - cell "Gérer la Structure admin.structure" [ref=e591]:
+                    - generic [ref=e592]:
+                      - img [ref=e593]
+                      - generic [ref=e596]:
+                        - paragraph [ref=e597]: Gérer la Structure
+                        - paragraph [ref=e598]: admin.structure
+                  - cell [ref=e599]:
+                    - checkbox [checked] [ref=e600] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e601]:
+                    - checkbox [ref=e602] [cursor=pointer]
+                  - cell [ref=e603]:
+                    - checkbox [ref=e604] [cursor=pointer]
+                  - cell [ref=e605]:
+                    - checkbox [ref=e606] [cursor=pointer]
+                  - cell [ref=e607]:
+                    - checkbox [ref=e608] [cursor=pointer]
+                  - cell [ref=e609]:
+                    - checkbox [ref=e610] [cursor=pointer]
+                  - cell [ref=e611]:
+                    - checkbox [ref=e612] [cursor=pointer]
+                  - cell [ref=e613]:
+                    - checkbox [ref=e614] [cursor=pointer]
+                  - cell [ref=e615]:
+                    - checkbox [ref=e616] [cursor=pointer]
+                  - cell [ref=e617]:
+                    - checkbox [ref=e618] [cursor=pointer]
+                - row "Gérer les rôles admin_roles" [ref=e619]:
+                  - cell "Gérer les rôles admin_roles" [ref=e620]:
+                    - generic [ref=e621]:
+                      - img [ref=e622]
+                      - generic [ref=e625]:
+                        - paragraph [ref=e626]: Gérer les rôles
+                        - paragraph [ref=e627]: admin_roles
+                  - cell [ref=e628]:
+                    - checkbox [checked] [ref=e629] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e630]:
+                    - checkbox [ref=e631] [cursor=pointer]
+                  - cell [ref=e632]:
+                    - checkbox [ref=e633] [cursor=pointer]
+                  - cell [ref=e634]:
+                    - checkbox [ref=e635] [cursor=pointer]
+                  - cell [ref=e636]:
+                    - checkbox [ref=e637] [cursor=pointer]
+                  - cell [ref=e638]:
+                    - checkbox [ref=e639] [cursor=pointer]
+                  - cell [ref=e640]:
+                    - checkbox [ref=e641] [cursor=pointer]
+                  - cell [ref=e642]:
+                    - checkbox [ref=e643] [cursor=pointer]
+                  - cell [ref=e644]:
+                    - checkbox [ref=e645] [cursor=pointer]
+                  - cell [ref=e646]:
+                    - checkbox [ref=e647] [cursor=pointer]
+                - row "Gérer les Rôles admin.roles" [ref=e648]:
+                  - cell "Gérer les Rôles admin.roles" [ref=e649]:
+                    - generic [ref=e650]:
+                      - img [ref=e651]
+                      - generic [ref=e654]:
+                        - paragraph [ref=e655]: Gérer les Rôles
+                        - paragraph [ref=e656]: admin.roles
+                  - cell [ref=e657]:
+                    - checkbox [checked] [ref=e658] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e659]:
+                    - checkbox [ref=e660] [cursor=pointer]
+                  - cell [ref=e661]:
+                    - checkbox [ref=e662] [cursor=pointer]
+                  - cell [ref=e663]:
+                    - checkbox [ref=e664] [cursor=pointer]
+                  - cell [ref=e665]:
+                    - checkbox [ref=e666] [cursor=pointer]
+                  - cell [ref=e667]:
+                    - checkbox [ref=e668] [cursor=pointer]
+                  - cell [ref=e669]:
+                    - checkbox [ref=e670] [cursor=pointer]
+                  - cell [ref=e671]:
+                    - checkbox [ref=e672] [cursor=pointer]
+                  - cell [ref=e673]:
+                    - checkbox [ref=e674] [cursor=pointer]
+                  - cell [ref=e675]:
+                    - checkbox [ref=e676] [cursor=pointer]
+                - row "Gérer les utilisateurs admin_users" [ref=e677]:
+                  - cell "Gérer les utilisateurs admin_users" [ref=e678]:
+                    - generic [ref=e679]:
+                      - img [ref=e680]
+                      - generic [ref=e683]:
+                        - paragraph [ref=e684]: Gérer les utilisateurs
+                        - paragraph [ref=e685]: admin_users
+                  - cell [ref=e686]:
+                    - checkbox [checked] [ref=e687] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e688]:
+                    - checkbox [ref=e689] [cursor=pointer]
+                  - cell [ref=e690]:
+                    - checkbox [ref=e691] [cursor=pointer]
+                  - cell [ref=e692]:
+                    - checkbox [ref=e693] [cursor=pointer]
+                  - cell [ref=e694]:
+                    - checkbox [ref=e695] [cursor=pointer]
+                  - cell [ref=e696]:
+                    - checkbox [ref=e697] [cursor=pointer]
+                  - cell [ref=e698]:
+                    - checkbox [ref=e699] [cursor=pointer]
+                  - cell [ref=e700]:
+                    - checkbox [ref=e701] [cursor=pointer]
+                  - cell [ref=e702]:
+                    - checkbox [ref=e703] [cursor=pointer]
+                  - cell [ref=e704]:
+                    - checkbox [ref=e705] [cursor=pointer]
+                - row "Gérer Rôles manage_roles" [ref=e706]:
+                  - cell "Gérer Rôles manage_roles" [ref=e707]:
+                    - generic [ref=e708]:
+                      - img [ref=e709]
+                      - generic [ref=e712]:
+                        - paragraph [ref=e713]: Gérer Rôles
+                        - paragraph [ref=e714]: manage_roles
+                  - cell [ref=e715]:
+                    - checkbox [checked] [ref=e716] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e717]:
+                    - checkbox [ref=e718] [cursor=pointer]
+                  - cell [ref=e719]:
+                    - checkbox [ref=e720] [cursor=pointer]
+                  - cell [ref=e721]:
+                    - checkbox [ref=e722] [cursor=pointer]
+                  - cell [ref=e723]:
+                    - checkbox [ref=e724] [cursor=pointer]
+                  - cell [ref=e725]:
+                    - checkbox [ref=e726] [cursor=pointer]
+                  - cell [ref=e727]:
+                    - checkbox [ref=e728] [cursor=pointer]
+                  - cell [ref=e729]:
+                    - checkbox [ref=e730] [cursor=pointer]
+                  - cell [ref=e731]:
+                    - checkbox [ref=e732] [cursor=pointer]
+                  - cell [ref=e733]:
+                    - checkbox [ref=e734] [cursor=pointer]
+                - row "Gérer Utilisateurs admin.users" [ref=e735]:
+                  - cell "Gérer Utilisateurs admin.users" [ref=e736]:
+                    - generic [ref=e737]:
+                      - img [ref=e738]
+                      - generic [ref=e741]:
+                        - paragraph [ref=e742]: Gérer Utilisateurs
+                        - paragraph [ref=e743]: admin.users
+                  - cell [ref=e744]:
+                    - checkbox [checked] [ref=e745] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e746]:
+                    - checkbox [ref=e747] [cursor=pointer]
+                  - cell [ref=e748]:
+                    - checkbox [ref=e749] [cursor=pointer]
+                  - cell [ref=e750]:
+                    - checkbox [ref=e751] [cursor=pointer]
+                  - cell [ref=e752]:
+                    - checkbox [ref=e753] [cursor=pointer]
+                  - cell [ref=e754]:
+                    - checkbox [ref=e755] [cursor=pointer]
+                  - cell [ref=e756]:
+                    - checkbox [ref=e757] [cursor=pointer]
+                  - cell [ref=e758]:
+                    - checkbox [ref=e759] [cursor=pointer]
+                  - cell [ref=e760]:
+                    - checkbox [ref=e761] [cursor=pointer]
+                  - cell [ref=e762]:
+                    - checkbox [ref=e763] [cursor=pointer]
+                - row "Gérer Utilisateurs manage_users" [ref=e764]:
+                  - cell "Gérer Utilisateurs manage_users" [ref=e765]:
+                    - generic [ref=e766]:
+                      - img [ref=e767]
+                      - generic [ref=e770]:
+                        - paragraph [ref=e771]: Gérer Utilisateurs
+                        - paragraph [ref=e772]: manage_users
+                  - cell [ref=e773]:
+                    - checkbox [checked] [ref=e774] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e775]:
+                    - checkbox [ref=e776] [cursor=pointer]
+                  - cell [ref=e777]:
+                    - checkbox [ref=e778] [cursor=pointer]
+                  - cell [ref=e779]:
+                    - checkbox [ref=e780] [cursor=pointer]
+                  - cell [ref=e781]:
+                    - checkbox [ref=e782] [cursor=pointer]
+                  - cell [ref=e783]:
+                    - checkbox [ref=e784] [cursor=pointer]
+                  - cell [ref=e785]:
+                    - checkbox [ref=e786] [cursor=pointer]
+                  - cell [ref=e787]:
+                    - checkbox [ref=e788] [cursor=pointer]
+                  - cell [ref=e789]:
+                    - checkbox [ref=e790] [cursor=pointer]
+                  - cell [ref=e791]:
+                    - checkbox [ref=e792] [cursor=pointer]
+                - row "Gérer Workflows manage_workflows" [ref=e793]:
+                  - cell "Gérer Workflows manage_workflows" [ref=e794]:
+                    - generic [ref=e795]:
+                      - img [ref=e796]
+                      - generic [ref=e799]:
+                        - paragraph [ref=e800]: Gérer Workflows
+                        - paragraph [ref=e801]: manage_workflows
+                  - cell [ref=e802]:
+                    - checkbox [checked] [ref=e803] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e804]:
+                    - checkbox [ref=e805] [cursor=pointer]
+                  - cell [ref=e806]:
+                    - checkbox [ref=e807] [cursor=pointer]
+                  - cell [ref=e808]:
+                    - checkbox [ref=e809] [cursor=pointer]
+                  - cell [ref=e810]:
+                    - checkbox [ref=e811] [cursor=pointer]
+                  - cell [ref=e812]:
+                    - checkbox [ref=e813] [cursor=pointer]
+                  - cell [ref=e814]:
+                    - checkbox [ref=e815] [cursor=pointer]
+                  - cell [ref=e816]:
+                    - checkbox [ref=e817] [cursor=pointer]
+                  - cell [ref=e818]:
+                    - checkbox [ref=e819] [cursor=pointer]
+                  - cell [ref=e820]:
+                    - checkbox [ref=e821] [cursor=pointer]
+                - row "Journal d'Audit view_audit_logs" [ref=e822]:
+                  - cell "Journal d'Audit view_audit_logs" [ref=e823]:
+                    - generic [ref=e824]:
+                      - img [ref=e825]
+                      - generic [ref=e828]:
+                        - paragraph [ref=e829]: Journal d'Audit
+                        - paragraph [ref=e830]: view_audit_logs
+                  - cell [ref=e831]:
+                    - checkbox [checked] [ref=e832] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e833]:
+                    - checkbox [ref=e834] [cursor=pointer]
+                  - cell [ref=e835]:
+                    - checkbox [ref=e836] [cursor=pointer]
+                  - cell [ref=e837]:
+                    - checkbox [ref=e838] [cursor=pointer]
+                  - cell [ref=e839]:
+                    - checkbox [ref=e840] [cursor=pointer]
+                  - cell [ref=e841]:
+                    - checkbox [ref=e842] [cursor=pointer]
+                  - cell [ref=e843]:
+                    - checkbox [ref=e844] [cursor=pointer]
+                  - cell [ref=e845]:
+                    - checkbox [ref=e846] [cursor=pointer]
+                  - cell [ref=e847]:
+                    - checkbox [ref=e848] [cursor=pointer]
+                  - cell [ref=e849]:
+                    - checkbox [ref=e850] [cursor=pointer]
+                - row "Voir les Audits admin.audit" [ref=e851]:
+                  - cell "Voir les Audits admin.audit" [ref=e852]:
+                    - generic [ref=e853]:
+                      - img [ref=e854]
+                      - generic [ref=e857]:
+                        - paragraph [ref=e858]: Voir les Audits
+                        - paragraph [ref=e859]: admin.audit
+                  - cell [ref=e860]:
+                    - checkbox [checked] [ref=e861] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e862]:
+                    - checkbox [ref=e863] [cursor=pointer]
+                  - cell [ref=e864]:
+                    - checkbox [ref=e865] [cursor=pointer]
+                  - cell [ref=e866]:
+                    - checkbox [ref=e867] [cursor=pointer]
+                  - cell [ref=e868]:
+                    - checkbox [ref=e869] [cursor=pointer]
+                  - cell [ref=e870]:
+                    - checkbox [ref=e871] [cursor=pointer]
+                  - cell [ref=e872]:
+                    - checkbox [ref=e873] [cursor=pointer]
+                  - cell [ref=e874]:
+                    - checkbox [ref=e875] [cursor=pointer]
+                  - cell [ref=e876]:
+                    - checkbox [ref=e877] [cursor=pointer]
+                  - cell [ref=e878]:
+                    - checkbox [ref=e879] [cursor=pointer]
+                - row "Budget" [ref=e880]:
+                  - cell "Budget" [ref=e881]:
+                    - generic [ref=e882]:
+                      - img [ref=e883]
+                      - text: Budget
+                - row "Approuver Virement budget.approve_transfer" [ref=e888]:
+                  - cell "Approuver Virement budget.approve_transfer" [ref=e889]:
+                    - generic [ref=e890]:
+                      - img [ref=e891]
+                      - generic [ref=e894]:
+                        - paragraph [ref=e895]: Approuver Virement
+                        - paragraph [ref=e896]: budget.approve_transfer
+                  - cell [ref=e897]:
+                    - checkbox [checked] [ref=e898] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e899]:
+                    - checkbox [ref=e900] [cursor=pointer]
+                  - cell [ref=e901]:
+                    - checkbox [ref=e902] [cursor=pointer]
+                  - cell [ref=e903]:
+                    - checkbox [checked] [ref=e904] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e905]:
+                    - checkbox [ref=e906] [cursor=pointer]
+                  - cell [ref=e907]:
+                    - checkbox [ref=e908] [cursor=pointer]
+                  - cell [ref=e909]:
+                    - checkbox [ref=e910] [cursor=pointer]
+                  - cell [ref=e911]:
+                    - checkbox [ref=e912] [cursor=pointer]
+                  - cell [ref=e913]:
+                    - checkbox [ref=e914] [cursor=pointer]
+                  - cell [ref=e915]:
+                    - checkbox [ref=e916] [cursor=pointer]
+                - row "Consulter le budget budget_voir" [ref=e917]:
+                  - cell "Consulter le budget budget_voir" [ref=e918]:
+                    - generic [ref=e919]:
+                      - img [ref=e920]
+                      - generic [ref=e923]:
+                        - paragraph [ref=e924]: Consulter le budget
+                        - paragraph [ref=e925]: budget_voir
+                  - cell [ref=e926]:
+                    - checkbox [checked] [ref=e927] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e928]:
+                    - checkbox [checked] [ref=e929] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e930]:
+                    - checkbox [ref=e931] [cursor=pointer]
+                  - cell [ref=e932]:
+                    - checkbox [checked] [ref=e933] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e934]:
+                    - checkbox [checked] [ref=e935] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e936]:
+                    - checkbox [ref=e937] [cursor=pointer]
+                  - cell [ref=e938]:
+                    - checkbox [checked] [ref=e939] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e940]:
+                    - checkbox [checked] [ref=e941] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e942]:
+                    - checkbox [ref=e943] [cursor=pointer]
+                  - cell [ref=e944]:
+                    - checkbox [ref=e945] [cursor=pointer]
+                - row "Créer une ligne budget_creer" [ref=e946]:
+                  - cell "Créer une ligne budget_creer" [ref=e947]:
+                    - generic [ref=e948]:
+                      - img [ref=e949]
+                      - generic [ref=e950]:
+                        - paragraph [ref=e951]: Créer une ligne
+                        - paragraph [ref=e952]: budget_creer
+                  - cell [ref=e953]:
+                    - checkbox [checked] [ref=e954] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e955]:
+                    - checkbox [ref=e956] [cursor=pointer]
+                  - cell [ref=e957]:
+                    - checkbox [ref=e958] [cursor=pointer]
+                  - cell [ref=e959]:
+                    - checkbox [checked] [ref=e960] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e961]:
+                    - checkbox [ref=e962] [cursor=pointer]
+                  - cell [ref=e963]:
+                    - checkbox [ref=e964] [cursor=pointer]
+                  - cell [ref=e965]:
+                    - checkbox [ref=e966] [cursor=pointer]
+                  - cell [ref=e967]:
+                    - checkbox [ref=e968] [cursor=pointer]
+                  - cell [ref=e969]:
+                    - checkbox [ref=e970] [cursor=pointer]
+                  - cell [ref=e971]:
+                    - checkbox [ref=e972] [cursor=pointer]
+                - row "Créer une Ligne budget.create" [ref=e973]:
+                  - cell "Créer une Ligne budget.create" [ref=e974]:
+                    - generic [ref=e975]:
+                      - img [ref=e976]
+                      - generic [ref=e979]:
+                        - paragraph [ref=e980]: Créer une Ligne
+                        - paragraph [ref=e981]: budget.create
+                  - cell [ref=e982]:
+                    - checkbox [checked] [ref=e983] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e984]:
+                    - checkbox [ref=e985] [cursor=pointer]
+                  - cell [ref=e986]:
+                    - checkbox [ref=e987] [cursor=pointer]
+                  - cell [ref=e988]:
+                    - checkbox [checked] [ref=e989] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e990]:
+                    - checkbox [ref=e991] [cursor=pointer]
+                  - cell [ref=e992]:
+                    - checkbox [ref=e993] [cursor=pointer]
+                  - cell [ref=e994]:
+                    - checkbox [ref=e995] [cursor=pointer]
+                  - cell [ref=e996]:
+                    - checkbox [ref=e997] [cursor=pointer]
+                  - cell [ref=e998]:
+                    - checkbox [ref=e999] [cursor=pointer]
+                  - cell [ref=e1000]:
+                    - checkbox [ref=e1001] [cursor=pointer]
+                - row "Modifier Budget edit_budget" [ref=e1002]:
+                  - cell "Modifier Budget edit_budget" [ref=e1003]:
+                    - generic [ref=e1004]:
+                      - img [ref=e1005]
+                      - generic [ref=e1008]:
+                        - paragraph [ref=e1009]: Modifier Budget
+                        - paragraph [ref=e1010]: edit_budget
+                  - cell [ref=e1011]:
+                    - checkbox [checked] [ref=e1012] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1013]:
+                    - checkbox [ref=e1014] [cursor=pointer]
+                  - cell [ref=e1015]:
+                    - checkbox [ref=e1016] [cursor=pointer]
+                  - cell [ref=e1017]:
+                    - checkbox [checked] [ref=e1018] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1019]:
+                    - checkbox [ref=e1020] [cursor=pointer]
+                  - cell [ref=e1021]:
+                    - checkbox [ref=e1022] [cursor=pointer]
+                  - cell [ref=e1023]:
+                    - checkbox [ref=e1024] [cursor=pointer]
+                  - cell [ref=e1025]:
+                    - checkbox [ref=e1026] [cursor=pointer]
+                  - cell [ref=e1027]:
+                    - checkbox [ref=e1028] [cursor=pointer]
+                  - cell [ref=e1029]:
+                    - checkbox [ref=e1030] [cursor=pointer]
+                - row "Modifier le Budget budget.edit" [ref=e1031]:
+                  - cell "Modifier le Budget budget.edit" [ref=e1032]:
+                    - generic [ref=e1033]:
+                      - img [ref=e1034]
+                      - generic [ref=e1037]:
+                        - paragraph [ref=e1038]: Modifier le Budget
+                        - paragraph [ref=e1039]: budget.edit
+                  - cell [ref=e1040]:
+                    - checkbox [checked] [ref=e1041] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1042]:
+                    - checkbox [ref=e1043] [cursor=pointer]
+                  - cell [ref=e1044]:
+                    - checkbox [ref=e1045] [cursor=pointer]
+                  - cell [ref=e1046]:
+                    - checkbox [checked] [ref=e1047] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1048]:
+                    - checkbox [ref=e1049] [cursor=pointer]
+                  - cell [ref=e1050]:
+                    - checkbox [ref=e1051] [cursor=pointer]
+                  - cell [ref=e1052]:
+                    - checkbox [ref=e1053] [cursor=pointer]
+                  - cell [ref=e1054]:
+                    - checkbox [ref=e1055] [cursor=pointer]
+                  - cell [ref=e1056]:
+                    - checkbox [ref=e1057] [cursor=pointer]
+                  - cell [ref=e1058]:
+                    - checkbox [ref=e1059] [cursor=pointer]
+                - row "Modifier une ligne budget_modifier" [ref=e1060]:
+                  - cell "Modifier une ligne budget_modifier" [ref=e1061]:
+                    - generic [ref=e1062]:
+                      - img [ref=e1063]
+                      - generic [ref=e1066]:
+                        - paragraph [ref=e1067]: Modifier une ligne
+                        - paragraph [ref=e1068]: budget_modifier
+                  - cell [ref=e1069]:
+                    - checkbox [checked] [ref=e1070] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1071]:
+                    - checkbox [ref=e1072] [cursor=pointer]
+                  - cell [ref=e1073]:
+                    - checkbox [ref=e1074] [cursor=pointer]
+                  - cell [ref=e1075]:
+                    - checkbox [checked] [ref=e1076] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1077]:
+                    - checkbox [ref=e1078] [cursor=pointer]
+                  - cell [ref=e1079]:
+                    - checkbox [ref=e1080] [cursor=pointer]
+                  - cell [ref=e1081]:
+                    - checkbox [ref=e1082] [cursor=pointer]
+                  - cell [ref=e1083]:
+                    - checkbox [ref=e1084] [cursor=pointer]
+                  - cell [ref=e1085]:
+                    - checkbox [ref=e1086] [cursor=pointer]
+                  - cell [ref=e1087]:
+                    - checkbox [ref=e1088] [cursor=pointer]
+                - row "Planification Budgétaire view_budget" [ref=e1089]:
+                  - cell "Planification Budgétaire view_budget" [ref=e1090]:
+                    - generic [ref=e1091]:
+                      - img [ref=e1092]
+                      - generic [ref=e1095]:
+                        - paragraph [ref=e1096]: Planification Budgétaire
+                        - paragraph [ref=e1097]: view_budget
+                  - cell [ref=e1098]:
+                    - checkbox [checked] [ref=e1099] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1100]:
+                    - checkbox [ref=e1101] [cursor=pointer]
+                  - cell [ref=e1102]:
+                    - checkbox [checked] [ref=e1103] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1104]:
+                    - checkbox [checked] [ref=e1105] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1106]:
+                    - checkbox [checked] [ref=e1107] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1108]:
+                    - checkbox [checked] [ref=e1109] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1110]:
+                    - checkbox [ref=e1111] [cursor=pointer]
+                  - cell [ref=e1112]:
+                    - checkbox [ref=e1113] [cursor=pointer]
+                  - cell [ref=e1114]:
+                    - checkbox [checked] [ref=e1115] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1116]:
+                    - checkbox [ref=e1117] [cursor=pointer]
+                - row "Valider le budget budget_valider" [ref=e1118]:
+                  - cell "Valider le budget budget_valider" [ref=e1119]:
+                    - generic [ref=e1120]:
+                      - img [ref=e1121]
+                      - generic [ref=e1124]:
+                        - paragraph [ref=e1125]: Valider le budget
+                        - paragraph [ref=e1126]: budget_valider
+                  - cell [ref=e1127]:
+                    - checkbox [checked] [ref=e1128] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1129]:
+                    - checkbox [ref=e1130] [cursor=pointer]
+                  - cell [ref=e1131]:
+                    - checkbox [ref=e1132] [cursor=pointer]
+                  - cell [ref=e1133]:
+                    - checkbox [checked] [ref=e1134] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1135]:
+                    - checkbox [checked] [ref=e1136] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1137]:
+                    - checkbox [ref=e1138] [cursor=pointer]
+                  - cell [ref=e1139]:
+                    - checkbox [ref=e1140] [cursor=pointer]
+                  - cell [ref=e1141]:
+                    - checkbox [ref=e1142] [cursor=pointer]
+                  - cell [ref=e1143]:
+                    - checkbox [ref=e1144] [cursor=pointer]
+                  - cell [ref=e1145]:
+                    - checkbox [ref=e1146] [cursor=pointer]
+                - row "Valider Transfert validate_budget_transfer" [ref=e1147]:
+                  - cell "Valider Transfert validate_budget_transfer" [ref=e1148]:
+                    - generic [ref=e1149]:
+                      - img [ref=e1150]
+                      - generic [ref=e1153]:
+                        - paragraph [ref=e1154]: Valider Transfert
+                        - paragraph [ref=e1155]: validate_budget_transfer
+                  - cell [ref=e1156]:
+                    - checkbox [checked] [ref=e1157] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1158]:
+                    - checkbox [ref=e1159] [cursor=pointer]
+                  - cell [ref=e1160]:
+                    - checkbox [ref=e1161] [cursor=pointer]
+                  - cell [ref=e1162]:
+                    - checkbox [checked] [ref=e1163] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1164]:
+                    - checkbox [ref=e1165] [cursor=pointer]
+                  - cell [ref=e1166]:
+                    - checkbox [ref=e1167] [cursor=pointer]
+                  - cell [ref=e1168]:
+                    - checkbox [ref=e1169] [cursor=pointer]
+                  - cell [ref=e1170]:
+                    - checkbox [ref=e1171] [cursor=pointer]
+                  - cell [ref=e1172]:
+                    - checkbox [ref=e1173] [cursor=pointer]
+                  - cell [ref=e1174]:
+                    - checkbox [ref=e1175] [cursor=pointer]
+                - row "Virement de Crédit budget.transfer" [ref=e1176]:
+                  - cell "Virement de Crédit budget.transfer" [ref=e1177]:
+                    - generic [ref=e1178]:
+                      - img [ref=e1179]
+                      - generic [ref=e1182]:
+                        - paragraph [ref=e1183]: Virement de Crédit
+                        - paragraph [ref=e1184]: budget.transfer
+                  - cell [ref=e1185]:
+                    - checkbox [checked] [ref=e1186] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1187]:
+                    - checkbox [ref=e1188] [cursor=pointer]
+                  - cell [ref=e1189]:
+                    - checkbox [ref=e1190] [cursor=pointer]
+                  - cell [ref=e1191]:
+                    - checkbox [checked] [ref=e1192] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1193]:
+                    - checkbox [ref=e1194] [cursor=pointer]
+                  - cell [ref=e1195]:
+                    - checkbox [ref=e1196] [cursor=pointer]
+                  - cell [ref=e1197]:
+                    - checkbox [ref=e1198] [cursor=pointer]
+                  - cell [ref=e1199]:
+                    - checkbox [ref=e1200] [cursor=pointer]
+                  - cell [ref=e1201]:
+                    - checkbox [ref=e1202] [cursor=pointer]
+                  - cell [ref=e1203]:
+                    - checkbox [ref=e1204] [cursor=pointer]
+                - row "Voir le Budget budget.view" [ref=e1205]:
+                  - cell "Voir le Budget budget.view" [ref=e1206]:
+                    - generic [ref=e1207]:
+                      - img [ref=e1208]
+                      - generic [ref=e1211]:
+                        - paragraph [ref=e1212]: Voir le Budget
+                        - paragraph [ref=e1213]: budget.view
+                  - cell [ref=e1214]:
+                    - checkbox [checked] [ref=e1215] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1216]:
+                    - checkbox [ref=e1217] [cursor=pointer]
+                  - cell [ref=e1218]:
+                    - checkbox [ref=e1219] [cursor=pointer]
+                  - cell [ref=e1220]:
+                    - checkbox [checked] [ref=e1221] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1222]:
+                    - checkbox [checked] [ref=e1223] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1224]:
+                    - checkbox [ref=e1225] [cursor=pointer]
+                  - cell [ref=e1226]:
+                    - checkbox [ref=e1227] [cursor=pointer]
+                  - cell [ref=e1228]:
+                    - checkbox [checked] [ref=e1229] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1230]:
+                    - checkbox [ref=e1231] [cursor=pointer]
+                  - cell [ref=e1232]:
+                    - checkbox [ref=e1233] [cursor=pointer]
+                - row "dashboard" [ref=e1234]:
+                  - cell "dashboard" [ref=e1235]:
+                    - generic [ref=e1236]:
+                      - img [ref=e1237]
+                      - text: dashboard
+                - row "Dashboard DAAF/CB view_dashboard_daaf" [ref=e1242]:
+                  - cell "Dashboard DAAF/CB view_dashboard_daaf" [ref=e1243]:
+                    - generic [ref=e1244]:
+                      - img [ref=e1245]
+                      - generic [ref=e1248]:
+                        - paragraph [ref=e1249]: Dashboard DAAF/CB
+                        - paragraph [ref=e1250]: view_dashboard_daaf
+                  - cell [ref=e1251]:
+                    - checkbox [checked] [ref=e1252] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1253]:
+                    - checkbox [ref=e1254] [cursor=pointer]
+                  - cell [ref=e1255]:
+                    - checkbox [checked] [ref=e1256] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1257]:
+                    - checkbox [checked] [ref=e1258] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1259]:
+                    - checkbox [ref=e1260] [cursor=pointer]
+                  - cell [ref=e1261]:
+                    - checkbox [ref=e1262] [cursor=pointer]
+                  - cell [ref=e1263]:
+                    - checkbox [ref=e1264] [cursor=pointer]
+                  - cell [ref=e1265]:
+                    - checkbox [ref=e1266] [cursor=pointer]
+                  - cell [ref=e1267]:
+                    - checkbox [ref=e1268] [cursor=pointer]
+                  - cell [ref=e1269]:
+                    - checkbox [ref=e1270] [cursor=pointer]
+                - row "Tour de Contrôle DG view_dashboard_dg" [ref=e1271]:
+                  - cell "Tour de Contrôle DG view_dashboard_dg" [ref=e1272]:
+                    - generic [ref=e1273]:
+                      - img [ref=e1274]
+                      - generic [ref=e1277]:
+                        - paragraph [ref=e1278]: Tour de Contrôle DG
+                        - paragraph [ref=e1279]: view_dashboard_dg
+                  - cell [ref=e1280]:
+                    - checkbox [checked] [ref=e1281] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1282]:
+                    - checkbox [ref=e1283] [cursor=pointer]
+                  - cell [ref=e1284]:
+                    - checkbox [ref=e1285] [cursor=pointer]
+                  - cell [ref=e1286]:
+                    - checkbox [ref=e1287] [cursor=pointer]
+                  - cell [ref=e1288]:
+                    - checkbox [checked] [ref=e1289] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1290]:
+                    - checkbox [ref=e1291] [cursor=pointer]
+                  - cell [ref=e1292]:
+                    - checkbox [ref=e1293] [cursor=pointer]
+                  - cell [ref=e1294]:
+                    - checkbox [ref=e1295] [cursor=pointer]
+                  - cell [ref=e1296]:
+                    - checkbox [ref=e1297] [cursor=pointer]
+                  - cell [ref=e1298]:
+                    - checkbox [ref=e1299] [cursor=pointer]
+                - row "Vue Générale view_dashboard_general" [ref=e1300]:
+                  - cell "Vue Générale view_dashboard_general" [ref=e1301]:
+                    - generic [ref=e1302]:
+                      - img [ref=e1303]
+                      - generic [ref=e1306]:
+                        - paragraph [ref=e1307]: Vue Générale
+                        - paragraph [ref=e1308]: view_dashboard_general
+                  - cell [ref=e1309]:
+                    - checkbox [checked] [ref=e1310] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1311]:
+                    - checkbox [ref=e1312] [cursor=pointer]
+                  - cell [ref=e1313]:
+                    - checkbox [checked] [ref=e1314] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1315]:
+                    - checkbox [checked] [ref=e1316] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1317]:
+                    - checkbox [checked] [ref=e1318] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1319]:
+                    - checkbox [checked] [ref=e1320] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1321]:
+                    - checkbox [ref=e1322] [cursor=pointer]
+                  - cell [ref=e1323]:
+                    - checkbox [checked] [ref=e1324] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1325]:
+                    - checkbox [checked] [ref=e1326] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1327]:
+                    - checkbox [ref=e1328] [cursor=pointer]
+                - row "dg" [ref=e1329]:
+                  - cell "dg" [ref=e1330]:
+                    - generic [ref=e1331]:
+                      - img [ref=e1332]
+                      - text: dg
+                - row "Inbox DG view_inbox_dg" [ref=e1337]:
+                  - cell "Inbox DG view_inbox_dg" [ref=e1338]:
+                    - generic [ref=e1339]:
+                      - img [ref=e1340]
+                      - generic [ref=e1343]:
+                        - paragraph [ref=e1344]: Inbox DG
+                        - paragraph [ref=e1345]: view_inbox_dg
+                  - cell [ref=e1346]:
+                    - checkbox [checked] [ref=e1347] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1348]:
+                    - checkbox [ref=e1349] [cursor=pointer]
+                  - cell [ref=e1350]:
+                    - checkbox [ref=e1351] [cursor=pointer]
+                  - cell [ref=e1352]:
+                    - checkbox [ref=e1353] [cursor=pointer]
+                  - cell [ref=e1354]:
+                    - checkbox [checked] [ref=e1355] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1356]:
+                    - checkbox [ref=e1357] [cursor=pointer]
+                  - cell [ref=e1358]:
+                    - checkbox [ref=e1359] [cursor=pointer]
+                  - cell [ref=e1360]:
+                    - checkbox [ref=e1361] [cursor=pointer]
+                  - cell [ref=e1362]:
+                    - checkbox [ref=e1363] [cursor=pointer]
+                  - cell [ref=e1364]:
+                    - checkbox [ref=e1365] [cursor=pointer]
+                - row "Parapheur view_parapheur" [ref=e1366]:
+                  - cell "Parapheur view_parapheur" [ref=e1367]:
+                    - generic [ref=e1368]:
+                      - img [ref=e1369]
+                      - generic [ref=e1372]:
+                        - paragraph [ref=e1373]: Parapheur
+                        - paragraph [ref=e1374]: view_parapheur
+                  - cell [ref=e1375]:
+                    - checkbox [checked] [ref=e1376] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1377]:
+                    - checkbox [ref=e1378] [cursor=pointer]
+                  - cell [ref=e1379]:
+                    - checkbox [ref=e1380] [cursor=pointer]
+                  - cell [ref=e1381]:
+                    - checkbox [ref=e1382] [cursor=pointer]
+                  - cell [ref=e1383]:
+                    - checkbox [checked] [ref=e1384] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1385]:
+                    - checkbox [ref=e1386] [cursor=pointer]
+                  - cell [ref=e1387]:
+                    - checkbox [ref=e1388] [cursor=pointer]
+                  - cell [ref=e1389]:
+                    - checkbox [ref=e1390] [cursor=pointer]
+                  - cell [ref=e1391]:
+                    - checkbox [ref=e1392] [cursor=pointer]
+                  - cell [ref=e1393]:
+                    - checkbox [ref=e1394] [cursor=pointer]
+                - row "documents" [ref=e1395]:
+                  - cell "documents" [ref=e1396]:
+                    - generic [ref=e1397]:
+                      - img [ref=e1398]
+                      - text: documents
+                - row "Archiver document.archive" [ref=e1403]:
+                  - cell "Archiver document.archive" [ref=e1404]:
+                    - generic [ref=e1405]:
+                      - img [ref=e1406]
+                      - generic [ref=e1409]:
+                        - paragraph [ref=e1410]: Archiver
+                        - paragraph [ref=e1411]: document.archive
+                  - cell [ref=e1412]:
+                    - checkbox [checked] [ref=e1413] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1414]:
+                    - checkbox [ref=e1415] [cursor=pointer]
+                  - cell [ref=e1416]:
+                    - checkbox [ref=e1417] [cursor=pointer]
+                  - cell [ref=e1418]:
+                    - checkbox [checked] [ref=e1419] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1420]:
+                    - checkbox [ref=e1421] [cursor=pointer]
+                  - cell [ref=e1422]:
+                    - checkbox [ref=e1423] [cursor=pointer]
+                  - cell [ref=e1424]:
+                    - checkbox [ref=e1425] [cursor=pointer]
+                  - cell [ref=e1426]:
+                    - checkbox [ref=e1427] [cursor=pointer]
+                  - cell [ref=e1428]:
+                    - checkbox [ref=e1429] [cursor=pointer]
+                  - cell [ref=e1430]:
+                    - checkbox [ref=e1431] [cursor=pointer]
+                - row "Scanner/Téléverser document.upload" [ref=e1432]:
+                  - cell "Scanner/Téléverser document.upload" [ref=e1433]:
+                    - generic [ref=e1434]:
+                      - img [ref=e1435]
+                      - generic [ref=e1438]:
+                        - paragraph [ref=e1439]: Scanner/Téléverser
+                        - paragraph [ref=e1440]: document.upload
+                  - cell [ref=e1441]:
+                    - checkbox [checked] [ref=e1442] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1443]:
+                    - checkbox [ref=e1444] [cursor=pointer]
+                  - cell [ref=e1445]:
+                    - checkbox [ref=e1446] [cursor=pointer]
+                  - cell [ref=e1447]:
+                    - checkbox [checked] [ref=e1448] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1449]:
+                    - checkbox [ref=e1450] [cursor=pointer]
+                  - cell [ref=e1451]:
+                    - checkbox [ref=e1452] [cursor=pointer]
+                  - cell [ref=e1453]:
+                    - checkbox [ref=e1454] [cursor=pointer]
+                  - cell [ref=e1455]:
+                    - checkbox [checked] [ref=e1456] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1457]:
+                    - checkbox [ref=e1458] [cursor=pointer]
+                  - cell [ref=e1459]:
+                    - checkbox [ref=e1460] [cursor=pointer]
+                - row "Supprimer Document document.delete" [ref=e1461]:
+                  - cell "Supprimer Document document.delete" [ref=e1462]:
+                    - generic [ref=e1463]:
+                      - img [ref=e1464]
+                      - generic [ref=e1467]:
+                        - paragraph [ref=e1468]: Supprimer Document
+                        - paragraph [ref=e1469]: document.delete
+                  - cell [ref=e1470]:
+                    - checkbox [checked] [ref=e1471] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1472]:
+                    - checkbox [ref=e1473] [cursor=pointer]
+                  - cell [ref=e1474]:
+                    - checkbox [ref=e1475] [cursor=pointer]
+                  - cell [ref=e1476]:
+                    - checkbox [ref=e1477] [cursor=pointer]
+                  - cell [ref=e1478]:
+                    - checkbox [ref=e1479] [cursor=pointer]
+                  - cell [ref=e1480]:
+                    - checkbox [ref=e1481] [cursor=pointer]
+                  - cell [ref=e1482]:
+                    - checkbox [ref=e1483] [cursor=pointer]
+                  - cell [ref=e1484]:
+                    - checkbox [ref=e1485] [cursor=pointer]
+                  - cell [ref=e1486]:
+                    - checkbox [ref=e1487] [cursor=pointer]
+                  - cell [ref=e1488]:
+                    - checkbox [ref=e1489] [cursor=pointer]
+                - row "Télécharger document.download" [ref=e1490]:
+                  - cell "Télécharger document.download" [ref=e1491]:
+                    - generic [ref=e1492]:
+                      - img [ref=e1493]
+                      - generic [ref=e1496]:
+                        - paragraph [ref=e1497]: Télécharger
+                        - paragraph [ref=e1498]: document.download
+                  - cell [ref=e1499]:
+                    - checkbox [checked] [ref=e1500] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1501]:
+                    - checkbox [ref=e1502] [cursor=pointer]
+                  - cell [ref=e1503]:
+                    - checkbox [ref=e1504] [cursor=pointer]
+                  - cell [ref=e1505]:
+                    - checkbox [checked] [ref=e1506] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1507]:
+                    - checkbox [checked] [ref=e1508] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1509]:
+                    - checkbox [ref=e1510] [cursor=pointer]
+                  - cell [ref=e1511]:
+                    - checkbox [ref=e1512] [cursor=pointer]
+                  - cell [ref=e1513]:
+                    - checkbox [checked] [ref=e1514] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1515]:
+                    - checkbox [ref=e1516] [cursor=pointer]
+                  - cell [ref=e1517]:
+                    - checkbox [ref=e1518] [cursor=pointer]
+                - row "Télécharger Documents upload_documents" [ref=e1519]:
+                  - cell "Télécharger Documents upload_documents" [ref=e1520]:
+                    - generic [ref=e1521]:
+                      - img [ref=e1522]
+                      - generic [ref=e1525]:
+                        - paragraph [ref=e1526]: Télécharger Documents
+                        - paragraph [ref=e1527]: upload_documents
+                  - cell [ref=e1528]:
+                    - checkbox [checked] [ref=e1529] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1530]:
+                    - checkbox [ref=e1531] [cursor=pointer]
+                  - cell [ref=e1532]:
+                    - checkbox [ref=e1533] [cursor=pointer]
+                  - cell [ref=e1534]:
+                    - checkbox [checked] [ref=e1535] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1536]:
+                    - checkbox [ref=e1537] [cursor=pointer]
+                  - cell [ref=e1538]:
+                    - checkbox [ref=e1539] [cursor=pointer]
+                  - cell [ref=e1540]:
+                    - checkbox [ref=e1541] [cursor=pointer]
+                  - cell [ref=e1542]:
+                    - checkbox [ref=e1543] [cursor=pointer]
+                  - cell [ref=e1544]:
+                    - checkbox [ref=e1545] [cursor=pointer]
+                  - cell [ref=e1546]:
+                    - checkbox [ref=e1547] [cursor=pointer]
+                - row "Voir GED view_ged" [ref=e1548]:
+                  - cell "Voir GED view_ged" [ref=e1549]:
+                    - generic [ref=e1550]:
+                      - img [ref=e1551]
+                      - generic [ref=e1554]:
+                        - paragraph [ref=e1555]: Voir GED
+                        - paragraph [ref=e1556]: view_ged
+                  - cell [ref=e1557]:
+                    - checkbox [checked] [ref=e1558] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1559]:
+                    - checkbox [ref=e1560] [cursor=pointer]
+                  - cell [ref=e1561]:
+                    - checkbox [checked] [ref=e1562] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1563]:
+                    - checkbox [checked] [ref=e1564] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1565]:
+                    - checkbox [checked] [ref=e1566] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1567]:
+                    - checkbox [checked] [ref=e1568] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1569]:
+                    - checkbox [ref=e1570] [cursor=pointer]
+                  - cell [ref=e1571]:
+                    - checkbox [checked] [ref=e1572] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1573]:
+                    - checkbox [checked] [ref=e1574] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1575]:
+                    - checkbox [ref=e1576] [cursor=pointer]
+                - row "Voir les Documents document.view" [ref=e1577]:
+                  - cell "Voir les Documents document.view" [ref=e1578]:
+                    - generic [ref=e1579]:
+                      - img [ref=e1580]
+                      - generic [ref=e1583]:
+                        - paragraph [ref=e1584]: Voir les Documents
+                        - paragraph [ref=e1585]: document.view
+                  - cell [ref=e1586]:
+                    - checkbox [checked] [ref=e1587] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1588]:
+                    - checkbox [ref=e1589] [cursor=pointer]
+                  - cell [ref=e1590]:
+                    - checkbox [ref=e1591] [cursor=pointer]
+                  - cell [ref=e1592]:
+                    - checkbox [checked] [ref=e1593] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1594]:
+                    - checkbox [checked] [ref=e1595] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1596]:
+                    - checkbox [ref=e1597] [cursor=pointer]
+                  - cell [ref=e1598]:
+                    - checkbox [ref=e1599] [cursor=pointer]
+                  - cell [ref=e1600]:
+                    - checkbox [checked] [ref=e1601] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1602]:
+                    - checkbox [ref=e1603] [cursor=pointer]
+                  - cell [ref=e1604]:
+                    - checkbox [ref=e1605] [cursor=pointer]
+                - row "Engagement" [ref=e1606]:
+                  - cell "Engagement" [ref=e1607]:
+                    - generic [ref=e1608]:
+                      - img [ref=e1609]
+                      - text: Engagement
+                - row "Consulter les engagements engagement_voir" [ref=e1614]:
+                  - cell "Consulter les engagements engagement_voir" [ref=e1615]:
+                    - generic [ref=e1616]:
+                      - img [ref=e1617]
+                      - generic [ref=e1620]:
+                        - paragraph [ref=e1621]: Consulter les engagements
+                        - paragraph [ref=e1622]: engagement_voir
+                  - cell [ref=e1623]:
+                    - checkbox [checked] [ref=e1624] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1625]:
+                    - checkbox [checked] [ref=e1626] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1627]:
+                    - checkbox [ref=e1628] [cursor=pointer]
+                  - cell [ref=e1629]:
+                    - checkbox [checked] [ref=e1630] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1631]:
+                    - checkbox [checked] [ref=e1632] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1633]:
+                    - checkbox [ref=e1634] [cursor=pointer]
+                  - cell [ref=e1635]:
+                    - checkbox [checked] [ref=e1636] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1637]:
+                    - checkbox [checked] [ref=e1638] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1639]:
+                    - checkbox [ref=e1640] [cursor=pointer]
+                  - cell [ref=e1641]:
+                    - checkbox [ref=e1642] [cursor=pointer]
+                - row "Créer un engagement engagement_creer" [ref=e1643]:
+                  - cell "Créer un engagement engagement_creer" [ref=e1644]:
+                    - generic [ref=e1645]:
+                      - img [ref=e1646]
+                      - generic [ref=e1647]:
+                        - paragraph [ref=e1648]: Créer un engagement
+                        - paragraph [ref=e1649]: engagement_creer
+                  - cell [ref=e1650]:
+                    - checkbox [checked] [ref=e1651] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1652]:
+                    - checkbox [checked] [ref=e1653] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1654]:
+                    - checkbox [ref=e1655] [cursor=pointer]
+                  - cell [ref=e1656]:
+                    - checkbox [checked] [ref=e1657] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1658]:
+                    - checkbox [ref=e1659] [cursor=pointer]
+                  - cell [ref=e1660]:
+                    - checkbox [ref=e1661] [cursor=pointer]
+                  - cell [ref=e1662]:
+                    - checkbox [ref=e1663] [cursor=pointer]
+                  - cell [ref=e1664]:
+                    - checkbox [checked] [ref=e1665] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1666]:
+                    - checkbox [ref=e1667] [cursor=pointer]
+                  - cell [ref=e1668]:
+                    - checkbox [ref=e1669] [cursor=pointer]
+                - row "Valider un engagement engagement_valider" [ref=e1670]:
+                  - cell "Valider un engagement engagement_valider" [ref=e1671]:
+                    - generic [ref=e1672]:
+                      - img [ref=e1673]
+                      - generic [ref=e1676]:
+                        - paragraph [ref=e1677]: Valider un engagement
+                        - paragraph [ref=e1678]: engagement_valider
+                  - cell [ref=e1679]:
+                    - checkbox [checked] [ref=e1680] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1681]:
+                    - checkbox [ref=e1682] [cursor=pointer]
+                  - cell [ref=e1683]:
+                    - checkbox [ref=e1684] [cursor=pointer]
+                  - cell [ref=e1685]:
+                    - checkbox [checked] [ref=e1686] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1687]:
+                    - checkbox [checked] [ref=e1688] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1689]:
+                    - checkbox [ref=e1690] [cursor=pointer]
+                  - cell [ref=e1691]:
+                    - checkbox [ref=e1692] [cursor=pointer]
+                  - cell [ref=e1693]:
+                    - checkbox [ref=e1694] [cursor=pointer]
+                  - cell [ref=e1695]:
+                    - checkbox [ref=e1696] [cursor=pointer]
+                  - cell [ref=e1697]:
+                    - checkbox [ref=e1698] [cursor=pointer]
+                - row "engagements" [ref=e1699]:
+                  - cell "engagements" [ref=e1700]:
+                    - generic [ref=e1701]:
+                      - img [ref=e1702]
+                      - text: engagements
+                - row "Créer Engagement create_engagements" [ref=e1707]:
+                  - cell "Créer Engagement create_engagements" [ref=e1708]:
+                    - generic [ref=e1709]:
+                      - img [ref=e1710]
+                      - generic [ref=e1713]:
+                        - paragraph [ref=e1714]: Créer Engagement
+                        - paragraph [ref=e1715]: create_engagements
+                  - cell [ref=e1716]:
+                    - checkbox [checked] [ref=e1717] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1718]:
+                    - checkbox [ref=e1719] [cursor=pointer]
+                  - cell [ref=e1720]:
+                    - checkbox [ref=e1721] [cursor=pointer]
+                  - cell [ref=e1722]:
+                    - checkbox [checked] [ref=e1723] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1724]:
+                    - checkbox [ref=e1725] [cursor=pointer]
+                  - cell [ref=e1726]:
+                    - checkbox [ref=e1727] [cursor=pointer]
+                  - cell [ref=e1728]:
+                    - checkbox [ref=e1729] [cursor=pointer]
+                  - cell [ref=e1730]:
+                    - checkbox [ref=e1731] [cursor=pointer]
+                  - cell [ref=e1732]:
+                    - checkbox [ref=e1733] [cursor=pointer]
+                  - cell [ref=e1734]:
+                    - checkbox [ref=e1735] [cursor=pointer]
+                - row "Créer un Engagement engagement.create" [ref=e1736]:
+                  - cell "Créer un Engagement engagement.create" [ref=e1737]:
+                    - generic [ref=e1738]:
+                      - img [ref=e1739]
+                      - generic [ref=e1742]:
+                        - paragraph [ref=e1743]: Créer un Engagement
+                        - paragraph [ref=e1744]: engagement.create
+                  - cell [ref=e1745]:
+                    - checkbox [checked] [ref=e1746] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1747]:
+                    - checkbox [ref=e1748] [cursor=pointer]
+                  - cell [ref=e1749]:
+                    - checkbox [ref=e1750] [cursor=pointer]
+                  - cell [ref=e1751]:
+                    - checkbox [checked] [ref=e1752] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1753]:
+                    - checkbox [ref=e1754] [cursor=pointer]
+                  - cell [ref=e1755]:
+                    - checkbox [ref=e1756] [cursor=pointer]
+                  - cell [ref=e1757]:
+                    - checkbox [ref=e1758] [cursor=pointer]
+                  - cell [ref=e1759]:
+                    - checkbox [ref=e1760] [cursor=pointer]
+                  - cell [ref=e1761]:
+                    - checkbox [ref=e1762] [cursor=pointer]
+                  - cell [ref=e1763]:
+                    - checkbox [ref=e1764] [cursor=pointer]
+                - row "Différer un Engagement engagement.defer" [ref=e1765]:
+                  - cell "Différer un Engagement engagement.defer" [ref=e1766]:
+                    - generic [ref=e1767]:
+                      - img [ref=e1768]
+                      - generic [ref=e1771]:
+                        - paragraph [ref=e1772]: Différer un Engagement
+                        - paragraph [ref=e1773]: engagement.defer
+                  - cell [ref=e1774]:
+                    - checkbox [checked] [ref=e1775] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1776]:
+                    - checkbox [ref=e1777] [cursor=pointer]
+                  - cell [ref=e1778]:
+                    - checkbox [checked] [ref=e1779] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1780]:
+                    - checkbox [checked] [ref=e1781] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1782]:
+                    - checkbox [checked] [ref=e1783] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1784]:
+                    - checkbox [ref=e1785] [cursor=pointer]
+                  - cell [ref=e1786]:
+                    - checkbox [ref=e1787] [cursor=pointer]
+                  - cell [ref=e1788]:
+                    - checkbox [ref=e1789] [cursor=pointer]
+                  - cell [ref=e1790]:
+                    - checkbox [ref=e1791] [cursor=pointer]
+                  - cell [ref=e1792]:
+                    - checkbox [ref=e1793] [cursor=pointer]
+                - row "Modifier un Engagement engagement.edit" [ref=e1794]:
+                  - cell "Modifier un Engagement engagement.edit" [ref=e1795]:
+                    - generic [ref=e1796]:
+                      - img [ref=e1797]
+                      - generic [ref=e1800]:
+                        - paragraph [ref=e1801]: Modifier un Engagement
+                        - paragraph [ref=e1802]: engagement.edit
+                  - cell [ref=e1803]:
+                    - checkbox [checked] [ref=e1804] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1805]:
+                    - checkbox [ref=e1806] [cursor=pointer]
+                  - cell [ref=e1807]:
+                    - checkbox [ref=e1808] [cursor=pointer]
+                  - cell [ref=e1809]:
+                    - checkbox [checked] [ref=e1810] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1811]:
+                    - checkbox [ref=e1812] [cursor=pointer]
+                  - cell [ref=e1813]:
+                    - checkbox [ref=e1814] [cursor=pointer]
+                  - cell [ref=e1815]:
+                    - checkbox [ref=e1816] [cursor=pointer]
+                  - cell [ref=e1817]:
+                    - checkbox [ref=e1818] [cursor=pointer]
+                  - cell [ref=e1819]:
+                    - checkbox [ref=e1820] [cursor=pointer]
+                  - cell [ref=e1821]:
+                    - checkbox [ref=e1822] [cursor=pointer]
+                - row "Rejeter un Engagement engagement.reject" [ref=e1823]:
+                  - cell "Rejeter un Engagement engagement.reject" [ref=e1824]:
+                    - generic [ref=e1825]:
+                      - img [ref=e1826]
+                      - generic [ref=e1829]:
+                        - paragraph [ref=e1830]: Rejeter un Engagement
+                        - paragraph [ref=e1831]: engagement.reject
+                  - cell [ref=e1832]:
+                    - checkbox [checked] [ref=e1833] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1834]:
+                    - checkbox [ref=e1835] [cursor=pointer]
+                  - cell [ref=e1836]:
+                    - checkbox [checked] [ref=e1837] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1838]:
+                    - checkbox [checked] [ref=e1839] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1840]:
+                    - checkbox [checked] [ref=e1841] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1842]:
+                    - checkbox [ref=e1843] [cursor=pointer]
+                  - cell [ref=e1844]:
+                    - checkbox [ref=e1845] [cursor=pointer]
+                  - cell [ref=e1846]:
+                    - checkbox [ref=e1847] [cursor=pointer]
+                  - cell [ref=e1848]:
+                    - checkbox [ref=e1849] [cursor=pointer]
+                  - cell [ref=e1850]:
+                    - checkbox [ref=e1851] [cursor=pointer]
+                - row "Supprimer un Engagement engagement.delete" [ref=e1852]:
+                  - cell "Supprimer un Engagement engagement.delete" [ref=e1853]:
+                    - generic [ref=e1854]:
+                      - img [ref=e1855]
+                      - generic [ref=e1858]:
+                        - paragraph [ref=e1859]: Supprimer un Engagement
+                        - paragraph [ref=e1860]: engagement.delete
+                  - cell [ref=e1861]:
+                    - checkbox [checked] [ref=e1862] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1863]:
+                    - checkbox [ref=e1864] [cursor=pointer]
+                  - cell [ref=e1865]:
+                    - checkbox [ref=e1866] [cursor=pointer]
+                  - cell [ref=e1867]:
+                    - checkbox [ref=e1868] [cursor=pointer]
+                  - cell [ref=e1869]:
+                    - checkbox [ref=e1870] [cursor=pointer]
+                  - cell [ref=e1871]:
+                    - checkbox [ref=e1872] [cursor=pointer]
+                  - cell [ref=e1873]:
+                    - checkbox [ref=e1874] [cursor=pointer]
+                  - cell [ref=e1875]:
+                    - checkbox [ref=e1876] [cursor=pointer]
+                  - cell [ref=e1877]:
+                    - checkbox [ref=e1878] [cursor=pointer]
+                  - cell [ref=e1879]:
+                    - checkbox [ref=e1880] [cursor=pointer]
+                - row "Valider Engagement validate_engagements" [ref=e1881]:
+                  - cell "Valider Engagement validate_engagements" [ref=e1882]:
+                    - generic [ref=e1883]:
+                      - img [ref=e1884]
+                      - generic [ref=e1887]:
+                        - paragraph [ref=e1888]: Valider Engagement
+                        - paragraph [ref=e1889]: validate_engagements
+                  - cell [ref=e1890]:
+                    - checkbox [checked] [ref=e1891] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1892]:
+                    - checkbox [ref=e1893] [cursor=pointer]
+                  - cell [ref=e1894]:
+                    - checkbox [checked] [ref=e1895] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1896]:
+                    - checkbox [checked] [ref=e1897] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1898]:
+                    - checkbox [ref=e1899] [cursor=pointer]
+                  - cell [ref=e1900]:
+                    - checkbox [checked] [ref=e1901] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1902]:
+                    - checkbox [ref=e1903] [cursor=pointer]
+                  - cell [ref=e1904]:
+                    - checkbox [ref=e1905] [cursor=pointer]
+                  - cell [ref=e1906]:
+                    - checkbox [checked] [ref=e1907] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1908]:
+                    - checkbox [ref=e1909] [cursor=pointer]
+                - row "Valider un Engagement engagement.validate" [ref=e1910]:
+                  - cell "Valider un Engagement engagement.validate" [ref=e1911]:
+                    - generic [ref=e1912]:
+                      - img [ref=e1913]
+                      - generic [ref=e1916]:
+                        - paragraph [ref=e1917]: Valider un Engagement
+                        - paragraph [ref=e1918]: engagement.validate
+                  - cell [ref=e1919]:
+                    - checkbox [checked] [ref=e1920] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1921]:
+                    - checkbox [ref=e1922] [cursor=pointer]
+                  - cell [ref=e1923]:
+                    - checkbox [checked] [ref=e1924] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1925]:
+                    - checkbox [checked] [ref=e1926] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1927]:
+                    - checkbox [checked] [ref=e1928] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1929]:
+                    - checkbox [ref=e1930] [cursor=pointer]
+                  - cell [ref=e1931]:
+                    - checkbox [ref=e1932] [cursor=pointer]
+                  - cell [ref=e1933]:
+                    - checkbox [ref=e1934] [cursor=pointer]
+                  - cell [ref=e1935]:
+                    - checkbox [ref=e1936] [cursor=pointer]
+                  - cell [ref=e1937]:
+                    - checkbox [ref=e1938] [cursor=pointer]
+                - row "Voir Engagements view_engagements" [ref=e1939]:
+                  - cell "Voir Engagements view_engagements" [ref=e1940]:
+                    - generic [ref=e1941]:
+                      - img [ref=e1942]
+                      - generic [ref=e1945]:
+                        - paragraph [ref=e1946]: Voir Engagements
+                        - paragraph [ref=e1947]: view_engagements
+                  - cell [ref=e1948]:
+                    - checkbox [checked] [ref=e1949] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1950]:
+                    - checkbox [ref=e1951] [cursor=pointer]
+                  - cell [ref=e1952]:
+                    - checkbox [checked] [ref=e1953] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1954]:
+                    - checkbox [checked] [ref=e1955] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1956]:
+                    - checkbox [ref=e1957] [cursor=pointer]
+                  - cell [ref=e1958]:
+                    - checkbox [checked] [ref=e1959] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1960]:
+                    - checkbox [ref=e1961] [cursor=pointer]
+                  - cell [ref=e1962]:
+                    - checkbox [checked] [ref=e1963] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1964]:
+                    - checkbox [checked] [ref=e1965] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1966]:
+                    - checkbox [ref=e1967] [cursor=pointer]
+                - row "Voir les Engagements engagement.view" [ref=e1968]:
+                  - cell "Voir les Engagements engagement.view" [ref=e1969]:
+                    - generic [ref=e1970]:
+                      - img [ref=e1971]
+                      - generic [ref=e1974]:
+                        - paragraph [ref=e1975]: Voir les Engagements
+                        - paragraph [ref=e1976]: engagement.view
+                  - cell [ref=e1977]:
+                    - checkbox [checked] [ref=e1978] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1979]:
+                    - checkbox [ref=e1980] [cursor=pointer]
+                  - cell [ref=e1981]:
+                    - checkbox [checked] [ref=e1982] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1983]:
+                    - checkbox [checked] [ref=e1984] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1985]:
+                    - checkbox [checked] [ref=e1986] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1987]:
+                    - checkbox [ref=e1988] [cursor=pointer]
+                  - cell [ref=e1989]:
+                    - checkbox [ref=e1990] [cursor=pointer]
+                  - cell [ref=e1991]:
+                    - checkbox [checked] [ref=e1992] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e1993]:
+                    - checkbox [ref=e1994] [cursor=pointer]
+                  - cell [ref=e1995]:
+                    - checkbox [checked] [ref=e1996] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Export" [ref=e1997]:
+                  - cell "Export" [ref=e1998]:
+                    - generic [ref=e1999]:
+                      - img [ref=e2000]
+                      - text: Export
+                - row "Exporter Données export_data" [ref=e2005]:
+                  - cell "Exporter Données export_data" [ref=e2006]:
+                    - generic [ref=e2007]:
+                      - img [ref=e2008]
+                      - generic [ref=e2011]:
+                        - paragraph [ref=e2012]: Exporter Données
+                        - paragraph [ref=e2013]: export_data
+                  - cell [ref=e2014]:
+                    - checkbox [checked] [ref=e2015] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2016]:
+                    - checkbox [ref=e2017] [cursor=pointer]
+                  - cell [ref=e2018]:
+                    - checkbox [checked] [ref=e2019] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2020]:
+                    - checkbox [checked] [ref=e2021] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2022]:
+                    - checkbox [checked] [ref=e2023] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2024]:
+                    - checkbox [ref=e2025] [cursor=pointer]
+                  - cell [ref=e2026]:
+                    - checkbox [ref=e2027] [cursor=pointer]
+                  - cell [ref=e2028]:
+                    - checkbox [ref=e2029] [cursor=pointer]
+                  - cell [ref=e2030]:
+                    - checkbox [ref=e2031] [cursor=pointer]
+                  - cell [ref=e2032]:
+                    - checkbox [checked] [ref=e2033] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Exporter en Excel export.excel" [ref=e2034]:
+                  - cell "Exporter en Excel export.excel" [ref=e2035]:
+                    - generic [ref=e2036]:
+                      - img [ref=e2037]
+                      - generic [ref=e2040]:
+                        - paragraph [ref=e2041]: Exporter en Excel
+                        - paragraph [ref=e2042]: export.excel
+                  - cell [ref=e2043]:
+                    - checkbox [checked] [ref=e2044] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2045]:
+                    - checkbox [ref=e2046] [cursor=pointer]
+                  - cell [ref=e2047]:
+                    - checkbox [ref=e2048] [cursor=pointer]
+                  - cell [ref=e2049]:
+                    - checkbox [checked] [ref=e2050] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2051]:
+                    - checkbox [checked] [ref=e2052] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2053]:
+                    - checkbox [ref=e2054] [cursor=pointer]
+                  - cell [ref=e2055]:
+                    - checkbox [ref=e2056] [cursor=pointer]
+                  - cell [ref=e2057]:
+                    - checkbox [ref=e2058] [cursor=pointer]
+                  - cell [ref=e2059]:
+                    - checkbox [ref=e2060] [cursor=pointer]
+                  - cell [ref=e2061]:
+                    - checkbox [ref=e2062] [cursor=pointer]
+                - row "Exporter en PDF export.pdf" [ref=e2063]:
+                  - cell "Exporter en PDF export.pdf" [ref=e2064]:
+                    - generic [ref=e2065]:
+                      - img [ref=e2066]
+                      - generic [ref=e2069]:
+                        - paragraph [ref=e2070]: Exporter en PDF
+                        - paragraph [ref=e2071]: export.pdf
+                  - cell [ref=e2072]:
+                    - checkbox [checked] [ref=e2073] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2074]:
+                    - checkbox [ref=e2075] [cursor=pointer]
+                  - cell [ref=e2076]:
+                    - checkbox [ref=e2077] [cursor=pointer]
+                  - cell [ref=e2078]:
+                    - checkbox [checked] [ref=e2079] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2080]:
+                    - checkbox [checked] [ref=e2081] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2082]:
+                    - checkbox [ref=e2083] [cursor=pointer]
+                  - cell [ref=e2084]:
+                    - checkbox [ref=e2085] [cursor=pointer]
+                  - cell [ref=e2086]:
+                    - checkbox [ref=e2087] [cursor=pointer]
+                  - cell [ref=e2088]:
+                    - checkbox [ref=e2089] [cursor=pointer]
+                  - cell [ref=e2090]:
+                    - checkbox [ref=e2091] [cursor=pointer]
+                - row "Sauvegarde Complète full_backup" [ref=e2092]:
+                  - cell "Sauvegarde Complète full_backup" [ref=e2093]:
+                    - generic [ref=e2094]:
+                      - img [ref=e2095]
+                      - generic [ref=e2098]:
+                        - paragraph [ref=e2099]: Sauvegarde Complète
+                        - paragraph [ref=e2100]: full_backup
+                  - cell [ref=e2101]:
+                    - checkbox [checked] [ref=e2102] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2103]:
+                    - checkbox [ref=e2104] [cursor=pointer]
+                  - cell [ref=e2105]:
+                    - checkbox [ref=e2106] [cursor=pointer]
+                  - cell [ref=e2107]:
+                    - checkbox [ref=e2108] [cursor=pointer]
+                  - cell [ref=e2109]:
+                    - checkbox [ref=e2110] [cursor=pointer]
+                  - cell [ref=e2111]:
+                    - checkbox [ref=e2112] [cursor=pointer]
+                  - cell [ref=e2113]:
+                    - checkbox [ref=e2114] [cursor=pointer]
+                  - cell [ref=e2115]:
+                    - checkbox [ref=e2116] [cursor=pointer]
+                  - cell [ref=e2117]:
+                    - checkbox [ref=e2118] [cursor=pointer]
+                  - cell [ref=e2119]:
+                    - checkbox [ref=e2120] [cursor=pointer]
+                - row "Sauvegarde Complète export.backup" [ref=e2121]:
+                  - cell "Sauvegarde Complète export.backup" [ref=e2122]:
+                    - generic [ref=e2123]:
+                      - img [ref=e2124]
+                      - generic [ref=e2127]:
+                        - paragraph [ref=e2128]: Sauvegarde Complète
+                        - paragraph [ref=e2129]: export.backup
+                  - cell [ref=e2130]:
+                    - checkbox [checked] [ref=e2131] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2132]:
+                    - checkbox [ref=e2133] [cursor=pointer]
+                  - cell [ref=e2134]:
+                    - checkbox [ref=e2135] [cursor=pointer]
+                  - cell [ref=e2136]:
+                    - checkbox [ref=e2137] [cursor=pointer]
+                  - cell [ref=e2138]:
+                    - checkbox [ref=e2139] [cursor=pointer]
+                  - cell [ref=e2140]:
+                    - checkbox [ref=e2141] [cursor=pointer]
+                  - cell [ref=e2142]:
+                    - checkbox [ref=e2143] [cursor=pointer]
+                  - cell [ref=e2144]:
+                    - checkbox [ref=e2145] [cursor=pointer]
+                  - cell [ref=e2146]:
+                    - checkbox [ref=e2147] [cursor=pointer]
+                  - cell [ref=e2148]:
+                    - checkbox [ref=e2149] [cursor=pointer]
+                - row "general" [ref=e2150]:
+                  - cell "general" [ref=e2151]:
+                    - generic [ref=e2152]:
+                      - img [ref=e2153]
+                      - text: general
+                - row "À propos view_about" [ref=e2158]:
+                  - cell "À propos view_about" [ref=e2159]:
+                    - generic [ref=e2160]:
+                      - img [ref=e2161]
+                      - generic [ref=e2164]:
+                        - paragraph [ref=e2165]: À propos
+                        - paragraph [ref=e2166]: view_about
+                  - cell [ref=e2167]:
+                    - checkbox [checked] [ref=e2168] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2169]:
+                    - checkbox [ref=e2170] [cursor=pointer]
+                  - cell [ref=e2171]:
+                    - checkbox [checked] [ref=e2172] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2173]:
+                    - checkbox [checked] [ref=e2174] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2175]:
+                    - checkbox [checked] [ref=e2176] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2177]:
+                    - checkbox [checked] [ref=e2178] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2179]:
+                    - checkbox [ref=e2180] [cursor=pointer]
+                  - cell [ref=e2181]:
+                    - checkbox [checked] [ref=e2182] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2183]:
+                    - checkbox [checked] [ref=e2184] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2185]:
+                    - checkbox [ref=e2186] [cursor=pointer]
+                - row "Aide & Support view_aide" [ref=e2187]:
+                  - cell "Aide & Support view_aide" [ref=e2188]:
+                    - generic [ref=e2189]:
+                      - img [ref=e2190]
+                      - generic [ref=e2193]:
+                        - paragraph [ref=e2194]: Aide & Support
+                        - paragraph [ref=e2195]: view_aide
+                  - cell [ref=e2196]:
+                    - checkbox [checked] [ref=e2197] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2198]:
+                    - checkbox [ref=e2199] [cursor=pointer]
+                  - cell [ref=e2200]:
+                    - checkbox [checked] [ref=e2201] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2202]:
+                    - checkbox [checked] [ref=e2203] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2204]:
+                    - checkbox [checked] [ref=e2205] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2206]:
+                    - checkbox [checked] [ref=e2207] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2208]:
+                    - checkbox [ref=e2209] [cursor=pointer]
+                  - cell [ref=e2210]:
+                    - checkbox [checked] [ref=e2211] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2212]:
+                    - checkbox [checked] [ref=e2213] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2214]:
+                    - checkbox [ref=e2215] [cursor=pointer]
+                - row "Liquidation" [ref=e2216]:
+                  - cell "Liquidation" [ref=e2217]:
+                    - generic [ref=e2218]:
+                      - img [ref=e2219]
+                      - text: Liquidation
+                - row "Consulter les liquidations liquidation_voir" [ref=e2224]:
+                  - cell "Consulter les liquidations liquidation_voir" [ref=e2225]:
+                    - generic [ref=e2226]:
+                      - img [ref=e2227]
+                      - generic [ref=e2230]:
+                        - paragraph [ref=e2231]: Consulter les liquidations
+                        - paragraph [ref=e2232]: liquidation_voir
+                  - cell [ref=e2233]:
+                    - checkbox [checked] [ref=e2234] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2235]:
+                    - checkbox [ref=e2236] [cursor=pointer]
+                  - cell [ref=e2237]:
+                    - checkbox [ref=e2238] [cursor=pointer]
+                  - cell [ref=e2239]:
+                    - checkbox [checked] [ref=e2240] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2241]:
+                    - checkbox [checked] [ref=e2242] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2243]:
+                    - checkbox [ref=e2244] [cursor=pointer]
+                  - cell [ref=e2245]:
+                    - checkbox [checked] [ref=e2246] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2247]:
+                    - checkbox [checked] [ref=e2248] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2249]:
+                    - checkbox [ref=e2250] [cursor=pointer]
+                  - cell [ref=e2251]:
+                    - checkbox [checked] [ref=e2252] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Créer une liquidation liquidation_creer" [ref=e2253]:
+                  - cell "Créer une liquidation liquidation_creer" [ref=e2254]:
+                    - generic [ref=e2255]:
+                      - img [ref=e2256]
+                      - generic [ref=e2257]:
+                        - paragraph [ref=e2258]: Créer une liquidation
+                        - paragraph [ref=e2259]: liquidation_creer
+                  - cell [ref=e2260]:
+                    - checkbox [checked] [ref=e2261] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2262]:
+                    - checkbox [ref=e2263] [cursor=pointer]
+                  - cell [ref=e2264]:
+                    - checkbox [ref=e2265] [cursor=pointer]
+                  - cell [ref=e2266]:
+                    - checkbox [checked] [ref=e2267] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2268]:
+                    - checkbox [ref=e2269] [cursor=pointer]
+                  - cell [ref=e2270]:
+                    - checkbox [ref=e2271] [cursor=pointer]
+                  - cell [ref=e2272]:
+                    - checkbox [ref=e2273] [cursor=pointer]
+                  - cell [ref=e2274]:
+                    - checkbox [checked] [ref=e2275] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2276]:
+                    - checkbox [ref=e2277] [cursor=pointer]
+                  - cell [ref=e2278]:
+                    - checkbox [ref=e2279] [cursor=pointer]
+                - row "Valider une liquidation liquidation_valider" [ref=e2280]:
+                  - cell "Valider une liquidation liquidation_valider" [ref=e2281]:
+                    - generic [ref=e2282]:
+                      - img [ref=e2283]
+                      - generic [ref=e2286]:
+                        - paragraph [ref=e2287]: Valider une liquidation
+                        - paragraph [ref=e2288]: liquidation_valider
+                  - cell [ref=e2289]:
+                    - checkbox [checked] [ref=e2290] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2291]:
+                    - checkbox [ref=e2292] [cursor=pointer]
+                  - cell [ref=e2293]:
+                    - checkbox [ref=e2294] [cursor=pointer]
+                  - cell [ref=e2295]:
+                    - checkbox [checked] [ref=e2296] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2297]:
+                    - checkbox [checked] [ref=e2298] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2299]:
+                    - checkbox [ref=e2300] [cursor=pointer]
+                  - cell [ref=e2301]:
+                    - checkbox [ref=e2302] [cursor=pointer]
+                  - cell [ref=e2303]:
+                    - checkbox [ref=e2304] [cursor=pointer]
+                  - cell [ref=e2305]:
+                    - checkbox [ref=e2306] [cursor=pointer]
+                  - cell [ref=e2307]:
+                    - checkbox [ref=e2308] [cursor=pointer]
+                - row "liquidations" [ref=e2309]:
+                  - cell "liquidations" [ref=e2310]:
+                    - generic [ref=e2311]:
+                      - img [ref=e2312]
+                      - text: liquidations
+                - row "Certifier Service Fait liquidation.certify" [ref=e2317]:
+                  - cell "Certifier Service Fait liquidation.certify" [ref=e2318]:
+                    - generic [ref=e2319]:
+                      - img [ref=e2320]
+                      - generic [ref=e2323]:
+                        - paragraph [ref=e2324]: Certifier Service Fait
+                        - paragraph [ref=e2325]: liquidation.certify
+                  - cell [ref=e2326]:
+                    - checkbox [checked] [ref=e2327] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2328]:
+                    - checkbox [ref=e2329] [cursor=pointer]
+                  - cell [ref=e2330]:
+                    - checkbox [ref=e2331] [cursor=pointer]
+                  - cell [ref=e2332]:
+                    - checkbox [checked] [ref=e2333] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2334]:
+                    - checkbox [ref=e2335] [cursor=pointer]
+                  - cell [ref=e2336]:
+                    - checkbox [ref=e2337] [cursor=pointer]
+                  - cell [ref=e2338]:
+                    - checkbox [ref=e2339] [cursor=pointer]
+                  - cell [ref=e2340]:
+                    - checkbox [ref=e2341] [cursor=pointer]
+                  - cell [ref=e2342]:
+                    - checkbox [ref=e2343] [cursor=pointer]
+                  - cell [ref=e2344]:
+                    - checkbox [ref=e2345] [cursor=pointer]
+                - row "Certifier Service Fait certify_service_fait" [ref=e2346]:
+                  - cell "Certifier Service Fait certify_service_fait" [ref=e2347]:
+                    - generic [ref=e2348]:
+                      - img [ref=e2349]
+                      - generic [ref=e2352]:
+                        - paragraph [ref=e2353]: Certifier Service Fait
+                        - paragraph [ref=e2354]: certify_service_fait
+                  - cell [ref=e2355]:
+                    - checkbox [checked] [ref=e2356] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2357]:
+                    - checkbox [ref=e2358] [cursor=pointer]
+                  - cell [ref=e2359]:
+                    - checkbox [ref=e2360] [cursor=pointer]
+                  - cell [ref=e2361]:
+                    - checkbox [ref=e2362] [cursor=pointer]
+                  - cell [ref=e2363]:
+                    - checkbox [ref=e2364] [cursor=pointer]
+                  - cell [ref=e2365]:
+                    - checkbox [ref=e2366] [cursor=pointer]
+                  - cell [ref=e2367]:
+                    - checkbox [ref=e2368] [cursor=pointer]
+                  - cell [ref=e2369]:
+                    - checkbox [ref=e2370] [cursor=pointer]
+                  - cell [ref=e2371]:
+                    - checkbox [ref=e2372] [cursor=pointer]
+                  - cell [ref=e2373]:
+                    - checkbox [ref=e2374] [cursor=pointer]
+                - row "Créer Liquidation create_liquidations" [ref=e2375]:
+                  - cell "Créer Liquidation create_liquidations" [ref=e2376]:
+                    - generic [ref=e2377]:
+                      - img [ref=e2378]
+                      - generic [ref=e2381]:
+                        - paragraph [ref=e2382]: Créer Liquidation
+                        - paragraph [ref=e2383]: create_liquidations
+                  - cell [ref=e2384]:
+                    - checkbox [checked] [ref=e2385] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2386]:
+                    - checkbox [ref=e2387] [cursor=pointer]
+                  - cell [ref=e2388]:
+                    - checkbox [ref=e2389] [cursor=pointer]
+                  - cell [ref=e2390]:
+                    - checkbox [checked] [ref=e2391] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2392]:
+                    - checkbox [ref=e2393] [cursor=pointer]
+                  - cell [ref=e2394]:
+                    - checkbox [ref=e2395] [cursor=pointer]
+                  - cell [ref=e2396]:
+                    - checkbox [ref=e2397] [cursor=pointer]
+                  - cell [ref=e2398]:
+                    - checkbox [ref=e2399] [cursor=pointer]
+                  - cell [ref=e2400]:
+                    - checkbox [ref=e2401] [cursor=pointer]
+                  - cell [ref=e2402]:
+                    - checkbox [ref=e2403] [cursor=pointer]
+                - row "Créer une Liquidation liquidation.create" [ref=e2404]:
+                  - cell "Créer une Liquidation liquidation.create" [ref=e2405]:
+                    - generic [ref=e2406]:
+                      - img [ref=e2407]
+                      - generic [ref=e2410]:
+                        - paragraph [ref=e2411]: Créer une Liquidation
+                        - paragraph [ref=e2412]: liquidation.create
+                  - cell [ref=e2413]:
+                    - checkbox [checked] [ref=e2414] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2415]:
+                    - checkbox [ref=e2416] [cursor=pointer]
+                  - cell [ref=e2417]:
+                    - checkbox [ref=e2418] [cursor=pointer]
+                  - cell [ref=e2419]:
+                    - checkbox [checked] [ref=e2420] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2421]:
+                    - checkbox [ref=e2422] [cursor=pointer]
+                  - cell [ref=e2423]:
+                    - checkbox [ref=e2424] [cursor=pointer]
+                  - cell [ref=e2425]:
+                    - checkbox [ref=e2426] [cursor=pointer]
+                  - cell [ref=e2427]:
+                    - checkbox [ref=e2428] [cursor=pointer]
+                  - cell [ref=e2429]:
+                    - checkbox [ref=e2430] [cursor=pointer]
+                  - cell [ref=e2431]:
+                    - checkbox [ref=e2432] [cursor=pointer]
+                - row "Modifier une Liquidation liquidation.edit" [ref=e2433]:
+                  - cell "Modifier une Liquidation liquidation.edit" [ref=e2434]:
+                    - generic [ref=e2435]:
+                      - img [ref=e2436]
+                      - generic [ref=e2439]:
+                        - paragraph [ref=e2440]: Modifier une Liquidation
+                        - paragraph [ref=e2441]: liquidation.edit
+                  - cell [ref=e2442]:
+                    - checkbox [checked] [ref=e2443] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2444]:
+                    - checkbox [ref=e2445] [cursor=pointer]
+                  - cell [ref=e2446]:
+                    - checkbox [ref=e2447] [cursor=pointer]
+                  - cell [ref=e2448]:
+                    - checkbox [checked] [ref=e2449] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2450]:
+                    - checkbox [ref=e2451] [cursor=pointer]
+                  - cell [ref=e2452]:
+                    - checkbox [ref=e2453] [cursor=pointer]
+                  - cell [ref=e2454]:
+                    - checkbox [ref=e2455] [cursor=pointer]
+                  - cell [ref=e2456]:
+                    - checkbox [ref=e2457] [cursor=pointer]
+                  - cell [ref=e2458]:
+                    - checkbox [ref=e2459] [cursor=pointer]
+                  - cell [ref=e2460]:
+                    - checkbox [ref=e2461] [cursor=pointer]
+                - row "Valider une Liquidation liquidation.validate" [ref=e2462]:
+                  - cell "Valider une Liquidation liquidation.validate" [ref=e2463]:
+                    - generic [ref=e2464]:
+                      - img [ref=e2465]
+                      - generic [ref=e2468]:
+                        - paragraph [ref=e2469]: Valider une Liquidation
+                        - paragraph [ref=e2470]: liquidation.validate
+                  - cell [ref=e2471]:
+                    - checkbox [checked] [ref=e2472] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2473]:
+                    - checkbox [ref=e2474] [cursor=pointer]
+                  - cell [ref=e2475]:
+                    - checkbox [ref=e2476] [cursor=pointer]
+                  - cell [ref=e2477]:
+                    - checkbox [checked] [ref=e2478] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2479]:
+                    - checkbox [ref=e2480] [cursor=pointer]
+                  - cell [ref=e2481]:
+                    - checkbox [ref=e2482] [cursor=pointer]
+                  - cell [ref=e2483]:
+                    - checkbox [ref=e2484] [cursor=pointer]
+                  - cell [ref=e2485]:
+                    - checkbox [ref=e2486] [cursor=pointer]
+                  - cell [ref=e2487]:
+                    - checkbox [ref=e2488] [cursor=pointer]
+                  - cell [ref=e2489]:
+                    - checkbox [ref=e2490] [cursor=pointer]
+                - row "Voir les Liquidations liquidation.view" [ref=e2491]:
+                  - cell "Voir les Liquidations liquidation.view" [ref=e2492]:
+                    - generic [ref=e2493]:
+                      - img [ref=e2494]
+                      - generic [ref=e2497]:
+                        - paragraph [ref=e2498]: Voir les Liquidations
+                        - paragraph [ref=e2499]: liquidation.view
+                  - cell [ref=e2500]:
+                    - checkbox [checked] [ref=e2501] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2502]:
+                    - checkbox [ref=e2503] [cursor=pointer]
+                  - cell [ref=e2504]:
+                    - checkbox [ref=e2505] [cursor=pointer]
+                  - cell [ref=e2506]:
+                    - checkbox [checked] [ref=e2507] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2508]:
+                    - checkbox [checked] [ref=e2509] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2510]:
+                    - checkbox [ref=e2511] [cursor=pointer]
+                  - cell [ref=e2512]:
+                    - checkbox [ref=e2513] [cursor=pointer]
+                  - cell [ref=e2514]:
+                    - checkbox [ref=e2515] [cursor=pointer]
+                  - cell [ref=e2516]:
+                    - checkbox [ref=e2517] [cursor=pointer]
+                  - cell [ref=e2518]:
+                    - checkbox [checked] [ref=e2519] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Voir Liquidations view_liquidations" [ref=e2520]:
+                  - cell "Voir Liquidations view_liquidations" [ref=e2521]:
+                    - generic [ref=e2522]:
+                      - img [ref=e2523]
+                      - generic [ref=e2526]:
+                        - paragraph [ref=e2527]: Voir Liquidations
+                        - paragraph [ref=e2528]: view_liquidations
+                  - cell [ref=e2529]:
+                    - checkbox [checked] [ref=e2530] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2531]:
+                    - checkbox [ref=e2532] [cursor=pointer]
+                  - cell [ref=e2533]:
+                    - checkbox [checked] [ref=e2534] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2535]:
+                    - checkbox [checked] [ref=e2536] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2537]:
+                    - checkbox [ref=e2538] [cursor=pointer]
+                  - cell [ref=e2539]:
+                    - checkbox [ref=e2540] [cursor=pointer]
+                  - cell [ref=e2541]:
+                    - checkbox [ref=e2542] [cursor=pointer]
+                  - cell [ref=e2543]:
+                    - checkbox [checked] [ref=e2544] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2545]:
+                    - checkbox [ref=e2546] [cursor=pointer]
+                  - cell [ref=e2547]:
+                    - checkbox [ref=e2548] [cursor=pointer]
+                - row "marches" [ref=e2549]:
+                  - cell "marches" [ref=e2550]:
+                    - generic [ref=e2551]:
+                      - img [ref=e2552]
+                      - text: marches
+                - row "Attribuer Marché attribute_marches" [ref=e2557]:
+                  - cell "Attribuer Marché attribute_marches" [ref=e2558]:
+                    - generic [ref=e2559]:
+                      - img [ref=e2560]
+                      - generic [ref=e2563]:
+                        - paragraph [ref=e2564]: Attribuer Marché
+                        - paragraph [ref=e2565]: attribute_marches
+                  - cell [ref=e2566]:
+                    - checkbox [checked] [ref=e2567] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2568]:
+                    - checkbox [ref=e2569] [cursor=pointer]
+                  - cell [ref=e2570]:
+                    - checkbox [ref=e2571] [cursor=pointer]
+                  - cell [ref=e2572]:
+                    - checkbox [ref=e2573] [cursor=pointer]
+                  - cell [ref=e2574]:
+                    - checkbox [ref=e2575] [cursor=pointer]
+                  - cell [ref=e2576]:
+                    - checkbox [ref=e2577] [cursor=pointer]
+                  - cell [ref=e2578]:
+                    - checkbox [ref=e2579] [cursor=pointer]
+                  - cell [ref=e2580]:
+                    - checkbox [ref=e2581] [cursor=pointer]
+                  - cell [ref=e2582]:
+                    - checkbox [ref=e2583] [cursor=pointer]
+                  - cell [ref=e2584]:
+                    - checkbox [ref=e2585] [cursor=pointer]
+                - row "Attribuer un Marché marche.award" [ref=e2586]:
+                  - cell "Attribuer un Marché marche.award" [ref=e2587]:
+                    - generic [ref=e2588]:
+                      - img [ref=e2589]
+                      - generic [ref=e2592]:
+                        - paragraph [ref=e2593]: Attribuer un Marché
+                        - paragraph [ref=e2594]: marche.award
+                  - cell [ref=e2595]:
+                    - checkbox [checked] [ref=e2596] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2597]:
+                    - checkbox [ref=e2598] [cursor=pointer]
+                  - cell [ref=e2599]:
+                    - checkbox [ref=e2600] [cursor=pointer]
+                  - cell [ref=e2601]:
+                    - checkbox [ref=e2602] [cursor=pointer]
+                  - cell [ref=e2603]:
+                    - checkbox [ref=e2604] [cursor=pointer]
+                  - cell [ref=e2605]:
+                    - checkbox [ref=e2606] [cursor=pointer]
+                  - cell [ref=e2607]:
+                    - checkbox [ref=e2608] [cursor=pointer]
+                  - cell [ref=e2609]:
+                    - checkbox [ref=e2610] [cursor=pointer]
+                  - cell [ref=e2611]:
+                    - checkbox [ref=e2612] [cursor=pointer]
+                  - cell [ref=e2613]:
+                    - checkbox [ref=e2614] [cursor=pointer]
+                - row "Créer Marché create_marches" [ref=e2615]:
+                  - cell "Créer Marché create_marches" [ref=e2616]:
+                    - generic [ref=e2617]:
+                      - img [ref=e2618]
+                      - generic [ref=e2621]:
+                        - paragraph [ref=e2622]: Créer Marché
+                        - paragraph [ref=e2623]: create_marches
+                  - cell [ref=e2624]:
+                    - checkbox [checked] [ref=e2625] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2626]:
+                    - checkbox [ref=e2627] [cursor=pointer]
+                  - cell [ref=e2628]:
+                    - checkbox [ref=e2629] [cursor=pointer]
+                  - cell [ref=e2630]:
+                    - checkbox [checked] [ref=e2631] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2632]:
+                    - checkbox [ref=e2633] [cursor=pointer]
+                  - cell [ref=e2634]:
+                    - checkbox [ref=e2635] [cursor=pointer]
+                  - cell [ref=e2636]:
+                    - checkbox [ref=e2637] [cursor=pointer]
+                  - cell [ref=e2638]:
+                    - checkbox [ref=e2639] [cursor=pointer]
+                  - cell [ref=e2640]:
+                    - checkbox [ref=e2641] [cursor=pointer]
+                  - cell [ref=e2642]:
+                    - checkbox [ref=e2643] [cursor=pointer]
+                - row "Créer un Marché marche.create" [ref=e2644]:
+                  - cell "Créer un Marché marche.create" [ref=e2645]:
+                    - generic [ref=e2646]:
+                      - img [ref=e2647]
+                      - generic [ref=e2650]:
+                        - paragraph [ref=e2651]: Créer un Marché
+                        - paragraph [ref=e2652]: marche.create
+                  - cell [ref=e2653]:
+                    - checkbox [checked] [ref=e2654] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2655]:
+                    - checkbox [ref=e2656] [cursor=pointer]
+                  - cell [ref=e2657]:
+                    - checkbox [ref=e2658] [cursor=pointer]
+                  - cell [ref=e2659]:
+                    - checkbox [checked] [ref=e2660] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2661]:
+                    - checkbox [ref=e2662] [cursor=pointer]
+                  - cell [ref=e2663]:
+                    - checkbox [ref=e2664] [cursor=pointer]
+                  - cell [ref=e2665]:
+                    - checkbox [ref=e2666] [cursor=pointer]
+                  - cell [ref=e2667]:
+                    - checkbox [ref=e2668] [cursor=pointer]
+                  - cell [ref=e2669]:
+                    - checkbox [ref=e2670] [cursor=pointer]
+                  - cell [ref=e2671]:
+                    - checkbox [ref=e2672] [cursor=pointer]
+                - row "Modifier un Marché marche.edit" [ref=e2673]:
+                  - cell "Modifier un Marché marche.edit" [ref=e2674]:
+                    - generic [ref=e2675]:
+                      - img [ref=e2676]
+                      - generic [ref=e2679]:
+                        - paragraph [ref=e2680]: Modifier un Marché
+                        - paragraph [ref=e2681]: marche.edit
+                  - cell [ref=e2682]:
+                    - checkbox [checked] [ref=e2683] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2684]:
+                    - checkbox [ref=e2685] [cursor=pointer]
+                  - cell [ref=e2686]:
+                    - checkbox [ref=e2687] [cursor=pointer]
+                  - cell [ref=e2688]:
+                    - checkbox [checked] [ref=e2689] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2690]:
+                    - checkbox [ref=e2691] [cursor=pointer]
+                  - cell [ref=e2692]:
+                    - checkbox [ref=e2693] [cursor=pointer]
+                  - cell [ref=e2694]:
+                    - checkbox [ref=e2695] [cursor=pointer]
+                  - cell [ref=e2696]:
+                    - checkbox [ref=e2697] [cursor=pointer]
+                  - cell [ref=e2698]:
+                    - checkbox [ref=e2699] [cursor=pointer]
+                  - cell [ref=e2700]:
+                    - checkbox [ref=e2701] [cursor=pointer]
+                - row "Voir les Marchés marche.view" [ref=e2702]:
+                  - cell "Voir les Marchés marche.view" [ref=e2703]:
+                    - generic [ref=e2704]:
+                      - img [ref=e2705]
+                      - generic [ref=e2708]:
+                        - paragraph [ref=e2709]: Voir les Marchés
+                        - paragraph [ref=e2710]: marche.view
+                  - cell [ref=e2711]:
+                    - checkbox [checked] [ref=e2712] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2713]:
+                    - checkbox [ref=e2714] [cursor=pointer]
+                  - cell [ref=e2715]:
+                    - checkbox [ref=e2716] [cursor=pointer]
+                  - cell [ref=e2717]:
+                    - checkbox [checked] [ref=e2718] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2719]:
+                    - checkbox [checked] [ref=e2720] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2721]:
+                    - checkbox [ref=e2722] [cursor=pointer]
+                  - cell [ref=e2723]:
+                    - checkbox [ref=e2724] [cursor=pointer]
+                  - cell [ref=e2725]:
+                    - checkbox [checked] [ref=e2726] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2727]:
+                    - checkbox [ref=e2728] [cursor=pointer]
+                  - cell [ref=e2729]:
+                    - checkbox [ref=e2730] [cursor=pointer]
+                - row "Voir Marchés view_marches" [ref=e2731]:
+                  - cell "Voir Marchés view_marches" [ref=e2732]:
+                    - generic [ref=e2733]:
+                      - img [ref=e2734]
+                      - generic [ref=e2737]:
+                        - paragraph [ref=e2738]: Voir Marchés
+                        - paragraph [ref=e2739]: view_marches
+                  - cell [ref=e2740]:
+                    - checkbox [checked] [ref=e2741] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2742]:
+                    - checkbox [ref=e2743] [cursor=pointer]
+                  - cell [ref=e2744]:
+                    - checkbox [checked] [ref=e2745] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2746]:
+                    - checkbox [checked] [ref=e2747] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2748]:
+                    - checkbox [ref=e2749] [cursor=pointer]
+                  - cell [ref=e2750]:
+                    - checkbox [checked] [ref=e2751] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2752]:
+                    - checkbox [ref=e2753] [cursor=pointer]
+                  - cell [ref=e2754]:
+                    - checkbox [ref=e2755] [cursor=pointer]
+                  - cell [ref=e2756]:
+                    - checkbox [ref=e2757] [cursor=pointer]
+                  - cell [ref=e2758]:
+                    - checkbox [ref=e2759] [cursor=pointer]
+                - row "notes" [ref=e2760]:
+                  - cell "notes" [ref=e2761]:
+                    - generic [ref=e2762]:
+                      - img [ref=e2763]
+                      - text: notes
+                - row "Créer Imputation create_imputations" [ref=e2768]:
+                  - cell "Créer Imputation create_imputations" [ref=e2769]:
+                    - generic [ref=e2770]:
+                      - img [ref=e2771]
+                      - generic [ref=e2774]:
+                        - paragraph [ref=e2775]: Créer Imputation
+                        - paragraph [ref=e2776]: create_imputations
+                  - cell [ref=e2777]:
+                    - checkbox [checked] [ref=e2778] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2779]:
+                    - checkbox [ref=e2780] [cursor=pointer]
+                  - cell [ref=e2781]:
+                    - checkbox [ref=e2782] [cursor=pointer]
+                  - cell [ref=e2783]:
+                    - checkbox [checked] [ref=e2784] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2785]:
+                    - checkbox [ref=e2786] [cursor=pointer]
+                  - cell [ref=e2787]:
+                    - checkbox [ref=e2788] [cursor=pointer]
+                  - cell [ref=e2789]:
+                    - checkbox [ref=e2790] [cursor=pointer]
+                  - cell [ref=e2791]:
+                    - checkbox [ref=e2792] [cursor=pointer]
+                  - cell [ref=e2793]:
+                    - checkbox [ref=e2794] [cursor=pointer]
+                  - cell [ref=e2795]:
+                    - checkbox [ref=e2796] [cursor=pointer]
+                - row "Créer Note create_notes" [ref=e2797]:
+                  - cell "Créer Note create_notes" [ref=e2798]:
+                    - generic [ref=e2799]:
+                      - img [ref=e2800]
+                      - generic [ref=e2803]:
+                        - paragraph [ref=e2804]: Créer Note
+                        - paragraph [ref=e2805]: create_notes
+                  - cell [ref=e2806]:
+                    - checkbox [checked] [ref=e2807] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2808]:
+                    - checkbox [ref=e2809] [cursor=pointer]
+                  - cell [ref=e2810]:
+                    - checkbox [ref=e2811] [cursor=pointer]
+                  - cell [ref=e2812]:
+                    - checkbox [ref=e2813] [cursor=pointer]
+                  - cell [ref=e2814]:
+                    - checkbox [ref=e2815] [cursor=pointer]
+                  - cell [ref=e2816]:
+                    - checkbox [ref=e2817] [cursor=pointer]
+                  - cell [ref=e2818]:
+                    - checkbox [ref=e2819] [cursor=pointer]
+                  - cell [ref=e2820]:
+                    - checkbox [checked] [ref=e2821] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2822]:
+                    - checkbox [ref=e2823] [cursor=pointer]
+                  - cell [ref=e2824]:
+                    - checkbox [ref=e2825] [cursor=pointer]
+                - row "Créer une Note note.create" [ref=e2826]:
+                  - cell "Créer une Note note.create" [ref=e2827]:
+                    - generic [ref=e2828]:
+                      - img [ref=e2829]
+                      - generic [ref=e2832]:
+                        - paragraph [ref=e2833]: Créer une Note
+                        - paragraph [ref=e2834]: note.create
+                  - cell [ref=e2835]:
+                    - checkbox [checked] [ref=e2836] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2837]:
+                    - checkbox [ref=e2838] [cursor=pointer]
+                  - cell [ref=e2839]:
+                    - checkbox [ref=e2840] [cursor=pointer]
+                  - cell [ref=e2841]:
+                    - checkbox [checked] [ref=e2842] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2843]:
+                    - checkbox [ref=e2844] [cursor=pointer]
+                  - cell [ref=e2845]:
+                    - checkbox [ref=e2846] [cursor=pointer]
+                  - cell [ref=e2847]:
+                    - checkbox [ref=e2848] [cursor=pointer]
+                  - cell [ref=e2849]:
+                    - checkbox [checked] [ref=e2850] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2851]:
+                    - checkbox [ref=e2852] [cursor=pointer]
+                  - cell [ref=e2853]:
+                    - checkbox [ref=e2854] [cursor=pointer]
+                - row "Différer une Note note.defer" [ref=e2855]:
+                  - cell "Différer une Note note.defer" [ref=e2856]:
+                    - generic [ref=e2857]:
+                      - img [ref=e2858]
+                      - generic [ref=e2861]:
+                        - paragraph [ref=e2862]: Différer une Note
+                        - paragraph [ref=e2863]: note.defer
+                  - cell [ref=e2864]:
+                    - checkbox [checked] [ref=e2865] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2866]:
+                    - checkbox [ref=e2867] [cursor=pointer]
+                  - cell [ref=e2868]:
+                    - checkbox [ref=e2869] [cursor=pointer]
+                  - cell [ref=e2870]:
+                    - checkbox [ref=e2871] [cursor=pointer]
+                  - cell [ref=e2872]:
+                    - checkbox [checked] [ref=e2873] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2874]:
+                    - checkbox [ref=e2875] [cursor=pointer]
+                  - cell [ref=e2876]:
+                    - checkbox [ref=e2877] [cursor=pointer]
+                  - cell [ref=e2878]:
+                    - checkbox [ref=e2879] [cursor=pointer]
+                  - cell [ref=e2880]:
+                    - checkbox [ref=e2881] [cursor=pointer]
+                  - cell [ref=e2882]:
+                    - checkbox [ref=e2883] [cursor=pointer]
+                - row "Modifier une Note note.edit" [ref=e2884]:
+                  - cell "Modifier une Note note.edit" [ref=e2885]:
+                    - generic [ref=e2886]:
+                      - img [ref=e2887]
+                      - generic [ref=e2890]:
+                        - paragraph [ref=e2891]: Modifier une Note
+                        - paragraph [ref=e2892]: note.edit
+                  - cell [ref=e2893]:
+                    - checkbox [checked] [ref=e2894] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2895]:
+                    - checkbox [ref=e2896] [cursor=pointer]
+                  - cell [ref=e2897]:
+                    - checkbox [ref=e2898] [cursor=pointer]
+                  - cell [ref=e2899]:
+                    - checkbox [ref=e2900] [cursor=pointer]
+                  - cell [ref=e2901]:
+                    - checkbox [ref=e2902] [cursor=pointer]
+                  - cell [ref=e2903]:
+                    - checkbox [ref=e2904] [cursor=pointer]
+                  - cell [ref=e2905]:
+                    - checkbox [ref=e2906] [cursor=pointer]
+                  - cell [ref=e2907]:
+                    - checkbox [checked] [ref=e2908] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2909]:
+                    - checkbox [ref=e2910] [cursor=pointer]
+                  - cell [ref=e2911]:
+                    - checkbox [ref=e2912] [cursor=pointer]
+                - row "Rejeter une Note note.reject" [ref=e2913]:
+                  - cell "Rejeter une Note note.reject" [ref=e2914]:
+                    - generic [ref=e2915]:
+                      - img [ref=e2916]
+                      - generic [ref=e2919]:
+                        - paragraph [ref=e2920]: Rejeter une Note
+                        - paragraph [ref=e2921]: note.reject
+                  - cell [ref=e2922]:
+                    - checkbox [checked] [ref=e2923] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2924]:
+                    - checkbox [ref=e2925] [cursor=pointer]
+                  - cell [ref=e2926]:
+                    - checkbox [ref=e2927] [cursor=pointer]
+                  - cell [ref=e2928]:
+                    - checkbox [ref=e2929] [cursor=pointer]
+                  - cell [ref=e2930]:
+                    - checkbox [checked] [ref=e2931] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2932]:
+                    - checkbox [ref=e2933] [cursor=pointer]
+                  - cell [ref=e2934]:
+                    - checkbox [ref=e2935] [cursor=pointer]
+                  - cell [ref=e2936]:
+                    - checkbox [ref=e2937] [cursor=pointer]
+                  - cell [ref=e2938]:
+                    - checkbox [ref=e2939] [cursor=pointer]
+                  - cell [ref=e2940]:
+                    - checkbox [ref=e2941] [cursor=pointer]
+                - row "Soumettre une Note note.submit" [ref=e2942]:
+                  - cell "Soumettre une Note note.submit" [ref=e2943]:
+                    - generic [ref=e2944]:
+                      - img [ref=e2945]
+                      - generic [ref=e2948]:
+                        - paragraph [ref=e2949]: Soumettre une Note
+                        - paragraph [ref=e2950]: note.submit
+                  - cell [ref=e2951]:
+                    - checkbox [checked] [ref=e2952] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2953]:
+                    - checkbox [ref=e2954] [cursor=pointer]
+                  - cell [ref=e2955]:
+                    - checkbox [ref=e2956] [cursor=pointer]
+                  - cell [ref=e2957]:
+                    - checkbox [ref=e2958] [cursor=pointer]
+                  - cell [ref=e2959]:
+                    - checkbox [ref=e2960] [cursor=pointer]
+                  - cell [ref=e2961]:
+                    - checkbox [ref=e2962] [cursor=pointer]
+                  - cell [ref=e2963]:
+                    - checkbox [ref=e2964] [cursor=pointer]
+                  - cell [ref=e2965]:
+                    - checkbox [checked] [ref=e2966] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2967]:
+                    - checkbox [ref=e2968] [cursor=pointer]
+                  - cell [ref=e2969]:
+                    - checkbox [ref=e2970] [cursor=pointer]
+                - row "Supprimer une Note note.delete" [ref=e2971]:
+                  - cell "Supprimer une Note note.delete" [ref=e2972]:
+                    - generic [ref=e2973]:
+                      - img [ref=e2974]
+                      - generic [ref=e2977]:
+                        - paragraph [ref=e2978]: Supprimer une Note
+                        - paragraph [ref=e2979]: note.delete
+                  - cell [ref=e2980]:
+                    - checkbox [checked] [ref=e2981] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e2982]:
+                    - checkbox [ref=e2983] [cursor=pointer]
+                  - cell [ref=e2984]:
+                    - checkbox [ref=e2985] [cursor=pointer]
+                  - cell [ref=e2986]:
+                    - checkbox [ref=e2987] [cursor=pointer]
+                  - cell [ref=e2988]:
+                    - checkbox [ref=e2989] [cursor=pointer]
+                  - cell [ref=e2990]:
+                    - checkbox [ref=e2991] [cursor=pointer]
+                  - cell [ref=e2992]:
+                    - checkbox [ref=e2993] [cursor=pointer]
+                  - cell [ref=e2994]:
+                    - checkbox [ref=e2995] [cursor=pointer]
+                  - cell [ref=e2996]:
+                    - checkbox [ref=e2997] [cursor=pointer]
+                  - cell [ref=e2998]:
+                    - checkbox [ref=e2999] [cursor=pointer]
+                - row "Valider Notes validate_notes" [ref=e3000]:
+                  - cell "Valider Notes validate_notes" [ref=e3001]:
+                    - generic [ref=e3002]:
+                      - img [ref=e3003]
+                      - generic [ref=e3006]:
+                        - paragraph [ref=e3007]: Valider Notes
+                        - paragraph [ref=e3008]: validate_notes
+                  - cell [ref=e3009]:
+                    - checkbox [checked] [ref=e3010] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3011]:
+                    - checkbox [ref=e3012] [cursor=pointer]
+                  - cell [ref=e3013]:
+                    - checkbox [ref=e3014] [cursor=pointer]
+                  - cell [ref=e3015]:
+                    - checkbox [ref=e3016] [cursor=pointer]
+                  - cell [ref=e3017]:
+                    - checkbox [checked] [ref=e3018] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3019]:
+                    - checkbox [ref=e3020] [cursor=pointer]
+                  - cell [ref=e3021]:
+                    - checkbox [ref=e3022] [cursor=pointer]
+                  - cell [ref=e3023]:
+                    - checkbox [ref=e3024] [cursor=pointer]
+                  - cell [ref=e3025]:
+                    - checkbox [ref=e3026] [cursor=pointer]
+                  - cell [ref=e3027]:
+                    - checkbox [ref=e3028] [cursor=pointer]
+                - row "Valider une Note note.validate" [ref=e3029]:
+                  - cell "Valider une Note note.validate" [ref=e3030]:
+                    - generic [ref=e3031]:
+                      - img [ref=e3032]
+                      - generic [ref=e3035]:
+                        - paragraph [ref=e3036]: Valider une Note
+                        - paragraph [ref=e3037]: note.validate
+                  - cell [ref=e3038]:
+                    - checkbox [checked] [ref=e3039] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3040]:
+                    - checkbox [ref=e3041] [cursor=pointer]
+                  - cell [ref=e3042]:
+                    - checkbox [ref=e3043] [cursor=pointer]
+                  - cell [ref=e3044]:
+                    - checkbox [ref=e3045] [cursor=pointer]
+                  - cell [ref=e3046]:
+                    - checkbox [checked] [ref=e3047] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3048]:
+                    - checkbox [ref=e3049] [cursor=pointer]
+                  - cell [ref=e3050]:
+                    - checkbox [ref=e3051] [cursor=pointer]
+                  - cell [ref=e3052]:
+                    - checkbox [ref=e3053] [cursor=pointer]
+                  - cell [ref=e3054]:
+                    - checkbox [ref=e3055] [cursor=pointer]
+                  - cell [ref=e3056]:
+                    - checkbox [ref=e3057] [cursor=pointer]
+                - row "Voir Imputations view_imputations" [ref=e3058]:
+                  - cell "Voir Imputations view_imputations" [ref=e3059]:
+                    - generic [ref=e3060]:
+                      - img [ref=e3061]
+                      - generic [ref=e3064]:
+                        - paragraph [ref=e3065]: Voir Imputations
+                        - paragraph [ref=e3066]: view_imputations
+                  - cell [ref=e3067]:
+                    - checkbox [checked] [ref=e3068] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3069]:
+                    - checkbox [ref=e3070] [cursor=pointer]
+                  - cell [ref=e3071]:
+                    - checkbox [checked] [ref=e3072] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3073]:
+                    - checkbox [checked] [ref=e3074] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3075]:
+                    - checkbox [ref=e3076] [cursor=pointer]
+                  - cell [ref=e3077]:
+                    - checkbox [ref=e3078] [cursor=pointer]
+                  - cell [ref=e3079]:
+                    - checkbox [ref=e3080] [cursor=pointer]
+                  - cell [ref=e3081]:
+                    - checkbox [ref=e3082] [cursor=pointer]
+                  - cell [ref=e3083]:
+                    - checkbox [ref=e3084] [cursor=pointer]
+                  - cell [ref=e3085]:
+                    - checkbox [ref=e3086] [cursor=pointer]
+                - row "Voir les Notes note.view" [ref=e3087]:
+                  - cell "Voir les Notes note.view" [ref=e3088]:
+                    - generic [ref=e3089]:
+                      - img [ref=e3090]
+                      - generic [ref=e3093]:
+                        - paragraph [ref=e3094]: Voir les Notes
+                        - paragraph [ref=e3095]: note.view
+                  - cell [ref=e3096]:
+                    - checkbox [checked] [ref=e3097] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3098]:
+                    - checkbox [ref=e3099] [cursor=pointer]
+                  - cell [ref=e3100]:
+                    - checkbox [ref=e3101] [cursor=pointer]
+                  - cell [ref=e3102]:
+                    - checkbox [checked] [ref=e3103] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3104]:
+                    - checkbox [checked] [ref=e3105] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3106]:
+                    - checkbox [ref=e3107] [cursor=pointer]
+                  - cell [ref=e3108]:
+                    - checkbox [ref=e3109] [cursor=pointer]
+                  - cell [ref=e3110]:
+                    - checkbox [checked] [ref=e3111] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3112]:
+                    - checkbox [ref=e3113] [cursor=pointer]
+                  - cell [ref=e3114]:
+                    - checkbox [ref=e3115] [cursor=pointer]
+                - row "Voir Notes DG view_notes" [ref=e3116]:
+                  - cell "Voir Notes DG view_notes" [ref=e3117]:
+                    - generic [ref=e3118]:
+                      - img [ref=e3119]
+                      - generic [ref=e3122]:
+                        - paragraph [ref=e3123]: Voir Notes DG
+                        - paragraph [ref=e3124]: view_notes
+                  - cell [ref=e3125]:
+                    - checkbox [checked] [ref=e3126] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3127]:
+                    - checkbox [ref=e3128] [cursor=pointer]
+                  - cell [ref=e3129]:
+                    - checkbox [checked] [ref=e3130] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3131]:
+                    - checkbox [checked] [ref=e3132] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3133]:
+                    - checkbox [checked] [ref=e3134] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3135]:
+                    - checkbox [checked] [ref=e3136] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3137]:
+                    - checkbox [ref=e3138] [cursor=pointer]
+                  - cell [ref=e3139]:
+                    - checkbox [checked] [ref=e3140] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3141]:
+                    - checkbox [checked] [ref=e3142] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3143]:
+                    - checkbox [ref=e3144] [cursor=pointer]
+                - row "Ordonnancement" [ref=e3145]:
+                  - cell "Ordonnancement" [ref=e3146]:
+                    - generic [ref=e3147]:
+                      - img [ref=e3148]
+                      - text: Ordonnancement
+                - row "Consulter les ordonnancements ordonnancement_voir" [ref=e3153]:
+                  - cell "Consulter les ordonnancements ordonnancement_voir" [ref=e3154]:
+                    - generic [ref=e3155]:
+                      - img [ref=e3156]
+                      - generic [ref=e3159]:
+                        - paragraph [ref=e3160]: Consulter les ordonnancements
+                        - paragraph [ref=e3161]: ordonnancement_voir
+                  - cell [ref=e3162]:
+                    - checkbox [checked] [ref=e3163] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3164]:
+                    - checkbox [ref=e3165] [cursor=pointer]
+                  - cell [ref=e3166]:
+                    - checkbox [ref=e3167] [cursor=pointer]
+                  - cell [ref=e3168]:
+                    - checkbox [checked] [ref=e3169] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3170]:
+                    - checkbox [checked] [ref=e3171] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3172]:
+                    - checkbox [ref=e3173] [cursor=pointer]
+                  - cell [ref=e3174]:
+                    - checkbox [checked] [ref=e3175] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3176]:
+                    - checkbox [checked] [ref=e3177] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3178]:
+                    - checkbox [ref=e3179] [cursor=pointer]
+                  - cell [ref=e3180]:
+                    - checkbox [checked] [ref=e3181] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Créer un ordonnancement ordonnancement_creer" [ref=e3182]:
+                  - cell "Créer un ordonnancement ordonnancement_creer" [ref=e3183]:
+                    - generic [ref=e3184]:
+                      - img [ref=e3185]
+                      - generic [ref=e3186]:
+                        - paragraph [ref=e3187]: Créer un ordonnancement
+                        - paragraph [ref=e3188]: ordonnancement_creer
+                  - cell [ref=e3189]:
+                    - checkbox [checked] [ref=e3190] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3191]:
+                    - checkbox [ref=e3192] [cursor=pointer]
+                  - cell [ref=e3193]:
+                    - checkbox [ref=e3194] [cursor=pointer]
+                  - cell [ref=e3195]:
+                    - checkbox [checked] [ref=e3196] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3197]:
+                    - checkbox [ref=e3198] [cursor=pointer]
+                  - cell [ref=e3199]:
+                    - checkbox [ref=e3200] [cursor=pointer]
+                  - cell [ref=e3201]:
+                    - checkbox [ref=e3202] [cursor=pointer]
+                  - cell [ref=e3203]:
+                    - checkbox [checked] [ref=e3204] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3205]:
+                    - checkbox [ref=e3206] [cursor=pointer]
+                  - cell [ref=e3207]:
+                    - checkbox [ref=e3208] [cursor=pointer]
+                - row "Signer un mandat ordonnancement_signer" [ref=e3209]:
+                  - cell "Signer un mandat ordonnancement_signer" [ref=e3210]:
+                    - generic [ref=e3211]:
+                      - img [ref=e3212]
+                      - generic [ref=e3215]:
+                        - paragraph [ref=e3216]: Signer un mandat
+                        - paragraph [ref=e3217]: ordonnancement_signer
+                  - cell [ref=e3218]:
+                    - checkbox [checked] [ref=e3219] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3220]:
+                    - checkbox [ref=e3221] [cursor=pointer]
+                  - cell [ref=e3222]:
+                    - checkbox [ref=e3223] [cursor=pointer]
+                  - cell [ref=e3224]:
+                    - checkbox [ref=e3225] [cursor=pointer]
+                  - cell [ref=e3226]:
+                    - checkbox [checked] [ref=e3227] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3228]:
+                    - checkbox [ref=e3229] [cursor=pointer]
+                  - cell [ref=e3230]:
+                    - checkbox [ref=e3231] [cursor=pointer]
+                  - cell [ref=e3232]:
+                    - checkbox [ref=e3233] [cursor=pointer]
+                  - cell [ref=e3234]:
+                    - checkbox [ref=e3235] [cursor=pointer]
+                  - cell [ref=e3236]:
+                    - checkbox [ref=e3237] [cursor=pointer]
+                - row "ordonnancements" [ref=e3238]:
+                  - cell "ordonnancements" [ref=e3239]:
+                    - generic [ref=e3240]:
+                      - img [ref=e3241]
+                      - text: ordonnancements
+                - row "Créer Ordonnancement create_ordonnancements" [ref=e3246]:
+                  - cell "Créer Ordonnancement create_ordonnancements" [ref=e3247]:
+                    - generic [ref=e3248]:
+                      - img [ref=e3249]
+                      - generic [ref=e3252]:
+                        - paragraph [ref=e3253]: Créer Ordonnancement
+                        - paragraph [ref=e3254]: create_ordonnancements
+                  - cell [ref=e3255]:
+                    - checkbox [checked] [ref=e3256] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3257]:
+                    - checkbox [ref=e3258] [cursor=pointer]
+                  - cell [ref=e3259]:
+                    - checkbox [ref=e3260] [cursor=pointer]
+                  - cell [ref=e3261]:
+                    - checkbox [checked] [ref=e3262] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3263]:
+                    - checkbox [ref=e3264] [cursor=pointer]
+                  - cell [ref=e3265]:
+                    - checkbox [ref=e3266] [cursor=pointer]
+                  - cell [ref=e3267]:
+                    - checkbox [ref=e3268] [cursor=pointer]
+                  - cell [ref=e3269]:
+                    - checkbox [ref=e3270] [cursor=pointer]
+                  - cell [ref=e3271]:
+                    - checkbox [ref=e3272] [cursor=pointer]
+                  - cell [ref=e3273]:
+                    - checkbox [ref=e3274] [cursor=pointer]
+                - row "Créer un Mandat ordonnancement.create" [ref=e3275]:
+                  - cell "Créer un Mandat ordonnancement.create" [ref=e3276]:
+                    - generic [ref=e3277]:
+                      - img [ref=e3278]
+                      - generic [ref=e3281]:
+                        - paragraph [ref=e3282]: Créer un Mandat
+                        - paragraph [ref=e3283]: ordonnancement.create
+                  - cell [ref=e3284]:
+                    - checkbox [checked] [ref=e3285] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3286]:
+                    - checkbox [ref=e3287] [cursor=pointer]
+                  - cell [ref=e3288]:
+                    - checkbox [ref=e3289] [cursor=pointer]
+                  - cell [ref=e3290]:
+                    - checkbox [checked] [ref=e3291] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3292]:
+                    - checkbox [ref=e3293] [cursor=pointer]
+                  - cell [ref=e3294]:
+                    - checkbox [ref=e3295] [cursor=pointer]
+                  - cell [ref=e3296]:
+                    - checkbox [ref=e3297] [cursor=pointer]
+                  - cell [ref=e3298]:
+                    - checkbox [ref=e3299] [cursor=pointer]
+                  - cell [ref=e3300]:
+                    - checkbox [ref=e3301] [cursor=pointer]
+                  - cell [ref=e3302]:
+                    - checkbox [ref=e3303] [cursor=pointer]
+                - row "Signer Ordonnancement sign_ordonnancements" [ref=e3304]:
+                  - cell "Signer Ordonnancement sign_ordonnancements" [ref=e3305]:
+                    - generic [ref=e3306]:
+                      - img [ref=e3307]
+                      - generic [ref=e3310]:
+                        - paragraph [ref=e3311]: Signer Ordonnancement
+                        - paragraph [ref=e3312]: sign_ordonnancements
+                  - cell [ref=e3313]:
+                    - checkbox [checked] [ref=e3314] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3315]:
+                    - checkbox [ref=e3316] [cursor=pointer]
+                  - cell [ref=e3317]:
+                    - checkbox [ref=e3318] [cursor=pointer]
+                  - cell [ref=e3319]:
+                    - checkbox [checked] [ref=e3320] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3321]:
+                    - checkbox [checked] [ref=e3322] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3323]:
+                    - checkbox [ref=e3324] [cursor=pointer]
+                  - cell [ref=e3325]:
+                    - checkbox [ref=e3326] [cursor=pointer]
+                  - cell [ref=e3327]:
+                    - checkbox [ref=e3328] [cursor=pointer]
+                  - cell [ref=e3329]:
+                    - checkbox [ref=e3330] [cursor=pointer]
+                  - cell [ref=e3331]:
+                    - checkbox [ref=e3332] [cursor=pointer]
+                - row "Signer un Mandat ordonnancement.sign" [ref=e3333]:
+                  - cell "Signer un Mandat ordonnancement.sign" [ref=e3334]:
+                    - generic [ref=e3335]:
+                      - img [ref=e3336]
+                      - generic [ref=e3339]:
+                        - paragraph [ref=e3340]: Signer un Mandat
+                        - paragraph [ref=e3341]: ordonnancement.sign
+                  - cell [ref=e3342]:
+                    - checkbox [checked] [ref=e3343] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3344]:
+                    - checkbox [ref=e3345] [cursor=pointer]
+                  - cell [ref=e3346]:
+                    - checkbox [ref=e3347] [cursor=pointer]
+                  - cell [ref=e3348]:
+                    - checkbox [checked] [ref=e3349] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3350]:
+                    - checkbox [checked] [ref=e3351] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3352]:
+                    - checkbox [ref=e3353] [cursor=pointer]
+                  - cell [ref=e3354]:
+                    - checkbox [ref=e3355] [cursor=pointer]
+                  - cell [ref=e3356]:
+                    - checkbox [ref=e3357] [cursor=pointer]
+                  - cell [ref=e3358]:
+                    - checkbox [ref=e3359] [cursor=pointer]
+                  - cell [ref=e3360]:
+                    - checkbox [ref=e3361] [cursor=pointer]
+                - row "Transmettre au Trésor ordonnancement.transmit" [ref=e3362]:
+                  - cell "Transmettre au Trésor ordonnancement.transmit" [ref=e3363]:
+                    - generic [ref=e3364]:
+                      - img [ref=e3365]
+                      - generic [ref=e3368]:
+                        - paragraph [ref=e3369]: Transmettre au Trésor
+                        - paragraph [ref=e3370]: ordonnancement.transmit
+                  - cell [ref=e3371]:
+                    - checkbox [checked] [ref=e3372] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3373]:
+                    - checkbox [ref=e3374] [cursor=pointer]
+                  - cell [ref=e3375]:
+                    - checkbox [ref=e3376] [cursor=pointer]
+                  - cell [ref=e3377]:
+                    - checkbox [checked] [ref=e3378] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3379]:
+                    - checkbox [ref=e3380] [cursor=pointer]
+                  - cell [ref=e3381]:
+                    - checkbox [ref=e3382] [cursor=pointer]
+                  - cell [ref=e3383]:
+                    - checkbox [ref=e3384] [cursor=pointer]
+                  - cell [ref=e3385]:
+                    - checkbox [ref=e3386] [cursor=pointer]
+                  - cell [ref=e3387]:
+                    - checkbox [ref=e3388] [cursor=pointer]
+                  - cell [ref=e3389]:
+                    - checkbox [ref=e3390] [cursor=pointer]
+                - row "Voir les Mandats ordonnancement.view" [ref=e3391]:
+                  - cell "Voir les Mandats ordonnancement.view" [ref=e3392]:
+                    - generic [ref=e3393]:
+                      - img [ref=e3394]
+                      - generic [ref=e3397]:
+                        - paragraph [ref=e3398]: Voir les Mandats
+                        - paragraph [ref=e3399]: ordonnancement.view
+                  - cell [ref=e3400]:
+                    - checkbox [checked] [ref=e3401] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3402]:
+                    - checkbox [ref=e3403] [cursor=pointer]
+                  - cell [ref=e3404]:
+                    - checkbox [ref=e3405] [cursor=pointer]
+                  - cell [ref=e3406]:
+                    - checkbox [checked] [ref=e3407] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3408]:
+                    - checkbox [checked] [ref=e3409] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3410]:
+                    - checkbox [ref=e3411] [cursor=pointer]
+                  - cell [ref=e3412]:
+                    - checkbox [ref=e3413] [cursor=pointer]
+                  - cell [ref=e3414]:
+                    - checkbox [ref=e3415] [cursor=pointer]
+                  - cell [ref=e3416]:
+                    - checkbox [ref=e3417] [cursor=pointer]
+                  - cell [ref=e3418]:
+                    - checkbox [checked] [ref=e3419] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Voir Ordonnancements view_ordonnancements" [ref=e3420]:
+                  - cell "Voir Ordonnancements view_ordonnancements" [ref=e3421]:
+                    - generic [ref=e3422]:
+                      - img [ref=e3423]
+                      - generic [ref=e3426]:
+                        - paragraph [ref=e3427]: Voir Ordonnancements
+                        - paragraph [ref=e3428]: view_ordonnancements
+                  - cell [ref=e3429]:
+                    - checkbox [checked] [ref=e3430] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3431]:
+                    - checkbox [ref=e3432] [cursor=pointer]
+                  - cell [ref=e3433]:
+                    - checkbox [checked] [ref=e3434] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3435]:
+                    - checkbox [checked] [ref=e3436] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3437]:
+                    - checkbox [ref=e3438] [cursor=pointer]
+                  - cell [ref=e3439]:
+                    - checkbox [ref=e3440] [cursor=pointer]
+                  - cell [ref=e3441]:
+                    - checkbox [ref=e3442] [cursor=pointer]
+                  - cell [ref=e3443]:
+                    - checkbox [ref=e3444] [cursor=pointer]
+                  - cell [ref=e3445]:
+                    - checkbox [checked] [ref=e3446] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3447]:
+                    - checkbox [ref=e3448] [cursor=pointer]
+                - row "prestataires" [ref=e3449]:
+                  - cell "prestataires" [ref=e3450]:
+                    - generic [ref=e3451]:
+                      - img [ref=e3452]
+                      - text: prestataires
+                - row "Créer un Prestataire prestataire.create" [ref=e3457]:
+                  - cell "Créer un Prestataire prestataire.create" [ref=e3458]:
+                    - generic [ref=e3459]:
+                      - img [ref=e3460]
+                      - generic [ref=e3463]:
+                        - paragraph [ref=e3464]: Créer un Prestataire
+                        - paragraph [ref=e3465]: prestataire.create
+                  - cell [ref=e3466]:
+                    - checkbox [checked] [ref=e3467] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3468]:
+                    - checkbox [ref=e3469] [cursor=pointer]
+                  - cell [ref=e3470]:
+                    - checkbox [ref=e3471] [cursor=pointer]
+                  - cell [ref=e3472]:
+                    - checkbox [checked] [ref=e3473] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3474]:
+                    - checkbox [ref=e3475] [cursor=pointer]
+                  - cell [ref=e3476]:
+                    - checkbox [ref=e3477] [cursor=pointer]
+                  - cell [ref=e3478]:
+                    - checkbox [ref=e3479] [cursor=pointer]
+                  - cell [ref=e3480]:
+                    - checkbox [ref=e3481] [cursor=pointer]
+                  - cell [ref=e3482]:
+                    - checkbox [ref=e3483] [cursor=pointer]
+                  - cell [ref=e3484]:
+                    - checkbox [ref=e3485] [cursor=pointer]
+                - row "Modifier un Prestataire prestataire.edit" [ref=e3486]:
+                  - cell "Modifier un Prestataire prestataire.edit" [ref=e3487]:
+                    - generic [ref=e3488]:
+                      - img [ref=e3489]
+                      - generic [ref=e3492]:
+                        - paragraph [ref=e3493]: Modifier un Prestataire
+                        - paragraph [ref=e3494]: prestataire.edit
+                  - cell [ref=e3495]:
+                    - checkbox [checked] [ref=e3496] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3497]:
+                    - checkbox [ref=e3498] [cursor=pointer]
+                  - cell [ref=e3499]:
+                    - checkbox [ref=e3500] [cursor=pointer]
+                  - cell [ref=e3501]:
+                    - checkbox [checked] [ref=e3502] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3503]:
+                    - checkbox [ref=e3504] [cursor=pointer]
+                  - cell [ref=e3505]:
+                    - checkbox [ref=e3506] [cursor=pointer]
+                  - cell [ref=e3507]:
+                    - checkbox [ref=e3508] [cursor=pointer]
+                  - cell [ref=e3509]:
+                    - checkbox [ref=e3510] [cursor=pointer]
+                  - cell [ref=e3511]:
+                    - checkbox [ref=e3512] [cursor=pointer]
+                  - cell [ref=e3513]:
+                    - checkbox [ref=e3514] [cursor=pointer]
+                - row "Supprimer un Prestataire prestataire.delete" [ref=e3515]:
+                  - cell "Supprimer un Prestataire prestataire.delete" [ref=e3516]:
+                    - generic [ref=e3517]:
+                      - img [ref=e3518]
+                      - generic [ref=e3521]:
+                        - paragraph [ref=e3522]: Supprimer un Prestataire
+                        - paragraph [ref=e3523]: prestataire.delete
+                  - cell [ref=e3524]:
+                    - checkbox [checked] [ref=e3525] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3526]:
+                    - checkbox [ref=e3527] [cursor=pointer]
+                  - cell [ref=e3528]:
+                    - checkbox [ref=e3529] [cursor=pointer]
+                  - cell [ref=e3530]:
+                    - checkbox [ref=e3531] [cursor=pointer]
+                  - cell [ref=e3532]:
+                    - checkbox [ref=e3533] [cursor=pointer]
+                  - cell [ref=e3534]:
+                    - checkbox [ref=e3535] [cursor=pointer]
+                  - cell [ref=e3536]:
+                    - checkbox [ref=e3537] [cursor=pointer]
+                  - cell [ref=e3538]:
+                    - checkbox [ref=e3539] [cursor=pointer]
+                  - cell [ref=e3540]:
+                    - checkbox [ref=e3541] [cursor=pointer]
+                  - cell [ref=e3542]:
+                    - checkbox [ref=e3543] [cursor=pointer]
+                - row "Voir les Prestataires prestataire.view" [ref=e3544]:
+                  - cell "Voir les Prestataires prestataire.view" [ref=e3545]:
+                    - generic [ref=e3546]:
+                      - img [ref=e3547]
+                      - generic [ref=e3550]:
+                        - paragraph [ref=e3551]: Voir les Prestataires
+                        - paragraph [ref=e3552]: prestataire.view
+                  - cell [ref=e3553]:
+                    - checkbox [checked] [ref=e3554] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3555]:
+                    - checkbox [ref=e3556] [cursor=pointer]
+                  - cell [ref=e3557]:
+                    - checkbox [ref=e3558] [cursor=pointer]
+                  - cell [ref=e3559]:
+                    - checkbox [checked] [ref=e3560] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3561]:
+                    - checkbox [ref=e3562] [cursor=pointer]
+                  - cell [ref=e3563]:
+                    - checkbox [ref=e3564] [cursor=pointer]
+                  - cell [ref=e3565]:
+                    - checkbox [ref=e3566] [cursor=pointer]
+                  - cell [ref=e3567]:
+                    - checkbox [ref=e3568] [cursor=pointer]
+                  - cell [ref=e3569]:
+                    - checkbox [ref=e3570] [cursor=pointer]
+                  - cell [ref=e3571]:
+                    - checkbox [ref=e3572] [cursor=pointer]
+                - row "règlement" [ref=e3573]:
+                  - cell "règlement" [ref=e3574]:
+                    - generic [ref=e3575]:
+                      - img [ref=e3576]
+                      - text: règlement
+                - row "Consulter les règlements reglement_voir" [ref=e3581]:
+                  - cell "Consulter les règlements reglement_voir" [ref=e3582]:
+                    - generic [ref=e3583]:
+                      - img [ref=e3584]
+                      - generic [ref=e3587]:
+                        - paragraph [ref=e3588]: Consulter les règlements
+                        - paragraph [ref=e3589]: reglement_voir
+                  - cell [ref=e3590]:
+                    - checkbox [checked] [ref=e3591] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3592]:
+                    - checkbox [ref=e3593] [cursor=pointer]
+                  - cell [ref=e3594]:
+                    - checkbox [ref=e3595] [cursor=pointer]
+                  - cell [ref=e3596]:
+                    - checkbox [checked] [ref=e3597] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3598]:
+                    - checkbox [checked] [ref=e3599] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3600]:
+                    - checkbox [ref=e3601] [cursor=pointer]
+                  - cell [ref=e3602]:
+                    - checkbox [checked] [ref=e3603] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3604]:
+                    - checkbox [checked] [ref=e3605] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3606]:
+                    - checkbox [ref=e3607] [cursor=pointer]
+                  - cell [ref=e3608]:
+                    - checkbox [checked] [ref=e3609] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "Enregistrer un paiement reglement_creer" [ref=e3610]:
+                  - cell "Enregistrer un paiement reglement_creer" [ref=e3611]:
+                    - generic [ref=e3612]:
+                      - img [ref=e3613]
+                      - generic [ref=e3614]:
+                        - paragraph [ref=e3615]: Enregistrer un paiement
+                        - paragraph [ref=e3616]: reglement_creer
+                  - cell [ref=e3617]:
+                    - checkbox [checked] [ref=e3618] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3619]:
+                    - checkbox [ref=e3620] [cursor=pointer]
+                  - cell [ref=e3621]:
+                    - checkbox [ref=e3622] [cursor=pointer]
+                  - cell [ref=e3623]:
+                    - checkbox [ref=e3624] [cursor=pointer]
+                  - cell [ref=e3625]:
+                    - checkbox [ref=e3626] [cursor=pointer]
+                  - cell [ref=e3627]:
+                    - checkbox [ref=e3628] [cursor=pointer]
+                  - cell [ref=e3629]:
+                    - checkbox [ref=e3630] [cursor=pointer]
+                  - cell [ref=e3631]:
+                    - checkbox [ref=e3632] [cursor=pointer]
+                  - cell [ref=e3633]:
+                    - checkbox [ref=e3634] [cursor=pointer]
+                  - cell [ref=e3635]:
+                    - checkbox [checked] [ref=e3636] [cursor=pointer]:
+                      - generic:
+                        - img
+                - row "reporting" [ref=e3637]:
+                  - cell "reporting" [ref=e3638]:
+                    - generic [ref=e3639]:
+                      - img [ref=e3640]
+                      - text: reporting
+                - row "Générer Rapports report.generate" [ref=e3645]:
+                  - cell "Générer Rapports report.generate" [ref=e3646]:
+                    - generic [ref=e3647]:
+                      - img [ref=e3648]
+                      - generic [ref=e3651]:
+                        - paragraph [ref=e3652]: Générer Rapports
+                        - paragraph [ref=e3653]: report.generate
+                  - cell [ref=e3654]:
+                    - checkbox [checked] [ref=e3655] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3656]:
+                    - checkbox [ref=e3657] [cursor=pointer]
+                  - cell [ref=e3658]:
+                    - checkbox [ref=e3659] [cursor=pointer]
+                  - cell [ref=e3660]:
+                    - checkbox [checked] [ref=e3661] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3662]:
+                    - checkbox [ref=e3663] [cursor=pointer]
+                  - cell [ref=e3664]:
+                    - checkbox [ref=e3665] [cursor=pointer]
+                  - cell [ref=e3666]:
+                    - checkbox [ref=e3667] [cursor=pointer]
+                  - cell [ref=e3668]:
+                    - checkbox [ref=e3669] [cursor=pointer]
+                  - cell [ref=e3670]:
+                    - checkbox [ref=e3671] [cursor=pointer]
+                  - cell [ref=e3672]:
+                    - checkbox [ref=e3673] [cursor=pointer]
+                - row "Voir les KPI report.kpi" [ref=e3674]:
+                  - cell "Voir les KPI report.kpi" [ref=e3675]:
+                    - generic [ref=e3676]:
+                      - img [ref=e3677]
+                      - generic [ref=e3680]:
+                        - paragraph [ref=e3681]: Voir les KPI
+                        - paragraph [ref=e3682]: report.kpi
+                  - cell [ref=e3683]:
+                    - checkbox [checked] [ref=e3684] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3685]:
+                    - checkbox [ref=e3686] [cursor=pointer]
+                  - cell [ref=e3687]:
+                    - checkbox [ref=e3688] [cursor=pointer]
+                  - cell [ref=e3689]:
+                    - checkbox [checked] [ref=e3690] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3691]:
+                    - checkbox [checked] [ref=e3692] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3693]:
+                    - checkbox [ref=e3694] [cursor=pointer]
+                  - cell [ref=e3695]:
+                    - checkbox [ref=e3696] [cursor=pointer]
+                  - cell [ref=e3697]:
+                    - checkbox [ref=e3698] [cursor=pointer]
+                  - cell [ref=e3699]:
+                    - checkbox [ref=e3700] [cursor=pointer]
+                  - cell [ref=e3701]:
+                    - checkbox [ref=e3702] [cursor=pointer]
+                - row "Voir les Rapports report.view" [ref=e3703]:
+                  - cell "Voir les Rapports report.view" [ref=e3704]:
+                    - generic [ref=e3705]:
+                      - img [ref=e3706]
+                      - generic [ref=e3709]:
+                        - paragraph [ref=e3710]: Voir les Rapports
+                        - paragraph [ref=e3711]: report.view
+                  - cell [ref=e3712]:
+                    - checkbox [checked] [ref=e3713] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3714]:
+                    - checkbox [ref=e3715] [cursor=pointer]
+                  - cell [ref=e3716]:
+                    - checkbox [ref=e3717] [cursor=pointer]
+                  - cell [ref=e3718]:
+                    - checkbox [checked] [ref=e3719] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3720]:
+                    - checkbox [checked] [ref=e3721] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3722]:
+                    - checkbox [ref=e3723] [cursor=pointer]
+                  - cell [ref=e3724]:
+                    - checkbox [ref=e3725] [cursor=pointer]
+                  - cell [ref=e3726]:
+                    - checkbox [ref=e3727] [cursor=pointer]
+                  - cell [ref=e3728]:
+                    - checkbox [ref=e3729] [cursor=pointer]
+                  - cell [ref=e3730]:
+                    - checkbox [ref=e3731] [cursor=pointer]
+                - row "Voir Performance view_performance" [ref=e3732]:
+                  - cell "Voir Performance view_performance" [ref=e3733]:
+                    - generic [ref=e3734]:
+                      - img [ref=e3735]
+                      - generic [ref=e3738]:
+                        - paragraph [ref=e3739]: Voir Performance
+                        - paragraph [ref=e3740]: view_performance
+                  - cell [ref=e3741]:
+                    - checkbox [checked] [ref=e3742] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3743]:
+                    - checkbox [ref=e3744] [cursor=pointer]
+                  - cell [ref=e3745]:
+                    - checkbox [checked] [ref=e3746] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3747]:
+                    - checkbox [checked] [ref=e3748] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3749]:
+                    - checkbox [checked] [ref=e3750] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3751]:
+                    - checkbox [checked] [ref=e3752] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3753]:
+                    - checkbox [ref=e3754] [cursor=pointer]
+                  - cell [ref=e3755]:
+                    - checkbox [checked] [ref=e3756] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3757]:
+                    - checkbox [checked] [ref=e3758] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3759]:
+                    - checkbox [ref=e3760] [cursor=pointer]
+                - row "sensible" [ref=e3761]:
+                  - cell "sensible" [ref=e3762]:
+                    - generic [ref=e3763]:
+                      - img [ref=e3764]
+                      - text: sensible
+                - row "Audit Complet sensitive.audit_full" [ref=e3769]:
+                  - cell "Audit Complet sensitive.audit_full" [ref=e3770]:
+                    - generic [ref=e3771]:
+                      - img [ref=e3772]
+                      - generic [ref=e3775]:
+                        - paragraph [ref=e3776]: Audit Complet
+                        - paragraph [ref=e3777]: sensitive.audit_full
+                  - cell [ref=e3778]:
+                    - checkbox [checked] [ref=e3779] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3780]:
+                    - checkbox [ref=e3781] [cursor=pointer]
+                  - cell [ref=e3782]:
+                    - checkbox [ref=e3783] [cursor=pointer]
+                  - cell [ref=e3784]:
+                    - checkbox [ref=e3785] [cursor=pointer]
+                  - cell [ref=e3786]:
+                    - checkbox [ref=e3787] [cursor=pointer]
+                  - cell [ref=e3788]:
+                    - checkbox [ref=e3789] [cursor=pointer]
+                  - cell [ref=e3790]:
+                    - checkbox [ref=e3791] [cursor=pointer]
+                  - cell [ref=e3792]:
+                    - checkbox [ref=e3793] [cursor=pointer]
+                  - cell [ref=e3794]:
+                    - checkbox [ref=e3795] [cursor=pointer]
+                  - cell [ref=e3796]:
+                    - checkbox [ref=e3797] [cursor=pointer]
+                - row "Module RH view_hr" [ref=e3798]:
+                  - cell "Module RH view_hr" [ref=e3799]:
+                    - generic [ref=e3800]:
+                      - img [ref=e3801]
+                      - generic [ref=e3804]:
+                        - paragraph [ref=e3805]: Module RH
+                        - paragraph [ref=e3806]: view_hr
+                  - cell [ref=e3807]:
+                    - checkbox [checked] [ref=e3808] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3809]:
+                    - checkbox [ref=e3810] [cursor=pointer]
+                  - cell [ref=e3811]:
+                    - checkbox [ref=e3812] [cursor=pointer]
+                  - cell [ref=e3813]:
+                    - checkbox [ref=e3814] [cursor=pointer]
+                  - cell [ref=e3815]:
+                    - checkbox [ref=e3816] [cursor=pointer]
+                  - cell [ref=e3817]:
+                    - checkbox [ref=e3818] [cursor=pointer]
+                  - cell [ref=e3819]:
+                    - checkbox [ref=e3820] [cursor=pointer]
+                  - cell [ref=e3821]:
+                    - checkbox [ref=e3822] [cursor=pointer]
+                  - cell [ref=e3823]:
+                    - checkbox [ref=e3824] [cursor=pointer]
+                  - cell [ref=e3825]:
+                    - checkbox [ref=e3826] [cursor=pointer]
+                - row "Voir Contrats Confidentiels sensitive.contracts" [ref=e3827]:
+                  - cell "Voir Contrats Confidentiels sensitive.contracts" [ref=e3828]:
+                    - generic [ref=e3829]:
+                      - img [ref=e3830]
+                      - generic [ref=e3833]:
+                        - paragraph [ref=e3834]: Voir Contrats Confidentiels
+                        - paragraph [ref=e3835]: sensitive.contracts
+                  - cell [ref=e3836]:
+                    - checkbox [checked] [ref=e3837] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3838]:
+                    - checkbox [ref=e3839] [cursor=pointer]
+                  - cell [ref=e3840]:
+                    - checkbox [ref=e3841] [cursor=pointer]
+                  - cell [ref=e3842]:
+                    - checkbox [ref=e3843] [cursor=pointer]
+                  - cell [ref=e3844]:
+                    - checkbox [checked] [ref=e3845] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3846]:
+                    - checkbox [ref=e3847] [cursor=pointer]
+                  - cell [ref=e3848]:
+                    - checkbox [ref=e3849] [cursor=pointer]
+                  - cell [ref=e3850]:
+                    - checkbox [ref=e3851] [cursor=pointer]
+                  - cell [ref=e3852]:
+                    - checkbox [ref=e3853] [cursor=pointer]
+                  - cell [ref=e3854]:
+                    - checkbox [ref=e3855] [cursor=pointer]
+                - row "Voir les Salaires sensitive.salaries" [ref=e3856]:
+                  - cell "Voir les Salaires sensitive.salaries" [ref=e3857]:
+                    - generic [ref=e3858]:
+                      - img [ref=e3859]
+                      - generic [ref=e3862]:
+                        - paragraph [ref=e3863]: Voir les Salaires
+                        - paragraph [ref=e3864]: sensitive.salaries
+                  - cell [ref=e3865]:
+                    - checkbox [checked] [ref=e3866] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3867]:
+                    - checkbox [ref=e3868] [cursor=pointer]
+                  - cell [ref=e3869]:
+                    - checkbox [ref=e3870] [cursor=pointer]
+                  - cell [ref=e3871]:
+                    - checkbox [ref=e3872] [cursor=pointer]
+                  - cell [ref=e3873]:
+                    - checkbox [checked] [ref=e3874] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3875]:
+                    - checkbox [ref=e3876] [cursor=pointer]
+                  - cell [ref=e3877]:
+                    - checkbox [ref=e3878] [cursor=pointer]
+                  - cell [ref=e3879]:
+                    - checkbox [ref=e3880] [cursor=pointer]
+                  - cell [ref=e3881]:
+                    - checkbox [ref=e3882] [cursor=pointer]
+                  - cell [ref=e3883]:
+                    - checkbox [ref=e3884] [cursor=pointer]
+                - row "Voir Salaires view_salaries" [ref=e3885]:
+                  - cell "Voir Salaires view_salaries" [ref=e3886]:
+                    - generic [ref=e3887]:
+                      - img [ref=e3888]
+                      - generic [ref=e3891]:
+                        - paragraph [ref=e3892]: Voir Salaires
+                        - paragraph [ref=e3893]: view_salaries
+                  - cell [ref=e3894]:
+                    - checkbox [checked] [ref=e3895] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3896]:
+                    - checkbox [ref=e3897] [cursor=pointer]
+                  - cell [ref=e3898]:
+                    - checkbox [ref=e3899] [cursor=pointer]
+                  - cell [ref=e3900]:
+                    - checkbox [ref=e3901] [cursor=pointer]
+                  - cell [ref=e3902]:
+                    - checkbox [ref=e3903] [cursor=pointer]
+                  - cell [ref=e3904]:
+                    - checkbox [ref=e3905] [cursor=pointer]
+                  - cell [ref=e3906]:
+                    - checkbox [ref=e3907] [cursor=pointer]
+                  - cell [ref=e3908]:
+                    - checkbox [ref=e3909] [cursor=pointer]
+                  - cell [ref=e3910]:
+                    - checkbox [ref=e3911] [cursor=pointer]
+                  - cell [ref=e3912]:
+                    - checkbox [ref=e3913] [cursor=pointer]
+                - row "tresorerie" [ref=e3914]:
+                  - cell "tresorerie" [ref=e3915]:
+                    - generic [ref=e3916]:
+                      - img [ref=e3917]
+                      - text: tresorerie
+                - row "Enregistrer Mouvement treasury.record" [ref=e3922]:
+                  - cell "Enregistrer Mouvement treasury.record" [ref=e3923]:
+                    - generic [ref=e3924]:
+                      - img [ref=e3925]
+                      - generic [ref=e3928]:
+                        - paragraph [ref=e3929]: Enregistrer Mouvement
+                        - paragraph [ref=e3930]: treasury.record
+                  - cell [ref=e3931]:
+                    - checkbox [checked] [ref=e3932] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3933]:
+                    - checkbox [ref=e3934] [cursor=pointer]
+                  - cell [ref=e3935]:
+                    - checkbox [ref=e3936] [cursor=pointer]
+                  - cell [ref=e3937]:
+                    - checkbox [checked] [ref=e3938] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3939]:
+                    - checkbox [ref=e3940] [cursor=pointer]
+                  - cell [ref=e3941]:
+                    - checkbox [ref=e3942] [cursor=pointer]
+                  - cell [ref=e3943]:
+                    - checkbox [ref=e3944] [cursor=pointer]
+                  - cell [ref=e3945]:
+                    - checkbox [ref=e3946] [cursor=pointer]
+                  - cell [ref=e3947]:
+                    - checkbox [ref=e3948] [cursor=pointer]
+                  - cell [ref=e3949]:
+                    - checkbox [ref=e3950] [cursor=pointer]
+                - row "Gérer la Trésorerie treasury.manage" [ref=e3951]:
+                  - cell "Gérer la Trésorerie treasury.manage" [ref=e3952]:
+                    - generic [ref=e3953]:
+                      - img [ref=e3954]
+                      - generic [ref=e3957]:
+                        - paragraph [ref=e3958]: Gérer la Trésorerie
+                        - paragraph [ref=e3959]: treasury.manage
+                  - cell [ref=e3960]:
+                    - checkbox [checked] [ref=e3961] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3962]:
+                    - checkbox [ref=e3963] [cursor=pointer]
+                  - cell [ref=e3964]:
+                    - checkbox [ref=e3965] [cursor=pointer]
+                  - cell [ref=e3966]:
+                    - checkbox [checked] [ref=e3967] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3968]:
+                    - checkbox [ref=e3969] [cursor=pointer]
+                  - cell [ref=e3970]:
+                    - checkbox [ref=e3971] [cursor=pointer]
+                  - cell [ref=e3972]:
+                    - checkbox [ref=e3973] [cursor=pointer]
+                  - cell [ref=e3974]:
+                    - checkbox [ref=e3975] [cursor=pointer]
+                  - cell [ref=e3976]:
+                    - checkbox [ref=e3977] [cursor=pointer]
+                  - cell [ref=e3978]:
+                    - checkbox [ref=e3979] [cursor=pointer]
+                - row "Gérer Trésorerie manage_tresorerie" [ref=e3980]:
+                  - cell "Gérer Trésorerie manage_tresorerie" [ref=e3981]:
+                    - generic [ref=e3982]:
+                      - img [ref=e3983]
+                      - generic [ref=e3986]:
+                        - paragraph [ref=e3987]: Gérer Trésorerie
+                        - paragraph [ref=e3988]: manage_tresorerie
+                  - cell [ref=e3989]:
+                    - checkbox [checked] [ref=e3990] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3991]:
+                    - checkbox [ref=e3992] [cursor=pointer]
+                  - cell [ref=e3993]:
+                    - checkbox [ref=e3994] [cursor=pointer]
+                  - cell [ref=e3995]:
+                    - checkbox [checked] [ref=e3996] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e3997]:
+                    - checkbox [ref=e3998] [cursor=pointer]
+                  - cell [ref=e3999]:
+                    - checkbox [ref=e4000] [cursor=pointer]
+                  - cell [ref=e4001]:
+                    - checkbox [ref=e4002] [cursor=pointer]
+                  - cell [ref=e4003]:
+                    - checkbox [ref=e4004] [cursor=pointer]
+                  - cell [ref=e4005]:
+                    - checkbox [ref=e4006] [cursor=pointer]
+                  - cell [ref=e4007]:
+                    - checkbox [ref=e4008] [cursor=pointer]
+                - row "Voir la Trésorerie treasury.view" [ref=e4009]:
+                  - cell "Voir la Trésorerie treasury.view" [ref=e4010]:
+                    - generic [ref=e4011]:
+                      - img [ref=e4012]
+                      - generic [ref=e4015]:
+                        - paragraph [ref=e4016]: Voir la Trésorerie
+                        - paragraph [ref=e4017]: treasury.view
+                  - cell [ref=e4018]:
+                    - checkbox [checked] [ref=e4019] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4020]:
+                    - checkbox [ref=e4021] [cursor=pointer]
+                  - cell [ref=e4022]:
+                    - checkbox [ref=e4023] [cursor=pointer]
+                  - cell [ref=e4024]:
+                    - checkbox [checked] [ref=e4025] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4026]:
+                    - checkbox [checked] [ref=e4027] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4028]:
+                    - checkbox [ref=e4029] [cursor=pointer]
+                  - cell [ref=e4030]:
+                    - checkbox [ref=e4031] [cursor=pointer]
+                  - cell [ref=e4032]:
+                    - checkbox [ref=e4033] [cursor=pointer]
+                  - cell [ref=e4034]:
+                    - checkbox [ref=e4035] [cursor=pointer]
+                  - cell [ref=e4036]:
+                    - checkbox [ref=e4037] [cursor=pointer]
+                - row "Voir Trésorerie view_tresorerie" [ref=e4038]:
+                  - cell "Voir Trésorerie view_tresorerie" [ref=e4039]:
+                    - generic [ref=e4040]:
+                      - img [ref=e4041]
+                      - generic [ref=e4044]:
+                        - paragraph [ref=e4045]: Voir Trésorerie
+                        - paragraph [ref=e4046]: view_tresorerie
+                  - cell [ref=e4047]:
+                    - checkbox [checked] [ref=e4048] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4049]:
+                    - checkbox [ref=e4050] [cursor=pointer]
+                  - cell [ref=e4051]:
+                    - checkbox [ref=e4052] [cursor=pointer]
+                  - cell [ref=e4053]:
+                    - checkbox [checked] [ref=e4054] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4055]:
+                    - checkbox [checked] [ref=e4056] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4057]:
+                    - checkbox [ref=e4058] [cursor=pointer]
+                  - cell [ref=e4059]:
+                    - checkbox [ref=e4060] [cursor=pointer]
+                  - cell [ref=e4061]:
+                    - checkbox [ref=e4062] [cursor=pointer]
+                  - cell [ref=e4063]:
+                    - checkbox [checked] [ref=e4064] [cursor=pointer]:
+                      - generic:
+                        - img
+                  - cell [ref=e4065]:
+                    - checkbox [ref=e4066] [cursor=pointer]
+          - generic [ref=e4069]:
+            - generic [ref=e4072]: Permission modifiée (non sauvegardée)
+            - generic [ref=e4073]:
+              - generic [ref=e4074]: ROLE
+              - generic [ref=e4075]: Rôle système
+            - generic [ref=e4076]:
+              - generic [ref=e4077]: ROLE
+              - generic [ref=e4078]: Rôle personnalisé

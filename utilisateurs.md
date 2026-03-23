@@ -1,0 +1,1824 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Paramétrage" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Gestion Utilisateurs" [disabled] [ref=e282]
+            - generic [ref=e284]:
+              - button "Retour" [ref=e285] [cursor=pointer]:
+                - img
+              - img [ref=e288]
+              - generic [ref=e293]:
+                - heading "Gestion des Utilisateurs" [level=1] [ref=e294]
+                - paragraph [ref=e295]: Administration des comptes utilisateurs
+          - alert [ref=e297]:
+            - img [ref=e298]
+            - heading "Aide – Module Gestion des Utilisateurs Réduire" [level=5] [ref=e301]:
+              - generic [ref=e302]: Aide – Module Gestion des Utilisateurs
+              - button "Réduire" [expanded] [ref=e303] [cursor=pointer]
+            - generic [ref=e305]:
+              - paragraph [ref=e307]:
+                - text: Ce module permet de
+                - strong [ref=e308]: gérer les comptes utilisateurs
+                - text: de SYGFP. Vous pouvez modifier les informations des utilisateurs, leur attribuer des rôles hiérarchiques et fonctionnels, les rattacher à une direction, et activer/désactiver leurs accès. La gestion centralisée des utilisateurs assure la traçabilité et la sécurité du système.
+              - generic [ref=e309]:
+                - generic [ref=e310]:
+                  - generic [ref=e311]:
+                    - img [ref=e312]
+                    - generic [ref=e317]: Rôle Hiérarchique
+                  - paragraph [ref=e318]:
+                    - text: "Définit la position dans l'organigramme :"
+                    - strong [ref=e319]: Agent
+                    - text: ","
+                    - strong [ref=e320]: Chef de Service
+                    - text: ","
+                    - strong [ref=e321]: Sous-Directeur
+                    - text: ","
+                    - strong [ref=e322]: Directeur
+                    - text: ", ou"
+                    - strong [ref=e323]: DG
+                    - text: . Ce rôle détermine les droits de validation et la visibilité des données.
+                - generic [ref=e324]:
+                  - generic [ref=e325]:
+                    - img [ref=e326]
+                    - generic [ref=e328]: Profil Fonctionnel
+                  - paragraph [ref=e329]:
+                    - text: "Définit les permissions système :"
+                    - strong [ref=e330]: Admin
+                    - text: (accès total),
+                    - strong [ref=e331]: Validateur
+                    - text: (validation des workflows),
+                    - strong [ref=e332]: Opérationnel
+                    - text: (saisie),
+                    - strong [ref=e333]: Contrôleur
+                    - text: (contrôle),
+                    - strong [ref=e334]: Auditeur
+                    - text: (lecture seule).
+                - generic [ref=e335]:
+                  - generic [ref=e336]:
+                    - img [ref=e337]
+                    - generic [ref=e341]: Direction
+                  - paragraph [ref=e342]: Rattache l'utilisateur à une direction métier. Cela limite la visibilité aux données de sa direction (sauf pour les profils Admin/Auditeur qui ont une vue transversale).
+                - generic [ref=e343]:
+                  - generic [ref=e344]:
+                    - img [ref=e345]
+                    - generic [ref=e348]: Matricule
+                  - paragraph [ref=e349]: "Identifiant unique de l'agent dans l'organisation (ex: MAT-001). Utilisé pour la traçabilité dans le journal d'audit et les rapports."
+              - generic [ref=e350]:
+                - heading "Actions disponibles" [level=4] [ref=e351]:
+                  - img [ref=e352]
+                  - text: Actions disponibles
+                - list [ref=e355]:
+                  - listitem [ref=e356]:
+                    - strong [ref=e357]: Modifier
+                    - text: "(icône crayon) : Éditer le matricule, téléphone, direction, rôle hiérarchique et profil fonctionnel d'un utilisateur."
+                  - listitem [ref=e358]:
+                    - strong [ref=e359]: Activer/Désactiver
+                    - text: "(icône utilisateur) : Un utilisateur désactivé ne peut plus se connecter au système. Ses données restent conservées."
+                  - listitem [ref=e360]:
+                    - strong [ref=e361]: Filtrer
+                    - text: ": Utilisez la barre de recherche et les filtres par direction et rôle pour trouver rapidement un utilisateur."
+              - generic [ref=e362]:
+                - heading "💡 Bonnes pratiques" [level=4] [ref=e363]
+                - list [ref=e364]:
+                  - listitem [ref=e365]: Attribuez le profil "Admin" uniquement aux administrateurs système.
+                  - listitem [ref=e366]: Vérifiez que chaque utilisateur est bien rattaché à sa direction.
+                  - listitem [ref=e367]: Désactivez les comptes des agents ayant quitté l'organisation.
+                  - listitem [ref=e368]: Les modifications sont tracées dans le Journal d'Audit.
+          - generic [ref=e369]:
+            - generic [ref=e370]:
+              - generic [ref=e371]:
+                - heading "Liste des Utilisateurs" [level=3] [ref=e372]
+                - paragraph [ref=e373]: 78 utilisateur(s) trouvé(s)
+              - button "Nouvel utilisateur" [ref=e374] [cursor=pointer]:
+                - img
+                - text: Nouvel utilisateur
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - generic [ref=e377]:
+                  - img [ref=e378]
+                  - textbox "Rechercher par nom, email ou matricule..." [ref=e381]
+                - combobox [ref=e382] [cursor=pointer]:
+                  - img [ref=e383]
+                  - generic: Toutes les directions
+                  - img [ref=e385]
+                - combobox [ref=e387] [cursor=pointer]:
+                  - generic: Tous les rôles
+                  - img [ref=e388]
+              - table [ref=e392]:
+                - rowgroup [ref=e393]:
+                  - row "Utilisateur Matricule Direction Rôle Hiérarchique Profil Statut Actions" [ref=e394]:
+                    - columnheader "Utilisateur" [ref=e395]
+                    - columnheader "Matricule" [ref=e396]
+                    - columnheader "Direction" [ref=e397]
+                    - columnheader "Rôle Hiérarchique" [ref=e398]
+                    - columnheader "Profil" [ref=e399]
+                    - columnheader "Statut" [ref=e400]
+                    - columnheader "Actions" [ref=e401]
+                - rowgroup [ref=e402]:
+                  - row "Administrateur SYSTEM admin@arti.ci - Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e403]:
+                    - cell "Administrateur SYSTEM admin@arti.ci" [ref=e404]:
+                      - generic [ref=e405]:
+                        - paragraph [ref=e406]: Administrateur SYSTEM
+                        - paragraph [ref=e407]: admin@arti.ci
+                    - cell "-" [ref=e408]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e409]
+                    - cell "Agent" [ref=e410]:
+                      - generic [ref=e411]: Agent
+                    - cell "Operationnel" [ref=e412]:
+                      - generic [ref=e413]: Operationnel
+                    - cell "Actif" [ref=e414]:
+                      - generic [ref=e415]: Actif
+                    - cell [ref=e416]:
+                      - generic [ref=e417]:
+                        - button [ref=e418] [cursor=pointer]:
+                          - img
+                        - button [ref=e419] [cursor=pointer]:
+                          - img
+                  - row "AFFI Ferdinand ferdinand.affi@arti.ci 1610825A Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Sous-Directeur Validateur Actif" [ref=e420]:
+                    - cell "AFFI Ferdinand ferdinand.affi@arti.ci" [ref=e421]:
+                      - generic [ref=e422]:
+                        - paragraph [ref=e423]: AFFI Ferdinand
+                        - paragraph [ref=e424]: ferdinand.affi@arti.ci
+                    - cell "1610825A" [ref=e425]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e426]
+                    - cell "Sous-Directeur" [ref=e427]:
+                      - generic [ref=e428]: Sous-Directeur
+                    - cell "Validateur" [ref=e429]:
+                      - generic [ref=e430]: Validateur
+                    - cell "Actif" [ref=e431]:
+                      - generic [ref=e432]: Actif
+                    - cell [ref=e433]:
+                      - generic [ref=e434]:
+                        - button [ref=e435] [cursor=pointer]:
+                          - img
+                        - button [ref=e436] [cursor=pointer]:
+                          - img
+                  - row "Agent DAAF agent.daaf@arti.ci - Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e437]:
+                    - cell "Agent DAAF agent.daaf@arti.ci" [ref=e438]:
+                      - generic [ref=e439]:
+                        - paragraph [ref=e440]: Agent DAAF
+                        - paragraph [ref=e441]: agent.daaf@arti.ci
+                    - cell "-" [ref=e442]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e443]
+                    - cell "Agent" [ref=e444]:
+                      - generic [ref=e445]: Agent
+                    - cell "Operationnel" [ref=e446]:
+                      - generic [ref=e447]: Operationnel
+                    - cell "Actif" [ref=e448]:
+                      - generic [ref=e449]: Actif
+                    - cell [ref=e450]:
+                      - generic [ref=e451]:
+                        - button [ref=e452] [cursor=pointer]:
+                          - img
+                        - button [ref=e453] [cursor=pointer]:
+                          - img
+                  - row "Agent DCP agent.dcp@arti.ci - Direction de la Communication et du Partenariat Agent Operationnel Actif" [ref=e454]:
+                    - cell "Agent DCP agent.dcp@arti.ci" [ref=e455]:
+                      - generic [ref=e456]:
+                        - paragraph [ref=e457]: Agent DCP
+                        - paragraph [ref=e458]: agent.dcp@arti.ci
+                    - cell "-" [ref=e459]
+                    - cell "Direction de la Communication et du Partenariat" [ref=e460]
+                    - cell "Agent" [ref=e461]:
+                      - generic [ref=e462]: Agent
+                    - cell "Operationnel" [ref=e463]:
+                      - generic [ref=e464]: Operationnel
+                    - cell "Actif" [ref=e465]:
+                      - generic [ref=e466]: Actif
+                    - cell [ref=e467]:
+                      - generic [ref=e468]:
+                        - button [ref=e469] [cursor=pointer]:
+                          - img
+                        - button [ref=e470] [cursor=pointer]:
+                          - img
+                  - row "Agent DSI agent.dsi@arti.ci - Direction des Systèmes d'Information Agent Operationnel Actif" [ref=e471]:
+                    - cell "Agent DSI agent.dsi@arti.ci" [ref=e472]:
+                      - generic [ref=e473]:
+                        - paragraph [ref=e474]: Agent DSI
+                        - paragraph [ref=e475]: agent.dsi@arti.ci
+                    - cell "-" [ref=e476]
+                    - cell "Direction des Systèmes d'Information" [ref=e477]
+                    - cell "Agent" [ref=e478]:
+                      - generic [ref=e479]: Agent
+                    - cell "Operationnel" [ref=e480]:
+                      - generic [ref=e481]: Operationnel
+                    - cell "Actif" [ref=e482]:
+                      - generic [ref=e483]: Actif
+                    - cell [ref=e484]:
+                      - generic [ref=e485]:
+                        - button [ref=e486] [cursor=pointer]:
+                          - img
+                        - button [ref=e487] [cursor=pointer]:
+                          - img
+                  - row "AHMED KONET Mohamed Hussen mohamed.ahmedkonet@arti.ci 2222222A Direction Générale Directeur Validateur Actif" [ref=e488]:
+                    - cell "AHMED KONET Mohamed Hussen mohamed.ahmedkonet@arti.ci" [ref=e489]:
+                      - generic [ref=e490]:
+                        - paragraph [ref=e491]: AHMED KONET Mohamed Hussen
+                        - paragraph [ref=e492]: mohamed.ahmedkonet@arti.ci
+                    - cell "2222222A" [ref=e493]
+                    - cell "Direction Générale" [ref=e494]
+                    - cell "Directeur" [ref=e495]:
+                      - generic [ref=e496]: Directeur
+                    - cell "Validateur" [ref=e497]:
+                      - generic [ref=e498]: Validateur
+                    - cell "Actif" [ref=e499]:
+                      - generic [ref=e500]: Actif
+                    - cell [ref=e501]:
+                      - generic [ref=e502]:
+                        - button [ref=e503] [cursor=pointer]:
+                          - img
+                        - button [ref=e504] [cursor=pointer]:
+                          - img
+                  - row "AKA Kassi Denis Cédric denis.aka@arti.ci 1520724A Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e505]:
+                    - cell "AKA Kassi Denis Cédric denis.aka@arti.ci" [ref=e506]:
+                      - generic [ref=e507]:
+                        - paragraph [ref=e508]: AKA Kassi Denis Cédric
+                        - paragraph [ref=e509]: denis.aka@arti.ci
+                    - cell "1520724A" [ref=e510]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e511]
+                    - cell "Agent" [ref=e512]:
+                      - generic [ref=e513]: Agent
+                    - cell "Operationnel" [ref=e514]:
+                      - generic [ref=e515]: Operationnel
+                    - cell "Actif" [ref=e516]:
+                      - generic [ref=e517]: Actif
+                    - cell [ref=e518]:
+                      - generic [ref=e519]:
+                        - button [ref=e520] [cursor=pointer]:
+                          - img
+                        - button [ref=e521] [cursor=pointer]:
+                          - img
+                  - row "AMANGOUA Constance Josette cj.lagaud@arti.ci 2370422A Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Chef de Service Operationnel Actif" [ref=e522]:
+                    - cell "AMANGOUA Constance Josette cj.lagaud@arti.ci" [ref=e523]:
+                      - generic [ref=e524]:
+                        - paragraph [ref=e525]: AMANGOUA Constance Josette
+                        - paragraph [ref=e526]: cj.lagaud@arti.ci
+                    - cell "2370422A" [ref=e527]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e528]
+                    - cell "Chef de Service" [ref=e529]:
+                      - generic [ref=e530]: Chef de Service
+                    - cell "Operationnel" [ref=e531]:
+                      - generic [ref=e532]: Operationnel
+                    - cell "Actif" [ref=e533]:
+                      - generic [ref=e534]: Actif
+                    - cell [ref=e535]:
+                      - generic [ref=e536]:
+                        - button [ref=e537] [cursor=pointer]:
+                          - img
+                        - button [ref=e538] [cursor=pointer]:
+                          - img
+                  - row "ANGOUA Yobouah Guy Charles guy-charles.angoua@arti.ci 1080720A Direction des Systèmes d'Information Directeur Admin Actif" [ref=e539]:
+                    - cell "ANGOUA Yobouah Guy Charles guy-charles.angoua@arti.ci" [ref=e540]:
+                      - generic [ref=e541]:
+                        - paragraph [ref=e542]: ANGOUA Yobouah Guy Charles
+                        - paragraph [ref=e543]: guy-charles.angoua@arti.ci
+                    - cell "1080720A" [ref=e544]
+                    - cell "Direction des Systèmes d'Information" [ref=e545]
+                    - cell "Directeur" [ref=e546]:
+                      - generic [ref=e547]: Directeur
+                    - cell "Admin" [ref=e548]:
+                      - generic [ref=e549]: Admin
+                    - cell "Actif" [ref=e550]:
+                      - generic [ref=e551]: Actif
+                    - cell [ref=e552]:
+                      - generic [ref=e553]:
+                        - button [ref=e554] [cursor=pointer]:
+                          - img
+                        - button [ref=e555] [cursor=pointer]:
+                          - img
+                  - row "ANOH Ama Lisette Desiree lisette.affanou@arti.ci 2270921A Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Chef de Service Operationnel Actif" [ref=e556]:
+                    - cell "ANOH Ama Lisette Desiree lisette.affanou@arti.ci" [ref=e557]:
+                      - generic [ref=e558]:
+                        - paragraph [ref=e559]: ANOH Ama Lisette Desiree
+                        - paragraph [ref=e560]: lisette.affanou@arti.ci
+                    - cell "2270921A" [ref=e561]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e562]
+                    - cell "Chef de Service" [ref=e563]:
+                      - generic [ref=e564]: Chef de Service
+                    - cell "Operationnel" [ref=e565]:
+                      - generic [ref=e566]: Operationnel
+                    - cell "Actif" [ref=e567]:
+                      - generic [ref=e568]: Actif
+                    - cell [ref=e569]:
+                      - generic [ref=e570]:
+                        - button [ref=e571] [cursor=pointer]:
+                          - img
+                        - button [ref=e572] [cursor=pointer]:
+                          - img
+                  - row "BAILLY Eric Théodore eric.bailly@arti.ci 1390722B Direction Centrale des Zones Agent Operationnel Actif" [ref=e573]:
+                    - cell "BAILLY Eric Théodore eric.bailly@arti.ci" [ref=e574]:
+                      - generic [ref=e575]:
+                        - paragraph [ref=e576]: BAILLY Eric Théodore
+                        - paragraph [ref=e577]: eric.bailly@arti.ci
+                    - cell "1390722B" [ref=e578]
+                    - cell "Direction Centrale des Zones" [ref=e579]
+                    - cell "Agent" [ref=e580]:
+                      - generic [ref=e581]: Agent
+                    - cell "Operationnel" [ref=e582]:
+                      - generic [ref=e583]: Operationnel
+                    - cell "Actif" [ref=e584]:
+                      - generic [ref=e585]: Actif
+                    - cell [ref=e586]:
+                      - generic [ref=e587]:
+                        - button [ref=e588] [cursor=pointer]:
+                          - img
+                        - button [ref=e589] [cursor=pointer]:
+                          - img
+                  - row "BEHI Yawa Gisèle gisele.behi@arti.ci 2480124B Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e590]:
+                    - cell "BEHI Yawa Gisèle gisele.behi@arti.ci" [ref=e591]:
+                      - generic [ref=e592]:
+                        - paragraph [ref=e593]: BEHI Yawa Gisèle
+                        - paragraph [ref=e594]: gisele.behi@arti.ci
+                    - cell "2480124B" [ref=e595]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e596]
+                    - cell "Agent" [ref=e597]:
+                      - generic [ref=e598]: Agent
+                    - cell "Operationnel" [ref=e599]:
+                      - generic [ref=e600]: Operationnel
+                    - cell "Actif" [ref=e601]:
+                      - generic [ref=e602]: Actif
+                    - cell [ref=e603]:
+                      - generic [ref=e604]:
+                        - button [ref=e605] [cursor=pointer]:
+                          - img
+                        - button [ref=e606] [cursor=pointer]:
+                          - img
+                  - row "BEN MOURAD Mohamed Aly ben.mourad@arti.ci 1230521B Direction des Systèmes d'Information Agent Operationnel Actif" [ref=e607]:
+                    - cell "BEN MOURAD Mohamed Aly ben.mourad@arti.ci" [ref=e608]:
+                      - generic [ref=e609]:
+                        - paragraph [ref=e610]: BEN MOURAD Mohamed Aly
+                        - paragraph [ref=e611]: ben.mourad@arti.ci
+                    - cell "1230521B" [ref=e612]
+                    - cell "Direction des Systèmes d'Information" [ref=e613]
+                    - cell "Agent" [ref=e614]:
+                      - generic [ref=e615]: Agent
+                    - cell "Operationnel" [ref=e616]:
+                      - generic [ref=e617]: Operationnel
+                    - cell "Actif" [ref=e618]:
+                      - generic [ref=e619]: Actif
+                    - cell [ref=e620]:
+                      - generic [ref=e621]:
+                        - button [ref=e622] [cursor=pointer]:
+                          - img
+                        - button [ref=e623] [cursor=pointer]:
+                          - img
+                  - row "BENDEY-DIBY Karen karen.bendey-diby@arti.ci 2560225T Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Directeur Validateur Actif" [ref=e624]:
+                    - cell "BENDEY-DIBY Karen karen.bendey-diby@arti.ci" [ref=e625]:
+                      - generic [ref=e626]:
+                        - paragraph [ref=e627]: BENDEY-DIBY Karen
+                        - paragraph [ref=e628]: karen.bendey-diby@arti.ci
+                    - cell "2560225T" [ref=e629]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e630]
+                    - cell "Directeur" [ref=e631]:
+                      - generic [ref=e632]: Directeur
+                    - cell "Validateur" [ref=e633]:
+                      - generic [ref=e634]: Validateur
+                    - cell "Actif" [ref=e635]:
+                      - generic [ref=e636]: Actif
+                    - cell [ref=e637]:
+                      - generic [ref=e638]:
+                        - button [ref=e639] [cursor=pointer]:
+                          - img
+                        - button [ref=e640] [cursor=pointer]:
+                          - img
+                  - row "BIDIA Annick Hélène annick.zadi@arti.ci 2590325B Direction des Recours, de la Réglementation et des Normes Directeur Validateur Actif" [ref=e641]:
+                    - cell "BIDIA Annick Hélène annick.zadi@arti.ci" [ref=e642]:
+                      - generic [ref=e643]:
+                        - paragraph [ref=e644]: BIDIA Annick Hélène
+                        - paragraph [ref=e645]: annick.zadi@arti.ci
+                    - cell "2590325B" [ref=e646]
+                    - cell "Direction des Recours, de la Réglementation et des Normes" [ref=e647]
+                    - cell "Directeur" [ref=e648]:
+                      - generic [ref=e649]: Directeur
+                    - cell "Validateur" [ref=e650]:
+                      - generic [ref=e651]: Validateur
+                    - cell "Actif" [ref=e652]:
+                      - generic [ref=e653]: Actif
+                    - cell [ref=e654]:
+                      - generic [ref=e655]:
+                        - button [ref=e656] [cursor=pointer]:
+                          - img
+                        - button [ref=e657] [cursor=pointer]:
+                          - img
+                  - row "BOKOUA Ziogba Sébastien sebastien.bokoua@arti.ci 1281021B Direction Centrale des Zones Chef de Service Operationnel Actif" [ref=e658]:
+                    - cell "BOKOUA Ziogba Sébastien sebastien.bokoua@arti.ci" [ref=e659]:
+                      - generic [ref=e660]:
+                        - paragraph [ref=e661]: BOKOUA Ziogba Sébastien
+                        - paragraph [ref=e662]: sebastien.bokoua@arti.ci
+                    - cell "1281021B" [ref=e663]
+                    - cell "Direction Centrale des Zones" [ref=e664]
+                    - cell "Chef de Service" [ref=e665]:
+                      - generic [ref=e666]: Chef de Service
+                    - cell "Operationnel" [ref=e667]:
+                      - generic [ref=e668]: Operationnel
+                    - cell "Actif" [ref=e669]:
+                      - generic [ref=e670]: Actif
+                    - cell [ref=e671]:
+                      - generic [ref=e672]:
+                        - button [ref=e673] [cursor=pointer]:
+                          - img
+                        - button [ref=e674] [cursor=pointer]:
+                          - img
+                  - row "BONI Axelle axelle.boni@arti.ci 2570325B Direction de la Qualité Agent Operationnel Actif" [ref=e675]:
+                    - cell "BONI Axelle axelle.boni@arti.ci" [ref=e676]:
+                      - generic [ref=e677]:
+                        - paragraph [ref=e678]: BONI Axelle
+                        - paragraph [ref=e679]: axelle.boni@arti.ci
+                    - cell "2570325B" [ref=e680]
+                    - cell "Direction de la Qualité" [ref=e681]
+                    - cell "Agent" [ref=e682]:
+                      - generic [ref=e683]: Agent
+                    - cell "Operationnel" [ref=e684]:
+                      - generic [ref=e685]: Operationnel
+                    - cell "Actif" [ref=e686]:
+                      - generic [ref=e687]: Actif
+                    - cell [ref=e688]:
+                      - generic [ref=e689]:
+                        - button [ref=e690] [cursor=pointer]:
+                          - img
+                        - button [ref=e691] [cursor=pointer]:
+                          - img
+                  - row "Chef DAAF daaf@arti.ci - Direction des Affaires Administratives et Financières Directeur Validateur Actif" [ref=e692]:
+                    - cell "Chef DAAF daaf@arti.ci" [ref=e693]:
+                      - generic [ref=e694]:
+                        - paragraph [ref=e695]: Chef DAAF
+                        - paragraph [ref=e696]: daaf@arti.ci
+                    - cell "-" [ref=e697]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e698]
+                    - cell "Directeur" [ref=e699]:
+                      - generic [ref=e700]: Directeur
+                    - cell "Validateur" [ref=e701]:
+                      - generic [ref=e702]: Validateur
+                    - cell "Actif" [ref=e703]:
+                      - generic [ref=e704]: Actif
+                    - cell [ref=e705]:
+                      - generic [ref=e706]:
+                        - button [ref=e707] [cursor=pointer]:
+                          - img
+                        - button [ref=e708] [cursor=pointer]:
+                          - img
+                  - row "Chef DCP dcp@arti.ci - Direction de la Communication et du Partenariat Agent Operationnel Actif" [ref=e709]:
+                    - cell "Chef DCP dcp@arti.ci" [ref=e710]:
+                      - generic [ref=e711]:
+                        - paragraph [ref=e712]: Chef DCP
+                        - paragraph [ref=e713]: dcp@arti.ci
+                    - cell "-" [ref=e714]
+                    - cell "Direction de la Communication et du Partenariat" [ref=e715]
+                    - cell "Agent" [ref=e716]:
+                      - generic [ref=e717]: Agent
+                    - cell "Operationnel" [ref=e718]:
+                      - generic [ref=e719]: Operationnel
+                    - cell "Actif" [ref=e720]:
+                      - generic [ref=e721]: Actif
+                    - cell [ref=e722]:
+                      - generic [ref=e723]:
+                        - button [ref=e724] [cursor=pointer]:
+                          - img
+                        - button [ref=e725] [cursor=pointer]:
+                          - img
+                  - row "Chef DEGPEC-RH rh@arti.ci - Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Directeur Operationnel Actif" [ref=e726]:
+                    - cell "Chef DEGPEC-RH rh@arti.ci" [ref=e727]:
+                      - generic [ref=e728]:
+                        - paragraph [ref=e729]: Chef DEGPEC-RH
+                        - paragraph [ref=e730]: rh@arti.ci
+                    - cell "-" [ref=e731]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e732]
+                    - cell "Directeur" [ref=e733]:
+                      - generic [ref=e734]: Directeur
+                    - cell "Operationnel" [ref=e735]:
+                      - generic [ref=e736]: Operationnel
+                    - cell "Actif" [ref=e737]:
+                      - generic [ref=e738]: Actif
+                    - cell [ref=e739]:
+                      - generic [ref=e740]:
+                        - button [ref=e741] [cursor=pointer]:
+                          - img
+                        - button [ref=e742] [cursor=pointer]:
+                          - img
+                  - row "Chef DSI dsi@arti.ci - Direction des Systèmes d'Information Agent Operationnel Actif" [ref=e743]:
+                    - cell "Chef DSI dsi@arti.ci" [ref=e744]:
+                      - generic [ref=e745]:
+                        - paragraph [ref=e746]: Chef DSI
+                        - paragraph [ref=e747]: dsi@arti.ci
+                    - cell "-" [ref=e748]
+                    - cell "Direction des Systèmes d'Information" [ref=e749]
+                    - cell "Agent" [ref=e750]:
+                      - generic [ref=e751]: Agent
+                    - cell "Operationnel" [ref=e752]:
+                      - generic [ref=e753]: Operationnel
+                    - cell "Actif" [ref=e754]:
+                      - generic [ref=e755]: Actif
+                    - cell [ref=e756]:
+                      - generic [ref=e757]:
+                        - button [ref=e758] [cursor=pointer]:
+                          - img
+                        - button [ref=e759] [cursor=pointer]:
+                          - img
+                  - row "Chef Moyens Généraux dmg@arti.ci - Service des Moyens Généraux Chef de Service Operationnel Actif" [ref=e760]:
+                    - cell "Chef Moyens Généraux dmg@arti.ci" [ref=e761]:
+                      - generic [ref=e762]:
+                        - paragraph [ref=e763]: Chef Moyens Généraux
+                        - paragraph [ref=e764]: dmg@arti.ci
+                    - cell "-" [ref=e765]
+                    - cell "Service des Moyens Généraux" [ref=e766]
+                    - cell "Chef de Service" [ref=e767]:
+                      - generic [ref=e768]: Chef de Service
+                    - cell "Operationnel" [ref=e769]:
+                      - generic [ref=e770]: Operationnel
+                    - cell "Actif" [ref=e771]:
+                      - generic [ref=e772]: Actif
+                    - cell [ref=e773]:
+                      - generic [ref=e774]:
+                        - button [ref=e775] [cursor=pointer]:
+                          - img
+                        - button [ref=e776] [cursor=pointer]:
+                          - img
+                  - row "Chef STATS stats@arti.ci - Direction des Statistiques, des Études, de la Stratégie et de la Prospective Agent Operationnel Actif" [ref=e777]:
+                    - cell "Chef STATS stats@arti.ci" [ref=e778]:
+                      - generic [ref=e779]:
+                        - paragraph [ref=e780]: Chef STATS
+                        - paragraph [ref=e781]: stats@arti.ci
+                    - cell "-" [ref=e782]
+                    - cell "Direction des Statistiques, des Études, de la Stratégie et de la Prospective" [ref=e783]
+                    - cell "Agent" [ref=e784]:
+                      - generic [ref=e785]: Agent
+                    - cell "Operationnel" [ref=e786]:
+                      - generic [ref=e787]: Operationnel
+                    - cell "Actif" [ref=e788]:
+                      - generic [ref=e789]: Actif
+                    - cell [ref=e790]:
+                      - generic [ref=e791]:
+                        - button [ref=e792] [cursor=pointer]:
+                          - img
+                        - button [ref=e793] [cursor=pointer]:
+                          - img
+                  - row "CISSE Alassane Al Moustapha al.cisse@arti.ci 1260921C Direction des Systèmes d'Information Chef de Service Admin Actif" [ref=e794]:
+                    - cell "CISSE Alassane Al Moustapha al.cisse@arti.ci" [ref=e795]:
+                      - generic [ref=e796]:
+                        - paragraph [ref=e797]: CISSE Alassane Al Moustapha
+                        - paragraph [ref=e798]: al.cisse@arti.ci
+                    - cell "1260921C" [ref=e799]
+                    - cell "Direction des Systèmes d'Information" [ref=e800]
+                    - cell "Chef de Service" [ref=e801]:
+                      - generic [ref=e802]: Chef de Service
+                    - cell "Admin" [ref=e803]:
+                      - generic [ref=e804]: Admin
+                    - cell "Actif" [ref=e805]:
+                      - generic [ref=e806]: Actif
+                    - cell [ref=e807]:
+                      - generic [ref=e808]:
+                        - button [ref=e809] [cursor=pointer]:
+                          - img
+                        - button [ref=e810] [cursor=pointer]:
+                          - img
+                  - row "Comptable Assistant comptable.assistant@arti.ci - Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e811]:
+                    - cell "Comptable Assistant comptable.assistant@arti.ci" [ref=e812]:
+                      - generic [ref=e813]:
+                        - paragraph [ref=e814]: Comptable Assistant
+                        - paragraph [ref=e815]: comptable.assistant@arti.ci
+                    - cell "-" [ref=e816]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e817]
+                    - cell "Agent" [ref=e818]:
+                      - generic [ref=e819]: Agent
+                    - cell "Operationnel" [ref=e820]:
+                      - generic [ref=e821]: Operationnel
+                    - cell "Actif" [ref=e822]:
+                      - generic [ref=e823]: Actif
+                    - cell [ref=e824]:
+                      - generic [ref=e825]:
+                        - button [ref=e826] [cursor=pointer]:
+                          - img
+                        - button [ref=e827] [cursor=pointer]:
+                          - img
+                  - row "Comptable Principal comptable@arti.ci - Direction des Affaires Administratives et Financières Chef de Service Operationnel Actif" [ref=e828]:
+                    - cell "Comptable Principal comptable@arti.ci" [ref=e829]:
+                      - generic [ref=e830]:
+                        - paragraph [ref=e831]: Comptable Principal
+                        - paragraph [ref=e832]: comptable@arti.ci
+                    - cell "-" [ref=e833]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e834]
+                    - cell "Chef de Service" [ref=e835]:
+                      - generic [ref=e836]: Chef de Service
+                    - cell "Operationnel" [ref=e837]:
+                      - generic [ref=e838]: Operationnel
+                    - cell "Actif" [ref=e839]:
+                      - generic [ref=e840]: Actif
+                    - cell [ref=e841]:
+                      - generic [ref=e842]:
+                        - button [ref=e843] [cursor=pointer]:
+                          - img
+                        - button [ref=e844] [cursor=pointer]:
+                          - img
+                  - row "CONE Dioman dioman.cone@arti.ci 7777777C Direction Générale Directeur Validateur Actif" [ref=e845]:
+                    - cell "CONE Dioman dioman.cone@arti.ci" [ref=e846]:
+                      - generic [ref=e847]:
+                        - paragraph [ref=e848]: CONE Dioman
+                        - paragraph [ref=e849]: dioman.cone@arti.ci
+                    - cell "7777777C" [ref=e850]
+                    - cell "Direction Générale" [ref=e851]
+                    - cell "Directeur" [ref=e852]:
+                      - generic [ref=e853]: Directeur
+                    - cell "Validateur" [ref=e854]:
+                      - generic [ref=e855]: Validateur
+                    - cell "Actif" [ref=e856]:
+                      - generic [ref=e857]: Actif
+                    - cell [ref=e858]:
+                      - generic [ref=e859]:
+                        - button [ref=e860] [cursor=pointer]:
+                          - img
+                        - button [ref=e861] [cursor=pointer]:
+                          - img
+                  - row "Contrôleur BUDGETAIRE cb@arti.ci - Contrôleur Budgétaire Directeur Controleur Actif" [ref=e862]:
+                    - cell "Contrôleur BUDGETAIRE cb@arti.ci" [ref=e863]:
+                      - generic [ref=e864]:
+                        - paragraph [ref=e865]: Contrôleur BUDGETAIRE
+                        - paragraph [ref=e866]: cb@arti.ci
+                    - cell "-" [ref=e867]
+                    - cell "Contrôleur Budgétaire" [ref=e868]
+                    - cell "Directeur" [ref=e869]:
+                      - generic [ref=e870]: Directeur
+                    - cell "Controleur" [ref=e871]:
+                      - generic [ref=e872]: Controleur
+                    - cell "Actif" [ref=e873]:
+                      - generic [ref=e874]: Actif
+                    - cell [ref=e875]:
+                      - generic [ref=e876]:
+                        - button [ref=e877] [cursor=pointer]:
+                          - img
+                        - button [ref=e878] [cursor=pointer]:
+                          - img
+                  - row "COULIBALY Moussa moussa.coulibaly@arti.ci 1150820C Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e879]:
+                    - cell "COULIBALY Moussa moussa.coulibaly@arti.ci" [ref=e880]:
+                      - generic [ref=e881]:
+                        - paragraph [ref=e882]: COULIBALY Moussa
+                        - paragraph [ref=e883]: moussa.coulibaly@arti.ci
+                    - cell "1150820C" [ref=e884]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e885]
+                    - cell "Agent" [ref=e886]:
+                      - generic [ref=e887]: Agent
+                    - cell "Operationnel" [ref=e888]:
+                      - generic [ref=e889]: Operationnel
+                    - cell "Actif" [ref=e890]:
+                      - generic [ref=e891]: Actif
+                    - cell [ref=e892]:
+                      - generic [ref=e893]:
+                        - button [ref=e894] [cursor=pointer]:
+                          - img
+                        - button [ref=e895] [cursor=pointer]:
+                          - img
+                  - row "DEBEY Alleguy Linda Carole lynda.debey@arti.ci 2090720D Direction Générale DG Validateur Actif" [ref=e896]:
+                    - cell "DEBEY Alleguy Linda Carole lynda.debey@arti.ci" [ref=e897]:
+                      - generic [ref=e898]:
+                        - paragraph [ref=e899]: DEBEY Alleguy Linda Carole
+                        - paragraph [ref=e900]: lynda.debey@arti.ci
+                    - cell "2090720D" [ref=e901]
+                    - cell "Direction Générale" [ref=e902]
+                    - cell "DG" [ref=e903]:
+                      - generic [ref=e904]: DG
+                    - cell "Validateur" [ref=e905]:
+                      - generic [ref=e906]: Validateur
+                    - cell "Actif" [ref=e907]:
+                      - generic [ref=e908]: Actif
+                    - cell [ref=e909]:
+                      - generic [ref=e910]:
+                        - button [ref=e911] [cursor=pointer]:
+                          - img
+                        - button [ref=e912] [cursor=pointer]:
+                          - img
+                  - row "DIABAGATE Aboubacar-Sidick aboubacar.diabagate@arti.ci 1500324D Direction des Statistiques, des Études, de la Stratégie et de la Prospective Chef de Service Operationnel Actif" [ref=e913]:
+                    - cell "DIABAGATE Aboubacar-Sidick aboubacar.diabagate@arti.ci" [ref=e914]:
+                      - generic [ref=e915]:
+                        - paragraph [ref=e916]: DIABAGATE Aboubacar-Sidick
+                        - paragraph [ref=e917]: aboubacar.diabagate@arti.ci
+                    - cell "1500324D" [ref=e918]
+                    - cell "Direction des Statistiques, des Études, de la Stratégie et de la Prospective" [ref=e919]
+                    - cell "Chef de Service" [ref=e920]:
+                      - generic [ref=e921]: Chef de Service
+                    - cell "Operationnel" [ref=e922]:
+                      - generic [ref=e923]: Operationnel
+                    - cell "Actif" [ref=e924]:
+                      - generic [ref=e925]: Actif
+                    - cell [ref=e926]:
+                      - generic [ref=e927]:
+                        - button [ref=e928] [cursor=pointer]:
+                          - img
+                        - button [ref=e929] [cursor=pointer]:
+                          - img
+                  - row "DIABAGATE Mohammed mohammed.diabagate@arti.ci 1311021D Direction Centrale des Zones Chef de Service Operationnel Actif" [ref=e930]:
+                    - cell "DIABAGATE Mohammed mohammed.diabagate@arti.ci" [ref=e931]:
+                      - generic [ref=e932]:
+                        - paragraph [ref=e933]: DIABAGATE Mohammed
+                        - paragraph [ref=e934]: mohammed.diabagate@arti.ci
+                    - cell "1311021D" [ref=e935]
+                    - cell "Direction Centrale des Zones" [ref=e936]
+                    - cell "Chef de Service" [ref=e937]:
+                      - generic [ref=e938]: Chef de Service
+                    - cell "Operationnel" [ref=e939]:
+                      - generic [ref=e940]: Operationnel
+                    - cell "Actif" [ref=e941]:
+                      - generic [ref=e942]: Actif
+                    - cell [ref=e943]:
+                      - generic [ref=e944]:
+                        - button [ref=e945] [cursor=pointer]:
+                          - img
+                        - button [ref=e946] [cursor=pointer]:
+                          - img
+                  - row "DIARRASSOUBA Mory mory.diarrassouba@arti.ci 6666666D Direction Générale Directeur Validateur Actif" [ref=e947]:
+                    - cell "DIARRASSOUBA Mory mory.diarrassouba@arti.ci" [ref=e948]:
+                      - generic [ref=e949]:
+                        - paragraph [ref=e950]: DIARRASSOUBA Mory
+                        - paragraph [ref=e951]: mory.diarrassouba@arti.ci
+                    - cell "6666666D" [ref=e952]
+                    - cell "Direction Générale" [ref=e953]
+                    - cell "Directeur" [ref=e954]:
+                      - generic [ref=e955]: Directeur
+                    - cell "Validateur" [ref=e956]:
+                      - generic [ref=e957]: Validateur
+                    - cell "Actif" [ref=e958]:
+                      - generic [ref=e959]: Actif
+                    - cell [ref=e960]:
+                      - generic [ref=e961]:
+                        - button [ref=e962] [cursor=pointer]:
+                          - img
+                        - button [ref=e963] [cursor=pointer]:
+                          - img
+                  - row "DIHI Keletigui Lamine lamine.dihi@arti.ci 1040622D Direction Générale DG Admin Actif" [ref=e964]:
+                    - cell "DIHI Keletigui Lamine lamine.dihi@arti.ci" [ref=e965]:
+                      - generic [ref=e966]:
+                        - paragraph [ref=e967]: DIHI Keletigui Lamine
+                        - paragraph [ref=e968]: lamine.dihi@arti.ci
+                    - cell "1040622D" [ref=e969]
+                    - cell "Direction Générale" [ref=e970]
+                    - cell "DG" [ref=e971]:
+                      - generic [ref=e972]: DG
+                    - cell "Admin" [ref=e973]:
+                      - generic [ref=e974]: Admin
+                    - cell "Actif" [ref=e975]:
+                      - generic [ref=e976]: Actif
+                    - cell [ref=e977]:
+                      - generic [ref=e978]:
+                        - button [ref=e979] [cursor=pointer]:
+                          - img
+                        - button [ref=e980] [cursor=pointer]:
+                          - img
+                  - row "DIOMANDE Adama adama.diomande@arti.ci 1461023D Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e981]:
+                    - cell "DIOMANDE Adama adama.diomande@arti.ci" [ref=e982]:
+                      - generic [ref=e983]:
+                        - paragraph [ref=e984]: DIOMANDE Adama
+                        - paragraph [ref=e985]: adama.diomande@arti.ci
+                    - cell "1461023D" [ref=e986]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e987]
+                    - cell "Agent" [ref=e988]:
+                      - generic [ref=e989]: Agent
+                    - cell "Operationnel" [ref=e990]:
+                      - generic [ref=e991]: Operationnel
+                    - cell "Actif" [ref=e992]:
+                      - generic [ref=e993]: Actif
+                    - cell [ref=e994]:
+                      - generic [ref=e995]:
+                        - button [ref=e996] [cursor=pointer]:
+                          - img
+                        - button [ref=e997] [cursor=pointer]:
+                          - img
+                  - row "Directeur GENERAL dg@arti.ci - Direction Générale DG Admin Actif" [ref=e998]:
+                    - cell "Directeur GENERAL dg@arti.ci" [ref=e999]:
+                      - generic [ref=e1000]:
+                        - paragraph [ref=e1001]: Directeur GENERAL
+                        - paragraph [ref=e1002]: dg@arti.ci
+                    - cell "-" [ref=e1003]
+                    - cell "Direction Générale" [ref=e1004]
+                    - cell "DG" [ref=e1005]:
+                      - generic [ref=e1006]: DG
+                    - cell "Admin" [ref=e1007]:
+                      - generic [ref=e1008]: Admin
+                    - cell "Actif" [ref=e1009]:
+                      - generic [ref=e1010]: Actif
+                    - cell [ref=e1011]:
+                      - generic [ref=e1012]:
+                        - button [ref=e1013] [cursor=pointer]:
+                          - img
+                        - button [ref=e1014] [cursor=pointer]:
+                          - img
+                  - row "DJIRE Kélétigui Lamine lamine.djire@arti.ci 1400822D Direction Générale Agent Operationnel Actif" [ref=e1015]:
+                    - cell "DJIRE Kélétigui Lamine lamine.djire@arti.ci" [ref=e1016]:
+                      - generic [ref=e1017]:
+                        - paragraph [ref=e1018]: DJIRE Kélétigui Lamine
+                        - paragraph [ref=e1019]: lamine.djire@arti.ci
+                    - cell "1400822D" [ref=e1020]
+                    - cell "Direction Générale" [ref=e1021]
+                    - cell "Agent" [ref=e1022]:
+                      - generic [ref=e1023]: Agent
+                    - cell "Operationnel" [ref=e1024]:
+                      - generic [ref=e1025]: Operationnel
+                    - cell "Actif" [ref=e1026]:
+                      - generic [ref=e1027]: Actif
+                    - cell [ref=e1028]:
+                      - generic [ref=e1029]:
+                        - button [ref=e1030] [cursor=pointer]:
+                          - img
+                        - button [ref=e1031] [cursor=pointer]:
+                          - img
+                  - row "DOSSO Moussa moussa.dosso@arti.ci 1510524D Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Agent Operationnel Actif" [ref=e1032]:
+                    - cell "DOSSO Moussa moussa.dosso@arti.ci" [ref=e1033]:
+                      - generic [ref=e1034]:
+                        - paragraph [ref=e1035]: DOSSO Moussa
+                        - paragraph [ref=e1036]: moussa.dosso@arti.ci
+                    - cell "1510524D" [ref=e1037]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1038]
+                    - cell "Agent" [ref=e1039]:
+                      - generic [ref=e1040]: Agent
+                    - cell "Operationnel" [ref=e1041]:
+                      - generic [ref=e1042]: Operationnel
+                    - cell "Actif" [ref=e1043]:
+                      - generic [ref=e1044]: Actif
+                    - cell [ref=e1045]:
+                      - generic [ref=e1046]:
+                        - button [ref=e1047] [cursor=pointer]:
+                          - img
+                        - button [ref=e1048] [cursor=pointer]:
+                          - img
+                  - row "ENAN Eblotché Jean-Jacques jj.enan@arti.ci 1340222E Direction des Affaires Administratives et Financières Directeur Validateur Actif" [ref=e1049]:
+                    - cell "ENAN Eblotché Jean-Jacques jj.enan@arti.ci" [ref=e1050]:
+                      - generic [ref=e1051]:
+                        - paragraph [ref=e1052]: ENAN Eblotché Jean-Jacques
+                        - paragraph [ref=e1053]: jj.enan@arti.ci
+                    - cell "1340222E" [ref=e1054]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1055]
+                    - cell "Directeur" [ref=e1056]:
+                      - generic [ref=e1057]: Directeur
+                    - cell "Validateur" [ref=e1058]:
+                      - generic [ref=e1059]: Validateur
+                    - cell "Actif" [ref=e1060]:
+                      - generic [ref=e1061]: Actif
+                    - cell [ref=e1062]:
+                      - generic [ref=e1063]:
+                        - button [ref=e1064] [cursor=pointer]:
+                          - img
+                        - button [ref=e1065] [cursor=pointer]:
+                          - img
+                  - row "FOFANA Seydou Simon simon.fofana@arti.ci 1410922F Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Chef de Service Operationnel Actif" [ref=e1066]:
+                    - cell "FOFANA Seydou Simon simon.fofana@arti.ci" [ref=e1067]:
+                      - generic [ref=e1068]:
+                        - paragraph [ref=e1069]: FOFANA Seydou Simon
+                        - paragraph [ref=e1070]: simon.fofana@arti.ci
+                    - cell "1410922F" [ref=e1071]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1072]
+                    - cell "Chef de Service" [ref=e1073]:
+                      - generic [ref=e1074]: Chef de Service
+                    - cell "Operationnel" [ref=e1075]:
+                      - generic [ref=e1076]: Operationnel
+                    - cell "Actif" [ref=e1077]:
+                      - generic [ref=e1078]: Actif
+                    - cell [ref=e1079]:
+                      - generic [ref=e1080]:
+                        - button [ref=e1081] [cursor=pointer]:
+                          - img
+                        - button [ref=e1082] [cursor=pointer]:
+                          - img
+                  - row "GBAMELE Kouassi Siméon simeon.gbamele@arti.ci 1291021G Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1083]:
+                    - cell "GBAMELE Kouassi Siméon simeon.gbamele@arti.ci" [ref=e1084]:
+                      - generic [ref=e1085]:
+                        - paragraph [ref=e1086]: GBAMELE Kouassi Siméon
+                        - paragraph [ref=e1087]: simeon.gbamele@arti.ci
+                    - cell "1291021G" [ref=e1088]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1089]
+                    - cell "Agent" [ref=e1090]:
+                      - generic [ref=e1091]: Agent
+                    - cell "Operationnel" [ref=e1092]:
+                      - generic [ref=e1093]: Operationnel
+                    - cell "Actif" [ref=e1094]:
+                      - generic [ref=e1095]: Actif
+                    - cell [ref=e1096]:
+                      - generic [ref=e1097]:
+                        - button [ref=e1098] [cursor=pointer]:
+                          - img
+                        - button [ref=e1099] [cursor=pointer]:
+                          - img
+                  - row "GNAGNE Mel Patrick Serges serge.gnagne@arti.ci 1350322G Direction des Recours, de la Réglementation et des Normes Chef de Service Operationnel Actif" [ref=e1100]:
+                    - cell "GNAGNE Mel Patrick Serges serge.gnagne@arti.ci" [ref=e1101]:
+                      - generic [ref=e1102]:
+                        - paragraph [ref=e1103]: GNAGNE Mel Patrick Serges
+                        - paragraph [ref=e1104]: serge.gnagne@arti.ci
+                    - cell "1350322G" [ref=e1105]
+                    - cell "Direction des Recours, de la Réglementation et des Normes" [ref=e1106]
+                    - cell "Chef de Service" [ref=e1107]:
+                      - generic [ref=e1108]: Chef de Service
+                    - cell "Operationnel" [ref=e1109]:
+                      - generic [ref=e1110]: Operationnel
+                    - cell "Actif" [ref=e1111]:
+                      - generic [ref=e1112]: Actif
+                    - cell [ref=e1113]:
+                      - generic [ref=e1114]:
+                        - button [ref=e1115] [cursor=pointer]:
+                          - img
+                        - button [ref=e1116] [cursor=pointer]:
+                          - img
+                  - row "GRAH Franck franck.grah@arti.ci 1380722G Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Agent Operationnel Actif" [ref=e1117]:
+                    - cell "GRAH Franck franck.grah@arti.ci" [ref=e1118]:
+                      - generic [ref=e1119]:
+                        - paragraph [ref=e1120]: GRAH Franck
+                        - paragraph [ref=e1121]: franck.grah@arti.ci
+                    - cell "1380722G" [ref=e1122]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1123]
+                    - cell "Agent" [ref=e1124]:
+                      - generic [ref=e1125]: Agent
+                    - cell "Operationnel" [ref=e1126]:
+                      - generic [ref=e1127]: Operationnel
+                    - cell "Actif" [ref=e1128]:
+                      - generic [ref=e1129]: Actif
+                    - cell [ref=e1130]:
+                      - generic [ref=e1131]:
+                        - button [ref=e1132] [cursor=pointer]:
+                          - img
+                        - button [ref=e1133] [cursor=pointer]:
+                          - img
+                  - row "HIEN Issa issa.hien@arti.ci 1531024H Direction des Affaires Administratives et Financières Chef de Service Operationnel Actif" [ref=e1134]:
+                    - cell "HIEN Issa issa.hien@arti.ci" [ref=e1135]:
+                      - generic [ref=e1136]:
+                        - paragraph [ref=e1137]: HIEN Issa
+                        - paragraph [ref=e1138]: issa.hien@arti.ci
+                    - cell "1531024H" [ref=e1139]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1140]
+                    - cell "Chef de Service" [ref=e1141]:
+                      - generic [ref=e1142]: Chef de Service
+                    - cell "Operationnel" [ref=e1143]:
+                      - generic [ref=e1144]: Operationnel
+                    - cell "Actif" [ref=e1145]:
+                      - generic [ref=e1146]: Actif
+                    - cell [ref=e1147]:
+                      - generic [ref=e1148]:
+                        - button [ref=e1149] [cursor=pointer]:
+                          - img
+                        - button [ref=e1150] [cursor=pointer]:
+                          - img
+                  - row "KABA Mory mory.kaba@arti.ci 3333333K Direction Générale Directeur Validateur Actif" [ref=e1151]:
+                    - cell "KABA Mory mory.kaba@arti.ci" [ref=e1152]:
+                      - generic [ref=e1153]:
+                        - paragraph [ref=e1154]: KABA Mory
+                        - paragraph [ref=e1155]: mory.kaba@arti.ci
+                    - cell "3333333K" [ref=e1156]
+                    - cell "Direction Générale" [ref=e1157]
+                    - cell "Directeur" [ref=e1158]:
+                      - generic [ref=e1159]: Directeur
+                    - cell "Validateur" [ref=e1160]:
+                      - generic [ref=e1161]: Validateur
+                    - cell "Actif" [ref=e1162]:
+                      - generic [ref=e1163]: Actif
+                    - cell [ref=e1164]:
+                      - generic [ref=e1165]:
+                        - button [ref=e1166] [cursor=pointer]:
+                          - img
+                        - button [ref=e1167] [cursor=pointer]:
+                          - img
+                  - row "KABA Nassou Aurélie aurelie.kaba@arti.ci 2580325K Direction des Recours, de la Réglementation et des Normes Agent Operationnel Actif" [ref=e1168]:
+                    - cell "KABA Nassou Aurélie aurelie.kaba@arti.ci" [ref=e1169]:
+                      - generic [ref=e1170]:
+                        - paragraph [ref=e1171]: KABA Nassou Aurélie
+                        - paragraph [ref=e1172]: aurelie.kaba@arti.ci
+                    - cell "2580325K" [ref=e1173]
+                    - cell "Direction des Recours, de la Réglementation et des Normes" [ref=e1174]
+                    - cell "Agent" [ref=e1175]:
+                      - generic [ref=e1176]: Agent
+                    - cell "Operationnel" [ref=e1177]:
+                      - generic [ref=e1178]: Operationnel
+                    - cell "Actif" [ref=e1179]:
+                      - generic [ref=e1180]: Actif
+                    - cell [ref=e1181]:
+                      - generic [ref=e1182]:
+                        - button [ref=e1183] [cursor=pointer]:
+                          - img
+                        - button [ref=e1184] [cursor=pointer]:
+                          - img
+                  - row "KABLAN Jean Claude jeanclaude.kablan@arti.ci 1180820K Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1185]:
+                    - cell "KABLAN Jean Claude jeanclaude.kablan@arti.ci" [ref=e1186]:
+                      - generic [ref=e1187]:
+                        - paragraph [ref=e1188]: KABLAN Jean Claude
+                        - paragraph [ref=e1189]: jeanclaude.kablan@arti.ci
+                    - cell "1180820K" [ref=e1190]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1191]
+                    - cell "Agent" [ref=e1192]:
+                      - generic [ref=e1193]: Agent
+                    - cell "Operationnel" [ref=e1194]:
+                      - generic [ref=e1195]: Operationnel
+                    - cell "Actif" [ref=e1196]:
+                      - generic [ref=e1197]: Actif
+                    - cell [ref=e1198]:
+                      - generic [ref=e1199]:
+                        - button [ref=e1200] [cursor=pointer]:
+                          - img
+                        - button [ref=e1201] [cursor=pointer]:
+                          - img
+                  - row "KACOU Albéric alberic.kacou@arti.ci 9999999D Direction Générale Directeur Validateur Actif" [ref=e1202]:
+                    - cell "KACOU Albéric alberic.kacou@arti.ci" [ref=e1203]:
+                      - generic [ref=e1204]:
+                        - paragraph [ref=e1205]: KACOU Albéric
+                        - paragraph [ref=e1206]: alberic.kacou@arti.ci
+                    - cell "9999999D" [ref=e1207]
+                    - cell "Direction Générale" [ref=e1208]
+                    - cell "Directeur" [ref=e1209]:
+                      - generic [ref=e1210]: Directeur
+                    - cell "Validateur" [ref=e1211]:
+                      - generic [ref=e1212]: Validateur
+                    - cell "Actif" [ref=e1213]:
+                      - generic [ref=e1214]: Actif
+                    - cell [ref=e1215]:
+                      - generic [ref=e1216]:
+                        - button [ref=e1217] [cursor=pointer]:
+                          - img
+                        - button [ref=e1218] [cursor=pointer]:
+                          - img
+                  - row "KAMAGATE Bakagnan bakagnan.kamagate@arti.ci 1040620K Direction du Contrôle et de Surveillance du Transport Intérieur Directeur Validateur Actif" [ref=e1219]:
+                    - cell "KAMAGATE Bakagnan bakagnan.kamagate@arti.ci" [ref=e1220]:
+                      - generic [ref=e1221]:
+                        - paragraph [ref=e1222]: KAMAGATE Bakagnan
+                        - paragraph [ref=e1223]: bakagnan.kamagate@arti.ci
+                    - cell "1040620K" [ref=e1224]
+                    - cell "Direction du Contrôle et de Surveillance du Transport Intérieur" [ref=e1225]
+                    - cell "Directeur" [ref=e1226]:
+                      - generic [ref=e1227]: Directeur
+                    - cell "Validateur" [ref=e1228]:
+                      - generic [ref=e1229]: Validateur
+                    - cell "Actif" [ref=e1230]:
+                      - generic [ref=e1231]: Actif
+                    - cell [ref=e1232]:
+                      - generic [ref=e1233]:
+                        - button [ref=e1234] [cursor=pointer]:
+                          - img
+                        - button [ref=e1235] [cursor=pointer]:
+                          - img
+                  - row "KASSI Marie-Paule mariepaule.kassi@arti.ci 2451023K Direction de la Qualité Directeur Validateur Actif" [ref=e1236]:
+                    - cell "KASSI Marie-Paule mariepaule.kassi@arti.ci" [ref=e1237]:
+                      - generic [ref=e1238]:
+                        - paragraph [ref=e1239]: KASSI Marie-Paule
+                        - paragraph [ref=e1240]: mariepaule.kassi@arti.ci
+                    - cell "2451023K" [ref=e1241]
+                    - cell "Direction de la Qualité" [ref=e1242]
+                    - cell "Directeur" [ref=e1243]:
+                      - generic [ref=e1244]: Directeur
+                    - cell "Validateur" [ref=e1245]:
+                      - generic [ref=e1246]: Validateur
+                    - cell "Actif" [ref=e1247]:
+                      - generic [ref=e1248]: Actif
+                    - cell [ref=e1249]:
+                      - generic [ref=e1250]:
+                        - button [ref=e1251] [cursor=pointer]:
+                          - img
+                        - button [ref=e1252] [cursor=pointer]:
+                          - img
+                  - row "KOFFI Jean Léon jleon.koffi@arti.ci 1030620K Direction des Statistiques, des Études, de la Stratégie et de la Prospective Directeur Validateur Actif" [ref=e1253]:
+                    - cell "KOFFI Jean Léon jleon.koffi@arti.ci" [ref=e1254]:
+                      - generic [ref=e1255]:
+                        - paragraph [ref=e1256]: KOFFI Jean Léon
+                        - paragraph [ref=e1257]: jleon.koffi@arti.ci
+                    - cell "1030620K" [ref=e1258]
+                    - cell "Direction des Statistiques, des Études, de la Stratégie et de la Prospective" [ref=e1259]
+                    - cell "Directeur" [ref=e1260]:
+                      - generic [ref=e1261]: Directeur
+                    - cell "Validateur" [ref=e1262]:
+                      - generic [ref=e1263]: Validateur
+                    - cell "Actif" [ref=e1264]:
+                      - generic [ref=e1265]: Actif
+                    - cell [ref=e1266]:
+                      - generic [ref=e1267]:
+                        - button [ref=e1268] [cursor=pointer]:
+                          - img
+                        - button [ref=e1269] [cursor=pointer]:
+                          - img
+                  - row "KOFFI Kolou Ange ange.koffi@arti.ci 1590425K Direction des Recours, de la Réglementation et des Normes Agent Operationnel Actif" [ref=e1270]:
+                    - cell "KOFFI Kolou Ange ange.koffi@arti.ci" [ref=e1271]:
+                      - generic [ref=e1272]:
+                        - paragraph [ref=e1273]: KOFFI Kolou Ange
+                        - paragraph [ref=e1274]: ange.koffi@arti.ci
+                    - cell "1590425K" [ref=e1275]
+                    - cell "Direction des Recours, de la Réglementation et des Normes" [ref=e1276]
+                    - cell "Agent" [ref=e1277]:
+                      - generic [ref=e1278]: Agent
+                    - cell "Operationnel" [ref=e1279]:
+                      - generic [ref=e1280]: Operationnel
+                    - cell "Actif" [ref=e1281]:
+                      - generic [ref=e1282]: Actif
+                    - cell [ref=e1283]:
+                      - generic [ref=e1284]:
+                        - button [ref=e1285] [cursor=pointer]:
+                          - img
+                        - button [ref=e1286] [cursor=pointer]:
+                          - img
+                  - row "KONE Séhénan sehenan.kone@arti.ci ARTI0402K Direction des Statistiques, des Études, de la Stratégie et de la Prospective Agent Operationnel Actif" [ref=e1287]:
+                    - cell "KONE Séhénan sehenan.kone@arti.ci" [ref=e1288]:
+                      - generic [ref=e1289]:
+                        - paragraph [ref=e1290]: KONE Séhénan
+                        - paragraph [ref=e1291]: sehenan.kone@arti.ci
+                    - cell "ARTI0402K" [ref=e1292]
+                    - cell "Direction des Statistiques, des Études, de la Stratégie et de la Prospective" [ref=e1293]
+                    - cell "Agent" [ref=e1294]:
+                      - generic [ref=e1295]: Agent
+                    - cell "Operationnel" [ref=e1296]:
+                      - generic [ref=e1297]: Operationnel
+                    - cell "Actif" [ref=e1298]:
+                      - generic [ref=e1299]: Actif
+                    - cell [ref=e1300]:
+                      - generic [ref=e1301]:
+                        - button [ref=e1302] [cursor=pointer]:
+                          - img
+                        - button [ref=e1303] [cursor=pointer]:
+                          - img
+                  - row "KOSSIKE Kango Séraphin seraphin.kossike@arti.ci 1110720K Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1304]:
+                    - cell "KOSSIKE Kango Séraphin seraphin.kossike@arti.ci" [ref=e1305]:
+                      - generic [ref=e1306]:
+                        - paragraph [ref=e1307]: KOSSIKE Kango Séraphin
+                        - paragraph [ref=e1308]: seraphin.kossike@arti.ci
+                    - cell "1110720K" [ref=e1309]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1310]
+                    - cell "Agent" [ref=e1311]:
+                      - generic [ref=e1312]: Agent
+                    - cell "Operationnel" [ref=e1313]:
+                      - generic [ref=e1314]: Operationnel
+                    - cell "Actif" [ref=e1315]:
+                      - generic [ref=e1316]: Actif
+                    - cell [ref=e1317]:
+                      - generic [ref=e1318]:
+                        - button [ref=e1319] [cursor=pointer]:
+                          - img
+                        - button [ref=e1320] [cursor=pointer]:
+                          - img
+                  - row "KOUADIO Amany Francis amany.kouadio@arti.ci 4444444K Direction Générale Directeur Validateur Actif" [ref=e1321]:
+                    - cell "KOUADIO Amany Francis amany.kouadio@arti.ci" [ref=e1322]:
+                      - generic [ref=e1323]:
+                        - paragraph [ref=e1324]: KOUADIO Amany Francis
+                        - paragraph [ref=e1325]: amany.kouadio@arti.ci
+                    - cell "4444444K" [ref=e1326]
+                    - cell "Direction Générale" [ref=e1327]
+                    - cell "Directeur" [ref=e1328]:
+                      - generic [ref=e1329]: Directeur
+                    - cell "Validateur" [ref=e1330]:
+                      - generic [ref=e1331]: Validateur
+                    - cell "Actif" [ref=e1332]:
+                      - generic [ref=e1333]: Actif
+                    - cell [ref=e1334]:
+                      - generic [ref=e1335]:
+                        - button [ref=e1336] [cursor=pointer]:
+                          - img
+                        - button [ref=e1337] [cursor=pointer]:
+                          - img
+                  - row "KOUADIO Konan Edmond edmond.kouadio@arti.ci 1360322K Direction du Contrôle et de Surveillance du Transport Intérieur Agent Operationnel Actif" [ref=e1338]:
+                    - cell "KOUADIO Konan Edmond edmond.kouadio@arti.ci" [ref=e1339]:
+                      - generic [ref=e1340]:
+                        - paragraph [ref=e1341]: KOUADIO Konan Edmond
+                        - paragraph [ref=e1342]: edmond.kouadio@arti.ci
+                    - cell "1360322K" [ref=e1343]
+                    - cell "Direction du Contrôle et de Surveillance du Transport Intérieur" [ref=e1344]
+                    - cell "Agent" [ref=e1345]:
+                      - generic [ref=e1346]: Agent
+                    - cell "Operationnel" [ref=e1347]:
+                      - generic [ref=e1348]: Operationnel
+                    - cell "Actif" [ref=e1349]:
+                      - generic [ref=e1350]: Actif
+                    - cell [ref=e1351]:
+                      - generic [ref=e1352]:
+                        - button [ref=e1353] [cursor=pointer]:
+                          - img
+                        - button [ref=e1354] [cursor=pointer]:
+                          - img
+                  - row "KOUADIO Maxime maxime.kouadio@arti.ci 1600725K Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1355]:
+                    - cell "KOUADIO Maxime maxime.kouadio@arti.ci" [ref=e1356]:
+                      - generic [ref=e1357]:
+                        - paragraph [ref=e1358]: KOUADIO Maxime
+                        - paragraph [ref=e1359]: maxime.kouadio@arti.ci
+                    - cell "1600725K" [ref=e1360]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1361]
+                    - cell "Agent" [ref=e1362]:
+                      - generic [ref=e1363]: Agent
+                    - cell "Operationnel" [ref=e1364]:
+                      - generic [ref=e1365]: Operationnel
+                    - cell "Actif" [ref=e1366]:
+                      - generic [ref=e1367]: Actif
+                    - cell [ref=e1368]:
+                      - generic [ref=e1369]:
+                        - button [ref=e1370] [cursor=pointer]:
+                          - img
+                        - button [ref=e1371] [cursor=pointer]:
+                          - img
+                  - row "KOUAKOU Adjoua Gertrude gertrude.djamara@arti.ci 2630925K Direction des Affaires Administratives et Financières Chef de Service Operationnel Actif" [ref=e1372]:
+                    - cell "KOUAKOU Adjoua Gertrude gertrude.djamara@arti.ci" [ref=e1373]:
+                      - generic [ref=e1374]:
+                        - paragraph [ref=e1375]: KOUAKOU Adjoua Gertrude
+                        - paragraph [ref=e1376]: gertrude.djamara@arti.ci
+                    - cell "2630925K" [ref=e1377]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1378]
+                    - cell "Chef de Service" [ref=e1379]:
+                      - generic [ref=e1380]: Chef de Service
+                    - cell "Operationnel" [ref=e1381]:
+                      - generic [ref=e1382]: Operationnel
+                    - cell "Actif" [ref=e1383]:
+                      - generic [ref=e1384]: Actif
+                    - cell [ref=e1385]:
+                      - generic [ref=e1386]:
+                        - button [ref=e1387] [cursor=pointer]:
+                          - img
+                        - button [ref=e1388] [cursor=pointer]:
+                          - img
+                  - row "KOUAKOU N'guessan Annick Marie-France annick.kouakou@arti.ci 2620925K Direction des Affaires Administratives et Financières Directeur Validateur Actif" [ref=e1389]:
+                    - cell "KOUAKOU N'guessan Annick Marie-France annick.kouakou@arti.ci" [ref=e1390]:
+                      - generic [ref=e1391]:
+                        - paragraph [ref=e1392]: KOUAKOU N'guessan Annick Marie-France
+                        - paragraph [ref=e1393]: annick.kouakou@arti.ci
+                    - cell "2620925K" [ref=e1394]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1395]
+                    - cell "Directeur" [ref=e1396]:
+                      - generic [ref=e1397]: Directeur
+                    - cell "Validateur" [ref=e1398]:
+                      - generic [ref=e1399]: Validateur
+                    - cell "Actif" [ref=e1400]:
+                      - generic [ref=e1401]: Actif
+                    - cell [ref=e1402]:
+                      - generic [ref=e1403]:
+                        - button [ref=e1404] [cursor=pointer]:
+                          - img
+                        - button [ref=e1405] [cursor=pointer]:
+                          - img
+                  - row "KOUAKOU-KAN Jean-Marc Akhenaton jm.kouakoukan@arti.ci 1070720K Chargé de Mission du Directeur Général DG Validateur Actif" [ref=e1406]:
+                    - cell "KOUAKOU-KAN Jean-Marc Akhenaton jm.kouakoukan@arti.ci" [ref=e1407]:
+                      - generic [ref=e1408]:
+                        - paragraph [ref=e1409]: KOUAKOU-KAN Jean-Marc Akhenaton
+                        - paragraph [ref=e1410]: jm.kouakoukan@arti.ci
+                    - cell "1070720K" [ref=e1411]
+                    - cell "Chargé de Mission du Directeur Général" [ref=e1412]
+                    - cell "DG" [ref=e1413]:
+                      - generic [ref=e1414]: DG
+                    - cell "Validateur" [ref=e1415]:
+                      - generic [ref=e1416]: Validateur
+                    - cell "Actif" [ref=e1417]:
+                      - generic [ref=e1418]: Actif
+                    - cell [ref=e1419]:
+                      - generic [ref=e1420]:
+                        - button [ref=e1421] [cursor=pointer]:
+                          - img
+                        - button [ref=e1422] [cursor=pointer]:
+                          - img
+                  - row "KOUAME Bérénice berenice.kouame@arti.ci ARTI1903K Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Agent Operationnel Actif" [ref=e1423]:
+                    - cell "KOUAME Bérénice berenice.kouame@arti.ci" [ref=e1424]:
+                      - generic [ref=e1425]:
+                        - paragraph [ref=e1426]: KOUAME Bérénice
+                        - paragraph [ref=e1427]: berenice.kouame@arti.ci
+                    - cell "ARTI1903K" [ref=e1428]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1429]
+                    - cell "Agent" [ref=e1430]:
+                      - generic [ref=e1431]: Agent
+                    - cell "Operationnel" [ref=e1432]:
+                      - generic [ref=e1433]: Operationnel
+                    - cell "Actif" [ref=e1434]:
+                      - generic [ref=e1435]: Actif
+                    - cell [ref=e1436]:
+                      - generic [ref=e1437]:
+                        - button [ref=e1438] [cursor=pointer]:
+                          - img
+                        - button [ref=e1439] [cursor=pointer]:
+                          - img
+                  - row "KOUAME Yah Noélie Gabrielle gabrielle.kouame@arti.ci 2550225K Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Sous-Directeur Validateur Actif" [ref=e1440]:
+                    - cell "KOUAME Yah Noélie Gabrielle gabrielle.kouame@arti.ci" [ref=e1441]:
+                      - generic [ref=e1442]:
+                        - paragraph [ref=e1443]: KOUAME Yah Noélie Gabrielle
+                        - paragraph [ref=e1444]: gabrielle.kouame@arti.ci
+                    - cell "2550225K" [ref=e1445]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1446]
+                    - cell "Sous-Directeur" [ref=e1447]:
+                      - generic [ref=e1448]: Sous-Directeur
+                    - cell "Validateur" [ref=e1449]:
+                      - generic [ref=e1450]: Validateur
+                    - cell "Actif" [ref=e1451]:
+                      - generic [ref=e1452]: Actif
+                    - cell [ref=e1453]:
+                      - generic [ref=e1454]:
+                        - button [ref=e1455] [cursor=pointer]:
+                          - img
+                        - button [ref=e1456] [cursor=pointer]:
+                          - img
+                  - row "KOUASSI Kouamé Adrien adrien.kouassi@arti.ci 1210221K Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1457]:
+                    - cell "KOUASSI Kouamé Adrien adrien.kouassi@arti.ci" [ref=e1458]:
+                      - generic [ref=e1459]:
+                        - paragraph [ref=e1460]: KOUASSI Kouamé Adrien
+                        - paragraph [ref=e1461]: adrien.kouassi@arti.ci
+                    - cell "1210221K" [ref=e1462]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1463]
+                    - cell "Agent" [ref=e1464]:
+                      - generic [ref=e1465]: Agent
+                    - cell "Operationnel" [ref=e1466]:
+                      - generic [ref=e1467]: Operationnel
+                    - cell "Actif" [ref=e1468]:
+                      - generic [ref=e1469]: Actif
+                    - cell [ref=e1470]:
+                      - generic [ref=e1471]:
+                        - button [ref=e1472] [cursor=pointer]:
+                          - img
+                        - button [ref=e1473] [cursor=pointer]:
+                          - img
+                  - row "KUE Kamonian Valentin valentin.kue@arti.ci 1120720K Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1474]:
+                    - cell "KUE Kamonian Valentin valentin.kue@arti.ci" [ref=e1475]:
+                      - generic [ref=e1476]:
+                        - paragraph [ref=e1477]: KUE Kamonian Valentin
+                        - paragraph [ref=e1478]: valentin.kue@arti.ci
+                    - cell "1120720K" [ref=e1479]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1480]
+                    - cell "Agent" [ref=e1481]:
+                      - generic [ref=e1482]: Agent
+                    - cell "Operationnel" [ref=e1483]:
+                      - generic [ref=e1484]: Operationnel
+                    - cell "Actif" [ref=e1485]:
+                      - generic [ref=e1486]: Actif
+                    - cell [ref=e1487]:
+                      - generic [ref=e1488]:
+                        - button [ref=e1489] [cursor=pointer]:
+                          - img
+                        - button [ref=e1490] [cursor=pointer]:
+                          - img
+                  - row "M'BAYE Konan Philippe mbaye.philippe@arti.ci 1430123M Direction Générale Agent Controleur Actif" [ref=e1491]:
+                    - cell "M'BAYE Konan Philippe mbaye.philippe@arti.ci" [ref=e1492]:
+                      - generic [ref=e1493]:
+                        - paragraph [ref=e1494]: M'BAYE Konan Philippe
+                        - paragraph [ref=e1495]: mbaye.philippe@arti.ci
+                    - cell "1430123M" [ref=e1496]
+                    - cell "Direction Générale" [ref=e1497]
+                    - cell "Agent" [ref=e1498]:
+                      - generic [ref=e1499]: Agent
+                    - cell "Controleur" [ref=e1500]:
+                      - generic [ref=e1501]: Controleur
+                    - cell "Actif" [ref=e1502]:
+                      - generic [ref=e1503]: Actif
+                    - cell [ref=e1504]:
+                      - generic [ref=e1505]:
+                        - button [ref=e1506] [cursor=pointer]:
+                          - img
+                        - button [ref=e1507] [cursor=pointer]:
+                          - img
+                  - row "MANOUAN Thècle Nina nina.kone@arti.ci 2140820M Direction Générale Agent Operationnel Actif" [ref=e1508]:
+                    - cell "MANOUAN Thècle Nina nina.kone@arti.ci" [ref=e1509]:
+                      - generic [ref=e1510]:
+                        - paragraph [ref=e1511]: MANOUAN Thècle Nina
+                        - paragraph [ref=e1512]: nina.kone@arti.ci
+                    - cell "2140820M" [ref=e1513]
+                    - cell "Direction Générale" [ref=e1514]
+                    - cell "Agent" [ref=e1515]:
+                      - generic [ref=e1516]: Agent
+                    - cell "Operationnel" [ref=e1517]:
+                      - generic [ref=e1518]: Operationnel
+                    - cell "Actif" [ref=e1519]:
+                      - generic [ref=e1520]: Actif
+                    - cell [ref=e1521]:
+                      - generic [ref=e1522]:
+                        - button [ref=e1523] [cursor=pointer]:
+                          - img
+                        - button [ref=e1524] [cursor=pointer]:
+                          - img
+                  - row "N'DA Niamkey Elysee elysee.semi@arti.ci 2160820N Direction Générale Agent Operationnel Actif" [ref=e1525]:
+                    - cell "N'DA Niamkey Elysee elysee.semi@arti.ci" [ref=e1526]:
+                      - generic [ref=e1527]:
+                        - paragraph [ref=e1528]: N'DA Niamkey Elysee
+                        - paragraph [ref=e1529]: elysee.semi@arti.ci
+                    - cell "2160820N" [ref=e1530]
+                    - cell "Direction Générale" [ref=e1531]
+                    - cell "Agent" [ref=e1532]:
+                      - generic [ref=e1533]: Agent
+                    - cell "Operationnel" [ref=e1534]:
+                      - generic [ref=e1535]: Operationnel
+                    - cell "Actif" [ref=e1536]:
+                      - generic [ref=e1537]: Actif
+                    - cell [ref=e1538]:
+                      - generic [ref=e1539]:
+                        - button [ref=e1540] [cursor=pointer]:
+                          - img
+                        - button [ref=e1541] [cursor=pointer]:
+                          - img
+                  - row "N'DRI Kouadio kouadio.ndri@arti.ci 8888888N Direction Générale Directeur Validateur Actif" [ref=e1542]:
+                    - cell "N'DRI Kouadio kouadio.ndri@arti.ci" [ref=e1543]:
+                      - generic [ref=e1544]:
+                        - paragraph [ref=e1545]: N'DRI Kouadio
+                        - paragraph [ref=e1546]: kouadio.ndri@arti.ci
+                    - cell "8888888N" [ref=e1547]
+                    - cell "Direction Générale" [ref=e1548]
+                    - cell "Directeur" [ref=e1549]:
+                      - generic [ref=e1550]: Directeur
+                    - cell "Validateur" [ref=e1551]:
+                      - generic [ref=e1552]: Validateur
+                    - cell "Actif" [ref=e1553]:
+                      - generic [ref=e1554]: Actif
+                    - cell [ref=e1555]:
+                      - generic [ref=e1556]:
+                        - button [ref=e1557] [cursor=pointer]:
+                          - img
+                        - button [ref=e1558] [cursor=pointer]:
+                          - img
+                  - row "N'ZI ASSAMOUA Désiré desire.nzi@arti.ci 1020220N Direction Générale DG Validateur Actif" [ref=e1559]:
+                    - cell "N'ZI ASSAMOUA Désiré desire.nzi@arti.ci" [ref=e1560]:
+                      - generic [ref=e1561]:
+                        - paragraph [ref=e1562]: N'ZI ASSAMOUA Désiré
+                        - paragraph [ref=e1563]: desire.nzi@arti.ci
+                    - cell "1020220N" [ref=e1564]
+                    - cell "Direction Générale" [ref=e1565]
+                    - cell "DG" [ref=e1566]:
+                      - generic [ref=e1567]: DG
+                    - cell "Validateur" [ref=e1568]:
+                      - generic [ref=e1569]: Validateur
+                    - cell "Actif" [ref=e1570]:
+                      - generic [ref=e1571]: Actif
+                    - cell [ref=e1572]:
+                      - generic [ref=e1573]:
+                        - button [ref=e1574] [cursor=pointer]:
+                          - img
+                        - button [ref=e1575] [cursor=pointer]:
+                          - img
+                  - row "NIMBA Odahin Ange Yannick ange.nimba@arti.ci 1541024N Direction Générale Agent Operationnel Actif" [ref=e1576]:
+                    - cell "NIMBA Odahin Ange Yannick ange.nimba@arti.ci" [ref=e1577]:
+                      - generic [ref=e1578]:
+                        - paragraph [ref=e1579]: NIMBA Odahin Ange Yannick
+                        - paragraph [ref=e1580]: ange.nimba@arti.ci
+                    - cell "1541024N" [ref=e1581]
+                    - cell "Direction Générale" [ref=e1582]
+                    - cell "Agent" [ref=e1583]:
+                      - generic [ref=e1584]: Agent
+                    - cell "Operationnel" [ref=e1585]:
+                      - generic [ref=e1586]: Operationnel
+                    - cell "Actif" [ref=e1587]:
+                      - generic [ref=e1588]: Actif
+                    - cell [ref=e1589]:
+                      - generic [ref=e1590]:
+                        - button [ref=e1591] [cursor=pointer]:
+                          - img
+                        - button [ref=e1592] [cursor=pointer]:
+                          - img
+                  - row "OUATTARA Francis Nielbien francis.ouattara@arti.ci 5555555O Direction Générale Directeur Validateur Actif" [ref=e1593]:
+                    - cell "OUATTARA Francis Nielbien francis.ouattara@arti.ci" [ref=e1594]:
+                      - generic [ref=e1595]:
+                        - paragraph [ref=e1596]: OUATTARA Francis Nielbien
+                        - paragraph [ref=e1597]: francis.ouattara@arti.ci
+                    - cell "5555555O" [ref=e1598]
+                    - cell "Direction Générale" [ref=e1599]
+                    - cell "Directeur" [ref=e1600]:
+                      - generic [ref=e1601]: Directeur
+                    - cell "Validateur" [ref=e1602]:
+                      - generic [ref=e1603]: Validateur
+                    - cell "Actif" [ref=e1604]:
+                      - generic [ref=e1605]: Actif
+                    - cell [ref=e1606]:
+                      - generic [ref=e1607]:
+                        - button [ref=e1608] [cursor=pointer]:
+                          - img
+                        - button [ref=e1609] [cursor=pointer]:
+                          - img
+                  - row "SAMBARE Zakaria zakaria.sambare@arti.ci 1100720S Direction des Affaires Administratives et Financières Agent Operationnel Actif" [ref=e1610]:
+                    - cell "SAMBARE Zakaria zakaria.sambare@arti.ci" [ref=e1611]:
+                      - generic [ref=e1612]:
+                        - paragraph [ref=e1613]: SAMBARE Zakaria
+                        - paragraph [ref=e1614]: zakaria.sambare@arti.ci
+                    - cell "1100720S" [ref=e1615]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1616]
+                    - cell "Agent" [ref=e1617]:
+                      - generic [ref=e1618]: Agent
+                    - cell "Operationnel" [ref=e1619]:
+                      - generic [ref=e1620]: Operationnel
+                    - cell "Actif" [ref=e1621]:
+                      - generic [ref=e1622]: Actif
+                    - cell [ref=e1623]:
+                      - generic [ref=e1624]:
+                        - button [ref=e1625] [cursor=pointer]:
+                          - img
+                        - button [ref=e1626] [cursor=pointer]:
+                          - img
+                  - row "SEYNOU Aïcha aicha.seynou@arti.ci 2301021S Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Agent Operationnel Actif" [ref=e1627]:
+                    - cell "SEYNOU Aïcha aicha.seynou@arti.ci" [ref=e1628]:
+                      - generic [ref=e1629]:
+                        - paragraph [ref=e1630]: SEYNOU Aïcha
+                        - paragraph [ref=e1631]: aicha.seynou@arti.ci
+                    - cell "2301021S" [ref=e1632]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1633]
+                    - cell "Agent" [ref=e1634]:
+                      - generic [ref=e1635]: Agent
+                    - cell "Operationnel" [ref=e1636]:
+                      - generic [ref=e1637]: Operationnel
+                    - cell "Actif" [ref=e1638]:
+                      - generic [ref=e1639]: Actif
+                    - cell [ref=e1640]:
+                      - generic [ref=e1641]:
+                        - button [ref=e1642] [cursor=pointer]:
+                          - img
+                        - button [ref=e1643] [cursor=pointer]:
+                          - img
+                  - row "SOHOUKOUYA Tchinseonnon Marina marina.sohou@arti.ci 2470124S Direction Générale DG Validateur Actif" [ref=e1644]:
+                    - cell "SOHOUKOUYA Tchinseonnon Marina marina.sohou@arti.ci" [ref=e1645]:
+                      - generic [ref=e1646]:
+                        - paragraph [ref=e1647]: SOHOUKOUYA Tchinseonnon Marina
+                        - paragraph [ref=e1648]: marina.sohou@arti.ci
+                    - cell "2470124S" [ref=e1649]
+                    - cell "Direction Générale" [ref=e1650]
+                    - cell "DG" [ref=e1651]:
+                      - generic [ref=e1652]: DG
+                    - cell "Validateur" [ref=e1653]:
+                      - generic [ref=e1654]: Validateur
+                    - cell "Actif" [ref=e1655]:
+                      - generic [ref=e1656]: Actif
+                    - cell [ref=e1657]:
+                      - generic [ref=e1658]:
+                        - button [ref=e1659] [cursor=pointer]:
+                          - img
+                        - button [ref=e1660] [cursor=pointer]:
+                          - img
+                  - row "TOURE Souleymane souleymane.toure@arti.ci 1490324T Direction des Affaires Administratives et Financières Directeur Validateur Actif" [ref=e1661]:
+                    - cell "TOURE Souleymane souleymane.toure@arti.ci" [ref=e1662]:
+                      - generic [ref=e1663]:
+                        - paragraph [ref=e1664]: TOURE Souleymane
+                        - paragraph [ref=e1665]: souleymane.toure@arti.ci
+                    - cell "1490324T" [ref=e1666]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1667]
+                    - cell "Directeur" [ref=e1668]:
+                      - generic [ref=e1669]: Directeur
+                    - cell "Validateur" [ref=e1670]:
+                      - generic [ref=e1671]: Validateur
+                    - cell "Actif" [ref=e1672]:
+                      - generic [ref=e1673]: Actif
+                    - cell [ref=e1674]:
+                      - generic [ref=e1675]:
+                        - button [ref=e1676] [cursor=pointer]:
+                          - img
+                        - button [ref=e1677] [cursor=pointer]:
+                          - img
+                  - row "Trésorier ARTI tresorier@arti.ci - Direction des Affaires Administratives et Financières Chef de Service Validateur Actif" [ref=e1678]:
+                    - cell "Trésorier ARTI tresorier@arti.ci" [ref=e1679]:
+                      - generic [ref=e1680]:
+                        - paragraph [ref=e1681]: Trésorier ARTI
+                        - paragraph [ref=e1682]: tresorier@arti.ci
+                    - cell "-" [ref=e1683]
+                    - cell "Direction des Affaires Administratives et Financières" [ref=e1684]
+                    - cell "Chef de Service" [ref=e1685]:
+                      - generic [ref=e1686]: Chef de Service
+                    - cell "Validateur" [ref=e1687]:
+                      - generic [ref=e1688]: Validateur
+                    - cell "Actif" [ref=e1689]:
+                      - generic [ref=e1690]: Actif
+                    - cell [ref=e1691]:
+                      - generic [ref=e1692]:
+                        - button [ref=e1693] [cursor=pointer]:
+                          - img
+                        - button [ref=e1694] [cursor=pointer]:
+                          - img
+                  - row "VOMOUAN TEKE Jean Philippe jp.vomouan@arti.ci 1440823V Direction des Recours, de la Réglementation et des Normes Directeur Validateur Actif" [ref=e1695]:
+                    - cell "VOMOUAN TEKE Jean Philippe jp.vomouan@arti.ci" [ref=e1696]:
+                      - generic [ref=e1697]:
+                        - paragraph [ref=e1698]: VOMOUAN TEKE Jean Philippe
+                        - paragraph [ref=e1699]: jp.vomouan@arti.ci
+                    - cell "1440823V" [ref=e1700]
+                    - cell "Direction des Recours, de la Réglementation et des Normes" [ref=e1701]
+                    - cell "Directeur" [ref=e1702]:
+                      - generic [ref=e1703]: Directeur
+                    - cell "Validateur" [ref=e1704]:
+                      - generic [ref=e1705]: Validateur
+                    - cell "Actif" [ref=e1706]:
+                      - generic [ref=e1707]: Actif
+                    - cell [ref=e1708]:
+                      - generic [ref=e1709]:
+                        - button [ref=e1710] [cursor=pointer]:
+                          - img
+                        - button [ref=e1711] [cursor=pointer]:
+                          - img
+                  - row "YAO Anyela Marie-Colombe anyela.yao@arti.ci 2170820Y Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques Agent Operationnel Actif" [ref=e1712]:
+                    - cell "YAO Anyela Marie-Colombe anyela.yao@arti.ci" [ref=e1713]:
+                      - generic [ref=e1714]:
+                        - paragraph [ref=e1715]: YAO Anyela Marie-Colombe
+                        - paragraph [ref=e1716]: anyela.yao@arti.ci
+                    - cell "2170820Y" [ref=e1717]
+                    - cell "Direction de la Gestion Prévisionnelle de l'Emploi, des Compétences et des Relations Publiques" [ref=e1718]
+                    - cell "Agent" [ref=e1719]:
+                      - generic [ref=e1720]: Agent
+                    - cell "Operationnel" [ref=e1721]:
+                      - generic [ref=e1722]: Operationnel
+                    - cell "Actif" [ref=e1723]:
+                      - generic [ref=e1724]: Actif
+                    - cell [ref=e1725]:
+                      - generic [ref=e1726]:
+                        - button [ref=e1727] [cursor=pointer]:
+                          - img
+                        - button [ref=e1728] [cursor=pointer]:
+                          - img

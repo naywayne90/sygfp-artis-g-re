@@ -1,0 +1,605 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e269]:
+            - heading "Règles de Codification" [level=1] [ref=e270]:
+              - img [ref=e271]
+              - text: Règles de Codification
+            - paragraph [ref=e274]: Codification unifiée des objets SYGFP - Exercice 2026
+          - generic [ref=e275]:
+            - generic [ref=e278]:
+              - generic [ref=e279]:
+                - paragraph [ref=e280]: Règles totales
+                - paragraph [ref=e281]: "14"
+              - img [ref=e282]
+            - generic [ref=e287]:
+              - generic [ref=e288]:
+                - paragraph [ref=e289]: Règles actives
+                - paragraph [ref=e290]: "14"
+              - img [ref=e291]
+            - generic [ref=e296]:
+              - generic [ref=e297]:
+                - paragraph [ref=e298]: Séquences 2026
+                - paragraph [ref=e299]: "0"
+              - img [ref=e300]
+            - generic [ref=e304]:
+              - generic [ref=e305]:
+                - paragraph [ref=e306]: Codes générés
+                - paragraph [ref=e307]: "0"
+              - img [ref=e308]
+          - generic [ref=e311]:
+            - tablist [ref=e312]:
+              - tab "Règles" [selected] [ref=e313] [cursor=pointer]:
+                - img [ref=e314]
+                - text: Règles
+              - tab "Séquences (0)" [ref=e317] [cursor=pointer]:
+                - img [ref=e318]
+                - text: Séquences (0)
+            - tabpanel "Règles" [ref=e320]:
+              - generic [ref=e321]:
+                - generic [ref=e322]:
+                  - heading "Règles de Codification (14)" [level=3] [ref=e323]:
+                    - img [ref=e324]
+                    - text: Règles de Codification (14)
+                  - paragraph [ref=e327]: Format des codes pour chaque type d'objet
+                - table [ref=e330]:
+                  - rowgroup [ref=e331]:
+                    - row "Type Préfixe Format Reset Exemple Statut Actions" [ref=e332]:
+                      - columnheader "Type" [ref=e333]
+                      - columnheader "Préfixe" [ref=e334]
+                      - columnheader "Format" [ref=e335]
+                      - columnheader "Reset" [ref=e336]
+                      - columnheader "Exemple" [ref=e337]
+                      - columnheader "Statut" [ref=e338]
+                      - columnheader "Actions" [ref=e339]
+                  - rowgroup [ref=e340]:
+                    - 'row "BUDGETAIRE BUDGETAIRE {ANNEE}{SEP}{DIRECTION}{SEP}{MISSION}{SEP}{ACTION}{SEP}{ACTIVITE}{SEP}{NVE}{SEP}{SEQ} Par exercice 2026-DSI-M01-A02-AC03-NVE615-0007 Tester" [ref=e341]':
+                      - cell "BUDGETAIRE BUDGETAIRE" [ref=e342]:
+                        - generic [ref=e343]: BUDGETAIRE
+                        - paragraph [ref=e344]: BUDGETAIRE
+                      - cell [ref=e345]
+                      - 'cell "{ANNEE}{SEP}{DIRECTION}{SEP}{MISSION}{SEP}{ACTION}{SEP}{ACTIVITE}{SEP}{NVE}{SEP}{SEQ}" [ref=e346]':
+                        - code [ref=e347]: "{ANNEE}{SEP}{DIRECTION}{SEP}{MISSION}{SEP}{ACTION}{SEP}{ACTIVITE}{SEP}{NVE}{SEP}{SEQ}"
+                      - cell "Par exercice" [ref=e348]:
+                        - generic [ref=e349]: Par exercice
+                      - cell "2026-DSI-M01-A02-AC03-NVE615-0007" [ref=e350]:
+                        - generic [ref=e351]:
+                          - code [ref=e352]: 2026-DSI-M01-A02-AC03-NVE615-0007
+                          - button [ref=e353] [cursor=pointer]:
+                            - img
+                      - cell [ref=e354]:
+                        - switch [checked] [ref=e355] [cursor=pointer]
+                      - cell "Tester" [ref=e356]:
+                        - generic [ref=e357]:
+                          - button "Tester" [ref=e358] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e359] [cursor=pointer]:
+                            - img
+                    - 'row "CONTRAT contrats CTR {YYYY}-{SEQ4} Par année CTR-2026-0001 Tester" [ref=e360]':
+                      - cell "CONTRAT contrats" [ref=e361]:
+                        - generic [ref=e362]: CONTRAT
+                        - paragraph [ref=e363]: contrats
+                      - cell "CTR" [ref=e364]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e365]':
+                        - code [ref=e366]: "{YYYY}-{SEQ4}"
+                      - cell "Par année" [ref=e367]:
+                        - generic [ref=e368]: Par année
+                      - cell "CTR-2026-0001" [ref=e369]:
+                        - generic [ref=e370]:
+                          - code [ref=e371]: CTR-2026-0001
+                          - button [ref=e372] [cursor=pointer]:
+                            - img
+                      - cell [ref=e373]:
+                        - switch [checked] [ref=e374] [cursor=pointer]
+                      - cell "Tester" [ref=e375]:
+                        - generic [ref=e376]:
+                          - button "Tester" [ref=e377] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e378] [cursor=pointer]:
+                            - img
+                    - 'row "DOSSIER dossiers DOS {YYYY}-{MM}-{SEQ6} Par année DOS-2026-01-000001 Tester" [ref=e379]':
+                      - cell "DOSSIER dossiers" [ref=e380]:
+                        - generic [ref=e381]: DOSSIER
+                        - paragraph [ref=e382]: dossiers
+                      - cell "DOS" [ref=e383]
+                      - 'cell "{YYYY}-{MM}-{SEQ6}" [ref=e384]':
+                        - code [ref=e385]: "{YYYY}-{MM}-{SEQ6}"
+                      - cell "Par année" [ref=e386]:
+                        - generic [ref=e387]: Par année
+                      - cell "DOS-2026-01-000001" [ref=e388]:
+                        - generic [ref=e389]:
+                          - code [ref=e390]: DOS-2026-01-000001
+                          - button [ref=e391] [cursor=pointer]:
+                            - img
+                      - cell [ref=e392]:
+                        - switch [checked] [ref=e393] [cursor=pointer]
+                      - cell "Tester" [ref=e394]:
+                        - generic [ref=e395]:
+                          - button "Tester" [ref=e396] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e397] [cursor=pointer]:
+                            - img
+                    - 'row "ENGAGEMENT budget_engagements ENG {YYYY}-{SEQ4} Par exercice ENG-2026-0001 Tester" [ref=e398]':
+                      - cell "ENGAGEMENT budget_engagements" [ref=e399]:
+                        - generic [ref=e400]: ENGAGEMENT
+                        - paragraph [ref=e401]: budget_engagements
+                      - cell "ENG" [ref=e402]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e403]':
+                        - code [ref=e404]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e405]:
+                        - generic [ref=e406]: Par exercice
+                      - cell "ENG-2026-0001" [ref=e407]:
+                        - generic [ref=e408]:
+                          - code [ref=e409]: ENG-2026-0001
+                          - button [ref=e410] [cursor=pointer]:
+                            - img
+                      - cell [ref=e411]:
+                        - switch [checked] [ref=e412] [cursor=pointer]
+                      - cell "Tester" [ref=e413]:
+                        - generic [ref=e414]:
+                          - button "Tester" [ref=e415] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e416] [cursor=pointer]:
+                            - img
+                    - 'row "EXPRESSION_BESOIN expressions_besoin EB {YYYY}-{SEQ4} Par exercice EB-2026-0001 Tester" [ref=e417]':
+                      - cell "EXPRESSION_BESOIN expressions_besoin" [ref=e418]:
+                        - generic [ref=e419]: EXPRESSION_BESOIN
+                        - paragraph [ref=e420]: expressions_besoin
+                      - cell "EB" [ref=e421]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e422]':
+                        - code [ref=e423]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e424]:
+                        - generic [ref=e425]: Par exercice
+                      - cell "EB-2026-0001" [ref=e426]:
+                        - generic [ref=e427]:
+                          - code [ref=e428]: EB-2026-0001
+                          - button [ref=e429] [cursor=pointer]:
+                            - img
+                      - cell [ref=e430]:
+                        - switch [checked] [ref=e431] [cursor=pointer]
+                      - cell "Tester" [ref=e432]:
+                        - generic [ref=e433]:
+                          - button "Tester" [ref=e434] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e435] [cursor=pointer]:
+                            - img
+                    - 'row "LIGNE_BUDGETAIRE budget_lines LB {YYYY}-{SEQ6} Par exercice LB-2026-000001 Tester" [ref=e436]':
+                      - cell "LIGNE_BUDGETAIRE budget_lines" [ref=e437]:
+                        - generic [ref=e438]: LIGNE_BUDGETAIRE
+                        - paragraph [ref=e439]: budget_lines
+                      - cell "LB" [ref=e440]
+                      - 'cell "{YYYY}-{SEQ6}" [ref=e441]':
+                        - code [ref=e442]: "{YYYY}-{SEQ6}"
+                      - cell "Par exercice" [ref=e443]:
+                        - generic [ref=e444]: Par exercice
+                      - cell "LB-2026-000001" [ref=e445]:
+                        - generic [ref=e446]:
+                          - code [ref=e447]: LB-2026-000001
+                          - button [ref=e448] [cursor=pointer]:
+                            - img
+                      - cell [ref=e449]:
+                        - switch [checked] [ref=e450] [cursor=pointer]
+                      - cell "Tester" [ref=e451]:
+                        - generic [ref=e452]:
+                          - button "Tester" [ref=e453] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e454] [cursor=pointer]:
+                            - img
+                    - 'row "LIQUIDATION budget_liquidations LIQ {YYYY}-{SEQ4} Par exercice LIQ-2026-0001 Tester" [ref=e455]':
+                      - cell "LIQUIDATION budget_liquidations" [ref=e456]:
+                        - generic [ref=e457]: LIQUIDATION
+                        - paragraph [ref=e458]: budget_liquidations
+                      - cell "LIQ" [ref=e459]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e460]':
+                        - code [ref=e461]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e462]:
+                        - generic [ref=e463]: Par exercice
+                      - cell "LIQ-2026-0001" [ref=e464]:
+                        - generic [ref=e465]:
+                          - code [ref=e466]: LIQ-2026-0001
+                          - button [ref=e467] [cursor=pointer]:
+                            - img
+                      - cell [ref=e468]:
+                        - switch [checked] [ref=e469] [cursor=pointer]
+                      - cell "Tester" [ref=e470]:
+                        - generic [ref=e471]:
+                          - button "Tester" [ref=e472] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e473] [cursor=pointer]:
+                            - img
+                    - 'row "MARCHE marches MAR {YYYY}-{SEQ4} Par année MAR-2026-0001 Tester" [ref=e474]':
+                      - cell "MARCHE marches" [ref=e475]:
+                        - generic [ref=e476]: MARCHE
+                        - paragraph [ref=e477]: marches
+                      - cell "MAR" [ref=e478]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e479]':
+                        - code [ref=e480]: "{YYYY}-{SEQ4}"
+                      - cell "Par année" [ref=e481]:
+                        - generic [ref=e482]: Par année
+                      - cell "MAR-2026-0001" [ref=e483]:
+                        - generic [ref=e484]:
+                          - code [ref=e485]: MAR-2026-0001
+                          - button [ref=e486] [cursor=pointer]:
+                            - img
+                      - cell [ref=e487]:
+                        - switch [checked] [ref=e488] [cursor=pointer]
+                      - cell "Tester" [ref=e489]:
+                        - generic [ref=e490]:
+                          - button "Tester" [ref=e491] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e492] [cursor=pointer]:
+                            - img
+                    - 'row "NOTE_AEF notes_aef AEF {YYYY}-{SEQ4} Par exercice AEF-2026-0001 Tester" [ref=e493]':
+                      - cell "NOTE_AEF notes_aef" [ref=e494]:
+                        - generic [ref=e495]: NOTE_AEF
+                        - paragraph [ref=e496]: notes_aef
+                      - cell "AEF" [ref=e497]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e498]':
+                        - code [ref=e499]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e500]:
+                        - generic [ref=e501]: Par exercice
+                      - cell "AEF-2026-0001" [ref=e502]:
+                        - generic [ref=e503]:
+                          - code [ref=e504]: AEF-2026-0001
+                          - button [ref=e505] [cursor=pointer]:
+                            - img
+                      - cell [ref=e506]:
+                        - switch [checked] [ref=e507] [cursor=pointer]
+                      - cell "Tester" [ref=e508]:
+                        - generic [ref=e509]:
+                          - button "Tester" [ref=e510] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e511] [cursor=pointer]:
+                            - img
+                    - 'row "NOTE_SEF notes_sef SEF {YYYY}-{SEQ4} Par exercice SEF-2026-0001 Tester" [ref=e512]':
+                      - cell "NOTE_SEF notes_sef" [ref=e513]:
+                        - generic [ref=e514]: NOTE_SEF
+                        - paragraph [ref=e515]: notes_sef
+                      - cell "SEF" [ref=e516]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e517]':
+                        - code [ref=e518]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e519]:
+                        - generic [ref=e520]: Par exercice
+                      - cell "SEF-2026-0001" [ref=e521]:
+                        - generic [ref=e522]:
+                          - code [ref=e523]: SEF-2026-0001
+                          - button [ref=e524] [cursor=pointer]:
+                            - img
+                      - cell [ref=e525]:
+                        - switch [checked] [ref=e526] [cursor=pointer]
+                      - cell "Tester" [ref=e527]:
+                        - generic [ref=e528]:
+                          - button "Tester" [ref=e529] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e530] [cursor=pointer]:
+                            - img
+                    - 'row "ORDONNANCEMENT ordonnancements ORD {YYYY}-{SEQ4} Par exercice ORD-2026-0001 Tester" [ref=e531]':
+                      - cell "ORDONNANCEMENT ordonnancements" [ref=e532]:
+                        - generic [ref=e533]: ORDONNANCEMENT
+                        - paragraph [ref=e534]: ordonnancements
+                      - cell "ORD" [ref=e535]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e536]':
+                        - code [ref=e537]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e538]:
+                        - generic [ref=e539]: Par exercice
+                      - cell "ORD-2026-0001" [ref=e540]:
+                        - generic [ref=e541]:
+                          - code [ref=e542]: ORD-2026-0001
+                          - button [ref=e543] [cursor=pointer]:
+                            - img
+                      - cell [ref=e544]:
+                        - switch [checked] [ref=e545] [cursor=pointer]
+                      - cell "Tester" [ref=e546]:
+                        - generic [ref=e547]:
+                          - button "Tester" [ref=e548] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e549] [cursor=pointer]:
+                            - img
+                    - 'row "PRESTATAIRE prestataires SUP {SEQ5} Jamais (global) SUP-00001 Tester" [ref=e550]':
+                      - cell "PRESTATAIRE prestataires" [ref=e551]:
+                        - generic [ref=e552]: PRESTATAIRE
+                        - paragraph [ref=e553]: prestataires
+                      - cell "SUP" [ref=e554]
+                      - 'cell "{SEQ5}" [ref=e555]':
+                        - code [ref=e556]: "{SEQ5}"
+                      - cell "Jamais (global)" [ref=e557]:
+                        - generic [ref=e558]: Jamais (global)
+                      - cell "SUP-00001" [ref=e559]:
+                        - generic [ref=e560]:
+                          - code [ref=e561]: SUP-00001
+                          - button [ref=e562] [cursor=pointer]:
+                            - img
+                      - cell [ref=e563]:
+                        - switch [checked] [ref=e564] [cursor=pointer]
+                      - cell "Tester" [ref=e565]:
+                        - generic [ref=e566]:
+                          - button "Tester" [ref=e567] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e568] [cursor=pointer]:
+                            - img
+                    - 'row "REGLEMENT reglements PAY {YYYY}-{SEQ4} Par exercice PAY-2026-0001 Tester" [ref=e569]':
+                      - cell "REGLEMENT reglements" [ref=e570]:
+                        - generic [ref=e571]: REGLEMENT
+                        - paragraph [ref=e572]: reglements
+                      - cell "PAY" [ref=e573]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e574]':
+                        - code [ref=e575]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e576]:
+                        - generic [ref=e577]: Par exercice
+                      - cell "PAY-2026-0001" [ref=e578]:
+                        - generic [ref=e579]:
+                          - code [ref=e580]: PAY-2026-0001
+                          - button [ref=e581] [cursor=pointer]:
+                            - img
+                      - cell [ref=e582]:
+                        - switch [checked] [ref=e583] [cursor=pointer]
+                      - cell "Tester" [ref=e584]:
+                        - generic [ref=e585]:
+                          - button "Tester" [ref=e586] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e587] [cursor=pointer]:
+                            - img
+                    - 'row "VIREMENT credit_transfers VIR {YYYY}-{SEQ4} Par exercice VIR-2026-0001 Tester" [ref=e588]':
+                      - cell "VIREMENT credit_transfers" [ref=e589]:
+                        - generic [ref=e590]: VIREMENT
+                        - paragraph [ref=e591]: credit_transfers
+                      - cell "VIR" [ref=e592]
+                      - 'cell "{YYYY}-{SEQ4}" [ref=e593]':
+                        - code [ref=e594]: "{YYYY}-{SEQ4}"
+                      - cell "Par exercice" [ref=e595]:
+                        - generic [ref=e596]: Par exercice
+                      - cell "VIR-2026-0001" [ref=e597]:
+                        - generic [ref=e598]:
+                          - code [ref=e599]: VIR-2026-0001
+                          - button [ref=e600] [cursor=pointer]:
+                            - img
+                      - cell [ref=e601]:
+                        - switch [checked] [ref=e602] [cursor=pointer]
+                      - cell "Tester" [ref=e603]:
+                        - generic [ref=e604]:
+                          - button "Tester" [ref=e605] [cursor=pointer]:
+                            - img
+                            - text: Tester
+                          - button [ref=e606] [cursor=pointer]:
+                            - img
+              - generic [ref=e607]:
+                - heading "Variables de format" [level=3] [ref=e609]
+                - generic [ref=e611]:
+                  - generic [ref=e612]:
+                    - generic [ref=e613]: "{YYYY}"
+                    - generic [ref=e614]: Année/Exercice
+                  - generic [ref=e615]:
+                    - generic [ref=e616]: "{MM}"
+                    - generic [ref=e617]: Mois (01-12)
+                  - generic [ref=e618]:
+                    - generic [ref=e619]: "{SEQ4}"
+                    - generic [ref=e620]: Séquence 4 digits
+                  - generic [ref=e621]:
+                    - generic [ref=e622]: "{SEQ6}"
+                    - generic [ref=e623]: Séquence 6 digits

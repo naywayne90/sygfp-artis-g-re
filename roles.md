@@ -1,0 +1,513 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Paramétrage" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Profils & Rôles" [disabled] [ref=e282]
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - button "Retour" [ref=e285] [cursor=pointer]:
+                  - img
+                - img [ref=e288]
+                - generic [ref=e290]:
+                  - heading "Profils & Rôles" [level=1] [ref=e291]
+                  - paragraph [ref=e292]: Configuration des profils et rôles utilisateurs
+              - button "Nouveau Rôle" [ref=e294] [cursor=pointer]:
+                - img
+                - text: Nouveau Rôle
+          - alert [ref=e296]:
+            - img [ref=e297]
+            - heading "Aide – Module Profils & Rôles Réduire" [level=5] [ref=e300]:
+              - generic [ref=e301]: Aide – Module Profils & Rôles
+              - button "Réduire" [expanded] [ref=e302] [cursor=pointer]
+            - generic [ref=e304]:
+              - paragraph [ref=e306]:
+                - text: Ce module permet de
+                - strong [ref=e307]: configurer les rôles
+                - text: qui définissent les permissions des utilisateurs dans SYGFP. Chaque rôle représente un profil métier avec des droits d'accès spécifiques aux différents modules. Les rôles sont ensuite attribués aux utilisateurs dans le module "Gestion des Autorisations".
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - generic [ref=e310]:
+                    - img [ref=e311]
+                    - generic [ref=e314]: Rôles Système
+                  - paragraph [ref=e315]: Rôles prédéfinis et protégés (ADMIN, CB, DAF, DG, etc.). Leur code ne peut pas être modifié et ils ne peuvent pas être supprimés. Vous pouvez cependant modifier leur libellé et description.
+                - generic [ref=e316]:
+                  - generic [ref=e317]:
+                    - img [ref=e318]
+                    - generic [ref=e320]: Rôles Personnalisés
+                  - paragraph [ref=e321]: "Rôles créés par l'administrateur pour répondre à des besoins spécifiques. Ils peuvent être modifiés ou supprimés à tout moment. Exemple : \"Responsable Marchés\", \"Agent Comptable\"."
+                - generic [ref=e322]:
+                  - generic [ref=e323]:
+                    - img [ref=e324]
+                    - generic [ref=e330]: Code & Couleur
+                  - paragraph [ref=e331]:
+                    - text: Le
+                    - strong [ref=e332]: code
+                    - text: "est un identifiant court (ex: ADMIN, CB) utilisé dans les règles d'autorisation. La"
+                    - strong [ref=e333]: couleur
+                    - text: permet de distinguer visuellement les rôles dans l'interface.
+                - generic [ref=e334]:
+                  - generic [ref=e335]:
+                    - img [ref=e336]
+                    - generic [ref=e339]: Statut Actif/Inactif
+                  - paragraph [ref=e340]: Un rôle désactivé n'est plus proposé lors de l'attribution des permissions. Les utilisateurs ayant ce rôle conservent leurs droits jusqu'à modification.
+              - generic [ref=e341]:
+                - heading "Rôles système et leurs responsabilités" [level=4] [ref=e342]
+                - generic [ref=e343]:
+                  - generic [ref=e344]:
+                    - generic [ref=e345]: ADMIN
+                    - generic [ref=e346]:
+                      - text: Administrateur
+                      - paragraph [ref=e347]: Accès complet à tous les modules
+                  - generic [ref=e348]:
+                    - generic [ref=e349]: CB
+                    - generic [ref=e350]:
+                      - text: Contrôleur Budgétaire
+                      - paragraph [ref=e351]: Imputation, validation engagements, virements
+                  - generic [ref=e352]:
+                    - generic [ref=e353]: DAAF
+                    - generic [ref=e354]:
+                      - text: Dir. Admin & Financier
+                      - paragraph [ref=e355]: Création engagements, liquidations
+                  - generic [ref=e356]:
+                    - generic [ref=e357]: DG
+                    - generic [ref=e358]:
+                      - text: Directeur Général
+                      - paragraph [ref=e359]: Validation Notes SEF, signature ordonnancements
+                  - generic [ref=e360]:
+                    - generic [ref=e361]: TRESORERIE
+                    - generic [ref=e362]:
+                      - text: Trésorerie / Agent Comptable
+                      - paragraph [ref=e363]: Exécution des règlements
+                  - generic [ref=e364]:
+                    - generic [ref=e365]: DIRECTEUR
+                    - generic [ref=e366]:
+                      - text: Directeur de département
+                      - paragraph [ref=e367]: Validation Notes AEF de sa direction
+              - generic [ref=e368]:
+                - heading "Tableau \"Qui valide quoi\"" [level=4] [ref=e369]:
+                  - img [ref=e370]
+                  - text: Tableau "Qui valide quoi"
+                - table [ref=e374]:
+                  - rowgroup [ref=e375]:
+                    - row "Action Rôle requis Remarque" [ref=e376]:
+                      - columnheader "Action" [ref=e377]
+                      - columnheader "Rôle requis" [ref=e378]
+                      - columnheader "Remarque" [ref=e379]
+                  - rowgroup [ref=e380]:
+                    - row "Valider Note SEF DG Crée automatiquement le dossier" [ref=e381]:
+                      - cell "Valider Note SEF" [ref=e382]
+                      - cell "DG" [ref=e383]:
+                        - generic [ref=e384]: DG
+                      - cell "Crée automatiquement le dossier" [ref=e385]
+                    - row "Valider Note AEF Directeur ou DG Selon périmètre direction" [ref=e386]:
+                      - cell "Valider Note AEF" [ref=e387]
+                      - cell "Directeur ou DG" [ref=e388]:
+                        - generic [ref=e389]: Directeur
+                        - text: ou
+                        - generic [ref=e390]: DG
+                      - cell "Selon périmètre direction" [ref=e391]
+                    - row "Imputation budgétaire CB Vérifie le disponible" [ref=e392]:
+                      - cell "Imputation budgétaire" [ref=e393]
+                      - cell "CB" [ref=e394]:
+                        - generic [ref=e395]: CB
+                      - cell "Vérifie le disponible" [ref=e396]
+                    - row "Valider Marché DG Après avis commission" [ref=e397]:
+                      - cell "Valider Marché" [ref=e398]
+                      - cell "DG" [ref=e399]:
+                        - generic [ref=e400]: DG
+                      - cell "Après avis commission" [ref=e401]
+                    - row "Valider Engagement CB Réserve les crédits" [ref=e402]:
+                      - cell "Valider Engagement" [ref=e403]
+                      - cell "CB" [ref=e404]:
+                        - generic [ref=e405]: CB
+                      - cell "Réserve les crédits" [ref=e406]
+                    - row "Valider Liquidation DAAF Après service fait" [ref=e407]:
+                      - cell "Valider Liquidation" [ref=e408]
+                      - cell "DAAF" [ref=e409]:
+                        - generic [ref=e410]: DAAF
+                      - cell "Après service fait" [ref=e411]
+                    - row "Signer Ordonnancement DG Ordre de payer" [ref=e412]:
+                      - cell "Signer Ordonnancement" [ref=e413]
+                      - cell "DG" [ref=e414]:
+                        - generic [ref=e415]: DG
+                      - cell "Ordre de payer" [ref=e416]
+                    - row "Exécuter Règlement TRESORERIE Paiement effectif" [ref=e417]:
+                      - cell "Exécuter Règlement" [ref=e418]
+                      - cell "TRESORERIE" [ref=e419]:
+                        - generic [ref=e420]: TRESORERIE
+                      - cell "Paiement effectif" [ref=e421]
+                    - row "Approuver Virement CB Modification budgétaire" [ref=e422]:
+                      - cell "Approuver Virement" [ref=e423]
+                      - cell "CB" [ref=e424]:
+                        - generic [ref=e425]: CB
+                      - cell "Modification budgétaire" [ref=e426]
+              - generic [ref=e427]:
+                - heading "Points d'attention" [level=4] [ref=e428]:
+                  - img [ref=e429]
+                  - text: Points d'attention
+                - list [ref=e431]:
+                  - listitem [ref=e432]: Les codes de rôle doivent être uniques et en majuscules.
+                  - listitem [ref=e433]: La suppression d'un rôle retire les permissions associées aux utilisateurs.
+                  - listitem [ref=e434]: Après création d'un rôle, configurez ses permissions dans "Autorisations".
+                  - listitem [ref=e435]: Les modifications sont tracées dans le Journal d'Audit.
+          - generic [ref=e436]:
+            - generic [ref=e437]:
+              - heading "Liste des Rôles" [level=3] [ref=e438]:
+                - img [ref=e439]
+                - text: Liste des Rôles
+              - paragraph [ref=e441]: 10 rôle(s) configuré(s)
+            - table [ref=e445]:
+              - rowgroup [ref=e446]:
+                - row "Code Libellé Description Type Statut Actions" [ref=e447]:
+                  - columnheader "Code" [ref=e448]
+                  - columnheader "Libellé" [ref=e449]
+                  - columnheader "Description" [ref=e450]
+                  - columnheader "Type" [ref=e451]
+                  - columnheader "Statut" [ref=e452]
+                  - columnheader "Actions" [ref=e453]
+              - rowgroup [ref=e454]:
+                - row "ADMIN Administrateur Accès complet au système Système Actif" [ref=e455]:
+                  - cell "ADMIN" [ref=e456]:
+                    - generic [ref=e457]: ADMIN
+                  - cell "Administrateur" [ref=e458]
+                  - cell "Accès complet au système" [ref=e459]
+                  - cell "Système" [ref=e460]:
+                    - generic [ref=e461]: Système
+                  - cell "Actif" [ref=e462]:
+                    - generic [ref=e463]: Actif
+                  - cell [ref=e464]:
+                    - button [ref=e466] [cursor=pointer]:
+                      - img
+                - row "APPRO Approvisionnement Gestion des achats et stocks Système Actif" [ref=e467]:
+                  - cell "APPRO" [ref=e468]:
+                    - generic [ref=e469]: APPRO
+                  - cell "Approvisionnement" [ref=e470]
+                  - cell "Gestion des achats et stocks" [ref=e471]
+                  - cell "Système" [ref=e472]:
+                    - generic [ref=e473]: Système
+                  - cell "Actif" [ref=e474]:
+                    - generic [ref=e475]: Actif
+                  - cell [ref=e476]:
+                    - button [ref=e478] [cursor=pointer]:
+                      - img
+                - row "CB Contrôleur Budgétaire Contrôle budgétaire Système Actif" [ref=e479]:
+                  - cell "CB" [ref=e480]:
+                    - generic [ref=e481]: CB
+                  - cell "Contrôleur Budgétaire" [ref=e482]
+                  - cell "Contrôle budgétaire" [ref=e483]
+                  - cell "Système" [ref=e484]:
+                    - generic [ref=e485]: Système
+                  - cell "Actif" [ref=e486]:
+                    - generic [ref=e487]: Actif
+                  - cell [ref=e488]:
+                    - button [ref=e490] [cursor=pointer]:
+                      - img
+                - row "DAAF Directeur Administratif et Financier Gestion financière et budgétaire Système Actif" [ref=e491]:
+                  - cell "DAAF" [ref=e492]:
+                    - generic [ref=e493]: DAAF
+                  - cell "Directeur Administratif et Financier" [ref=e494]
+                  - cell "Gestion financière et budgétaire" [ref=e495]
+                  - cell "Système" [ref=e496]:
+                    - generic [ref=e497]: Système
+                  - cell "Actif" [ref=e498]:
+                    - generic [ref=e499]: Actif
+                  - cell [ref=e500]:
+                    - button [ref=e502] [cursor=pointer]:
+                      - img
+                - row "DG Directeur Général Validation finale et signature Système Actif" [ref=e503]:
+                  - cell "DG" [ref=e504]:
+                    - generic [ref=e505]: DG
+                  - cell "Directeur Général" [ref=e506]
+                  - cell "Validation finale et signature" [ref=e507]
+                  - cell "Système" [ref=e508]:
+                    - generic [ref=e509]: Système
+                  - cell "Actif" [ref=e510]:
+                    - generic [ref=e511]: Actif
+                  - cell [ref=e512]:
+                    - button [ref=e514] [cursor=pointer]:
+                      - img
+                - row "DGPEC Directeur Général Adjoint PEC Validation des engagements Système Actif" [ref=e515]:
+                  - cell "DGPEC" [ref=e516]:
+                    - generic [ref=e517]: DGPEC
+                  - cell "Directeur Général Adjoint PEC" [ref=e518]
+                  - cell "Validation des engagements" [ref=e519]
+                  - cell "Système" [ref=e520]:
+                    - generic [ref=e521]: Système
+                  - cell "Actif" [ref=e522]:
+                    - generic [ref=e523]: Actif
+                  - cell [ref=e524]:
+                    - button [ref=e526] [cursor=pointer]:
+                      - img
+                - row "LECTEUR Lecteur Consultation uniquement Système Actif" [ref=e527]:
+                  - cell "LECTEUR" [ref=e528]:
+                    - generic [ref=e529]: LECTEUR
+                  - cell "Lecteur" [ref=e530]
+                  - cell "Consultation uniquement" [ref=e531]
+                  - cell "Système" [ref=e532]:
+                    - generic [ref=e533]: Système
+                  - cell "Actif" [ref=e534]:
+                    - generic [ref=e535]: Actif
+                  - cell [ref=e536]:
+                    - button [ref=e538] [cursor=pointer]:
+                      - img
+                - row "OPERATEUR Opérateur Saisie et consultation Système Actif" [ref=e539]:
+                  - cell "OPERATEUR" [ref=e540]:
+                    - generic [ref=e541]: OPERATEUR
+                  - cell "Opérateur" [ref=e542]
+                  - cell "Saisie et consultation" [ref=e543]
+                  - cell "Système" [ref=e544]:
+                    - generic [ref=e545]: Système
+                  - cell "Actif" [ref=e546]:
+                    - generic [ref=e547]: Actif
+                  - cell [ref=e548]:
+                    - button [ref=e550] [cursor=pointer]:
+                      - img
+                - row "SDMG Sous-Directeur Moyens Généraux Gestion des moyens généraux Système Actif" [ref=e551]:
+                  - cell "SDMG" [ref=e552]:
+                    - generic [ref=e553]: SDMG
+                  - cell "Sous-Directeur Moyens Généraux" [ref=e554]
+                  - cell "Gestion des moyens généraux" [ref=e555]
+                  - cell "Système" [ref=e556]:
+                    - generic [ref=e557]: Système
+                  - cell "Actif" [ref=e558]:
+                    - generic [ref=e559]: Actif
+                  - cell [ref=e560]:
+                    - button [ref=e562] [cursor=pointer]:
+                      - img
+                - row "TRESORERIE Trésorerie Gestion des paiements Système Actif" [ref=e563]:
+                  - cell "TRESORERIE" [ref=e564]:
+                    - generic [ref=e565]: TRESORERIE
+                  - cell "Trésorerie" [ref=e566]
+                  - cell "Gestion des paiements" [ref=e567]
+                  - cell "Système" [ref=e568]:
+                    - generic [ref=e569]: Système
+                  - cell "Actif" [ref=e570]:
+                    - generic [ref=e571]: Actif
+                  - cell [ref=e572]:
+                    - button [ref=e574] [cursor=pointer]:
+                      - img

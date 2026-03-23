@@ -1106,6 +1106,38 @@ export const ROUTE_ACCESS_MATRIX: Record<
     allowedProfiles: ['ADMIN'],
     description: 'Tests de non-régression',
   },
+  '/admin/seuils-validation': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Seuils de validation',
+  },
+  '/admin/email-templates': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Templates email',
+  },
+  '/admin/documents-requis': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Documents requis',
+  },
+  '/admin/banques-fournisseurs': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Banques fournisseurs',
+  },
+  '/admin/notification-roles': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Notifications par rôle',
+  },
+  '/admin/rappels': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Rappels automatiques',
+  },
+  '/admin/alertes-dmg': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Alertes DMG',
+  },
+  '/admin/parametres-fiscaux': {
+    allowedProfiles: ['ADMIN'],
+    description: 'Paramètres fiscaux',
+  },
 };
 
 // ============================================

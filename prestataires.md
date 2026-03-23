@@ -1,0 +1,9057 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Prestataires" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Liste" [disabled] [ref=e282]
+            - generic [ref=e284]:
+              - button "Retour" [ref=e285] [cursor=pointer]:
+                - img
+              - img [ref=e288]
+              - generic [ref=e292]:
+                - heading "Prestataires" [level=1] [ref=e293]
+                - paragraph [ref=e294]: Gestion des fournisseurs et prestataires
+          - generic [ref=e295]:
+            - generic [ref=e296]:
+              - generic [ref=e297]:
+                - heading "Total Prestataires" [level=3] [ref=e298]
+                - img [ref=e299]
+              - generic [ref=e303]:
+                - generic [ref=e304]: "431"
+                - paragraph [ref=e305]: Référentiel officiel
+            - generic [ref=e306]:
+              - generic [ref=e307]:
+                - heading "Actifs" [level=3] [ref=e308]
+                - img [ref=e309]
+              - generic [ref=e312]:
+                - generic [ref=e313]: "431"
+                - paragraph [ref=e314]: Qualifiés et validés
+            - generic [ref=e315]:
+              - generic [ref=e316]:
+                - heading "Docs. Expirés" [level=3] [ref=e317]
+                - img [ref=e318]
+              - generic [ref=e320]:
+                - generic [ref=e321]: "0"
+                - paragraph [ref=e322]: "Documents à renouveler: 0"
+            - generic [ref=e323]:
+              - generic [ref=e324]:
+                - heading "Nouveaux (30j)" [level=3] [ref=e325]
+                - img [ref=e326]
+              - generic [ref=e331]:
+                - generic [ref=e332]: "0"
+                - paragraph [ref=e333]: Ajoutés récemment
+            - generic [ref=e334]:
+              - generic [ref=e335]:
+                - heading "Suspendus" [level=3] [ref=e336]
+                - img [ref=e337]
+              - generic [ref=e339]:
+                - generic [ref=e340]: "0"
+                - paragraph [ref=e341]: Bloqués
+          - generic [ref=e342]:
+            - generic [ref=e343]:
+              - img [ref=e344]
+              - textbox "Rechercher par nom, code, email, NINEA..." [ref=e347]
+            - generic [ref=e348]:
+              - button "Export" [ref=e349] [cursor=pointer]:
+                - img
+                - text: Export
+              - button "Import Excel" [ref=e350] [cursor=pointer]:
+                - img
+                - text: Import Excel
+              - link "Panier (0)" [ref=e351] [cursor=pointer]:
+                - /url: /contractualisation/validation-prestataires
+                - img
+                - text: Panier (0)
+              - link "Nouveau prestataire" [ref=e352] [cursor=pointer]:
+                - /url: /contractualisation/demande-prestataire
+                - img
+                - text: Nouveau prestataire
+          - generic [ref=e354]:
+            - tablist [ref=e356]:
+              - tab "Actifs (431)" [selected] [ref=e357] [cursor=pointer]
+              - tab "Suspendus (0)" [ref=e358] [cursor=pointer]
+              - tab "Autres (0)" [ref=e359] [cursor=pointer]
+              - tab "Tous (431)" [ref=e360] [cursor=pointer]
+            - table [ref=e363]:
+              - rowgroup [ref=e364]:
+                - row "Code Raison sociale Contact Secteur NINEA Statut Actions" [ref=e365]:
+                  - columnheader "Code" [ref=e366]
+                  - columnheader "Raison sociale" [ref=e367]
+                  - columnheader "Contact" [ref=e368]
+                  - columnheader "Secteur" [ref=e369]
+                  - columnheader "NINEA" [ref=e370]
+                  - columnheader "Statut" [ref=e371]
+                  - columnheader "Actions" [ref=e372]
+              - rowgroup [ref=e373]:
+                - row "PREST-2BP-0124 2BPUB 2BPUB info@2bpub.com 2.72126e+009 - - Actif" [ref=e374]:
+                  - cell "PREST-2BP-0124" [ref=e375]:
+                    - generic [ref=e376]:
+                      - generic [ref=e377]: PREST-2BP-0124
+                      - button [ref=e378] [cursor=pointer]:
+                        - img
+                  - cell "2BPUB 2BPUB" [ref=e379]:
+                    - generic [ref=e380]:
+                      - paragraph [ref=e381]: 2BPUB
+                      - paragraph [ref=e382]: 2BPUB
+                  - cell "info@2bpub.com 2.72126e+009" [ref=e383]:
+                    - generic [ref=e384]:
+                      - generic [ref=e385]: info@2bpub.com
+                      - generic [ref=e386]: "2.72126e+009"
+                  - cell "-" [ref=e387]
+                  - cell "-" [ref=e388]
+                  - cell "Actif" [ref=e389]:
+                    - generic [ref=e390]: Actif
+                  - cell [ref=e391]:
+                    - button [ref=e392] [cursor=pointer]:
+                      - img
+                - row "PREST-2GE-0423 2GE GROUPEMENT DE GESTION D'ENTREPRISE NEANT 2721228385 - - Actif" [ref=e393]:
+                  - cell "PREST-2GE-0423" [ref=e394]:
+                    - generic [ref=e395]:
+                      - generic [ref=e396]: PREST-2GE-0423
+                      - button [ref=e397] [cursor=pointer]:
+                        - img
+                  - cell "2GE GROUPEMENT DE GESTION D'ENTREPRISE" [ref=e398]:
+                    - generic [ref=e399]:
+                      - paragraph [ref=e400]: 2GE
+                      - paragraph [ref=e401]: GROUPEMENT DE GESTION D'ENTREPRISE
+                  - cell "NEANT 2721228385" [ref=e402]:
+                    - generic [ref=e403]:
+                      - generic [ref=e404]: NEANT
+                      - generic [ref=e405]: "2721228385"
+                  - cell "-" [ref=e406]
+                  - cell "-" [ref=e407]
+                  - cell "Actif" [ref=e408]:
+                    - generic [ref=e409]: Actif
+                  - cell [ref=e410]:
+                    - button [ref=e411] [cursor=pointer]:
+                      - img
+                - row "PREST-2MT-0381 2MTRADING 2MTRADING NEANT 0700850808 - - Actif" [ref=e412]:
+                  - cell "PREST-2MT-0381" [ref=e413]:
+                    - generic [ref=e414]:
+                      - generic [ref=e415]: PREST-2MT-0381
+                      - button [ref=e416] [cursor=pointer]:
+                        - img
+                  - cell "2MTRADING 2MTRADING" [ref=e417]:
+                    - generic [ref=e418]:
+                      - paragraph [ref=e419]: 2MTRADING
+                      - paragraph [ref=e420]: 2MTRADING
+                  - cell "NEANT 0700850808" [ref=e421]:
+                    - generic [ref=e422]:
+                      - generic [ref=e423]: NEANT
+                      - generic [ref=e424]: "0700850808"
+                  - cell "-" [ref=e425]
+                  - cell "-" [ref=e426]
+                  - cell "Actif" [ref=e427]:
+                    - generic [ref=e428]: Actif
+                  - cell [ref=e429]:
+                    - button [ref=e430] [cursor=pointer]:
+                      - img
+                - row "PREST-AS-0278 AB SERVICE AB SERVICE NEANT 0152578395 - - Actif" [ref=e431]:
+                  - cell "PREST-AS-0278" [ref=e432]:
+                    - generic [ref=e433]:
+                      - generic [ref=e434]: PREST-AS-0278
+                      - button [ref=e435] [cursor=pointer]:
+                        - img
+                  - cell "AB SERVICE AB SERVICE" [ref=e436]:
+                    - generic [ref=e437]:
+                      - paragraph [ref=e438]: AB SERVICE
+                      - paragraph [ref=e439]: AB SERVICE
+                  - cell "NEANT 0152578395" [ref=e440]:
+                    - generic [ref=e441]:
+                      - generic [ref=e442]: NEANT
+                      - generic [ref=e443]: "0152578395"
+                  - cell "-" [ref=e444]
+                  - cell "-" [ref=e445]
+                  - cell "Actif" [ref=e446]:
+                    - generic [ref=e447]: Actif
+                  - cell [ref=e448]:
+                    - button [ref=e449] [cursor=pointer]:
+                      - img
+                - row "PREST-AED-0196 Acteurs externes de l'ARTI Acteurs externes de l'ARTI Neant Neant - - Actif" [ref=e450]:
+                  - cell "PREST-AED-0196" [ref=e451]:
+                    - generic [ref=e452]:
+                      - generic [ref=e453]: PREST-AED-0196
+                      - button [ref=e454] [cursor=pointer]:
+                        - img
+                  - cell "Acteurs externes de l'ARTI Acteurs externes de l'ARTI" [ref=e455]:
+                    - generic [ref=e456]:
+                      - paragraph [ref=e457]: Acteurs externes de l'ARTI
+                      - paragraph [ref=e458]: Acteurs externes de l'ARTI
+                  - cell "Neant Neant" [ref=e459]:
+                    - generic [ref=e460]:
+                      - generic [ref=e461]: Neant
+                      - generic [ref=e462]: Neant
+                  - cell "-" [ref=e463]
+                  - cell "-" [ref=e464]
+                  - cell "Actif" [ref=e465]:
+                    - generic [ref=e466]: Actif
+                  - cell [ref=e467]:
+                    - button [ref=e468] [cursor=pointer]:
+                      - img
+                - row "PREST-AR-0337 ACTU ROUTE ACTU ROUTE NEANT NEANT - - Actif" [ref=e469]:
+                  - cell "PREST-AR-0337" [ref=e470]:
+                    - generic [ref=e471]:
+                      - generic [ref=e472]: PREST-AR-0337
+                      - button [ref=e473] [cursor=pointer]:
+                        - img
+                  - cell "ACTU ROUTE ACTU ROUTE" [ref=e474]:
+                    - generic [ref=e475]:
+                      - paragraph [ref=e476]: ACTU ROUTE
+                      - paragraph [ref=e477]: ACTU ROUTE
+                  - cell "NEANT NEANT" [ref=e478]:
+                    - generic [ref=e479]:
+                      - generic [ref=e480]: NEANT
+                      - generic [ref=e481]: NEANT
+                  - cell "-" [ref=e482]
+                  - cell "-" [ref=e483]
+                  - cell "Actif" [ref=e484]:
+                    - generic [ref=e485]: Actif
+                  - cell [ref=e486]:
+                    - button [ref=e487] [cursor=pointer]:
+                      - img
+                - row "PREST-AQ-0001 ADJA QUINCAILLERIE ADJA QUINCAILLERIE 7.4962e+008 - - Actif" [ref=e488]:
+                  - cell "PREST-AQ-0001" [ref=e489]:
+                    - generic [ref=e490]:
+                      - generic [ref=e491]: PREST-AQ-0001
+                      - button [ref=e492] [cursor=pointer]:
+                        - img
+                  - cell "ADJA QUINCAILLERIE ADJA QUINCAILLERIE" [ref=e493]:
+                    - generic [ref=e494]:
+                      - paragraph [ref=e495]: ADJA QUINCAILLERIE
+                      - paragraph [ref=e496]: ADJA QUINCAILLERIE
+                  - cell "7.4962e+008" [ref=e497]:
+                    - generic [ref=e499]: "7.4962e+008"
+                  - cell "-" [ref=e500]
+                  - cell "-" [ref=e501]
+                  - cell "Actif" [ref=e502]:
+                    - generic [ref=e503]: Actif
+                  - cell [ref=e504]:
+                    - button [ref=e505] [cursor=pointer]:
+                      - img
+                - row "PREST-AFC-0304 AFCCI AFRIQUE FORMATION CONSEIL COTE D'IVOIRE NEANT 0505072800 - - Actif" [ref=e506]:
+                  - cell "PREST-AFC-0304" [ref=e507]:
+                    - generic [ref=e508]:
+                      - generic [ref=e509]: PREST-AFC-0304
+                      - button [ref=e510] [cursor=pointer]:
+                        - img
+                  - cell "AFCCI AFRIQUE FORMATION CONSEIL COTE D'IVOIRE" [ref=e511]:
+                    - generic [ref=e512]:
+                      - paragraph [ref=e513]: AFCCI
+                      - paragraph [ref=e514]: AFRIQUE FORMATION CONSEIL COTE D'IVOIRE
+                  - cell "NEANT 0505072800" [ref=e515]:
+                    - generic [ref=e516]:
+                      - generic [ref=e517]: NEANT
+                      - generic [ref=e518]: "0505072800"
+                  - cell "-" [ref=e519]
+                  - cell "-" [ref=e520]
+                  - cell "Actif" [ref=e521]:
+                    - generic [ref=e522]: Actif
+                  - cell [ref=e523]:
+                    - button [ref=e524] [cursor=pointer]:
+                      - img
+                - row "PREST-ACA-0002 AFRIC CONSULTING & AUDIT ACA - - Actif" [ref=e525]:
+                  - cell "PREST-ACA-0002" [ref=e526]:
+                    - generic [ref=e527]:
+                      - generic [ref=e528]: PREST-ACA-0002
+                      - button [ref=e529] [cursor=pointer]:
+                        - img
+                  - cell "AFRIC CONSULTING & AUDIT ACA" [ref=e530]:
+                    - generic [ref=e531]:
+                      - paragraph [ref=e532]: AFRIC CONSULTING & AUDIT
+                      - paragraph [ref=e533]: ACA
+                  - cell [ref=e534]
+                  - cell "-" [ref=e535]
+                  - cell "-" [ref=e536]
+                  - cell "Actif" [ref=e537]:
+                    - generic [ref=e538]: Actif
+                  - cell [ref=e539]:
+                    - button [ref=e540] [cursor=pointer]:
+                      - img
+                - row "PREST-ACM-0003 AFRICA CAPITAL MARKETS CORPORATION (ACMC) ACMC acmc@acmc-group.com 2.7226e+009 - - Actif" [ref=e541]:
+                  - cell "PREST-ACM-0003" [ref=e542]:
+                    - generic [ref=e543]:
+                      - generic [ref=e544]: PREST-ACM-0003
+                      - button [ref=e545] [cursor=pointer]:
+                        - img
+                  - cell "AFRICA CAPITAL MARKETS CORPORATION (ACMC) ACMC" [ref=e546]:
+                    - generic [ref=e547]:
+                      - paragraph [ref=e548]: AFRICA CAPITAL MARKETS CORPORATION (ACMC)
+                      - paragraph [ref=e549]: ACMC
+                  - cell "acmc@acmc-group.com 2.7226e+009" [ref=e550]:
+                    - generic [ref=e551]:
+                      - generic [ref=e552]: acmc@acmc-group.com
+                      - generic [ref=e553]: "2.7226e+009"
+                  - cell "-" [ref=e554]
+                  - cell "-" [ref=e555]
+                  - cell "Actif" [ref=e556]:
+                    - generic [ref=e557]: Actif
+                  - cell [ref=e558]:
+                    - button [ref=e559] [cursor=pointer]:
+                      - img
+                - row "PREST-AMS-0368 AFRICA MAINTENANCE SOLUTION AFRICA MAINTENANCE SOLUTION Néant 0777566065 - - Actif" [ref=e560]:
+                  - cell "PREST-AMS-0368" [ref=e561]:
+                    - generic [ref=e562]:
+                      - generic [ref=e563]: PREST-AMS-0368
+                      - button [ref=e564] [cursor=pointer]:
+                        - img
+                  - cell "AFRICA MAINTENANCE SOLUTION AFRICA MAINTENANCE SOLUTION" [ref=e565]:
+                    - generic [ref=e566]:
+                      - paragraph [ref=e567]: AFRICA MAINTENANCE SOLUTION
+                      - paragraph [ref=e568]: AFRICA MAINTENANCE SOLUTION
+                  - cell "Néant 0777566065" [ref=e569]:
+                    - generic [ref=e570]:
+                      - generic [ref=e571]: Néant
+                      - generic [ref=e572]: "0777566065"
+                  - cell "-" [ref=e573]
+                  - cell "-" [ref=e574]
+                  - cell "Actif" [ref=e575]:
+                    - generic [ref=e576]: Actif
+                  - cell [ref=e577]:
+                    - button [ref=e578] [cursor=pointer]:
+                      - img
+                - row "PREST-AO-0004 AFRICA O'CLOCK AFRICA O'CLOCK www.africaoclock.com / info@africaoclock.com 2.25507e+013 - - Actif" [ref=e579]:
+                  - cell "PREST-AO-0004" [ref=e580]:
+                    - generic [ref=e581]:
+                      - generic [ref=e582]: PREST-AO-0004
+                      - button [ref=e583] [cursor=pointer]:
+                        - img
+                  - cell "AFRICA O'CLOCK AFRICA O'CLOCK" [ref=e584]:
+                    - generic [ref=e585]:
+                      - paragraph [ref=e586]: AFRICA O'CLOCK
+                      - paragraph [ref=e587]: AFRICA O'CLOCK
+                  - cell "www.africaoclock.com / info@africaoclock.com 2.25507e+013" [ref=e588]:
+                    - generic [ref=e589]:
+                      - generic [ref=e590]: www.africaoclock.com / info@africaoclock.com
+                      - generic [ref=e591]: "2.25507e+013"
+                  - cell "-" [ref=e592]
+                  - cell "-" [ref=e593]
+                  - cell "Actif" [ref=e594]:
+                    - generic [ref=e595]: Actif
+                  - cell [ref=e596]:
+                    - button [ref=e597] [cursor=pointer]:
+                      - img
+                - row "MIG-0008 AFRICA VIRTUAL GROUP +225 27 21 22 19 95 / 07 97 32 86 03 - - Actif" [ref=e598]:
+                  - cell "MIG-0008" [ref=e599]:
+                    - generic [ref=e600]:
+                      - generic [ref=e601]: MIG-0008
+                      - button [ref=e602] [cursor=pointer]:
+                        - img
+                  - cell "AFRICA VIRTUAL GROUP" [ref=e603]:
+                    - paragraph [ref=e605]: AFRICA VIRTUAL GROUP
+                  - cell "+225 27 21 22 19 95 / 07 97 32 86 03" [ref=e606]:
+                    - generic [ref=e608]: +225 27 21 22 19 95 / 07 97 32 86 03
+                  - cell "-" [ref=e609]
+                  - cell "-" [ref=e610]
+                  - cell "Actif" [ref=e611]:
+                    - generic [ref=e612]: Actif
+                  - cell [ref=e613]:
+                    - button [ref=e614] [cursor=pointer]:
+                      - img
+                - row "PREST-AFR-0006 AFRICAUTO AFRICAUTO Tmci.abj-nord@tractafrictmc.com 2.25272e+012 - - Actif" [ref=e615]:
+                  - cell "PREST-AFR-0006" [ref=e616]:
+                    - generic [ref=e617]:
+                      - generic [ref=e618]: PREST-AFR-0006
+                      - button [ref=e619] [cursor=pointer]:
+                        - img
+                  - cell "AFRICAUTO AFRICAUTO" [ref=e620]:
+                    - generic [ref=e621]:
+                      - paragraph [ref=e622]: AFRICAUTO
+                      - paragraph [ref=e623]: AFRICAUTO
+                  - cell "Tmci.abj-nord@tractafrictmc.com 2.25272e+012" [ref=e624]:
+                    - generic [ref=e625]:
+                      - generic [ref=e626]: Tmci.abj-nord@tractafrictmc.com
+                      - generic [ref=e627]: "2.25272e+012"
+                  - cell "-" [ref=e628]
+                  - cell "-" [ref=e629]
+                  - cell "Actif" [ref=e630]:
+                    - generic [ref=e631]: Actif
+                  - cell [ref=e632]:
+                    - button [ref=e633] [cursor=pointer]:
+                      - img
+                - row "PREST-AFU-0005 AFUR AFRICAN FORUM FOR UTILITY REG - - Actif" [ref=e634]:
+                  - cell "PREST-AFU-0005" [ref=e635]:
+                    - generic [ref=e636]:
+                      - generic [ref=e637]: PREST-AFU-0005
+                      - button [ref=e638] [cursor=pointer]:
+                        - img
+                  - cell "AFUR AFRICAN FORUM FOR UTILITY REG" [ref=e639]:
+                    - generic [ref=e640]:
+                      - paragraph [ref=e641]: AFUR
+                      - paragraph [ref=e642]: AFRICAN FORUM FOR UTILITY REG
+                  - cell [ref=e643]
+                  - cell "-" [ref=e644]
+                  - cell "-" [ref=e645]
+                  - cell "Actif" [ref=e646]:
+                    - generic [ref=e647]: Actif
+                  - cell [ref=e648]:
+                    - button [ref=e649] [cursor=pointer]:
+                      - img
+                - row "PREST-AR-0372 AGENCE RCG AGENCE RCG NEANT NEANT - - Actif" [ref=e650]:
+                  - cell "PREST-AR-0372" [ref=e651]:
+                    - generic [ref=e652]:
+                      - generic [ref=e653]: PREST-AR-0372
+                      - button [ref=e654] [cursor=pointer]:
+                        - img
+                  - cell "AGENCE RCG AGENCE RCG" [ref=e655]:
+                    - generic [ref=e656]:
+                      - paragraph [ref=e657]: AGENCE RCG
+                      - paragraph [ref=e658]: AGENCE RCG
+                  - cell "NEANT NEANT" [ref=e659]:
+                    - generic [ref=e660]:
+                      - generic [ref=e661]: NEANT
+                      - generic [ref=e662]: NEANT
+                  - cell "-" [ref=e663]
+                  - cell "-" [ref=e664]
+                  - cell "Actif" [ref=e665]:
+                    - generic [ref=e666]: Actif
+                  - cell [ref=e667]:
+                    - button [ref=e668] [cursor=pointer]:
+                      - img
+                - row "PREST-AC-0213 AGENCY CAMYDIA AGENCY CAMYDIA camydia94@gmail.com 0768683315 - - Actif" [ref=e669]:
+                  - cell "PREST-AC-0213" [ref=e670]:
+                    - generic [ref=e671]:
+                      - generic [ref=e672]: PREST-AC-0213
+                      - button [ref=e673] [cursor=pointer]:
+                        - img
+                  - cell "AGENCY CAMYDIA AGENCY CAMYDIA" [ref=e674]:
+                    - generic [ref=e675]:
+                      - paragraph [ref=e676]: AGENCY CAMYDIA
+                      - paragraph [ref=e677]: AGENCY CAMYDIA
+                  - cell "camydia94@gmail.com 0768683315" [ref=e678]:
+                    - generic [ref=e679]:
+                      - generic [ref=e680]: camydia94@gmail.com
+                      - generic [ref=e681]: "0768683315"
+                  - cell "-" [ref=e682]
+                  - cell "-" [ref=e683]
+                  - cell "Actif" [ref=e684]:
+                    - generic [ref=e685]: Actif
+                  - cell [ref=e686]:
+                    - button [ref=e687] [cursor=pointer]:
+                      - img
+                - row "PREST-AGR-0293 AGROSPHYSSARL AGROSPHYS SARL agrophys.sarl@gmail.com 0101524400 - - Actif" [ref=e688]:
+                  - cell "PREST-AGR-0293" [ref=e689]:
+                    - generic [ref=e690]:
+                      - generic [ref=e691]: PREST-AGR-0293
+                      - button [ref=e692] [cursor=pointer]:
+                        - img
+                  - cell "AGROSPHYSSARL AGROSPHYS SARL" [ref=e693]:
+                    - generic [ref=e694]:
+                      - paragraph [ref=e695]: AGROSPHYSSARL
+                      - paragraph [ref=e696]: AGROSPHYS SARL
+                  - cell "agrophys.sarl@gmail.com 0101524400" [ref=e697]:
+                    - generic [ref=e698]:
+                      - generic [ref=e699]: agrophys.sarl@gmail.com
+                      - generic [ref=e700]: "0101524400"
+                  - cell "-" [ref=e701]
+                  - cell "-" [ref=e702]
+                  - cell "Actif" [ref=e703]:
+                    - generic [ref=e704]: Actif
+                  - cell [ref=e705]:
+                    - button [ref=e706] [cursor=pointer]:
+                      - img
+                - row "PREST-ACD-0007 AIR COTE D'IVOIRE AIR COTE D'IVOIRE Reservation@air cotedivoire.com - - Actif" [ref=e707]:
+                  - cell "PREST-ACD-0007" [ref=e708]:
+                    - generic [ref=e709]:
+                      - generic [ref=e710]: PREST-ACD-0007
+                      - button [ref=e711] [cursor=pointer]:
+                        - img
+                  - cell "AIR COTE D'IVOIRE AIR COTE D'IVOIRE" [ref=e712]:
+                    - generic [ref=e713]:
+                      - paragraph [ref=e714]: AIR COTE D'IVOIRE
+                      - paragraph [ref=e715]: AIR COTE D'IVOIRE
+                  - cell "Reservation@air cotedivoire.com" [ref=e716]:
+                    - generic [ref=e718]: Reservation@air cotedivoire.com
+                  - cell "-" [ref=e719]
+                  - cell "-" [ref=e720]
+                  - cell "Actif" [ref=e721]:
+                    - generic [ref=e722]: Actif
+                  - cell [ref=e723]:
+                    - button [ref=e724] [cursor=pointer]:
+                      - img
+                - row "PREST-AF-0008 AIR France AIR France - - Actif" [ref=e725]:
+                  - cell "PREST-AF-0008" [ref=e726]:
+                    - generic [ref=e727]:
+                      - generic [ref=e728]: PREST-AF-0008
+                      - button [ref=e729] [cursor=pointer]:
+                        - img
+                  - cell "AIR France AIR France" [ref=e730]:
+                    - generic [ref=e731]:
+                      - paragraph [ref=e732]: AIR France
+                      - paragraph [ref=e733]: AIR France
+                  - cell [ref=e734]
+                  - cell "-" [ref=e735]
+                  - cell "-" [ref=e736]
+                  - cell "Actif" [ref=e737]:
+                    - generic [ref=e738]: Actif
+                  - cell [ref=e739]:
+                    - button [ref=e740] [cursor=pointer]:
+                      - img
+                - row "PREST-AMC-0182 ALLUMINIUM METALLERIE CONSTRUCTION AMCO coulibalydaouda4047@gmail,com 0505748114 - - Actif" [ref=e741]:
+                  - cell "PREST-AMC-0182" [ref=e742]:
+                    - generic [ref=e743]:
+                      - generic [ref=e744]: PREST-AMC-0182
+                      - button [ref=e745] [cursor=pointer]:
+                        - img
+                  - cell "ALLUMINIUM METALLERIE CONSTRUCTION AMCO" [ref=e746]:
+                    - generic [ref=e747]:
+                      - paragraph [ref=e748]: ALLUMINIUM METALLERIE CONSTRUCTION
+                      - paragraph [ref=e749]: AMCO
+                  - cell "coulibalydaouda4047@gmail,com 0505748114" [ref=e750]:
+                    - generic [ref=e751]:
+                      - generic [ref=e752]: coulibalydaouda4047@gmail,com
+                      - generic [ref=e753]: "0505748114"
+                  - cell "-" [ref=e754]
+                  - cell "-" [ref=e755]
+                  - cell "Actif" [ref=e756]:
+                    - generic [ref=e757]: Actif
+                  - cell [ref=e758]:
+                    - button [ref=e759] [cursor=pointer]:
+                      - img
+                - row "PREST-AMC-0172 ALUMINIUM METALLERIE CONSTRUCTION AMCO coulibalydaouda4047@gmail,com 0505748114 - - Actif" [ref=e760]:
+                  - cell "PREST-AMC-0172" [ref=e761]:
+                    - generic [ref=e762]:
+                      - generic [ref=e763]: PREST-AMC-0172
+                      - button [ref=e764] [cursor=pointer]:
+                        - img
+                  - cell "ALUMINIUM METALLERIE CONSTRUCTION AMCO" [ref=e765]:
+                    - generic [ref=e766]:
+                      - paragraph [ref=e767]: ALUMINIUM METALLERIE CONSTRUCTION
+                      - paragraph [ref=e768]: AMCO
+                  - cell "coulibalydaouda4047@gmail,com 0505748114" [ref=e769]:
+                    - generic [ref=e770]:
+                      - generic [ref=e771]: coulibalydaouda4047@gmail,com
+                      - generic [ref=e772]: "0505748114"
+                  - cell "-" [ref=e773]
+                  - cell "-" [ref=e774]
+                  - cell "Actif" [ref=e775]:
+                    - generic [ref=e776]: Actif
+                  - cell [ref=e777]:
+                    - button [ref=e778] [cursor=pointer]:
+                      - img
+                - row "PREST-AMS-0343 AMS AMS africamaintenancesolution@gmail.com 0140665999 - - Actif" [ref=e779]:
+                  - cell "PREST-AMS-0343" [ref=e780]:
+                    - generic [ref=e781]:
+                      - generic [ref=e782]: PREST-AMS-0343
+                      - button [ref=e783] [cursor=pointer]:
+                        - img
+                  - cell "AMS AMS" [ref=e784]:
+                    - generic [ref=e785]:
+                      - paragraph [ref=e786]: AMS
+                      - paragraph [ref=e787]: AMS
+                  - cell "africamaintenancesolution@gmail.com 0140665999" [ref=e788]:
+                    - generic [ref=e789]:
+                      - generic [ref=e790]: africamaintenancesolution@gmail.com
+                      - generic [ref=e791]: "0140665999"
+                  - cell "-" [ref=e792]
+                  - cell "-" [ref=e793]
+                  - cell "Actif" [ref=e794]:
+                    - generic [ref=e795]: Actif
+                  - cell [ref=e796]:
+                    - button [ref=e797] [cursor=pointer]:
+                      - img
+                - row "PREST-AC-0009 AMS CONSULTING AMS CONSULTING Amsconsulting@gmail.com - - Actif" [ref=e798]:
+                  - cell "PREST-AC-0009" [ref=e799]:
+                    - generic [ref=e800]:
+                      - generic [ref=e801]: PREST-AC-0009
+                      - button [ref=e802] [cursor=pointer]:
+                        - img
+                  - cell "AMS CONSULTING AMS CONSULTING" [ref=e803]:
+                    - generic [ref=e804]:
+                      - paragraph [ref=e805]: AMS CONSULTING
+                      - paragraph [ref=e806]: AMS CONSULTING
+                  - cell "Amsconsulting@gmail.com" [ref=e807]:
+                    - generic [ref=e809]: Amsconsulting@gmail.com
+                  - cell "-" [ref=e810]
+                  - cell "-" [ref=e811]
+                  - cell "Actif" [ref=e812]:
+                    - generic [ref=e813]: Actif
+                  - cell [ref=e814]:
+                    - button [ref=e815] [cursor=pointer]:
+                      - img
+                - row "PREST-ACF-0010 ANAIS CONSTRUCTION FACTURE ANAIS CONSTRUCTION FACTURE anais.construction@gmail.com 2.25272e+012 - - Actif" [ref=e816]:
+                  - cell "PREST-ACF-0010" [ref=e817]:
+                    - generic [ref=e818]:
+                      - generic [ref=e819]: PREST-ACF-0010
+                      - button [ref=e820] [cursor=pointer]:
+                        - img
+                  - cell "ANAIS CONSTRUCTION FACTURE ANAIS CONSTRUCTION FACTURE" [ref=e821]:
+                    - generic [ref=e822]:
+                      - paragraph [ref=e823]: ANAIS CONSTRUCTION FACTURE
+                      - paragraph [ref=e824]: ANAIS CONSTRUCTION FACTURE
+                  - cell "anais.construction@gmail.com 2.25272e+012" [ref=e825]:
+                    - generic [ref=e826]:
+                      - generic [ref=e827]: anais.construction@gmail.com
+                      - generic [ref=e828]: "2.25272e+012"
+                  - cell "-" [ref=e829]
+                  - cell "-" [ref=e830]
+                  - cell "Actif" [ref=e831]:
+                    - generic [ref=e832]: Actif
+                  - cell [ref=e833]:
+                    - button [ref=e834] [cursor=pointer]:
+                      - img
+                - row "PREST-AS-0011 ANOYA SERVICES ANOYA SERVICES anoyzservices@gmail.com - - Actif" [ref=e835]:
+                  - cell "PREST-AS-0011" [ref=e836]:
+                    - generic [ref=e837]:
+                      - generic [ref=e838]: PREST-AS-0011
+                      - button [ref=e839] [cursor=pointer]:
+                        - img
+                  - cell "ANOYA SERVICES ANOYA SERVICES" [ref=e840]:
+                    - generic [ref=e841]:
+                      - paragraph [ref=e842]: ANOYA SERVICES
+                      - paragraph [ref=e843]: ANOYA SERVICES
+                  - cell "anoyzservices@gmail.com" [ref=e844]:
+                    - generic [ref=e846]: anoyzservices@gmail.com
+                  - cell "-" [ref=e847]
+                  - cell "-" [ref=e848]
+                  - cell "Actif" [ref=e849]:
+                    - generic [ref=e850]: Actif
+                  - cell [ref=e851]:
+                    - button [ref=e852] [cursor=pointer]:
+                      - img
+                - row "PREST-AFA-0012 ANTHONY, FOFANA & ASSOCIES ANTHONY, FOFANA & ASSOCIES scpaafa@aviso.ci 2.25272e+012 - - Actif" [ref=e853]:
+                  - cell "PREST-AFA-0012" [ref=e854]:
+                    - generic [ref=e855]:
+                      - generic [ref=e856]: PREST-AFA-0012
+                      - button [ref=e857] [cursor=pointer]:
+                        - img
+                  - cell "ANTHONY, FOFANA & ASSOCIES ANTHONY, FOFANA & ASSOCIES" [ref=e858]:
+                    - generic [ref=e859]:
+                      - paragraph [ref=e860]: ANTHONY, FOFANA & ASSOCIES
+                      - paragraph [ref=e861]: ANTHONY, FOFANA & ASSOCIES
+                  - cell "scpaafa@aviso.ci 2.25272e+012" [ref=e862]:
+                    - generic [ref=e863]:
+                      - generic [ref=e864]: scpaafa@aviso.ci
+                      - generic [ref=e865]: "2.25272e+012"
+                  - cell "-" [ref=e866]
+                  - cell "-" [ref=e867]
+                  - cell "Actif" [ref=e868]:
+                    - generic [ref=e869]: Actif
+                  - cell [ref=e870]:
+                    - button [ref=e871] [cursor=pointer]:
+                      - img
+                - row "PREST-ARF-0410 APPLE RETAIL FRANCE APPLE RETAIL FRANCE NEANT NEANT - - Actif" [ref=e872]:
+                  - cell "PREST-ARF-0410" [ref=e873]:
+                    - generic [ref=e874]:
+                      - generic [ref=e875]: PREST-ARF-0410
+                      - button [ref=e876] [cursor=pointer]:
+                        - img
+                  - cell "APPLE RETAIL FRANCE APPLE RETAIL FRANCE" [ref=e877]:
+                    - generic [ref=e878]:
+                      - paragraph [ref=e879]: APPLE RETAIL FRANCE
+                      - paragraph [ref=e880]: APPLE RETAIL FRANCE
+                  - cell "NEANT NEANT" [ref=e881]:
+                    - generic [ref=e882]:
+                      - generic [ref=e883]: NEANT
+                      - generic [ref=e884]: NEANT
+                  - cell "-" [ref=e885]
+                  - cell "-" [ref=e886]
+                  - cell "Actif" [ref=e887]:
+                    - generic [ref=e888]: Actif
+                  - cell [ref=e889]:
+                    - button [ref=e890] [cursor=pointer]:
+                      - img
+                - row "PREST-AQU-0231 AQUABAT AQUABAT CONCEPTION SARL aquabat10@gmail.com O5.04.03.26.48 - - Actif" [ref=e891]:
+                  - cell "PREST-AQU-0231" [ref=e892]:
+                    - generic [ref=e893]:
+                      - generic [ref=e894]: PREST-AQU-0231
+                      - button [ref=e895] [cursor=pointer]:
+                        - img
+                  - cell "AQUABAT AQUABAT CONCEPTION SARL" [ref=e896]:
+                    - generic [ref=e897]:
+                      - paragraph [ref=e898]: AQUABAT
+                      - paragraph [ref=e899]: AQUABAT CONCEPTION SARL
+                  - cell "aquabat10@gmail.com O5.04.03.26.48" [ref=e900]:
+                    - generic [ref=e901]:
+                      - generic [ref=e902]: aquabat10@gmail.com
+                      - generic [ref=e903]: O5.04.03.26.48
+                  - cell "-" [ref=e904]
+                  - cell "-" [ref=e905]
+                  - cell "Actif" [ref=e906]:
+                    - generic [ref=e907]: Actif
+                  - cell [ref=e908]:
+                    - button [ref=e909] [cursor=pointer]:
+                      - img
+                - row "PREST-ART-0417 ARTCI ARTCI courrier@artci.ci 225 27 20 34 43 74 - - Actif" [ref=e910]:
+                  - cell "PREST-ART-0417" [ref=e911]:
+                    - generic [ref=e912]:
+                      - generic [ref=e913]: PREST-ART-0417
+                      - button [ref=e914] [cursor=pointer]:
+                        - img
+                  - cell "ARTCI ARTCI" [ref=e915]:
+                    - generic [ref=e916]:
+                      - paragraph [ref=e917]: ARTCI
+                      - paragraph [ref=e918]: ARTCI
+                  - cell "courrier@artci.ci 225 27 20 34 43 74" [ref=e919]:
+                    - generic [ref=e920]:
+                      - generic [ref=e921]: courrier@artci.ci
+                      - generic [ref=e922]: 225 27 20 34 43 74
+                  - cell "-" [ref=e923]
+                  - cell "-" [ref=e924]
+                  - cell "Actif" [ref=e925]:
+                    - generic [ref=e926]: Actif
+                  - cell [ref=e927]:
+                    - button [ref=e928] [cursor=pointer]:
+                      - img
+                - row "PREST-ART-0217 ARTIS ARTIS artiscivo@gmail.com (225) 21 35 60 58 - - Actif" [ref=e929]:
+                  - cell "PREST-ART-0217" [ref=e930]:
+                    - generic [ref=e931]:
+                      - generic [ref=e932]: PREST-ART-0217
+                      - button [ref=e933] [cursor=pointer]:
+                        - img
+                  - cell "ARTIS ARTIS" [ref=e934]:
+                    - generic [ref=e935]:
+                      - paragraph [ref=e936]: ARTIS
+                      - paragraph [ref=e937]: ARTIS
+                  - cell "artiscivo@gmail.com (225) 21 35 60 58" [ref=e938]:
+                    - generic [ref=e939]:
+                      - generic [ref=e940]: artiscivo@gmail.com
+                      - generic [ref=e941]: (225) 21 35 60 58
+                  - cell "-" [ref=e942]
+                  - cell "-" [ref=e943]
+                  - cell "Actif" [ref=e944]:
+                    - generic [ref=e945]: Actif
+                  - cell [ref=e946]:
+                    - button [ref=e947] [cursor=pointer]:
+                      - img
+                - row "PREST-AP-0226 AS PLUS AS PLUS astoubeye88@gmail.com 09182309 - - Actif" [ref=e948]:
+                  - cell "PREST-AP-0226" [ref=e949]:
+                    - generic [ref=e950]:
+                      - generic [ref=e951]: PREST-AP-0226
+                      - button [ref=e952] [cursor=pointer]:
+                        - img
+                  - cell "AS PLUS AS PLUS" [ref=e953]:
+                    - generic [ref=e954]:
+                      - paragraph [ref=e955]: AS PLUS
+                      - paragraph [ref=e956]: AS PLUS
+                  - cell "astoubeye88@gmail.com 09182309" [ref=e957]:
+                    - generic [ref=e958]:
+                      - generic [ref=e959]: astoubeye88@gmail.com
+                      - generic [ref=e960]: "09182309"
+                  - cell "-" [ref=e961]
+                  - cell "-" [ref=e962]
+                  - cell "Actif" [ref=e963]:
+                    - generic [ref=e964]: Actif
+                  - cell [ref=e965]:
+                    - button [ref=e966] [cursor=pointer]:
+                      - img
+                - row "PREST-ASB-0164 ASBAT-CI ASBAT-CI SARL NEANT 2521009434 - - Actif" [ref=e967]:
+                  - cell "PREST-ASB-0164" [ref=e968]:
+                    - generic [ref=e969]:
+                      - generic [ref=e970]: PREST-ASB-0164
+                      - button [ref=e971] [cursor=pointer]:
+                        - img
+                  - cell "ASBAT-CI ASBAT-CI SARL" [ref=e972]:
+                    - generic [ref=e973]:
+                      - paragraph [ref=e974]: ASBAT-CI
+                      - paragraph [ref=e975]: ASBAT-CI SARL
+                  - cell "NEANT 2521009434" [ref=e976]:
+                    - generic [ref=e977]:
+                      - generic [ref=e978]: NEANT
+                      - generic [ref=e979]: "2521009434"
+                  - cell "-" [ref=e980]
+                  - cell "-" [ref=e981]
+                  - cell "Actif" [ref=e982]:
+                    - generic [ref=e983]: Actif
+                  - cell [ref=e984]:
+                    - button [ref=e985] [cursor=pointer]:
+                      - img
+                - row "PREST-AS-0286 ASBAT-CI SARL ASBAT-CI NC 2521009434 - - Actif" [ref=e986]:
+                  - cell "PREST-AS-0286" [ref=e987]:
+                    - generic [ref=e988]:
+                      - generic [ref=e989]: PREST-AS-0286
+                      - button [ref=e990] [cursor=pointer]:
+                        - img
+                  - cell "ASBAT-CI SARL ASBAT-CI" [ref=e991]:
+                    - generic [ref=e992]:
+                      - paragraph [ref=e993]: ASBAT-CI SARL
+                      - paragraph [ref=e994]: ASBAT-CI
+                  - cell "NC 2521009434" [ref=e995]:
+                    - generic [ref=e996]:
+                      - generic [ref=e997]: NC
+                      - generic [ref=e998]: "2521009434"
+                  - cell "-" [ref=e999]
+                  - cell "-" [ref=e1000]
+                  - cell "Actif" [ref=e1001]:
+                    - generic [ref=e1002]: Actif
+                  - cell [ref=e1003]:
+                    - button [ref=e1004] [cursor=pointer]:
+                      - img
+                - row "PREST-ASM-0155 ASMA&CO ASMA&CO info@asmaco.ci 0707720202 - - Actif" [ref=e1005]:
+                  - cell "PREST-ASM-0155" [ref=e1006]:
+                    - generic [ref=e1007]:
+                      - generic [ref=e1008]: PREST-ASM-0155
+                      - button [ref=e1009] [cursor=pointer]:
+                        - img
+                  - cell "ASMA&CO ASMA&CO" [ref=e1010]:
+                    - generic [ref=e1011]:
+                      - paragraph [ref=e1012]: ASMA&CO
+                      - paragraph [ref=e1013]: ASMA&CO
+                  - cell "info@asmaco.ci 0707720202" [ref=e1014]:
+                    - generic [ref=e1015]:
+                      - generic [ref=e1016]: info@asmaco.ci
+                      - generic [ref=e1017]: "0707720202"
+                  - cell "-" [ref=e1018]
+                  - cell "-" [ref=e1019]
+                  - cell "Actif" [ref=e1020]:
+                    - generic [ref=e1021]: Actif
+                  - cell [ref=e1022]:
+                    - button [ref=e1023] [cursor=pointer]:
+                      - img
+                - row "PREST-AP-0013 ASSURE PLUS ASSURE PLUS Sanlamci@ci.sanlam.com 2.25272e+012 - - Actif" [ref=e1024]:
+                  - cell "PREST-AP-0013" [ref=e1025]:
+                    - generic [ref=e1026]:
+                      - generic [ref=e1027]: PREST-AP-0013
+                      - button [ref=e1028] [cursor=pointer]:
+                        - img
+                  - cell "ASSURE PLUS ASSURE PLUS" [ref=e1029]:
+                    - generic [ref=e1030]:
+                      - paragraph [ref=e1031]: ASSURE PLUS
+                      - paragraph [ref=e1032]: ASSURE PLUS
+                  - cell "Sanlamci@ci.sanlam.com 2.25272e+012" [ref=e1033]:
+                    - generic [ref=e1034]:
+                      - generic [ref=e1035]: Sanlamci@ci.sanlam.com
+                      - generic [ref=e1036]: "2.25272e+012"
+                  - cell "-" [ref=e1037]
+                  - cell "-" [ref=e1038]
+                  - cell "Actif" [ref=e1039]:
+                    - generic [ref=e1040]: Actif
+                  - cell [ref=e1041]:
+                    - button [ref=e1042] [cursor=pointer]:
+                      - img
+                - row "PREST-AC-0014 ATC COMAFRIQUE ATC COMAFRIQUE 2721751610 - - Actif" [ref=e1043]:
+                  - cell "PREST-AC-0014" [ref=e1044]:
+                    - generic [ref=e1045]:
+                      - generic [ref=e1046]: PREST-AC-0014
+                      - button [ref=e1047] [cursor=pointer]:
+                        - img
+                  - cell "ATC COMAFRIQUE ATC COMAFRIQUE" [ref=e1048]:
+                    - generic [ref=e1049]:
+                      - paragraph [ref=e1050]: ATC COMAFRIQUE
+                      - paragraph [ref=e1051]: ATC COMAFRIQUE
+                  - cell "2721751610" [ref=e1052]:
+                    - generic [ref=e1054]: "2721751610"
+                  - cell "-" [ref=e1055]
+                  - cell "-" [ref=e1056]
+                  - cell "Actif" [ref=e1057]:
+                    - generic [ref=e1058]: Actif
+                  - cell [ref=e1059]:
+                    - button [ref=e1060] [cursor=pointer]:
+                      - img
+                - row "PREST-ASS-0173 ATLANTIS SMART SOLUTIONS ATLANTIS SMART SOLUTIONS salah.dhib@atlantissmartsolutions.com 07 79 000 005 - - Actif" [ref=e1061]:
+                  - cell "PREST-ASS-0173" [ref=e1062]:
+                    - generic [ref=e1063]:
+                      - generic [ref=e1064]: PREST-ASS-0173
+                      - button [ref=e1065] [cursor=pointer]:
+                        - img
+                  - cell "ATLANTIS SMART SOLUTIONS ATLANTIS SMART SOLUTIONS" [ref=e1066]:
+                    - generic [ref=e1067]:
+                      - paragraph [ref=e1068]: ATLANTIS SMART SOLUTIONS
+                      - paragraph [ref=e1069]: ATLANTIS SMART SOLUTIONS
+                  - cell "salah.dhib@atlantissmartsolutions.com 07 79 000 005" [ref=e1070]:
+                    - generic [ref=e1071]:
+                      - generic [ref=e1072]: salah.dhib@atlantissmartsolutions.com
+                      - generic [ref=e1073]: 07 79 000 005
+                  - cell "-" [ref=e1074]
+                  - cell "-" [ref=e1075]
+                  - cell "Actif" [ref=e1076]:
+                    - generic [ref=e1077]: Actif
+                  - cell [ref=e1078]:
+                    - button [ref=e1079] [cursor=pointer]:
+                      - img
+                - row "PREST-AP-0201 AU PARCHEMIN AU PARCHEMIN contact@auparchemin.ci 2721756685 - - Actif" [ref=e1080]:
+                  - cell "PREST-AP-0201" [ref=e1081]:
+                    - generic [ref=e1082]:
+                      - generic [ref=e1083]: PREST-AP-0201
+                      - button [ref=e1084] [cursor=pointer]:
+                        - img
+                  - cell "AU PARCHEMIN AU PARCHEMIN" [ref=e1085]:
+                    - generic [ref=e1086]:
+                      - paragraph [ref=e1087]: AU PARCHEMIN
+                      - paragraph [ref=e1088]: AU PARCHEMIN
+                  - cell "contact@auparchemin.ci 2721756685" [ref=e1089]:
+                    - generic [ref=e1090]:
+                      - generic [ref=e1091]: contact@auparchemin.ci
+                      - generic [ref=e1092]: "2721756685"
+                  - cell "-" [ref=e1093]
+                  - cell "-" [ref=e1094]
+                  - cell "Actif" [ref=e1095]:
+                    - generic [ref=e1096]: Actif
+                  - cell [ref=e1097]:
+                    - button [ref=e1098] [cursor=pointer]:
+                      - img
+                - row "PREST-AR-0160 AUTHENTIC RH AUTHENTIC RH NEANT 0748113888 - - Actif" [ref=e1099]:
+                  - cell "PREST-AR-0160" [ref=e1100]:
+                    - generic [ref=e1101]:
+                      - generic [ref=e1102]: PREST-AR-0160
+                      - button [ref=e1103] [cursor=pointer]:
+                        - img
+                  - cell "AUTHENTIC RH AUTHENTIC RH" [ref=e1104]:
+                    - generic [ref=e1105]:
+                      - paragraph [ref=e1106]: AUTHENTIC RH
+                      - paragraph [ref=e1107]: AUTHENTIC RH
+                  - cell "NEANT 0748113888" [ref=e1108]:
+                    - generic [ref=e1109]:
+                      - generic [ref=e1110]: NEANT
+                      - generic [ref=e1111]: "0748113888"
+                  - cell "-" [ref=e1112]
+                  - cell "-" [ref=e1113]
+                  - cell "Actif" [ref=e1114]:
+                    - generic [ref=e1115]: Actif
+                  - cell [ref=e1116]:
+                    - button [ref=e1117] [cursor=pointer]:
+                      - img
+                - row "PREST-AUT-0280 AUTHENTICRH AUTHENTIC RH NEANT 0748113888 - - Actif" [ref=e1118]:
+                  - cell "PREST-AUT-0280" [ref=e1119]:
+                    - generic [ref=e1120]:
+                      - generic [ref=e1121]: PREST-AUT-0280
+                      - button [ref=e1122] [cursor=pointer]:
+                        - img
+                  - cell "AUTHENTICRH AUTHENTIC RH" [ref=e1123]:
+                    - generic [ref=e1124]:
+                      - paragraph [ref=e1125]: AUTHENTICRH
+                      - paragraph [ref=e1126]: AUTHENTIC RH
+                  - cell "NEANT 0748113888" [ref=e1127]:
+                    - generic [ref=e1128]:
+                      - generic [ref=e1129]: NEANT
+                      - generic [ref=e1130]: "0748113888"
+                  - cell "-" [ref=e1131]
+                  - cell "-" [ref=e1132]
+                  - cell "Actif" [ref=e1133]:
+                    - generic [ref=e1134]: Actif
+                  - cell [ref=e1135]:
+                    - button [ref=e1136] [cursor=pointer]:
+                      - img
+                - row "PREST-ACM-0015 AUTO - CLASS MASTER AUTO - GLASS MASTER CI - - Actif" [ref=e1137]:
+                  - cell "PREST-ACM-0015" [ref=e1138]:
+                    - generic [ref=e1139]:
+                      - generic [ref=e1140]: PREST-ACM-0015
+                      - button [ref=e1141] [cursor=pointer]:
+                        - img
+                  - cell "AUTO - CLASS MASTER AUTO - GLASS MASTER CI" [ref=e1142]:
+                    - generic [ref=e1143]:
+                      - paragraph [ref=e1144]: AUTO - CLASS MASTER
+                      - paragraph [ref=e1145]: AUTO - GLASS MASTER CI
+                  - cell [ref=e1146]
+                  - cell "-" [ref=e1147]
+                  - cell "-" [ref=e1148]
+                  - cell "Actif" [ref=e1149]:
+                    - generic [ref=e1150]: Actif
+                  - cell [ref=e1151]:
+                    - button [ref=e1152] [cursor=pointer]:
+                      - img
+                - row "PREST-005 AUTO SERVICES INTERNATIONAL service@autoservices.ci +225 27 23 24 25 26 - SN56789012345 Actif" [ref=e1153]:
+                  - cell "PREST-005" [ref=e1154]:
+                    - generic [ref=e1155]:
+                      - generic [ref=e1156]: PREST-005
+                      - button [ref=e1157] [cursor=pointer]:
+                        - img
+                  - cell "AUTO SERVICES INTERNATIONAL" [ref=e1158]:
+                    - paragraph [ref=e1160]: AUTO SERVICES INTERNATIONAL
+                  - cell "service@autoservices.ci +225 27 23 24 25 26" [ref=e1161]:
+                    - generic [ref=e1162]:
+                      - generic [ref=e1163]: service@autoservices.ci
+                      - generic [ref=e1164]: +225 27 23 24 25 26
+                  - cell "-" [ref=e1165]
+                  - cell "SN56789012345" [ref=e1166]
+                  - cell "Actif" [ref=e1167]:
+                    - generic [ref=e1168]: Actif
+                  - cell [ref=e1169]:
+                    - button [ref=e1170] [cursor=pointer]:
+                      - img
+                - row "PREST-AVL-0016 AUTOMOTIVE VEHICLES & LOGISTICS AUTOMOTIVE VEHICLES & LOGISTICS 7.48552e+008 - - Actif" [ref=e1171]:
+                  - cell "PREST-AVL-0016" [ref=e1172]:
+                    - generic [ref=e1173]:
+                      - generic [ref=e1174]: PREST-AVL-0016
+                      - button [ref=e1175] [cursor=pointer]:
+                        - img
+                  - cell "AUTOMOTIVE VEHICLES & LOGISTICS AUTOMOTIVE VEHICLES & LOGISTICS" [ref=e1176]:
+                    - generic [ref=e1177]:
+                      - paragraph [ref=e1178]: AUTOMOTIVE VEHICLES & LOGISTICS
+                      - paragraph [ref=e1179]: AUTOMOTIVE VEHICLES & LOGISTICS
+                  - cell "7.48552e+008" [ref=e1180]:
+                    - generic [ref=e1182]: "7.48552e+008"
+                  - cell "-" [ref=e1183]
+                  - cell "-" [ref=e1184]
+                  - cell "Actif" [ref=e1185]:
+                    - generic [ref=e1186]: Actif
+                  - cell [ref=e1187]:
+                    - button [ref=e1188] [cursor=pointer]:
+                      - img
+                - row "PREST-AAS-0194 AYOUBEL AFRIKA SARL AYOUBEL AFRIKA SARL ayoubelafrikacom@gmail.com 0711110884 - - Actif" [ref=e1189]:
+                  - cell "PREST-AAS-0194" [ref=e1190]:
+                    - generic [ref=e1191]:
+                      - generic [ref=e1192]: PREST-AAS-0194
+                      - button [ref=e1193] [cursor=pointer]:
+                        - img
+                  - cell "AYOUBEL AFRIKA SARL AYOUBEL AFRIKA SARL" [ref=e1194]:
+                    - generic [ref=e1195]:
+                      - paragraph [ref=e1196]: AYOUBEL AFRIKA SARL
+                      - paragraph [ref=e1197]: AYOUBEL AFRIKA SARL
+                  - cell "ayoubelafrikacom@gmail.com 0711110884" [ref=e1198]:
+                    - generic [ref=e1199]:
+                      - generic [ref=e1200]: ayoubelafrikacom@gmail.com
+                      - generic [ref=e1201]: "0711110884"
+                  - cell "-" [ref=e1202]
+                  - cell "-" [ref=e1203]
+                  - cell "Actif" [ref=e1204]:
+                    - generic [ref=e1205]: Actif
+                  - cell [ref=e1206]:
+                    - button [ref=e1207] [cursor=pointer]:
+                      - img
+                - row "PREST-BCS-0345 B COM SARL B COM SARL info@bcomci.com 0747507017 - - Actif" [ref=e1208]:
+                  - cell "PREST-BCS-0345" [ref=e1209]:
+                    - generic [ref=e1210]:
+                      - generic [ref=e1211]: PREST-BCS-0345
+                      - button [ref=e1212] [cursor=pointer]:
+                        - img
+                  - cell "B COM SARL B COM SARL" [ref=e1213]:
+                    - generic [ref=e1214]:
+                      - paragraph [ref=e1215]: B COM SARL
+                      - paragraph [ref=e1216]: B COM SARL
+                  - cell "info@bcomci.com 0747507017" [ref=e1217]:
+                    - generic [ref=e1218]:
+                      - generic [ref=e1219]: info@bcomci.com
+                      - generic [ref=e1220]: "0747507017"
+                  - cell "-" [ref=e1221]
+                  - cell "-" [ref=e1222]
+                  - cell "Actif" [ref=e1223]:
+                    - generic [ref=e1224]: Actif
+                  - cell [ref=e1225]:
+                    - button [ref=e1226] [cursor=pointer]:
+                      - img
+                - row "PREST-BDD-0192 BANQUE DES DEPOTS DU TRESOR PUBLIQUE BANQUE DES DEPOTS DU TRESOR PUBLIQUE NEANT 2720258484 - - Actif" [ref=e1227]:
+                  - cell "PREST-BDD-0192" [ref=e1228]:
+                    - generic [ref=e1229]:
+                      - generic [ref=e1230]: PREST-BDD-0192
+                      - button [ref=e1231] [cursor=pointer]:
+                        - img
+                  - cell "BANQUE DES DEPOTS DU TRESOR PUBLIQUE BANQUE DES DEPOTS DU TRESOR PUBLIQUE" [ref=e1232]:
+                    - generic [ref=e1233]:
+                      - paragraph [ref=e1234]: BANQUE DES DEPOTS DU TRESOR PUBLIQUE
+                      - paragraph [ref=e1235]: BANQUE DES DEPOTS DU TRESOR PUBLIQUE
+                  - cell "NEANT 2720258484" [ref=e1236]:
+                    - generic [ref=e1237]:
+                      - generic [ref=e1238]: NEANT
+                      - generic [ref=e1239]: "2720258484"
+                  - cell "-" [ref=e1240]
+                  - cell "-" [ref=e1241]
+                  - cell "Actif" [ref=e1242]:
+                    - generic [ref=e1243]: Actif
+                  - cell [ref=e1244]:
+                    - button [ref=e1245] [cursor=pointer]:
+                      - img
+                - row "PREST-BE-0135 BARAKIEL ENTREPRISE BARAKIEL ENTREPRISE Chantallyassi82@gmail.com 0708002067 - - Actif" [ref=e1246]:
+                  - cell "PREST-BE-0135" [ref=e1247]:
+                    - generic [ref=e1248]:
+                      - generic [ref=e1249]: PREST-BE-0135
+                      - button [ref=e1250] [cursor=pointer]:
+                        - img
+                  - cell "BARAKIEL ENTREPRISE BARAKIEL ENTREPRISE" [ref=e1251]:
+                    - generic [ref=e1252]:
+                      - paragraph [ref=e1253]: BARAKIEL ENTREPRISE
+                      - paragraph [ref=e1254]: BARAKIEL ENTREPRISE
+                  - cell "Chantallyassi82@gmail.com 0708002067" [ref=e1255]:
+                    - generic [ref=e1256]:
+                      - generic [ref=e1257]: Chantallyassi82@gmail.com
+                      - generic [ref=e1258]: "0708002067"
+                  - cell "-" [ref=e1259]
+                  - cell "-" [ref=e1260]
+                  - cell "Actif" [ref=e1261]:
+                    - generic [ref=e1262]: Actif
+                  - cell [ref=e1263]:
+                    - button [ref=e1264] [cursor=pointer]:
+                      - img
+                - row "PREST-BCD-0017 BAT CLEAN DECO BCD Batcleandeco@gmail.com 2.25079e+012 - - Actif" [ref=e1265]:
+                  - cell "PREST-BCD-0017" [ref=e1266]:
+                    - generic [ref=e1267]:
+                      - generic [ref=e1268]: PREST-BCD-0017
+                      - button [ref=e1269] [cursor=pointer]:
+                        - img
+                  - cell "BAT CLEAN DECO BCD" [ref=e1270]:
+                    - generic [ref=e1271]:
+                      - paragraph [ref=e1272]: BAT CLEAN DECO
+                      - paragraph [ref=e1273]: BCD
+                  - cell "Batcleandeco@gmail.com 2.25079e+012" [ref=e1274]:
+                    - generic [ref=e1275]:
+                      - generic [ref=e1276]: Batcleandeco@gmail.com
+                      - generic [ref=e1277]: "2.25079e+012"
+                  - cell "-" [ref=e1278]
+                  - cell "-" [ref=e1279]
+                  - cell "Actif" [ref=e1280]:
+                    - generic [ref=e1281]: Actif
+                  - cell [ref=e1282]:
+                    - button [ref=e1283] [cursor=pointer]:
+                      - img
+                - row "PREST-BC-0208 BATISS CONSTRUCTION BATISS CONSTRUCTION bc.secretariat@gmail.com 07 09 16 96 97 - - Actif" [ref=e1284]:
+                  - cell "PREST-BC-0208" [ref=e1285]:
+                    - generic [ref=e1286]:
+                      - generic [ref=e1287]: PREST-BC-0208
+                      - button [ref=e1288] [cursor=pointer]:
+                        - img
+                  - cell "BATISS CONSTRUCTION BATISS CONSTRUCTION" [ref=e1289]:
+                    - generic [ref=e1290]:
+                      - paragraph [ref=e1291]: BATISS CONSTRUCTION
+                      - paragraph [ref=e1292]: BATISS CONSTRUCTION
+                  - cell "bc.secretariat@gmail.com 07 09 16 96 97" [ref=e1293]:
+                    - generic [ref=e1294]:
+                      - generic [ref=e1295]: bc.secretariat@gmail.com
+                      - generic [ref=e1296]: 07 09 16 96 97
+                  - cell "-" [ref=e1297]
+                  - cell "-" [ref=e1298]
+                  - cell "Actif" [ref=e1299]:
+                    - generic [ref=e1300]: Actif
+                  - cell [ref=e1301]:
+                    - button [ref=e1302] [cursor=pointer]:
+                      - img
+                - row "PREST-BAT-0274 BATIVOIRE.CO BATIVOIRE.CO NEANT 07 59 13 07 03 - - Actif" [ref=e1303]:
+                  - cell "PREST-BAT-0274" [ref=e1304]:
+                    - generic [ref=e1305]:
+                      - generic [ref=e1306]: PREST-BAT-0274
+                      - button [ref=e1307] [cursor=pointer]:
+                        - img
+                  - cell "BATIVOIRE.CO BATIVOIRE.CO" [ref=e1308]:
+                    - generic [ref=e1309]:
+                      - paragraph [ref=e1310]: BATIVOIRE.CO
+                      - paragraph [ref=e1311]: BATIVOIRE.CO
+                  - cell "NEANT 07 59 13 07 03" [ref=e1312]:
+                    - generic [ref=e1313]:
+                      - generic [ref=e1314]: NEANT
+                      - generic [ref=e1315]: 07 59 13 07 03
+                  - cell "-" [ref=e1316]
+                  - cell "-" [ref=e1317]
+                  - cell "Actif" [ref=e1318]:
+                    - generic [ref=e1319]: Actif
+                  - cell [ref=e1320]:
+                    - button [ref=e1321] [cursor=pointer]:
+                      - img
+                - row "PREST-BS-0018 BBS SARL BBS - - Actif" [ref=e1322]:
+                  - cell "PREST-BS-0018" [ref=e1323]:
+                    - generic [ref=e1324]:
+                      - generic [ref=e1325]: PREST-BS-0018
+                      - button [ref=e1326] [cursor=pointer]:
+                        - img
+                  - cell "BBS SARL BBS" [ref=e1327]:
+                    - generic [ref=e1328]:
+                      - paragraph [ref=e1329]: BBS SARL
+                      - paragraph [ref=e1330]: BBS
+                  - cell [ref=e1331]
+                  - cell "-" [ref=e1332]
+                  - cell "-" [ref=e1333]
+                  - cell "Actif" [ref=e1334]:
+                    - generic [ref=e1335]: Actif
+                  - cell [ref=e1336]:
+                    - button [ref=e1337] [cursor=pointer]:
+                      - img
+                - row "PREST-BB-0313 BEE BUILDING BEE BUILDING qualitébeebuildingscom 0584705754 - - Actif" [ref=e1338]:
+                  - cell "PREST-BB-0313" [ref=e1339]:
+                    - generic [ref=e1340]:
+                      - generic [ref=e1341]: PREST-BB-0313
+                      - button [ref=e1342] [cursor=pointer]:
+                        - img
+                  - cell "BEE BUILDING BEE BUILDING" [ref=e1343]:
+                    - generic [ref=e1344]:
+                      - paragraph [ref=e1345]: BEE BUILDING
+                      - paragraph [ref=e1346]: BEE BUILDING
+                  - cell "qualitébeebuildingscom 0584705754" [ref=e1347]:
+                    - generic [ref=e1348]:
+                      - generic [ref=e1349]: qualitébeebuildingscom
+                      - generic [ref=e1350]: "0584705754"
+                  - cell "-" [ref=e1351]
+                  - cell "-" [ref=e1352]
+                  - cell "Actif" [ref=e1353]:
+                    - generic [ref=e1354]: Actif
+                  - cell [ref=e1355]:
+                    - button [ref=e1356] [cursor=pointer]:
+                      - img
+                - row "PREST-BER-0156 BERAK'ART BERAK'ART infos@berakart.com 0778787821 - - Actif" [ref=e1357]:
+                  - cell "PREST-BER-0156" [ref=e1358]:
+                    - generic [ref=e1359]:
+                      - generic [ref=e1360]: PREST-BER-0156
+                      - button [ref=e1361] [cursor=pointer]:
+                        - img
+                  - cell "BERAK'ART BERAK'ART" [ref=e1362]:
+                    - generic [ref=e1363]:
+                      - paragraph [ref=e1364]: BERAK'ART
+                      - paragraph [ref=e1365]: BERAK'ART
+                  - cell "infos@berakart.com 0778787821" [ref=e1366]:
+                    - generic [ref=e1367]:
+                      - generic [ref=e1368]: infos@berakart.com
+                      - generic [ref=e1369]: "0778787821"
+                  - cell "-" [ref=e1370]
+                  - cell "-" [ref=e1371]
+                  - cell "Actif" [ref=e1372]:
+                    - generic [ref=e1373]: Actif
+                  - cell [ref=e1374]:
+                    - button [ref=e1375] [cursor=pointer]:
+                      - img
+                - row "PREST-BCD-0020 BERNABE CÔTE D'IVOIRE BERNABE CÔTE D'IVOIRE (Fonctionnement) - - Actif" [ref=e1376]:
+                  - cell "PREST-BCD-0020" [ref=e1377]:
+                    - generic [ref=e1378]:
+                      - generic [ref=e1379]: PREST-BCD-0020
+                      - button [ref=e1380] [cursor=pointer]:
+                        - img
+                  - cell "BERNABE CÔTE D'IVOIRE BERNABE CÔTE D'IVOIRE (Fonctionnement)" [ref=e1381]:
+                    - generic [ref=e1382]:
+                      - paragraph [ref=e1383]: BERNABE CÔTE D'IVOIRE
+                      - paragraph [ref=e1384]: BERNABE CÔTE D'IVOIRE (Fonctionnement)
+                  - cell [ref=e1385]
+                  - cell "-" [ref=e1386]
+                  - cell "-" [ref=e1387]
+                  - cell "Actif" [ref=e1388]:
+                    - generic [ref=e1389]: Actif
+                  - cell [ref=e1390]:
+                    - button [ref=e1391] [cursor=pointer]:
+                      - img
+                - row "PREST-BCD-0019 BERNABE CÔTE D'IVOIRE (Investissement) BERNABE CÔTE D'IVOIRE 2.25272e+012 - - Actif" [ref=e1392]:
+                  - cell "PREST-BCD-0019" [ref=e1393]:
+                    - generic [ref=e1394]:
+                      - generic [ref=e1395]: PREST-BCD-0019
+                      - button [ref=e1396] [cursor=pointer]:
+                        - img
+                  - cell "BERNABE CÔTE D'IVOIRE (Investissement) BERNABE CÔTE D'IVOIRE" [ref=e1397]:
+                    - generic [ref=e1398]:
+                      - paragraph [ref=e1399]: BERNABE CÔTE D'IVOIRE (Investissement)
+                      - paragraph [ref=e1400]: BERNABE CÔTE D'IVOIRE
+                  - cell "2.25272e+012" [ref=e1401]:
+                    - generic [ref=e1403]: "2.25272e+012"
+                  - cell "-" [ref=e1404]
+                  - cell "-" [ref=e1405]
+                  - cell "Actif" [ref=e1406]:
+                    - generic [ref=e1407]: Actif
+                  - cell [ref=e1408]:
+                    - button [ref=e1409] [cursor=pointer]:
+                      - img
+                - row "PREST-BHC-0291 BHCI BANQUE DE L’HABITAT DE COTE D’IVOIRE officenanouadou@notaire.ci (225) 27-20-32-17-23 - - Actif" [ref=e1410]:
+                  - cell "PREST-BHC-0291" [ref=e1411]:
+                    - generic [ref=e1412]:
+                      - generic [ref=e1413]: PREST-BHC-0291
+                      - button [ref=e1414] [cursor=pointer]:
+                        - img
+                  - cell "BHCI BANQUE DE L’HABITAT DE COTE D’IVOIRE" [ref=e1415]:
+                    - generic [ref=e1416]:
+                      - paragraph [ref=e1417]: BHCI
+                      - paragraph [ref=e1418]: BANQUE DE L’HABITAT DE COTE D’IVOIRE
+                  - cell "officenanouadou@notaire.ci (225) 27-20-32-17-23" [ref=e1419]:
+                    - generic [ref=e1420]:
+                      - generic [ref=e1421]: officenanouadou@notaire.ci
+                      - generic [ref=e1422]: (225) 27-20-32-17-23
+                  - cell "-" [ref=e1423]
+                  - cell "-" [ref=e1424]
+                  - cell "Actif" [ref=e1425]:
+                    - generic [ref=e1426]: Actif
+                  - cell [ref=e1427]:
+                    - button [ref=e1428] [cursor=pointer]:
+                      - img
+                - row "PREST-BAW-0319 BLACK AND WHITE BLACK AND WHITE NEANT 0505926080 - - Actif" [ref=e1429]:
+                  - cell "PREST-BAW-0319" [ref=e1430]:
+                    - generic [ref=e1431]:
+                      - generic [ref=e1432]: PREST-BAW-0319
+                      - button [ref=e1433] [cursor=pointer]:
+                        - img
+                  - cell "BLACK AND WHITE BLACK AND WHITE" [ref=e1434]:
+                    - generic [ref=e1435]:
+                      - paragraph [ref=e1436]: BLACK AND WHITE
+                      - paragraph [ref=e1437]: BLACK AND WHITE
+                  - cell "NEANT 0505926080" [ref=e1438]:
+                    - generic [ref=e1439]:
+                      - generic [ref=e1440]: NEANT
+                      - generic [ref=e1441]: "0505926080"
+                  - cell "-" [ref=e1442]
+                  - cell "-" [ref=e1443]
+                  - cell "Actif" [ref=e1444]:
+                    - generic [ref=e1445]: Actif
+                  - cell [ref=e1446]:
+                    - button [ref=e1447] [cursor=pointer]:
+                      - img
+                - row "PREST-BD-0021 BOIRE DAOUDA BOIRE DAOUDA Daoudyb@gmail.com - - Actif" [ref=e1448]:
+                  - cell "PREST-BD-0021" [ref=e1449]:
+                    - generic [ref=e1450]:
+                      - generic [ref=e1451]: PREST-BD-0021
+                      - button [ref=e1452] [cursor=pointer]:
+                        - img
+                  - cell "BOIRE DAOUDA BOIRE DAOUDA" [ref=e1453]:
+                    - generic [ref=e1454]:
+                      - paragraph [ref=e1455]: BOIRE DAOUDA
+                      - paragraph [ref=e1456]: BOIRE DAOUDA
+                  - cell "Daoudyb@gmail.com" [ref=e1457]:
+                    - generic [ref=e1459]: Daoudyb@gmail.com
+                  - cell "-" [ref=e1460]
+                  - cell "-" [ref=e1461]
+                  - cell "Actif" [ref=e1462]:
+                    - generic [ref=e1463]: Actif
+                  - cell [ref=e1464]:
+                    - button [ref=e1465] [cursor=pointer]:
+                      - img
+                - row "PREST-BP-0347 BOLLESTORE PLUS BOLLESTORE PLUS mbolle@bollestoreplus.com 07 77 77 7702 - - Actif" [ref=e1466]:
+                  - cell "PREST-BP-0347" [ref=e1467]:
+                    - generic [ref=e1468]:
+                      - generic [ref=e1469]: PREST-BP-0347
+                      - button [ref=e1470] [cursor=pointer]:
+                        - img
+                  - cell "BOLLESTORE PLUS BOLLESTORE PLUS" [ref=e1471]:
+                    - generic [ref=e1472]:
+                      - paragraph [ref=e1473]: BOLLESTORE PLUS
+                      - paragraph [ref=e1474]: BOLLESTORE PLUS
+                  - cell "mbolle@bollestoreplus.com 07 77 77 7702" [ref=e1475]:
+                    - generic [ref=e1476]:
+                      - generic [ref=e1477]: mbolle@bollestoreplus.com
+                      - generic [ref=e1478]: 07 77 77 7702
+                  - cell "-" [ref=e1479]
+                  - cell "-" [ref=e1480]
+                  - cell "Actif" [ref=e1481]:
+                    - generic [ref=e1482]: Actif
+                  - cell [ref=e1483]:
+                    - button [ref=e1484] [cursor=pointer]:
+                      - img
+                - row "PREST-BAB-0369 BRIC A BRAC BRIC A BRAC NEANT 0101492224 - - Actif" [ref=e1485]:
+                  - cell "PREST-BAB-0369" [ref=e1486]:
+                    - generic [ref=e1487]:
+                      - generic [ref=e1488]: PREST-BAB-0369
+                      - button [ref=e1489] [cursor=pointer]:
+                        - img
+                  - cell "BRIC A BRAC BRIC A BRAC" [ref=e1490]:
+                    - generic [ref=e1491]:
+                      - paragraph [ref=e1492]: BRIC A BRAC
+                      - paragraph [ref=e1493]: BRIC A BRAC
+                  - cell "NEANT 0101492224" [ref=e1494]:
+                    - generic [ref=e1495]:
+                      - generic [ref=e1496]: NEANT
+                      - generic [ref=e1497]: "0101492224"
+                  - cell "-" [ref=e1498]
+                  - cell "-" [ref=e1499]
+                  - cell "Actif" [ref=e1500]:
+                    - generic [ref=e1501]: Actif
+                  - cell [ref=e1502]:
+                    - button [ref=e1503] [cursor=pointer]:
+                      - img
+                - row "PREST-BUL-0022 BULLES BULLES - - Actif" [ref=e1504]:
+                  - cell "PREST-BUL-0022" [ref=e1505]:
+                    - generic [ref=e1506]:
+                      - generic [ref=e1507]: PREST-BUL-0022
+                      - button [ref=e1508] [cursor=pointer]:
+                        - img
+                  - cell "BULLES BULLES" [ref=e1509]:
+                    - generic [ref=e1510]:
+                      - paragraph [ref=e1511]: BULLES
+                      - paragraph [ref=e1512]: BULLES
+                  - cell [ref=e1513]
+                  - cell "-" [ref=e1514]
+                  - cell "-" [ref=e1515]
+                  - cell "Actif" [ref=e1516]:
+                    - generic [ref=e1517]: Actif
+                  - cell [ref=e1518]:
+                    - button [ref=e1519] [cursor=pointer]:
+                      - img
+                - row "PREST-002 BUREAU FOURNITURES PLUS info@bfplus.ci +225 27 22 23 24 25 - SN23456789012 Actif" [ref=e1520]:
+                  - cell "PREST-002" [ref=e1521]:
+                    - generic [ref=e1522]:
+                      - generic [ref=e1523]: PREST-002
+                      - button [ref=e1524] [cursor=pointer]:
+                        - img
+                  - cell "BUREAU FOURNITURES PLUS" [ref=e1525]:
+                    - paragraph [ref=e1527]: BUREAU FOURNITURES PLUS
+                  - cell "info@bfplus.ci +225 27 22 23 24 25" [ref=e1528]:
+                    - generic [ref=e1529]:
+                      - generic [ref=e1530]: info@bfplus.ci
+                      - generic [ref=e1531]: +225 27 22 23 24 25
+                  - cell "-" [ref=e1532]
+                  - cell "SN23456789012" [ref=e1533]
+                  - cell "Actif" [ref=e1534]:
+                    - generic [ref=e1535]: Actif
+                  - cell [ref=e1536]:
+                    - button [ref=e1537] [cursor=pointer]:
+                      - img
+                - row "PREST-BUR-0218 BUROTIC BUROTIC direction@bureautic-ci.com 2721752175 - - Actif" [ref=e1538]:
+                  - cell "PREST-BUR-0218" [ref=e1539]:
+                    - generic [ref=e1540]:
+                      - generic [ref=e1541]: PREST-BUR-0218
+                      - button [ref=e1542] [cursor=pointer]:
+                        - img
+                  - cell "BUROTIC BUROTIC" [ref=e1543]:
+                    - generic [ref=e1544]:
+                      - paragraph [ref=e1545]: BUROTIC
+                      - paragraph [ref=e1546]: BUROTIC
+                  - cell "direction@bureautic-ci.com 2721752175" [ref=e1547]:
+                    - generic [ref=e1548]:
+                      - generic [ref=e1549]: direction@bureautic-ci.com
+                      - generic [ref=e1550]: "2721752175"
+                  - cell "-" [ref=e1551]
+                  - cell "-" [ref=e1552]
+                  - cell "Actif" [ref=e1553]:
+                    - generic [ref=e1554]: Actif
+                  - cell [ref=e1555]:
+                    - button [ref=e1556] [cursor=pointer]:
+                      - img
+                - row "PREST-CA-0126 CABINET ARCHI-SYSTEM CABINET ARCHI SYSTEM Serge.mobio@yahoo.fr - - Actif" [ref=e1557]:
+                  - cell "PREST-CA-0126" [ref=e1558]:
+                    - generic [ref=e1559]:
+                      - generic [ref=e1560]: PREST-CA-0126
+                      - button [ref=e1561] [cursor=pointer]:
+                        - img
+                  - cell "CABINET ARCHI-SYSTEM CABINET ARCHI SYSTEM" [ref=e1562]:
+                    - generic [ref=e1563]:
+                      - paragraph [ref=e1564]: CABINET ARCHI-SYSTEM
+                      - paragraph [ref=e1565]: CABINET ARCHI SYSTEM
+                  - cell "Serge.mobio@yahoo.fr" [ref=e1566]:
+                    - generic [ref=e1568]: Serge.mobio@yahoo.fr
+                  - cell "-" [ref=e1569]
+                  - cell "-" [ref=e1570]
+                  - cell "Actif" [ref=e1571]:
+                    - generic [ref=e1572]: Actif
+                  - cell [ref=e1573]:
+                    - button [ref=e1574] [cursor=pointer]:
+                      - img
+                - row "PREST-CDG-0380 CABINET DE GEOMETRE EXPERT CISSE ADAMA CABINET DE GEOMETRE EXPERT CISSE ADAMA geocadci.@gmail.com 07964574 - - Actif" [ref=e1575]:
+                  - cell "PREST-CDG-0380" [ref=e1576]:
+                    - generic [ref=e1577]:
+                      - generic [ref=e1578]: PREST-CDG-0380
+                      - button [ref=e1579] [cursor=pointer]:
+                        - img
+                  - cell "CABINET DE GEOMETRE EXPERT CISSE ADAMA CABINET DE GEOMETRE EXPERT CISSE ADAMA" [ref=e1580]:
+                    - generic [ref=e1581]:
+                      - paragraph [ref=e1582]: CABINET DE GEOMETRE EXPERT CISSE ADAMA
+                      - paragraph [ref=e1583]: CABINET DE GEOMETRE EXPERT CISSE ADAMA
+                  - cell "geocadci.@gmail.com 07964574" [ref=e1584]:
+                    - generic [ref=e1585]:
+                      - generic [ref=e1586]: geocadci.@gmail.com
+                      - generic [ref=e1587]: "07964574"
+                  - cell "-" [ref=e1588]
+                  - cell "-" [ref=e1589]
+                  - cell "Actif" [ref=e1590]:
+                    - generic [ref=e1591]: Actif
+                  - cell [ref=e1592]:
+                    - button [ref=e1593] [cursor=pointer]:
+                      - img
+                - row "PREST-CAC-0161 CACOMIAF CACOMIAF cacomiaf@cacomiaf.com 2721757878 - - Actif" [ref=e1594]:
+                  - cell "PREST-CAC-0161" [ref=e1595]:
+                    - generic [ref=e1596]:
+                      - generic [ref=e1597]: PREST-CAC-0161
+                      - button [ref=e1598] [cursor=pointer]:
+                        - img
+                  - cell "CACOMIAF CACOMIAF" [ref=e1599]:
+                    - generic [ref=e1600]:
+                      - paragraph [ref=e1601]: CACOMIAF
+                      - paragraph [ref=e1602]: CACOMIAF
+                  - cell "cacomiaf@cacomiaf.com 2721757878" [ref=e1603]:
+                    - generic [ref=e1604]:
+                      - generic [ref=e1605]: cacomiaf@cacomiaf.com
+                      - generic [ref=e1606]: "2721757878"
+                  - cell "-" [ref=e1607]
+                  - cell "-" [ref=e1608]
+                  - cell "Actif" [ref=e1609]:
+                    - generic [ref=e1610]: Actif
+                  - cell [ref=e1611]:
+                    - button [ref=e1612] [cursor=pointer]:
+                      - img
+                - row "PREST-CAM-0281 CAM-SERVICES CAM-SERVICES NEANT 0707812838 - - Actif" [ref=e1613]:
+                  - cell "PREST-CAM-0281" [ref=e1614]:
+                    - generic [ref=e1615]:
+                      - generic [ref=e1616]: PREST-CAM-0281
+                      - button [ref=e1617] [cursor=pointer]:
+                        - img
+                  - cell "CAM-SERVICES CAM-SERVICES" [ref=e1618]:
+                    - generic [ref=e1619]:
+                      - paragraph [ref=e1620]: CAM-SERVICES
+                      - paragraph [ref=e1621]: CAM-SERVICES
+                  - cell "NEANT 0707812838" [ref=e1622]:
+                    - generic [ref=e1623]:
+                      - generic [ref=e1624]: NEANT
+                      - generic [ref=e1625]: "0707812838"
+                  - cell "-" [ref=e1626]
+                  - cell "-" [ref=e1627]
+                  - cell "Actif" [ref=e1628]:
+                    - generic [ref=e1629]: Actif
+                  - cell [ref=e1630]:
+                    - button [ref=e1631] [cursor=pointer]:
+                      - img
+                - row "PREST-CH-0257 CANAL + HORIZON CANAL + HORIZON NEANT ARTI - - Actif" [ref=e1632]:
+                  - cell "PREST-CH-0257" [ref=e1633]:
+                    - generic [ref=e1634]:
+                      - generic [ref=e1635]: PREST-CH-0257
+                      - button [ref=e1636] [cursor=pointer]:
+                        - img
+                  - cell "CANAL + HORIZON CANAL + HORIZON" [ref=e1637]:
+                    - generic [ref=e1638]:
+                      - paragraph [ref=e1639]: CANAL + HORIZON
+                      - paragraph [ref=e1640]: CANAL + HORIZON
+                  - cell "NEANT ARTI" [ref=e1641]:
+                    - generic [ref=e1642]:
+                      - generic [ref=e1643]: NEANT
+                      - generic [ref=e1644]: ARTI
+                  - cell "-" [ref=e1645]
+                  - cell "-" [ref=e1646]
+                  - cell "Actif" [ref=e1647]:
+                    - generic [ref=e1648]: Actif
+                  - cell [ref=e1649]:
+                    - button [ref=e1650] [cursor=pointer]:
+                      - img
+                - row "PREST-CD-0387 CAR DEPOT CAR DEPOT NEANT 0102449999 - - Actif" [ref=e1651]:
+                  - cell "PREST-CD-0387" [ref=e1652]:
+                    - generic [ref=e1653]:
+                      - generic [ref=e1654]: PREST-CD-0387
+                      - button [ref=e1655] [cursor=pointer]:
+                        - img
+                  - cell "CAR DEPOT CAR DEPOT" [ref=e1656]:
+                    - generic [ref=e1657]:
+                      - paragraph [ref=e1658]: CAR DEPOT
+                      - paragraph [ref=e1659]: CAR DEPOT
+                  - cell "NEANT 0102449999" [ref=e1660]:
+                    - generic [ref=e1661]:
+                      - generic [ref=e1662]: NEANT
+                      - generic [ref=e1663]: "0102449999"
+                  - cell "-" [ref=e1664]
+                  - cell "-" [ref=e1665]
+                  - cell "Actif" [ref=e1666]:
+                    - generic [ref=e1667]: Actif
+                  - cell [ref=e1668]:
+                    - button [ref=e1669] [cursor=pointer]:
+                      - img
+                - row "PREST-CC-0379 CARA CENTER CARA CENTER NEANT 0706155155 - - Actif" [ref=e1670]:
+                  - cell "PREST-CC-0379" [ref=e1671]:
+                    - generic [ref=e1672]:
+                      - generic [ref=e1673]: PREST-CC-0379
+                      - button [ref=e1674] [cursor=pointer]:
+                        - img
+                  - cell "CARA CENTER CARA CENTER" [ref=e1675]:
+                    - generic [ref=e1676]:
+                      - paragraph [ref=e1677]: CARA CENTER
+                      - paragraph [ref=e1678]: CARA CENTER
+                  - cell "NEANT 0706155155" [ref=e1679]:
+                    - generic [ref=e1680]:
+                      - generic [ref=e1681]: NEANT
+                      - generic [ref=e1682]: "0706155155"
+                  - cell "-" [ref=e1683]
+                  - cell "-" [ref=e1684]
+                  - cell "Actif" [ref=e1685]:
+                    - generic [ref=e1686]: Actif
+                  - cell [ref=e1687]:
+                    - button [ref=e1688] [cursor=pointer]:
+                      - img
+                - row "PREST-CCI-0157 CASA CONCEPT INTERNATIONAL CASA CONCEPT casa.conceptinternational@gmail.com 0779353517 - - Actif" [ref=e1689]:
+                  - cell "PREST-CCI-0157" [ref=e1690]:
+                    - generic [ref=e1691]:
+                      - generic [ref=e1692]: PREST-CCI-0157
+                      - button [ref=e1693] [cursor=pointer]:
+                        - img
+                  - cell "CASA CONCEPT INTERNATIONAL CASA CONCEPT" [ref=e1694]:
+                    - generic [ref=e1695]:
+                      - paragraph [ref=e1696]: CASA CONCEPT INTERNATIONAL
+                      - paragraph [ref=e1697]: CASA CONCEPT
+                  - cell "casa.conceptinternational@gmail.com 0779353517" [ref=e1698]:
+                    - generic [ref=e1699]:
+                      - generic [ref=e1700]: casa.conceptinternational@gmail.com
+                      - generic [ref=e1701]: "0779353517"
+                  - cell "-" [ref=e1702]
+                  - cell "-" [ref=e1703]
+                  - cell "Actif" [ref=e1704]:
+                    - generic [ref=e1705]: Actif
+                  - cell [ref=e1706]:
+                    - button [ref=e1707] [cursor=pointer]:
+                      - img
+                - row "PREST-CE-0375 CASA Ekwa CASA Ekwa NEANT NEANT - - Actif" [ref=e1708]:
+                  - cell "PREST-CE-0375" [ref=e1709]:
+                    - generic [ref=e1710]:
+                      - generic [ref=e1711]: PREST-CE-0375
+                      - button [ref=e1712] [cursor=pointer]:
+                        - img
+                  - cell "CASA Ekwa CASA Ekwa" [ref=e1713]:
+                    - generic [ref=e1714]:
+                      - paragraph [ref=e1715]: CASA Ekwa
+                      - paragraph [ref=e1716]: CASA Ekwa
+                  - cell "NEANT NEANT" [ref=e1717]:
+                    - generic [ref=e1718]:
+                      - generic [ref=e1719]: NEANT
+                      - generic [ref=e1720]: NEANT
+                  - cell "-" [ref=e1721]
+                  - cell "-" [ref=e1722]
+                  - cell "Actif" [ref=e1723]:
+                    - generic [ref=e1724]: Actif
+                  - cell [ref=e1725]:
+                    - button [ref=e1726] [cursor=pointer]:
+                      - img
+                - row "PREST-CD-0403 CATHY DELICE CATHY DELICE NEANT 0749787116 - - Actif" [ref=e1727]:
+                  - cell "PREST-CD-0403" [ref=e1728]:
+                    - generic [ref=e1729]:
+                      - generic [ref=e1730]: PREST-CD-0403
+                      - button [ref=e1731] [cursor=pointer]:
+                        - img
+                  - cell "CATHY DELICE CATHY DELICE" [ref=e1732]:
+                    - generic [ref=e1733]:
+                      - paragraph [ref=e1734]: CATHY DELICE
+                      - paragraph [ref=e1735]: CATHY DELICE
+                  - cell "NEANT 0749787116" [ref=e1736]:
+                    - generic [ref=e1737]:
+                      - generic [ref=e1738]: NEANT
+                      - generic [ref=e1739]: "0749787116"
+                  - cell "-" [ref=e1740]
+                  - cell "-" [ref=e1741]
+                  - cell "Actif" [ref=e1742]:
+                    - generic [ref=e1743]: Actif
+                  - cell [ref=e1744]:
+                    - button [ref=e1745] [cursor=pointer]:
+                      - img
+                - row "PREST-CCB-0024 CCBI CCBI - - Actif" [ref=e1746]:
+                  - cell "PREST-CCB-0024" [ref=e1747]:
+                    - generic [ref=e1748]:
+                      - generic [ref=e1749]: PREST-CCB-0024
+                      - button [ref=e1750] [cursor=pointer]:
+                        - img
+                  - cell "CCBI CCBI" [ref=e1751]:
+                    - generic [ref=e1752]:
+                      - paragraph [ref=e1753]: CCBI
+                      - paragraph [ref=e1754]: CCBI
+                  - cell [ref=e1755]
+                  - cell "-" [ref=e1756]
+                  - cell "-" [ref=e1757]
+                  - cell "Actif" [ref=e1758]:
+                    - generic [ref=e1759]: Actif
+                  - cell [ref=e1760]:
+                    - button [ref=e1761] [cursor=pointer]:
+                      - img
+                - row "PREST-CAD-0325 CENTRE AFRICAIN DE MANAGEMENT ET DE PERFECTIONNEMENT DES CADRES CAMPC info@campc.net 2722444322 - - Actif" [ref=e1762]:
+                  - cell "PREST-CAD-0325" [ref=e1763]:
+                    - generic [ref=e1764]:
+                      - generic [ref=e1765]: PREST-CAD-0325
+                      - button [ref=e1766] [cursor=pointer]:
+                        - img
+                  - cell "CENTRE AFRICAIN DE MANAGEMENT ET DE PERFECTIONNEMENT DES CADRES CAMPC" [ref=e1767]:
+                    - generic [ref=e1768]:
+                      - paragraph [ref=e1769]: CENTRE AFRICAIN DE MANAGEMENT ET DE PERFECTIONNEMENT DES CADRES
+                      - paragraph [ref=e1770]: CAMPC
+                  - cell "info@campc.net 2722444322" [ref=e1771]:
+                    - generic [ref=e1772]:
+                      - generic [ref=e1773]: info@campc.net
+                      - generic [ref=e1774]: "2722444322"
+                  - cell "-" [ref=e1775]
+                  - cell "-" [ref=e1776]
+                  - cell "Actif" [ref=e1777]:
+                    - generic [ref=e1778]: Actif
+                  - cell [ref=e1779]:
+                    - button [ref=e1780] [cursor=pointer]:
+                      - img
+                - row "PREST-CHE-0209 CENTRE HOSPITALIER ET UNIVERSITAIRE DE TREICHVILLE CHU TREICHVILLE NEANT NEANT - - Actif" [ref=e1781]:
+                  - cell "PREST-CHE-0209" [ref=e1782]:
+                    - generic [ref=e1783]:
+                      - generic [ref=e1784]: PREST-CHE-0209
+                      - button [ref=e1785] [cursor=pointer]:
+                        - img
+                  - cell "CENTRE HOSPITALIER ET UNIVERSITAIRE DE TREICHVILLE CHU TREICHVILLE" [ref=e1786]:
+                    - generic [ref=e1787]:
+                      - paragraph [ref=e1788]: CENTRE HOSPITALIER ET UNIVERSITAIRE DE TREICHVILLE
+                      - paragraph [ref=e1789]: CHU TREICHVILLE
+                  - cell "NEANT NEANT" [ref=e1790]:
+                    - generic [ref=e1791]:
+                      - generic [ref=e1792]: NEANT
+                      - generic [ref=e1793]: NEANT
+                  - cell "-" [ref=e1794]
+                  - cell "-" [ref=e1795]
+                  - cell "Actif" [ref=e1796]:
+                    - generic [ref=e1797]: Actif
+                  - cell [ref=e1798]:
+                    - button [ref=e1799] [cursor=pointer]:
+                      - img
+                - row "PREST-CMI-0193 CENTRE MEDICAL INTERNATIONAL LA GOSPA CENTRE MEDICAL INTERNATIONAL LA GOSPA NEANT 2722487681 - - Actif" [ref=e1800]:
+                  - cell "PREST-CMI-0193" [ref=e1801]:
+                    - generic [ref=e1802]:
+                      - generic [ref=e1803]: PREST-CMI-0193
+                      - button [ref=e1804] [cursor=pointer]:
+                        - img
+                  - cell "CENTRE MEDICAL INTERNATIONAL LA GOSPA CENTRE MEDICAL INTERNATIONAL LA GOSPA" [ref=e1805]:
+                    - generic [ref=e1806]:
+                      - paragraph [ref=e1807]: CENTRE MEDICAL INTERNATIONAL LA GOSPA
+                      - paragraph [ref=e1808]: CENTRE MEDICAL INTERNATIONAL LA GOSPA
+                  - cell "NEANT 2722487681" [ref=e1809]:
+                    - generic [ref=e1810]:
+                      - generic [ref=e1811]: NEANT
+                      - generic [ref=e1812]: "2722487681"
+                  - cell "-" [ref=e1813]
+                  - cell "-" [ref=e1814]
+                  - cell "Actif" [ref=e1815]:
+                    - generic [ref=e1816]: Actif
+                  - cell [ref=e1817]:
+                    - button [ref=e1818] [cursor=pointer]:
+                      - img
+                - row "PREST-CM-0360 CFAO MOBILITY CFAO MOBILITY NEANT 0758859788 - - Actif" [ref=e1819]:
+                  - cell "PREST-CM-0360" [ref=e1820]:
+                    - generic [ref=e1821]:
+                      - generic [ref=e1822]: PREST-CM-0360
+                      - button [ref=e1823] [cursor=pointer]:
+                        - img
+                  - cell "CFAO MOBILITY CFAO MOBILITY" [ref=e1824]:
+                    - generic [ref=e1825]:
+                      - paragraph [ref=e1826]: CFAO MOBILITY
+                      - paragraph [ref=e1827]: CFAO MOBILITY
+                  - cell "NEANT 0758859788" [ref=e1828]:
+                    - generic [ref=e1829]:
+                      - generic [ref=e1830]: NEANT
+                      - generic [ref=e1831]: "0758859788"
+                  - cell "-" [ref=e1832]
+                  - cell "-" [ref=e1833]
+                  - cell "Actif" [ref=e1834]:
+                    - generic [ref=e1835]: Actif
+                  - cell [ref=e1836]:
+                    - button [ref=e1837] [cursor=pointer]:
+                      - img
+                - row "PREST-CM-0026 CFAO MOTORS CFAO MOTORS - - Actif" [ref=e1838]:
+                  - cell "PREST-CM-0026" [ref=e1839]:
+                    - generic [ref=e1840]:
+                      - generic [ref=e1841]: PREST-CM-0026
+                      - button [ref=e1842] [cursor=pointer]:
+                        - img
+                  - cell "CFAO MOTORS CFAO MOTORS" [ref=e1843]:
+                    - generic [ref=e1844]:
+                      - paragraph [ref=e1845]: CFAO MOTORS
+                      - paragraph [ref=e1846]: CFAO MOTORS
+                  - cell [ref=e1847]
+                  - cell "-" [ref=e1848]
+                  - cell "-" [ref=e1849]
+                  - cell "Actif" [ref=e1850]:
+                    - generic [ref=e1851]: Actif
+                  - cell [ref=e1852]:
+                    - button [ref=e1853] [cursor=pointer]:
+                      - img
+                - row "PREST-CK-0236 CGE KOUROUKAN CGE KOUROUKAN keita.kouroukan@geometre-expert.ci 07-07-26-10-10 - - Actif" [ref=e1854]:
+                  - cell "PREST-CK-0236" [ref=e1855]:
+                    - generic [ref=e1856]:
+                      - generic [ref=e1857]: PREST-CK-0236
+                      - button [ref=e1858] [cursor=pointer]:
+                        - img
+                  - cell "CGE KOUROUKAN CGE KOUROUKAN" [ref=e1859]:
+                    - generic [ref=e1860]:
+                      - paragraph [ref=e1861]: CGE KOUROUKAN
+                      - paragraph [ref=e1862]: CGE KOUROUKAN
+                  - cell "keita.kouroukan@geometre-expert.ci 07-07-26-10-10" [ref=e1863]:
+                    - generic [ref=e1864]:
+                      - generic [ref=e1865]: keita.kouroukan@geometre-expert.ci
+                      - generic [ref=e1866]: 07-07-26-10-10
+                  - cell "-" [ref=e1867]
+                  - cell "-" [ref=e1868]
+                  - cell "Actif" [ref=e1869]:
+                    - generic [ref=e1870]: Actif
+                  - cell [ref=e1871]:
+                    - button [ref=e1872] [cursor=pointer]:
+                      - img
+                - row "PREST-CGI-0396 CGI CENTRE DE GESTION INTEGRE NEANT NEANT - - Actif" [ref=e1873]:
+                  - cell "PREST-CGI-0396" [ref=e1874]:
+                    - generic [ref=e1875]:
+                      - generic [ref=e1876]: PREST-CGI-0396
+                      - button [ref=e1877] [cursor=pointer]:
+                        - img
+                  - cell "CGI CENTRE DE GESTION INTEGRE" [ref=e1878]:
+                    - generic [ref=e1879]:
+                      - paragraph [ref=e1880]: CGI
+                      - paragraph [ref=e1881]: CENTRE DE GESTION INTEGRE
+                  - cell "NEANT NEANT" [ref=e1882]:
+                    - generic [ref=e1883]:
+                      - generic [ref=e1884]: NEANT
+                      - generic [ref=e1885]: NEANT
+                  - cell "-" [ref=e1886]
+                  - cell "-" [ref=e1887]
+                  - cell "Actif" [ref=e1888]:
+                    - generic [ref=e1889]: Actif
+                  - cell [ref=e1890]:
+                    - button [ref=e1891] [cursor=pointer]:
+                      - img
+                - row "PREST-CDC-0147 CHAMBRE DE COMMERCE ET D'INDUSTRIE DE COTE D'IVOIRE CCI NEANT 2720331600 - - Actif" [ref=e1892]:
+                  - cell "PREST-CDC-0147" [ref=e1893]:
+                    - generic [ref=e1894]:
+                      - generic [ref=e1895]: PREST-CDC-0147
+                      - button [ref=e1896] [cursor=pointer]:
+                        - img
+                  - cell "CHAMBRE DE COMMERCE ET D'INDUSTRIE DE COTE D'IVOIRE CCI" [ref=e1897]:
+                    - generic [ref=e1898]:
+                      - paragraph [ref=e1899]: CHAMBRE DE COMMERCE ET D'INDUSTRIE DE COTE D'IVOIRE
+                      - paragraph [ref=e1900]: CCI
+                  - cell "NEANT 2720331600" [ref=e1901]:
+                    - generic [ref=e1902]:
+                      - generic [ref=e1903]: NEANT
+                      - generic [ref=e1904]: "2720331600"
+                  - cell "-" [ref=e1905]
+                  - cell "-" [ref=e1906]
+                  - cell "Actif" [ref=e1907]:
+                    - generic [ref=e1908]: Actif
+                  - cell [ref=e1909]:
+                    - button [ref=e1910] [cursor=pointer]:
+                      - img
+                - row "PREST-CG-0170 CHEN GROUP CHEN GROUP ciage.cheninstitut@gmail.com 2722551705 - - Actif" [ref=e1911]:
+                  - cell "PREST-CG-0170" [ref=e1912]:
+                    - generic [ref=e1913]:
+                      - generic [ref=e1914]: PREST-CG-0170
+                      - button [ref=e1915] [cursor=pointer]:
+                        - img
+                  - cell "CHEN GROUP CHEN GROUP" [ref=e1916]:
+                    - generic [ref=e1917]:
+                      - paragraph [ref=e1918]: CHEN GROUP
+                      - paragraph [ref=e1919]: CHEN GROUP
+                  - cell "ciage.cheninstitut@gmail.com 2722551705" [ref=e1920]:
+                    - generic [ref=e1921]:
+                      - generic [ref=e1922]: ciage.cheninstitut@gmail.com
+                      - generic [ref=e1923]: "2722551705"
+                  - cell "-" [ref=e1924]
+                  - cell "-" [ref=e1925]
+                  - cell "Actif" [ref=e1926]:
+                    - generic [ref=e1927]: Actif
+                  - cell [ref=e1928]:
+                    - button [ref=e1929] [cursor=pointer]:
+                      - img
+                - row "PREST-CC-0384 CI2T & COMPAGNY CI2T & COMPAGNY ci2tsarl19@gmail.com 07 07 41 25 61 - - Actif" [ref=e1930]:
+                  - cell "PREST-CC-0384" [ref=e1931]:
+                    - generic [ref=e1932]:
+                      - generic [ref=e1933]: PREST-CC-0384
+                      - button [ref=e1934] [cursor=pointer]:
+                        - img
+                  - cell "CI2T & COMPAGNY CI2T & COMPAGNY" [ref=e1935]:
+                    - generic [ref=e1936]:
+                      - paragraph [ref=e1937]: CI2T & COMPAGNY
+                      - paragraph [ref=e1938]: CI2T & COMPAGNY
+                  - cell "ci2tsarl19@gmail.com 07 07 41 25 61" [ref=e1939]:
+                    - generic [ref=e1940]:
+                      - generic [ref=e1941]: ci2tsarl19@gmail.com
+                      - generic [ref=e1942]: 07 07 41 25 61
+                  - cell "-" [ref=e1943]
+                  - cell "-" [ref=e1944]
+                  - cell "Actif" [ref=e1945]:
+                    - generic [ref=e1946]: Actif
+                  - cell [ref=e1947]:
+                    - button [ref=e1948] [cursor=pointer]:
+                      - img
+                - row "PREST-CIR-0402 CIRAD CIRAD NEANT 2722528528 - - Actif" [ref=e1949]:
+                  - cell "PREST-CIR-0402" [ref=e1950]:
+                    - generic [ref=e1951]:
+                      - generic [ref=e1952]: PREST-CIR-0402
+                      - button [ref=e1953] [cursor=pointer]:
+                        - img
+                  - cell "CIRAD CIRAD" [ref=e1954]:
+                    - generic [ref=e1955]:
+                      - paragraph [ref=e1956]: CIRAD
+                      - paragraph [ref=e1957]: CIRAD
+                  - cell "NEANT 2722528528" [ref=e1958]:
+                    - generic [ref=e1959]:
+                      - generic [ref=e1960]: NEANT
+                      - generic [ref=e1961]: "2722528528"
+                  - cell "-" [ref=e1962]
+                  - cell "-" [ref=e1963]
+                  - cell "Actif" [ref=e1964]:
+                    - generic [ref=e1965]: Actif
+                  - cell [ref=e1966]:
+                    - button [ref=e1967] [cursor=pointer]:
+                      - img
+                - row "PREST-CE-0316 CKZ ELVEHTPRO CKZ ELVEHTPRO ckzdlv@gmail.com 0151111199 - - Actif" [ref=e1968]:
+                  - cell "PREST-CE-0316" [ref=e1969]:
+                    - generic [ref=e1970]:
+                      - generic [ref=e1971]: PREST-CE-0316
+                      - button [ref=e1972] [cursor=pointer]:
+                        - img
+                  - cell "CKZ ELVEHTPRO CKZ ELVEHTPRO" [ref=e1973]:
+                    - generic [ref=e1974]:
+                      - paragraph [ref=e1975]: CKZ ELVEHTPRO
+                      - paragraph [ref=e1976]: CKZ ELVEHTPRO
+                  - cell "ckzdlv@gmail.com 0151111199" [ref=e1977]:
+                    - generic [ref=e1978]:
+                      - generic [ref=e1979]: ckzdlv@gmail.com
+                      - generic [ref=e1980]: "0151111199"
+                  - cell "-" [ref=e1981]
+                  - cell "-" [ref=e1982]
+                  - cell "Actif" [ref=e1983]:
+                    - generic [ref=e1984]: Actif
+                  - cell [ref=e1985]:
+                    - button [ref=e1986] [cursor=pointer]:
+                      - img
+                - row "PREST-CCP-0248 CLASS C PLUS CLASS C PLUS chabibiao@yahoo.fr 07797885 - - Actif" [ref=e1987]:
+                  - cell "PREST-CCP-0248" [ref=e1988]:
+                    - generic [ref=e1989]:
+                      - generic [ref=e1990]: PREST-CCP-0248
+                      - button [ref=e1991] [cursor=pointer]:
+                        - img
+                  - cell "CLASS C PLUS CLASS C PLUS" [ref=e1992]:
+                    - generic [ref=e1993]:
+                      - paragraph [ref=e1994]: CLASS C PLUS
+                      - paragraph [ref=e1995]: CLASS C PLUS
+                  - cell "chabibiao@yahoo.fr 07797885" [ref=e1996]:
+                    - generic [ref=e1997]:
+                      - generic [ref=e1998]: chabibiao@yahoo.fr
+                      - generic [ref=e1999]: "07797885"
+                  - cell "-" [ref=e2000]
+                  - cell "-" [ref=e2001]
+                  - cell "Actif" [ref=e2002]:
+                    - generic [ref=e2003]: Actif
+                  - cell [ref=e2004]:
+                    - button [ref=e2005] [cursor=pointer]:
+                      - img
+                - row "PREST-CAD-0027 CLASSIC AUTO DESIGN CLASSIC AUTO DESIGN 7.07403e+008 - - Actif" [ref=e2006]:
+                  - cell "PREST-CAD-0027" [ref=e2007]:
+                    - generic [ref=e2008]:
+                      - generic [ref=e2009]: PREST-CAD-0027
+                      - button [ref=e2010] [cursor=pointer]:
+                        - img
+                  - cell "CLASSIC AUTO DESIGN CLASSIC AUTO DESIGN" [ref=e2011]:
+                    - generic [ref=e2012]:
+                      - paragraph [ref=e2013]: CLASSIC AUTO DESIGN
+                      - paragraph [ref=e2014]: CLASSIC AUTO DESIGN
+                  - cell "7.07403e+008" [ref=e2015]:
+                    - generic [ref=e2017]: "7.07403e+008"
+                  - cell "-" [ref=e2018]
+                  - cell "-" [ref=e2019]
+                  - cell "Actif" [ref=e2020]:
+                    - generic [ref=e2021]: Actif
+                  - cell [ref=e2022]:
+                    - button [ref=e2023] [cursor=pointer]:
+                      - img
+                - row "PREST-CS-0028 CLUB SOCOCE CLUB SOCOCE - - Actif" [ref=e2024]:
+                  - cell "PREST-CS-0028" [ref=e2025]:
+                    - generic [ref=e2026]:
+                      - generic [ref=e2027]: PREST-CS-0028
+                      - button [ref=e2028] [cursor=pointer]:
+                        - img
+                  - cell "CLUB SOCOCE CLUB SOCOCE" [ref=e2029]:
+                    - generic [ref=e2030]:
+                      - paragraph [ref=e2031]: CLUB SOCOCE
+                      - paragraph [ref=e2032]: CLUB SOCOCE
+                  - cell [ref=e2033]
+                  - cell "-" [ref=e2034]
+                  - cell "-" [ref=e2035]
+                  - cell "Actif" [ref=e2036]:
+                    - generic [ref=e2037]: Actif
+                  - cell [ref=e2038]:
+                    - button [ref=e2039] [cursor=pointer]:
+                      - img
+                - row "PREST-CND-0393 CNDJ CENTRE NATIONAL DE DOCUMENTATION JURIDIQUE cndjci@cndj.ci 2722414495 - - Actif" [ref=e2040]:
+                  - cell "PREST-CND-0393" [ref=e2041]:
+                    - generic [ref=e2042]:
+                      - generic [ref=e2043]: PREST-CND-0393
+                      - button [ref=e2044] [cursor=pointer]:
+                        - img
+                  - cell "CNDJ CENTRE NATIONAL DE DOCUMENTATION JURIDIQUE" [ref=e2045]:
+                    - generic [ref=e2046]:
+                      - paragraph [ref=e2047]: CNDJ
+                      - paragraph [ref=e2048]: CENTRE NATIONAL DE DOCUMENTATION JURIDIQUE
+                  - cell "cndjci@cndj.ci 2722414495" [ref=e2049]:
+                    - generic [ref=e2050]:
+                      - generic [ref=e2051]: cndjci@cndj.ci
+                      - generic [ref=e2052]: "2722414495"
+                  - cell "-" [ref=e2053]
+                  - cell "-" [ref=e2054]
+                  - cell "Actif" [ref=e2055]:
+                    - generic [ref=e2056]: Actif
+                  - cell [ref=e2057]:
+                    - button [ref=e2058] [cursor=pointer]:
+                      - img
+                - row "PREST-CNP-0129 CNPS CNPS NEANT - - Actif" [ref=e2059]:
+                  - cell "PREST-CNP-0129" [ref=e2060]:
+                    - generic [ref=e2061]:
+                      - generic [ref=e2062]: PREST-CNP-0129
+                      - button [ref=e2063] [cursor=pointer]:
+                        - img
+                  - cell "CNPS CNPS" [ref=e2064]:
+                    - generic [ref=e2065]:
+                      - paragraph [ref=e2066]: CNPS
+                      - paragraph [ref=e2067]: CNPS
+                  - cell "NEANT" [ref=e2068]:
+                    - generic [ref=e2070]: NEANT
+                  - cell "-" [ref=e2071]
+                  - cell "-" [ref=e2072]
+                  - cell "Actif" [ref=e2073]:
+                    - generic [ref=e2074]: Actif
+                  - cell [ref=e2075]:
+                    - button [ref=e2076] [cursor=pointer]:
+                      - img
+                - row "PREST-COC-0414 COCITAM COCITAM info@cocitam.com 22521256797 - - Actif" [ref=e2077]:
+                  - cell "PREST-COC-0414" [ref=e2078]:
+                    - generic [ref=e2079]:
+                      - generic [ref=e2080]: PREST-COC-0414
+                      - button [ref=e2081] [cursor=pointer]:
+                        - img
+                  - cell "COCITAM COCITAM" [ref=e2082]:
+                    - generic [ref=e2083]:
+                      - paragraph [ref=e2084]: COCITAM
+                      - paragraph [ref=e2085]: COCITAM
+                  - cell "info@cocitam.com 22521256797" [ref=e2086]:
+                    - generic [ref=e2087]:
+                      - generic [ref=e2088]: info@cocitam.com
+                      - generic [ref=e2089]: "22521256797"
+                  - cell "-" [ref=e2090]
+                  - cell "-" [ref=e2091]
+                  - cell "Actif" [ref=e2092]:
+                    - generic [ref=e2093]: Actif
+                  - cell [ref=e2094]:
+                    - button [ref=e2095] [cursor=pointer]:
+                      - img
+                - row "PREST-COD-0282 CODINORM COTE D'IVOIRE-NORMALISATION info@codinorm.ci 225 27 22 41 52 97 - - Actif" [ref=e2096]:
+                  - cell "PREST-COD-0282" [ref=e2097]:
+                    - generic [ref=e2098]:
+                      - generic [ref=e2099]: PREST-COD-0282
+                      - button [ref=e2100] [cursor=pointer]:
+                        - img
+                  - cell "CODINORM COTE D'IVOIRE-NORMALISATION" [ref=e2101]:
+                    - generic [ref=e2102]:
+                      - paragraph [ref=e2103]: CODINORM
+                      - paragraph [ref=e2104]: COTE D'IVOIRE-NORMALISATION
+                  - cell "info@codinorm.ci 225 27 22 41 52 97" [ref=e2105]:
+                    - generic [ref=e2106]:
+                      - generic [ref=e2107]: info@codinorm.ci
+                      - generic [ref=e2108]: 225 27 22 41 52 97
+                  - cell "-" [ref=e2109]
+                  - cell "-" [ref=e2110]
+                  - cell "Actif" [ref=e2111]:
+                    - generic [ref=e2112]: Actif
+                  - cell [ref=e2113]:
+                    - button [ref=e2114] [cursor=pointer]:
+                      - img
+                - row "PREST-COD-0314 CODITRANS CODITRANS NEANT 2121757060 - - Actif" [ref=e2115]:
+                  - cell "PREST-COD-0314" [ref=e2116]:
+                    - generic [ref=e2117]:
+                      - generic [ref=e2118]: PREST-COD-0314
+                      - button [ref=e2119] [cursor=pointer]:
+                        - img
+                  - cell "CODITRANS CODITRANS" [ref=e2120]:
+                    - generic [ref=e2121]:
+                      - paragraph [ref=e2122]: CODITRANS
+                      - paragraph [ref=e2123]: CODITRANS
+                  - cell "NEANT 2121757060" [ref=e2124]:
+                    - generic [ref=e2125]:
+                      - generic [ref=e2126]: NEANT
+                      - generic [ref=e2127]: "2121757060"
+                  - cell "-" [ref=e2128]
+                  - cell "-" [ref=e2129]
+                  - cell "Actif" [ref=e2130]:
+                    - generic [ref=e2131]: Actif
+                  - cell [ref=e2132]:
+                    - button [ref=e2133] [cursor=pointer]:
+                      - img
+                - row "PREST-CI-0297 COMEN INTERNATIONAL COMEN INTERNATIONAL - - Actif" [ref=e2134]:
+                  - cell "PREST-CI-0297" [ref=e2135]:
+                    - generic [ref=e2136]:
+                      - generic [ref=e2137]: PREST-CI-0297
+                      - button [ref=e2138] [cursor=pointer]:
+                        - img
+                  - cell "COMEN INTERNATIONAL COMEN INTERNATIONAL" [ref=e2139]:
+                    - generic [ref=e2140]:
+                      - paragraph [ref=e2141]: COMEN INTERNATIONAL
+                      - paragraph [ref=e2142]: COMEN INTERNATIONAL
+                  - cell [ref=e2143]
+                  - cell "-" [ref=e2144]
+                  - cell "-" [ref=e2145]
+                  - cell "Actif" [ref=e2146]:
+                    - generic [ref=e2147]: Actif
+                  - cell [ref=e2148]:
+                    - button [ref=e2149] [cursor=pointer]:
+                      - img
+                - row "PREST-COM-0171 COMEUP COMEUP NEANT NEANT - - Actif" [ref=e2150]:
+                  - cell "PREST-COM-0171" [ref=e2151]:
+                    - generic [ref=e2152]:
+                      - generic [ref=e2153]: PREST-COM-0171
+                      - button [ref=e2154] [cursor=pointer]:
+                        - img
+                  - cell "COMEUP COMEUP" [ref=e2155]:
+                    - generic [ref=e2156]:
+                      - paragraph [ref=e2157]: COMEUP
+                      - paragraph [ref=e2158]: COMEUP
+                  - cell "NEANT NEANT" [ref=e2159]:
+                    - generic [ref=e2160]:
+                      - generic [ref=e2161]: NEANT
+                      - generic [ref=e2162]: NEANT
+                  - cell "-" [ref=e2163]
+                  - cell "-" [ref=e2164]
+                  - cell "Actif" [ref=e2165]:
+                    - generic [ref=e2166]: Actif
+                  - cell [ref=e2167]:
+                    - button [ref=e2168] [cursor=pointer]:
+                      - img
+                - row "PREST-CID-0023 COMPAGNIE IVOIRIENNE D'ELECTRICITE C.I.E - - Actif" [ref=e2169]:
+                  - cell "PREST-CID-0023" [ref=e2170]:
+                    - generic [ref=e2171]:
+                      - generic [ref=e2172]: PREST-CID-0023
+                      - button [ref=e2173] [cursor=pointer]:
+                        - img
+                  - cell "COMPAGNIE IVOIRIENNE D'ELECTRICITE C.I.E" [ref=e2174]:
+                    - generic [ref=e2175]:
+                      - paragraph [ref=e2176]: COMPAGNIE IVOIRIENNE D'ELECTRICITE
+                      - paragraph [ref=e2177]: C.I.E
+                  - cell [ref=e2178]
+                  - cell "-" [ref=e2179]
+                  - cell "-" [ref=e2180]
+                  - cell "Actif" [ref=e2181]:
+                    - generic [ref=e2182]: Actif
+                  - cell [ref=e2183]:
+                    - button [ref=e2184] [cursor=pointer]:
+                      - img
+                - row "PREST-CG-0029 COMPLEXE GBEKE COMPLEXE GBEKE 2.25273e+012 - - Actif" [ref=e2185]:
+                  - cell "PREST-CG-0029" [ref=e2186]:
+                    - generic [ref=e2187]:
+                      - generic [ref=e2188]: PREST-CG-0029
+                      - button [ref=e2189] [cursor=pointer]:
+                        - img
+                  - cell "COMPLEXE GBEKE COMPLEXE GBEKE" [ref=e2190]:
+                    - generic [ref=e2191]:
+                      - paragraph [ref=e2192]: COMPLEXE GBEKE
+                      - paragraph [ref=e2193]: COMPLEXE GBEKE
+                  - cell "2.25273e+012" [ref=e2194]:
+                    - generic [ref=e2196]: "2.25273e+012"
+                  - cell "-" [ref=e2197]
+                  - cell "-" [ref=e2198]
+                  - cell "Actif" [ref=e2199]:
+                    - generic [ref=e2200]: Actif
+                  - cell [ref=e2201]:
+                    - button [ref=e2202] [cursor=pointer]:
+                      - img
+                - row "PREST-CHT-0370 COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE NEANT 0142103131 - - Actif" [ref=e2203]:
+                  - cell "PREST-CHT-0370" [ref=e2204]:
+                    - generic [ref=e2205]:
+                      - generic [ref=e2206]: PREST-CHT-0370
+                      - button [ref=e2207] [cursor=pointer]:
+                        - img
+                  - cell "COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE" [ref=e2208]:
+                    - generic [ref=e2209]:
+                      - paragraph [ref=e2210]: COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE
+                      - paragraph [ref=e2211]: COMPLEXE HOTELIER TAPIS ROUGE LA FONTAINE
+                  - cell "NEANT 0142103131" [ref=e2212]:
+                    - generic [ref=e2213]:
+                      - generic [ref=e2214]: NEANT
+                      - generic [ref=e2215]: "0142103131"
+                  - cell "-" [ref=e2216]
+                  - cell "-" [ref=e2217]
+                  - cell "Actif" [ref=e2218]:
+                    - generic [ref=e2219]: Actif
+                  - cell [ref=e2220]:
+                    - button [ref=e2221] [cursor=pointer]:
+                      - img
+                - row "PREST-CCB-0401 COMPTE COURANT BHCI COMPTE COURANT BHCI NEANT NEANT - - Actif" [ref=e2222]:
+                  - cell "PREST-CCB-0401" [ref=e2223]:
+                    - generic [ref=e2224]:
+                      - generic [ref=e2225]: PREST-CCB-0401
+                      - button [ref=e2226] [cursor=pointer]:
+                        - img
+                  - cell "COMPTE COURANT BHCI COMPTE COURANT BHCI" [ref=e2227]:
+                    - generic [ref=e2228]:
+                      - paragraph [ref=e2229]: COMPTE COURANT BHCI
+                      - paragraph [ref=e2230]: COMPTE COURANT BHCI
+                  - cell "NEANT NEANT" [ref=e2231]:
+                    - generic [ref=e2232]:
+                      - generic [ref=e2233]: NEANT
+                      - generic [ref=e2234]: NEANT
+                  - cell "-" [ref=e2235]
+                  - cell "-" [ref=e2236]
+                  - cell "Actif" [ref=e2237]:
+                    - generic [ref=e2238]: Actif
+                  - cell [ref=e2239]:
+                    - button [ref=e2240] [cursor=pointer]:
+                      - img
+                - row "PREST-CDE-0065 COMPTOIR DISTRIBUTION ELECTRIQUE LA MAISON DES AMPOULES Contact@lamaisondesampoules.net 2.25272e+012 - - Actif" [ref=e2241]:
+                  - cell "PREST-CDE-0065" [ref=e2242]:
+                    - generic [ref=e2243]:
+                      - generic [ref=e2244]: PREST-CDE-0065
+                      - button [ref=e2245] [cursor=pointer]:
+                        - img
+                  - cell "COMPTOIR DISTRIBUTION ELECTRIQUE LA MAISON DES AMPOULES" [ref=e2246]:
+                    - generic [ref=e2247]:
+                      - paragraph [ref=e2248]: COMPTOIR DISTRIBUTION ELECTRIQUE
+                      - paragraph [ref=e2249]: LA MAISON DES AMPOULES
+                  - cell "Contact@lamaisondesampoules.net 2.25272e+012" [ref=e2250]:
+                    - generic [ref=e2251]:
+                      - generic [ref=e2252]: Contact@lamaisondesampoules.net
+                      - generic [ref=e2253]: "2.25272e+012"
+                  - cell "-" [ref=e2254]
+                  - cell "-" [ref=e2255]
+                  - cell "Actif" [ref=e2256]:
+                    - generic [ref=e2257]: Actif
+                  - cell [ref=e2258]:
+                    - button [ref=e2259] [cursor=pointer]:
+                      - img
+                - row "PREST-COM-0306 COMUNIQUE COMUNIQUE NEANT 0101603412 - - Actif" [ref=e2260]:
+                  - cell "PREST-COM-0306" [ref=e2261]:
+                    - generic [ref=e2262]:
+                      - generic [ref=e2263]: PREST-COM-0306
+                      - button [ref=e2264] [cursor=pointer]:
+                        - img
+                  - cell "COMUNIQUE COMUNIQUE" [ref=e2265]:
+                    - generic [ref=e2266]:
+                      - paragraph [ref=e2267]: COMUNIQUE
+                      - paragraph [ref=e2268]: COMUNIQUE
+                  - cell "NEANT 0101603412" [ref=e2269]:
+                    - generic [ref=e2270]:
+                      - generic [ref=e2271]: NEANT
+                      - generic [ref=e2272]: "0101603412"
+                  - cell "-" [ref=e2273]
+                  - cell "-" [ref=e2274]
+                  - cell "Actif" [ref=e2275]:
+                    - generic [ref=e2276]: Actif
+                  - cell [ref=e2277]:
+                    - button [ref=e2278] [cursor=pointer]:
+                      - img
+                - row "PREST-CC-0206 CONCEPT CONSULTING CONCEPT CONSULTING NEANT 22421408 - - Actif" [ref=e2279]:
+                  - cell "PREST-CC-0206" [ref=e2280]:
+                    - generic [ref=e2281]:
+                      - generic [ref=e2282]: PREST-CC-0206
+                      - button [ref=e2283] [cursor=pointer]:
+                        - img
+                  - cell "CONCEPT CONSULTING CONCEPT CONSULTING" [ref=e2284]:
+                    - generic [ref=e2285]:
+                      - paragraph [ref=e2286]: CONCEPT CONSULTING
+                      - paragraph [ref=e2287]: CONCEPT CONSULTING
+                  - cell "NEANT 22421408" [ref=e2288]:
+                    - generic [ref=e2289]:
+                      - generic [ref=e2290]: NEANT
+                      - generic [ref=e2291]: "22421408"
+                  - cell "-" [ref=e2292]
+                  - cell "-" [ref=e2293]
+                  - cell "Actif" [ref=e2294]:
+                    - generic [ref=e2295]: Actif
+                  - cell [ref=e2296]:
+                    - button [ref=e2297] [cursor=pointer]:
+                      - img
+                - row "PREST-CP-0030 CONNEXION PHOTOGRAPHY CONNEXION PHOTOGRAPHY Info@connexionphotography.com 2.25272e+012 - - Actif" [ref=e2298]:
+                  - cell "PREST-CP-0030" [ref=e2299]:
+                    - generic [ref=e2300]:
+                      - generic [ref=e2301]: PREST-CP-0030
+                      - button [ref=e2302] [cursor=pointer]:
+                        - img
+                  - cell "CONNEXION PHOTOGRAPHY CONNEXION PHOTOGRAPHY" [ref=e2303]:
+                    - generic [ref=e2304]:
+                      - paragraph [ref=e2305]: CONNEXION PHOTOGRAPHY
+                      - paragraph [ref=e2306]: CONNEXION PHOTOGRAPHY
+                  - cell "Info@connexionphotography.com 2.25272e+012" [ref=e2307]:
+                    - generic [ref=e2308]:
+                      - generic [ref=e2309]: Info@connexionphotography.com
+                      - generic [ref=e2310]: "2.25272e+012"
+                  - cell "-" [ref=e2311]
+                  - cell "-" [ref=e2312]
+                  - cell "Actif" [ref=e2313]:
+                    - generic [ref=e2314]: Actif
+                  - cell [ref=e2315]:
+                    - button [ref=e2316] [cursor=pointer]:
+                      - img
+                - row "PREST-CHD-0165 CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE info@consulatrwandaci.org 0705057434 - - Actif" [ref=e2317]:
+                  - cell "PREST-CHD-0165" [ref=e2318]:
+                    - generic [ref=e2319]:
+                      - generic [ref=e2320]: PREST-CHD-0165
+                      - button [ref=e2321] [cursor=pointer]:
+                        - img
+                  - cell "CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE" [ref=e2322]:
+                    - generic [ref=e2323]:
+                      - paragraph [ref=e2324]: CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE
+                      - paragraph [ref=e2325]: CONSULAT HONORAIRE DU RWANDA EN COTE D'IVOIRE
+                  - cell "info@consulatrwandaci.org 0705057434" [ref=e2326]:
+                    - generic [ref=e2327]:
+                      - generic [ref=e2328]: info@consulatrwandaci.org
+                      - generic [ref=e2329]: "0705057434"
+                  - cell "-" [ref=e2330]
+                  - cell "-" [ref=e2331]
+                  - cell "Actif" [ref=e2332]:
+                    - generic [ref=e2333]: Actif
+                  - cell [ref=e2334]:
+                    - button [ref=e2335] [cursor=pointer]:
+                      - img
+                - row "PREST-CCD-0032 CORLAY COTE D'IVOIRE SA CORLAY COTE D'IVOIRE SA Info@corlay.ci - - Actif" [ref=e2336]:
+                  - cell "PREST-CCD-0032" [ref=e2337]:
+                    - generic [ref=e2338]:
+                      - generic [ref=e2339]: PREST-CCD-0032
+                      - button [ref=e2340] [cursor=pointer]:
+                        - img
+                  - cell "CORLAY COTE D'IVOIRE SA CORLAY COTE D'IVOIRE SA" [ref=e2341]:
+                    - generic [ref=e2342]:
+                      - paragraph [ref=e2343]: CORLAY COTE D'IVOIRE SA
+                      - paragraph [ref=e2344]: CORLAY COTE D'IVOIRE SA
+                  - cell "Info@corlay.ci" [ref=e2345]:
+                    - generic [ref=e2347]: Info@corlay.ci
+                  - cell "-" [ref=e2348]
+                  - cell "-" [ref=e2349]
+                  - cell "Actif" [ref=e2350]:
+                    - generic [ref=e2351]: Actif
+                  - cell [ref=e2352]:
+                    - button [ref=e2353] [cursor=pointer]:
+                      - img
+                - row "PREST-CP-0031 CORRECT PRINT CORECT PRINT regarsurimpression1@gmail.com 2.25071e+012 - - Actif" [ref=e2354]:
+                  - cell "PREST-CP-0031" [ref=e2355]:
+                    - generic [ref=e2356]:
+                      - generic [ref=e2357]: PREST-CP-0031
+                      - button [ref=e2358] [cursor=pointer]:
+                        - img
+                  - cell "CORRECT PRINT CORECT PRINT" [ref=e2359]:
+                    - generic [ref=e2360]:
+                      - paragraph [ref=e2361]: CORRECT PRINT
+                      - paragraph [ref=e2362]: CORECT PRINT
+                  - cell "regarsurimpression1@gmail.com 2.25071e+012" [ref=e2363]:
+                    - generic [ref=e2364]:
+                      - generic [ref=e2365]: regarsurimpression1@gmail.com
+                      - generic [ref=e2366]: "2.25071e+012"
+                  - cell "-" [ref=e2367]
+                  - cell "-" [ref=e2368]
+                  - cell "Actif" [ref=e2369]:
+                    - generic [ref=e2370]: Actif
+                  - cell [ref=e2371]:
+                    - button [ref=e2372] [cursor=pointer]:
+                      - img
+                - row "PREST-CDN-0177 COTE D'IVOIRE NORMALISATION CODINORM info@codinorm.ci 225 27 22 59 00 10 - - Actif" [ref=e2373]:
+                  - cell "PREST-CDN-0177" [ref=e2374]:
+                    - generic [ref=e2375]:
+                      - generic [ref=e2376]: PREST-CDN-0177
+                      - button [ref=e2377] [cursor=pointer]:
+                        - img
+                  - cell "COTE D'IVOIRE NORMALISATION CODINORM" [ref=e2378]:
+                    - generic [ref=e2379]:
+                      - paragraph [ref=e2380]: COTE D'IVOIRE NORMALISATION
+                      - paragraph [ref=e2381]: CODINORM
+                  - cell "info@codinorm.ci 225 27 22 59 00 10" [ref=e2382]:
+                    - generic [ref=e2383]:
+                      - generic [ref=e2384]: info@codinorm.ci
+                      - generic [ref=e2385]: 225 27 22 59 00 10
+                  - cell "-" [ref=e2386]
+                  - cell "-" [ref=e2387]
+                  - cell "Actif" [ref=e2388]:
+                    - generic [ref=e2389]: Actif
+                  - cell [ref=e2390]:
+                    - button [ref=e2391] [cursor=pointer]:
+                      - img
+                - row "PREST-CU-0258 COTISATION UITP UITP - - Actif" [ref=e2392]:
+                  - cell "PREST-CU-0258" [ref=e2393]:
+                    - generic [ref=e2394]:
+                      - generic [ref=e2395]: PREST-CU-0258
+                      - button [ref=e2396] [cursor=pointer]:
+                        - img
+                  - cell "COTISATION UITP UITP" [ref=e2397]:
+                    - generic [ref=e2398]:
+                      - paragraph [ref=e2399]: COTISATION UITP
+                      - paragraph [ref=e2400]: UITP
+                  - cell [ref=e2401]
+                  - cell "-" [ref=e2402]
+                  - cell "-" [ref=e2403]
+                  - cell "Actif" [ref=e2404]:
+                    - generic [ref=e2405]: Actif
+                  - cell [ref=e2406]:
+                    - button [ref=e2407] [cursor=pointer]:
+                      - img
+                - row "PREST-CMA-0385 CURSOR-CLAUD MAX-NEON AI CURSOR-CLAUD MAX-NEON AI NEANT NEANT - - Actif" [ref=e2408]:
+                  - cell "PREST-CMA-0385" [ref=e2409]:
+                    - generic [ref=e2410]:
+                      - generic [ref=e2411]: PREST-CMA-0385
+                      - button [ref=e2412] [cursor=pointer]:
+                        - img
+                  - cell "CURSOR-CLAUD MAX-NEON AI CURSOR-CLAUD MAX-NEON AI" [ref=e2413]:
+                    - generic [ref=e2414]:
+                      - paragraph [ref=e2415]: CURSOR-CLAUD MAX-NEON AI
+                      - paragraph [ref=e2416]: CURSOR-CLAUD MAX-NEON AI
+                  - cell "NEANT NEANT" [ref=e2417]:
+                    - generic [ref=e2418]:
+                      - generic [ref=e2419]: NEANT
+                      - generic [ref=e2420]: NEANT
+                  - cell "-" [ref=e2421]
+                  - cell "-" [ref=e2422]
+                  - cell "Actif" [ref=e2423]:
+                    - generic [ref=e2424]: Actif
+                  - cell [ref=e2425]:
+                    - button [ref=e2426] [cursor=pointer]:
+                      - img
+                - row "PREST-CG-0133 CYPHER GLOBAL CYPHER GLOBAL infos@cypherglobal.net 2721388006 - - Actif" [ref=e2427]:
+                  - cell "PREST-CG-0133" [ref=e2428]:
+                    - generic [ref=e2429]:
+                      - generic [ref=e2430]: PREST-CG-0133
+                      - button [ref=e2431] [cursor=pointer]:
+                        - img
+                  - cell "CYPHER GLOBAL CYPHER GLOBAL" [ref=e2432]:
+                    - generic [ref=e2433]:
+                      - paragraph [ref=e2434]: CYPHER GLOBAL
+                      - paragraph [ref=e2435]: CYPHER GLOBAL
+                  - cell "infos@cypherglobal.net 2721388006" [ref=e2436]:
+                    - generic [ref=e2437]:
+                      - generic [ref=e2438]: infos@cypherglobal.net
+                      - generic [ref=e2439]: "2721388006"
+                  - cell "-" [ref=e2440]
+                  - cell "-" [ref=e2441]
+                  - cell "Actif" [ref=e2442]:
+                    - generic [ref=e2443]: Actif
+                  - cell [ref=e2444]:
+                    - button [ref=e2445] [cursor=pointer]:
+                      - img
+                - row "PREST-DR-0378 D'KHAN RESORT D'KHAN RESORT contact@dkhanresort.com 0585889488 - - Actif" [ref=e2446]:
+                  - cell "PREST-DR-0378" [ref=e2447]:
+                    - generic [ref=e2448]:
+                      - generic [ref=e2449]: PREST-DR-0378
+                      - button [ref=e2450] [cursor=pointer]:
+                        - img
+                  - cell "D'KHAN RESORT D'KHAN RESORT" [ref=e2451]:
+                    - generic [ref=e2452]:
+                      - paragraph [ref=e2453]: D'KHAN RESORT
+                      - paragraph [ref=e2454]: D'KHAN RESORT
+                  - cell "contact@dkhanresort.com 0585889488" [ref=e2455]:
+                    - generic [ref=e2456]:
+                      - generic [ref=e2457]: contact@dkhanresort.com
+                      - generic [ref=e2458]: "0585889488"
+                  - cell "-" [ref=e2459]
+                  - cell "-" [ref=e2460]
+                  - cell "Actif" [ref=e2461]:
+                    - generic [ref=e2462]: Actif
+                  - cell [ref=e2463]:
+                    - button [ref=e2464] [cursor=pointer]:
+                      - img
+                - row "PREST-DA-0353 DATACONNECT AFRICA DATACONNECT AFRICA info@dataconnect.africa 2722548500 - - Actif" [ref=e2465]:
+                  - cell "PREST-DA-0353" [ref=e2466]:
+                    - generic [ref=e2467]:
+                      - generic [ref=e2468]: PREST-DA-0353
+                      - button [ref=e2469] [cursor=pointer]:
+                        - img
+                  - cell "DATACONNECT AFRICA DATACONNECT AFRICA" [ref=e2470]:
+                    - generic [ref=e2471]:
+                      - paragraph [ref=e2472]: DATACONNECT AFRICA
+                      - paragraph [ref=e2473]: DATACONNECT AFRICA
+                  - cell "info@dataconnect.africa 2722548500" [ref=e2474]:
+                    - generic [ref=e2475]:
+                      - generic [ref=e2476]: info@dataconnect.africa
+                      - generic [ref=e2477]: "2722548500"
+                  - cell "-" [ref=e2478]
+                  - cell "-" [ref=e2479]
+                  - cell "Actif" [ref=e2480]:
+                    - generic [ref=e2481]: Actif
+                  - cell [ref=e2482]:
+                    - button [ref=e2483] [cursor=pointer]:
+                      - img
+                - row "PREST-DC-0324 DELIOZ CONSULTING DELIOZ CONSULTING deliozgroup@gmailcom NEANT - - Actif" [ref=e2484]:
+                  - cell "PREST-DC-0324" [ref=e2485]:
+                    - generic [ref=e2486]:
+                      - generic [ref=e2487]: PREST-DC-0324
+                      - button [ref=e2488] [cursor=pointer]:
+                        - img
+                  - cell "DELIOZ CONSULTING DELIOZ CONSULTING" [ref=e2489]:
+                    - generic [ref=e2490]:
+                      - paragraph [ref=e2491]: DELIOZ CONSULTING
+                      - paragraph [ref=e2492]: DELIOZ CONSULTING
+                  - cell "deliozgroup@gmailcom NEANT" [ref=e2493]:
+                    - generic [ref=e2494]:
+                      - generic [ref=e2495]: deliozgroup@gmailcom
+                      - generic [ref=e2496]: NEANT
+                  - cell "-" [ref=e2497]
+                  - cell "-" [ref=e2498]
+                  - cell "Actif" [ref=e2499]:
+                    - generic [ref=e2500]: Actif
+                  - cell [ref=e2501]:
+                    - button [ref=e2502] [cursor=pointer]:
+                      - img
+                - row "PREST-DGE-0033 DES GATEAUX ET DU PAIN DES GATEAUX ET DU PAIN Desgateauxetdupain@hotmail.fr 2.25272e+012 - - Actif" [ref=e2503]:
+                  - cell "PREST-DGE-0033" [ref=e2504]:
+                    - generic [ref=e2505]:
+                      - generic [ref=e2506]: PREST-DGE-0033
+                      - button [ref=e2507] [cursor=pointer]:
+                        - img
+                  - cell "DES GATEAUX ET DU PAIN DES GATEAUX ET DU PAIN" [ref=e2508]:
+                    - generic [ref=e2509]:
+                      - paragraph [ref=e2510]: DES GATEAUX ET DU PAIN
+                      - paragraph [ref=e2511]: DES GATEAUX ET DU PAIN
+                  - cell "Desgateauxetdupain@hotmail.fr 2.25272e+012" [ref=e2512]:
+                    - generic [ref=e2513]:
+                      - generic [ref=e2514]: Desgateauxetdupain@hotmail.fr
+                      - generic [ref=e2515]: "2.25272e+012"
+                  - cell "-" [ref=e2516]
+                  - cell "-" [ref=e2517]
+                  - cell "Actif" [ref=e2518]:
+                    - generic [ref=e2519]: Actif
+                  - cell [ref=e2520]:
+                    - button [ref=e2521] [cursor=pointer]:
+                      - img
+                - row "PREST-DGI-0143 DGI DIRECTION GENERALE DES IMPOTS NC NC - - Actif" [ref=e2522]:
+                  - cell "PREST-DGI-0143" [ref=e2523]:
+                    - generic [ref=e2524]:
+                      - generic [ref=e2525]: PREST-DGI-0143
+                      - button [ref=e2526] [cursor=pointer]:
+                        - img
+                  - cell "DGI DIRECTION GENERALE DES IMPOTS" [ref=e2527]:
+                    - generic [ref=e2528]:
+                      - paragraph [ref=e2529]: DGI
+                      - paragraph [ref=e2530]: DIRECTION GENERALE DES IMPOTS
+                  - cell "NC NC" [ref=e2531]:
+                    - generic [ref=e2532]:
+                      - generic [ref=e2533]: NC
+                      - generic [ref=e2534]: NC
+                  - cell "-" [ref=e2535]
+                  - cell "-" [ref=e2536]
+                  - cell "Actif" [ref=e2537]:
+                    - generic [ref=e2538]: Actif
+                  - cell [ref=e2539]:
+                    - button [ref=e2540] [cursor=pointer]:
+                      - img
+                - row "MIG-0004 DGTTC NEANT - - Actif" [ref=e2541]:
+                  - cell "MIG-0004" [ref=e2542]:
+                    - generic [ref=e2543]:
+                      - generic [ref=e2544]: MIG-0004
+                      - button [ref=e2545] [cursor=pointer]:
+                        - img
+                  - cell "DGTTC" [ref=e2546]:
+                    - paragraph [ref=e2548]: DGTTC
+                  - cell "NEANT" [ref=e2549]:
+                    - generic [ref=e2551]: NEANT
+                  - cell "-" [ref=e2552]
+                  - cell "-" [ref=e2553]
+                  - cell "Actif" [ref=e2554]:
+                    - generic [ref=e2555]: Actif
+                  - cell [ref=e2556]:
+                    - button [ref=e2557] [cursor=pointer]:
+                      - img
+                - row "PREST-DE-0422 DHL EXPRESS DHL EXPRESS serge.anoh@dhl.com 21219999 - - Actif" [ref=e2558]:
+                  - cell "PREST-DE-0422" [ref=e2559]:
+                    - generic [ref=e2560]:
+                      - generic [ref=e2561]: PREST-DE-0422
+                      - button [ref=e2562] [cursor=pointer]:
+                        - img
+                  - cell "DHL EXPRESS DHL EXPRESS" [ref=e2563]:
+                    - generic [ref=e2564]:
+                      - paragraph [ref=e2565]: DHL EXPRESS
+                      - paragraph [ref=e2566]: DHL EXPRESS
+                  - cell "serge.anoh@dhl.com 21219999" [ref=e2567]:
+                    - generic [ref=e2568]:
+                      - generic [ref=e2569]: serge.anoh@dhl.com
+                      - generic [ref=e2570]: "21219999"
+                  - cell "-" [ref=e2571]
+                  - cell "-" [ref=e2572]
+                  - cell "Actif" [ref=e2573]:
+                    - generic [ref=e2574]: Actif
+                  - cell [ref=e2575]:
+                    - button [ref=e2576] [cursor=pointer]:
+                      - img
+                - row "PREST-DDC-0322 DIRECTION DU CADASTRE DIRECTION DU CADASTRE infodgi@gouv.ci 2720217026 - - Actif" [ref=e2577]:
+                  - cell "PREST-DDC-0322" [ref=e2578]:
+                    - generic [ref=e2579]:
+                      - generic [ref=e2580]: PREST-DDC-0322
+                      - button [ref=e2581] [cursor=pointer]:
+                        - img
+                  - cell "DIRECTION DU CADASTRE DIRECTION DU CADASTRE" [ref=e2582]:
+                    - generic [ref=e2583]:
+                      - paragraph [ref=e2584]: DIRECTION DU CADASTRE
+                      - paragraph [ref=e2585]: DIRECTION DU CADASTRE
+                  - cell "infodgi@gouv.ci 2720217026" [ref=e2586]:
+                    - generic [ref=e2587]:
+                      - generic [ref=e2588]: infodgi@gouv.ci
+                      - generic [ref=e2589]: "2720217026"
+                  - cell "-" [ref=e2590]
+                  - cell "-" [ref=e2591]
+                  - cell "Actif" [ref=e2592]:
+                    - generic [ref=e2593]: Actif
+                  - cell [ref=e2594]:
+                    - button [ref=e2595] [cursor=pointer]:
+                      - img
+                - row "PREST-DGD-0284 DIRECTION GENERALE DES TRANSPORTS TERRESTRES ET DE LA CIRCULATION ( DGTTC) DGTTC NEANT NEANT - - Actif" [ref=e2596]:
+                  - cell "PREST-DGD-0284" [ref=e2597]:
+                    - generic [ref=e2598]:
+                      - generic [ref=e2599]: PREST-DGD-0284
+                      - button [ref=e2600] [cursor=pointer]:
+                        - img
+                  - cell "DIRECTION GENERALE DES TRANSPORTS TERRESTRES ET DE LA CIRCULATION ( DGTTC) DGTTC" [ref=e2601]:
+                    - generic [ref=e2602]:
+                      - paragraph [ref=e2603]: DIRECTION GENERALE DES TRANSPORTS TERRESTRES ET DE LA CIRCULATION ( DGTTC)
+                      - paragraph [ref=e2604]: DGTTC
+                  - cell "NEANT NEANT" [ref=e2605]:
+                    - generic [ref=e2606]:
+                      - generic [ref=e2607]: NEANT
+                      - generic [ref=e2608]: NEANT
+                  - cell "-" [ref=e2609]
+                  - cell "-" [ref=e2610]
+                  - cell "Actif" [ref=e2611]:
+                    - generic [ref=e2612]: Actif
+                  - cell [ref=e2613]:
+                    - button [ref=e2614] [cursor=pointer]:
+                      - img
+                - row "PREST-DS-0150 DIRIGEANTS SOCIAUX DIRIGEANTS SOCIAUX NEA?T NEANT - - Actif" [ref=e2615]:
+                  - cell "PREST-DS-0150" [ref=e2616]:
+                    - generic [ref=e2617]:
+                      - generic [ref=e2618]: PREST-DS-0150
+                      - button [ref=e2619] [cursor=pointer]:
+                        - img
+                  - cell "DIRIGEANTS SOCIAUX DIRIGEANTS SOCIAUX" [ref=e2620]:
+                    - generic [ref=e2621]:
+                      - paragraph [ref=e2622]: DIRIGEANTS SOCIAUX
+                      - paragraph [ref=e2623]: DIRIGEANTS SOCIAUX
+                  - cell "NEA?T NEANT" [ref=e2624]:
+                    - generic [ref=e2625]:
+                      - generic [ref=e2626]: NEA?T
+                      - generic [ref=e2627]: NEANT
+                  - cell "-" [ref=e2628]
+                  - cell "-" [ref=e2629]
+                  - cell "Actif" [ref=e2630]:
+                    - generic [ref=e2631]: Actif
+                  - cell [ref=e2632]:
+                    - button [ref=e2633] [cursor=pointer]:
+                      - img
+                - row "PREST-DAD-0140 DISTRICT AUTONOME D'ABIDJAN DISTRICT AUTONOME D'ABIDJAN NC NC - - Actif" [ref=e2634]:
+                  - cell "PREST-DAD-0140" [ref=e2635]:
+                    - generic [ref=e2636]:
+                      - generic [ref=e2637]: PREST-DAD-0140
+                      - button [ref=e2638] [cursor=pointer]:
+                        - img
+                  - cell "DISTRICT AUTONOME D'ABIDJAN DISTRICT AUTONOME D'ABIDJAN" [ref=e2639]:
+                    - generic [ref=e2640]:
+                      - paragraph [ref=e2641]: DISTRICT AUTONOME D'ABIDJAN
+                      - paragraph [ref=e2642]: DISTRICT AUTONOME D'ABIDJAN
+                  - cell "NC NC" [ref=e2643]:
+                    - generic [ref=e2644]:
+                      - generic [ref=e2645]: NC
+                      - generic [ref=e2646]: NC
+                  - cell "-" [ref=e2647]
+                  - cell "-" [ref=e2648]
+                  - cell "Actif" [ref=e2649]:
+                    - generic [ref=e2650]: Actif
+                  - cell [ref=e2651]:
+                    - button [ref=e2652] [cursor=pointer]:
+                      - img
+                - row "PREST-DFD-0259 DIVERS FOURNISSEURS D'INVESTISSEMENT DIVERS FOURNISSEURS D'INVESTISSEMENT - - Actif" [ref=e2653]:
+                  - cell "PREST-DFD-0259" [ref=e2654]:
+                    - generic [ref=e2655]:
+                      - generic [ref=e2656]: PREST-DFD-0259
+                      - button [ref=e2657] [cursor=pointer]:
+                        - img
+                  - cell "DIVERS FOURNISSEURS D'INVESTISSEMENT DIVERS FOURNISSEURS D'INVESTISSEMENT" [ref=e2658]:
+                    - generic [ref=e2659]:
+                      - paragraph [ref=e2660]: DIVERS FOURNISSEURS D'INVESTISSEMENT
+                      - paragraph [ref=e2661]: DIVERS FOURNISSEURS D'INVESTISSEMENT
+                  - cell [ref=e2662]
+                  - cell "-" [ref=e2663]
+                  - cell "-" [ref=e2664]
+                  - cell "Actif" [ref=e2665]:
+                    - generic [ref=e2666]: Actif
+                  - cell [ref=e2667]:
+                    - button [ref=e2668] [cursor=pointer]:
+                      - img
+                - row "PREST-DD-0346 DIVINE DECOR DIVINE DECOR NEANT NEANT - - Actif" [ref=e2669]:
+                  - cell "PREST-DD-0346" [ref=e2670]:
+                    - generic [ref=e2671]:
+                      - generic [ref=e2672]: PREST-DD-0346
+                      - button [ref=e2673] [cursor=pointer]:
+                        - img
+                  - cell "DIVINE DECOR DIVINE DECOR" [ref=e2674]:
+                    - generic [ref=e2675]:
+                      - paragraph [ref=e2676]: DIVINE DECOR
+                      - paragraph [ref=e2677]: DIVINE DECOR
+                  - cell "NEANT NEANT" [ref=e2678]:
+                    - generic [ref=e2679]:
+                      - generic [ref=e2680]: NEANT
+                      - generic [ref=e2681]: NEANT
+                  - cell "-" [ref=e2682]
+                  - cell "-" [ref=e2683]
+                  - cell "Actif" [ref=e2684]:
+                    - generic [ref=e2685]: Actif
+                  - cell [ref=e2686]:
+                    - button [ref=e2687] [cursor=pointer]:
+                      - img
+                - row "PREST-DS-0246 DKYI SERVICES DKYI SERVICES NEANT NEANT - - Actif" [ref=e2688]:
+                  - cell "PREST-DS-0246" [ref=e2689]:
+                    - generic [ref=e2690]:
+                      - generic [ref=e2691]: PREST-DS-0246
+                      - button [ref=e2692] [cursor=pointer]:
+                        - img
+                  - cell "DKYI SERVICES DKYI SERVICES" [ref=e2693]:
+                    - generic [ref=e2694]:
+                      - paragraph [ref=e2695]: DKYI SERVICES
+                      - paragraph [ref=e2696]: DKYI SERVICES
+                  - cell "NEANT NEANT" [ref=e2697]:
+                    - generic [ref=e2698]:
+                      - generic [ref=e2699]: NEANT
+                      - generic [ref=e2700]: NEANT
+                  - cell "-" [ref=e2701]
+                  - cell "-" [ref=e2702]
+                  - cell "Actif" [ref=e2703]:
+                    - generic [ref=e2704]: Actif
+                  - cell [ref=e2705]:
+                    - button [ref=e2706] [cursor=pointer]:
+                      - img
+                - row "PREST-DA-0034 DLP ALU DLP ALU 7.77972e+008 - - Actif" [ref=e2707]:
+                  - cell "PREST-DA-0034" [ref=e2708]:
+                    - generic [ref=e2709]:
+                      - generic [ref=e2710]: PREST-DA-0034
+                      - button [ref=e2711] [cursor=pointer]:
+                        - img
+                  - cell "DLP ALU DLP ALU" [ref=e2712]:
+                    - generic [ref=e2713]:
+                      - paragraph [ref=e2714]: DLP ALU
+                      - paragraph [ref=e2715]: DLP ALU
+                  - cell "7.77972e+008" [ref=e2716]:
+                    - generic [ref=e2718]: "7.77972e+008"
+                  - cell "-" [ref=e2719]
+                  - cell "-" [ref=e2720]
+                  - cell "Actif" [ref=e2721]:
+                    - generic [ref=e2722]: Actif
+                  - cell [ref=e2723]:
+                    - button [ref=e2724] [cursor=pointer]:
+                      - img
+                - row "PREST-DI-0371 DMA INTERTAINMENT DMA INTERTAINMENT NEANT NEANT - - Actif" [ref=e2725]:
+                  - cell "PREST-DI-0371" [ref=e2726]:
+                    - generic [ref=e2727]:
+                      - generic [ref=e2728]: PREST-DI-0371
+                      - button [ref=e2729] [cursor=pointer]:
+                        - img
+                  - cell "DMA INTERTAINMENT DMA INTERTAINMENT" [ref=e2730]:
+                    - generic [ref=e2731]:
+                      - paragraph [ref=e2732]: DMA INTERTAINMENT
+                      - paragraph [ref=e2733]: DMA INTERTAINMENT
+                  - cell "NEANT NEANT" [ref=e2734]:
+                    - generic [ref=e2735]:
+                      - generic [ref=e2736]: NEANT
+                      - generic [ref=e2737]: NEANT
+                  - cell "-" [ref=e2738]
+                  - cell "-" [ref=e2739]
+                  - cell "Actif" [ref=e2740]:
+                    - generic [ref=e2741]: Actif
+                  - cell [ref=e2742]:
+                    - button [ref=e2743] [cursor=pointer]:
+                      - img
+                - row "PREST-DOO-0334 DOOWELL DOOWELL NEANT NEANT - - Actif" [ref=e2744]:
+                  - cell "PREST-DOO-0334" [ref=e2745]:
+                    - generic [ref=e2746]:
+                      - generic [ref=e2747]: PREST-DOO-0334
+                      - button [ref=e2748] [cursor=pointer]:
+                        - img
+                  - cell "DOOWELL DOOWELL" [ref=e2749]:
+                    - generic [ref=e2750]:
+                      - paragraph [ref=e2751]: DOOWELL
+                      - paragraph [ref=e2752]: DOOWELL
+                  - cell "NEANT NEANT" [ref=e2753]:
+                    - generic [ref=e2754]:
+                      - generic [ref=e2755]: NEANT
+                      - generic [ref=e2756]: NEANT
+                  - cell "-" [ref=e2757]
+                  - cell "-" [ref=e2758]
+                  - cell "Actif" [ref=e2759]:
+                    - generic [ref=e2760]: Actif
+                  - cell [ref=e2761]:
+                    - button [ref=e2762] [cursor=pointer]:
+                      - img
+                - row "PREST-DE-0125 DREAM EVENTS DREAM EVENTS dreamevents956@gmail.com 1.03795e+008 - - Actif" [ref=e2763]:
+                  - cell "PREST-DE-0125" [ref=e2764]:
+                    - generic [ref=e2765]:
+                      - generic [ref=e2766]: PREST-DE-0125
+                      - button [ref=e2767] [cursor=pointer]:
+                        - img
+                  - cell "DREAM EVENTS DREAM EVENTS" [ref=e2768]:
+                    - generic [ref=e2769]:
+                      - paragraph [ref=e2770]: DREAM EVENTS
+                      - paragraph [ref=e2771]: DREAM EVENTS
+                  - cell "dreamevents956@gmail.com 1.03795e+008" [ref=e2772]:
+                    - generic [ref=e2773]:
+                      - generic [ref=e2774]: dreamevents956@gmail.com
+                      - generic [ref=e2775]: "1.03795e+008"
+                  - cell "-" [ref=e2776]
+                  - cell "-" [ref=e2777]
+                  - cell "Actif" [ref=e2778]:
+                    - generic [ref=e2779]: Actif
+                  - cell [ref=e2780]:
+                    - button [ref=e2781] [cursor=pointer]:
+                      - img
+                - row "PREST-ECC-0219 ECC.CI ECC.CI eccgelti1@yahoo.fr 0707828522 - - Actif" [ref=e2782]:
+                  - cell "PREST-ECC-0219" [ref=e2783]:
+                    - generic [ref=e2784]:
+                      - generic [ref=e2785]: PREST-ECC-0219
+                      - button [ref=e2786] [cursor=pointer]:
+                        - img
+                  - cell "ECC.CI ECC.CI" [ref=e2787]:
+                    - generic [ref=e2788]:
+                      - paragraph [ref=e2789]: ECC.CI
+                      - paragraph [ref=e2790]: ECC.CI
+                  - cell "eccgelti1@yahoo.fr 0707828522" [ref=e2791]:
+                    - generic [ref=e2792]:
+                      - generic [ref=e2793]: eccgelti1@yahoo.fr
+                      - generic [ref=e2794]: "0707828522"
+                  - cell "-" [ref=e2795]
+                  - cell "-" [ref=e2796]
+                  - cell "Actif" [ref=e2797]:
+                    - generic [ref=e2798]: Actif
+                  - cell [ref=e2799]:
+                    - button [ref=e2800] [cursor=pointer]:
+                      - img
+                - row "PREST-ES-0130 ECO-CLAIR SARL ECO-CLAIR SARL Neant 2721372071 - - Actif" [ref=e2801]:
+                  - cell "PREST-ES-0130" [ref=e2802]:
+                    - generic [ref=e2803]:
+                      - generic [ref=e2804]: PREST-ES-0130
+                      - button [ref=e2805] [cursor=pointer]:
+                        - img
+                  - cell "ECO-CLAIR SARL ECO-CLAIR SARL" [ref=e2806]:
+                    - generic [ref=e2807]:
+                      - paragraph [ref=e2808]: ECO-CLAIR SARL
+                      - paragraph [ref=e2809]: ECO-CLAIR SARL
+                  - cell "Neant 2721372071" [ref=e2810]:
+                    - generic [ref=e2811]:
+                      - generic [ref=e2812]: Neant
+                      - generic [ref=e2813]: "2721372071"
+                  - cell "-" [ref=e2814]
+                  - cell "-" [ref=e2815]
+                  - cell "Actif" [ref=e2816]:
+                    - generic [ref=e2817]: Actif
+                  - cell [ref=e2818]:
+                    - button [ref=e2819] [cursor=pointer]:
+                      - img
+                - row "PREST-ES-0035 EGIB SECURITE EGIB SECURITE Infos@groupeegib.net 2.72242e+009 - - Actif" [ref=e2820]:
+                  - cell "PREST-ES-0035" [ref=e2821]:
+                    - generic [ref=e2822]:
+                      - generic [ref=e2823]: PREST-ES-0035
+                      - button [ref=e2824] [cursor=pointer]:
+                        - img
+                  - cell "EGIB SECURITE EGIB SECURITE" [ref=e2825]:
+                    - generic [ref=e2826]:
+                      - paragraph [ref=e2827]: EGIB SECURITE
+                      - paragraph [ref=e2828]: EGIB SECURITE
+                  - cell "Infos@groupeegib.net 2.72242e+009" [ref=e2829]:
+                    - generic [ref=e2830]:
+                      - generic [ref=e2831]: Infos@groupeegib.net
+                      - generic [ref=e2832]: "2.72242e+009"
+                  - cell "-" [ref=e2833]
+                  - cell "-" [ref=e2834]
+                  - cell "Actif" [ref=e2835]:
+                    - generic [ref=e2836]: Actif
+                  - cell [ref=e2837]:
+                    - button [ref=e2838] [cursor=pointer]:
+                      - img
+                - row "PREST-EA-0301 EMIRATES AIRLINES EMIRATES AIRLINES NEANT NEANT - - Actif" [ref=e2839]:
+                  - cell "PREST-EA-0301" [ref=e2840]:
+                    - generic [ref=e2841]:
+                      - generic [ref=e2842]: PREST-EA-0301
+                      - button [ref=e2843] [cursor=pointer]:
+                        - img
+                  - cell "EMIRATES AIRLINES EMIRATES AIRLINES" [ref=e2844]:
+                    - generic [ref=e2845]:
+                      - paragraph [ref=e2846]: EMIRATES AIRLINES
+                      - paragraph [ref=e2847]: EMIRATES AIRLINES
+                  - cell "NEANT NEANT" [ref=e2848]:
+                    - generic [ref=e2849]:
+                      - generic [ref=e2850]: NEANT
+                      - generic [ref=e2851]: NEANT
+                  - cell "-" [ref=e2852]
+                  - cell "-" [ref=e2853]
+                  - cell "Actif" [ref=e2854]:
+                    - generic [ref=e2855]: Actif
+                  - cell [ref=e2856]:
+                    - button [ref=e2857] [cursor=pointer]:
+                      - img
+                - row "PREST-EC-0036 EMMA CAB EMMA CAB Emmacab92@yahoo.fr 08 92 97 59 71 - - Actif" [ref=e2858]:
+                  - cell "PREST-EC-0036" [ref=e2859]:
+                    - generic [ref=e2860]:
+                      - generic [ref=e2861]: PREST-EC-0036
+                      - button [ref=e2862] [cursor=pointer]:
+                        - img
+                  - cell "EMMA CAB EMMA CAB" [ref=e2863]:
+                    - generic [ref=e2864]:
+                      - paragraph [ref=e2865]: EMMA CAB
+                      - paragraph [ref=e2866]: EMMA CAB
+                  - cell "Emmacab92@yahoo.fr 08 92 97 59 71" [ref=e2867]:
+                    - generic [ref=e2868]:
+                      - generic [ref=e2869]: Emmacab92@yahoo.fr
+                      - generic [ref=e2870]: 08 92 97 59 71
+                  - cell "-" [ref=e2871]
+                  - cell "-" [ref=e2872]
+                  - cell "Actif" [ref=e2873]:
+                    - generic [ref=e2874]: Actif
+                  - cell [ref=e2875]:
+                    - button [ref=e2876] [cursor=pointer]:
+                      - img
+                - row "PREST-ESM-0153 ENGINE SYSTEM MOTORS ENGINE SYSTEM MOTORS engiesystemmotors@gmail.com 0707945515 - - Actif" [ref=e2877]:
+                  - cell "PREST-ESM-0153" [ref=e2878]:
+                    - generic [ref=e2879]:
+                      - generic [ref=e2880]: PREST-ESM-0153
+                      - button [ref=e2881] [cursor=pointer]:
+                        - img
+                  - cell "ENGINE SYSTEM MOTORS ENGINE SYSTEM MOTORS" [ref=e2882]:
+                    - generic [ref=e2883]:
+                      - paragraph [ref=e2884]: ENGINE SYSTEM MOTORS
+                      - paragraph [ref=e2885]: ENGINE SYSTEM MOTORS
+                  - cell "engiesystemmotors@gmail.com 0707945515" [ref=e2886]:
+                    - generic [ref=e2887]:
+                      - generic [ref=e2888]: engiesystemmotors@gmail.com
+                      - generic [ref=e2889]: "0707945515"
+                  - cell "-" [ref=e2890]
+                  - cell "-" [ref=e2891]
+                  - cell "Actif" [ref=e2892]:
+                    - generic [ref=e2893]: Actif
+                  - cell [ref=e2894]:
+                    - button [ref=e2895] [cursor=pointer]:
+                      - img
+                - row "PREST-EG-0373 ENTREPRISE GCIS ENTREPRISE GCIS NEANT NEANT - - Actif" [ref=e2896]:
+                  - cell "PREST-EG-0373" [ref=e2897]:
+                    - generic [ref=e2898]:
+                      - generic [ref=e2899]: PREST-EG-0373
+                      - button [ref=e2900] [cursor=pointer]:
+                        - img
+                  - cell "ENTREPRISE GCIS ENTREPRISE GCIS" [ref=e2901]:
+                    - generic [ref=e2902]:
+                      - paragraph [ref=e2903]: ENTREPRISE GCIS
+                      - paragraph [ref=e2904]: ENTREPRISE GCIS
+                  - cell "NEANT NEANT" [ref=e2905]:
+                    - generic [ref=e2906]:
+                      - generic [ref=e2907]: NEANT
+                      - generic [ref=e2908]: NEANT
+                  - cell "-" [ref=e2909]
+                  - cell "-" [ref=e2910]
+                  - cell "Actif" [ref=e2911]:
+                    - generic [ref=e2912]: Actif
+                  - cell [ref=e2913]:
+                    - button [ref=e2914] [cursor=pointer]:
+                      - img
+                - row "PREST-ELF-0389 ENTREPRISE LAGAZE FONGBE ENTREPRISE LAGAZE FONGBE NEANT 0153957743 - - Actif" [ref=e2915]:
+                  - cell "PREST-ELF-0389" [ref=e2916]:
+                    - generic [ref=e2917]:
+                      - generic [ref=e2918]: PREST-ELF-0389
+                      - button [ref=e2919] [cursor=pointer]:
+                        - img
+                  - cell "ENTREPRISE LAGAZE FONGBE ENTREPRISE LAGAZE FONGBE" [ref=e2920]:
+                    - generic [ref=e2921]:
+                      - paragraph [ref=e2922]: ENTREPRISE LAGAZE FONGBE
+                      - paragraph [ref=e2923]: ENTREPRISE LAGAZE FONGBE
+                  - cell "NEANT 0153957743" [ref=e2924]:
+                    - generic [ref=e2925]:
+                      - generic [ref=e2926]: NEANT
+                      - generic [ref=e2927]: "0153957743"
+                  - cell "-" [ref=e2928]
+                  - cell "-" [ref=e2929]
+                  - cell "Actif" [ref=e2930]:
+                    - generic [ref=e2931]: Actif
+                  - cell [ref=e2932]:
+                    - button [ref=e2933] [cursor=pointer]:
+                      - img
+                - row "PREST-EDV-0292 ENTRETIEN DE VEHICULE(LAVAGE) ENTRETIEN DE VEHICULE(LAVAGE) NEANT ARTI - - Actif" [ref=e2934]:
+                  - cell "PREST-EDV-0292" [ref=e2935]:
+                    - generic [ref=e2936]:
+                      - generic [ref=e2937]: PREST-EDV-0292
+                      - button [ref=e2938] [cursor=pointer]:
+                        - img
+                  - cell "ENTRETIEN DE VEHICULE(LAVAGE) ENTRETIEN DE VEHICULE(LAVAGE)" [ref=e2939]:
+                    - generic [ref=e2940]:
+                      - paragraph [ref=e2941]: ENTRETIEN DE VEHICULE(LAVAGE)
+                      - paragraph [ref=e2942]: ENTRETIEN DE VEHICULE(LAVAGE)
+                  - cell "NEANT ARTI" [ref=e2943]:
+                    - generic [ref=e2944]:
+                      - generic [ref=e2945]: NEANT
+                      - generic [ref=e2946]: ARTI
+                  - cell "-" [ref=e2947]
+                  - cell "-" [ref=e2948]
+                  - cell "Actif" [ref=e2949]:
+                    - generic [ref=e2950]: Actif
+                  - cell [ref=e2951]:
+                    - button [ref=e2952] [cursor=pointer]:
+                      - img
+                - row "PREST-EY-0166 ESPACE YEMAD ESPACE YEMAD espaceyemad@gmail.com 2722436016 - - Actif" [ref=e2953]:
+                  - cell "PREST-EY-0166" [ref=e2954]:
+                    - generic [ref=e2955]:
+                      - generic [ref=e2956]: PREST-EY-0166
+                      - button [ref=e2957] [cursor=pointer]:
+                        - img
+                  - cell "ESPACE YEMAD ESPACE YEMAD" [ref=e2958]:
+                    - generic [ref=e2959]:
+                      - paragraph [ref=e2960]: ESPACE YEMAD
+                      - paragraph [ref=e2961]: ESPACE YEMAD
+                  - cell "espaceyemad@gmail.com 2722436016" [ref=e2962]:
+                    - generic [ref=e2963]:
+                      - generic [ref=e2964]: espaceyemad@gmail.com
+                      - generic [ref=e2965]: "2722436016"
+                  - cell "-" [ref=e2966]
+                  - cell "-" [ref=e2967]
+                  - cell "Actif" [ref=e2968]:
+                    - generic [ref=e2969]: Actif
+                  - cell [ref=e2970]:
+                    - button [ref=e2971] [cursor=pointer]:
+                      - img
+                - row "PREST-ES-0250 ETABLISSEMENT SN ETABLISSEMENT SN NEANT 0747352197 - - Actif" [ref=e2972]:
+                  - cell "PREST-ES-0250" [ref=e2973]:
+                    - generic [ref=e2974]:
+                      - generic [ref=e2975]: PREST-ES-0250
+                      - button [ref=e2976] [cursor=pointer]:
+                        - img
+                  - cell "ETABLISSEMENT SN ETABLISSEMENT SN" [ref=e2977]:
+                    - generic [ref=e2978]:
+                      - paragraph [ref=e2979]: ETABLISSEMENT SN
+                      - paragraph [ref=e2980]: ETABLISSEMENT SN
+                  - cell "NEANT 0747352197" [ref=e2981]:
+                    - generic [ref=e2982]:
+                      - generic [ref=e2983]: NEANT
+                      - generic [ref=e2984]: "0747352197"
+                  - cell "-" [ref=e2985]
+                  - cell "-" [ref=e2986]
+                  - cell "Actif" [ref=e2987]:
+                    - generic [ref=e2988]: Actif
+                  - cell [ref=e2989]:
+                    - button [ref=e2990] [cursor=pointer]:
+                      - img
+                - row "PREST-EB-0237 ETIC BTP ETIC BTP groupetic@gmail.com +225 01 01 33 89 87 - - Actif" [ref=e2991]:
+                  - cell "PREST-EB-0237" [ref=e2992]:
+                    - generic [ref=e2993]:
+                      - generic [ref=e2994]: PREST-EB-0237
+                      - button [ref=e2995] [cursor=pointer]:
+                        - img
+                  - cell "ETIC BTP ETIC BTP" [ref=e2996]:
+                    - generic [ref=e2997]:
+                      - paragraph [ref=e2998]: ETIC BTP
+                      - paragraph [ref=e2999]: ETIC BTP
+                  - cell "groupetic@gmail.com +225 01 01 33 89 87" [ref=e3000]:
+                    - generic [ref=e3001]:
+                      - generic [ref=e3002]: groupetic@gmail.com
+                      - generic [ref=e3003]: +225 01 01 33 89 87
+                  - cell "-" [ref=e3004]
+                  - cell "-" [ref=e3005]
+                  - cell "Actif" [ref=e3006]:
+                    - generic [ref=e3007]: Actif
+                  - cell [ref=e3008]:
+                    - button [ref=e3009] [cursor=pointer]:
+                      - img
+                - row "PREST-ES-0037 ETRACON SARL ETRACON SARL Etraconci@gmail.com 7.08697e+008 - - Actif" [ref=e3010]:
+                  - cell "PREST-ES-0037" [ref=e3011]:
+                    - generic [ref=e3012]:
+                      - generic [ref=e3013]: PREST-ES-0037
+                      - button [ref=e3014] [cursor=pointer]:
+                        - img
+                  - cell "ETRACON SARL ETRACON SARL" [ref=e3015]:
+                    - generic [ref=e3016]:
+                      - paragraph [ref=e3017]: ETRACON SARL
+                      - paragraph [ref=e3018]: ETRACON SARL
+                  - cell "Etraconci@gmail.com 7.08697e+008" [ref=e3019]:
+                    - generic [ref=e3020]:
+                      - generic [ref=e3021]: Etraconci@gmail.com
+                      - generic [ref=e3022]: "7.08697e+008"
+                  - cell "-" [ref=e3023]
+                  - cell "-" [ref=e3024]
+                  - cell "Actif" [ref=e3025]:
+                    - generic [ref=e3026]: Actif
+                  - cell [ref=e3027]:
+                    - button [ref=e3028] [cursor=pointer]:
+                      - img
+                - row "PREST-EA-0038 ETS AIDA ETS AIDA Toursandtravels@etsaida.net NEANT - - Actif" [ref=e3029]:
+                  - cell "PREST-EA-0038" [ref=e3030]:
+                    - generic [ref=e3031]:
+                      - generic [ref=e3032]: PREST-EA-0038
+                      - button [ref=e3033] [cursor=pointer]:
+                        - img
+                  - cell "ETS AIDA ETS AIDA" [ref=e3034]:
+                    - generic [ref=e3035]:
+                      - paragraph [ref=e3036]: ETS AIDA
+                      - paragraph [ref=e3037]: ETS AIDA
+                  - cell "Toursandtravels@etsaida.net NEANT" [ref=e3038]:
+                    - generic [ref=e3039]:
+                      - generic [ref=e3040]: Toursandtravels@etsaida.net
+                      - generic [ref=e3041]: NEANT
+                  - cell "-" [ref=e3042]
+                  - cell "-" [ref=e3043]
+                  - cell "Actif" [ref=e3044]:
+                    - generic [ref=e3045]: Actif
+                  - cell [ref=e3046]:
+                    - button [ref=e3047] [cursor=pointer]:
+                      - img
+                - row "PREST-EE-0039 ETS ETACOM ETS ETACOM 2.25272e+012 - - Actif" [ref=e3048]:
+                  - cell "PREST-EE-0039" [ref=e3049]:
+                    - generic [ref=e3050]:
+                      - generic [ref=e3051]: PREST-EE-0039
+                      - button [ref=e3052] [cursor=pointer]:
+                        - img
+                  - cell "ETS ETACOM ETS ETACOM" [ref=e3053]:
+                    - generic [ref=e3054]:
+                      - paragraph [ref=e3055]: ETS ETACOM
+                      - paragraph [ref=e3056]: ETS ETACOM
+                  - cell "2.25272e+012" [ref=e3057]:
+                    - generic [ref=e3059]: "2.25272e+012"
+                  - cell "-" [ref=e3060]
+                  - cell "-" [ref=e3061]
+                  - cell "Actif" [ref=e3062]:
+                    - generic [ref=e3063]: Actif
+                  - cell [ref=e3064]:
+                    - button [ref=e3065] [cursor=pointer]:
+                      - img
+                - row "PREST-EJS-0289 ETS JEHOVAH-JIREH SARL ETS JEHOVAH-JIREH SARL NEANT 0749106302 - - Actif" [ref=e3066]:
+                  - cell "PREST-EJS-0289" [ref=e3067]:
+                    - generic [ref=e3068]:
+                      - generic [ref=e3069]: PREST-EJS-0289
+                      - button [ref=e3070] [cursor=pointer]:
+                        - img
+                  - cell "ETS JEHOVAH-JIREH SARL ETS JEHOVAH-JIREH SARL" [ref=e3071]:
+                    - generic [ref=e3072]:
+                      - paragraph [ref=e3073]: ETS JEHOVAH-JIREH SARL
+                      - paragraph [ref=e3074]: ETS JEHOVAH-JIREH SARL
+                  - cell "NEANT 0749106302" [ref=e3075]:
+                    - generic [ref=e3076]:
+                      - generic [ref=e3077]: NEANT
+                      - generic [ref=e3078]: "0749106302"
+                  - cell "-" [ref=e3079]
+                  - cell "-" [ref=e3080]
+                  - cell "Actif" [ref=e3081]:
+                    - generic [ref=e3082]: Actif
+                  - cell [ref=e3083]:
+                    - button [ref=e3084] [cursor=pointer]:
+                      - img
+                - row "PREST-EOF-0288 ETS OUVRIER & FONGBE ETS OUVRIER FONGBE NEANT 0153957743 - - Actif" [ref=e3085]:
+                  - cell "PREST-EOF-0288" [ref=e3086]:
+                    - generic [ref=e3087]:
+                      - generic [ref=e3088]: PREST-EOF-0288
+                      - button [ref=e3089] [cursor=pointer]:
+                        - img
+                  - cell "ETS OUVRIER & FONGBE ETS OUVRIER FONGBE" [ref=e3090]:
+                    - generic [ref=e3091]:
+                      - paragraph [ref=e3092]: ETS OUVRIER & FONGBE
+                      - paragraph [ref=e3093]: ETS OUVRIER FONGBE
+                  - cell "NEANT 0153957743" [ref=e3094]:
+                    - generic [ref=e3095]:
+                      - generic [ref=e3096]: NEANT
+                      - generic [ref=e3097]: "0153957743"
+                  - cell "-" [ref=e3098]
+                  - cell "-" [ref=e3099]
+                  - cell "Actif" [ref=e3100]:
+                    - generic [ref=e3101]: Actif
+                  - cell [ref=e3102]:
+                    - button [ref=e3103] [cursor=pointer]:
+                      - img
+                - row "PREST-EOD-0244 ETS OUVRIER DIARRA & FONGBE ETS OUVRIER DIARRA & FONGBE NEANT 0153957743 - - Actif" [ref=e3104]:
+                  - cell "PREST-EOD-0244" [ref=e3105]:
+                    - generic [ref=e3106]:
+                      - generic [ref=e3107]: PREST-EOD-0244
+                      - button [ref=e3108] [cursor=pointer]:
+                        - img
+                  - cell "ETS OUVRIER DIARRA & FONGBE ETS OUVRIER DIARRA & FONGBE" [ref=e3109]:
+                    - generic [ref=e3110]:
+                      - paragraph [ref=e3111]: ETS OUVRIER DIARRA & FONGBE
+                      - paragraph [ref=e3112]: ETS OUVRIER DIARRA & FONGBE
+                  - cell "NEANT 0153957743" [ref=e3113]:
+                    - generic [ref=e3114]:
+                      - generic [ref=e3115]: NEANT
+                      - generic [ref=e3116]: "0153957743"
+                  - cell "-" [ref=e3117]
+                  - cell "-" [ref=e3118]
+                  - cell "Actif" [ref=e3119]:
+                    - generic [ref=e3120]: Actif
+                  - cell [ref=e3121]:
+                    - button [ref=e3122] [cursor=pointer]:
+                      - img
+                - row "PREST-EDM-0383 ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA NEANT .27 22 28 36 23 - - Actif" [ref=e3123]:
+                  - cell "PREST-EDM-0383" [ref=e3124]:
+                    - generic [ref=e3125]:
+                      - generic [ref=e3126]: PREST-EDM-0383
+                      - button [ref=e3127] [cursor=pointer]:
+                        - img
+                  - cell "ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA" [ref=e3128]:
+                    - generic [ref=e3129]:
+                      - paragraph [ref=e3130]: ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA
+                      - paragraph [ref=e3131]: ETUDE DE MAITRE COULIBALY YOH KHADIDIA NOURA
+                  - cell "NEANT .27 22 28 36 23" [ref=e3132]:
+                    - generic [ref=e3133]:
+                      - generic [ref=e3134]: NEANT
+                      - generic [ref=e3135]: .27 22 28 36 23
+                  - cell "-" [ref=e3136]
+                  - cell "-" [ref=e3137]
+                  - cell "Actif" [ref=e3138]:
+                    - generic [ref=e3139]: Actif
+                  - cell [ref=e3140]:
+                    - button [ref=e3141] [cursor=pointer]:
+                      - img
+                - row "PREST-EDM-0331 ETUDE DE MAITRE KOUAME NGUESSAN CHARLES ETUDE DE MAITRE KOUAME NGUESSAN CHARLES etudekouame@gmail.com 2722598333 - - Actif" [ref=e3142]:
+                  - cell "PREST-EDM-0331" [ref=e3143]:
+                    - generic [ref=e3144]:
+                      - generic [ref=e3145]: PREST-EDM-0331
+                      - button [ref=e3146] [cursor=pointer]:
+                        - img
+                  - cell "ETUDE DE MAITRE KOUAME NGUESSAN CHARLES ETUDE DE MAITRE KOUAME NGUESSAN CHARLES" [ref=e3147]:
+                    - generic [ref=e3148]:
+                      - paragraph [ref=e3149]: ETUDE DE MAITRE KOUAME NGUESSAN CHARLES
+                      - paragraph [ref=e3150]: ETUDE DE MAITRE KOUAME NGUESSAN CHARLES
+                  - cell "etudekouame@gmail.com 2722598333" [ref=e3151]:
+                    - generic [ref=e3152]:
+                      - generic [ref=e3153]: etudekouame@gmail.com
+                      - generic [ref=e3154]: "2722598333"
+                  - cell "-" [ref=e3155]
+                  - cell "-" [ref=e3156]
+                  - cell "Actif" [ref=e3157]:
+                    - generic [ref=e3158]: Actif
+                  - cell [ref=e3159]:
+                    - button [ref=e3160] [cursor=pointer]:
+                      - img
+                - row "PREST-EDM-0180 ETUDE DE MAITRE ORE GROGUHE SANDRINE ETUDE DE MAITRE ORE GROGUHE SANDRINE meoregsandrine4b@notaire.ci 0708060957 - - Actif" [ref=e3161]:
+                  - cell "PREST-EDM-0180" [ref=e3162]:
+                    - generic [ref=e3163]:
+                      - generic [ref=e3164]: PREST-EDM-0180
+                      - button [ref=e3165] [cursor=pointer]:
+                        - img
+                  - cell "ETUDE DE MAITRE ORE GROGUHE SANDRINE ETUDE DE MAITRE ORE GROGUHE SANDRINE" [ref=e3166]:
+                    - generic [ref=e3167]:
+                      - paragraph [ref=e3168]: ETUDE DE MAITRE ORE GROGUHE SANDRINE
+                      - paragraph [ref=e3169]: ETUDE DE MAITRE ORE GROGUHE SANDRINE
+                  - cell "meoregsandrine4b@notaire.ci 0708060957" [ref=e3170]:
+                    - generic [ref=e3171]:
+                      - generic [ref=e3172]: meoregsandrine4b@notaire.ci
+                      - generic [ref=e3173]: "0708060957"
+                  - cell "-" [ref=e3174]
+                  - cell "-" [ref=e3175]
+                  - cell "Actif" [ref=e3176]:
+                    - generic [ref=e3177]: Actif
+                  - cell [ref=e3178]:
+                    - button [ref=e3179] [cursor=pointer]:
+                      - img
+                - row "PREST-EDM-0391 ETUDE DE Me MANGOUA CHARLOTTE YOLANDE ETUDE DE Me MANGOUA CHARLOTTE YOLANDE officemangouaey@notaire.ci 2720214581 - - Actif" [ref=e3180]:
+                  - cell "PREST-EDM-0391" [ref=e3181]:
+                    - generic [ref=e3182]:
+                      - generic [ref=e3183]: PREST-EDM-0391
+                      - button [ref=e3184] [cursor=pointer]:
+                        - img
+                  - cell "ETUDE DE Me MANGOUA CHARLOTTE YOLANDE ETUDE DE Me MANGOUA CHARLOTTE YOLANDE" [ref=e3185]:
+                    - generic [ref=e3186]:
+                      - paragraph [ref=e3187]: ETUDE DE Me MANGOUA CHARLOTTE YOLANDE
+                      - paragraph [ref=e3188]: ETUDE DE Me MANGOUA CHARLOTTE YOLANDE
+                  - cell "officemangouaey@notaire.ci 2720214581" [ref=e3189]:
+                    - generic [ref=e3190]:
+                      - generic [ref=e3191]: officemangouaey@notaire.ci
+                      - generic [ref=e3192]: "2720214581"
+                  - cell "-" [ref=e3193]
+                  - cell "-" [ref=e3194]
+                  - cell "Actif" [ref=e3195]:
+                    - generic [ref=e3196]: Actif
+                  - cell [ref=e3197]:
+                    - button [ref=e3198] [cursor=pointer]:
+                      - img
+                - row "PREST-EDM-0179 ETUDE DE Me ORE G. SANDRINE ETUDE DE Me ORE G. SANDRINE meoregsandrine4b@gmail.com 0171514751 - - Actif" [ref=e3199]:
+                  - cell "PREST-EDM-0179" [ref=e3200]:
+                    - generic [ref=e3201]:
+                      - generic [ref=e3202]: PREST-EDM-0179
+                      - button [ref=e3203] [cursor=pointer]:
+                        - img
+                  - cell "ETUDE DE Me ORE G. SANDRINE ETUDE DE Me ORE G. SANDRINE" [ref=e3204]:
+                    - generic [ref=e3205]:
+                      - paragraph [ref=e3206]: ETUDE DE Me ORE G. SANDRINE
+                      - paragraph [ref=e3207]: ETUDE DE Me ORE G. SANDRINE
+                  - cell "meoregsandrine4b@gmail.com 0171514751" [ref=e3208]:
+                    - generic [ref=e3209]:
+                      - generic [ref=e3210]: meoregsandrine4b@gmail.com
+                      - generic [ref=e3211]: "0171514751"
+                  - cell "-" [ref=e3212]
+                  - cell "-" [ref=e3213]
+                  - cell "Actif" [ref=e3214]:
+                    - generic [ref=e3215]: Actif
+                  - cell [ref=e3216]:
+                    - button [ref=e3217] [cursor=pointer]:
+                      - img
+                - row "PREST-EH-0408 EULIS HOTEL EULIS HOTEL NEANT 0787770377 - - Actif" [ref=e3218]:
+                  - cell "PREST-EH-0408" [ref=e3219]:
+                    - generic [ref=e3220]:
+                      - generic [ref=e3221]: PREST-EH-0408
+                      - button [ref=e3222] [cursor=pointer]:
+                        - img
+                  - cell "EULIS HOTEL EULIS HOTEL" [ref=e3223]:
+                    - generic [ref=e3224]:
+                      - paragraph [ref=e3225]: EULIS HOTEL
+                      - paragraph [ref=e3226]: EULIS HOTEL
+                  - cell "NEANT 0787770377" [ref=e3227]:
+                    - generic [ref=e3228]:
+                      - generic [ref=e3229]: NEANT
+                      - generic [ref=e3230]: "0787770377"
+                  - cell "-" [ref=e3231]
+                  - cell "-" [ref=e3232]
+                  - cell "Actif" [ref=e3233]:
+                    - generic [ref=e3234]: Actif
+                  - cell [ref=e3235]:
+                    - button [ref=e3236] [cursor=pointer]:
+                      - img
+                - row "PREST-EUR-0040 EUROPCAR EUROPCAR europcar.tmci@tractafric.com 2.72175e+009 - - Actif" [ref=e3237]:
+                  - cell "PREST-EUR-0040" [ref=e3238]:
+                    - generic [ref=e3239]:
+                      - generic [ref=e3240]: PREST-EUR-0040
+                      - button [ref=e3241] [cursor=pointer]:
+                        - img
+                  - cell "EUROPCAR EUROPCAR" [ref=e3242]:
+                    - generic [ref=e3243]:
+                      - paragraph [ref=e3244]: EUROPCAR
+                      - paragraph [ref=e3245]: EUROPCAR
+                  - cell "europcar.tmci@tractafric.com 2.72175e+009" [ref=e3246]:
+                    - generic [ref=e3247]:
+                      - generic [ref=e3248]: europcar.tmci@tractafric.com
+                      - generic [ref=e3249]: "2.72175e+009"
+                  - cell "-" [ref=e3250]
+                  - cell "-" [ref=e3251]
+                  - cell "Actif" [ref=e3252]:
+                    - generic [ref=e3253]: Actif
+                  - cell [ref=e3254]:
+                    - button [ref=e3255] [cursor=pointer]:
+                      - img
+                - row "PREST-EMS-0303 EVIS MULTI SERVICES EVENT EVIS MULTI SERVICES EVENT NEANT NEANT - - Actif" [ref=e3256]:
+                  - cell "PREST-EMS-0303" [ref=e3257]:
+                    - generic [ref=e3258]:
+                      - generic [ref=e3259]: PREST-EMS-0303
+                      - button [ref=e3260] [cursor=pointer]:
+                        - img
+                  - cell "EVIS MULTI SERVICES EVENT EVIS MULTI SERVICES EVENT" [ref=e3261]:
+                    - generic [ref=e3262]:
+                      - paragraph [ref=e3263]: EVIS MULTI SERVICES EVENT
+                      - paragraph [ref=e3264]: EVIS MULTI SERVICES EVENT
+                  - cell "NEANT NEANT" [ref=e3265]:
+                    - generic [ref=e3266]:
+                      - generic [ref=e3267]: NEANT
+                      - generic [ref=e3268]: NEANT
+                  - cell "-" [ref=e3269]
+                  - cell "-" [ref=e3270]
+                  - cell "Actif" [ref=e3271]:
+                    - generic [ref=e3272]: Actif
+                  - cell [ref=e3273]:
+                    - button [ref=e3274] [cursor=pointer]:
+                      - img
+                - row "MIG-0005 EXCELSIOR CONSULANTS CONSEILS ET AUDITEURS ASSOCIES (225) 27 22 43 04 81 - - Actif" [ref=e3275]:
+                  - cell "MIG-0005" [ref=e3276]:
+                    - generic [ref=e3277]:
+                      - generic [ref=e3278]: MIG-0005
+                      - button [ref=e3279] [cursor=pointer]:
+                        - img
+                  - cell "EXCELSIOR CONSULANTS CONSEILS ET AUDITEURS ASSOCIES" [ref=e3280]:
+                    - paragraph [ref=e3282]: EXCELSIOR CONSULANTS CONSEILS ET AUDITEURS ASSOCIES
+                  - cell "(225) 27 22 43 04 81" [ref=e3283]:
+                    - generic [ref=e3285]: (225) 27 22 43 04 81
+                  - cell "-" [ref=e3286]
+                  - cell "-" [ref=e3287]
+                  - cell "Actif" [ref=e3288]:
+                    - generic [ref=e3289]: Actif
+                  - cell [ref=e3290]:
+                    - button [ref=e3291] [cursor=pointer]:
+                      - img
+                - row "PREST-ECF-0041 EXFI CONSULTING FIRM EXFI CONSULTING FIRM Exfi.onsulting@gmail.com 2.25075e+012 - - Actif" [ref=e3292]:
+                  - cell "PREST-ECF-0041" [ref=e3293]:
+                    - generic [ref=e3294]:
+                      - generic [ref=e3295]: PREST-ECF-0041
+                      - button [ref=e3296] [cursor=pointer]:
+                        - img
+                  - cell "EXFI CONSULTING FIRM EXFI CONSULTING FIRM" [ref=e3297]:
+                    - generic [ref=e3298]:
+                      - paragraph [ref=e3299]: EXFI CONSULTING FIRM
+                      - paragraph [ref=e3300]: EXFI CONSULTING FIRM
+                  - cell "Exfi.onsulting@gmail.com 2.25075e+012" [ref=e3301]:
+                    - generic [ref=e3302]:
+                      - generic [ref=e3303]: Exfi.onsulting@gmail.com
+                      - generic [ref=e3304]: "2.25075e+012"
+                  - cell "-" [ref=e3305]
+                  - cell "-" [ref=e3306]
+                  - cell "Actif" [ref=e3307]:
+                    - generic [ref=e3308]: Actif
+                  - cell [ref=e3309]:
+                    - button [ref=e3310] [cursor=pointer]:
+                      - img
+                - row "PREST-EL-0340 EXPERTISE LOCALE EXPERTISE LOCALE info@expertiselocale.com 0143958753 - - Actif" [ref=e3311]:
+                  - cell "PREST-EL-0340" [ref=e3312]:
+                    - generic [ref=e3313]:
+                      - generic [ref=e3314]: PREST-EL-0340
+                      - button [ref=e3315] [cursor=pointer]:
+                        - img
+                  - cell "EXPERTISE LOCALE EXPERTISE LOCALE" [ref=e3316]:
+                    - generic [ref=e3317]:
+                      - paragraph [ref=e3318]: EXPERTISE LOCALE
+                      - paragraph [ref=e3319]: EXPERTISE LOCALE
+                  - cell "info@expertiselocale.com 0143958753" [ref=e3320]:
+                    - generic [ref=e3321]:
+                      - generic [ref=e3322]: info@expertiselocale.com
+                      - generic [ref=e3323]: "0143958753"
+                  - cell "-" [ref=e3324]
+                  - cell "-" [ref=e3325]
+                  - cell "Actif" [ref=e3326]:
+                    - generic [ref=e3327]: Actif
+                  - cell [ref=e3328]:
+                    - button [ref=e3329] [cursor=pointer]:
+                      - img
+                - row "PREST-EXS-0152 EXSOL EXSOL exsolpartner.info@gmail.com 0709421062 - - Actif" [ref=e3330]:
+                  - cell "PREST-EXS-0152" [ref=e3331]:
+                    - generic [ref=e3332]:
+                      - generic [ref=e3333]: PREST-EXS-0152
+                      - button [ref=e3334] [cursor=pointer]:
+                        - img
+                  - cell "EXSOL EXSOL" [ref=e3335]:
+                    - generic [ref=e3336]:
+                      - paragraph [ref=e3337]: EXSOL
+                      - paragraph [ref=e3338]: EXSOL
+                  - cell "exsolpartner.info@gmail.com 0709421062" [ref=e3339]:
+                    - generic [ref=e3340]:
+                      - generic [ref=e3341]: exsolpartner.info@gmail.com
+                      - generic [ref=e3342]: "0709421062"
+                  - cell "-" [ref=e3343]
+                  - cell "-" [ref=e3344]
+                  - cell "Actif" [ref=e3345]:
+                    - generic [ref=e3346]: Actif
+                  - cell [ref=e3347]:
+                    - button [ref=e3348] [cursor=pointer]:
+                      - img
+                - row "PREST-FU-0260 FAV. UITP FAV. UITP - - Actif" [ref=e3349]:
+                  - cell "PREST-FU-0260" [ref=e3350]:
+                    - generic [ref=e3351]:
+                      - generic [ref=e3352]: PREST-FU-0260
+                      - button [ref=e3353] [cursor=pointer]:
+                        - img
+                  - cell "FAV. UITP FAV. UITP" [ref=e3354]:
+                    - generic [ref=e3355]:
+                      - paragraph [ref=e3356]: FAV. UITP
+                      - paragraph [ref=e3357]: FAV. UITP
+                  - cell [ref=e3358]
+                  - cell "-" [ref=e3359]
+                  - cell "-" [ref=e3360]
+                  - cell "Actif" [ref=e3361]:
+                    - generic [ref=e3362]: Actif
+                  - cell [ref=e3363]:
+                    - button [ref=e3364] [cursor=pointer]:
+                      - img
+                - row "PREST-FRS-0042 FAWAZ RADWAN \"SUPER AUTO\" FAWAZ RADWAN \"SUPER AUTO\" - - Actif" [ref=e3365]:
+                  - cell "PREST-FRS-0042" [ref=e3366]:
+                    - generic [ref=e3367]:
+                      - generic [ref=e3368]: PREST-FRS-0042
+                      - button [ref=e3369] [cursor=pointer]:
+                        - img
+                  - cell "FAWAZ RADWAN \"SUPER AUTO\" FAWAZ RADWAN \"SUPER AUTO\"" [ref=e3370]:
+                    - generic [ref=e3371]:
+                      - paragraph [ref=e3372]: FAWAZ RADWAN "SUPER AUTO"
+                      - paragraph [ref=e3373]: FAWAZ RADWAN "SUPER AUTO"
+                  - cell [ref=e3374]
+                  - cell "-" [ref=e3375]
+                  - cell "-" [ref=e3376]
+                  - cell "Actif" [ref=e3377]:
+                    - generic [ref=e3378]: Actif
+                  - cell [ref=e3379]:
+                    - button [ref=e3380] [cursor=pointer]:
+                      - img
+                - row "PREST-FB-0394 FERRONNERIE BOKA FERRONNERIE BOKA Néant 0777566065 - - Actif" [ref=e3381]:
+                  - cell "PREST-FB-0394" [ref=e3382]:
+                    - generic [ref=e3383]:
+                      - generic [ref=e3384]: PREST-FB-0394
+                      - button [ref=e3385] [cursor=pointer]:
+                        - img
+                  - cell "FERRONNERIE BOKA FERRONNERIE BOKA" [ref=e3386]:
+                    - generic [ref=e3387]:
+                      - paragraph [ref=e3388]: FERRONNERIE BOKA
+                      - paragraph [ref=e3389]: FERRONNERIE BOKA
+                  - cell "Néant 0777566065" [ref=e3390]:
+                    - generic [ref=e3391]:
+                      - generic [ref=e3392]: Néant
+                      - generic [ref=e3393]: "0777566065"
+                  - cell "-" [ref=e3394]
+                  - cell "-" [ref=e3395]
+                  - cell "Actif" [ref=e3396]:
+                    - generic [ref=e3397]: Actif
+                  - cell [ref=e3398]:
+                    - button [ref=e3399] [cursor=pointer]:
+                      - img
+                - row "PREST-FIE-0214 FIESTA FIESTA NEA?T NEANT - - Actif" [ref=e3400]:
+                  - cell "PREST-FIE-0214" [ref=e3401]:
+                    - generic [ref=e3402]:
+                      - generic [ref=e3403]: PREST-FIE-0214
+                      - button [ref=e3404] [cursor=pointer]:
+                        - img
+                  - cell "FIESTA FIESTA" [ref=e3405]:
+                    - generic [ref=e3406]:
+                      - paragraph [ref=e3407]: FIESTA
+                      - paragraph [ref=e3408]: FIESTA
+                  - cell "NEA?T NEANT" [ref=e3409]:
+                    - generic [ref=e3410]:
+                      - generic [ref=e3411]: NEA?T
+                      - generic [ref=e3412]: NEANT
+                  - cell "-" [ref=e3413]
+                  - cell "-" [ref=e3414]
+                  - cell "Actif" [ref=e3415]:
+                    - generic [ref=e3416]: Actif
+                  - cell [ref=e3417]:
+                    - button [ref=e3418] [cursor=pointer]:
+                      - img
+                - row "PREST-FDJ-0044 FLEUR DE JONQUILLE FLEUR DE JONQUILLE 2.2501e+012 - - Actif" [ref=e3419]:
+                  - cell "PREST-FDJ-0044" [ref=e3420]:
+                    - generic [ref=e3421]:
+                      - generic [ref=e3422]: PREST-FDJ-0044
+                      - button [ref=e3423] [cursor=pointer]:
+                        - img
+                  - cell "FLEUR DE JONQUILLE FLEUR DE JONQUILLE" [ref=e3424]:
+                    - generic [ref=e3425]:
+                      - paragraph [ref=e3426]: FLEUR DE JONQUILLE
+                      - paragraph [ref=e3427]: FLEUR DE JONQUILLE
+                  - cell "2.2501e+012" [ref=e3428]:
+                    - generic [ref=e3430]: "2.2501e+012"
+                  - cell "-" [ref=e3431]
+                  - cell "-" [ref=e3432]
+                  - cell "Actif" [ref=e3433]:
+                    - generic [ref=e3434]: Actif
+                  - cell [ref=e3435]:
+                    - button [ref=e3436] [cursor=pointer]:
+                      - img
+                - row "PREST-FLE-0045 FLEUR'ATITUD FLEUR'ATITUD 2.25272e+012 - - Actif" [ref=e3437]:
+                  - cell "PREST-FLE-0045" [ref=e3438]:
+                    - generic [ref=e3439]:
+                      - generic [ref=e3440]: PREST-FLE-0045
+                      - button [ref=e3441] [cursor=pointer]:
+                        - img
+                  - cell "FLEUR'ATITUD FLEUR'ATITUD" [ref=e3442]:
+                    - generic [ref=e3443]:
+                      - paragraph [ref=e3444]: FLEUR'ATITUD
+                      - paragraph [ref=e3445]: FLEUR'ATITUD
+                  - cell "2.25272e+012" [ref=e3446]:
+                    - generic [ref=e3448]: "2.25272e+012"
+                  - cell "-" [ref=e3449]
+                  - cell "-" [ref=e3450]
+                  - cell "Actif" [ref=e3451]:
+                    - generic [ref=e3452]: Actif
+                  - cell [ref=e3453]:
+                    - button [ref=e3454] [cursor=pointer]:
+                      - img
+                - row "PREST-FLO-0148 FLOPYTECH FLOPYTECH info@flopytech.com 0709999666 - - Actif" [ref=e3455]:
+                  - cell "PREST-FLO-0148" [ref=e3456]:
+                    - generic [ref=e3457]:
+                      - generic [ref=e3458]: PREST-FLO-0148
+                      - button [ref=e3459] [cursor=pointer]:
+                        - img
+                  - cell "FLOPYTECH FLOPYTECH" [ref=e3460]:
+                    - generic [ref=e3461]:
+                      - paragraph [ref=e3462]: FLOPYTECH
+                      - paragraph [ref=e3463]: FLOPYTECH
+                  - cell "info@flopytech.com 0709999666" [ref=e3464]:
+                    - generic [ref=e3465]:
+                      - generic [ref=e3466]: info@flopytech.com
+                      - generic [ref=e3467]: "0709999666"
+                  - cell "-" [ref=e3468]
+                  - cell "-" [ref=e3469]
+                  - cell "Actif" [ref=e3470]:
+                    - generic [ref=e3471]: Actif
+                  - cell [ref=e3472]:
+                    - button [ref=e3473] [cursor=pointer]:
+                      - img
+                - row "PREST-FLO-0149 Floréal Michèle CARVILLE (Floréal) NEANT 2720212624 - - Actif" [ref=e3474]:
+                  - cell "PREST-FLO-0149" [ref=e3475]:
+                    - generic [ref=e3476]:
+                      - generic [ref=e3477]: PREST-FLO-0149
+                      - button [ref=e3478] [cursor=pointer]:
+                        - img
+                  - cell "Floréal Michèle CARVILLE (Floréal)" [ref=e3479]:
+                    - generic [ref=e3480]:
+                      - paragraph [ref=e3481]: Floréal
+                      - paragraph [ref=e3482]: Michèle CARVILLE (Floréal)
+                  - cell "NEANT 2720212624" [ref=e3483]:
+                    - generic [ref=e3484]:
+                      - generic [ref=e3485]: NEANT
+                      - generic [ref=e3486]: "2720212624"
+                  - cell "-" [ref=e3487]
+                  - cell "-" [ref=e3488]
+                  - cell "Actif" [ref=e3489]:
+                    - generic [ref=e3490]: Actif
+                  - cell [ref=e3491]:
+                    - button [ref=e3492] [cursor=pointer]:
+                      - img
+                - row "PREST-FNA-0311 FNAC FNAC NEANT NEANT - - Actif" [ref=e3493]:
+                  - cell "PREST-FNA-0311" [ref=e3494]:
+                    - generic [ref=e3495]:
+                      - generic [ref=e3496]: PREST-FNA-0311
+                      - button [ref=e3497] [cursor=pointer]:
+                        - img
+                  - cell "FNAC FNAC" [ref=e3498]:
+                    - generic [ref=e3499]:
+                      - paragraph [ref=e3500]: FNAC
+                      - paragraph [ref=e3501]: FNAC
+                  - cell "NEANT NEANT" [ref=e3502]:
+                    - generic [ref=e3503]:
+                      - generic [ref=e3504]: NEANT
+                      - generic [ref=e3505]: NEANT
+                  - cell "-" [ref=e3506]
+                  - cell "-" [ref=e3507]
+                  - cell "Actif" [ref=e3508]:
+                    - generic [ref=e3509]: Actif
+                  - cell [ref=e3510]:
+                    - button [ref=e3511] [cursor=pointer]:
+                      - img
+                - row "PREST-FAC-0404 FONDATION AGIR CONTRE LE CANCERS FONDATION AGIR CONTRE LE CANCERS agircontrelecancers@gmail.com 0747009898 - - Actif" [ref=e3512]:
+                  - cell "PREST-FAC-0404" [ref=e3513]:
+                    - generic [ref=e3514]:
+                      - generic [ref=e3515]: PREST-FAC-0404
+                      - button [ref=e3516] [cursor=pointer]:
+                        - img
+                  - cell "FONDATION AGIR CONTRE LE CANCERS FONDATION AGIR CONTRE LE CANCERS" [ref=e3517]:
+                    - generic [ref=e3518]:
+                      - paragraph [ref=e3519]: FONDATION AGIR CONTRE LE CANCERS
+                      - paragraph [ref=e3520]: FONDATION AGIR CONTRE LE CANCERS
+                  - cell "agircontrelecancers@gmail.com 0747009898" [ref=e3521]:
+                    - generic [ref=e3522]:
+                      - generic [ref=e3523]: agircontrelecancers@gmail.com
+                      - generic [ref=e3524]: "0747009898"
+                  - cell "-" [ref=e3525]
+                  - cell "-" [ref=e3526]
+                  - cell "Actif" [ref=e3527]:
+                    - generic [ref=e3528]: Actif
+                  - cell [ref=e3529]:
+                    - button [ref=e3530] [cursor=pointer]:
+                      - img
+                - row "PREST-FDR-0043 FONS D'ENTRETIEN ROUTIER FER 2.55203e+010 - - Actif" [ref=e3531]:
+                  - cell "PREST-FDR-0043" [ref=e3532]:
+                    - generic [ref=e3533]:
+                      - generic [ref=e3534]: PREST-FDR-0043
+                      - button [ref=e3535] [cursor=pointer]:
+                        - img
+                  - cell "FONS D'ENTRETIEN ROUTIER FER" [ref=e3536]:
+                    - generic [ref=e3537]:
+                      - paragraph [ref=e3538]: FONS D'ENTRETIEN ROUTIER
+                      - paragraph [ref=e3539]: FER
+                  - cell "2.55203e+010" [ref=e3540]:
+                    - generic [ref=e3542]: "2.55203e+010"
+                  - cell "-" [ref=e3543]
+                  - cell "-" [ref=e3544]
+                  - cell "Actif" [ref=e3545]:
+                    - generic [ref=e3546]: Actif
+                  - cell [ref=e3547]:
+                    - button [ref=e3548] [cursor=pointer]:
+                      - img
+                - row "PREST-FE-0151 FOTOGRAPHIC EVENT FOTOGRAPHIC EVENT fotographicci@gmail.com (225) 0757326399 - - Actif" [ref=e3549]:
+                  - cell "PREST-FE-0151" [ref=e3550]:
+                    - generic [ref=e3551]:
+                      - generic [ref=e3552]: PREST-FE-0151
+                      - button [ref=e3553] [cursor=pointer]:
+                        - img
+                  - cell "FOTOGRAPHIC EVENT FOTOGRAPHIC EVENT" [ref=e3554]:
+                    - generic [ref=e3555]:
+                      - paragraph [ref=e3556]: FOTOGRAPHIC EVENT
+                      - paragraph [ref=e3557]: FOTOGRAPHIC EVENT
+                  - cell "fotographicci@gmail.com (225) 0757326399" [ref=e3558]:
+                    - generic [ref=e3559]:
+                      - generic [ref=e3560]: fotographicci@gmail.com
+                      - generic [ref=e3561]: (225) 0757326399
+                  - cell "-" [ref=e3562]
+                  - cell "-" [ref=e3563]
+                  - cell "Actif" [ref=e3564]:
+                    - generic [ref=e3565]: Actif
+                  - cell [ref=e3566]:
+                    - button [ref=e3567] [cursor=pointer]:
+                      - img
+                - row "PREST-FD-0163 FOURNISSEURS DIVERS FOURNISSEURS DIVERS NEANT NEANT - - Actif" [ref=e3568]:
+                  - cell "PREST-FD-0163" [ref=e3569]:
+                    - generic [ref=e3570]:
+                      - generic [ref=e3571]: PREST-FD-0163
+                      - button [ref=e3572] [cursor=pointer]:
+                        - img
+                  - cell "FOURNISSEURS DIVERS FOURNISSEURS DIVERS" [ref=e3573]:
+                    - generic [ref=e3574]:
+                      - paragraph [ref=e3575]: FOURNISSEURS DIVERS
+                      - paragraph [ref=e3576]: FOURNISSEURS DIVERS
+                  - cell "NEANT NEANT" [ref=e3577]:
+                    - generic [ref=e3578]:
+                      - generic [ref=e3579]: NEANT
+                      - generic [ref=e3580]: NEANT
+                  - cell "-" [ref=e3581]
+                  - cell "-" [ref=e3582]
+                  - cell "Actif" [ref=e3583]:
+                    - generic [ref=e3584]: Actif
+                  - cell [ref=e3585]:
+                    - button [ref=e3586] [cursor=pointer]:
+                      - img
+                - row "PREST-FLI-0134 FRANCK & LEOPOLD IVOIRE SARL FRANCK & LEOPOLD IVOIRE SARL flivoiresarl@gmail.com 2743910795 - - Actif" [ref=e3587]:
+                  - cell "PREST-FLI-0134" [ref=e3588]:
+                    - generic [ref=e3589]:
+                      - generic [ref=e3590]: PREST-FLI-0134
+                      - button [ref=e3591] [cursor=pointer]:
+                        - img
+                  - cell "FRANCK & LEOPOLD IVOIRE SARL FRANCK & LEOPOLD IVOIRE SARL" [ref=e3592]:
+                    - generic [ref=e3593]:
+                      - paragraph [ref=e3594]: FRANCK & LEOPOLD IVOIRE SARL
+                      - paragraph [ref=e3595]: FRANCK & LEOPOLD IVOIRE SARL
+                  - cell "flivoiresarl@gmail.com 2743910795" [ref=e3596]:
+                    - generic [ref=e3597]:
+                      - generic [ref=e3598]: flivoiresarl@gmail.com
+                      - generic [ref=e3599]: "2743910795"
+                  - cell "-" [ref=e3600]
+                  - cell "-" [ref=e3601]
+                  - cell "Actif" [ref=e3602]:
+                    - generic [ref=e3603]: Actif
+                  - cell [ref=e3604]:
+                    - button [ref=e3605] [cursor=pointer]:
+                      - img
+                - row "PREST-G4S-0047 G4S G4S Information@ci.g4s.com 2.25272e+012 - - Actif" [ref=e3606]:
+                  - cell "PREST-G4S-0047" [ref=e3607]:
+                    - generic [ref=e3608]:
+                      - generic [ref=e3609]: PREST-G4S-0047
+                      - button [ref=e3610] [cursor=pointer]:
+                        - img
+                  - cell "G4S G4S" [ref=e3611]:
+                    - generic [ref=e3612]:
+                      - paragraph [ref=e3613]: G4S
+                      - paragraph [ref=e3614]: G4S
+                  - cell "Information@ci.g4s.com 2.25272e+012" [ref=e3615]:
+                    - generic [ref=e3616]:
+                      - generic [ref=e3617]: Information@ci.g4s.com
+                      - generic [ref=e3618]: "2.25272e+012"
+                  - cell "-" [ref=e3619]
+                  - cell "-" [ref=e3620]
+                  - cell "Actif" [ref=e3621]:
+                    - generic [ref=e3622]: Actif
+                  - cell [ref=e3623]:
+                    - button [ref=e3624] [cursor=pointer]:
+                      - img
+                - row "PREST-GP-0048 GALERIES PEYRISSAC GALERIES PEYRISSAC Info.ci@peyrissac.com 2.25272e+012 - - Actif" [ref=e3625]:
+                  - cell "PREST-GP-0048" [ref=e3626]:
+                    - generic [ref=e3627]:
+                      - generic [ref=e3628]: PREST-GP-0048
+                      - button [ref=e3629] [cursor=pointer]:
+                        - img
+                  - cell "GALERIES PEYRISSAC GALERIES PEYRISSAC" [ref=e3630]:
+                    - generic [ref=e3631]:
+                      - paragraph [ref=e3632]: GALERIES PEYRISSAC
+                      - paragraph [ref=e3633]: GALERIES PEYRISSAC
+                  - cell "Info.ci@peyrissac.com 2.25272e+012" [ref=e3634]:
+                    - generic [ref=e3635]:
+                      - generic [ref=e3636]: Info.ci@peyrissac.com
+                      - generic [ref=e3637]: "2.25272e+012"
+                  - cell "-" [ref=e3638]
+                  - cell "-" [ref=e3639]
+                  - cell "Actif" [ref=e3640]:
+                    - generic [ref=e3641]: Actif
+                  - cell [ref=e3642]:
+                    - button [ref=e3643] [cursor=pointer]:
+                      - img
+                - row "PREST-GRD-0210 GAOUSSOU RAMASSAGE DES ORDURES GAOUSSOU RAMASSAGE DES ORDURES NEANT NEANT - - Actif" [ref=e3644]:
+                  - cell "PREST-GRD-0210" [ref=e3645]:
+                    - generic [ref=e3646]:
+                      - generic [ref=e3647]: PREST-GRD-0210
+                      - button [ref=e3648] [cursor=pointer]:
+                        - img
+                  - cell "GAOUSSOU RAMASSAGE DES ORDURES GAOUSSOU RAMASSAGE DES ORDURES" [ref=e3649]:
+                    - generic [ref=e3650]:
+                      - paragraph [ref=e3651]: GAOUSSOU RAMASSAGE DES ORDURES
+                      - paragraph [ref=e3652]: GAOUSSOU RAMASSAGE DES ORDURES
+                  - cell "NEANT NEANT" [ref=e3653]:
+                    - generic [ref=e3654]:
+                      - generic [ref=e3655]: NEANT
+                      - generic [ref=e3656]: NEANT
+                  - cell "-" [ref=e3657]
+                  - cell "-" [ref=e3658]
+                  - cell "Actif" [ref=e3659]:
+                    - generic [ref=e3660]: Actif
+                  - cell [ref=e3661]:
+                    - button [ref=e3662] [cursor=pointer]:
+                      - img
+                - row "PREST-GP-0223 GARAGE PGA GARAGE PGA NC 0544444724 - - Actif" [ref=e3663]:
+                  - cell "PREST-GP-0223" [ref=e3664]:
+                    - generic [ref=e3665]:
+                      - generic [ref=e3666]: PREST-GP-0223
+                      - button [ref=e3667] [cursor=pointer]:
+                        - img
+                  - cell "GARAGE PGA GARAGE PGA" [ref=e3668]:
+                    - generic [ref=e3669]:
+                      - paragraph [ref=e3670]: GARAGE PGA
+                      - paragraph [ref=e3671]: GARAGE PGA
+                  - cell "NC 0544444724" [ref=e3672]:
+                    - generic [ref=e3673]:
+                      - generic [ref=e3674]: NC
+                      - generic [ref=e3675]: "0544444724"
+                  - cell "-" [ref=e3676]
+                  - cell "-" [ref=e3677]
+                  - cell "Actif" [ref=e3678]:
+                    - generic [ref=e3679]: Actif
+                  - cell [ref=e3680]:
+                    - button [ref=e3681] [cursor=pointer]:
+                      - img
+                - row "PREST-GR-0418 GARAGE RTA GARAGE RTA garagerta@hotmailcom.fr 0152363622 - - Actif" [ref=e3682]:
+                  - cell "PREST-GR-0418" [ref=e3683]:
+                    - generic [ref=e3684]:
+                      - generic [ref=e3685]: PREST-GR-0418
+                      - button [ref=e3686] [cursor=pointer]:
+                        - img
+                  - cell "GARAGE RTA GARAGE RTA" [ref=e3687]:
+                    - generic [ref=e3688]:
+                      - paragraph [ref=e3689]: GARAGE RTA
+                      - paragraph [ref=e3690]: GARAGE RTA
+                  - cell "garagerta@hotmailcom.fr 0152363622" [ref=e3691]:
+                    - generic [ref=e3692]:
+                      - generic [ref=e3693]: garagerta@hotmailcom.fr
+                      - generic [ref=e3694]: "0152363622"
+                  - cell "-" [ref=e3695]
+                  - cell "-" [ref=e3696]
+                  - cell "Actif" [ref=e3697]:
+                    - generic [ref=e3698]: Actif
+                  - cell [ref=e3699]:
+                    - button [ref=e3700] [cursor=pointer]:
+                      - img
+                - row "PREST-GCS-0339 GCIS CONCEPT SARL GCIS CONCEPT SARL gcisconcept@yahoofr 2721355403 - - Actif" [ref=e3701]:
+                  - cell "PREST-GCS-0339" [ref=e3702]:
+                    - generic [ref=e3703]:
+                      - generic [ref=e3704]: PREST-GCS-0339
+                      - button [ref=e3705] [cursor=pointer]:
+                        - img
+                  - cell "GCIS CONCEPT SARL GCIS CONCEPT SARL" [ref=e3706]:
+                    - generic [ref=e3707]:
+                      - paragraph [ref=e3708]: GCIS CONCEPT SARL
+                      - paragraph [ref=e3709]: GCIS CONCEPT SARL
+                  - cell "gcisconcept@yahoofr 2721355403" [ref=e3710]:
+                    - generic [ref=e3711]:
+                      - generic [ref=e3712]: gcisconcept@yahoofr
+                      - generic [ref=e3713]: "2721355403"
+                  - cell "-" [ref=e3714]
+                  - cell "-" [ref=e3715]
+                  - cell "Actif" [ref=e3716]:
+                    - generic [ref=e3717]: Actif
+                  - cell [ref=e3718]:
+                    - button [ref=e3719] [cursor=pointer]:
+                      - img
+                - row "PREST-GGE-0190 GE GLOBAL- ELEC GE GLOBAL- ELEC globalelecge@gmail.com 0101716991 - - Actif" [ref=e3720]:
+                  - cell "PREST-GGE-0190" [ref=e3721]:
+                    - generic [ref=e3722]:
+                      - generic [ref=e3723]: PREST-GGE-0190
+                      - button [ref=e3724] [cursor=pointer]:
+                        - img
+                  - cell "GE GLOBAL- ELEC GE GLOBAL- ELEC" [ref=e3725]:
+                    - generic [ref=e3726]:
+                      - paragraph [ref=e3727]: GE GLOBAL- ELEC
+                      - paragraph [ref=e3728]: GE GLOBAL- ELEC
+                  - cell "globalelecge@gmail.com 0101716991" [ref=e3729]:
+                    - generic [ref=e3730]:
+                      - generic [ref=e3731]: globalelecge@gmail.com
+                      - generic [ref=e3732]: "0101716991"
+                  - cell "-" [ref=e3733]
+                  - cell "-" [ref=e3734]
+                  - cell "Actif" [ref=e3735]:
+                    - generic [ref=e3736]: Actif
+                  - cell [ref=e3737]:
+                    - button [ref=e3738] [cursor=pointer]:
+                      - img
+                - row "MIG-0002 GEGCI SARL 0151292929 - - Actif" [ref=e3739]:
+                  - cell "MIG-0002" [ref=e3740]:
+                    - generic [ref=e3741]:
+                      - generic [ref=e3742]: MIG-0002
+                      - button [ref=e3743] [cursor=pointer]:
+                        - img
+                  - cell "GEGCI SARL" [ref=e3744]:
+                    - paragraph [ref=e3746]: GEGCI SARL
+                  - cell "0151292929" [ref=e3747]:
+                    - generic [ref=e3749]: "0151292929"
+                  - cell "-" [ref=e3750]
+                  - cell "-" [ref=e3751]
+                  - cell "Actif" [ref=e3752]:
+                    - generic [ref=e3753]: Actif
+                  - cell [ref=e3754]:
+                    - button [ref=e3755] [cursor=pointer]:
+                      - img
+                - row "PREST-GN-0175 GENDARMERIE NATIONALE GENDARMERIE NATIONALE NEANT 2120210873 - - Actif" [ref=e3756]:
+                  - cell "PREST-GN-0175" [ref=e3757]:
+                    - generic [ref=e3758]:
+                      - generic [ref=e3759]: PREST-GN-0175
+                      - button [ref=e3760] [cursor=pointer]:
+                        - img
+                  - cell "GENDARMERIE NATIONALE GENDARMERIE NATIONALE" [ref=e3761]:
+                    - generic [ref=e3762]:
+                      - paragraph [ref=e3763]: GENDARMERIE NATIONALE
+                      - paragraph [ref=e3764]: GENDARMERIE NATIONALE
+                  - cell "NEANT 2120210873" [ref=e3765]:
+                    - generic [ref=e3766]:
+                      - generic [ref=e3767]: NEANT
+                      - generic [ref=e3768]: "2120210873"
+                  - cell "-" [ref=e3769]
+                  - cell "-" [ref=e3770]
+                  - cell "Actif" [ref=e3771]:
+                    - generic [ref=e3772]: Actif
+                  - cell [ref=e3773]:
+                    - button [ref=e3774] [cursor=pointer]:
+                      - img
+                - row "PREST-GIA-0049 GENERAL IVOIRIENNE ALIMENTAIRE GENIAL - - Actif" [ref=e3775]:
+                  - cell "PREST-GIA-0049" [ref=e3776]:
+                    - generic [ref=e3777]:
+                      - generic [ref=e3778]: PREST-GIA-0049
+                      - button [ref=e3779] [cursor=pointer]:
+                        - img
+                  - cell "GENERAL IVOIRIENNE ALIMENTAIRE GENIAL" [ref=e3780]:
+                    - generic [ref=e3781]:
+                      - paragraph [ref=e3782]: GENERAL IVOIRIENNE ALIMENTAIRE
+                      - paragraph [ref=e3783]: GENIAL
+                  - cell [ref=e3784]
+                  - cell "-" [ref=e3785]
+                  - cell "-" [ref=e3786]
+                  - cell "Actif" [ref=e3787]:
+                    - generic [ref=e3788]: Actif
+                  - cell [ref=e3789]:
+                    - button [ref=e3790] [cursor=pointer]:
+                      - img
+                - row "PREST-GAC-0181 GLOBAL ALU CI GLOBAL ALU CI NEANT NEANT - - Actif" [ref=e3791]:
+                  - cell "PREST-GAC-0181" [ref=e3792]:
+                    - generic [ref=e3793]:
+                      - generic [ref=e3794]: PREST-GAC-0181
+                      - button [ref=e3795] [cursor=pointer]:
+                        - img
+                  - cell "GLOBAL ALU CI GLOBAL ALU CI" [ref=e3796]:
+                    - generic [ref=e3797]:
+                      - paragraph [ref=e3798]: GLOBAL ALU CI
+                      - paragraph [ref=e3799]: GLOBAL ALU CI
+                  - cell "NEANT NEANT" [ref=e3800]:
+                    - generic [ref=e3801]:
+                      - generic [ref=e3802]: NEANT
+                      - generic [ref=e3803]: NEANT
+                  - cell "-" [ref=e3804]
+                  - cell "-" [ref=e3805]
+                  - cell "Actif" [ref=e3806]:
+                    - generic [ref=e3807]: Actif
+                  - cell [ref=e3808]:
+                    - button [ref=e3809] [cursor=pointer]:
+                      - img
+                - row "PREST-GBS-0290 GLOBAL BUILDING & SERVICES GLOBAL BUILDING & SERVICES NEANT 0707517383 - - Actif" [ref=e3810]:
+                  - cell "PREST-GBS-0290" [ref=e3811]:
+                    - generic [ref=e3812]:
+                      - generic [ref=e3813]: PREST-GBS-0290
+                      - button [ref=e3814] [cursor=pointer]:
+                        - img
+                  - cell "GLOBAL BUILDING & SERVICES GLOBAL BUILDING & SERVICES" [ref=e3815]:
+                    - generic [ref=e3816]:
+                      - paragraph [ref=e3817]: GLOBAL BUILDING & SERVICES
+                      - paragraph [ref=e3818]: GLOBAL BUILDING & SERVICES
+                  - cell "NEANT 0707517383" [ref=e3819]:
+                    - generic [ref=e3820]:
+                      - generic [ref=e3821]: NEANT
+                      - generic [ref=e3822]: "0707517383"
+                  - cell "-" [ref=e3823]
+                  - cell "-" [ref=e3824]
+                  - cell "Actif" [ref=e3825]:
+                    - generic [ref=e3826]: Actif
+                  - cell [ref=e3827]:
+                    - button [ref=e3828] [cursor=pointer]:
+                      - img
+                - row "PREST-GLU-0191 GLUTTON GLUTTON NEANT +3285310430 - - Actif" [ref=e3829]:
+                  - cell "PREST-GLU-0191" [ref=e3830]:
+                    - generic [ref=e3831]:
+                      - generic [ref=e3832]: PREST-GLU-0191
+                      - button [ref=e3833] [cursor=pointer]:
+                        - img
+                  - cell "GLUTTON GLUTTON" [ref=e3834]:
+                    - generic [ref=e3835]:
+                      - paragraph [ref=e3836]: GLUTTON
+                      - paragraph [ref=e3837]: GLUTTON
+                  - cell "NEANT +3285310430" [ref=e3838]:
+                    - generic [ref=e3839]:
+                      - generic [ref=e3840]: NEANT
+                      - generic [ref=e3841]: "+3285310430"
+                  - cell "-" [ref=e3842]
+                  - cell "-" [ref=e3843]
+                  - cell "Actif" [ref=e3844]:
+                    - generic [ref=e3845]: Actif
+                  - cell [ref=e3846]:
+                    - button [ref=e3847] [cursor=pointer]:
+                      - img
+                - row "PREST-GSS-0221 GOLD SOLUTION SARL GOLD SOLUTION SARL infosgoldsolution@gmail.com 0758290927 - - Actif" [ref=e3848]:
+                  - cell "PREST-GSS-0221" [ref=e3849]:
+                    - generic [ref=e3850]:
+                      - generic [ref=e3851]: PREST-GSS-0221
+                      - button [ref=e3852] [cursor=pointer]:
+                        - img
+                  - cell "GOLD SOLUTION SARL GOLD SOLUTION SARL" [ref=e3853]:
+                    - generic [ref=e3854]:
+                      - paragraph [ref=e3855]: GOLD SOLUTION SARL
+                      - paragraph [ref=e3856]: GOLD SOLUTION SARL
+                  - cell "infosgoldsolution@gmail.com 0758290927" [ref=e3857]:
+                    - generic [ref=e3858]:
+                      - generic [ref=e3859]: infosgoldsolution@gmail.com
+                      - generic [ref=e3860]: "0758290927"
+                  - cell "-" [ref=e3861]
+                  - cell "-" [ref=e3862]
+                  - cell "Actif" [ref=e3863]:
+                    - generic [ref=e3864]: Actif
+                  - cell [ref=e3865]:
+                    - button [ref=e3866] [cursor=pointer]:
+                      - img
+                - row "PREST-GPE-0365 GPE GENERAL PERFORMANCE ENGINEERING infogpe-ci@.com 0101582632 - - Actif" [ref=e3867]:
+                  - cell "PREST-GPE-0365" [ref=e3868]:
+                    - generic [ref=e3869]:
+                      - generic [ref=e3870]: PREST-GPE-0365
+                      - button [ref=e3871] [cursor=pointer]:
+                        - img
+                  - cell "GPE GENERAL PERFORMANCE ENGINEERING" [ref=e3872]:
+                    - generic [ref=e3873]:
+                      - paragraph [ref=e3874]: GPE
+                      - paragraph [ref=e3875]: GENERAL PERFORMANCE ENGINEERING
+                  - cell "infogpe-ci@.com 0101582632" [ref=e3876]:
+                    - generic [ref=e3877]:
+                      - generic [ref=e3878]: infogpe-ci@.com
+                      - generic [ref=e3879]: "0101582632"
+                  - cell "-" [ref=e3880]
+                  - cell "-" [ref=e3881]
+                  - cell "Actif" [ref=e3882]:
+                    - generic [ref=e3883]: Actif
+                  - cell [ref=e3884]:
+                    - button [ref=e3885] [cursor=pointer]:
+                      - img
+                - row "PREST-GCV-0358 GROUP CARRE VERT GROUP CARRE VERT groupcarrevert225@gmail.com 0504749596 - - Actif" [ref=e3886]:
+                  - cell "PREST-GCV-0358" [ref=e3887]:
+                    - generic [ref=e3888]:
+                      - generic [ref=e3889]: PREST-GCV-0358
+                      - button [ref=e3890] [cursor=pointer]:
+                        - img
+                  - cell "GROUP CARRE VERT GROUP CARRE VERT" [ref=e3891]:
+                    - generic [ref=e3892]:
+                      - paragraph [ref=e3893]: GROUP CARRE VERT
+                      - paragraph [ref=e3894]: GROUP CARRE VERT
+                  - cell "groupcarrevert225@gmail.com 0504749596" [ref=e3895]:
+                    - generic [ref=e3896]:
+                      - generic [ref=e3897]: groupcarrevert225@gmail.com
+                      - generic [ref=e3898]: "0504749596"
+                  - cell "-" [ref=e3899]
+                  - cell "-" [ref=e3900]
+                  - cell "Actif" [ref=e3901]:
+                    - generic [ref=e3902]: Actif
+                  - cell [ref=e3903]:
+                    - button [ref=e3904] [cursor=pointer]:
+                      - img
+                - row "PREST-GIM-0249 GROUP IVOIRE MOTO-SARL GROUP IVOIRE MOTO-SARL commercial@ivoiremoto.com 2522029890 - - Actif" [ref=e3905]:
+                  - cell "PREST-GIM-0249" [ref=e3906]:
+                    - generic [ref=e3907]:
+                      - generic [ref=e3908]: PREST-GIM-0249
+                      - button [ref=e3909] [cursor=pointer]:
+                        - img
+                  - cell "GROUP IVOIRE MOTO-SARL GROUP IVOIRE MOTO-SARL" [ref=e3910]:
+                    - generic [ref=e3911]:
+                      - paragraph [ref=e3912]: GROUP IVOIRE MOTO-SARL
+                      - paragraph [ref=e3913]: GROUP IVOIRE MOTO-SARL
+                  - cell "commercial@ivoiremoto.com 2522029890" [ref=e3914]:
+                    - generic [ref=e3915]:
+                      - generic [ref=e3916]: commercial@ivoiremoto.com
+                      - generic [ref=e3917]: "2522029890"
+                  - cell "-" [ref=e3918]
+                  - cell "-" [ref=e3919]
+                  - cell "Actif" [ref=e3920]:
+                    - generic [ref=e3921]: Actif
+                  - cell [ref=e3922]:
+                    - button [ref=e3923] [cursor=pointer]:
+                      - img
+                - row "PREST-GF-0050 GROUPE FSA GROUPE FSA Fredericodi138@gmail.com 1.71607e+008 - - Actif" [ref=e3924]:
+                  - cell "PREST-GF-0050" [ref=e3925]:
+                    - generic [ref=e3926]:
+                      - generic [ref=e3927]: PREST-GF-0050
+                      - button [ref=e3928] [cursor=pointer]:
+                        - img
+                  - cell "GROUPE FSA GROUPE FSA" [ref=e3929]:
+                    - generic [ref=e3930]:
+                      - paragraph [ref=e3931]: GROUPE FSA
+                      - paragraph [ref=e3932]: GROUPE FSA
+                  - cell "Fredericodi138@gmail.com 1.71607e+008" [ref=e3933]:
+                    - generic [ref=e3934]:
+                      - generic [ref=e3935]: Fredericodi138@gmail.com
+                      - generic [ref=e3936]: "1.71607e+008"
+                  - cell "-" [ref=e3937]
+                  - cell "-" [ref=e3938]
+                  - cell "Actif" [ref=e3939]:
+                    - generic [ref=e3940]: Actif
+                  - cell [ref=e3941]:
+                    - button [ref=e3942] [cursor=pointer]:
+                      - img
+                - row "PREST-GCG-0366 GROUPEMENT CYPHER GLOBAL-ISC-DEVIN GROUPEMENT CYPHER GLOBAL-ISC-DEVIN Néant Neant - - Actif" [ref=e3943]:
+                  - cell "PREST-GCG-0366" [ref=e3944]:
+                    - generic [ref=e3945]:
+                      - generic [ref=e3946]: PREST-GCG-0366
+                      - button [ref=e3947] [cursor=pointer]:
+                        - img
+                  - cell "GROUPEMENT CYPHER GLOBAL-ISC-DEVIN GROUPEMENT CYPHER GLOBAL-ISC-DEVIN" [ref=e3948]:
+                    - generic [ref=e3949]:
+                      - paragraph [ref=e3950]: GROUPEMENT CYPHER GLOBAL-ISC-DEVIN
+                      - paragraph [ref=e3951]: GROUPEMENT CYPHER GLOBAL-ISC-DEVIN
+                  - cell "Néant Neant" [ref=e3952]:
+                    - generic [ref=e3953]:
+                      - generic [ref=e3954]: Néant
+                      - generic [ref=e3955]: Neant
+                  - cell "-" [ref=e3956]
+                  - cell "-" [ref=e3957]
+                  - cell "Actif" [ref=e3958]:
+                    - generic [ref=e3959]: Actif
+                  - cell [ref=e3960]:
+                    - button [ref=e3961] [cursor=pointer]:
+                      - img
+                - row "PREST-GH-0315 GSB HOME GSB HOME NEANT 0707149394 - - Actif" [ref=e3962]:
+                  - cell "PREST-GH-0315" [ref=e3963]:
+                    - generic [ref=e3964]:
+                      - generic [ref=e3965]: PREST-GH-0315
+                      - button [ref=e3966] [cursor=pointer]:
+                        - img
+                  - cell "GSB HOME GSB HOME" [ref=e3967]:
+                    - generic [ref=e3968]:
+                      - paragraph [ref=e3969]: GSB HOME
+                      - paragraph [ref=e3970]: GSB HOME
+                  - cell "NEANT 0707149394" [ref=e3971]:
+                    - generic [ref=e3972]:
+                      - generic [ref=e3973]: NEANT
+                      - generic [ref=e3974]: "0707149394"
+                  - cell "-" [ref=e3975]
+                  - cell "-" [ref=e3976]
+                  - cell "Actif" [ref=e3977]:
+                    - generic [ref=e3978]: Actif
+                  - cell [ref=e3979]:
+                    - button [ref=e3980] [cursor=pointer]:
+                      - img
+                - row "PREST-HBS-0051 H.E.C BUSINESS SCHOOL H.E.C BUSINESS SCHOOL info@hec.ci - - Actif" [ref=e3981]:
+                  - cell "PREST-HBS-0051" [ref=e3982]:
+                    - generic [ref=e3983]:
+                      - generic [ref=e3984]: PREST-HBS-0051
+                      - button [ref=e3985] [cursor=pointer]:
+                        - img
+                  - cell "H.E.C BUSINESS SCHOOL H.E.C BUSINESS SCHOOL" [ref=e3986]:
+                    - generic [ref=e3987]:
+                      - paragraph [ref=e3988]: H.E.C BUSINESS SCHOOL
+                      - paragraph [ref=e3989]: H.E.C BUSINESS SCHOOL
+                  - cell "info@hec.ci" [ref=e3990]:
+                    - generic [ref=e3992]: info@hec.ci
+                  - cell "-" [ref=e3993]
+                  - cell "-" [ref=e3994]
+                  - cell "Actif" [ref=e3995]:
+                    - generic [ref=e3996]: Actif
+                  - cell [ref=e3997]:
+                    - button [ref=e3998] [cursor=pointer]:
+                      - img
+                - row "PREST-HP-0137 H2O PISCINE H2O PISCINE - - Actif" [ref=e3999]:
+                  - cell "PREST-HP-0137" [ref=e4000]:
+                    - generic [ref=e4001]:
+                      - generic [ref=e4002]: PREST-HP-0137
+                      - button [ref=e4003] [cursor=pointer]:
+                        - img
+                  - cell "H2O PISCINE H2O PISCINE" [ref=e4004]:
+                    - generic [ref=e4005]:
+                      - paragraph [ref=e4006]: H2O PISCINE
+                      - paragraph [ref=e4007]: H2O PISCINE
+                  - cell [ref=e4008]
+                  - cell "-" [ref=e4009]
+                  - cell "-" [ref=e4010]
+                  - cell "Actif" [ref=e4011]:
+                    - generic [ref=e4012]: Actif
+                  - cell [ref=e4013]:
+                    - button [ref=e4014] [cursor=pointer]:
+                      - img
+                - row "PREST-HPP-0323 HARVEST PIME Pvt Ltd HARVEST PIME Pvt Ltd harvettimeputltd@gmail.com 2722235376 - - Actif" [ref=e4015]:
+                  - cell "PREST-HPP-0323" [ref=e4016]:
+                    - generic [ref=e4017]:
+                      - generic [ref=e4018]: PREST-HPP-0323
+                      - button [ref=e4019] [cursor=pointer]:
+                        - img
+                  - cell "HARVEST PIME Pvt Ltd HARVEST PIME Pvt Ltd" [ref=e4020]:
+                    - generic [ref=e4021]:
+                      - paragraph [ref=e4022]: HARVEST PIME Pvt Ltd
+                      - paragraph [ref=e4023]: HARVEST PIME Pvt Ltd
+                  - cell "harvettimeputltd@gmail.com 2722235376" [ref=e4024]:
+                    - generic [ref=e4025]:
+                      - generic [ref=e4026]: harvettimeputltd@gmail.com
+                      - generic [ref=e4027]: "2722235376"
+                  - cell "-" [ref=e4028]
+                  - cell "-" [ref=e4029]
+                  - cell "Actif" [ref=e4030]:
+                    - generic [ref=e4031]: Actif
+                  - cell [ref=e4032]:
+                    - button [ref=e4033] [cursor=pointer]:
+                      - img
+                - row "PREST-HDR-0146 HAUTEUR D'ESPRIT RIGUEUR HAUTEUR D'ESPRIT RIGUEUR NEANT 0704871985 - - Actif" [ref=e4034]:
+                  - cell "PREST-HDR-0146" [ref=e4035]:
+                    - generic [ref=e4036]:
+                      - generic [ref=e4037]: PREST-HDR-0146
+                      - button [ref=e4038] [cursor=pointer]:
+                        - img
+                  - cell "HAUTEUR D'ESPRIT RIGUEUR HAUTEUR D'ESPRIT RIGUEUR" [ref=e4039]:
+                    - generic [ref=e4040]:
+                      - paragraph [ref=e4041]: HAUTEUR D'ESPRIT RIGUEUR
+                      - paragraph [ref=e4042]: HAUTEUR D'ESPRIT RIGUEUR
+                  - cell "NEANT 0704871985" [ref=e4043]:
+                    - generic [ref=e4044]:
+                      - generic [ref=e4045]: NEANT
+                      - generic [ref=e4046]: "0704871985"
+                  - cell "-" [ref=e4047]
+                  - cell "-" [ref=e4048]
+                  - cell "Actif" [ref=e4049]:
+                    - generic [ref=e4050]: Actif
+                  - cell [ref=e4051]:
+                    - button [ref=e4052] [cursor=pointer]:
+                      - img
+                - row "PREST-HI-0127 HELIOS INTERNATIONAL HELIOS INTERNATIONAL 2.25272e+012 - - Actif" [ref=e4053]:
+                  - cell "PREST-HI-0127" [ref=e4054]:
+                    - generic [ref=e4055]:
+                      - generic [ref=e4056]: PREST-HI-0127
+                      - button [ref=e4057] [cursor=pointer]:
+                        - img
+                  - cell "HELIOS INTERNATIONAL HELIOS INTERNATIONAL" [ref=e4058]:
+                    - generic [ref=e4059]:
+                      - paragraph [ref=e4060]: HELIOS INTERNATIONAL
+                      - paragraph [ref=e4061]: HELIOS INTERNATIONAL
+                  - cell "2.25272e+012" [ref=e4062]:
+                    - generic [ref=e4064]: "2.25272e+012"
+                  - cell "-" [ref=e4065]
+                  - cell "-" [ref=e4066]
+                  - cell "Actif" [ref=e4067]:
+                    - generic [ref=e4068]: Actif
+                  - cell [ref=e4069]:
+                    - button [ref=e4070] [cursor=pointer]:
+                      - img
+                - row "PREST-HPS-0187 HOLY PHARM SERVICES SARL HOLY PHARM SERVICES SARL holyphases2012@gmail.com 0707458505 - - Actif" [ref=e4071]:
+                  - cell "PREST-HPS-0187" [ref=e4072]:
+                    - generic [ref=e4073]:
+                      - generic [ref=e4074]: PREST-HPS-0187
+                      - button [ref=e4075] [cursor=pointer]:
+                        - img
+                  - cell "HOLY PHARM SERVICES SARL HOLY PHARM SERVICES SARL" [ref=e4076]:
+                    - generic [ref=e4077]:
+                      - paragraph [ref=e4078]: HOLY PHARM SERVICES SARL
+                      - paragraph [ref=e4079]: HOLY PHARM SERVICES SARL
+                  - cell "holyphases2012@gmail.com 0707458505" [ref=e4080]:
+                    - generic [ref=e4081]:
+                      - generic [ref=e4082]: holyphases2012@gmail.com
+                      - generic [ref=e4083]: "0707458505"
+                  - cell "-" [ref=e4084]
+                  - cell "-" [ref=e4085]
+                  - cell "Actif" [ref=e4086]:
+                    - generic [ref=e4087]: Actif
+                  - cell [ref=e4088]:
+                    - button [ref=e4089] [cursor=pointer]:
+                      - img
+                - row "PREST-HG-0138 HOODA GRAPHIQUE HOODA GRAPHIC IMPRIMERIE - - Actif" [ref=e4090]:
+                  - cell "PREST-HG-0138" [ref=e4091]:
+                    - generic [ref=e4092]:
+                      - generic [ref=e4093]: PREST-HG-0138
+                      - button [ref=e4094] [cursor=pointer]:
+                        - img
+                  - cell "HOODA GRAPHIQUE HOODA GRAPHIC IMPRIMERIE" [ref=e4095]:
+                    - generic [ref=e4096]:
+                      - paragraph [ref=e4097]: HOODA GRAPHIQUE
+                      - paragraph [ref=e4098]: HOODA GRAPHIC IMPRIMERIE
+                  - cell [ref=e4099]
+                  - cell "-" [ref=e4100]
+                  - cell "-" [ref=e4101]
+                  - cell "Actif" [ref=e4102]:
+                    - generic [ref=e4103]: Actif
+                  - cell [ref=e4104]:
+                    - button [ref=e4105] [cursor=pointer]:
+                      - img
+                - row "PREST-HWS-0329 HORECA WORLD SARL HORECA WORLD SARL www.ci.horecaworldsarl.com 0708343234 - - Actif" [ref=e4106]:
+                  - cell "PREST-HWS-0329" [ref=e4107]:
+                    - generic [ref=e4108]:
+                      - generic [ref=e4109]: PREST-HWS-0329
+                      - button [ref=e4110] [cursor=pointer]:
+                        - img
+                  - cell "HORECA WORLD SARL HORECA WORLD SARL" [ref=e4111]:
+                    - generic [ref=e4112]:
+                      - paragraph [ref=e4113]: HORECA WORLD SARL
+                      - paragraph [ref=e4114]: HORECA WORLD SARL
+                  - cell "www.ci.horecaworldsarl.com 0708343234" [ref=e4115]:
+                    - generic [ref=e4116]:
+                      - generic [ref=e4117]: www.ci.horecaworldsarl.com
+                      - generic [ref=e4118]: "0708343234"
+                  - cell "-" [ref=e4119]
+                  - cell "-" [ref=e4120]
+                  - cell "Actif" [ref=e4121]:
+                    - generic [ref=e4122]: Actif
+                  - cell [ref=e4123]:
+                    - button [ref=e4124] [cursor=pointer]:
+                      - img
+                - row "PREST-HT-0052 HORIZON TECHNOLOGIES HORIZON TECHNOLOGIES 2.25272e+012 - - Actif" [ref=e4125]:
+                  - cell "PREST-HT-0052" [ref=e4126]:
+                    - generic [ref=e4127]:
+                      - generic [ref=e4128]: PREST-HT-0052
+                      - button [ref=e4129] [cursor=pointer]:
+                        - img
+                  - cell "HORIZON TECHNOLOGIES HORIZON TECHNOLOGIES" [ref=e4130]:
+                    - generic [ref=e4131]:
+                      - paragraph [ref=e4132]: HORIZON TECHNOLOGIES
+                      - paragraph [ref=e4133]: HORIZON TECHNOLOGIES
+                  - cell "2.25272e+012" [ref=e4134]:
+                    - generic [ref=e4136]: "2.25272e+012"
+                  - cell "-" [ref=e4137]
+                  - cell "-" [ref=e4138]
+                  - cell "Actif" [ref=e4139]:
+                    - generic [ref=e4140]: Actif
+                  - cell [ref=e4141]:
+                    - button [ref=e4142] [cursor=pointer]:
+                      - img
+                - row "PREST-HDL-0144 HOTEL DE L'ART HOTEL DE L'ART NC 2731637723 - - Actif" [ref=e4143]:
+                  - cell "PREST-HDL-0144" [ref=e4144]:
+                    - generic [ref=e4145]:
+                      - generic [ref=e4146]: PREST-HDL-0144
+                      - button [ref=e4147] [cursor=pointer]:
+                        - img
+                  - cell "HOTEL DE L'ART HOTEL DE L'ART" [ref=e4148]:
+                    - generic [ref=e4149]:
+                      - paragraph [ref=e4150]: HOTEL DE L'ART
+                      - paragraph [ref=e4151]: HOTEL DE L'ART
+                  - cell "NC 2731637723" [ref=e4152]:
+                    - generic [ref=e4153]:
+                      - generic [ref=e4154]: NC
+                      - generic [ref=e4155]: "2731637723"
+                  - cell "-" [ref=e4156]
+                  - cell "-" [ref=e4157]
+                  - cell "Actif" [ref=e4158]:
+                    - generic [ref=e4159]: Actif
+                  - cell [ref=e4160]:
+                    - button [ref=e4161] [cursor=pointer]:
+                      - img
+                - row "PREST-HLR-0409 HOTEL LA ROSE BLANCHE HOTEL LA ROSE BLANCHE NEANT 2736200016 - - Actif" [ref=e4162]:
+                  - cell "PREST-HLR-0409" [ref=e4163]:
+                    - generic [ref=e4164]:
+                      - generic [ref=e4165]: PREST-HLR-0409
+                      - button [ref=e4166] [cursor=pointer]:
+                        - img
+                  - cell "HOTEL LA ROSE BLANCHE HOTEL LA ROSE BLANCHE" [ref=e4167]:
+                    - generic [ref=e4168]:
+                      - paragraph [ref=e4169]: HOTEL LA ROSE BLANCHE
+                      - paragraph [ref=e4170]: HOTEL LA ROSE BLANCHE
+                  - cell "NEANT 2736200016" [ref=e4171]:
+                    - generic [ref=e4172]:
+                      - generic [ref=e4173]: NEANT
+                      - generic [ref=e4174]: "2736200016"
+                  - cell "-" [ref=e4175]
+                  - cell "-" [ref=e4176]
+                  - cell "Actif" [ref=e4177]:
+                    - generic [ref=e4178]: Actif
+                  - cell [ref=e4179]:
+                    - button [ref=e4180] [cursor=pointer]:
+                      - img
+                - row "PREST-HLC-0261 HOTEL LE COLLECTIONNEUR HOTEL LE COLLECTIONNEUR - - Actif" [ref=e4181]:
+                  - cell "PREST-HLC-0261" [ref=e4182]:
+                    - generic [ref=e4183]:
+                      - generic [ref=e4184]: PREST-HLC-0261
+                      - button [ref=e4185] [cursor=pointer]:
+                        - img
+                  - cell "HOTEL LE COLLECTIONNEUR HOTEL LE COLLECTIONNEUR" [ref=e4186]:
+                    - generic [ref=e4187]:
+                      - paragraph [ref=e4188]: HOTEL LE COLLECTIONNEUR
+                      - paragraph [ref=e4189]: HOTEL LE COLLECTIONNEUR
+                  - cell [ref=e4190]
+                  - cell "-" [ref=e4191]
+                  - cell "-" [ref=e4192]
+                  - cell "Actif" [ref=e4193]:
+                    - generic [ref=e4194]: Actif
+                  - cell [ref=e4195]:
+                    - button [ref=e4196] [cursor=pointer]:
+                      - img
+                - row "PREST-HTA-0053 HOTEL TIAMA ABIDJAN HOTEL TIAMA ABIDJAN - - Actif" [ref=e4197]:
+                  - cell "PREST-HTA-0053" [ref=e4198]:
+                    - generic [ref=e4199]:
+                      - generic [ref=e4200]: PREST-HTA-0053
+                      - button [ref=e4201] [cursor=pointer]:
+                        - img
+                  - cell "HOTEL TIAMA ABIDJAN HOTEL TIAMA ABIDJAN" [ref=e4202]:
+                    - generic [ref=e4203]:
+                      - paragraph [ref=e4204]: HOTEL TIAMA ABIDJAN
+                      - paragraph [ref=e4205]: HOTEL TIAMA ABIDJAN
+                  - cell [ref=e4206]
+                  - cell "-" [ref=e4207]
+                  - cell "-" [ref=e4208]
+                  - cell "Actif" [ref=e4209]:
+                    - generic [ref=e4210]: Actif
+                  - cell [ref=e4211]:
+                    - button [ref=e4212] [cursor=pointer]:
+                      - img
+                - row "PREST-HLL-0141 HOTELLERIE LA LICORNE HOTELLERIE LA LICORNE hotellicorne @yahoo.fr 2722598333 - - Actif" [ref=e4213]:
+                  - cell "PREST-HLL-0141" [ref=e4214]:
+                    - generic [ref=e4215]:
+                      - generic [ref=e4216]: PREST-HLL-0141
+                      - button [ref=e4217] [cursor=pointer]:
+                        - img
+                  - cell "HOTELLERIE LA LICORNE HOTELLERIE LA LICORNE" [ref=e4218]:
+                    - generic [ref=e4219]:
+                      - paragraph [ref=e4220]: HOTELLERIE LA LICORNE
+                      - paragraph [ref=e4221]: HOTELLERIE LA LICORNE
+                  - cell "hotellicorne @yahoo.fr 2722598333" [ref=e4222]:
+                    - generic [ref=e4223]:
+                      - generic [ref=e4224]: hotellicorne @yahoo.fr
+                      - generic [ref=e4225]: "2722598333"
+                  - cell "-" [ref=e4226]
+                  - cell "-" [ref=e4227]
+                  - cell "Actif" [ref=e4228]:
+                    - generic [ref=e4229]: Actif
+                  - cell [ref=e4230]:
+                    - button [ref=e4231] [cursor=pointer]:
+                      - img
+                - row "PREST-HC-0054 HUGSON CONSULTING HUGSON CONSULTING infos@hugsonconsulting.com - - Actif" [ref=e4232]:
+                  - cell "PREST-HC-0054" [ref=e4233]:
+                    - generic [ref=e4234]:
+                      - generic [ref=e4235]: PREST-HC-0054
+                      - button [ref=e4236] [cursor=pointer]:
+                        - img
+                  - cell "HUGSON CONSULTING HUGSON CONSULTING" [ref=e4237]:
+                    - generic [ref=e4238]:
+                      - paragraph [ref=e4239]: HUGSON CONSULTING
+                      - paragraph [ref=e4240]: HUGSON CONSULTING
+                  - cell "infos@hugsonconsulting.com" [ref=e4241]:
+                    - generic [ref=e4243]: infos@hugsonconsulting.com
+                  - cell "-" [ref=e4244]
+                  - cell "-" [ref=e4245]
+                  - cell "Actif" [ref=e4246]:
+                    - generic [ref=e4247]: Actif
+                  - cell [ref=e4248]:
+                    - button [ref=e4249] [cursor=pointer]:
+                      - img
+                - row "PREST-HE-0344 HUMIDIT' EXPERT HUMIDIT' EXPERT NEANT 0708734102 - - Actif" [ref=e4250]:
+                  - cell "PREST-HE-0344" [ref=e4251]:
+                    - generic [ref=e4252]:
+                      - generic [ref=e4253]: PREST-HE-0344
+                      - button [ref=e4254] [cursor=pointer]:
+                        - img
+                  - cell "HUMIDIT' EXPERT HUMIDIT' EXPERT" [ref=e4255]:
+                    - generic [ref=e4256]:
+                      - paragraph [ref=e4257]: HUMIDIT' EXPERT
+                      - paragraph [ref=e4258]: HUMIDIT' EXPERT
+                  - cell "NEANT 0708734102" [ref=e4259]:
+                    - generic [ref=e4260]:
+                      - generic [ref=e4261]: NEANT
+                      - generic [ref=e4262]: "0708734102"
+                  - cell "-" [ref=e4263]
+                  - cell "-" [ref=e4264]
+                  - cell "Actif" [ref=e4265]:
+                    - generic [ref=e4266]: Actif
+                  - cell [ref=e4267]:
+                    - button [ref=e4268] [cursor=pointer]:
+                      - img
+                - row "PREST-HR-0320 HYATT REGENCY HYATT REGENCY NEANT +971 4 209 1234 - - Actif" [ref=e4269]:
+                  - cell "PREST-HR-0320" [ref=e4270]:
+                    - generic [ref=e4271]:
+                      - generic [ref=e4272]: PREST-HR-0320
+                      - button [ref=e4273] [cursor=pointer]:
+                        - img
+                  - cell "HYATT REGENCY HYATT REGENCY" [ref=e4274]:
+                    - generic [ref=e4275]:
+                      - paragraph [ref=e4276]: HYATT REGENCY
+                      - paragraph [ref=e4277]: HYATT REGENCY
+                  - cell "NEANT +971 4 209 1234" [ref=e4278]:
+                    - generic [ref=e4279]:
+                      - generic [ref=e4280]: NEANT
+                      - generic [ref=e4281]: +971 4 209 1234
+                  - cell "-" [ref=e4282]
+                  - cell "-" [ref=e4283]
+                  - cell "Actif" [ref=e4284]:
+                    - generic [ref=e4285]: Actif
+                  - cell [ref=e4286]:
+                    - button [ref=e4287] [cursor=pointer]:
+                      - img
+                - row "PREST-HCS-0102 HYPERMARCHES-SUPERMARCHES CLUB SOCCE CENTRE COMMERCIAL CLUB SOCOE SOCIETE DES DEUX PLATEAUX s2p@aviso.ci 2.72242e+009 - - Actif" [ref=e4288]:
+                  - cell "PREST-HCS-0102" [ref=e4289]:
+                    - generic [ref=e4290]:
+                      - generic [ref=e4291]: PREST-HCS-0102
+                      - button [ref=e4292] [cursor=pointer]:
+                        - img
+                  - cell "HYPERMARCHES-SUPERMARCHES CLUB SOCCE CENTRE COMMERCIAL CLUB SOCOE SOCIETE DES DEUX PLATEAUX" [ref=e4293]:
+                    - generic [ref=e4294]:
+                      - paragraph [ref=e4295]: HYPERMARCHES-SUPERMARCHES CLUB SOCCE CENTRE COMMERCIAL CLUB SOCOE
+                      - paragraph [ref=e4296]: SOCIETE DES DEUX PLATEAUX
+                  - cell "s2p@aviso.ci 2.72242e+009" [ref=e4297]:
+                    - generic [ref=e4298]:
+                      - generic [ref=e4299]: s2p@aviso.ci
+                      - generic [ref=e4300]: "2.72242e+009"
+                  - cell "-" [ref=e4301]
+                  - cell "-" [ref=e4302]
+                  - cell "Actif" [ref=e4303]:
+                    - generic [ref=e4304]: Actif
+                  - cell [ref=e4305]:
+                    - button [ref=e4306] [cursor=pointer]:
+                      - img
+                - row "PREST-ISN-0363 IB SOPE NABY IB SOPE NABY NEANT NEANT - - Actif" [ref=e4307]:
+                  - cell "PREST-ISN-0363" [ref=e4308]:
+                    - generic [ref=e4309]:
+                      - generic [ref=e4310]: PREST-ISN-0363
+                      - button [ref=e4311] [cursor=pointer]:
+                        - img
+                  - cell "IB SOPE NABY IB SOPE NABY" [ref=e4312]:
+                    - generic [ref=e4313]:
+                      - paragraph [ref=e4314]: IB SOPE NABY
+                      - paragraph [ref=e4315]: IB SOPE NABY
+                  - cell "NEANT NEANT" [ref=e4316]:
+                    - generic [ref=e4317]:
+                      - generic [ref=e4318]: NEANT
+                      - generic [ref=e4319]: NEANT
+                  - cell "-" [ref=e4320]
+                  - cell "-" [ref=e4321]
+                  - cell "Actif" [ref=e4322]:
+                    - generic [ref=e4323]: Actif
+                  - cell [ref=e4324]:
+                    - button [ref=e4325] [cursor=pointer]:
+                      - img
+                - row "PREST-IV-0338 IDEAL VOYAGE IDEAL VOYAGE NEANT NEANT - - Actif" [ref=e4326]:
+                  - cell "PREST-IV-0338" [ref=e4327]:
+                    - generic [ref=e4328]:
+                      - generic [ref=e4329]: PREST-IV-0338
+                      - button [ref=e4330] [cursor=pointer]:
+                        - img
+                  - cell "IDEAL VOYAGE IDEAL VOYAGE" [ref=e4331]:
+                    - generic [ref=e4332]:
+                      - paragraph [ref=e4333]: IDEAL VOYAGE
+                      - paragraph [ref=e4334]: IDEAL VOYAGE
+                  - cell "NEANT NEANT" [ref=e4335]:
+                    - generic [ref=e4336]:
+                      - generic [ref=e4337]: NEANT
+                      - generic [ref=e4338]: NEANT
+                  - cell "-" [ref=e4339]
+                  - cell "-" [ref=e4340]
+                  - cell "Actif" [ref=e4341]:
+                    - generic [ref=e4342]: Actif
+                  - cell [ref=e4343]:
+                    - button [ref=e4344] [cursor=pointer]:
+                      - img
+                - row "PREST-IFA-0341 IFACI IFACI NEANT NEANT - - Actif" [ref=e4345]:
+                  - cell "PREST-IFA-0341" [ref=e4346]:
+                    - generic [ref=e4347]:
+                      - generic [ref=e4348]: PREST-IFA-0341
+                      - button [ref=e4349] [cursor=pointer]:
+                        - img
+                  - cell "IFACI IFACI" [ref=e4350]:
+                    - generic [ref=e4351]:
+                      - paragraph [ref=e4352]: IFACI
+                      - paragraph [ref=e4353]: IFACI
+                  - cell "NEANT NEANT" [ref=e4354]:
+                    - generic [ref=e4355]:
+                      - generic [ref=e4356]: NEANT
+                      - generic [ref=e4357]: NEANT
+                  - cell "-" [ref=e4358]
+                  - cell "-" [ref=e4359]
+                  - cell "Actif" [ref=e4360]:
+                    - generic [ref=e4361]: Actif
+                  - cell [ref=e4362]:
+                    - button [ref=e4363] [cursor=pointer]:
+                      - img
+                - row "PREST-IIC-0398 IICI IMPRIMERIE ET IMAGES DE COTE D'IVOIRE lebaf@yahoo.fr 0506346767 - - Actif" [ref=e4364]:
+                  - cell "PREST-IIC-0398" [ref=e4365]:
+                    - generic [ref=e4366]:
+                      - generic [ref=e4367]: PREST-IIC-0398
+                      - button [ref=e4368] [cursor=pointer]:
+                        - img
+                  - cell "IICI IMPRIMERIE ET IMAGES DE COTE D'IVOIRE" [ref=e4369]:
+                    - generic [ref=e4370]:
+                      - paragraph [ref=e4371]: IICI
+                      - paragraph [ref=e4372]: IMPRIMERIE ET IMAGES DE COTE D'IVOIRE
+                  - cell "lebaf@yahoo.fr 0506346767" [ref=e4373]:
+                    - generic [ref=e4374]:
+                      - generic [ref=e4375]: lebaf@yahoo.fr
+                      - generic [ref=e4376]: "0506346767"
+                  - cell "-" [ref=e4377]
+                  - cell "-" [ref=e4378]
+                  - cell "Actif" [ref=e4379]:
+                    - generic [ref=e4380]: Actif
+                  - cell [ref=e4381]:
+                    - button [ref=e4382] [cursor=pointer]:
+                      - img
+                - row "PREST-IES-0240 IK EVENT' S RESSOURCES IK EVENT'S RESSOURCES iksono@yahoo.fr 07 07 10 87 40 - - Actif" [ref=e4383]:
+                  - cell "PREST-IES-0240" [ref=e4384]:
+                    - generic [ref=e4385]:
+                      - generic [ref=e4386]: PREST-IES-0240
+                      - button [ref=e4387] [cursor=pointer]:
+                        - img
+                  - cell "IK EVENT' S RESSOURCES IK EVENT'S RESSOURCES" [ref=e4388]:
+                    - generic [ref=e4389]:
+                      - paragraph [ref=e4390]: IK EVENT' S RESSOURCES
+                      - paragraph [ref=e4391]: IK EVENT'S RESSOURCES
+                  - cell "iksono@yahoo.fr 07 07 10 87 40" [ref=e4392]:
+                    - generic [ref=e4393]:
+                      - generic [ref=e4394]: iksono@yahoo.fr
+                      - generic [ref=e4395]: 07 07 10 87 40
+                  - cell "-" [ref=e4396]
+                  - cell "-" [ref=e4397]
+                  - cell "Actif" [ref=e4398]:
+                    - generic [ref=e4399]: Actif
+                  - cell [ref=e4400]:
+                    - button [ref=e4401] [cursor=pointer]:
+                      - img
+                - row "PREST-IER-0055 IK EVENT'S RESSOURCES IK EVENT'S RESSOURCES iksono@yahoo.fr 2.25071e+012 - - Actif" [ref=e4402]:
+                  - cell "PREST-IER-0055" [ref=e4403]:
+                    - generic [ref=e4404]:
+                      - generic [ref=e4405]: PREST-IER-0055
+                      - button [ref=e4406] [cursor=pointer]:
+                        - img
+                  - cell "IK EVENT'S RESSOURCES IK EVENT'S RESSOURCES" [ref=e4407]:
+                    - generic [ref=e4408]:
+                      - paragraph [ref=e4409]: IK EVENT'S RESSOURCES
+                      - paragraph [ref=e4410]: IK EVENT'S RESSOURCES
+                  - cell "iksono@yahoo.fr 2.25071e+012" [ref=e4411]:
+                    - generic [ref=e4412]:
+                      - generic [ref=e4413]: iksono@yahoo.fr
+                      - generic [ref=e4414]: "2.25071e+012"
+                  - cell "-" [ref=e4415]
+                  - cell "-" [ref=e4416]
+                  - cell "Actif" [ref=e4417]:
+                    - generic [ref=e4418]: Actif
+                  - cell [ref=e4419]:
+                    - button [ref=e4420] [cursor=pointer]:
+                      - img
+                - row "PREST-004 IMPRIMERIE MODERNE commandes@imprimerie-moderne.ci +225 27 24 25 26 27 - SN45678901234 Actif" [ref=e4421]:
+                  - cell "PREST-004" [ref=e4422]:
+                    - generic [ref=e4423]:
+                      - generic [ref=e4424]: PREST-004
+                      - button [ref=e4425] [cursor=pointer]:
+                        - img
+                  - cell "IMPRIMERIE MODERNE" [ref=e4426]:
+                    - paragraph [ref=e4428]: IMPRIMERIE MODERNE
+                  - cell "commandes@imprimerie-moderne.ci +225 27 24 25 26 27" [ref=e4429]:
+                    - generic [ref=e4430]:
+                      - generic [ref=e4431]: commandes@imprimerie-moderne.ci
+                      - generic [ref=e4432]: +225 27 24 25 26 27
+                  - cell "-" [ref=e4433]
+                  - cell "SN45678901234" [ref=e4434]
+                  - cell "Actif" [ref=e4435]:
+                    - generic [ref=e4436]: Actif
+                  - cell [ref=e4437]:
+                    - button [ref=e4438] [cursor=pointer]:
+                      - img
+                - row "PREST-IMP-0298 IMPULS'COM IMPULS'COM NEANT 0576907043 - - Actif" [ref=e4439]:
+                  - cell "PREST-IMP-0298" [ref=e4440]:
+                    - generic [ref=e4441]:
+                      - generic [ref=e4442]: PREST-IMP-0298
+                      - button [ref=e4443] [cursor=pointer]:
+                        - img
+                  - cell "IMPULS'COM IMPULS'COM" [ref=e4444]:
+                    - generic [ref=e4445]:
+                      - paragraph [ref=e4446]: IMPULS'COM
+                      - paragraph [ref=e4447]: IMPULS'COM
+                  - cell "NEANT 0576907043" [ref=e4448]:
+                    - generic [ref=e4449]:
+                      - generic [ref=e4450]: NEANT
+                      - generic [ref=e4451]: "0576907043"
+                  - cell "-" [ref=e4452]
+                  - cell "-" [ref=e4453]
+                  - cell "Actif" [ref=e4454]:
+                    - generic [ref=e4455]: Actif
+                  - cell [ref=e4456]:
+                    - button [ref=e4457] [cursor=pointer]:
+                      - img
+                - row "MIG-0006 INP HB +225 27 30 64 66 61 - - Actif" [ref=e4458]:
+                  - cell "MIG-0006" [ref=e4459]:
+                    - generic [ref=e4460]:
+                      - generic [ref=e4461]: MIG-0006
+                      - button [ref=e4462] [cursor=pointer]:
+                        - img
+                  - cell "INP HB" [ref=e4463]:
+                    - paragraph [ref=e4465]: INP HB
+                  - cell "+225 27 30 64 66 61" [ref=e4466]:
+                    - generic [ref=e4468]: +225 27 30 64 66 61
+                  - cell "-" [ref=e4469]
+                  - cell "-" [ref=e4470]
+                  - cell "Actif" [ref=e4471]:
+                    - generic [ref=e4472]: Actif
+                  - cell [ref=e4473]:
+                    - button [ref=e4474] [cursor=pointer]:
+                      - img
+                - row "PREST-INP-0056 INSTITUT NATIONAL POLYTECHNIQUE INP HB Polytec@inphb.ci - - Actif" [ref=e4475]:
+                  - cell "PREST-INP-0056" [ref=e4476]:
+                    - generic [ref=e4477]:
+                      - generic [ref=e4478]: PREST-INP-0056
+                      - button [ref=e4479] [cursor=pointer]:
+                        - img
+                  - cell "INSTITUT NATIONAL POLYTECHNIQUE INP HB" [ref=e4480]:
+                    - generic [ref=e4481]:
+                      - paragraph [ref=e4482]: INSTITUT NATIONAL POLYTECHNIQUE
+                      - paragraph [ref=e4483]: INP HB
+                  - cell "Polytec@inphb.ci" [ref=e4484]:
+                    - generic [ref=e4486]: Polytec@inphb.ci
+                  - cell "-" [ref=e4487]
+                  - cell "-" [ref=e4488]
+                  - cell "Actif" [ref=e4489]:
+                    - generic [ref=e4490]: Actif
+                  - cell [ref=e4491]:
+                    - button [ref=e4492] [cursor=pointer]:
+                      - img
+                - row "PREST-ITE-0351 INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE Itransittransport@gmaiL.com 0788671029 - - Actif" [ref=e4493]:
+                  - cell "PREST-ITE-0351" [ref=e4494]:
+                    - generic [ref=e4495]:
+                      - generic [ref=e4496]: PREST-ITE-0351
+                      - button [ref=e4497] [cursor=pointer]:
+                        - img
+                  - cell "INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE" [ref=e4498]:
+                    - generic [ref=e4499]:
+                      - paragraph [ref=e4500]: INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE
+                      - paragraph [ref=e4501]: INTEGRAL TRANSIT ET TRANSPORT LOGISTIQUE
+                  - cell "Itransittransport@gmaiL.com 0788671029" [ref=e4502]:
+                    - generic [ref=e4503]:
+                      - generic [ref=e4504]: Itransittransport@gmaiL.com
+                      - generic [ref=e4505]: "0788671029"
+                  - cell "-" [ref=e4506]
+                  - cell "-" [ref=e4507]
+                  - cell "Actif" [ref=e4508]:
+                    - generic [ref=e4509]: Actif
+                  - cell [ref=e4510]:
+                    - button [ref=e4511] [cursor=pointer]:
+                      - img
+                - row "PREST-IP-0057 INTELECT PROTECTION INTELECT PROTECTION protection@intelec6protection.com 27 21 24 45 59 - - Actif" [ref=e4512]:
+                  - cell "PREST-IP-0057" [ref=e4513]:
+                    - generic [ref=e4514]:
+                      - generic [ref=e4515]: PREST-IP-0057
+                      - button [ref=e4516] [cursor=pointer]:
+                        - img
+                  - cell "INTELECT PROTECTION INTELECT PROTECTION" [ref=e4517]:
+                    - generic [ref=e4518]:
+                      - paragraph [ref=e4519]: INTELECT PROTECTION
+                      - paragraph [ref=e4520]: INTELECT PROTECTION
+                  - cell "protection@intelec6protection.com 27 21 24 45 59" [ref=e4521]:
+                    - generic [ref=e4522]:
+                      - generic [ref=e4523]: protection@intelec6protection.com
+                      - generic [ref=e4524]: 27 21 24 45 59
+                  - cell "-" [ref=e4525]
+                  - cell "-" [ref=e4526]
+                  - cell "Actif" [ref=e4527]:
+                    - generic [ref=e4528]: Actif
+                  - cell [ref=e4529]:
+                    - button [ref=e4530] [cursor=pointer]:
+                      - img
+                - row "PREST-IMS-0295 INTELIGENCE MULTIMEDIA SARL INTELIGENCE MULTIMEDIA florent@intelligence.ci / contact@intelligence.ci 27 22 54 50 10 - - Actif" [ref=e4531]:
+                  - cell "PREST-IMS-0295" [ref=e4532]:
+                    - generic [ref=e4533]:
+                      - generic [ref=e4534]: PREST-IMS-0295
+                      - button [ref=e4535] [cursor=pointer]:
+                        - img
+                  - cell "INTELIGENCE MULTIMEDIA SARL INTELIGENCE MULTIMEDIA" [ref=e4536]:
+                    - generic [ref=e4537]:
+                      - paragraph [ref=e4538]: INTELIGENCE MULTIMEDIA SARL
+                      - paragraph [ref=e4539]: INTELIGENCE MULTIMEDIA
+                  - cell "florent@intelligence.ci / contact@intelligence.ci 27 22 54 50 10" [ref=e4540]:
+                    - generic [ref=e4541]:
+                      - generic [ref=e4542]: florent@intelligence.ci / contact@intelligence.ci
+                      - generic [ref=e4543]: 27 22 54 50 10
+                  - cell "-" [ref=e4544]
+                  - cell "-" [ref=e4545]
+                  - cell "Actif" [ref=e4546]:
+                    - generic [ref=e4547]: Actif
+                  - cell [ref=e4548]:
+                    - button [ref=e4549] [cursor=pointer]:
+                      - img
+                - row "PREST-IA-0229 INTERNATIONAL ADVISOR INTERNATIONAL ADVISOR internationaladvisors23@gmail.com 0757473373 - - Actif" [ref=e4550]:
+                  - cell "PREST-IA-0229" [ref=e4551]:
+                    - generic [ref=e4552]:
+                      - generic [ref=e4553]: PREST-IA-0229
+                      - button [ref=e4554] [cursor=pointer]:
+                        - img
+                  - cell "INTERNATIONAL ADVISOR INTERNATIONAL ADVISOR" [ref=e4555]:
+                    - generic [ref=e4556]:
+                      - paragraph [ref=e4557]: INTERNATIONAL ADVISOR
+                      - paragraph [ref=e4558]: INTERNATIONAL ADVISOR
+                  - cell "internationaladvisors23@gmail.com 0757473373" [ref=e4559]:
+                    - generic [ref=e4560]:
+                      - generic [ref=e4561]: internationaladvisors23@gmail.com
+                      - generic [ref=e4562]: "0757473373"
+                  - cell "-" [ref=e4563]
+                  - cell "-" [ref=e4564]
+                  - cell "Actif" [ref=e4565]:
+                    - generic [ref=e4566]: Actif
+                  - cell [ref=e4567]:
+                    - button [ref=e4568] [cursor=pointer]:
+                      - img
+                - row "PREST-ISC-0222 International Software Corporation ISC internationalsoftwarec2023@gmail.com +225 0140013555 - - Actif" [ref=e4569]:
+                  - cell "PREST-ISC-0222" [ref=e4570]:
+                    - generic [ref=e4571]:
+                      - generic [ref=e4572]: PREST-ISC-0222
+                      - button [ref=e4573] [cursor=pointer]:
+                        - img
+                  - cell "International Software Corporation ISC" [ref=e4574]:
+                    - generic [ref=e4575]:
+                      - paragraph [ref=e4576]: International Software Corporation
+                      - paragraph [ref=e4577]: ISC
+                  - cell "internationalsoftwarec2023@gmail.com +225 0140013555" [ref=e4578]:
+                    - generic [ref=e4579]:
+                      - generic [ref=e4580]: internationalsoftwarec2023@gmail.com
+                      - generic [ref=e4581]: +225 0140013555
+                  - cell "-" [ref=e4582]
+                  - cell "-" [ref=e4583]
+                  - cell "Actif" [ref=e4584]:
+                    - generic [ref=e4585]: Actif
+                  - cell [ref=e4586]:
+                    - button [ref=e4587] [cursor=pointer]:
+                      - img
+                - row "PREST-ICS-0058 IVOIRE CARTES SYSTEMES IVOIRE CARTES SYSTEMES ics@ics.ci - - Actif" [ref=e4588]:
+                  - cell "PREST-ICS-0058" [ref=e4589]:
+                    - generic [ref=e4590]:
+                      - generic [ref=e4591]: PREST-ICS-0058
+                      - button [ref=e4592] [cursor=pointer]:
+                        - img
+                  - cell "IVOIRE CARTES SYSTEMES IVOIRE CARTES SYSTEMES" [ref=e4593]:
+                    - generic [ref=e4594]:
+                      - paragraph [ref=e4595]: IVOIRE CARTES SYSTEMES
+                      - paragraph [ref=e4596]: IVOIRE CARTES SYSTEMES
+                  - cell "ics@ics.ci" [ref=e4597]:
+                    - generic [ref=e4599]: ics@ics.ci
+                  - cell "-" [ref=e4600]
+                  - cell "-" [ref=e4601]
+                  - cell "Actif" [ref=e4602]:
+                    - generic [ref=e4603]: Actif
+                  - cell [ref=e4604]:
+                    - button [ref=e4605] [cursor=pointer]:
+                      - img
+                - row "PREST-IQ-0059 IVOIRE QUINCAILLERIE IVOIRE QUINCAILLERIE 5.06961e+008 - - Actif" [ref=e4606]:
+                  - cell "PREST-IQ-0059" [ref=e4607]:
+                    - generic [ref=e4608]:
+                      - generic [ref=e4609]: PREST-IQ-0059
+                      - button [ref=e4610] [cursor=pointer]:
+                        - img
+                  - cell "IVOIRE QUINCAILLERIE IVOIRE QUINCAILLERIE" [ref=e4611]:
+                    - generic [ref=e4612]:
+                      - paragraph [ref=e4613]: IVOIRE QUINCAILLERIE
+                      - paragraph [ref=e4614]: IVOIRE QUINCAILLERIE
+                  - cell "5.06961e+008" [ref=e4615]:
+                    - generic [ref=e4617]: "5.06961e+008"
+                  - cell "-" [ref=e4618]
+                  - cell "-" [ref=e4619]
+                  - cell "Actif" [ref=e4620]:
+                    - generic [ref=e4621]: Actif
+                  - cell [ref=e4622]:
+                    - button [ref=e4623] [cursor=pointer]:
+                      - img
+                - row "PREST-JS-0060 JAKARA SERVICES JAKARA SRVICES christelle.gnahoui@gmail.com 0777780223 - - Actif" [ref=e4624]:
+                  - cell "PREST-JS-0060" [ref=e4625]:
+                    - generic [ref=e4626]:
+                      - generic [ref=e4627]: PREST-JS-0060
+                      - button [ref=e4628] [cursor=pointer]:
+                        - img
+                  - cell "JAKARA SERVICES JAKARA SRVICES" [ref=e4629]:
+                    - generic [ref=e4630]:
+                      - paragraph [ref=e4631]: JAKARA SERVICES
+                      - paragraph [ref=e4632]: JAKARA SRVICES
+                  - cell "christelle.gnahoui@gmail.com 0777780223" [ref=e4633]:
+                    - generic [ref=e4634]:
+                      - generic [ref=e4635]: christelle.gnahoui@gmail.com
+                      - generic [ref=e4636]: "0777780223"
+                  - cell "-" [ref=e4637]
+                  - cell "-" [ref=e4638]
+                  - cell "Actif" [ref=e4639]:
+                    - generic [ref=e4640]: Actif
+                  - cell [ref=e4641]:
+                    - button [ref=e4642] [cursor=pointer]:
+                      - img
+                - row "PREST-JS-0342 JIREH SERVICES JIREH SERVICES NEANT 0584259025 - - Actif" [ref=e4643]:
+                  - cell "PREST-JS-0342" [ref=e4644]:
+                    - generic [ref=e4645]:
+                      - generic [ref=e4646]: PREST-JS-0342
+                      - button [ref=e4647] [cursor=pointer]:
+                        - img
+                  - cell "JIREH SERVICES JIREH SERVICES" [ref=e4648]:
+                    - generic [ref=e4649]:
+                      - paragraph [ref=e4650]: JIREH SERVICES
+                      - paragraph [ref=e4651]: JIREH SERVICES
+                  - cell "NEANT 0584259025" [ref=e4652]:
+                    - generic [ref=e4653]:
+                      - generic [ref=e4654]: NEANT
+                      - generic [ref=e4655]: "0584259025"
+                  - cell "-" [ref=e4656]
+                  - cell "-" [ref=e4657]
+                  - cell "Actif" [ref=e4658]:
+                    - generic [ref=e4659]: Actif
+                  - cell [ref=e4660]:
+                    - button [ref=e4661] [cursor=pointer]:
+                      - img
+                - row "PREST-JC-0382 JUMIA CIV JUMIA COTE D'IVOIRE NEANT NEANT - - Actif" [ref=e4662]:
+                  - cell "PREST-JC-0382" [ref=e4663]:
+                    - generic [ref=e4664]:
+                      - generic [ref=e4665]: PREST-JC-0382
+                      - button [ref=e4666] [cursor=pointer]:
+                        - img
+                  - cell "JUMIA CIV JUMIA COTE D'IVOIRE" [ref=e4667]:
+                    - generic [ref=e4668]:
+                      - paragraph [ref=e4669]: JUMIA CIV
+                      - paragraph [ref=e4670]: JUMIA COTE D'IVOIRE
+                  - cell "NEANT NEANT" [ref=e4671]:
+                    - generic [ref=e4672]:
+                      - generic [ref=e4673]: NEANT
+                      - generic [ref=e4674]: NEANT
+                  - cell "-" [ref=e4675]
+                  - cell "-" [ref=e4676]
+                  - cell "Actif" [ref=e4677]:
+                    - generic [ref=e4678]: Actif
+                  - cell [ref=e4679]:
+                    - button [ref=e4680] [cursor=pointer]:
+                      - img
+                - row "PREST-JHS-0061 JUST HUSS SARL JUST HUSS SARL justhus@hotmail.fr - - Actif" [ref=e4681]:
+                  - cell "PREST-JHS-0061" [ref=e4682]:
+                    - generic [ref=e4683]:
+                      - generic [ref=e4684]: PREST-JHS-0061
+                      - button [ref=e4685] [cursor=pointer]:
+                        - img
+                  - cell "JUST HUSS SARL JUST HUSS SARL" [ref=e4686]:
+                    - generic [ref=e4687]:
+                      - paragraph [ref=e4688]: JUST HUSS SARL
+                      - paragraph [ref=e4689]: JUST HUSS SARL
+                  - cell "justhus@hotmail.fr" [ref=e4690]:
+                    - generic [ref=e4692]: justhus@hotmail.fr
+                  - cell "-" [ref=e4693]
+                  - cell "-" [ref=e4694]
+                  - cell "Actif" [ref=e4695]:
+                    - generic [ref=e4696]: Actif
+                  - cell [ref=e4697]:
+                    - button [ref=e4698] [cursor=pointer]:
+                      - img
+                - row "PREST-KSI-0062 KABOD SIGNATURE IMMOBILIER KABOD SIGNATURE IMMOBILIER contact@lamaisondesampoules 7.07226e+008 - - Actif" [ref=e4699]:
+                  - cell "PREST-KSI-0062" [ref=e4700]:
+                    - generic [ref=e4701]:
+                      - generic [ref=e4702]: PREST-KSI-0062
+                      - button [ref=e4703] [cursor=pointer]:
+                        - img
+                  - cell "KABOD SIGNATURE IMMOBILIER KABOD SIGNATURE IMMOBILIER" [ref=e4704]:
+                    - generic [ref=e4705]:
+                      - paragraph [ref=e4706]: KABOD SIGNATURE IMMOBILIER
+                      - paragraph [ref=e4707]: KABOD SIGNATURE IMMOBILIER
+                  - cell "contact@lamaisondesampoules 7.07226e+008" [ref=e4708]:
+                    - generic [ref=e4709]:
+                      - generic [ref=e4710]: contact@lamaisondesampoules
+                      - generic [ref=e4711]: "7.07226e+008"
+                  - cell "-" [ref=e4712]
+                  - cell "-" [ref=e4713]
+                  - cell "Actif" [ref=e4714]:
+                    - generic [ref=e4715]: Actif
+                  - cell [ref=e4716]:
+                    - button [ref=e4717] [cursor=pointer]:
+                      - img
+                - row "PREST-KE-0063 KADIA ENTREPRISES KADIA ENTREPRISES - - Actif" [ref=e4718]:
+                  - cell "PREST-KE-0063" [ref=e4719]:
+                    - generic [ref=e4720]:
+                      - generic [ref=e4721]: PREST-KE-0063
+                      - button [ref=e4722] [cursor=pointer]:
+                        - img
+                  - cell "KADIA ENTREPRISES KADIA ENTREPRISES" [ref=e4723]:
+                    - generic [ref=e4724]:
+                      - paragraph [ref=e4725]: KADIA ENTREPRISES
+                      - paragraph [ref=e4726]: KADIA ENTREPRISES
+                  - cell [ref=e4727]
+                  - cell "-" [ref=e4728]
+                  - cell "-" [ref=e4729]
+                  - cell "Actif" [ref=e4730]:
+                    - generic [ref=e4731]: Actif
+                  - cell [ref=e4732]:
+                    - button [ref=e4733] [cursor=pointer]:
+                      - img
+                - row "PREST-KMU-0263 KARLSRUHER MESSE - UND KONGRESS GMBH KARLSRUHER MESSE - UND KONGRESS GMBH - - Actif" [ref=e4734]:
+                  - cell "PREST-KMU-0263" [ref=e4735]:
+                    - generic [ref=e4736]:
+                      - generic [ref=e4737]: PREST-KMU-0263
+                      - button [ref=e4738] [cursor=pointer]:
+                        - img
+                  - cell "KARLSRUHER MESSE - UND KONGRESS GMBH KARLSRUHER MESSE - UND KONGRESS GMBH" [ref=e4739]:
+                    - generic [ref=e4740]:
+                      - paragraph [ref=e4741]: KARLSRUHER MESSE - UND KONGRESS GMBH
+                      - paragraph [ref=e4742]: KARLSRUHER MESSE - UND KONGRESS GMBH
+                  - cell [ref=e4743]
+                  - cell "-" [ref=e4744]
+                  - cell "-" [ref=e4745]
+                  - cell "Actif" [ref=e4746]:
+                    - generic [ref=e4747]: Actif
+                  - cell [ref=e4748]:
+                    - button [ref=e4749] [cursor=pointer]:
+                      - img
+                - row "PREST-KS-0350 KEDJ SECURITE KEDJ SECURITE info@kedj-securite.ci 2724311441 - - Actif" [ref=e4750]:
+                  - cell "PREST-KS-0350" [ref=e4751]:
+                    - generic [ref=e4752]:
+                      - generic [ref=e4753]: PREST-KS-0350
+                      - button [ref=e4754] [cursor=pointer]:
+                        - img
+                  - cell "KEDJ SECURITE KEDJ SECURITE" [ref=e4755]:
+                    - generic [ref=e4756]:
+                      - paragraph [ref=e4757]: KEDJ SECURITE
+                      - paragraph [ref=e4758]: KEDJ SECURITE
+                  - cell "info@kedj-securite.ci 2724311441" [ref=e4759]:
+                    - generic [ref=e4760]:
+                      - generic [ref=e4761]: info@kedj-securite.ci
+                      - generic [ref=e4762]: "2724311441"
+                  - cell "-" [ref=e4763]
+                  - cell "-" [ref=e4764]
+                  - cell "Actif" [ref=e4765]:
+                    - generic [ref=e4766]: Actif
+                  - cell [ref=e4767]:
+                    - button [ref=e4768] [cursor=pointer]:
+                      - img
+                - row "PREST-KA-0230 KENYA AIRWAYS KENYA AIRWAYS Edwige.SehiTora@kenya-airways.com 2721710820 - - Actif" [ref=e4769]:
+                  - cell "PREST-KA-0230" [ref=e4770]:
+                    - generic [ref=e4771]:
+                      - generic [ref=e4772]: PREST-KA-0230
+                      - button [ref=e4773] [cursor=pointer]:
+                        - img
+                  - cell "KENYA AIRWAYS KENYA AIRWAYS" [ref=e4774]:
+                    - generic [ref=e4775]:
+                      - paragraph [ref=e4776]: KENYA AIRWAYS
+                      - paragraph [ref=e4777]: KENYA AIRWAYS
+                  - cell "Edwige.SehiTora@kenya-airways.com 2721710820" [ref=e4778]:
+                    - generic [ref=e4779]:
+                      - generic [ref=e4780]: Edwige.SehiTora@kenya-airways.com
+                      - generic [ref=e4781]: "2721710820"
+                  - cell "-" [ref=e4782]
+                  - cell "-" [ref=e4783]
+                  - cell "Actif" [ref=e4784]:
+                    - generic [ref=e4785]: Actif
+                  - cell [ref=e4786]:
+                    - button [ref=e4787] [cursor=pointer]:
+                      - img
+                - row "PREST-KHI-0264 KONE HASSAN IDRISS (LOYER) KONE HASSAN IDRISS (LOYER) - - Actif" [ref=e4788]:
+                  - cell "PREST-KHI-0264" [ref=e4789]:
+                    - generic [ref=e4790]:
+                      - generic [ref=e4791]: PREST-KHI-0264
+                      - button [ref=e4792] [cursor=pointer]:
+                        - img
+                  - cell "KONE HASSAN IDRISS (LOYER) KONE HASSAN IDRISS (LOYER)" [ref=e4793]:
+                    - generic [ref=e4794]:
+                      - paragraph [ref=e4795]: KONE HASSAN IDRISS (LOYER)
+                      - paragraph [ref=e4796]: KONE HASSAN IDRISS (LOYER)
+                  - cell [ref=e4797]
+                  - cell "-" [ref=e4798]
+                  - cell "-" [ref=e4799]
+                  - cell "Actif" [ref=e4800]:
+                    - generic [ref=e4801]: Actif
+                  - cell [ref=e4802]:
+                    - button [ref=e4803] [cursor=pointer]:
+                      - img
+                - row "PREST-KTS-0203 KYNUX TECHNOLOGIES SARL KYNUX TECHNOLOGIES info@kynux.biz 2121366878 - - Actif" [ref=e4804]:
+                  - cell "PREST-KTS-0203" [ref=e4805]:
+                    - generic [ref=e4806]:
+                      - generic [ref=e4807]: PREST-KTS-0203
+                      - button [ref=e4808] [cursor=pointer]:
+                        - img
+                  - cell "KYNUX TECHNOLOGIES SARL KYNUX TECHNOLOGIES" [ref=e4809]:
+                    - generic [ref=e4810]:
+                      - paragraph [ref=e4811]: KYNUX TECHNOLOGIES SARL
+                      - paragraph [ref=e4812]: KYNUX TECHNOLOGIES
+                  - cell "info@kynux.biz 2121366878" [ref=e4813]:
+                    - generic [ref=e4814]:
+                      - generic [ref=e4815]: info@kynux.biz
+                      - generic [ref=e4816]: "2121366878"
+                  - cell "-" [ref=e4817]
+                  - cell "-" [ref=e4818]
+                  - cell "Actif" [ref=e4819]:
+                    - generic [ref=e4820]: Actif
+                  - cell [ref=e4821]:
+                    - button [ref=e4822] [cursor=pointer]:
+                      - img
+                - row "PREST-L'O-0215 L'OCEAN L'OCEAN NEANT 0788769999 - - Actif" [ref=e4823]:
+                  - cell "PREST-L'O-0215" [ref=e4824]:
+                    - generic [ref=e4825]:
+                      - generic [ref=e4826]: PREST-L'O-0215
+                      - button [ref=e4827] [cursor=pointer]:
+                        - img
+                  - cell "L'OCEAN L'OCEAN" [ref=e4828]:
+                    - generic [ref=e4829]:
+                      - paragraph [ref=e4830]: L'OCEAN
+                      - paragraph [ref=e4831]: L'OCEAN
+                  - cell "NEANT 0788769999" [ref=e4832]:
+                    - generic [ref=e4833]:
+                      - generic [ref=e4834]: NEANT
+                      - generic [ref=e4835]: "0788769999"
+                  - cell "-" [ref=e4836]
+                  - cell "-" [ref=e4837]
+                  - cell "Actif" [ref=e4838]:
+                    - generic [ref=e4839]: Actif
+                  - cell [ref=e4840]:
+                    - button [ref=e4841] [cursor=pointer]:
+                      - img
+                - row "PREST-L'O-0119 L'OENOPHILE L'OENOPHILE 0 - - Actif" [ref=e4842]:
+                  - cell "PREST-L'O-0119" [ref=e4843]:
+                    - generic [ref=e4844]:
+                      - generic [ref=e4845]: PREST-L'O-0119
+                      - button [ref=e4846] [cursor=pointer]:
+                        - img
+                  - cell "L'OENOPHILE L'OENOPHILE" [ref=e4847]:
+                    - generic [ref=e4848]:
+                      - paragraph [ref=e4849]: L'OENOPHILE
+                      - paragraph [ref=e4850]: L'OENOPHILE
+                  - cell "0" [ref=e4851]:
+                    - generic [ref=e4853]: "0"
+                  - cell "-" [ref=e4854]
+                  - cell "-" [ref=e4855]
+                  - cell "Actif" [ref=e4856]:
+                    - generic [ref=e4857]: Actif
+                  - cell [ref=e4858]:
+                    - button [ref=e4859] [cursor=pointer]:
+                      - img
+                - row "PREST-LB-0064 LA BOUQUINETTE LA BOUQUINETTE - - Actif" [ref=e4860]:
+                  - cell "PREST-LB-0064" [ref=e4861]:
+                    - generic [ref=e4862]:
+                      - generic [ref=e4863]: PREST-LB-0064
+                      - button [ref=e4864] [cursor=pointer]:
+                        - img
+                  - cell "LA BOUQUINETTE LA BOUQUINETTE" [ref=e4865]:
+                    - generic [ref=e4866]:
+                      - paragraph [ref=e4867]: LA BOUQUINETTE
+                      - paragraph [ref=e4868]: LA BOUQUINETTE
+                  - cell [ref=e4869]
+                  - cell "-" [ref=e4870]
+                  - cell "-" [ref=e4871]
+                  - cell "Actif" [ref=e4872]:
+                    - generic [ref=e4873]: Actif
+                  - cell [ref=e4874]:
+                    - button [ref=e4875] [cursor=pointer]:
+                      - img
+                - row "PREST-LMD-0356 LA MAISON DES TELEPHONES LA MAISON DES TELEPHONES Mtfaya69@gmail.com 0153808002 - - Actif" [ref=e4876]:
+                  - cell "PREST-LMD-0356" [ref=e4877]:
+                    - generic [ref=e4878]:
+                      - generic [ref=e4879]: PREST-LMD-0356
+                      - button [ref=e4880] [cursor=pointer]:
+                        - img
+                  - cell "LA MAISON DES TELEPHONES LA MAISON DES TELEPHONES" [ref=e4881]:
+                    - generic [ref=e4882]:
+                      - paragraph [ref=e4883]: LA MAISON DES TELEPHONES
+                      - paragraph [ref=e4884]: LA MAISON DES TELEPHONES
+                  - cell "Mtfaya69@gmail.com 0153808002" [ref=e4885]:
+                    - generic [ref=e4886]:
+                      - generic [ref=e4887]: Mtfaya69@gmail.com
+                      - generic [ref=e4888]: "0153808002"
+                  - cell "-" [ref=e4889]
+                  - cell "-" [ref=e4890]
+                  - cell "Actif" [ref=e4891]:
+                    - generic [ref=e4892]: Actif
+                  - cell [ref=e4893]:
+                    - button [ref=e4894] [cursor=pointer]:
+                      - img
+                - row "PREST-LMP-0199 LA MAISON PALMIER LA MAISON PALMIER Info.palmier@lamaisonpalmier.com +225 27 22 22 00 00 - - Actif" [ref=e4895]:
+                  - cell "PREST-LMP-0199" [ref=e4896]:
+                    - generic [ref=e4897]:
+                      - generic [ref=e4898]: PREST-LMP-0199
+                      - button [ref=e4899] [cursor=pointer]:
+                        - img
+                  - cell "LA MAISON PALMIER LA MAISON PALMIER" [ref=e4900]:
+                    - generic [ref=e4901]:
+                      - paragraph [ref=e4902]: LA MAISON PALMIER
+                      - paragraph [ref=e4903]: LA MAISON PALMIER
+                  - cell "Info.palmier@lamaisonpalmier.com +225 27 22 22 00 00" [ref=e4904]:
+                    - generic [ref=e4905]:
+                      - generic [ref=e4906]: Info.palmier@lamaisonpalmier.com
+                      - generic [ref=e4907]: +225 27 22 22 00 00
+                  - cell "-" [ref=e4908]
+                  - cell "-" [ref=e4909]
+                  - cell "Actif" [ref=e4910]:
+                    - generic [ref=e4911]: Actif
+                  - cell [ref=e4912]:
+                    - button [ref=e4913] [cursor=pointer]:
+                      - img
+                - row "PREST-LPD-0265 LA POSTE DE COTE D'IVOIRE LA POSTE DE COTE D'IVOIRE - - Actif" [ref=e4914]:
+                  - cell "PREST-LPD-0265" [ref=e4915]:
+                    - generic [ref=e4916]:
+                      - generic [ref=e4917]: PREST-LPD-0265
+                      - button [ref=e4918] [cursor=pointer]:
+                        - img
+                  - cell "LA POSTE DE COTE D'IVOIRE LA POSTE DE COTE D'IVOIRE" [ref=e4919]:
+                    - generic [ref=e4920]:
+                      - paragraph [ref=e4921]: LA POSTE DE COTE D'IVOIRE
+                      - paragraph [ref=e4922]: LA POSTE DE COTE D'IVOIRE
+                  - cell [ref=e4923]
+                  - cell "-" [ref=e4924]
+                  - cell "-" [ref=e4925]
+                  - cell "Actif" [ref=e4926]:
+                    - generic [ref=e4927]: Actif
+                  - cell [ref=e4928]:
+                    - button [ref=e4929] [cursor=pointer]:
+                      - img
+                - row "PREST-LPD-0066 LA POSTE DE COTE DIVOIRE LA POSTE DE COTE DIVOIRE - - Actif" [ref=e4930]:
+                  - cell "PREST-LPD-0066" [ref=e4931]:
+                    - generic [ref=e4932]:
+                      - generic [ref=e4933]: PREST-LPD-0066
+                      - button [ref=e4934] [cursor=pointer]:
+                        - img
+                  - cell "LA POSTE DE COTE DIVOIRE LA POSTE DE COTE DIVOIRE" [ref=e4935]:
+                    - generic [ref=e4936]:
+                      - paragraph [ref=e4937]: LA POSTE DE COTE DIVOIRE
+                      - paragraph [ref=e4938]: LA POSTE DE COTE DIVOIRE
+                  - cell [ref=e4939]
+                  - cell "-" [ref=e4940]
+                  - cell "-" [ref=e4941]
+                  - cell "Actif" [ref=e4942]:
+                    - generic [ref=e4943]: Actif
+                  - cell [ref=e4944]:
+                    - button [ref=e4945] [cursor=pointer]:
+                      - img
+                - row "PREST-LTR-0420 LA TAVERNE ROMAINE LA TAVERNE ROMAINE taverneromaine@gmail.com 0707938066 - - Actif" [ref=e4946]:
+                  - cell "PREST-LTR-0420" [ref=e4947]:
+                    - generic [ref=e4948]:
+                      - generic [ref=e4949]: PREST-LTR-0420
+                      - button [ref=e4950] [cursor=pointer]:
+                        - img
+                  - cell "LA TAVERNE ROMAINE LA TAVERNE ROMAINE" [ref=e4951]:
+                    - generic [ref=e4952]:
+                      - paragraph [ref=e4953]: LA TAVERNE ROMAINE
+                      - paragraph [ref=e4954]: LA TAVERNE ROMAINE
+                  - cell "taverneromaine@gmail.com 0707938066" [ref=e4955]:
+                    - generic [ref=e4956]:
+                      - generic [ref=e4957]: taverneromaine@gmail.com
+                      - generic [ref=e4958]: "0707938066"
+                  - cell "-" [ref=e4959]
+                  - cell "-" [ref=e4960]
+                  - cell "Actif" [ref=e4961]:
+                    - generic [ref=e4962]: Actif
+                  - cell [ref=e4963]:
+                    - button [ref=e4964] [cursor=pointer]:
+                      - img
+                - row "PREST-LDB-0200 LABORATOIRE DU BATIMENT ET DES TRAVAUX PUBLIQUES LBTP info@lbtp.org 0505050177 - - Actif" [ref=e4965]:
+                  - cell "PREST-LDB-0200" [ref=e4966]:
+                    - generic [ref=e4967]:
+                      - generic [ref=e4968]: PREST-LDB-0200
+                      - button [ref=e4969] [cursor=pointer]:
+                        - img
+                  - cell "LABORATOIRE DU BATIMENT ET DES TRAVAUX PUBLIQUES LBTP" [ref=e4970]:
+                    - generic [ref=e4971]:
+                      - paragraph [ref=e4972]: LABORATOIRE DU BATIMENT ET DES TRAVAUX PUBLIQUES
+                      - paragraph [ref=e4973]: LBTP
+                  - cell "info@lbtp.org 0505050177" [ref=e4974]:
+                    - generic [ref=e4975]:
+                      - generic [ref=e4976]: info@lbtp.org
+                      - generic [ref=e4977]: "0505050177"
+                  - cell "-" [ref=e4978]
+                  - cell "-" [ref=e4979]
+                  - cell "Actif" [ref=e4980]:
+                    - generic [ref=e4981]: Actif
+                  - cell [ref=e4982]:
+                    - button [ref=e4983] [cursor=pointer]:
+                      - img
+                - row "PREST-LB-0067 LASS BOUTIQUE LASS BOUTIQUE - - Actif" [ref=e4984]:
+                  - cell "PREST-LB-0067" [ref=e4985]:
+                    - generic [ref=e4986]:
+                      - generic [ref=e4987]: PREST-LB-0067
+                      - button [ref=e4988] [cursor=pointer]:
+                        - img
+                  - cell "LASS BOUTIQUE LASS BOUTIQUE" [ref=e4989]:
+                    - generic [ref=e4990]:
+                      - paragraph [ref=e4991]: LASS BOUTIQUE
+                      - paragraph [ref=e4992]: LASS BOUTIQUE
+                  - cell [ref=e4993]
+                  - cell "-" [ref=e4994]
+                  - cell "-" [ref=e4995]
+                  - cell "Actif" [ref=e4996]:
+                    - generic [ref=e4997]: Actif
+                  - cell [ref=e4998]:
+                    - button [ref=e4999] [cursor=pointer]:
+                      - img
+                - row "PREST-LSA-0405 LAWAS SERVICE & ASSOCIES LAWAS SERVICE & ASSOCIES kkouassiigoue@gmail.com 0747361219 - - Actif" [ref=e5000]:
+                  - cell "PREST-LSA-0405" [ref=e5001]:
+                    - generic [ref=e5002]:
+                      - generic [ref=e5003]: PREST-LSA-0405
+                      - button [ref=e5004] [cursor=pointer]:
+                        - img
+                  - cell "LAWAS SERVICE & ASSOCIES LAWAS SERVICE & ASSOCIES" [ref=e5005]:
+                    - generic [ref=e5006]:
+                      - paragraph [ref=e5007]: LAWAS SERVICE & ASSOCIES
+                      - paragraph [ref=e5008]: LAWAS SERVICE & ASSOCIES
+                  - cell "kkouassiigoue@gmail.com 0747361219" [ref=e5009]:
+                    - generic [ref=e5010]:
+                      - generic [ref=e5011]: kkouassiigoue@gmail.com
+                      - generic [ref=e5012]: "0747361219"
+                  - cell "-" [ref=e5013]
+                  - cell "-" [ref=e5014]
+                  - cell "Actif" [ref=e5015]:
+                    - generic [ref=e5016]: Actif
+                  - cell [ref=e5017]:
+                    - button [ref=e5018] [cursor=pointer]:
+                      - img
+                - row "PREST-LSA-0390 LAWASS SERVICE & ASSOCIES LAWASS SERVICE & ASSOCIES lawasservices103@gmail.com 0747361219 - - Actif" [ref=e5019]:
+                  - cell "PREST-LSA-0390" [ref=e5020]:
+                    - generic [ref=e5021]:
+                      - generic [ref=e5022]: PREST-LSA-0390
+                      - button [ref=e5023] [cursor=pointer]:
+                        - img
+                  - cell "LAWASS SERVICE & ASSOCIES LAWASS SERVICE & ASSOCIES" [ref=e5024]:
+                    - generic [ref=e5025]:
+                      - paragraph [ref=e5026]: LAWASS SERVICE & ASSOCIES
+                      - paragraph [ref=e5027]: LAWASS SERVICE & ASSOCIES
+                  - cell "lawasservices103@gmail.com 0747361219" [ref=e5028]:
+                    - generic [ref=e5029]:
+                      - generic [ref=e5030]: lawasservices103@gmail.com
+                      - generic [ref=e5031]: "0747361219"
+                  - cell "-" [ref=e5032]
+                  - cell "-" [ref=e5033]
+                  - cell "Actif" [ref=e5034]:
+                    - generic [ref=e5035]: Actif
+                  - cell [ref=e5036]:
+                    - button [ref=e5037] [cursor=pointer]:
+                      - img
+                - row "PREST-LCE-0158 LCE LEADEX CONSEILS & EXPERTISES infos.cabinetlce@gmail.com 2722556145 - - Actif" [ref=e5038]:
+                  - cell "PREST-LCE-0158" [ref=e5039]:
+                    - generic [ref=e5040]:
+                      - generic [ref=e5041]: PREST-LCE-0158
+                      - button [ref=e5042] [cursor=pointer]:
+                        - img
+                  - cell "LCE LEADEX CONSEILS & EXPERTISES" [ref=e5043]:
+                    - generic [ref=e5044]:
+                      - paragraph [ref=e5045]: LCE
+                      - paragraph [ref=e5046]: LEADEX CONSEILS & EXPERTISES
+                  - cell "infos.cabinetlce@gmail.com 2722556145" [ref=e5047]:
+                    - generic [ref=e5048]:
+                      - generic [ref=e5049]: infos.cabinetlce@gmail.com
+                      - generic [ref=e5050]: "2722556145"
+                  - cell "-" [ref=e5051]
+                  - cell "-" [ref=e5052]
+                  - cell "Actif" [ref=e5053]:
+                    - generic [ref=e5054]: Actif
+                  - cell [ref=e5055]:
+                    - button [ref=e5056] [cursor=pointer]:
+                      - img
+                - row "PREST-LM-0308 LE MATIN LE MATIN NEANT NEANT - - Actif" [ref=e5057]:
+                  - cell "PREST-LM-0308" [ref=e5058]:
+                    - generic [ref=e5059]:
+                      - generic [ref=e5060]: PREST-LM-0308
+                      - button [ref=e5061] [cursor=pointer]:
+                        - img
+                  - cell "LE MATIN LE MATIN" [ref=e5062]:
+                    - generic [ref=e5063]:
+                      - paragraph [ref=e5064]: LE MATIN
+                      - paragraph [ref=e5065]: LE MATIN
+                  - cell "NEANT NEANT" [ref=e5066]:
+                    - generic [ref=e5067]:
+                      - generic [ref=e5068]: NEANT
+                      - generic [ref=e5069]: NEANT
+                  - cell "-" [ref=e5070]
+                  - cell "-" [ref=e5071]
+                  - cell "Actif" [ref=e5072]:
+                    - generic [ref=e5073]: Actif
+                  - cell [ref=e5074]:
+                    - button [ref=e5075] [cursor=pointer]:
+                      - img
+                - row "PREST-LM-0413 LE MECHOUI LE MECHOUI - - Actif" [ref=e5076]:
+                  - cell "PREST-LM-0413" [ref=e5077]:
+                    - generic [ref=e5078]:
+                      - generic [ref=e5079]: PREST-LM-0413
+                      - button [ref=e5080] [cursor=pointer]:
+                        - img
+                  - cell "LE MECHOUI LE MECHOUI" [ref=e5081]:
+                    - generic [ref=e5082]:
+                      - paragraph [ref=e5083]: LE MECHOUI
+                      - paragraph [ref=e5084]: LE MECHOUI
+                  - cell [ref=e5085]
+                  - cell "-" [ref=e5086]
+                  - cell "-" [ref=e5087]
+                  - cell "Actif" [ref=e5088]:
+                    - generic [ref=e5089]: Actif
+                  - cell [ref=e5090]:
+                    - button [ref=e5091] [cursor=pointer]:
+                      - img
+                - row "PREST-LR-0310 LE RASSEMBLEMENT LE RASSEMBLEMENT NEANT NEANT - - Actif" [ref=e5092]:
+                  - cell "PREST-LR-0310" [ref=e5093]:
+                    - generic [ref=e5094]:
+                      - generic [ref=e5095]: PREST-LR-0310
+                      - button [ref=e5096] [cursor=pointer]:
+                        - img
+                  - cell "LE RASSEMBLEMENT LE RASSEMBLEMENT" [ref=e5097]:
+                    - generic [ref=e5098]:
+                      - paragraph [ref=e5099]: LE RASSEMBLEMENT
+                      - paragraph [ref=e5100]: LE RASSEMBLEMENT
+                  - cell "NEANT NEANT" [ref=e5101]:
+                    - generic [ref=e5102]:
+                      - generic [ref=e5103]: NEANT
+                      - generic [ref=e5104]: NEANT
+                  - cell "-" [ref=e5105]
+                  - cell "-" [ref=e5106]
+                  - cell "Actif" [ref=e5107]:
+                    - generic [ref=e5108]: Actif
+                  - cell [ref=e5109]:
+                    - button [ref=e5110] [cursor=pointer]:
+                      - img
+                - row "PREST-LNG-0253 LEAD NOOVA GROUP SARL LEAD NOOVA GROUP SARL leadnoovagroup@gmail.com 2722526279 - - Actif" [ref=e5111]:
+                  - cell "PREST-LNG-0253" [ref=e5112]:
+                    - generic [ref=e5113]:
+                      - generic [ref=e5114]: PREST-LNG-0253
+                      - button [ref=e5115] [cursor=pointer]:
+                        - img
+                  - cell "LEAD NOOVA GROUP SARL LEAD NOOVA GROUP SARL" [ref=e5116]:
+                    - generic [ref=e5117]:
+                      - paragraph [ref=e5118]: LEAD NOOVA GROUP SARL
+                      - paragraph [ref=e5119]: LEAD NOOVA GROUP SARL
+                  - cell "leadnoovagroup@gmail.com 2722526279" [ref=e5120]:
+                    - generic [ref=e5121]:
+                      - generic [ref=e5122]: leadnoovagroup@gmail.com
+                      - generic [ref=e5123]: "2722526279"
+                  - cell "-" [ref=e5124]
+                  - cell "-" [ref=e5125]
+                  - cell "Actif" [ref=e5126]:
+                    - generic [ref=e5127]: Actif
+                  - cell [ref=e5128]:
+                    - button [ref=e5129] [cursor=pointer]:
+                      - img
+                - row "PREST-LPC-0068 LEADER PRICE COTE D'IVOIRE LEADER PRICE COTE D'IVOIRE 2.25272e+012 - - Actif" [ref=e5130]:
+                  - cell "PREST-LPC-0068" [ref=e5131]:
+                    - generic [ref=e5132]:
+                      - generic [ref=e5133]: PREST-LPC-0068
+                      - button [ref=e5134] [cursor=pointer]:
+                        - img
+                  - cell "LEADER PRICE COTE D'IVOIRE LEADER PRICE COTE D'IVOIRE" [ref=e5135]:
+                    - generic [ref=e5136]:
+                      - paragraph [ref=e5137]: LEADER PRICE COTE D'IVOIRE
+                      - paragraph [ref=e5138]: LEADER PRICE COTE D'IVOIRE
+                  - cell "2.25272e+012" [ref=e5139]:
+                    - generic [ref=e5141]: "2.25272e+012"
+                  - cell "-" [ref=e5142]
+                  - cell "-" [ref=e5143]
+                  - cell "Actif" [ref=e5144]:
+                    - generic [ref=e5145]: Actif
+                  - cell [ref=e5146]:
+                    - button [ref=e5147] [cursor=pointer]:
+                      - img
+                - row "PREST-LED-0328 LEDIA LEDIA NEANT 07.08.54.55.36 - - Actif" [ref=e5148]:
+                  - cell "PREST-LED-0328" [ref=e5149]:
+                    - generic [ref=e5150]:
+                      - generic [ref=e5151]: PREST-LED-0328
+                      - button [ref=e5152] [cursor=pointer]:
+                        - img
+                  - cell "LEDIA LEDIA" [ref=e5153]:
+                    - generic [ref=e5154]:
+                      - paragraph [ref=e5155]: LEDIA
+                      - paragraph [ref=e5156]: LEDIA
+                  - cell "NEANT 07.08.54.55.36" [ref=e5157]:
+                    - generic [ref=e5158]:
+                      - generic [ref=e5159]: NEANT
+                      - generic [ref=e5160]: 07.08.54.55.36
+                  - cell "-" [ref=e5161]
+                  - cell "-" [ref=e5162]
+                  - cell "Actif" [ref=e5163]:
+                    - generic [ref=e5164]: Actif
+                  - cell [ref=e5165]:
+                    - button [ref=e5166] [cursor=pointer]:
+                      - img
+                - row "PREST-LPM-0349 LES PALMIERS MULTITISERVICES LES PALMIERS MULTITISERVICES NEANT 0505420280 - - Actif" [ref=e5167]:
+                  - cell "PREST-LPM-0349" [ref=e5168]:
+                    - generic [ref=e5169]:
+                      - generic [ref=e5170]: PREST-LPM-0349
+                      - button [ref=e5171] [cursor=pointer]:
+                        - img
+                  - cell "LES PALMIERS MULTITISERVICES LES PALMIERS MULTITISERVICES" [ref=e5172]:
+                    - generic [ref=e5173]:
+                      - paragraph [ref=e5174]: LES PALMIERS MULTITISERVICES
+                      - paragraph [ref=e5175]: LES PALMIERS MULTITISERVICES
+                  - cell "NEANT 0505420280" [ref=e5176]:
+                    - generic [ref=e5177]:
+                      - generic [ref=e5178]: NEANT
+                      - generic [ref=e5179]: "0505420280"
+                  - cell "-" [ref=e5180]
+                  - cell "-" [ref=e5181]
+                  - cell "Actif" [ref=e5182]:
+                    - generic [ref=e5183]: Actif
+                  - cell [ref=e5184]:
+                    - button [ref=e5185] [cursor=pointer]:
+                      - img
+                - row "PREST-LC-0132 LEVITIC COMPAGNIE LEVITIC COMPAGNIE leviticcompagniei@gmail.com 0709310540 - - Actif" [ref=e5186]:
+                  - cell "PREST-LC-0132" [ref=e5187]:
+                    - generic [ref=e5188]:
+                      - generic [ref=e5189]: PREST-LC-0132
+                      - button [ref=e5190] [cursor=pointer]:
+                        - img
+                  - cell "LEVITIC COMPAGNIE LEVITIC COMPAGNIE" [ref=e5191]:
+                    - generic [ref=e5192]:
+                      - paragraph [ref=e5193]: LEVITIC COMPAGNIE
+                      - paragraph [ref=e5194]: LEVITIC COMPAGNIE
+                  - cell "leviticcompagniei@gmail.com 0709310540" [ref=e5195]:
+                    - generic [ref=e5196]:
+                      - generic [ref=e5197]: leviticcompagniei@gmail.com
+                      - generic [ref=e5198]: "0709310540"
+                  - cell "-" [ref=e5199]
+                  - cell "-" [ref=e5200]
+                  - cell "Actif" [ref=e5201]:
+                    - generic [ref=e5202]: Actif
+                  - cell [ref=e5203]:
+                    - button [ref=e5204] [cursor=pointer]:
+                      - img
+                - row "PREST-LDF-0069 LIBRAIRIE DE FRANCE GROUPE LIBRAIRIE DE FRANCE GROUPE 2.72031e+009 - - Actif" [ref=e5205]:
+                  - cell "PREST-LDF-0069" [ref=e5206]:
+                    - generic [ref=e5207]:
+                      - generic [ref=e5208]: PREST-LDF-0069
+                      - button [ref=e5209] [cursor=pointer]:
+                        - img
+                  - cell "LIBRAIRIE DE FRANCE GROUPE LIBRAIRIE DE FRANCE GROUPE" [ref=e5210]:
+                    - generic [ref=e5211]:
+                      - paragraph [ref=e5212]: LIBRAIRIE DE FRANCE GROUPE
+                      - paragraph [ref=e5213]: LIBRAIRIE DE FRANCE GROUPE
+                  - cell "2.72031e+009" [ref=e5214]:
+                    - generic [ref=e5216]: "2.72031e+009"
+                  - cell "-" [ref=e5217]
+                  - cell "-" [ref=e5218]
+                  - cell "Actif" [ref=e5219]:
+                    - generic [ref=e5220]: Actif
+                  - cell [ref=e5221]:
+                    - button [ref=e5222] [cursor=pointer]:
+                      - img
+                - row "PREST-LD-0312 LIBRAIRIE DIEPKILE LIBRAIRIE DIEPKILE librairiediepkile2023@gmail.com 0777184077 - - Actif" [ref=e5223]:
+                  - cell "PREST-LD-0312" [ref=e5224]:
+                    - generic [ref=e5225]:
+                      - generic [ref=e5226]: PREST-LD-0312
+                      - button [ref=e5227] [cursor=pointer]:
+                        - img
+                  - cell "LIBRAIRIE DIEPKILE LIBRAIRIE DIEPKILE" [ref=e5228]:
+                    - generic [ref=e5229]:
+                      - paragraph [ref=e5230]: LIBRAIRIE DIEPKILE
+                      - paragraph [ref=e5231]: LIBRAIRIE DIEPKILE
+                  - cell "librairiediepkile2023@gmail.com 0777184077" [ref=e5232]:
+                    - generic [ref=e5233]:
+                      - generic [ref=e5234]: librairiediepkile2023@gmail.com
+                      - generic [ref=e5235]: "0777184077"
+                  - cell "-" [ref=e5236]
+                  - cell "-" [ref=e5237]
+                  - cell "Actif" [ref=e5238]:
+                    - generic [ref=e5239]: Actif
+                  - cell [ref=e5240]:
+                    - button [ref=e5241] [cursor=pointer]:
+                      - img
+                - row "PREST-LLB-0070 LIBRAIRIE LA BOUQUINETTE LIBRAIRIE LA BOUQUINETTE - - Actif" [ref=e5242]:
+                  - cell "PREST-LLB-0070" [ref=e5243]:
+                    - generic [ref=e5244]:
+                      - generic [ref=e5245]: PREST-LLB-0070
+                      - button [ref=e5246] [cursor=pointer]:
+                        - img
+                  - cell "LIBRAIRIE LA BOUQUINETTE LIBRAIRIE LA BOUQUINETTE" [ref=e5247]:
+                    - generic [ref=e5248]:
+                      - paragraph [ref=e5249]: LIBRAIRIE LA BOUQUINETTE
+                      - paragraph [ref=e5250]: LIBRAIRIE LA BOUQUINETTE
+                  - cell [ref=e5251]
+                  - cell "-" [ref=e5252]
+                  - cell "-" [ref=e5253]
+                  - cell "Actif" [ref=e5254]:
+                    - generic [ref=e5255]: Actif
+                  - cell [ref=e5256]:
+                    - button [ref=e5257] [cursor=pointer]:
+                      - img
+                - row "PREST-MA-0332 MAGISTRAT ARTI MAGISTRAT ARTI NEANT NEANT - - Actif" [ref=e5258]:
+                  - cell "PREST-MA-0332" [ref=e5259]:
+                    - generic [ref=e5260]:
+                      - generic [ref=e5261]: PREST-MA-0332
+                      - button [ref=e5262] [cursor=pointer]:
+                        - img
+                  - cell "MAGISTRAT ARTI MAGISTRAT ARTI" [ref=e5263]:
+                    - generic [ref=e5264]:
+                      - paragraph [ref=e5265]: MAGISTRAT ARTI
+                      - paragraph [ref=e5266]: MAGISTRAT ARTI
+                  - cell "NEANT NEANT" [ref=e5267]:
+                    - generic [ref=e5268]:
+                      - generic [ref=e5269]: NEANT
+                      - generic [ref=e5270]: NEANT
+                  - cell "-" [ref=e5271]
+                  - cell "-" [ref=e5272]
+                  - cell "Actif" [ref=e5273]:
+                    - generic [ref=e5274]: Actif
+                  - cell [ref=e5275]:
+                    - button [ref=e5276] [cursor=pointer]:
+                      - img
+                - row "PREST-MKN-0362 MAITRE KOUAME N'GUESSAN CHARLES MAITRE KOUAME N'GUESSAN CHARLES NEANT 0707183844 - - Actif" [ref=e5277]:
+                  - cell "PREST-MKN-0362" [ref=e5278]:
+                    - generic [ref=e5279]:
+                      - generic [ref=e5280]: PREST-MKN-0362
+                      - button [ref=e5281] [cursor=pointer]:
+                        - img
+                  - cell "MAITRE KOUAME N'GUESSAN CHARLES MAITRE KOUAME N'GUESSAN CHARLES" [ref=e5282]:
+                    - generic [ref=e5283]:
+                      - paragraph [ref=e5284]: MAITRE KOUAME N'GUESSAN CHARLES
+                      - paragraph [ref=e5285]: MAITRE KOUAME N'GUESSAN CHARLES
+                  - cell "NEANT 0707183844" [ref=e5286]:
+                    - generic [ref=e5287]:
+                      - generic [ref=e5288]: NEANT
+                      - generic [ref=e5289]: "0707183844"
+                  - cell "-" [ref=e5290]
+                  - cell "-" [ref=e5291]
+                  - cell "Actif" [ref=e5292]:
+                    - generic [ref=e5293]: Actif
+                  - cell [ref=e5294]:
+                    - button [ref=e5295] [cursor=pointer]:
+                      - img
+                - row "PREST-MTI-0071 MASTER TECHNOLOGIE INFORMATIQUE MASTER TECHNOLOGIE INFORMATIQUE 7.07903e+008 - - Actif" [ref=e5296]:
+                  - cell "PREST-MTI-0071" [ref=e5297]:
+                    - generic [ref=e5298]:
+                      - generic [ref=e5299]: PREST-MTI-0071
+                      - button [ref=e5300] [cursor=pointer]:
+                        - img
+                  - cell "MASTER TECHNOLOGIE INFORMATIQUE MASTER TECHNOLOGIE INFORMATIQUE" [ref=e5301]:
+                    - generic [ref=e5302]:
+                      - paragraph [ref=e5303]: MASTER TECHNOLOGIE INFORMATIQUE
+                      - paragraph [ref=e5304]: MASTER TECHNOLOGIE INFORMATIQUE
+                  - cell "7.07903e+008" [ref=e5305]:
+                    - generic [ref=e5307]: "7.07903e+008"
+                  - cell "-" [ref=e5308]
+                  - cell "-" [ref=e5309]
+                  - cell "Actif" [ref=e5310]:
+                    - generic [ref=e5311]: Actif
+                  - cell [ref=e5312]:
+                    - button [ref=e5313] [cursor=pointer]:
+                      - img
+                - row "PREST-MIA-0168 MAUVILAC INDUSTRIES AFRICA MIA espaceciv@mia-indudtriescom - - Actif" [ref=e5314]:
+                  - cell "PREST-MIA-0168" [ref=e5315]:
+                    - generic [ref=e5316]:
+                      - generic [ref=e5317]: PREST-MIA-0168
+                      - button [ref=e5318] [cursor=pointer]:
+                        - img
+                  - cell "MAUVILAC INDUSTRIES AFRICA MIA" [ref=e5319]:
+                    - generic [ref=e5320]:
+                      - paragraph [ref=e5321]: MAUVILAC INDUSTRIES AFRICA
+                      - paragraph [ref=e5322]: MIA
+                  - cell "espaceciv@mia-indudtriescom" [ref=e5323]:
+                    - generic [ref=e5325]: espaceciv@mia-indudtriescom
+                  - cell "-" [ref=e5326]
+                  - cell "-" [ref=e5327]
+                  - cell "Actif" [ref=e5328]:
+                    - generic [ref=e5329]: Actif
+                  - cell [ref=e5330]:
+                    - button [ref=e5331] [cursor=pointer]:
+                      - img
+                - row "PREST-MA-0255 MAYELIA AUTOMOTIVE MAYELIA AUTOMOTIVE info@mayelia.com 21255455 - - Actif" [ref=e5332]:
+                  - cell "PREST-MA-0255" [ref=e5333]:
+                    - generic [ref=e5334]:
+                      - generic [ref=e5335]: PREST-MA-0255
+                      - button [ref=e5336] [cursor=pointer]:
+                        - img
+                  - cell "MAYELIA AUTOMOTIVE MAYELIA AUTOMOTIVE" [ref=e5337]:
+                    - generic [ref=e5338]:
+                      - paragraph [ref=e5339]: MAYELIA AUTOMOTIVE
+                      - paragraph [ref=e5340]: MAYELIA AUTOMOTIVE
+                  - cell "info@mayelia.com 21255455" [ref=e5341]:
+                    - generic [ref=e5342]:
+                      - generic [ref=e5343]: info@mayelia.com
+                      - generic [ref=e5344]: "21255455"
+                  - cell "-" [ref=e5345]
+                  - cell "-" [ref=e5346]
+                  - cell "Actif" [ref=e5347]:
+                    - generic [ref=e5348]: Actif
+                  - cell [ref=e5349]:
+                    - button [ref=e5350] [cursor=pointer]:
+                      - img
+                - row "PREST-MO-0197 MCN OUTLET MONDIAL CYCLES NOUVELLE mcn@yeshigroup.com 2121248951 - - Actif" [ref=e5351]:
+                  - cell "PREST-MO-0197" [ref=e5352]:
+                    - generic [ref=e5353]:
+                      - generic [ref=e5354]: PREST-MO-0197
+                      - button [ref=e5355] [cursor=pointer]:
+                        - img
+                  - cell "MCN OUTLET MONDIAL CYCLES NOUVELLE" [ref=e5356]:
+                    - generic [ref=e5357]:
+                      - paragraph [ref=e5358]: MCN OUTLET
+                      - paragraph [ref=e5359]: MONDIAL CYCLES NOUVELLE
+                  - cell "mcn@yeshigroup.com 2121248951" [ref=e5360]:
+                    - generic [ref=e5361]:
+                      - generic [ref=e5362]: mcn@yeshigroup.com
+                      - generic [ref=e5363]: "2121248951"
+                  - cell "-" [ref=e5364]
+                  - cell "-" [ref=e5365]
+                  - cell "Actif" [ref=e5366]:
+                    - generic [ref=e5367]: Actif
+                  - cell [ref=e5368]:
+                    - button [ref=e5369] [cursor=pointer]:
+                      - img
+                - row "PREST-MI-0202 MCS INSTITUT MCS INSTITUT mcs-institut@hotmailcom 0102616121 - - Actif" [ref=e5370]:
+                  - cell "PREST-MI-0202" [ref=e5371]:
+                    - generic [ref=e5372]:
+                      - generic [ref=e5373]: PREST-MI-0202
+                      - button [ref=e5374] [cursor=pointer]:
+                        - img
+                  - cell "MCS INSTITUT MCS INSTITUT" [ref=e5375]:
+                    - generic [ref=e5376]:
+                      - paragraph [ref=e5377]: MCS INSTITUT
+                      - paragraph [ref=e5378]: MCS INSTITUT
+                  - cell "mcs-institut@hotmailcom 0102616121" [ref=e5379]:
+                    - generic [ref=e5380]:
+                      - generic [ref=e5381]: mcs-institut@hotmailcom
+                      - generic [ref=e5382]: "0102616121"
+                  - cell "-" [ref=e5383]
+                  - cell "-" [ref=e5384]
+                  - cell "Actif" [ref=e5385]:
+                    - generic [ref=e5386]: Actif
+                  - cell [ref=e5387]:
+                    - button [ref=e5388] [cursor=pointer]:
+                      - img
+                - row "PREST-MDT-0185 MEDECINE DU TRAVAIL MEDECINE DU TRAVAIL NEANT NEANT - - Actif" [ref=e5389]:
+                  - cell "PREST-MDT-0185" [ref=e5390]:
+                    - generic [ref=e5391]:
+                      - generic [ref=e5392]: PREST-MDT-0185
+                      - button [ref=e5393] [cursor=pointer]:
+                        - img
+                  - cell "MEDECINE DU TRAVAIL MEDECINE DU TRAVAIL" [ref=e5394]:
+                    - generic [ref=e5395]:
+                      - paragraph [ref=e5396]: MEDECINE DU TRAVAIL
+                      - paragraph [ref=e5397]: MEDECINE DU TRAVAIL
+                  - cell "NEANT NEANT" [ref=e5398]:
+                    - generic [ref=e5399]:
+                      - generic [ref=e5400]: NEANT
+                      - generic [ref=e5401]: NEANT
+                  - cell "-" [ref=e5402]
+                  - cell "-" [ref=e5403]
+                  - cell "Actif" [ref=e5404]:
+                    - generic [ref=e5405]: Actif
+                  - cell [ref=e5406]:
+                    - button [ref=e5407] [cursor=pointer]:
+                      - img
+                - row "PREST-ML-0072 MEDIASOFT LAFAYETTE MEDIASOFT LAFAYETTE infos@mediasoftci.net NEANT - - Actif" [ref=e5408]:
+                  - cell "PREST-ML-0072" [ref=e5409]:
+                    - generic [ref=e5410]:
+                      - generic [ref=e5411]: PREST-ML-0072
+                      - button [ref=e5412] [cursor=pointer]:
+                        - img
+                  - cell "MEDIASOFT LAFAYETTE MEDIASOFT LAFAYETTE" [ref=e5413]:
+                    - generic [ref=e5414]:
+                      - paragraph [ref=e5415]: MEDIASOFT LAFAYETTE
+                      - paragraph [ref=e5416]: MEDIASOFT LAFAYETTE
+                  - cell "infos@mediasoftci.net NEANT" [ref=e5417]:
+                    - generic [ref=e5418]:
+                      - generic [ref=e5419]: infos@mediasoftci.net
+                      - generic [ref=e5420]: NEANT
+                  - cell "-" [ref=e5421]
+                  - cell "-" [ref=e5422]
+                  - cell "Actif" [ref=e5423]:
+                    - generic [ref=e5424]: Actif
+                  - cell [ref=e5425]:
+                    - button [ref=e5426] [cursor=pointer]:
+                      - img
+                - row "MIG-0009 MEER NEANT - - Actif" [ref=e5427]:
+                  - cell "MIG-0009" [ref=e5428]:
+                    - generic [ref=e5429]:
+                      - generic [ref=e5430]: MIG-0009
+                      - button [ref=e5431] [cursor=pointer]:
+                        - img
+                  - cell "MEER" [ref=e5432]:
+                    - paragraph [ref=e5434]: MEER
+                  - cell "NEANT" [ref=e5435]:
+                    - generic [ref=e5437]: NEANT
+                  - cell "-" [ref=e5438]
+                  - cell "-" [ref=e5439]
+                  - cell "Actif" [ref=e5440]:
+                    - generic [ref=e5441]: Actif
+                  - cell [ref=e5442]:
+                    - button [ref=e5443] [cursor=pointer]:
+                      - img
+                - row "PREST-MK-0073 MESSE KARLSRUHE MESSE KARLSRUHE info@messe-karlsruhe.de 4.97214e+008 - - Actif" [ref=e5444]:
+                  - cell "PREST-MK-0073" [ref=e5445]:
+                    - generic [ref=e5446]:
+                      - generic [ref=e5447]: PREST-MK-0073
+                      - button [ref=e5448] [cursor=pointer]:
+                        - img
+                  - cell "MESSE KARLSRUHE MESSE KARLSRUHE" [ref=e5449]:
+                    - generic [ref=e5450]:
+                      - paragraph [ref=e5451]: MESSE KARLSRUHE
+                      - paragraph [ref=e5452]: MESSE KARLSRUHE
+                  - cell "info@messe-karlsruhe.de 4.97214e+008" [ref=e5453]:
+                    - generic [ref=e5454]:
+                      - generic [ref=e5455]: info@messe-karlsruhe.de
+                      - generic [ref=e5456]: "4.97214e+008"
+                  - cell "-" [ref=e5457]
+                  - cell "-" [ref=e5458]
+                  - cell "Actif" [ref=e5459]:
+                    - generic [ref=e5460]: Actif
+                  - cell [ref=e5461]:
+                    - button [ref=e5462] [cursor=pointer]:
+                      - img
+                - row "PREST-MI3-0074 MI3E MI3E - - Actif" [ref=e5463]:
+                  - cell "PREST-MI3-0074" [ref=e5464]:
+                    - generic [ref=e5465]:
+                      - generic [ref=e5466]: PREST-MI3-0074
+                      - button [ref=e5467] [cursor=pointer]:
+                        - img
+                  - cell "MI3E MI3E" [ref=e5468]:
+                    - generic [ref=e5469]:
+                      - paragraph [ref=e5470]: MI3E
+                      - paragraph [ref=e5471]: MI3E
+                  - cell [ref=e5472]
+                  - cell "-" [ref=e5473]
+                  - cell "-" [ref=e5474]
+                  - cell "Actif" [ref=e5475]:
+                    - generic [ref=e5476]: Actif
+                  - cell [ref=e5477]:
+                    - button [ref=e5478] [cursor=pointer]:
+                      - img
+                - row "MIG-0003 MINISTERE DES TRANSPORTS DIRECTION REGIONALE DES LAGUNES 0707126060 - - Actif" [ref=e5479]:
+                  - cell "MIG-0003" [ref=e5480]:
+                    - generic [ref=e5481]:
+                      - generic [ref=e5482]: MIG-0003
+                      - button [ref=e5483] [cursor=pointer]:
+                        - img
+                  - cell "MINISTERE DES TRANSPORTS DIRECTION REGIONALE DES LAGUNES" [ref=e5484]:
+                    - paragraph [ref=e5486]: MINISTERE DES TRANSPORTS DIRECTION REGIONALE DES LAGUNES
+                  - cell "0707126060" [ref=e5487]:
+                    - generic [ref=e5489]: "0707126060"
+                  - cell "-" [ref=e5490]
+                  - cell "-" [ref=e5491]
+                  - cell "Actif" [ref=e5492]:
+                    - generic [ref=e5493]: Actif
+                  - cell [ref=e5494]:
+                    - button [ref=e5495] [cursor=pointer]:
+                      - img
+                - row "PREST-MDC-0392 MINISTERE DU COMMERCE MINISTERE DU COMMERCE NEANT NEANT - - Actif" [ref=e5496]:
+                  - cell "PREST-MDC-0392" [ref=e5497]:
+                    - generic [ref=e5498]:
+                      - generic [ref=e5499]: PREST-MDC-0392
+                      - button [ref=e5500] [cursor=pointer]:
+                        - img
+                  - cell "MINISTERE DU COMMERCE MINISTERE DU COMMERCE" [ref=e5501]:
+                    - generic [ref=e5502]:
+                      - paragraph [ref=e5503]: MINISTERE DU COMMERCE
+                      - paragraph [ref=e5504]: MINISTERE DU COMMERCE
+                  - cell "NEANT NEANT" [ref=e5505]:
+                    - generic [ref=e5506]:
+                      - generic [ref=e5507]: NEANT
+                      - generic [ref=e5508]: NEANT
+                  - cell "-" [ref=e5509]
+                  - cell "-" [ref=e5510]
+                  - cell "Actif" [ref=e5511]:
+                    - generic [ref=e5512]: Actif
+                  - cell [ref=e5513]:
+                    - button [ref=e5514] [cursor=pointer]:
+                      - img
+                - row "PREST-MAC-0252 MK AUTO CI MK AUTO CI NEANT 0779304659 - - Actif" [ref=e5515]:
+                  - cell "PREST-MAC-0252" [ref=e5516]:
+                    - generic [ref=e5517]:
+                      - generic [ref=e5518]: PREST-MAC-0252
+                      - button [ref=e5519] [cursor=pointer]:
+                        - img
+                  - cell "MK AUTO CI MK AUTO CI" [ref=e5520]:
+                    - generic [ref=e5521]:
+                      - paragraph [ref=e5522]: MK AUTO CI
+                      - paragraph [ref=e5523]: MK AUTO CI
+                  - cell "NEANT 0779304659" [ref=e5524]:
+                    - generic [ref=e5525]:
+                      - generic [ref=e5526]: NEANT
+                      - generic [ref=e5527]: "0779304659"
+                  - cell "-" [ref=e5528]
+                  - cell "-" [ref=e5529]
+                  - cell "Actif" [ref=e5530]:
+                    - generic [ref=e5531]: Actif
+                  - cell [ref=e5532]:
+                    - button [ref=e5533] [cursor=pointer]:
+                      - img
+                - row "PREST-MHJ-0415 MKOA HOTEL JACQUEVILLE MKOA HOTEL JACQUEVILLE info@mkoahotel.com 0767294823 - - Actif" [ref=e5534]:
+                  - cell "PREST-MHJ-0415" [ref=e5535]:
+                    - generic [ref=e5536]:
+                      - generic [ref=e5537]: PREST-MHJ-0415
+                      - button [ref=e5538] [cursor=pointer]:
+                        - img
+                  - cell "MKOA HOTEL JACQUEVILLE MKOA HOTEL JACQUEVILLE" [ref=e5539]:
+                    - generic [ref=e5540]:
+                      - paragraph [ref=e5541]: MKOA HOTEL JACQUEVILLE
+                      - paragraph [ref=e5542]: MKOA HOTEL JACQUEVILLE
+                  - cell "info@mkoahotel.com 0767294823" [ref=e5543]:
+                    - generic [ref=e5544]:
+                      - generic [ref=e5545]: info@mkoahotel.com
+                      - generic [ref=e5546]: "0767294823"
+                  - cell "-" [ref=e5547]
+                  - cell "-" [ref=e5548]
+                  - cell "Actif" [ref=e5549]:
+                    - generic [ref=e5550]: Actif
+                  - cell [ref=e5551]:
+                    - button [ref=e5552] [cursor=pointer]:
+                      - img
+                - row "PREST-MP-0421 MOBIL'IN PULSE MOBIL'IN PULSE MOBIL'IN PULSE MOBIL'IN PULSE - - Actif" [ref=e5553]:
+                  - cell "PREST-MP-0421" [ref=e5554]:
+                    - generic [ref=e5555]:
+                      - generic [ref=e5556]: PREST-MP-0421
+                      - button [ref=e5557] [cursor=pointer]:
+                        - img
+                  - cell "MOBIL'IN PULSE MOBIL'IN PULSE" [ref=e5558]:
+                    - generic [ref=e5559]:
+                      - paragraph [ref=e5560]: MOBIL'IN PULSE
+                      - paragraph [ref=e5561]: MOBIL'IN PULSE
+                  - cell "MOBIL'IN PULSE MOBIL'IN PULSE" [ref=e5562]:
+                    - generic [ref=e5563]:
+                      - generic [ref=e5564]: MOBIL'IN PULSE
+                      - generic [ref=e5565]: MOBIL'IN PULSE
+                  - cell "-" [ref=e5566]
+                  - cell "-" [ref=e5567]
+                  - cell "Actif" [ref=e5568]:
+                    - generic [ref=e5569]: Actif
+                  - cell [ref=e5570]:
+                    - button [ref=e5571] [cursor=pointer]:
+                      - img
+                - row "PREST-003 MOBILIER PRO AFRICA ventes@mobilierafrica.ci +225 27 21 22 23 24 - SN34567890123 Actif" [ref=e5572]:
+                  - cell "PREST-003" [ref=e5573]:
+                    - generic [ref=e5574]:
+                      - generic [ref=e5575]: PREST-003
+                      - button [ref=e5576] [cursor=pointer]:
+                        - img
+                  - cell "MOBILIER PRO AFRICA" [ref=e5577]:
+                    - paragraph [ref=e5579]: MOBILIER PRO AFRICA
+                  - cell "ventes@mobilierafrica.ci +225 27 21 22 23 24" [ref=e5580]:
+                    - generic [ref=e5581]:
+                      - generic [ref=e5582]: ventes@mobilierafrica.ci
+                      - generic [ref=e5583]: +225 27 21 22 23 24
+                  - cell "-" [ref=e5584]
+                  - cell "SN34567890123" [ref=e5585]
+                  - cell "Actif" [ref=e5586]:
+                    - generic [ref=e5587]: Actif
+                  - cell [ref=e5588]:
+                    - button [ref=e5589] [cursor=pointer]:
+                      - img
+                - row "PREST-MS-0388 MOFVAK SERVICES MOFVAK SERVICES NEANT 0101117944 - - Actif" [ref=e5590]:
+                  - cell "PREST-MS-0388" [ref=e5591]:
+                    - generic [ref=e5592]:
+                      - generic [ref=e5593]: PREST-MS-0388
+                      - button [ref=e5594] [cursor=pointer]:
+                        - img
+                  - cell "MOFVAK SERVICES MOFVAK SERVICES" [ref=e5595]:
+                    - generic [ref=e5596]:
+                      - paragraph [ref=e5597]: MOFVAK SERVICES
+                      - paragraph [ref=e5598]: MOFVAK SERVICES
+                  - cell "NEANT 0101117944" [ref=e5599]:
+                    - generic [ref=e5600]:
+                      - generic [ref=e5601]: NEANT
+                      - generic [ref=e5602]: "0101117944"
+                  - cell "-" [ref=e5603]
+                  - cell "-" [ref=e5604]
+                  - cell "Actif" [ref=e5605]:
+                    - generic [ref=e5606]: Actif
+                  - cell [ref=e5607]:
+                    - button [ref=e5608] [cursor=pointer]:
+                      - img
+                - row "PREST-MAC-0169 MOOV AFRICA COTE D'IVOIRE MOOV AFRICA COTE D'IVOIRE NEANT 0160252525 - - Actif" [ref=e5609]:
+                  - cell "PREST-MAC-0169" [ref=e5610]:
+                    - generic [ref=e5611]:
+                      - generic [ref=e5612]: PREST-MAC-0169
+                      - button [ref=e5613] [cursor=pointer]:
+                        - img
+                  - cell "MOOV AFRICA COTE D'IVOIRE MOOV AFRICA COTE D'IVOIRE" [ref=e5614]:
+                    - generic [ref=e5615]:
+                      - paragraph [ref=e5616]: MOOV AFRICA COTE D'IVOIRE
+                      - paragraph [ref=e5617]: MOOV AFRICA COTE D'IVOIRE
+                  - cell "NEANT 0160252525" [ref=e5618]:
+                    - generic [ref=e5619]:
+                      - generic [ref=e5620]: NEANT
+                      - generic [ref=e5621]: "0160252525"
+                  - cell "-" [ref=e5622]
+                  - cell "-" [ref=e5623]
+                  - cell "Actif" [ref=e5624]:
+                    - generic [ref=e5625]: Actif
+                  - cell [ref=e5626]:
+                    - button [ref=e5627] [cursor=pointer]:
+                      - img
+                - row "PREST-MB-0376 MR BRICOLAGE MR BRICOLAGE NEA?NT 22510202 - - Actif" [ref=e5628]:
+                  - cell "PREST-MB-0376" [ref=e5629]:
+                    - generic [ref=e5630]:
+                      - generic [ref=e5631]: PREST-MB-0376
+                      - button [ref=e5632] [cursor=pointer]:
+                        - img
+                  - cell "MR BRICOLAGE MR BRICOLAGE" [ref=e5633]:
+                    - generic [ref=e5634]:
+                      - paragraph [ref=e5635]: MR BRICOLAGE
+                      - paragraph [ref=e5636]: MR BRICOLAGE
+                  - cell "NEA?NT 22510202" [ref=e5637]:
+                    - generic [ref=e5638]:
+                      - generic [ref=e5639]: NEA?NT
+                      - generic [ref=e5640]: "22510202"
+                  - cell "-" [ref=e5641]
+                  - cell "-" [ref=e5642]
+                  - cell "Actif" [ref=e5643]:
+                    - generic [ref=e5644]: Actif
+                  - cell [ref=e5645]:
+                    - button [ref=e5646] [cursor=pointer]:
+                      - img
+                - row "MIG-0007 MUCAB-MT 0709502797 - - Actif" [ref=e5647]:
+                  - cell "MIG-0007" [ref=e5648]:
+                    - generic [ref=e5649]:
+                      - generic [ref=e5650]: MIG-0007
+                      - button [ref=e5651] [cursor=pointer]:
+                        - img
+                  - cell "MUCAB-MT" [ref=e5652]:
+                    - paragraph [ref=e5654]: MUCAB-MT
+                  - cell "0709502797" [ref=e5655]:
+                    - generic [ref=e5657]: "0709502797"
+                  - cell "-" [ref=e5658]
+                  - cell "-" [ref=e5659]
+                  - cell "Actif" [ref=e5660]:
+                    - generic [ref=e5661]: Actif
+                  - cell [ref=e5662]:
+                    - button [ref=e5663] [cursor=pointer]:
+                      - img
+                - row "PREST-MDA-0242 Mutuelle des Agents du Cabinet du Ministre des Transports MUCAB-MT NEANT 0709502797 - - Actif" [ref=e5664]:
+                  - cell "PREST-MDA-0242" [ref=e5665]:
+                    - generic [ref=e5666]:
+                      - generic [ref=e5667]: PREST-MDA-0242
+                      - button [ref=e5668] [cursor=pointer]:
+                        - img
+                  - cell "Mutuelle des Agents du Cabinet du Ministre des Transports MUCAB-MT" [ref=e5669]:
+                    - generic [ref=e5670]:
+                      - paragraph [ref=e5671]: Mutuelle des Agents du Cabinet du Ministre des Transports
+                      - paragraph [ref=e5672]: MUCAB-MT
+                  - cell "NEANT 0709502797" [ref=e5673]:
+                    - generic [ref=e5674]:
+                      - generic [ref=e5675]: NEANT
+                      - generic [ref=e5676]: "0709502797"
+                  - cell "-" [ref=e5677]
+                  - cell "-" [ref=e5678]
+                  - cell "Actif" [ref=e5679]:
+                    - generic [ref=e5680]: Actif
+                  - cell [ref=e5681]:
+                    - button [ref=e5682] [cursor=pointer]:
+                      - img
+                - row "PREST-MBB-0377 MY BABY BOUTIQUE SARL MY BABY BOUTIQUE SARL NEANT NEANT - - Actif" [ref=e5683]:
+                  - cell "PREST-MBB-0377" [ref=e5684]:
+                    - generic [ref=e5685]:
+                      - generic [ref=e5686]: PREST-MBB-0377
+                      - button [ref=e5687] [cursor=pointer]:
+                        - img
+                  - cell "MY BABY BOUTIQUE SARL MY BABY BOUTIQUE SARL" [ref=e5688]:
+                    - generic [ref=e5689]:
+                      - paragraph [ref=e5690]: MY BABY BOUTIQUE SARL
+                      - paragraph [ref=e5691]: MY BABY BOUTIQUE SARL
+                  - cell "NEANT NEANT" [ref=e5692]:
+                    - generic [ref=e5693]:
+                      - generic [ref=e5694]: NEANT
+                      - generic [ref=e5695]: NEANT
+                  - cell "-" [ref=e5696]
+                  - cell "-" [ref=e5697]
+                  - cell "Actif" [ref=e5698]:
+                    - generic [ref=e5699]: Actif
+                  - cell [ref=e5700]:
+                    - button [ref=e5701] [cursor=pointer]:
+                      - img
+                - row "PREST-MI-0318 MY INBOX MY INBOX NEANT NEANT - - Actif" [ref=e5702]:
+                  - cell "PREST-MI-0318" [ref=e5703]:
+                    - generic [ref=e5704]:
+                      - generic [ref=e5705]: PREST-MI-0318
+                      - button [ref=e5706] [cursor=pointer]:
+                        - img
+                  - cell "MY INBOX MY INBOX" [ref=e5707]:
+                    - generic [ref=e5708]:
+                      - paragraph [ref=e5709]: MY INBOX
+                      - paragraph [ref=e5710]: MY INBOX
+                  - cell "NEANT NEANT" [ref=e5711]:
+                    - generic [ref=e5712]:
+                      - generic [ref=e5713]: NEANT
+                      - generic [ref=e5714]: NEANT
+                  - cell "-" [ref=e5715]
+                  - cell "-" [ref=e5716]
+                  - cell "Actif" [ref=e5717]:
+                    - generic [ref=e5718]: Actif
+                  - cell [ref=e5719]:
+                    - button [ref=e5720] [cursor=pointer]:
+                      - img
+                - row "PREST-MS-0142 MY SOLUTION MY SOLUTION NC - - Actif" [ref=e5721]:
+                  - cell "PREST-MS-0142" [ref=e5722]:
+                    - generic [ref=e5723]:
+                      - generic [ref=e5724]: PREST-MS-0142
+                      - button [ref=e5725] [cursor=pointer]:
+                        - img
+                  - cell "MY SOLUTION MY SOLUTION" [ref=e5726]:
+                    - generic [ref=e5727]:
+                      - paragraph [ref=e5728]: MY SOLUTION
+                      - paragraph [ref=e5729]: MY SOLUTION
+                  - cell "NC" [ref=e5730]:
+                    - generic [ref=e5732]: NC
+                  - cell "-" [ref=e5733]
+                  - cell "-" [ref=e5734]
+                  - cell "Actif" [ref=e5735]:
+                    - generic [ref=e5736]: Actif
+                  - cell [ref=e5737]:
+                    - button [ref=e5738] [cursor=pointer]:
+                      - img
+                - row "PREST-NP-0426 N'DOUH PLUS N'DOUH PLUS 0708584537 0708584537 - - Actif" [ref=e5739]:
+                  - cell "PREST-NP-0426" [ref=e5740]:
+                    - generic [ref=e5741]:
+                      - generic [ref=e5742]: PREST-NP-0426
+                      - button [ref=e5743] [cursor=pointer]:
+                        - img
+                  - cell "N'DOUH PLUS N'DOUH PLUS" [ref=e5744]:
+                    - generic [ref=e5745]:
+                      - paragraph [ref=e5746]: N'DOUH PLUS
+                      - paragraph [ref=e5747]: N'DOUH PLUS
+                  - cell "0708584537 0708584537" [ref=e5748]:
+                    - generic [ref=e5749]:
+                      - generic [ref=e5750]: "0708584537"
+                      - generic [ref=e5751]: "0708584537"
+                  - cell "-" [ref=e5752]
+                  - cell "-" [ref=e5753]
+                  - cell "Actif" [ref=e5754]:
+                    - generic [ref=e5755]: Actif
+                  - cell [ref=e5756]:
+                    - button [ref=e5757] [cursor=pointer]:
+                      - img
+                - row "PREST-NTA-0188 N°1 TECHNIQUE AUTO N°1 TECHNIQUE AUTO NEANT 0708554255 - - Actif" [ref=e5758]:
+                  - cell "PREST-NTA-0188" [ref=e5759]:
+                    - generic [ref=e5760]:
+                      - generic [ref=e5761]: PREST-NTA-0188
+                      - button [ref=e5762] [cursor=pointer]:
+                        - img
+                  - cell "N°1 TECHNIQUE AUTO N°1 TECHNIQUE AUTO" [ref=e5763]:
+                    - generic [ref=e5764]:
+                      - paragraph [ref=e5765]: N°1 TECHNIQUE AUTO
+                      - paragraph [ref=e5766]: N°1 TECHNIQUE AUTO
+                  - cell "NEANT 0708554255" [ref=e5767]:
+                    - generic [ref=e5768]:
+                      - generic [ref=e5769]: NEANT
+                      - generic [ref=e5770]: "0708554255"
+                  - cell "-" [ref=e5771]
+                  - cell "-" [ref=e5772]
+                  - cell "Actif" [ref=e5773]:
+                    - generic [ref=e5774]: Actif
+                  - cell [ref=e5775]:
+                    - button [ref=e5776] [cursor=pointer]:
+                      - img
+                - row "PREST-NH-0321 NAHICO HOTEL NAHICO HOTEL NEANT 2222598333 - - Actif" [ref=e5777]:
+                  - cell "PREST-NH-0321" [ref=e5778]:
+                    - generic [ref=e5779]:
+                      - generic [ref=e5780]: PREST-NH-0321
+                      - button [ref=e5781] [cursor=pointer]:
+                        - img
+                  - cell "NAHICO HOTEL NAHICO HOTEL" [ref=e5782]:
+                    - generic [ref=e5783]:
+                      - paragraph [ref=e5784]: NAHICO HOTEL
+                      - paragraph [ref=e5785]: NAHICO HOTEL
+                  - cell "NEANT 2222598333" [ref=e5786]:
+                    - generic [ref=e5787]:
+                      - generic [ref=e5788]: NEANT
+                      - generic [ref=e5789]: "2222598333"
+                  - cell "-" [ref=e5790]
+                  - cell "-" [ref=e5791]
+                  - cell "Actif" [ref=e5792]:
+                    - generic [ref=e5793]: Actif
+                  - cell [ref=e5794]:
+                    - button [ref=e5795] [cursor=pointer]:
+                      - img
+                - row "PREST-NR-0333 NAMA RESTAURANT NAMA RESTAURANT NEANT 0702020707 - - Actif" [ref=e5796]:
+                  - cell "PREST-NR-0333" [ref=e5797]:
+                    - generic [ref=e5798]:
+                      - generic [ref=e5799]: PREST-NR-0333
+                      - button [ref=e5800] [cursor=pointer]:
+                        - img
+                  - cell "NAMA RESTAURANT NAMA RESTAURANT" [ref=e5801]:
+                    - generic [ref=e5802]:
+                      - paragraph [ref=e5803]: NAMA RESTAURANT
+                      - paragraph [ref=e5804]: NAMA RESTAURANT
+                  - cell "NEANT 0702020707" [ref=e5805]:
+                    - generic [ref=e5806]:
+                      - generic [ref=e5807]: NEANT
+                      - generic [ref=e5808]: "0702020707"
+                  - cell "-" [ref=e5809]
+                  - cell "-" [ref=e5810]
+                  - cell "Actif" [ref=e5811]:
+                    - generic [ref=e5812]: Actif
+                  - cell [ref=e5813]:
+                    - button [ref=e5814] [cursor=pointer]:
+                      - img
+                - row "PREST-NPA-0075 NASCO PIECE AUTO NASCO PIECE AUTO - - Actif" [ref=e5815]:
+                  - cell "PREST-NPA-0075" [ref=e5816]:
+                    - generic [ref=e5817]:
+                      - generic [ref=e5818]: PREST-NPA-0075
+                      - button [ref=e5819] [cursor=pointer]:
+                        - img
+                  - cell "NASCO PIECE AUTO NASCO PIECE AUTO" [ref=e5820]:
+                    - generic [ref=e5821]:
+                      - paragraph [ref=e5822]: NASCO PIECE AUTO
+                      - paragraph [ref=e5823]: NASCO PIECE AUTO
+                  - cell [ref=e5824]
+                  - cell "-" [ref=e5825]
+                  - cell "-" [ref=e5826]
+                  - cell "Actif" [ref=e5827]:
+                    - generic [ref=e5828]: Actif
+                  - cell [ref=e5829]:
+                    - button [ref=e5830] [cursor=pointer]:
+                      - img
+                - row "PREST-NEA-0305 NEANT NEANT NEANT NEANT - - Actif" [ref=e5831]:
+                  - cell "PREST-NEA-0305" [ref=e5832]:
+                    - generic [ref=e5833]:
+                      - generic [ref=e5834]: PREST-NEA-0305
+                      - button [ref=e5835] [cursor=pointer]:
+                        - img
+                  - cell "NEANT NEANT" [ref=e5836]:
+                    - generic [ref=e5837]:
+                      - paragraph [ref=e5838]: NEANT
+                      - paragraph [ref=e5839]: NEANT
+                  - cell "NEANT NEANT" [ref=e5840]:
+                    - generic [ref=e5841]:
+                      - generic [ref=e5842]: NEANT
+                      - generic [ref=e5843]: NEANT
+                  - cell "-" [ref=e5844]
+                  - cell "-" [ref=e5845]
+                  - cell "Actif" [ref=e5846]:
+                    - generic [ref=e5847]: Actif
+                  - cell [ref=e5848]:
+                    - button [ref=e5849] [cursor=pointer]:
+                      - img
+                - row "PREST-NC-0076 NOEMA CONSULTING NOEMA CONSULTING 7.07832e+008 - - Actif" [ref=e5850]:
+                  - cell "PREST-NC-0076" [ref=e5851]:
+                    - generic [ref=e5852]:
+                      - generic [ref=e5853]: PREST-NC-0076
+                      - button [ref=e5854] [cursor=pointer]:
+                        - img
+                  - cell "NOEMA CONSULTING NOEMA CONSULTING" [ref=e5855]:
+                    - generic [ref=e5856]:
+                      - paragraph [ref=e5857]: NOEMA CONSULTING
+                      - paragraph [ref=e5858]: NOEMA CONSULTING
+                  - cell "7.07832e+008" [ref=e5859]:
+                    - generic [ref=e5861]: "7.07832e+008"
+                  - cell "-" [ref=e5862]
+                  - cell "-" [ref=e5863]
+                  - cell "Actif" [ref=e5864]:
+                    - generic [ref=e5865]: Actif
+                  - cell [ref=e5866]:
+                    - button [ref=e5867] [cursor=pointer]:
+                      - img
+                - row "PREST-NOV-0077 NOVASYS NOVASYS direction@novasys.ci - - Actif" [ref=e5868]:
+                  - cell "PREST-NOV-0077" [ref=e5869]:
+                    - generic [ref=e5870]:
+                      - generic [ref=e5871]: PREST-NOV-0077
+                      - button [ref=e5872] [cursor=pointer]:
+                        - img
+                  - cell "NOVASYS NOVASYS" [ref=e5873]:
+                    - generic [ref=e5874]:
+                      - paragraph [ref=e5875]: NOVASYS
+                      - paragraph [ref=e5876]: NOVASYS
+                  - cell "direction@novasys.ci" [ref=e5877]:
+                    - generic [ref=e5879]: direction@novasys.ci
+                  - cell "-" [ref=e5880]
+                  - cell "-" [ref=e5881]
+                  - cell "Actif" [ref=e5882]:
+                    - generic [ref=e5883]: Actif
+                  - cell [ref=e5884]:
+                    - button [ref=e5885] [cursor=pointer]:
+                      - img
+                - row "PREST-OEP-0335 O.S. EDITION & PRODUCTION GROUPE DE PRESSE EDITION & PRODUCTION NEANT 2721247698 - - Actif" [ref=e5886]:
+                  - cell "PREST-OEP-0335" [ref=e5887]:
+                    - generic [ref=e5888]:
+                      - generic [ref=e5889]: PREST-OEP-0335
+                      - button [ref=e5890] [cursor=pointer]:
+                        - img
+                  - cell "O.S. EDITION & PRODUCTION GROUPE DE PRESSE EDITION & PRODUCTION" [ref=e5891]:
+                    - generic [ref=e5892]:
+                      - paragraph [ref=e5893]: O.S. EDITION & PRODUCTION
+                      - paragraph [ref=e5894]: GROUPE DE PRESSE EDITION & PRODUCTION
+                  - cell "NEANT 2721247698" [ref=e5895]:
+                    - generic [ref=e5896]:
+                      - generic [ref=e5897]: NEANT
+                      - generic [ref=e5898]: "2721247698"
+                  - cell "-" [ref=e5899]
+                  - cell "-" [ref=e5900]
+                  - cell "Actif" [ref=e5901]:
+                    - generic [ref=e5902]: Actif
+                  - cell [ref=e5903]:
+                    - button [ref=e5904] [cursor=pointer]:
+                      - img
+                - row "PREST-O'C-0078 O'CONFECTION O'CONFECTION oualyolivier@gmail.com 7.0808e+008 - - Actif" [ref=e5905]:
+                  - cell "PREST-O'C-0078" [ref=e5906]:
+                    - generic [ref=e5907]:
+                      - generic [ref=e5908]: PREST-O'C-0078
+                      - button [ref=e5909] [cursor=pointer]:
+                        - img
+                  - cell "O'CONFECTION O'CONFECTION" [ref=e5910]:
+                    - generic [ref=e5911]:
+                      - paragraph [ref=e5912]: O'CONFECTION
+                      - paragraph [ref=e5913]: O'CONFECTION
+                  - cell "oualyolivier@gmail.com 7.0808e+008" [ref=e5914]:
+                    - generic [ref=e5915]:
+                      - generic [ref=e5916]: oualyolivier@gmail.com
+                      - generic [ref=e5917]: "7.0808e+008"
+                  - cell "-" [ref=e5918]
+                  - cell "-" [ref=e5919]
+                  - cell "Actif" [ref=e5920]:
+                    - generic [ref=e5921]: Actif
+                  - cell [ref=e5922]:
+                    - button [ref=e5923] [cursor=pointer]:
+                      - img
+                - row "PREST-O2S-0184 o2switch o2switch support@o2switch.fr +330444446040 - - Actif" [ref=e5924]:
+                  - cell "PREST-O2S-0184" [ref=e5925]:
+                    - generic [ref=e5926]:
+                      - generic [ref=e5927]: PREST-O2S-0184
+                      - button [ref=e5928] [cursor=pointer]:
+                        - img
+                  - cell "o2switch o2switch" [ref=e5929]:
+                    - generic [ref=e5930]:
+                      - paragraph [ref=e5931]: o2switch
+                      - paragraph [ref=e5932]: o2switch
+                  - cell "support@o2switch.fr +330444446040" [ref=e5933]:
+                    - generic [ref=e5934]:
+                      - generic [ref=e5935]: support@o2switch.fr
+                      - generic [ref=e5936]: "+330444446040"
+                  - cell "-" [ref=e5937]
+                  - cell "-" [ref=e5938]
+                  - cell "Actif" [ref=e5939]:
+                    - generic [ref=e5940]: Actif
+                  - cell [ref=e5941]:
+                    - button [ref=e5942] [cursor=pointer]:
+                      - img
+                - row "PREST-OT-0317 OAZIZ TECHNOLOGY OAZIS infi@oazis.ci 2722220270 - - Actif" [ref=e5943]:
+                  - cell "PREST-OT-0317" [ref=e5944]:
+                    - generic [ref=e5945]:
+                      - generic [ref=e5946]: PREST-OT-0317
+                      - button [ref=e5947] [cursor=pointer]:
+                        - img
+                  - cell "OAZIZ TECHNOLOGY OAZIS" [ref=e5948]:
+                    - generic [ref=e5949]:
+                      - paragraph [ref=e5950]: OAZIZ TECHNOLOGY
+                      - paragraph [ref=e5951]: OAZIS
+                  - cell "infi@oazis.ci 2722220270" [ref=e5952]:
+                    - generic [ref=e5953]:
+                      - generic [ref=e5954]: infi@oazis.ci
+                      - generic [ref=e5955]: "2722220270"
+                  - cell "-" [ref=e5956]
+                  - cell "-" [ref=e5957]
+                  - cell "Actif" [ref=e5958]:
+                    - generic [ref=e5959]: Actif
+                  - cell [ref=e5960]:
+                    - button [ref=e5961] [cursor=pointer]:
+                      - img
+                - row "PREST-OI-0348 OCEANE INTERNATIONAL OCEANE INTERNATIONAL NEANT NEANT - - Actif" [ref=e5962]:
+                  - cell "PREST-OI-0348" [ref=e5963]:
+                    - generic [ref=e5964]:
+                      - generic [ref=e5965]: PREST-OI-0348
+                      - button [ref=e5966] [cursor=pointer]:
+                        - img
+                  - cell "OCEANE INTERNATIONAL OCEANE INTERNATIONAL" [ref=e5967]:
+                    - generic [ref=e5968]:
+                      - paragraph [ref=e5969]: OCEANE INTERNATIONAL
+                      - paragraph [ref=e5970]: OCEANE INTERNATIONAL
+                  - cell "NEANT NEANT" [ref=e5971]:
+                    - generic [ref=e5972]:
+                      - generic [ref=e5973]: NEANT
+                      - generic [ref=e5974]: NEANT
+                  - cell "-" [ref=e5975]
+                  - cell "-" [ref=e5976]
+                  - cell "Actif" [ref=e5977]:
+                    - generic [ref=e5978]: Actif
+                  - cell [ref=e5979]:
+                    - button [ref=e5980] [cursor=pointer]:
+                      - img
+                - row "PREST-OID-0294 OFFICE IVOIRIEN DE LA PROPRIETE INTELLECTUELLE OIPI oipi.ci 2720335343 - - Actif" [ref=e5981]:
+                  - cell "PREST-OID-0294" [ref=e5982]:
+                    - generic [ref=e5983]:
+                      - generic [ref=e5984]: PREST-OID-0294
+                      - button [ref=e5985] [cursor=pointer]:
+                        - img
+                  - cell "OFFICE IVOIRIEN DE LA PROPRIETE INTELLECTUELLE OIPI" [ref=e5986]:
+                    - generic [ref=e5987]:
+                      - paragraph [ref=e5988]: OFFICE IVOIRIEN DE LA PROPRIETE INTELLECTUELLE
+                      - paragraph [ref=e5989]: OIPI
+                  - cell "oipi.ci 2720335343" [ref=e5990]:
+                    - generic [ref=e5991]:
+                      - generic [ref=e5992]: oipi.ci
+                      - generic [ref=e5993]: "2720335343"
+                  - cell "-" [ref=e5994]
+                  - cell "-" [ref=e5995]
+                  - cell "Actif" [ref=e5996]:
+                    - generic [ref=e5997]: Actif
+                  - cell [ref=e5998]:
+                    - button [ref=e5999] [cursor=pointer]:
+                      - img
+                - row "PREST-OT-0079 OIM TRAVEL OIM TRAVEL oimtravel@yahoo.fr 2.25272e+012 - - Actif" [ref=e6000]:
+                  - cell "PREST-OT-0079" [ref=e6001]:
+                    - generic [ref=e6002]:
+                      - generic [ref=e6003]: PREST-OT-0079
+                      - button [ref=e6004] [cursor=pointer]:
+                        - img
+                  - cell "OIM TRAVEL OIM TRAVEL" [ref=e6005]:
+                    - generic [ref=e6006]:
+                      - paragraph [ref=e6007]: OIM TRAVEL
+                      - paragraph [ref=e6008]: OIM TRAVEL
+                  - cell "oimtravel@yahoo.fr 2.25272e+012" [ref=e6009]:
+                    - generic [ref=e6010]:
+                      - generic [ref=e6011]: oimtravel@yahoo.fr
+                      - generic [ref=e6012]: "2.25272e+012"
+                  - cell "-" [ref=e6013]
+                  - cell "-" [ref=e6014]
+                  - cell "Actif" [ref=e6015]:
+                    - generic [ref=e6016]: Actif
+                  - cell [ref=e6017]:
+                    - button [ref=e6018] [cursor=pointer]:
+                      - img
+                - row "PREST-OE-0227 OLA ENERGY OLA ENERGY NC 0707992425 - - Actif" [ref=e6019]:
+                  - cell "PREST-OE-0227" [ref=e6020]:
+                    - generic [ref=e6021]:
+                      - generic [ref=e6022]: PREST-OE-0227
+                      - button [ref=e6023] [cursor=pointer]:
+                        - img
+                  - cell "OLA ENERGY OLA ENERGY" [ref=e6024]:
+                    - generic [ref=e6025]:
+                      - paragraph [ref=e6026]: OLA ENERGY
+                      - paragraph [ref=e6027]: OLA ENERGY
+                  - cell "NC 0707992425" [ref=e6028]:
+                    - generic [ref=e6029]:
+                      - generic [ref=e6030]: NC
+                      - generic [ref=e6031]: "0707992425"
+                  - cell "-" [ref=e6032]
+                  - cell "-" [ref=e6033]
+                  - cell "Actif" [ref=e6034]:
+                    - generic [ref=e6035]: Actif
+                  - cell [ref=e6036]:
+                    - button [ref=e6037] [cursor=pointer]:
+                      - img
+                - row "PREST-OEC-0285 OLA ENERGY CI OLA Energy Côte d’Ivoire NC 05 05 05 21 80 - - Actif" [ref=e6038]:
+                  - cell "PREST-OEC-0285" [ref=e6039]:
+                    - generic [ref=e6040]:
+                      - generic [ref=e6041]: PREST-OEC-0285
+                      - button [ref=e6042] [cursor=pointer]:
+                        - img
+                  - cell "OLA ENERGY CI OLA Energy Côte d’Ivoire" [ref=e6043]:
+                    - generic [ref=e6044]:
+                      - paragraph [ref=e6045]: OLA ENERGY CI
+                      - paragraph [ref=e6046]: OLA Energy Côte d’Ivoire
+                  - cell "NC 05 05 05 21 80" [ref=e6047]:
+                    - generic [ref=e6048]:
+                      - generic [ref=e6049]: NC
+                      - generic [ref=e6050]: 05 05 05 21 80
+                  - cell "-" [ref=e6051]
+                  - cell "-" [ref=e6052]
+                  - cell "Actif" [ref=e6053]:
+                    - generic [ref=e6054]: Actif
+                  - cell [ref=e6055]:
+                    - button [ref=e6056] [cursor=pointer]:
+                      - img
+                - row "PREST-OS-0128 ONE STOP ONE STOP 2.25272e+012 - - Actif" [ref=e6057]:
+                  - cell "PREST-OS-0128" [ref=e6058]:
+                    - generic [ref=e6059]:
+                      - generic [ref=e6060]: PREST-OS-0128
+                      - button [ref=e6061] [cursor=pointer]:
+                        - img
+                  - cell "ONE STOP ONE STOP" [ref=e6062]:
+                    - generic [ref=e6063]:
+                      - paragraph [ref=e6064]: ONE STOP
+                      - paragraph [ref=e6065]: ONE STOP
+                  - cell "2.25272e+012" [ref=e6066]:
+                    - generic [ref=e6068]: "2.25272e+012"
+                  - cell "-" [ref=e6069]
+                  - cell "-" [ref=e6070]
+                  - cell "Actif" [ref=e6071]:
+                    - generic [ref=e6072]: Actif
+                  - cell [ref=e6073]:
+                    - button [ref=e6074] [cursor=pointer]:
+                      - img
+                - row "PREST-OCD-0080 ORANGE CÔTE D'IVOIRE ORANGE CÔTE D'IVOIRE orangebusiness.oci@orange.com 2.25272e+012 - - Actif" [ref=e6075]:
+                  - cell "PREST-OCD-0080" [ref=e6076]:
+                    - generic [ref=e6077]:
+                      - generic [ref=e6078]: PREST-OCD-0080
+                      - button [ref=e6079] [cursor=pointer]:
+                        - img
+                  - cell "ORANGE CÔTE D'IVOIRE ORANGE CÔTE D'IVOIRE" [ref=e6080]:
+                    - generic [ref=e6081]:
+                      - paragraph [ref=e6082]: ORANGE CÔTE D'IVOIRE
+                      - paragraph [ref=e6083]: ORANGE CÔTE D'IVOIRE
+                  - cell "orangebusiness.oci@orange.com 2.25272e+012" [ref=e6084]:
+                    - generic [ref=e6085]:
+                      - generic [ref=e6086]: orangebusiness.oci@orange.com
+                      - generic [ref=e6087]: "2.25272e+012"
+                  - cell "-" [ref=e6088]
+                  - cell "-" [ref=e6089]
+                  - cell "Actif" [ref=e6090]:
+                    - generic [ref=e6091]: Actif
+                  - cell [ref=e6092]:
+                    - button [ref=e6093] [cursor=pointer]:
+                      - img
+                - row "PREST-OG-0205 OTHENTIC GROUP OTHENTIC GROUP othenticgroup@gmailcom 2520001812 - - Actif" [ref=e6094]:
+                  - cell "PREST-OG-0205" [ref=e6095]:
+                    - generic [ref=e6096]:
+                      - generic [ref=e6097]: PREST-OG-0205
+                      - button [ref=e6098] [cursor=pointer]:
+                        - img
+                  - cell "OTHENTIC GROUP OTHENTIC GROUP" [ref=e6099]:
+                    - generic [ref=e6100]:
+                      - paragraph [ref=e6101]: OTHENTIC GROUP
+                      - paragraph [ref=e6102]: OTHENTIC GROUP
+                  - cell "othenticgroup@gmailcom 2520001812" [ref=e6103]:
+                    - generic [ref=e6104]:
+                      - generic [ref=e6105]: othenticgroup@gmailcom
+                      - generic [ref=e6106]: "2520001812"
+                  - cell "-" [ref=e6107]
+                  - cell "-" [ref=e6108]
+                  - cell "Actif" [ref=e6109]:
+                    - generic [ref=e6110]: Actif
+                  - cell [ref=e6111]:
+                    - button [ref=e6112] [cursor=pointer]:
+                      - img
+                - row "PREST-OS-0302 OTOMASYS sarl OTOMASYS sarl infos@otomasys.com 0501600600 - - Actif" [ref=e6113]:
+                  - cell "PREST-OS-0302" [ref=e6114]:
+                    - generic [ref=e6115]:
+                      - generic [ref=e6116]: PREST-OS-0302
+                      - button [ref=e6117] [cursor=pointer]:
+                        - img
+                  - cell "OTOMASYS sarl OTOMASYS sarl" [ref=e6118]:
+                    - generic [ref=e6119]:
+                      - paragraph [ref=e6120]: OTOMASYS sarl
+                      - paragraph [ref=e6121]: OTOMASYS sarl
+                  - cell "infos@otomasys.com 0501600600" [ref=e6122]:
+                    - generic [ref=e6123]:
+                      - generic [ref=e6124]: infos@otomasys.com
+                      - generic [ref=e6125]: "0501600600"
+                  - cell "-" [ref=e6126]
+                  - cell "-" [ref=e6127]
+                  - cell "Actif" [ref=e6128]:
+                    - generic [ref=e6129]: Actif
+                  - cell [ref=e6130]:
+                    - button [ref=e6131] [cursor=pointer]:
+                      - img
+                - row "PREST-OSS-0300 OUEDRAOGO SEYDOU SERVICE OUEDRAOGO SEYDOU SERVICE NEANT 0505606730 - - Actif" [ref=e6132]:
+                  - cell "PREST-OSS-0300" [ref=e6133]:
+                    - generic [ref=e6134]:
+                      - generic [ref=e6135]: PREST-OSS-0300
+                      - button [ref=e6136] [cursor=pointer]:
+                        - img
+                  - cell "OUEDRAOGO SEYDOU SERVICE OUEDRAOGO SEYDOU SERVICE" [ref=e6137]:
+                    - generic [ref=e6138]:
+                      - paragraph [ref=e6139]: OUEDRAOGO SEYDOU SERVICE
+                      - paragraph [ref=e6140]: OUEDRAOGO SEYDOU SERVICE
+                  - cell "NEANT 0505606730" [ref=e6141]:
+                    - generic [ref=e6142]:
+                      - generic [ref=e6143]: NEANT
+                      - generic [ref=e6144]: "0505606730"
+                  - cell "-" [ref=e6145]
+                  - cell "-" [ref=e6146]
+                  - cell "Actif" [ref=e6147]:
+                    - generic [ref=e6148]: Actif
+                  - cell [ref=e6149]:
+                    - button [ref=e6150] [cursor=pointer]:
+                      - img
+                - row "PREST-PCH-0412 PALM CLUB HOTEL PALM CLUB HOTEL palmclub@hotelpalmclub.com NEANT - - Actif" [ref=e6151]:
+                  - cell "PREST-PCH-0412" [ref=e6152]:
+                    - generic [ref=e6153]:
+                      - generic [ref=e6154]: PREST-PCH-0412
+                      - button [ref=e6155] [cursor=pointer]:
+                        - img
+                  - cell "PALM CLUB HOTEL PALM CLUB HOTEL" [ref=e6156]:
+                    - generic [ref=e6157]:
+                      - paragraph [ref=e6158]: PALM CLUB HOTEL
+                      - paragraph [ref=e6159]: PALM CLUB HOTEL
+                  - cell "palmclub@hotelpalmclub.com NEANT" [ref=e6160]:
+                    - generic [ref=e6161]:
+                      - generic [ref=e6162]: palmclub@hotelpalmclub.com
+                      - generic [ref=e6163]: NEANT
+                  - cell "-" [ref=e6164]
+                  - cell "-" [ref=e6165]
+                  - cell "Actif" [ref=e6166]:
+                    - generic [ref=e6167]: Actif
+                  - cell [ref=e6168]:
+                    - button [ref=e6169] [cursor=pointer]:
+                      - img
+                - row "PREST-PC-0081 PAPIGRAPH CI PAPIGRAPH CI papigraph@hotmail.fr 2.25272e+012 - - Actif" [ref=e6170]:
+                  - cell "PREST-PC-0081" [ref=e6171]:
+                    - generic [ref=e6172]:
+                      - generic [ref=e6173]: PREST-PC-0081
+                      - button [ref=e6174] [cursor=pointer]:
+                        - img
+                  - cell "PAPIGRAPH CI PAPIGRAPH CI" [ref=e6175]:
+                    - generic [ref=e6176]:
+                      - paragraph [ref=e6177]: PAPIGRAPH CI
+                      - paragraph [ref=e6178]: PAPIGRAPH CI
+                  - cell "papigraph@hotmail.fr 2.25272e+012" [ref=e6179]:
+                    - generic [ref=e6180]:
+                      - generic [ref=e6181]: papigraph@hotmail.fr
+                      - generic [ref=e6182]: "2.25272e+012"
+                  - cell "-" [ref=e6183]
+                  - cell "-" [ref=e6184]
+                  - cell "Actif" [ref=e6185]:
+                    - generic [ref=e6186]: Actif
+                  - cell [ref=e6187]:
+                    - button [ref=e6188] [cursor=pointer]:
+                      - img
+                - row "PREST-PAP-0082 PAPILUX PAPILUX papilux.commercial18@gmail.com 1.70507e+008 - - Actif" [ref=e6189]:
+                  - cell "PREST-PAP-0082" [ref=e6190]:
+                    - generic [ref=e6191]:
+                      - generic [ref=e6192]: PREST-PAP-0082
+                      - button [ref=e6193] [cursor=pointer]:
+                        - img
+                  - cell "PAPILUX PAPILUX" [ref=e6194]:
+                    - generic [ref=e6195]:
+                      - paragraph [ref=e6196]: PAPILUX
+                      - paragraph [ref=e6197]: PAPILUX
+                  - cell "papilux.commercial18@gmail.com 1.70507e+008" [ref=e6198]:
+                    - generic [ref=e6199]:
+                      - generic [ref=e6200]: papilux.commercial18@gmail.com
+                      - generic [ref=e6201]: "1.70507e+008"
+                  - cell "-" [ref=e6202]
+                  - cell "-" [ref=e6203]
+                  - cell "Actif" [ref=e6204]:
+                    - generic [ref=e6205]: Actif
+                  - cell [ref=e6206]:
+                    - button [ref=e6207] [cursor=pointer]:
+                      - img
+                - row "PREST-PI-0238 PEINTRE ISSA PEINTRE ISSA NEANT 05 04 25 13 26 - - Actif" [ref=e6208]:
+                  - cell "PREST-PI-0238" [ref=e6209]:
+                    - generic [ref=e6210]:
+                      - generic [ref=e6211]: PREST-PI-0238
+                      - button [ref=e6212] [cursor=pointer]:
+                        - img
+                  - cell "PEINTRE ISSA PEINTRE ISSA" [ref=e6213]:
+                    - generic [ref=e6214]:
+                      - paragraph [ref=e6215]: PEINTRE ISSA
+                      - paragraph [ref=e6216]: PEINTRE ISSA
+                  - cell "NEANT 05 04 25 13 26" [ref=e6217]:
+                    - generic [ref=e6218]:
+                      - generic [ref=e6219]: NEANT
+                      - generic [ref=e6220]: 05 04 25 13 26
+                  - cell "-" [ref=e6221]
+                  - cell "-" [ref=e6222]
+                  - cell "Actif" [ref=e6223]:
+                    - generic [ref=e6224]: Actif
+                  - cell [ref=e6225]:
+                    - button [ref=e6226] [cursor=pointer]:
+                      - img
+                - row "PREST-PSA-0224 PEINTRE SIMIA ABOUBACAR PEINTRE SIMIA ABOUBACAR NC 05 46 87 80 20 - - Actif" [ref=e6227]:
+                  - cell "PREST-PSA-0224" [ref=e6228]:
+                    - generic [ref=e6229]:
+                      - generic [ref=e6230]: PREST-PSA-0224
+                      - button [ref=e6231] [cursor=pointer]:
+                        - img
+                  - cell "PEINTRE SIMIA ABOUBACAR PEINTRE SIMIA ABOUBACAR" [ref=e6232]:
+                    - generic [ref=e6233]:
+                      - paragraph [ref=e6234]: PEINTRE SIMIA ABOUBACAR
+                      - paragraph [ref=e6235]: PEINTRE SIMIA ABOUBACAR
+                  - cell "NC 05 46 87 80 20" [ref=e6236]:
+                    - generic [ref=e6237]:
+                      - generic [ref=e6238]: NC
+                      - generic [ref=e6239]: 05 46 87 80 20
+                  - cell "-" [ref=e6240]
+                  - cell "-" [ref=e6241]
+                  - cell "Actif" [ref=e6242]:
+                    - generic [ref=e6243]: Actif
+                  - cell [ref=e6244]:
+                    - button [ref=e6245] [cursor=pointer]:
+                      - img
+                - row "PREST-POS-0234 PERFECT ORGANIZ SARL PERFECT ORGANIZ perfect.organiz@gmail.com 0708100730 - - Actif" [ref=e6246]:
+                  - cell "PREST-POS-0234" [ref=e6247]:
+                    - generic [ref=e6248]:
+                      - generic [ref=e6249]: PREST-POS-0234
+                      - button [ref=e6250] [cursor=pointer]:
+                        - img
+                  - cell "PERFECT ORGANIZ SARL PERFECT ORGANIZ" [ref=e6251]:
+                    - generic [ref=e6252]:
+                      - paragraph [ref=e6253]: PERFECT ORGANIZ SARL
+                      - paragraph [ref=e6254]: PERFECT ORGANIZ
+                  - cell "perfect.organiz@gmail.com 0708100730" [ref=e6255]:
+                    - generic [ref=e6256]:
+                      - generic [ref=e6257]: perfect.organiz@gmail.com
+                      - generic [ref=e6258]: "0708100730"
+                  - cell "-" [ref=e6259]
+                  - cell "-" [ref=e6260]
+                  - cell "Actif" [ref=e6261]:
+                    - generic [ref=e6262]: Actif
+                  - cell [ref=e6263]:
+                    - button [ref=e6264] [cursor=pointer]:
+                      - img
+                - row "PREST-PDL-0136 PERSONNEL DE L'ARTI PERSONNEL DE L'ARTI PERSONNEL ARTI PERSONNEL ARTI - - Actif" [ref=e6265]:
+                  - cell "PREST-PDL-0136" [ref=e6266]:
+                    - generic [ref=e6267]:
+                      - generic [ref=e6268]: PREST-PDL-0136
+                      - button [ref=e6269] [cursor=pointer]:
+                        - img
+                  - cell "PERSONNEL DE L'ARTI PERSONNEL DE L'ARTI" [ref=e6270]:
+                    - generic [ref=e6271]:
+                      - paragraph [ref=e6272]: PERSONNEL DE L'ARTI
+                      - paragraph [ref=e6273]: PERSONNEL DE L'ARTI
+                  - cell "PERSONNEL ARTI PERSONNEL ARTI" [ref=e6274]:
+                    - generic [ref=e6275]:
+                      - generic [ref=e6276]: PERSONNEL ARTI
+                      - generic [ref=e6277]: PERSONNEL ARTI
+                  - cell "-" [ref=e6278]
+                  - cell "-" [ref=e6279]
+                  - cell "Actif" [ref=e6280]:
+                    - generic [ref=e6281]: Actif
+                  - cell [ref=e6282]:
+                    - button [ref=e6283] [cursor=pointer]:
+                      - img
+                - row "PREST-PI-0083 PETRO IVOIRE PETRO IVOIRE petroivoire@petroivoire.ci (225) 27 21 75 88 40 - - Actif" [ref=e6284]:
+                  - cell "PREST-PI-0083" [ref=e6285]:
+                    - generic [ref=e6286]:
+                      - generic [ref=e6287]: PREST-PI-0083
+                      - button [ref=e6288] [cursor=pointer]:
+                        - img
+                  - cell "PETRO IVOIRE PETRO IVOIRE" [ref=e6289]:
+                    - generic [ref=e6290]:
+                      - paragraph [ref=e6291]: PETRO IVOIRE
+                      - paragraph [ref=e6292]: PETRO IVOIRE
+                  - cell "petroivoire@petroivoire.ci (225) 27 21 75 88 40" [ref=e6293]:
+                    - generic [ref=e6294]:
+                      - generic [ref=e6295]: petroivoire@petroivoire.ci
+                      - generic [ref=e6296]: (225) 27 21 75 88 40
+                  - cell "-" [ref=e6297]
+                  - cell "-" [ref=e6298]
+                  - cell "Actif" [ref=e6299]:
+                    - generic [ref=e6300]: Actif
+                  - cell [ref=e6301]:
+                    - button [ref=e6302] [cursor=pointer]:
+                      - img
+                - row "PREST-PSC-0283 PHARMACIE SAINTE CECILE DES VALLONS PHARMACIE SAINTE CECILE DES VALLONS NEANT 27 22 42 63 35 - - Actif" [ref=e6303]:
+                  - cell "PREST-PSC-0283" [ref=e6304]:
+                    - generic [ref=e6305]:
+                      - generic [ref=e6306]: PREST-PSC-0283
+                      - button [ref=e6307] [cursor=pointer]:
+                        - img
+                  - cell "PHARMACIE SAINTE CECILE DES VALLONS PHARMACIE SAINTE CECILE DES VALLONS" [ref=e6308]:
+                    - generic [ref=e6309]:
+                      - paragraph [ref=e6310]: PHARMACIE SAINTE CECILE DES VALLONS
+                      - paragraph [ref=e6311]: PHARMACIE SAINTE CECILE DES VALLONS
+                  - cell "NEANT 27 22 42 63 35" [ref=e6312]:
+                    - generic [ref=e6313]:
+                      - generic [ref=e6314]: NEANT
+                      - generic [ref=e6315]: 27 22 42 63 35
+                  - cell "-" [ref=e6316]
+                  - cell "-" [ref=e6317]
+                  - cell "Actif" [ref=e6318]:
+                    - generic [ref=e6319]: Actif
+                  - cell [ref=e6320]:
+                    - button [ref=e6321] [cursor=pointer]:
+                      - img
+                - row "PREST-PA-0186 PHARMACIE AURORE PHARMACIE AURORE NEANT 27 22 42 63 35 - - Actif" [ref=e6322]:
+                  - cell "PREST-PA-0186" [ref=e6323]:
+                    - generic [ref=e6324]:
+                      - generic [ref=e6325]: PREST-PA-0186
+                      - button [ref=e6326] [cursor=pointer]:
+                        - img
+                  - cell "PHARMACIE AURORE PHARMACIE AURORE" [ref=e6327]:
+                    - generic [ref=e6328]:
+                      - paragraph [ref=e6329]: PHARMACIE AURORE
+                      - paragraph [ref=e6330]: PHARMACIE AURORE
+                  - cell "NEANT 27 22 42 63 35" [ref=e6331]:
+                    - generic [ref=e6332]:
+                      - generic [ref=e6333]: NEANT
+                      - generic [ref=e6334]: 27 22 42 63 35
+                  - cell "-" [ref=e6335]
+                  - cell "-" [ref=e6336]
+                  - cell "Actif" [ref=e6337]:
+                    - generic [ref=e6338]: Actif
+                  - cell [ref=e6339]:
+                    - button [ref=e6340] [cursor=pointer]:
+                      - img
+                - row "PREST-PHE-0084 PHENICIA PHENICIA - - Actif" [ref=e6341]:
+                  - cell "PREST-PHE-0084" [ref=e6342]:
+                    - generic [ref=e6343]:
+                      - generic [ref=e6344]: PREST-PHE-0084
+                      - button [ref=e6345] [cursor=pointer]:
+                        - img
+                  - cell "PHENICIA PHENICIA" [ref=e6346]:
+                    - generic [ref=e6347]:
+                      - paragraph [ref=e6348]: PHENICIA
+                      - paragraph [ref=e6349]: PHENICIA
+                  - cell [ref=e6350]
+                  - cell "-" [ref=e6351]
+                  - cell "-" [ref=e6352]
+                  - cell "Actif" [ref=e6353]:
+                    - generic [ref=e6354]: Actif
+                  - cell [ref=e6355]:
+                    - button [ref=e6356] [cursor=pointer]:
+                      - img
+                - row "PREST-PIE-0266 PHENICIA IMPORT EXPORT PHENICIA IMPORT EXPORT NEANT NEANT - - Actif" [ref=e6357]:
+                  - cell "PREST-PIE-0266" [ref=e6358]:
+                    - generic [ref=e6359]:
+                      - generic [ref=e6360]: PREST-PIE-0266
+                      - button [ref=e6361] [cursor=pointer]:
+                        - img
+                  - cell "PHENICIA IMPORT EXPORT PHENICIA IMPORT EXPORT" [ref=e6362]:
+                    - generic [ref=e6363]:
+                      - paragraph [ref=e6364]: PHENICIA IMPORT EXPORT
+                      - paragraph [ref=e6365]: PHENICIA IMPORT EXPORT
+                  - cell "NEANT NEANT" [ref=e6366]:
+                    - generic [ref=e6367]:
+                      - generic [ref=e6368]: NEANT
+                      - generic [ref=e6369]: NEANT
+                  - cell "-" [ref=e6370]
+                  - cell "-" [ref=e6371]
+                  - cell "Actif" [ref=e6372]:
+                    - generic [ref=e6373]: Actif
+                  - cell [ref=e6374]:
+                    - button [ref=e6375] [cursor=pointer]:
+                      - img
+                - row "PREST-PIV-0085 PIVOT PIVOT 7.77972e+008 - - Actif" [ref=e6376]:
+                  - cell "PREST-PIV-0085" [ref=e6377]:
+                    - generic [ref=e6378]:
+                      - generic [ref=e6379]: PREST-PIV-0085
+                      - button [ref=e6380] [cursor=pointer]:
+                        - img
+                  - cell "PIVOT PIVOT" [ref=e6381]:
+                    - generic [ref=e6382]:
+                      - paragraph [ref=e6383]: PIVOT
+                      - paragraph [ref=e6384]: PIVOT
+                  - cell "7.77972e+008" [ref=e6385]:
+                    - generic [ref=e6387]: "7.77972e+008"
+                  - cell "-" [ref=e6388]
+                  - cell "-" [ref=e6389]
+                  - cell "Actif" [ref=e6390]:
+                    - generic [ref=e6391]: Actif
+                  - cell [ref=e6392]:
+                    - button [ref=e6393] [cursor=pointer]:
+                      - img
+                - row "PREST-PB-0207 PLOMBIER BAMBA PLOMBIER BAMBA NEANT 05 56 11 05 09 - - Actif" [ref=e6394]:
+                  - cell "PREST-PB-0207" [ref=e6395]:
+                    - generic [ref=e6396]:
+                      - generic [ref=e6397]: PREST-PB-0207
+                      - button [ref=e6398] [cursor=pointer]:
+                        - img
+                  - cell "PLOMBIER BAMBA PLOMBIER BAMBA" [ref=e6399]:
+                    - generic [ref=e6400]:
+                      - paragraph [ref=e6401]: PLOMBIER BAMBA
+                      - paragraph [ref=e6402]: PLOMBIER BAMBA
+                  - cell "NEANT 05 56 11 05 09" [ref=e6403]:
+                    - generic [ref=e6404]:
+                      - generic [ref=e6405]: NEANT
+                      - generic [ref=e6406]: 05 56 11 05 09
+                  - cell "-" [ref=e6407]
+                  - cell "-" [ref=e6408]
+                  - cell "Actif" [ref=e6409]:
+                    - generic [ref=e6410]: Actif
+                  - cell [ref=e6411]:
+                    - button [ref=e6412] [cursor=pointer]:
+                      - img
+                - row "PREST-PI-0086 PMS INFORMATIQUE PMS INFORMATIQUE 2.55272e+012 - - Actif" [ref=e6413]:
+                  - cell "PREST-PI-0086" [ref=e6414]:
+                    - generic [ref=e6415]:
+                      - generic [ref=e6416]: PREST-PI-0086
+                      - button [ref=e6417] [cursor=pointer]:
+                        - img
+                  - cell "PMS INFORMATIQUE PMS INFORMATIQUE" [ref=e6418]:
+                    - generic [ref=e6419]:
+                      - paragraph [ref=e6420]: PMS INFORMATIQUE
+                      - paragraph [ref=e6421]: PMS INFORMATIQUE
+                  - cell "2.55272e+012" [ref=e6422]:
+                    - generic [ref=e6424]: "2.55272e+012"
+                  - cell "-" [ref=e6425]
+                  - cell "-" [ref=e6426]
+                  - cell "Actif" [ref=e6427]:
+                    - generic [ref=e6428]: Actif
+                  - cell [ref=e6429]:
+                    - button [ref=e6430] [cursor=pointer]:
+                      - img
+                - row "PREST-PIH-0267 POLYCLINIQUE INTERNATIONALE HOTEL DIEU POLYCLINIQUE INTERNATIONALE HOTEL DIEU - - Actif" [ref=e6431]:
+                  - cell "PREST-PIH-0267" [ref=e6432]:
+                    - generic [ref=e6433]:
+                      - generic [ref=e6434]: PREST-PIH-0267
+                      - button [ref=e6435] [cursor=pointer]:
+                        - img
+                  - cell "POLYCLINIQUE INTERNATIONALE HOTEL DIEU POLYCLINIQUE INTERNATIONALE HOTEL DIEU" [ref=e6436]:
+                    - generic [ref=e6437]:
+                      - paragraph [ref=e6438]: POLYCLINIQUE INTERNATIONALE HOTEL DIEU
+                      - paragraph [ref=e6439]: POLYCLINIQUE INTERNATIONALE HOTEL DIEU
+                  - cell [ref=e6440]
+                  - cell "-" [ref=e6441]
+                  - cell "-" [ref=e6442]
+                  - cell "Actif" [ref=e6443]:
+                    - generic [ref=e6444]: Actif
+                  - cell [ref=e6445]:
+                    - button [ref=e6446] [cursor=pointer]:
+                      - img
+                - row "PREST-POL-0174 POLYMED POLYMED polymed-W@ymail.com 2721266209 - - Actif" [ref=e6447]:
+                  - cell "PREST-POL-0174" [ref=e6448]:
+                    - generic [ref=e6449]:
+                      - generic [ref=e6450]: PREST-POL-0174
+                      - button [ref=e6451] [cursor=pointer]:
+                        - img
+                  - cell "POLYMED POLYMED" [ref=e6452]:
+                    - generic [ref=e6453]:
+                      - paragraph [ref=e6454]: POLYMED
+                      - paragraph [ref=e6455]: POLYMED
+                  - cell "polymed-W@ymail.com 2721266209" [ref=e6456]:
+                    - generic [ref=e6457]:
+                      - generic [ref=e6458]: polymed-W@ymail.com
+                      - generic [ref=e6459]: "2721266209"
+                  - cell "-" [ref=e6460]
+                  - cell "-" [ref=e6461]
+                  - cell "Actif" [ref=e6462]:
+                    - generic [ref=e6463]: Actif
+                  - cell [ref=e6464]:
+                    - button [ref=e6465] [cursor=pointer]:
+                      - img
+                - row "PREST-PRE-0307 PRESSES PRESSES NEANT NEANT - - Actif" [ref=e6466]:
+                  - cell "PREST-PRE-0307" [ref=e6467]:
+                    - generic [ref=e6468]:
+                      - generic [ref=e6469]: PREST-PRE-0307
+                      - button [ref=e6470] [cursor=pointer]:
+                        - img
+                  - cell "PRESSES PRESSES" [ref=e6471]:
+                    - generic [ref=e6472]:
+                      - paragraph [ref=e6473]: PRESSES
+                      - paragraph [ref=e6474]: PRESSES
+                  - cell "NEANT NEANT" [ref=e6475]:
+                    - generic [ref=e6476]:
+                      - generic [ref=e6477]: NEANT
+                      - generic [ref=e6478]: NEANT
+                  - cell "-" [ref=e6479]
+                  - cell "-" [ref=e6480]
+                  - cell "Actif" [ref=e6481]:
+                    - generic [ref=e6482]: Actif
+                  - cell [ref=e6483]:
+                    - button [ref=e6484] [cursor=pointer]:
+                      - img
+                - row "PREST-PR-0296 PRESSES RADIO PRESSES RADIO - - Actif" [ref=e6485]:
+                  - cell "PREST-PR-0296" [ref=e6486]:
+                    - generic [ref=e6487]:
+                      - generic [ref=e6488]: PREST-PR-0296
+                      - button [ref=e6489] [cursor=pointer]:
+                        - img
+                  - cell "PRESSES RADIO PRESSES RADIO" [ref=e6490]:
+                    - generic [ref=e6491]:
+                      - paragraph [ref=e6492]: PRESSES RADIO
+                      - paragraph [ref=e6493]: PRESSES RADIO
+                  - cell [ref=e6494]
+                  - cell "-" [ref=e6495]
+                  - cell "-" [ref=e6496]
+                  - cell "Actif" [ref=e6497]:
+                    - generic [ref=e6498]: Actif
+                  - cell [ref=e6499]:
+                    - button [ref=e6500] [cursor=pointer]:
+                      - img
+                - row "PREST-PSC-0326 PRESTIGE SERRURERIE COTE D'IVOIRE PRESTIGE SERRURERIE prestigeserrurerie26@gmail.com 0708796793 - - Actif" [ref=e6501]:
+                  - cell "PREST-PSC-0326" [ref=e6502]:
+                    - generic [ref=e6503]:
+                      - generic [ref=e6504]: PREST-PSC-0326
+                      - button [ref=e6505] [cursor=pointer]:
+                        - img
+                  - cell "PRESTIGE SERRURERIE COTE D'IVOIRE PRESTIGE SERRURERIE" [ref=e6506]:
+                    - generic [ref=e6507]:
+                      - paragraph [ref=e6508]: PRESTIGE SERRURERIE COTE D'IVOIRE
+                      - paragraph [ref=e6509]: PRESTIGE SERRURERIE
+                  - cell "prestigeserrurerie26@gmail.com 0708796793" [ref=e6510]:
+                    - generic [ref=e6511]:
+                      - generic [ref=e6512]: prestigeserrurerie26@gmail.com
+                      - generic [ref=e6513]: "0708796793"
+                  - cell "-" [ref=e6514]
+                  - cell "-" [ref=e6515]
+                  - cell "Actif" [ref=e6516]:
+                    - generic [ref=e6517]: Actif
+                  - cell [ref=e6518]:
+                    - button [ref=e6519] [cursor=pointer]:
+                      - img
+                - row "PREST-PRI-0087 PRICEWATERHOUSECOOPERS PRICEWATERHOUSECOOPERS 2.25272e+012 - - Actif" [ref=e6520]:
+                  - cell "PREST-PRI-0087" [ref=e6521]:
+                    - generic [ref=e6522]:
+                      - generic [ref=e6523]: PREST-PRI-0087
+                      - button [ref=e6524] [cursor=pointer]:
+                        - img
+                  - cell "PRICEWATERHOUSECOOPERS PRICEWATERHOUSECOOPERS" [ref=e6525]:
+                    - generic [ref=e6526]:
+                      - paragraph [ref=e6527]: PRICEWATERHOUSECOOPERS
+                      - paragraph [ref=e6528]: PRICEWATERHOUSECOOPERS
+                  - cell "2.25272e+012" [ref=e6529]:
+                    - generic [ref=e6531]: "2.25272e+012"
+                  - cell "-" [ref=e6532]
+                  - cell "-" [ref=e6533]
+                  - cell "Actif" [ref=e6534]:
+                    - generic [ref=e6535]: Actif
+                  - cell [ref=e6536]:
+                    - button [ref=e6537] [cursor=pointer]:
+                      - img
+                - row "PREST-PRI-0406 PRIZY PRIZY contact-ci@prizy.CO 0565000848 - - Actif" [ref=e6538]:
+                  - cell "PREST-PRI-0406" [ref=e6539]:
+                    - generic [ref=e6540]:
+                      - generic [ref=e6541]: PREST-PRI-0406
+                      - button [ref=e6542] [cursor=pointer]:
+                        - img
+                  - cell "PRIZY PRIZY" [ref=e6543]:
+                    - generic [ref=e6544]:
+                      - paragraph [ref=e6545]: PRIZY
+                      - paragraph [ref=e6546]: PRIZY
+                  - cell "contact-ci@prizy.CO 0565000848" [ref=e6547]:
+                    - generic [ref=e6548]:
+                      - generic [ref=e6549]: contact-ci@prizy.CO
+                      - generic [ref=e6550]: "0565000848"
+                  - cell "-" [ref=e6551]
+                  - cell "-" [ref=e6552]
+                  - cell "Actif" [ref=e6553]:
+                    - generic [ref=e6554]: Actif
+                  - cell [ref=e6555]:
+                    - button [ref=e6556] [cursor=pointer]:
+                      - img
+                - row "PREST-PGC-0411 PRO GLASS CI PRO GLASS CI reda1952@icloud.com 0787595929 - - Actif" [ref=e6557]:
+                  - cell "PREST-PGC-0411" [ref=e6558]:
+                    - generic [ref=e6559]:
+                      - generic [ref=e6560]: PREST-PGC-0411
+                      - button [ref=e6561] [cursor=pointer]:
+                        - img
+                  - cell "PRO GLASS CI PRO GLASS CI" [ref=e6562]:
+                    - generic [ref=e6563]:
+                      - paragraph [ref=e6564]: PRO GLASS CI
+                      - paragraph [ref=e6565]: PRO GLASS CI
+                  - cell "reda1952@icloud.com 0787595929" [ref=e6566]:
+                    - generic [ref=e6567]:
+                      - generic [ref=e6568]: reda1952@icloud.com
+                      - generic [ref=e6569]: "0787595929"
+                  - cell "-" [ref=e6570]
+                  - cell "-" [ref=e6571]
+                  - cell "Actif" [ref=e6572]:
+                    - generic [ref=e6573]: Actif
+                  - cell [ref=e6574]:
+                    - button [ref=e6575] [cursor=pointer]:
+                      - img
+                - row "PREST-PUL-0088 PULLMAN PULLMAN 2.72256e+009 - - Actif" [ref=e6576]:
+                  - cell "PREST-PUL-0088" [ref=e6577]:
+                    - generic [ref=e6578]:
+                      - generic [ref=e6579]: PREST-PUL-0088
+                      - button [ref=e6580] [cursor=pointer]:
+                        - img
+                  - cell "PULLMAN PULLMAN" [ref=e6581]:
+                    - generic [ref=e6582]:
+                      - paragraph [ref=e6583]: PULLMAN
+                      - paragraph [ref=e6584]: PULLMAN
+                  - cell "2.72256e+009" [ref=e6585]:
+                    - generic [ref=e6587]: "2.72256e+009"
+                  - cell "-" [ref=e6588]
+                  - cell "-" [ref=e6589]
+                  - cell "Actif" [ref=e6590]:
+                    - generic [ref=e6591]: Actif
+                  - cell [ref=e6592]:
+                    - button [ref=e6593] [cursor=pointer]:
+                      - img
+                - row "PREST-PD-0424 PULLMAN DAKAR PULLMAN DAKAR PULLMAN DAKAR PULLMAN DAKAR - - Actif" [ref=e6594]:
+                  - cell "PREST-PD-0424" [ref=e6595]:
+                    - generic [ref=e6596]:
+                      - generic [ref=e6597]: PREST-PD-0424
+                      - button [ref=e6598] [cursor=pointer]:
+                        - img
+                  - cell "PULLMAN DAKAR PULLMAN DAKAR" [ref=e6599]:
+                    - generic [ref=e6600]:
+                      - paragraph [ref=e6601]: PULLMAN DAKAR
+                      - paragraph [ref=e6602]: PULLMAN DAKAR
+                  - cell "PULLMAN DAKAR PULLMAN DAKAR" [ref=e6603]:
+                    - generic [ref=e6604]:
+                      - generic [ref=e6605]: PULLMAN DAKAR
+                      - generic [ref=e6606]: PULLMAN DAKAR
+                  - cell "-" [ref=e6607]
+                  - cell "-" [ref=e6608]
+                  - cell "Actif" [ref=e6609]:
+                    - generic [ref=e6610]: Actif
+                  - cell [ref=e6611]:
+                    - button [ref=e6612] [cursor=pointer]:
+                      - img
+                - row "PREST-QG-0268 QUICAILLERIE GENERALE QUICAILLERIE GENERALE - - Actif" [ref=e6613]:
+                  - cell "PREST-QG-0268" [ref=e6614]:
+                    - generic [ref=e6615]:
+                      - generic [ref=e6616]: PREST-QG-0268
+                      - button [ref=e6617] [cursor=pointer]:
+                        - img
+                  - cell "QUICAILLERIE GENERALE QUICAILLERIE GENERALE" [ref=e6618]:
+                    - generic [ref=e6619]:
+                      - paragraph [ref=e6620]: QUICAILLERIE GENERALE
+                      - paragraph [ref=e6621]: QUICAILLERIE GENERALE
+                  - cell [ref=e6622]
+                  - cell "-" [ref=e6623]
+                  - cell "-" [ref=e6624]
+                  - cell "Actif" [ref=e6625]:
+                    - generic [ref=e6626]: Actif
+                  - cell [ref=e6627]:
+                    - button [ref=e6628] [cursor=pointer]:
+                      - img
+                - row "PREST-QT-0089 QUICAILLERIE TITAREX QUICAILLERIE TITAREX 2.7235e+009 - - Actif" [ref=e6629]:
+                  - cell "PREST-QT-0089" [ref=e6630]:
+                    - generic [ref=e6631]:
+                      - generic [ref=e6632]: PREST-QT-0089
+                      - button [ref=e6633] [cursor=pointer]:
+                        - img
+                  - cell "QUICAILLERIE TITAREX QUICAILLERIE TITAREX" [ref=e6634]:
+                    - generic [ref=e6635]:
+                      - paragraph [ref=e6636]: QUICAILLERIE TITAREX
+                      - paragraph [ref=e6637]: QUICAILLERIE TITAREX
+                  - cell "2.7235e+009" [ref=e6638]:
+                    - generic [ref=e6640]: "2.7235e+009"
+                  - cell "-" [ref=e6641]
+                  - cell "-" [ref=e6642]
+                  - cell "Actif" [ref=e6643]:
+                    - generic [ref=e6644]: Actif
+                  - cell [ref=e6645]:
+                    - button [ref=e6646] [cursor=pointer]:
+                      - img
+                - row "PREST-QG-0277 QUINCAILLERIE GENERALE QUINCAILLERIE GENERALE NEANT NEANT - - Actif" [ref=e6647]:
+                  - cell "PREST-QG-0277" [ref=e6648]:
+                    - generic [ref=e6649]:
+                      - generic [ref=e6650]: PREST-QG-0277
+                      - button [ref=e6651] [cursor=pointer]:
+                        - img
+                  - cell "QUINCAILLERIE GENERALE QUINCAILLERIE GENERALE" [ref=e6652]:
+                    - generic [ref=e6653]:
+                      - paragraph [ref=e6654]: QUINCAILLERIE GENERALE
+                      - paragraph [ref=e6655]: QUINCAILLERIE GENERALE
+                  - cell "NEANT NEANT" [ref=e6656]:
+                    - generic [ref=e6657]:
+                      - generic [ref=e6658]: NEANT
+                      - generic [ref=e6659]: NEANT
+                  - cell "-" [ref=e6660]
+                  - cell "-" [ref=e6661]
+                  - cell "Actif" [ref=e6662]:
+                    - generic [ref=e6663]: Actif
+                  - cell [ref=e6664]:
+                    - button [ref=e6665] [cursor=pointer]:
+                      - img
+                - row "PREST-RAM-0232 RAMAFE Ra&MA Féerique Néant Neant - - Actif" [ref=e6666]:
+                  - cell "PREST-RAM-0232" [ref=e6667]:
+                    - generic [ref=e6668]:
+                      - generic [ref=e6669]: PREST-RAM-0232
+                      - button [ref=e6670] [cursor=pointer]:
+                        - img
+                  - cell "RAMAFE Ra&MA Féerique" [ref=e6671]:
+                    - generic [ref=e6672]:
+                      - paragraph [ref=e6673]: RAMAFE
+                      - paragraph [ref=e6674]: Ra&MA Féerique
+                  - cell "Néant Neant" [ref=e6675]:
+                    - generic [ref=e6676]:
+                      - generic [ref=e6677]: Néant
+                      - generic [ref=e6678]: Neant
+                  - cell "-" [ref=e6679]
+                  - cell "-" [ref=e6680]
+                  - cell "Actif" [ref=e6681]:
+                    - generic [ref=e6682]: Actif
+                  - cell [ref=e6683]:
+                    - button [ref=e6684] [cursor=pointer]:
+                      - img
+                - row "PREST-RD&-0269 RD&V ROI DES DRAPS ET VAISSELLES info@rdv.com.ci +225 27 21 25 07 15 - - Actif" [ref=e6685]:
+                  - cell "PREST-RD&-0269" [ref=e6686]:
+                    - generic [ref=e6687]:
+                      - generic [ref=e6688]: PREST-RD&-0269
+                      - button [ref=e6689] [cursor=pointer]:
+                        - img
+                  - cell "RD&V ROI DES DRAPS ET VAISSELLES" [ref=e6690]:
+                    - generic [ref=e6691]:
+                      - paragraph [ref=e6692]: RD&V
+                      - paragraph [ref=e6693]: ROI DES DRAPS ET VAISSELLES
+                  - cell "info@rdv.com.ci +225 27 21 25 07 15" [ref=e6694]:
+                    - generic [ref=e6695]:
+                      - generic [ref=e6696]: info@rdv.com.ci
+                      - generic [ref=e6697]: +225 27 21 25 07 15
+                  - cell "-" [ref=e6698]
+                  - cell "-" [ref=e6699]
+                  - cell "Actif" [ref=e6700]:
+                    - generic [ref=e6701]: Actif
+                  - cell [ref=e6702]:
+                    - button [ref=e6703] [cursor=pointer]:
+                      - img
+                - row "PREST-RDV-0090 RDV RDV info@rdvci.com 2.72124e+009 - - Actif" [ref=e6704]:
+                  - cell "PREST-RDV-0090" [ref=e6705]:
+                    - generic [ref=e6706]:
+                      - generic [ref=e6707]: PREST-RDV-0090
+                      - button [ref=e6708] [cursor=pointer]:
+                        - img
+                  - cell "RDV RDV" [ref=e6709]:
+                    - generic [ref=e6710]:
+                      - paragraph [ref=e6711]: RDV
+                      - paragraph [ref=e6712]: RDV
+                  - cell "info@rdvci.com 2.72124e+009" [ref=e6713]:
+                    - generic [ref=e6714]:
+                      - generic [ref=e6715]: info@rdvci.com
+                      - generic [ref=e6716]: "2.72124e+009"
+                  - cell "-" [ref=e6717]
+                  - cell "-" [ref=e6718]
+                  - cell "Actif" [ref=e6719]:
+                    - generic [ref=e6720]: Actif
+                  - cell [ref=e6721]:
+                    - button [ref=e6722] [cursor=pointer]:
+                      - img
+                - row "PREST-RHA-0270 RENAISSANCE HOTEL ARC DE TRIOMPHE RENAISSANCE HOTEL ARC DE TRIOMPHE - - Actif" [ref=e6723]:
+                  - cell "PREST-RHA-0270" [ref=e6724]:
+                    - generic [ref=e6725]:
+                      - generic [ref=e6726]: PREST-RHA-0270
+                      - button [ref=e6727] [cursor=pointer]:
+                        - img
+                  - cell "RENAISSANCE HOTEL ARC DE TRIOMPHE RENAISSANCE HOTEL ARC DE TRIOMPHE" [ref=e6728]:
+                    - generic [ref=e6729]:
+                      - paragraph [ref=e6730]: RENAISSANCE HOTEL ARC DE TRIOMPHE
+                      - paragraph [ref=e6731]: RENAISSANCE HOTEL ARC DE TRIOMPHE
+                  - cell [ref=e6732]
+                  - cell "-" [ref=e6733]
+                  - cell "-" [ref=e6734]
+                  - cell "Actif" [ref=e6735]:
+                    - generic [ref=e6736]: Actif
+                  - cell [ref=e6737]:
+                    - button [ref=e6738] [cursor=pointer]:
+                      - img
+                - row "PREST-RHO-0251 RESIDENCE HOTELIERE O'LORD RESIDENCE HOTELIERE O'LORD NEANT NEANT - - Actif" [ref=e6739]:
+                  - cell "PREST-RHO-0251" [ref=e6740]:
+                    - generic [ref=e6741]:
+                      - generic [ref=e6742]: PREST-RHO-0251
+                      - button [ref=e6743] [cursor=pointer]:
+                        - img
+                  - cell "RESIDENCE HOTELIERE O'LORD RESIDENCE HOTELIERE O'LORD" [ref=e6744]:
+                    - generic [ref=e6745]:
+                      - paragraph [ref=e6746]: RESIDENCE HOTELIERE O'LORD
+                      - paragraph [ref=e6747]: RESIDENCE HOTELIERE O'LORD
+                  - cell "NEANT NEANT" [ref=e6748]:
+                    - generic [ref=e6749]:
+                      - generic [ref=e6750]: NEANT
+                      - generic [ref=e6751]: NEANT
+                  - cell "-" [ref=e6752]
+                  - cell "-" [ref=e6753]
+                  - cell "Actif" [ref=e6754]:
+                    - generic [ref=e6755]: Actif
+                  - cell [ref=e6756]:
+                    - button [ref=e6757] [cursor=pointer]:
+                      - img
+                - row "PREST-RL-0139 RESIDENCE LIMANIYA RESIDENCE LIMANIYA limaniyagolf@gmail.com - - Actif" [ref=e6758]:
+                  - cell "PREST-RL-0139" [ref=e6759]:
+                    - generic [ref=e6760]:
+                      - generic [ref=e6761]: PREST-RL-0139
+                      - button [ref=e6762] [cursor=pointer]:
+                        - img
+                  - cell "RESIDENCE LIMANIYA RESIDENCE LIMANIYA" [ref=e6763]:
+                    - generic [ref=e6764]:
+                      - paragraph [ref=e6765]: RESIDENCE LIMANIYA
+                      - paragraph [ref=e6766]: RESIDENCE LIMANIYA
+                  - cell "limaniyagolf@gmail.com" [ref=e6767]:
+                    - generic [ref=e6769]: limaniyagolf@gmail.com
+                  - cell "-" [ref=e6770]
+                  - cell "-" [ref=e6771]
+                  - cell "Actif" [ref=e6772]:
+                    - generic [ref=e6773]: Actif
+                  - cell [ref=e6774]:
+                    - button [ref=e6775] [cursor=pointer]:
+                      - img
+                - row "PREST-RB-0235 RESTAURANT BANIAN RESTAURANT BANIAN NEANT 2221340564 - - Actif" [ref=e6776]:
+                  - cell "PREST-RB-0235" [ref=e6777]:
+                    - generic [ref=e6778]:
+                      - generic [ref=e6779]: PREST-RB-0235
+                      - button [ref=e6780] [cursor=pointer]:
+                        - img
+                  - cell "RESTAURANT BANIAN RESTAURANT BANIAN" [ref=e6781]:
+                    - generic [ref=e6782]:
+                      - paragraph [ref=e6783]: RESTAURANT BANIAN
+                      - paragraph [ref=e6784]: RESTAURANT BANIAN
+                  - cell "NEANT 2221340564" [ref=e6785]:
+                    - generic [ref=e6786]:
+                      - generic [ref=e6787]: NEANT
+                      - generic [ref=e6788]: "2221340564"
+                  - cell "-" [ref=e6789]
+                  - cell "-" [ref=e6790]
+                  - cell "Actif" [ref=e6791]:
+                    - generic [ref=e6792]: Actif
+                  - cell [ref=e6793]:
+                    - button [ref=e6794] [cursor=pointer]:
+                      - img
+                - row "PREST-RSC-0091 rgs sarl & cnps /regroupement de service RGS SARL rgs.services.g@gmail.com 7.49147e+008 - - Actif" [ref=e6795]:
+                  - cell "PREST-RSC-0091" [ref=e6796]:
+                    - generic [ref=e6797]:
+                      - generic [ref=e6798]: PREST-RSC-0091
+                      - button [ref=e6799] [cursor=pointer]:
+                        - img
+                  - cell "rgs sarl & cnps /regroupement de service RGS SARL" [ref=e6800]:
+                    - generic [ref=e6801]:
+                      - paragraph [ref=e6802]: rgs sarl & cnps /regroupement de service
+                      - paragraph [ref=e6803]: RGS SARL
+                  - cell "rgs.services.g@gmail.com 7.49147e+008" [ref=e6804]:
+                    - generic [ref=e6805]:
+                      - generic [ref=e6806]: rgs.services.g@gmail.com
+                      - generic [ref=e6807]: "7.49147e+008"
+                  - cell "-" [ref=e6808]
+                  - cell "-" [ref=e6809]
+                  - cell "Actif" [ref=e6810]:
+                    - generic [ref=e6811]: Actif
+                  - cell [ref=e6812]:
+                    - button [ref=e6813] [cursor=pointer]:
+                      - img
+                - row "PREST-RIA-0176 RIA REVUE D'IMPRIMERIE AFRICAINE ria@aviso.ci 0707456854 - - Actif" [ref=e6814]:
+                  - cell "PREST-RIA-0176" [ref=e6815]:
+                    - generic [ref=e6816]:
+                      - generic [ref=e6817]: PREST-RIA-0176
+                      - button [ref=e6818] [cursor=pointer]:
+                        - img
+                  - cell "RIA REVUE D'IMPRIMERIE AFRICAINE" [ref=e6819]:
+                    - generic [ref=e6820]:
+                      - paragraph [ref=e6821]: RIA
+                      - paragraph [ref=e6822]: REVUE D'IMPRIMERIE AFRICAINE
+                  - cell "ria@aviso.ci 0707456854" [ref=e6823]:
+                    - generic [ref=e6824]:
+                      - generic [ref=e6825]: ria@aviso.ci
+                      - generic [ref=e6826]: "0707456854"
+                  - cell "-" [ref=e6827]
+                  - cell "-" [ref=e6828]
+                  - cell "Actif" [ref=e6829]:
+                    - generic [ref=e6830]: Actif
+                  - cell [ref=e6831]:
+                    - button [ref=e6832] [cursor=pointer]:
+                      - img
+                - row "PREST-RAM-0416 ROYAL AIR MAROC ROYAL AIR MAROC NEANT 2722510597 - - Actif" [ref=e6833]:
+                  - cell "PREST-RAM-0416" [ref=e6834]:
+                    - generic [ref=e6835]:
+                      - generic [ref=e6836]: PREST-RAM-0416
+                      - button [ref=e6837] [cursor=pointer]:
+                        - img
+                  - cell "ROYAL AIR MAROC ROYAL AIR MAROC" [ref=e6838]:
+                    - generic [ref=e6839]:
+                      - paragraph [ref=e6840]: ROYAL AIR MAROC
+                      - paragraph [ref=e6841]: ROYAL AIR MAROC
+                  - cell "NEANT 2722510597" [ref=e6842]:
+                    - generic [ref=e6843]:
+                      - generic [ref=e6844]: NEANT
+                      - generic [ref=e6845]: "2722510597"
+                  - cell "-" [ref=e6846]
+                  - cell "-" [ref=e6847]
+                  - cell "Actif" [ref=e6848]:
+                    - generic [ref=e6849]: Actif
+                  - cell [ref=e6850]:
+                    - button [ref=e6851] [cursor=pointer]:
+                      - img
+                - row "PREST-SAB-0131 SABRAMAB SABRAMAB ENTREPRISE letelvire1@yahoo.fr 2721397410 - - Actif" [ref=e6852]:
+                  - cell "PREST-SAB-0131" [ref=e6853]:
+                    - generic [ref=e6854]:
+                      - generic [ref=e6855]: PREST-SAB-0131
+                      - button [ref=e6856] [cursor=pointer]:
+                        - img
+                  - cell "SABRAMAB SABRAMAB ENTREPRISE" [ref=e6857]:
+                    - generic [ref=e6858]:
+                      - paragraph [ref=e6859]: SABRAMAB
+                      - paragraph [ref=e6860]: SABRAMAB ENTREPRISE
+                  - cell "letelvire1@yahoo.fr 2721397410" [ref=e6861]:
+                    - generic [ref=e6862]:
+                      - generic [ref=e6863]: letelvire1@yahoo.fr
+                      - generic [ref=e6864]: "2721397410"
+                  - cell "-" [ref=e6865]
+                  - cell "-" [ref=e6866]
+                  - cell "Actif" [ref=e6867]:
+                    - generic [ref=e6868]: Actif
+                  - cell [ref=e6869]:
+                    - button [ref=e6870] [cursor=pointer]:
+                      - img
+                - row "PREST-SE-0154 SABRAMAB ENTREPRISE SABRAMAB NEANT 2721397410 - - Actif" [ref=e6871]:
+                  - cell "PREST-SE-0154" [ref=e6872]:
+                    - generic [ref=e6873]:
+                      - generic [ref=e6874]: PREST-SE-0154
+                      - button [ref=e6875] [cursor=pointer]:
+                        - img
+                  - cell "SABRAMAB ENTREPRISE SABRAMAB" [ref=e6876]:
+                    - generic [ref=e6877]:
+                      - paragraph [ref=e6878]: SABRAMAB ENTREPRISE
+                      - paragraph [ref=e6879]: SABRAMAB
+                  - cell "NEANT 2721397410" [ref=e6880]:
+                    - generic [ref=e6881]:
+                      - generic [ref=e6882]: NEANT
+                      - generic [ref=e6883]: "2721397410"
+                  - cell "-" [ref=e6884]
+                  - cell "-" [ref=e6885]
+                  - cell "Actif" [ref=e6886]:
+                    - generic [ref=e6887]: Actif
+                  - cell [ref=e6888]:
+                    - button [ref=e6889] [cursor=pointer]:
+                      - img
+                - row "PREST-SCD-0276 SANLAM COTE DIVOIRE SANLAM COTE DIVOIRE - - Actif" [ref=e6890]:
+                  - cell "PREST-SCD-0276" [ref=e6891]:
+                    - generic [ref=e6892]:
+                      - generic [ref=e6893]: PREST-SCD-0276
+                      - button [ref=e6894] [cursor=pointer]:
+                        - img
+                  - cell "SANLAM COTE DIVOIRE SANLAM COTE DIVOIRE" [ref=e6895]:
+                    - generic [ref=e6896]:
+                      - paragraph [ref=e6897]: SANLAM COTE DIVOIRE
+                      - paragraph [ref=e6898]: SANLAM COTE DIVOIRE
+                  - cell [ref=e6899]
+                  - cell "-" [ref=e6900]
+                  - cell "-" [ref=e6901]
+                  - cell "Actif" [ref=e6902]:
+                    - generic [ref=e6903]: Actif
+                  - cell [ref=e6904]:
+                    - button [ref=e6905] [cursor=pointer]:
+                      - img
+                - row "PREST-SA-0120 SAWADOGO ABOULAIHE SAWADOGO ABOULAIHE NEANT 0152578395 - - Actif" [ref=e6906]:
+                  - cell "PREST-SA-0120" [ref=e6907]:
+                    - generic [ref=e6908]:
+                      - generic [ref=e6909]: PREST-SA-0120
+                      - button [ref=e6910] [cursor=pointer]:
+                        - img
+                  - cell "SAWADOGO ABOULAIHE SAWADOGO ABOULAIHE" [ref=e6911]:
+                    - generic [ref=e6912]:
+                      - paragraph [ref=e6913]: SAWADOGO ABOULAIHE
+                      - paragraph [ref=e6914]: SAWADOGO ABOULAIHE
+                  - cell "NEANT 0152578395" [ref=e6915]:
+                    - generic [ref=e6916]:
+                      - generic [ref=e6917]: NEANT
+                      - generic [ref=e6918]: "0152578395"
+                  - cell "-" [ref=e6919]
+                  - cell "-" [ref=e6920]
+                  - cell "Actif" [ref=e6921]:
+                    - generic [ref=e6922]: Actif
+                  - cell [ref=e6923]:
+                    - button [ref=e6924] [cursor=pointer]:
+                      - img
+                - row "PREST-SED-0243 SEDS SOCIETE D ENTRETIEN ET DIVERS SERVICES NEANT 0708671189 - - Actif" [ref=e6925]:
+                  - cell "PREST-SED-0243" [ref=e6926]:
+                    - generic [ref=e6927]:
+                      - generic [ref=e6928]: PREST-SED-0243
+                      - button [ref=e6929] [cursor=pointer]:
+                        - img
+                  - cell "SEDS SOCIETE D ENTRETIEN ET DIVERS SERVICES" [ref=e6930]:
+                    - generic [ref=e6931]:
+                      - paragraph [ref=e6932]: SEDS
+                      - paragraph [ref=e6933]: SOCIETE D ENTRETIEN ET DIVERS SERVICES
+                  - cell "NEANT 0708671189" [ref=e6934]:
+                    - generic [ref=e6935]:
+                      - generic [ref=e6936]: NEANT
+                      - generic [ref=e6937]: "0708671189"
+                  - cell "-" [ref=e6938]
+                  - cell "-" [ref=e6939]
+                  - cell "Actif" [ref=e6940]:
+                    - generic [ref=e6941]: Actif
+                  - cell [ref=e6942]:
+                    - button [ref=e6943] [cursor=pointer]:
+                      - img
+                - row "PREST-SEN-0425 SENECARTOURS SENECARTOURS senecartours@senecartours@sn 00221338597777 - - Actif" [ref=e6944]:
+                  - cell "PREST-SEN-0425" [ref=e6945]:
+                    - generic [ref=e6946]:
+                      - generic [ref=e6947]: PREST-SEN-0425
+                      - button [ref=e6948] [cursor=pointer]:
+                        - img
+                  - cell "SENECARTOURS SENECARTOURS" [ref=e6949]:
+                    - generic [ref=e6950]:
+                      - paragraph [ref=e6951]: SENECARTOURS
+                      - paragraph [ref=e6952]: SENECARTOURS
+                  - cell "senecartours@senecartours@sn 00221338597777" [ref=e6953]:
+                    - generic [ref=e6954]:
+                      - generic [ref=e6955]: senecartours@senecartours@sn
+                      - generic [ref=e6956]: "00221338597777"
+                  - cell "-" [ref=e6957]
+                  - cell "-" [ref=e6958]
+                  - cell "Actif" [ref=e6959]:
+                    - generic [ref=e6960]: Actif
+                  - cell [ref=e6961]:
+                    - button [ref=e6962] [cursor=pointer]:
+                      - img
+                - row "PREST-SA-0092 SERVICE AQUATIQUE SERVICE AQUATIQUE 7.07572e+008 - - Actif" [ref=e6963]:
+                  - cell "PREST-SA-0092" [ref=e6964]:
+                    - generic [ref=e6965]:
+                      - generic [ref=e6966]: PREST-SA-0092
+                      - button [ref=e6967] [cursor=pointer]:
+                        - img
+                  - cell "SERVICE AQUATIQUE SERVICE AQUATIQUE" [ref=e6968]:
+                    - generic [ref=e6969]:
+                      - paragraph [ref=e6970]: SERVICE AQUATIQUE
+                      - paragraph [ref=e6971]: SERVICE AQUATIQUE
+                  - cell "7.07572e+008" [ref=e6972]:
+                    - generic [ref=e6974]: "7.07572e+008"
+                  - cell "-" [ref=e6975]
+                  - cell "-" [ref=e6976]
+                  - cell "Actif" [ref=e6977]:
+                    - generic [ref=e6978]: Actif
+                  - cell [ref=e6979]:
+                    - button [ref=e6980] [cursor=pointer]:
+                      - img
+                - row "PREST-SOL-0093 SEYDOU OUATTARA (LOYER)\_BKE SEYDOU OUATTARA (LOYER)\_BKE 7.09995e+008 - - Actif" [ref=e6981]:
+                  - cell "PREST-SOL-0093" [ref=e6982]:
+                    - generic [ref=e6983]:
+                      - generic [ref=e6984]: PREST-SOL-0093
+                      - button [ref=e6985] [cursor=pointer]:
+                        - img
+                  - cell "SEYDOU OUATTARA (LOYER)\_BKE SEYDOU OUATTARA (LOYER)\_BKE" [ref=e6986]:
+                    - generic [ref=e6987]:
+                      - paragraph [ref=e6988]: SEYDOU OUATTARA (LOYER)\_BKE
+                      - paragraph [ref=e6989]: SEYDOU OUATTARA (LOYER)\_BKE
+                  - cell "7.09995e+008" [ref=e6990]:
+                    - generic [ref=e6992]: "7.09995e+008"
+                  - cell "-" [ref=e6993]
+                  - cell "-" [ref=e6994]
+                  - cell "Actif" [ref=e6995]:
+                    - generic [ref=e6996]: Actif
+                  - cell [ref=e6997]:
+                    - button [ref=e6998] [cursor=pointer]:
+                      - img
+                - row "PREST-SGS-0094 SGS SGS - - Actif" [ref=e6999]:
+                  - cell "PREST-SGS-0094" [ref=e7000]:
+                    - generic [ref=e7001]:
+                      - generic [ref=e7002]: PREST-SGS-0094
+                      - button [ref=e7003] [cursor=pointer]:
+                        - img
+                  - cell "SGS SGS" [ref=e7004]:
+                    - generic [ref=e7005]:
+                      - paragraph [ref=e7006]: SGS
+                      - paragraph [ref=e7007]: SGS
+                  - cell [ref=e7008]
+                  - cell "-" [ref=e7009]
+                  - cell "-" [ref=e7010]
+                  - cell "Actif" [ref=e7011]:
+                    - generic [ref=e7012]: Actif
+                  - cell [ref=e7013]:
+                    - button [ref=e7014] [cursor=pointer]:
+                      - img
+                - row "PREST-SCS-0095 SHALOM CLEAN SERVICES SHALOM CLEAN SERVICES 1.02021e+008 - - Actif" [ref=e7015]:
+                  - cell "PREST-SCS-0095" [ref=e7016]:
+                    - generic [ref=e7017]:
+                      - generic [ref=e7018]: PREST-SCS-0095
+                      - button [ref=e7019] [cursor=pointer]:
+                        - img
+                  - cell "SHALOM CLEAN SERVICES SHALOM CLEAN SERVICES" [ref=e7020]:
+                    - generic [ref=e7021]:
+                      - paragraph [ref=e7022]: SHALOM CLEAN SERVICES
+                      - paragraph [ref=e7023]: SHALOM CLEAN SERVICES
+                  - cell "1.02021e+008" [ref=e7024]:
+                    - generic [ref=e7026]: "1.02021e+008"
+                  - cell "-" [ref=e7027]
+                  - cell "-" [ref=e7028]
+                  - cell "Actif" [ref=e7029]:
+                    - generic [ref=e7030]: Actif
+                  - cell [ref=e7031]:
+                    - button [ref=e7032] [cursor=pointer]:
+                      - img
+                - row "PREST-SG-0271 SIA GANDELA SIA GANDELA - - Actif" [ref=e7033]:
+                  - cell "PREST-SG-0271" [ref=e7034]:
+                    - generic [ref=e7035]:
+                      - generic [ref=e7036]: PREST-SG-0271
+                      - button [ref=e7037] [cursor=pointer]:
+                        - img
+                  - cell "SIA GANDELA SIA GANDELA" [ref=e7038]:
+                    - generic [ref=e7039]:
+                      - paragraph [ref=e7040]: SIA GANDELA
+                      - paragraph [ref=e7041]: SIA GANDELA
+                  - cell [ref=e7042]
+                  - cell "-" [ref=e7043]
+                  - cell "-" [ref=e7044]
+                  - cell "Actif" [ref=e7045]:
+                    - generic [ref=e7046]: Actif
+                  - cell [ref=e7047]:
+                    - button [ref=e7048] [cursor=pointer]:
+                      - img
+                - row "PREST-SIC-0272 SICI SOCIETE IVOIRIENNE DE COMMERCE & D'IMPRIMERIE NEANT NEANT - - Actif" [ref=e7049]:
+                  - cell "PREST-SIC-0272" [ref=e7050]:
+                    - generic [ref=e7051]:
+                      - generic [ref=e7052]: PREST-SIC-0272
+                      - button [ref=e7053] [cursor=pointer]:
+                        - img
+                  - cell "SICI SOCIETE IVOIRIENNE DE COMMERCE & D'IMPRIMERIE" [ref=e7054]:
+                    - generic [ref=e7055]:
+                      - paragraph [ref=e7056]: SICI
+                      - paragraph [ref=e7057]: SOCIETE IVOIRIENNE DE COMMERCE & D'IMPRIMERIE
+                  - cell "NEANT NEANT" [ref=e7058]:
+                    - generic [ref=e7059]:
+                      - generic [ref=e7060]: NEANT
+                      - generic [ref=e7061]: NEANT
+                  - cell "-" [ref=e7062]
+                  - cell "-" [ref=e7063]
+                  - cell "Actif" [ref=e7064]:
+                    - generic [ref=e7065]: Actif
+                  - cell [ref=e7066]:
+                    - button [ref=e7067] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0096 SICTA/ SGS SICTA/ SGS NEANT NEANT - - Actif" [ref=e7068]:
+                  - cell "PREST-SS-0096" [ref=e7069]:
+                    - generic [ref=e7070]:
+                      - generic [ref=e7071]: PREST-SS-0096
+                      - button [ref=e7072] [cursor=pointer]:
+                        - img
+                  - cell "SICTA/ SGS SICTA/ SGS" [ref=e7073]:
+                    - generic [ref=e7074]:
+                      - paragraph [ref=e7075]: SICTA/ SGS
+                      - paragraph [ref=e7076]: SICTA/ SGS
+                  - cell "NEANT NEANT" [ref=e7077]:
+                    - generic [ref=e7078]:
+                      - generic [ref=e7079]: NEANT
+                      - generic [ref=e7080]: NEANT
+                  - cell "-" [ref=e7081]
+                  - cell "-" [ref=e7082]
+                  - cell "Actif" [ref=e7083]:
+                    - generic [ref=e7084]: Actif
+                  - cell [ref=e7085]:
+                    - button [ref=e7086] [cursor=pointer]:
+                      - img
+                - row "PREST-SIG-0097 SIGASECURITE SIGASECURITE 2.72135e+009 - - Actif" [ref=e7087]:
+                  - cell "PREST-SIG-0097" [ref=e7088]:
+                    - generic [ref=e7089]:
+                      - generic [ref=e7090]: PREST-SIG-0097
+                      - button [ref=e7091] [cursor=pointer]:
+                        - img
+                  - cell "SIGASECURITE SIGASECURITE" [ref=e7092]:
+                    - generic [ref=e7093]:
+                      - paragraph [ref=e7094]: SIGASECURITE
+                      - paragraph [ref=e7095]: SIGASECURITE
+                  - cell "2.72135e+009" [ref=e7096]:
+                    - generic [ref=e7098]: "2.72135e+009"
+                  - cell "-" [ref=e7099]
+                  - cell "-" [ref=e7100]
+                  - cell "Actif" [ref=e7101]:
+                    - generic [ref=e7102]: Actif
+                  - cell [ref=e7103]:
+                    - button [ref=e7104] [cursor=pointer]:
+                      - img
+                - row "PREST-SGA-0225 SIKA GROUP ACHITECTURE SIKA GROUP ACHITECTURE NC 0749791373 - - Actif" [ref=e7105]:
+                  - cell "PREST-SGA-0225" [ref=e7106]:
+                    - generic [ref=e7107]:
+                      - generic [ref=e7108]: PREST-SGA-0225
+                      - button [ref=e7109] [cursor=pointer]:
+                        - img
+                  - cell "SIKA GROUP ACHITECTURE SIKA GROUP ACHITECTURE" [ref=e7110]:
+                    - generic [ref=e7111]:
+                      - paragraph [ref=e7112]: SIKA GROUP ACHITECTURE
+                      - paragraph [ref=e7113]: SIKA GROUP ACHITECTURE
+                  - cell "NC 0749791373" [ref=e7114]:
+                    - generic [ref=e7115]:
+                      - generic [ref=e7116]: NC
+                      - generic [ref=e7117]: "0749791373"
+                  - cell "-" [ref=e7118]
+                  - cell "-" [ref=e7119]
+                  - cell "Actif" [ref=e7120]:
+                    - generic [ref=e7121]: Actif
+                  - cell [ref=e7122]:
+                    - button [ref=e7123] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0098 SILBAT SARL SILBAT SARL silbat2018@gmail.com 0748542619 - - Actif" [ref=e7124]:
+                  - cell "PREST-SS-0098" [ref=e7125]:
+                    - generic [ref=e7126]:
+                      - generic [ref=e7127]: PREST-SS-0098
+                      - button [ref=e7128] [cursor=pointer]:
+                        - img
+                  - cell "SILBAT SARL SILBAT SARL" [ref=e7129]:
+                    - generic [ref=e7130]:
+                      - paragraph [ref=e7131]: SILBAT SARL
+                      - paragraph [ref=e7132]: SILBAT SARL
+                  - cell "silbat2018@gmail.com 0748542619" [ref=e7133]:
+                    - generic [ref=e7134]:
+                      - generic [ref=e7135]: silbat2018@gmail.com
+                      - generic [ref=e7136]: "0748542619"
+                  - cell "-" [ref=e7137]
+                  - cell "-" [ref=e7138]
+                  - cell "Actif" [ref=e7139]:
+                    - generic [ref=e7140]: Actif
+                  - cell [ref=e7141]:
+                    - button [ref=e7142] [cursor=pointer]:
+                      - img
+                - row "PREST-SL-0099 SILUE LACINA SILUE LACINA - - Actif" [ref=e7143]:
+                  - cell "PREST-SL-0099" [ref=e7144]:
+                    - generic [ref=e7145]:
+                      - generic [ref=e7146]: PREST-SL-0099
+                      - button [ref=e7147] [cursor=pointer]:
+                        - img
+                  - cell "SILUE LACINA SILUE LACINA" [ref=e7148]:
+                    - generic [ref=e7149]:
+                      - paragraph [ref=e7150]: SILUE LACINA
+                      - paragraph [ref=e7151]: SILUE LACINA
+                  - cell [ref=e7152]
+                  - cell "-" [ref=e7153]
+                  - cell "-" [ref=e7154]
+                  - cell "Actif" [ref=e7155]:
+                    - generic [ref=e7156]: Actif
+                  - cell [ref=e7157]:
+                    - button [ref=e7158] [cursor=pointer]:
+                      - img
+                - row "PREST-SBO-0100 SKY BIRD (OUATTARA & ASSOCIES) SKY BIRD (OUATTARA & ASSOCIES) allamiss2016@gmail.com 7.07014e+008 - - Actif" [ref=e7159]:
+                  - cell "PREST-SBO-0100" [ref=e7160]:
+                    - generic [ref=e7161]:
+                      - generic [ref=e7162]: PREST-SBO-0100
+                      - button [ref=e7163] [cursor=pointer]:
+                        - img
+                  - cell "SKY BIRD (OUATTARA & ASSOCIES) SKY BIRD (OUATTARA & ASSOCIES)" [ref=e7164]:
+                    - generic [ref=e7165]:
+                      - paragraph [ref=e7166]: SKY BIRD (OUATTARA & ASSOCIES)
+                      - paragraph [ref=e7167]: SKY BIRD (OUATTARA & ASSOCIES)
+                  - cell "allamiss2016@gmail.com 7.07014e+008" [ref=e7168]:
+                    - generic [ref=e7169]:
+                      - generic [ref=e7170]: allamiss2016@gmail.com
+                      - generic [ref=e7171]: "7.07014e+008"
+                  - cell "-" [ref=e7172]
+                  - cell "-" [ref=e7173]
+                  - cell "Actif" [ref=e7174]:
+                    - generic [ref=e7175]: Actif
+                  - cell [ref=e7176]:
+                    - button [ref=e7177] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0233 SLK Studios SLK Studios slkstudios1@gmail.com 0101533548 - - Actif" [ref=e7178]:
+                  - cell "PREST-SS-0233" [ref=e7179]:
+                    - generic [ref=e7180]:
+                      - generic [ref=e7181]: PREST-SS-0233
+                      - button [ref=e7182] [cursor=pointer]:
+                        - img
+                  - cell "SLK Studios SLK Studios" [ref=e7183]:
+                    - generic [ref=e7184]:
+                      - paragraph [ref=e7185]: SLK Studios
+                      - paragraph [ref=e7186]: SLK Studios
+                  - cell "slkstudios1@gmail.com 0101533548" [ref=e7187]:
+                    - generic [ref=e7188]:
+                      - generic [ref=e7189]: slkstudios1@gmail.com
+                      - generic [ref=e7190]: "0101533548"
+                  - cell "-" [ref=e7191]
+                  - cell "-" [ref=e7192]
+                  - cell "Actif" [ref=e7193]:
+                    - generic [ref=e7194]: Actif
+                  - cell [ref=e7195]:
+                    - button [ref=e7196] [cursor=pointer]:
+                      - img
+                - row "PREST-SS1-0327 SOCIAM SUCC 12 SOCIAM NEANT 0101435124 - - Actif" [ref=e7197]:
+                  - cell "PREST-SS1-0327" [ref=e7198]:
+                    - generic [ref=e7199]:
+                      - generic [ref=e7200]: PREST-SS1-0327
+                      - button [ref=e7201] [cursor=pointer]:
+                        - img
+                  - cell "SOCIAM SUCC 12 SOCIAM" [ref=e7202]:
+                    - generic [ref=e7203]:
+                      - paragraph [ref=e7204]: SOCIAM SUCC 12
+                      - paragraph [ref=e7205]: SOCIAM
+                  - cell "NEANT 0101435124" [ref=e7206]:
+                    - generic [ref=e7207]:
+                      - generic [ref=e7208]: NEANT
+                      - generic [ref=e7209]: "0101435124"
+                  - cell "-" [ref=e7210]
+                  - cell "-" [ref=e7211]
+                  - cell "Actif" [ref=e7212]:
+                    - generic [ref=e7213]: Actif
+                  - cell [ref=e7214]:
+                    - button [ref=e7215] [cursor=pointer]:
+                      - img
+                - row "PREST-SOC-0101 SOCIDA SOCIDA secretariat.atelier@gbh.fr +225 27 21 21 40 80 - - Actif" [ref=e7216]:
+                  - cell "PREST-SOC-0101" [ref=e7217]:
+                    - generic [ref=e7218]:
+                      - generic [ref=e7219]: PREST-SOC-0101
+                      - button [ref=e7220] [cursor=pointer]:
+                        - img
+                  - cell "SOCIDA SOCIDA" [ref=e7221]:
+                    - generic [ref=e7222]:
+                      - paragraph [ref=e7223]: SOCIDA
+                      - paragraph [ref=e7224]: SOCIDA
+                  - cell "secretariat.atelier@gbh.fr +225 27 21 21 40 80" [ref=e7225]:
+                    - generic [ref=e7226]:
+                      - generic [ref=e7227]: secretariat.atelier@gbh.fr
+                      - generic [ref=e7228]: +225 27 21 21 40 80
+                  - cell "-" [ref=e7229]
+                  - cell "-" [ref=e7230]
+                  - cell "Actif" [ref=e7231]:
+                    - generic [ref=e7232]: Actif
+                  - cell [ref=e7233]:
+                    - button [ref=e7234] [cursor=pointer]:
+                      - img
+                - row "PREST-S2-0247 SOCIETE 2BPUB SOCIETE 2BPUB info@2bpub.com 27 21 54 91 56 - - Actif" [ref=e7235]:
+                  - cell "PREST-S2-0247" [ref=e7236]:
+                    - generic [ref=e7237]:
+                      - generic [ref=e7238]: PREST-S2-0247
+                      - button [ref=e7239] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE 2BPUB SOCIETE 2BPUB" [ref=e7240]:
+                    - generic [ref=e7241]:
+                      - paragraph [ref=e7242]: SOCIETE 2BPUB
+                      - paragraph [ref=e7243]: SOCIETE 2BPUB
+                  - cell "info@2bpub.com 27 21 54 91 56" [ref=e7244]:
+                    - generic [ref=e7245]:
+                      - generic [ref=e7246]: info@2bpub.com
+                      - generic [ref=e7247]: 27 21 54 91 56
+                  - cell "-" [ref=e7248]
+                  - cell "-" [ref=e7249]
+                  - cell "Actif" [ref=e7250]:
+                    - generic [ref=e7251]: Actif
+                  - cell [ref=e7252]:
+                    - button [ref=e7253] [cursor=pointer]:
+                      - img
+                - row "PREST-SCA-0352 SOCIETE C5P AFRIQUE SOCIETE C5P AFRIQUE NEANT NEANT - - Actif" [ref=e7254]:
+                  - cell "PREST-SCA-0352" [ref=e7255]:
+                    - generic [ref=e7256]:
+                      - generic [ref=e7257]: PREST-SCA-0352
+                      - button [ref=e7258] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE C5P AFRIQUE SOCIETE C5P AFRIQUE" [ref=e7259]:
+                    - generic [ref=e7260]:
+                      - paragraph [ref=e7261]: SOCIETE C5P AFRIQUE
+                      - paragraph [ref=e7262]: SOCIETE C5P AFRIQUE
+                  - cell "NEANT NEANT" [ref=e7263]:
+                    - generic [ref=e7264]:
+                      - generic [ref=e7265]: NEANT
+                      - generic [ref=e7266]: NEANT
+                  - cell "-" [ref=e7267]
+                  - cell "-" [ref=e7268]
+                  - cell "Actif" [ref=e7269]:
+                    - generic [ref=e7270]: Actif
+                  - cell [ref=e7271]:
+                    - button [ref=e7272] [cursor=pointer]:
+                      - img
+                - row "PREST-SDB-0397 SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES contact@bilebrizoua.ci 0101451851 - - Actif" [ref=e7273]:
+                  - cell "PREST-SDB-0397" [ref=e7274]:
+                    - generic [ref=e7275]:
+                      - generic [ref=e7276]: PREST-SDB-0397
+                      - button [ref=e7277] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES" [ref=e7278]:
+                    - generic [ref=e7279]:
+                      - paragraph [ref=e7280]: SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES
+                      - paragraph [ref=e7281]: SOCIETE D'AVOCATS BILE-AKA,BRIZOUA-BI & ASSOCIES
+                  - cell "contact@bilebrizoua.ci 0101451851" [ref=e7282]:
+                    - generic [ref=e7283]:
+                      - generic [ref=e7284]: contact@bilebrizoua.ci
+                      - generic [ref=e7285]: "0101451851"
+                  - cell "-" [ref=e7286]
+                  - cell "-" [ref=e7287]
+                  - cell "Actif" [ref=e7288]:
+                    - generic [ref=e7289]: Actif
+                  - cell [ref=e7290]:
+                    - button [ref=e7291] [cursor=pointer]:
+                      - img
+                - row "PREST-SDD-0025 SOCIETE DE DISTRIBUTION ALIMENTAIRE CFAO RETAIL 2.72101e+009 - - Actif" [ref=e7292]:
+                  - cell "PREST-SDD-0025" [ref=e7293]:
+                    - generic [ref=e7294]:
+                      - generic [ref=e7295]: PREST-SDD-0025
+                      - button [ref=e7296] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE DE DISTRIBUTION ALIMENTAIRE CFAO RETAIL" [ref=e7297]:
+                    - generic [ref=e7298]:
+                      - paragraph [ref=e7299]: SOCIETE DE DISTRIBUTION ALIMENTAIRE
+                      - paragraph [ref=e7300]: CFAO RETAIL
+                  - cell "2.72101e+009" [ref=e7301]:
+                    - generic [ref=e7303]: "2.72101e+009"
+                  - cell "-" [ref=e7304]
+                  - cell "-" [ref=e7305]
+                  - cell "Actif" [ref=e7306]:
+                    - generic [ref=e7307]: Actif
+                  - cell [ref=e7308]:
+                    - button [ref=e7309] [cursor=pointer]:
+                      - img
+                - row "PREST-SDD-0367 SOCIÉTÉ DES DEUX PLATEAUX SOCIÉTÉ DES DEUX PLATEAUX Néant Neant - - Actif" [ref=e7310]:
+                  - cell "PREST-SDD-0367" [ref=e7311]:
+                    - generic [ref=e7312]:
+                      - generic [ref=e7313]: PREST-SDD-0367
+                      - button [ref=e7314] [cursor=pointer]:
+                        - img
+                  - cell "SOCIÉTÉ DES DEUX PLATEAUX SOCIÉTÉ DES DEUX PLATEAUX" [ref=e7315]:
+                    - generic [ref=e7316]:
+                      - paragraph [ref=e7317]: SOCIÉTÉ DES DEUX PLATEAUX
+                      - paragraph [ref=e7318]: SOCIÉTÉ DES DEUX PLATEAUX
+                  - cell "Néant Neant" [ref=e7319]:
+                    - generic [ref=e7320]:
+                      - generic [ref=e7321]: Néant
+                      - generic [ref=e7322]: Neant
+                  - cell "-" [ref=e7323]
+                  - cell "-" [ref=e7324]
+                  - cell "Actif" [ref=e7325]:
+                    - generic [ref=e7326]: Actif
+                  - cell [ref=e7327]:
+                    - button [ref=e7328] [cursor=pointer]:
+                      - img
+                - row "PREST-SI-0183 SOCIETE INQ SOCIETE INQ sales.civ@inq.inc 21255854 - - Actif" [ref=e7329]:
+                  - cell "PREST-SI-0183" [ref=e7330]:
+                    - generic [ref=e7331]:
+                      - generic [ref=e7332]: PREST-SI-0183
+                      - button [ref=e7333] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE INQ SOCIETE INQ" [ref=e7334]:
+                    - generic [ref=e7335]:
+                      - paragraph [ref=e7336]: SOCIETE INQ
+                      - paragraph [ref=e7337]: SOCIETE INQ
+                  - cell "sales.civ@inq.inc 21255854" [ref=e7338]:
+                    - generic [ref=e7339]:
+                      - generic [ref=e7340]: sales.civ@inq.inc
+                      - generic [ref=e7341]: "21255854"
+                  - cell "-" [ref=e7342]
+                  - cell "-" [ref=e7343]
+                  - cell "Actif" [ref=e7344]:
+                    - generic [ref=e7345]: Actif
+                  - cell [ref=e7346]:
+                    - button [ref=e7347] [cursor=pointer]:
+                      - img
+                - row "PREST-SND-0046 SOCIETE NOUVELLE DE PRESSE ET D'EDITION DE COTE DIVOIRE FRATERNITE MATIN 2.25204e+010 - - Actif" [ref=e7348]:
+                  - cell "PREST-SND-0046" [ref=e7349]:
+                    - generic [ref=e7350]:
+                      - generic [ref=e7351]: PREST-SND-0046
+                      - button [ref=e7352] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE NOUVELLE DE PRESSE ET D'EDITION DE COTE DIVOIRE FRATERNITE MATIN" [ref=e7353]:
+                    - generic [ref=e7354]:
+                      - paragraph [ref=e7355]: SOCIETE NOUVELLE DE PRESSE ET D'EDITION DE COTE DIVOIRE
+                      - paragraph [ref=e7356]: FRATERNITE MATIN
+                  - cell "2.25204e+010" [ref=e7357]:
+                    - generic [ref=e7359]: "2.25204e+010"
+                  - cell "-" [ref=e7360]
+                  - cell "-" [ref=e7361]
+                  - cell "Actif" [ref=e7362]:
+                    - generic [ref=e7363]: Actif
+                  - cell [ref=e7364]:
+                    - button [ref=e7365] [cursor=pointer]:
+                      - img
+                - row "PREST-SOD-0103 SOCIETE ORCA DECO ORCA DECO ORCAABJ@AFNET.NET 0 - - Actif" [ref=e7366]:
+                  - cell "PREST-SOD-0103" [ref=e7367]:
+                    - generic [ref=e7368]:
+                      - generic [ref=e7369]: PREST-SOD-0103
+                      - button [ref=e7370] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE ORCA DECO ORCA DECO" [ref=e7371]:
+                    - generic [ref=e7372]:
+                      - paragraph [ref=e7373]: SOCIETE ORCA DECO
+                      - paragraph [ref=e7374]: ORCA DECO
+                  - cell "ORCAABJ@AFNET.NET 0" [ref=e7375]:
+                    - generic [ref=e7376]:
+                      - generic [ref=e7377]: ORCAABJ@AFNET.NET
+                      - generic [ref=e7378]: "0"
+                  - cell "-" [ref=e7379]
+                  - cell "-" [ref=e7380]
+                  - cell "Actif" [ref=e7381]:
+                    - generic [ref=e7382]: Actif
+                  - cell [ref=e7383]:
+                    - button [ref=e7384] [cursor=pointer]:
+                      - img
+                - row "PREST-SPL-0104 SOCIETE POUR LES INNOVATIONS CREATRICES SIC info@sci-education.com 0 - - Actif" [ref=e7385]:
+                  - cell "PREST-SPL-0104" [ref=e7386]:
+                    - generic [ref=e7387]:
+                      - generic [ref=e7388]: PREST-SPL-0104
+                      - button [ref=e7389] [cursor=pointer]:
+                        - img
+                  - cell "SOCIETE POUR LES INNOVATIONS CREATRICES SIC" [ref=e7390]:
+                    - generic [ref=e7391]:
+                      - paragraph [ref=e7392]: SOCIETE POUR LES INNOVATIONS CREATRICES
+                      - paragraph [ref=e7393]: SIC
+                  - cell "info@sci-education.com 0" [ref=e7394]:
+                    - generic [ref=e7395]:
+                      - generic [ref=e7396]: info@sci-education.com
+                      - generic [ref=e7397]: "0"
+                  - cell "-" [ref=e7398]
+                  - cell "-" [ref=e7399]
+                  - cell "Actif" [ref=e7400]:
+                    - generic [ref=e7401]: Actif
+                  - cell [ref=e7402]:
+                    - button [ref=e7403] [cursor=pointer]:
+                      - img
+                - row "PREST-S2P-0105 SOCOCE 2 PLATEAUX LATRILLE SOCOCE 2 PLATEAUX LATRILLE 7.49496e+008 - - Actif" [ref=e7404]:
+                  - cell "PREST-S2P-0105" [ref=e7405]:
+                    - generic [ref=e7406]:
+                      - generic [ref=e7407]: PREST-S2P-0105
+                      - button [ref=e7408] [cursor=pointer]:
+                        - img
+                  - cell "SOCOCE 2 PLATEAUX LATRILLE SOCOCE 2 PLATEAUX LATRILLE" [ref=e7409]:
+                    - generic [ref=e7410]:
+                      - paragraph [ref=e7411]: SOCOCE 2 PLATEAUX LATRILLE
+                      - paragraph [ref=e7412]: SOCOCE 2 PLATEAUX LATRILLE
+                  - cell "7.49496e+008" [ref=e7413]:
+                    - generic [ref=e7415]: "7.49496e+008"
+                  - cell "-" [ref=e7416]
+                  - cell "-" [ref=e7417]
+                  - cell "Actif" [ref=e7418]:
+                    - generic [ref=e7419]: Actif
+                  - cell [ref=e7420]:
+                    - button [ref=e7421] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0159 SOCOPRIM SA SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY NEANT 2722437374 - - Actif" [ref=e7422]:
+                  - cell "PREST-SS-0159" [ref=e7423]:
+                    - generic [ref=e7424]:
+                      - generic [ref=e7425]: PREST-SS-0159
+                      - button [ref=e7426] [cursor=pointer]:
+                        - img
+                  - cell "SOCOPRIM SA SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY" [ref=e7427]:
+                    - generic [ref=e7428]:
+                      - paragraph [ref=e7429]: SOCOPRIM SA
+                      - paragraph [ref=e7430]: SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY
+                  - cell "NEANT 2722437374" [ref=e7431]:
+                    - generic [ref=e7432]:
+                      - generic [ref=e7433]: NEANT
+                      - generic [ref=e7434]: "2722437374"
+                  - cell "-" [ref=e7435]
+                  - cell "-" [ref=e7436]
+                  - cell "Actif" [ref=e7437]:
+                    - generic [ref=e7438]: Actif
+                  - cell [ref=e7439]:
+                    - button [ref=e7440] [cursor=pointer]:
+                      - img
+                - row "PREST-SSH-0279 SOCOPRIM SA (HKB) SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY NEANT 2722437374 - - Actif" [ref=e7441]:
+                  - cell "PREST-SSH-0279" [ref=e7442]:
+                    - generic [ref=e7443]:
+                      - generic [ref=e7444]: PREST-SSH-0279
+                      - button [ref=e7445] [cursor=pointer]:
+                        - img
+                  - cell "SOCOPRIM SA (HKB) SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY" [ref=e7446]:
+                    - generic [ref=e7447]:
+                      - paragraph [ref=e7448]: SOCOPRIM SA (HKB)
+                      - paragraph [ref=e7449]: SOCIETE CONCESSIONNAIRE DU PONT RIVIERA-MARCORY
+                  - cell "NEANT 2722437374" [ref=e7450]:
+                    - generic [ref=e7451]:
+                      - generic [ref=e7452]: NEANT
+                      - generic [ref=e7453]: "2722437374"
+                  - cell "-" [ref=e7454]
+                  - cell "-" [ref=e7455]
+                  - cell "Actif" [ref=e7456]:
+                    - generic [ref=e7457]: Actif
+                  - cell [ref=e7458]:
+                    - button [ref=e7459] [cursor=pointer]:
+                      - img
+                - row "PREST-SOC-0106 SOCOPRIX SOCOPRIX - - Actif" [ref=e7460]:
+                  - cell "PREST-SOC-0106" [ref=e7461]:
+                    - generic [ref=e7462]:
+                      - generic [ref=e7463]: PREST-SOC-0106
+                      - button [ref=e7464] [cursor=pointer]:
+                        - img
+                  - cell "SOCOPRIX SOCOPRIX" [ref=e7465]:
+                    - generic [ref=e7466]:
+                      - paragraph [ref=e7467]: SOCOPRIX
+                      - paragraph [ref=e7468]: SOCOPRIX
+                  - cell [ref=e7469]
+                  - cell "-" [ref=e7470]
+                  - cell "-" [ref=e7471]
+                  - cell "Actif" [ref=e7472]:
+                    - generic [ref=e7473]: Actif
+                  - cell [ref=e7474]:
+                    - button [ref=e7475] [cursor=pointer]:
+                      - img
+                - row "PREST-SOD-0107 SODECI SODECI - - Actif" [ref=e7476]:
+                  - cell "PREST-SOD-0107" [ref=e7477]:
+                    - generic [ref=e7478]:
+                      - generic [ref=e7479]: PREST-SOD-0107
+                      - button [ref=e7480] [cursor=pointer]:
+                        - img
+                  - cell "SODECI SODECI" [ref=e7481]:
+                    - generic [ref=e7482]:
+                      - paragraph [ref=e7483]: SODECI
+                      - paragraph [ref=e7484]: SODECI
+                  - cell [ref=e7485]
+                  - cell "-" [ref=e7486]
+                  - cell "-" [ref=e7487]
+                  - cell "Actif" [ref=e7488]:
+                    - generic [ref=e7489]: Actif
+                  - cell [ref=e7490]:
+                    - button [ref=e7491] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0400 SODIMA SARL SODIMA SARL NEANT 0153142459 - - Actif" [ref=e7492]:
+                  - cell "PREST-SS-0400" [ref=e7493]:
+                    - generic [ref=e7494]:
+                      - generic [ref=e7495]: PREST-SS-0400
+                      - button [ref=e7496] [cursor=pointer]:
+                        - img
+                  - cell "SODIMA SARL SODIMA SARL" [ref=e7497]:
+                    - generic [ref=e7498]:
+                      - paragraph [ref=e7499]: SODIMA SARL
+                      - paragraph [ref=e7500]: SODIMA SARL
+                  - cell "NEANT 0153142459" [ref=e7501]:
+                    - generic [ref=e7502]:
+                      - generic [ref=e7503]: NEANT
+                      - generic [ref=e7504]: "0153142459"
+                  - cell "-" [ref=e7505]
+                  - cell "-" [ref=e7506]
+                  - cell "Actif" [ref=e7507]:
+                    - generic [ref=e7508]: Actif
+                  - cell [ref=e7509]:
+                    - button [ref=e7510] [cursor=pointer]:
+                      - img
+                - row "PREST-SOD-0399 SODIREP SODIREP sodirep@sodirep.com 2721251979 - - Actif" [ref=e7511]:
+                  - cell "PREST-SOD-0399" [ref=e7512]:
+                    - generic [ref=e7513]:
+                      - generic [ref=e7514]: PREST-SOD-0399
+                      - button [ref=e7515] [cursor=pointer]:
+                        - img
+                  - cell "SODIREP SODIREP" [ref=e7516]:
+                    - generic [ref=e7517]:
+                      - paragraph [ref=e7518]: SODIREP
+                      - paragraph [ref=e7519]: SODIREP
+                  - cell "sodirep@sodirep.com 2721251979" [ref=e7520]:
+                    - generic [ref=e7521]:
+                      - generic [ref=e7522]: sodirep@sodirep.com
+                      - generic [ref=e7523]: "2721251979"
+                  - cell "-" [ref=e7524]
+                  - cell "-" [ref=e7525]
+                  - cell "Actif" [ref=e7526]:
+                    - generic [ref=e7527]: Actif
+                  - cell [ref=e7528]:
+                    - button [ref=e7529] [cursor=pointer]:
+                      - img
+                - row "PREST-SOF-0108 SOFITEL SOFITEL H8844@sofitel.com - - Actif" [ref=e7530]:
+                  - cell "PREST-SOF-0108" [ref=e7531]:
+                    - generic [ref=e7532]:
+                      - generic [ref=e7533]: PREST-SOF-0108
+                      - button [ref=e7534] [cursor=pointer]:
+                        - img
+                  - cell "SOFITEL SOFITEL" [ref=e7535]:
+                    - generic [ref=e7536]:
+                      - paragraph [ref=e7537]: SOFITEL
+                      - paragraph [ref=e7538]: SOFITEL
+                  - cell "H8844@sofitel.com" [ref=e7539]:
+                    - generic [ref=e7541]: H8844@sofitel.com
+                  - cell "-" [ref=e7542]
+                  - cell "-" [ref=e7543]
+                  - cell "Actif" [ref=e7544]:
+                    - generic [ref=e7545]: Actif
+                  - cell [ref=e7546]:
+                    - button [ref=e7547] [cursor=pointer]:
+                      - img
+                - row "PREST-SH-0273 SOFITEL HOTEL SOFITEL HOTEL H8844@sofitel.com - - Actif" [ref=e7548]:
+                  - cell "PREST-SH-0273" [ref=e7549]:
+                    - generic [ref=e7550]:
+                      - generic [ref=e7551]: PREST-SH-0273
+                      - button [ref=e7552] [cursor=pointer]:
+                        - img
+                  - cell "SOFITEL HOTEL SOFITEL HOTEL" [ref=e7553]:
+                    - generic [ref=e7554]:
+                      - paragraph [ref=e7555]: SOFITEL HOTEL
+                      - paragraph [ref=e7556]: SOFITEL HOTEL
+                  - cell "H8844@sofitel.com" [ref=e7557]:
+                    - generic [ref=e7559]: H8844@sofitel.com
+                  - cell "-" [ref=e7560]
+                  - cell "-" [ref=e7561]
+                  - cell "Actif" [ref=e7562]:
+                    - generic [ref=e7563]: Actif
+                  - cell [ref=e7564]:
+                    - button [ref=e7565] [cursor=pointer]:
+                      - img
+                - row "MIG-0001 SOGELUX 2.72135e+009 - - Actif" [ref=e7566]:
+                  - cell "MIG-0001" [ref=e7567]:
+                    - generic [ref=e7568]:
+                      - generic [ref=e7569]: MIG-0001
+                      - button [ref=e7570] [cursor=pointer]:
+                        - img
+                  - cell "SOGELUX" [ref=e7571]:
+                    - paragraph [ref=e7573]: SOGELUX
+                  - cell "2.72135e+009" [ref=e7574]:
+                    - generic [ref=e7576]: "2.72135e+009"
+                  - cell "-" [ref=e7577]
+                  - cell "-" [ref=e7578]
+                  - cell "Actif" [ref=e7579]:
+                    - generic [ref=e7580]: Actif
+                  - cell [ref=e7581]:
+                    - button [ref=e7582] [cursor=pointer]:
+                      - img
+                - row "PREST-SI-0145 SOLIUM IT SOLIUM IT info@solium-it.com (225)2722459765 - - Actif" [ref=e7583]:
+                  - cell "PREST-SI-0145" [ref=e7584]:
+                    - generic [ref=e7585]:
+                      - generic [ref=e7586]: PREST-SI-0145
+                      - button [ref=e7587] [cursor=pointer]:
+                        - img
+                  - cell "SOLIUM IT SOLIUM IT" [ref=e7588]:
+                    - generic [ref=e7589]:
+                      - paragraph [ref=e7590]: SOLIUM IT
+                      - paragraph [ref=e7591]: SOLIUM IT
+                  - cell "info@solium-it.com (225)2722459765" [ref=e7592]:
+                    - generic [ref=e7593]:
+                      - generic [ref=e7594]: info@solium-it.com
+                      - generic [ref=e7595]: (225)2722459765
+                  - cell "-" [ref=e7596]
+                  - cell "-" [ref=e7597]
+                  - cell "Actif" [ref=e7598]:
+                    - generic [ref=e7599]: Actif
+                  - cell [ref=e7600]:
+                    - button [ref=e7601] [cursor=pointer]:
+                      - img
+                - row "PREST-SAI-0110 SOM AUTOMOBILE IVOIRE SOM AUTOMOBILE IVOIRE somautomobileivoire@gmail.com - - Actif" [ref=e7602]:
+                  - cell "PREST-SAI-0110" [ref=e7603]:
+                    - generic [ref=e7604]:
+                      - generic [ref=e7605]: PREST-SAI-0110
+                      - button [ref=e7606] [cursor=pointer]:
+                        - img
+                  - cell "SOM AUTOMOBILE IVOIRE SOM AUTOMOBILE IVOIRE" [ref=e7607]:
+                    - generic [ref=e7608]:
+                      - paragraph [ref=e7609]: SOM AUTOMOBILE IVOIRE
+                      - paragraph [ref=e7610]: SOM AUTOMOBILE IVOIRE
+                  - cell "somautomobileivoire@gmail.com" [ref=e7611]:
+                    - generic [ref=e7613]: somautomobileivoire@gmail.com
+                  - cell "-" [ref=e7614]
+                  - cell "-" [ref=e7615]
+                  - cell "Actif" [ref=e7616]:
+                    - generic [ref=e7617]: Actif
+                  - cell [ref=e7618]:
+                    - button [ref=e7619] [cursor=pointer]:
+                      - img
+                - row "PREST-SON-0220 SONAPIE SONAPIE NEANT 2720256400 - - Actif" [ref=e7620]:
+                  - cell "PREST-SON-0220" [ref=e7621]:
+                    - generic [ref=e7622]:
+                      - generic [ref=e7623]: PREST-SON-0220
+                      - button [ref=e7624] [cursor=pointer]:
+                        - img
+                  - cell "SONAPIE SONAPIE" [ref=e7625]:
+                    - generic [ref=e7626]:
+                      - paragraph [ref=e7627]: SONAPIE
+                      - paragraph [ref=e7628]: SONAPIE
+                  - cell "NEANT 2720256400" [ref=e7629]:
+                    - generic [ref=e7630]:
+                      - generic [ref=e7631]: NEANT
+                      - generic [ref=e7632]: "2720256400"
+                  - cell "-" [ref=e7633]
+                  - cell "-" [ref=e7634]
+                  - cell "Actif" [ref=e7635]:
+                    - generic [ref=e7636]: Actif
+                  - cell [ref=e7637]:
+                    - button [ref=e7638] [cursor=pointer]:
+                      - img
+                - row "PREST-SOT-0355 SOTRATOURISME SOTRA TOURISME sotratourism@sotra.ci 2721212195 - - Actif" [ref=e7639]:
+                  - cell "PREST-SOT-0355" [ref=e7640]:
+                    - generic [ref=e7641]:
+                      - generic [ref=e7642]: PREST-SOT-0355
+                      - button [ref=e7643] [cursor=pointer]:
+                        - img
+                  - cell "SOTRATOURISME SOTRA TOURISME" [ref=e7644]:
+                    - generic [ref=e7645]:
+                      - paragraph [ref=e7646]: SOTRATOURISME
+                      - paragraph [ref=e7647]: SOTRA TOURISME
+                  - cell "sotratourism@sotra.ci 2721212195" [ref=e7648]:
+                    - generic [ref=e7649]:
+                      - generic [ref=e7650]: sotratourism@sotra.ci
+                      - generic [ref=e7651]: "2721212195"
+                  - cell "-" [ref=e7652]
+                  - cell "-" [ref=e7653]
+                  - cell "Actif" [ref=e7654]:
+                    - generic [ref=e7655]: Actif
+                  - cell [ref=e7656]:
+                    - button [ref=e7657] [cursor=pointer]:
+                      - img
+                - row "PREST-SOH-0111 SPIRAL OFFICE & HOME SPIRAL OFFICE & HOME spiral@spiral.ci +225 27 21 750 600 - - Actif" [ref=e7658]:
+                  - cell "PREST-SOH-0111" [ref=e7659]:
+                    - generic [ref=e7660]:
+                      - generic [ref=e7661]: PREST-SOH-0111
+                      - button [ref=e7662] [cursor=pointer]:
+                        - img
+                  - cell "SPIRAL OFFICE & HOME SPIRAL OFFICE & HOME" [ref=e7663]:
+                    - generic [ref=e7664]:
+                      - paragraph [ref=e7665]: SPIRAL OFFICE & HOME
+                      - paragraph [ref=e7666]: SPIRAL OFFICE & HOME
+                  - cell "spiral@spiral.ci +225 27 21 750 600" [ref=e7667]:
+                    - generic [ref=e7668]:
+                      - generic [ref=e7669]: spiral@spiral.ci
+                      - generic [ref=e7670]: +225 27 21 750 600
+                  - cell "-" [ref=e7671]
+                  - cell "-" [ref=e7672]
+                  - cell "Actif" [ref=e7673]:
+                    - generic [ref=e7674]: Actif
+                  - cell [ref=e7675]:
+                    - button [ref=e7676] [cursor=pointer]:
+                      - img
+                - row "PREST-SRS-0374 SPONSORING RESEAUX SOCIAUX ARTI SPONSORING RESEAUX SOCIAUX ARTI NEANT NEANT - - Actif" [ref=e7677]:
+                  - cell "PREST-SRS-0374" [ref=e7678]:
+                    - generic [ref=e7679]:
+                      - generic [ref=e7680]: PREST-SRS-0374
+                      - button [ref=e7681] [cursor=pointer]:
+                        - img
+                  - cell "SPONSORING RESEAUX SOCIAUX ARTI SPONSORING RESEAUX SOCIAUX ARTI" [ref=e7682]:
+                    - generic [ref=e7683]:
+                      - paragraph [ref=e7684]: SPONSORING RESEAUX SOCIAUX ARTI
+                      - paragraph [ref=e7685]: SPONSORING RESEAUX SOCIAUX ARTI
+                  - cell "NEANT NEANT" [ref=e7686]:
+                    - generic [ref=e7687]:
+                      - generic [ref=e7688]: NEANT
+                      - generic [ref=e7689]: NEANT
+                  - cell "-" [ref=e7690]
+                  - cell "-" [ref=e7691]
+                  - cell "Actif" [ref=e7692]:
+                    - generic [ref=e7693]: Actif
+                  - cell [ref=e7694]:
+                    - button [ref=e7695] [cursor=pointer]:
+                      - img
+                - row "PREST-ST-0395 SPRIINT TECH SPRIINT TECH Néant 0777566065 - - Actif" [ref=e7696]:
+                  - cell "PREST-ST-0395" [ref=e7697]:
+                    - generic [ref=e7698]:
+                      - generic [ref=e7699]: PREST-ST-0395
+                      - button [ref=e7700] [cursor=pointer]:
+                        - img
+                  - cell "SPRIINT TECH SPRIINT TECH" [ref=e7701]:
+                    - generic [ref=e7702]:
+                      - paragraph [ref=e7703]: SPRIINT TECH
+                      - paragraph [ref=e7704]: SPRIINT TECH
+                  - cell "Néant 0777566065" [ref=e7705]:
+                    - generic [ref=e7706]:
+                      - generic [ref=e7707]: Néant
+                      - generic [ref=e7708]: "0777566065"
+                  - cell "-" [ref=e7709]
+                  - cell "-" [ref=e7710]
+                  - cell "Actif" [ref=e7711]:
+                    - generic [ref=e7712]: Actif
+                  - cell [ref=e7713]:
+                    - button [ref=e7714] [cursor=pointer]:
+                      - img
+                - row "PREST-SS-0121 ST. SAN ST. SAN 7.07144e+008 - - Actif" [ref=e7715]:
+                  - cell "PREST-SS-0121" [ref=e7716]:
+                    - generic [ref=e7717]:
+                      - generic [ref=e7718]: PREST-SS-0121
+                      - button [ref=e7719] [cursor=pointer]:
+                        - img
+                  - cell "ST. SAN ST. SAN" [ref=e7720]:
+                    - generic [ref=e7721]:
+                      - paragraph [ref=e7722]: ST. SAN
+                      - paragraph [ref=e7723]: ST. SAN
+                  - cell "7.07144e+008" [ref=e7724]:
+                    - generic [ref=e7726]: "7.07144e+008"
+                  - cell "-" [ref=e7727]
+                  - cell "-" [ref=e7728]
+                  - cell "Actif" [ref=e7729]:
+                    - generic [ref=e7730]: Actif
+                  - cell [ref=e7731]:
+                    - button [ref=e7732] [cursor=pointer]:
+                      - img
+                - row "PREST-SGC-0299 STARS GROUP CONSULTING STARS GROUP CONSULTING sgc-ci@starsgroupconsulting.com 0700749705 - - Actif" [ref=e7733]:
+                  - cell "PREST-SGC-0299" [ref=e7734]:
+                    - generic [ref=e7735]:
+                      - generic [ref=e7736]: PREST-SGC-0299
+                      - button [ref=e7737] [cursor=pointer]:
+                        - img
+                  - cell "STARS GROUP CONSULTING STARS GROUP CONSULTING" [ref=e7738]:
+                    - generic [ref=e7739]:
+                      - paragraph [ref=e7740]: STARS GROUP CONSULTING
+                      - paragraph [ref=e7741]: STARS GROUP CONSULTING
+                  - cell "sgc-ci@starsgroupconsulting.com 0700749705" [ref=e7742]:
+                    - generic [ref=e7743]:
+                      - generic [ref=e7744]: sgc-ci@starsgroupconsulting.com
+                      - generic [ref=e7745]: "0700749705"
+                  - cell "-" [ref=e7746]
+                  - cell "-" [ref=e7747]
+                  - cell "Actif" [ref=e7748]:
+                    - generic [ref=e7749]: Actif
+                  - cell [ref=e7750]:
+                    - button [ref=e7751] [cursor=pointer]:
+                      - img
+                - row "PREST-SIG-0407 SUCCES IMPRIM GROUPE SUCCES IMPRIM GROUPE succesimprim@gmail.com 0103098289 - - Actif" [ref=e7752]:
+                  - cell "PREST-SIG-0407" [ref=e7753]:
+                    - generic [ref=e7754]:
+                      - generic [ref=e7755]: PREST-SIG-0407
+                      - button [ref=e7756] [cursor=pointer]:
+                        - img
+                  - cell "SUCCES IMPRIM GROUPE SUCCES IMPRIM GROUPE" [ref=e7757]:
+                    - generic [ref=e7758]:
+                      - paragraph [ref=e7759]: SUCCES IMPRIM GROUPE
+                      - paragraph [ref=e7760]: SUCCES IMPRIM GROUPE
+                  - cell "succesimprim@gmail.com 0103098289" [ref=e7761]:
+                    - generic [ref=e7762]:
+                      - generic [ref=e7763]: succesimprim@gmail.com
+                      - generic [ref=e7764]: "0103098289"
+                  - cell "-" [ref=e7765]
+                  - cell "-" [ref=e7766]
+                  - cell "Actif" [ref=e7767]:
+                    - generic [ref=e7768]: Actif
+                  - cell [ref=e7769]:
+                    - button [ref=e7770] [cursor=pointer]:
+                      - img
+                - row "PREST-SE-0254 SUPER ELECTRONIC SUPER ELECTRONIC NEANT 0102588266 - - Actif" [ref=e7771]:
+                  - cell "PREST-SE-0254" [ref=e7772]:
+                    - generic [ref=e7773]:
+                      - generic [ref=e7774]: PREST-SE-0254
+                      - button [ref=e7775] [cursor=pointer]:
+                        - img
+                  - cell "SUPER ELECTRONIC SUPER ELECTRONIC" [ref=e7776]:
+                    - generic [ref=e7777]:
+                      - paragraph [ref=e7778]: SUPER ELECTRONIC
+                      - paragraph [ref=e7779]: SUPER ELECTRONIC
+                  - cell "NEANT 0102588266" [ref=e7780]:
+                    - generic [ref=e7781]:
+                      - generic [ref=e7782]: NEANT
+                      - generic [ref=e7783]: "0102588266"
+                  - cell "-" [ref=e7784]
+                  - cell "-" [ref=e7785]
+                  - cell "Actif" [ref=e7786]:
+                    - generic [ref=e7787]: Actif
+                  - cell [ref=e7788]:
+                    - button [ref=e7789] [cursor=pointer]:
+                      - img
+                - row "PREST-TPE-0162 T & P EVENT T&P EVENT NEANT 0707580311 - - Actif" [ref=e7790]:
+                  - cell "PREST-TPE-0162" [ref=e7791]:
+                    - generic [ref=e7792]:
+                      - generic [ref=e7793]: PREST-TPE-0162
+                      - button [ref=e7794] [cursor=pointer]:
+                        - img
+                  - cell "T & P EVENT T&P EVENT" [ref=e7795]:
+                    - generic [ref=e7796]:
+                      - paragraph [ref=e7797]: T & P EVENT
+                      - paragraph [ref=e7798]: T&P EVENT
+                  - cell "NEANT 0707580311" [ref=e7799]:
+                    - generic [ref=e7800]:
+                      - generic [ref=e7801]: NEANT
+                      - generic [ref=e7802]: "0707580311"
+                  - cell "-" [ref=e7803]
+                  - cell "-" [ref=e7804]
+                  - cell "Actif" [ref=e7805]:
+                    - generic [ref=e7806]: Actif
+                  - cell [ref=e7807]:
+                    - button [ref=e7808] [cursor=pointer]:
+                      - img
+                - row "PREST-TLC-0361 TAURUS LOGISTICS COTE D'IVOIRE TLCI SARLU NEANT 59598016 - - Actif" [ref=e7809]:
+                  - cell "PREST-TLC-0361" [ref=e7810]:
+                    - generic [ref=e7811]:
+                      - generic [ref=e7812]: PREST-TLC-0361
+                      - button [ref=e7813] [cursor=pointer]:
+                        - img
+                  - cell "TAURUS LOGISTICS COTE D'IVOIRE TLCI SARLU" [ref=e7814]:
+                    - generic [ref=e7815]:
+                      - paragraph [ref=e7816]: TAURUS LOGISTICS COTE D'IVOIRE
+                      - paragraph [ref=e7817]: TLCI SARLU
+                  - cell "NEANT 59598016" [ref=e7818]:
+                    - generic [ref=e7819]:
+                      - generic [ref=e7820]: NEANT
+                      - generic [ref=e7821]: "59598016"
+                  - cell "-" [ref=e7822]
+                  - cell "-" [ref=e7823]
+                  - cell "Actif" [ref=e7824]:
+                    - generic [ref=e7825]: Actif
+                  - cell [ref=e7826]:
+                    - button [ref=e7827] [cursor=pointer]:
+                      - img
+                - row "PREST-TEB-0211 TEB TOTAL EVOLUTION BUSINESS teblogistics.civ@gmail.com 0758868688 - - Actif" [ref=e7828]:
+                  - cell "PREST-TEB-0211" [ref=e7829]:
+                    - generic [ref=e7830]:
+                      - generic [ref=e7831]: PREST-TEB-0211
+                      - button [ref=e7832] [cursor=pointer]:
+                        - img
+                  - cell "TEB TOTAL EVOLUTION BUSINESS" [ref=e7833]:
+                    - generic [ref=e7834]:
+                      - paragraph [ref=e7835]: TEB
+                      - paragraph [ref=e7836]: TOTAL EVOLUTION BUSINESS
+                  - cell "teblogistics.civ@gmail.com 0758868688" [ref=e7837]:
+                    - generic [ref=e7838]:
+                      - generic [ref=e7839]: teblogistics.civ@gmail.com
+                      - generic [ref=e7840]: "0758868688"
+                  - cell "-" [ref=e7841]
+                  - cell "-" [ref=e7842]
+                  - cell "Actif" [ref=e7843]:
+                    - generic [ref=e7844]: Actif
+                  - cell [ref=e7845]:
+                    - button [ref=e7846] [cursor=pointer]:
+                      - img
+                - row "PREST-001 TECH SOLUTIONS CI contact@techsolutions.ci +225 27 20 21 22 23 - SN12345678901 Actif" [ref=e7847]:
+                  - cell "PREST-001" [ref=e7848]:
+                    - generic [ref=e7849]:
+                      - generic [ref=e7850]: PREST-001
+                      - button [ref=e7851] [cursor=pointer]:
+                        - img
+                  - cell "TECH SOLUTIONS CI" [ref=e7852]:
+                    - paragraph [ref=e7854]: TECH SOLUTIONS CI
+                  - cell "contact@techsolutions.ci +225 27 20 21 22 23" [ref=e7855]:
+                    - generic [ref=e7856]:
+                      - generic [ref=e7857]: contact@techsolutions.ci
+                      - generic [ref=e7858]: +225 27 20 21 22 23
+                  - cell "-" [ref=e7859]
+                  - cell "SN12345678901" [ref=e7860]
+                  - cell "Actif" [ref=e7861]:
+                    - generic [ref=e7862]: Actif
+                  - cell [ref=e7863]:
+                    - button [ref=e7864] [cursor=pointer]:
+                      - img
+                - row "PREST-TM-0359 TECHNOLOGIE MEDICALE TECHNOLOGIE MEDICALE NEANT NEANT - - Actif" [ref=e7865]:
+                  - cell "PREST-TM-0359" [ref=e7866]:
+                    - generic [ref=e7867]:
+                      - generic [ref=e7868]: PREST-TM-0359
+                      - button [ref=e7869] [cursor=pointer]:
+                        - img
+                  - cell "TECHNOLOGIE MEDICALE TECHNOLOGIE MEDICALE" [ref=e7870]:
+                    - generic [ref=e7871]:
+                      - paragraph [ref=e7872]: TECHNOLOGIE MEDICALE
+                      - paragraph [ref=e7873]: TECHNOLOGIE MEDICALE
+                  - cell "NEANT NEANT" [ref=e7874]:
+                    - generic [ref=e7875]:
+                      - generic [ref=e7876]: NEANT
+                      - generic [ref=e7877]: NEANT
+                  - cell "-" [ref=e7878]
+                  - cell "-" [ref=e7879]
+                  - cell "Actif" [ref=e7880]:
+                    - generic [ref=e7881]: Actif
+                  - cell [ref=e7882]:
+                    - button [ref=e7883] [cursor=pointer]:
+                      - img
+                - 'row "PREST-TIS-0245 TOP IMPEX SARL TOP IMPEX SARL : secretariat@topimpex. +225 27 21 53 Z0 lJ - - Actif" [ref=e7884]':
+                  - cell "PREST-TIS-0245" [ref=e7885]:
+                    - generic [ref=e7886]:
+                      - generic [ref=e7887]: PREST-TIS-0245
+                      - button [ref=e7888] [cursor=pointer]:
+                        - img
+                  - cell "TOP IMPEX SARL TOP IMPEX SARL" [ref=e7889]:
+                    - generic [ref=e7890]:
+                      - paragraph [ref=e7891]: TOP IMPEX SARL
+                      - paragraph [ref=e7892]: TOP IMPEX SARL
+                  - 'cell ": secretariat@topimpex. +225 27 21 53 Z0 lJ" [ref=e7893]':
+                    - generic [ref=e7894]:
+                      - generic [ref=e7895]: ": secretariat@topimpex."
+                      - generic [ref=e7896]: +225 27 21 53 Z0 lJ
+                  - cell "-" [ref=e7897]
+                  - cell "-" [ref=e7898]
+                  - cell "Actif" [ref=e7899]:
+                    - generic [ref=e7900]: Actif
+                  - cell [ref=e7901]:
+                    - button [ref=e7902] [cursor=pointer]:
+                      - img
+                - row "PREST-TP-0112 TOP PISCINE TOP PISCINE - - Actif" [ref=e7903]:
+                  - cell "PREST-TP-0112" [ref=e7904]:
+                    - generic [ref=e7905]:
+                      - generic [ref=e7906]: PREST-TP-0112
+                      - button [ref=e7907] [cursor=pointer]:
+                        - img
+                  - cell "TOP PISCINE TOP PISCINE" [ref=e7908]:
+                    - generic [ref=e7909]:
+                      - paragraph [ref=e7910]: TOP PISCINE
+                      - paragraph [ref=e7911]: TOP PISCINE
+                  - cell [ref=e7912]
+                  - cell "-" [ref=e7913]
+                  - cell "-" [ref=e7914]
+                  - cell "Actif" [ref=e7915]:
+                    - generic [ref=e7916]: Actif
+                  - cell [ref=e7917]:
+                    - button [ref=e7918] [cursor=pointer]:
+                      - img
+                - row "PREST-TEC-0113 TOTAL ENERGIE CÔTE D'IVOIRE TOTAL ENERGIE CÔTE D'IVOIRE - - Actif" [ref=e7919]:
+                  - cell "PREST-TEC-0113" [ref=e7920]:
+                    - generic [ref=e7921]:
+                      - generic [ref=e7922]: PREST-TEC-0113
+                      - button [ref=e7923] [cursor=pointer]:
+                        - img
+                  - cell "TOTAL ENERGIE CÔTE D'IVOIRE TOTAL ENERGIE CÔTE D'IVOIRE" [ref=e7924]:
+                    - generic [ref=e7925]:
+                      - paragraph [ref=e7926]: TOTAL ENERGIE CÔTE D'IVOIRE
+                      - paragraph [ref=e7927]: TOTAL ENERGIE CÔTE D'IVOIRE
+                  - cell [ref=e7928]
+                  - cell "-" [ref=e7929]
+                  - cell "-" [ref=e7930]
+                  - cell "Actif" [ref=e7931]:
+                    - generic [ref=e7932]: Actif
+                  - cell [ref=e7933]:
+                    - button [ref=e7934] [cursor=pointer]:
+                      - img
+                - row "PREST-TPC-0122 TPCI TPCI 5.05075e+008 - - Actif" [ref=e7935]:
+                  - cell "PREST-TPC-0122" [ref=e7936]:
+                    - generic [ref=e7937]:
+                      - generic [ref=e7938]: PREST-TPC-0122
+                      - button [ref=e7939] [cursor=pointer]:
+                        - img
+                  - cell "TPCI TPCI" [ref=e7940]:
+                    - generic [ref=e7941]:
+                      - paragraph [ref=e7942]: TPCI
+                      - paragraph [ref=e7943]: TPCI
+                  - cell "5.05075e+008" [ref=e7944]:
+                    - generic [ref=e7946]: "5.05075e+008"
+                  - cell "-" [ref=e7947]
+                  - cell "-" [ref=e7948]
+                  - cell "Actif" [ref=e7949]:
+                    - generic [ref=e7950]: Actif
+                  - cell [ref=e7951]:
+                    - button [ref=e7952] [cursor=pointer]:
+                      - img
+                - row "PREST-TMC-0256 TRACTAFRIC MOTORS COTE D’IVOIRE TRACTAFRIC MOTORS COTE D’IVOIRE Tmci.abj-nord@tractafrictmc.com 2.25272e+012 - - Actif" [ref=e7953]:
+                  - cell "PREST-TMC-0256" [ref=e7954]:
+                    - generic [ref=e7955]:
+                      - generic [ref=e7956]: PREST-TMC-0256
+                      - button [ref=e7957] [cursor=pointer]:
+                        - img
+                  - cell "TRACTAFRIC MOTORS COTE D’IVOIRE TRACTAFRIC MOTORS COTE D’IVOIRE" [ref=e7958]:
+                    - generic [ref=e7959]:
+                      - paragraph [ref=e7960]: TRACTAFRIC MOTORS COTE D’IVOIRE
+                      - paragraph [ref=e7961]: TRACTAFRIC MOTORS COTE D’IVOIRE
+                  - cell "Tmci.abj-nord@tractafrictmc.com 2.25272e+012" [ref=e7962]:
+                    - generic [ref=e7963]:
+                      - generic [ref=e7964]: Tmci.abj-nord@tractafrictmc.com
+                      - generic [ref=e7965]: "2.25272e+012"
+                  - cell "-" [ref=e7966]
+                  - cell "-" [ref=e7967]
+                  - cell "Actif" [ref=e7968]:
+                    - generic [ref=e7969]: Actif
+                  - cell [ref=e7970]:
+                    - button [ref=e7971] [cursor=pointer]:
+                      - img
+                - row "PREST-TEP-0114 TRAITEUR ET PLUS TRAITEUR ET PLUS - - Actif" [ref=e7972]:
+                  - cell "PREST-TEP-0114" [ref=e7973]:
+                    - generic [ref=e7974]:
+                      - generic [ref=e7975]: PREST-TEP-0114
+                      - button [ref=e7976] [cursor=pointer]:
+                        - img
+                  - cell "TRAITEUR ET PLUS TRAITEUR ET PLUS" [ref=e7977]:
+                    - generic [ref=e7978]:
+                      - paragraph [ref=e7979]: TRAITEUR ET PLUS
+                      - paragraph [ref=e7980]: TRAITEUR ET PLUS
+                  - cell [ref=e7981]
+                  - cell "-" [ref=e7982]
+                  - cell "-" [ref=e7983]
+                  - cell "Actif" [ref=e7984]:
+                    - generic [ref=e7985]: Actif
+                  - cell [ref=e7986]:
+                    - button [ref=e7987] [cursor=pointer]:
+                      - img
+                - row "PREST-TO-0357 TRANSTELECOM OEOS TRANSTELECOM OEOS transtelecom@gmail.com 0505032010 - - Actif" [ref=e7988]:
+                  - cell "PREST-TO-0357" [ref=e7989]:
+                    - generic [ref=e7990]:
+                      - generic [ref=e7991]: PREST-TO-0357
+                      - button [ref=e7992] [cursor=pointer]:
+                        - img
+                  - cell "TRANSTELECOM OEOS TRANSTELECOM OEOS" [ref=e7993]:
+                    - generic [ref=e7994]:
+                      - paragraph [ref=e7995]: TRANSTELECOM OEOS
+                      - paragraph [ref=e7996]: TRANSTELECOM OEOS
+                  - cell "transtelecom@gmail.com 0505032010" [ref=e7997]:
+                    - generic [ref=e7998]:
+                      - generic [ref=e7999]: transtelecom@gmail.com
+                      - generic [ref=e8000]: "0505032010"
+                  - cell "-" [ref=e8001]
+                  - cell "-" [ref=e8002]
+                  - cell "Actif" [ref=e8003]:
+                    - generic [ref=e8004]: Actif
+                  - cell [ref=e8005]:
+                    - button [ref=e8006] [cursor=pointer]:
+                      - img
+                - row "PREST-TD-0178 TRAORE DRISSA TRAORE DRISSA NEANT NEANT - - Actif" [ref=e8007]:
+                  - cell "PREST-TD-0178" [ref=e8008]:
+                    - generic [ref=e8009]:
+                      - generic [ref=e8010]: PREST-TD-0178
+                      - button [ref=e8011] [cursor=pointer]:
+                        - img
+                  - cell "TRAORE DRISSA TRAORE DRISSA" [ref=e8012]:
+                    - generic [ref=e8013]:
+                      - paragraph [ref=e8014]: TRAORE DRISSA
+                      - paragraph [ref=e8015]: TRAORE DRISSA
+                  - cell "NEANT NEANT" [ref=e8016]:
+                    - generic [ref=e8017]:
+                      - generic [ref=e8018]: NEANT
+                      - generic [ref=e8019]: NEANT
+                  - cell "-" [ref=e8020]
+                  - cell "-" [ref=e8021]
+                  - cell "Actif" [ref=e8022]:
+                    - generic [ref=e8023]: Actif
+                  - cell [ref=e8024]:
+                    - button [ref=e8025] [cursor=pointer]:
+                      - img
+                - row "PREST-TDG-0386 TRIBUNAL DE GRAND BASSAM TRIBUNAL DE GRAND BASSAM NEANT NEANT - - Actif" [ref=e8026]:
+                  - cell "PREST-TDG-0386" [ref=e8027]:
+                    - generic [ref=e8028]:
+                      - generic [ref=e8029]: PREST-TDG-0386
+                      - button [ref=e8030] [cursor=pointer]:
+                        - img
+                  - cell "TRIBUNAL DE GRAND BASSAM TRIBUNAL DE GRAND BASSAM" [ref=e8031]:
+                    - generic [ref=e8032]:
+                      - paragraph [ref=e8033]: TRIBUNAL DE GRAND BASSAM
+                      - paragraph [ref=e8034]: TRIBUNAL DE GRAND BASSAM
+                  - cell "NEANT NEANT" [ref=e8035]:
+                    - generic [ref=e8036]:
+                      - generic [ref=e8037]: NEANT
+                      - generic [ref=e8038]: NEANT
+                  - cell "-" [ref=e8039]
+                  - cell "-" [ref=e8040]
+                  - cell "Actif" [ref=e8041]:
+                    - generic [ref=e8042]: Actif
+                  - cell [ref=e8043]:
+                    - button [ref=e8044] [cursor=pointer]:
+                      - img
+                - row "PREST-TEC-0336 TRILOGY EVENTS & COM TRILOGY EVENTS & COM trilogyeventscom@gmail.com 2250594009090 - - Actif" [ref=e8045]:
+                  - cell "PREST-TEC-0336" [ref=e8046]:
+                    - generic [ref=e8047]:
+                      - generic [ref=e8048]: PREST-TEC-0336
+                      - button [ref=e8049] [cursor=pointer]:
+                        - img
+                  - cell "TRILOGY EVENTS & COM TRILOGY EVENTS & COM" [ref=e8050]:
+                    - generic [ref=e8051]:
+                      - paragraph [ref=e8052]: TRILOGY EVENTS & COM
+                      - paragraph [ref=e8053]: TRILOGY EVENTS & COM
+                  - cell "trilogyeventscom@gmail.com 2250594009090" [ref=e8054]:
+                    - generic [ref=e8055]:
+                      - generic [ref=e8056]: trilogyeventscom@gmail.com
+                      - generic [ref=e8057]: "2250594009090"
+                  - cell "-" [ref=e8058]
+                  - cell "-" [ref=e8059]
+                  - cell "Actif" [ref=e8060]:
+                    - generic [ref=e8061]: Actif
+                  - cell [ref=e8062]:
+                    - button [ref=e8063] [cursor=pointer]:
+                      - img
+                - row "PREST-TA-0228 TURKISH AIRLINES TURKISH AIRLINES NC (+225) 27 20 24 23 70 - - Actif" [ref=e8064]:
+                  - cell "PREST-TA-0228" [ref=e8065]:
+                    - generic [ref=e8066]:
+                      - generic [ref=e8067]: PREST-TA-0228
+                      - button [ref=e8068] [cursor=pointer]:
+                        - img
+                  - cell "TURKISH AIRLINES TURKISH AIRLINES" [ref=e8069]:
+                    - generic [ref=e8070]:
+                      - paragraph [ref=e8071]: TURKISH AIRLINES
+                      - paragraph [ref=e8072]: TURKISH AIRLINES
+                  - cell "NC (+225) 27 20 24 23 70" [ref=e8073]:
+                    - generic [ref=e8074]:
+                      - generic [ref=e8075]: NC
+                      - generic [ref=e8076]: (+225) 27 20 24 23 70
+                  - cell "-" [ref=e8077]
+                  - cell "-" [ref=e8078]
+                  - cell "Actif" [ref=e8079]:
+                    - generic [ref=e8080]: Actif
+                  - cell [ref=e8081]:
+                    - button [ref=e8082] [cursor=pointer]:
+                      - img
+                - row "PREST-UCD-0239 UBA COTE D'IVOIRE UBA COTE D'IVOIRE NEANT +(225) 27 20 20 39 80 - - Actif" [ref=e8083]:
+                  - cell "PREST-UCD-0239" [ref=e8084]:
+                    - generic [ref=e8085]:
+                      - generic [ref=e8086]: PREST-UCD-0239
+                      - button [ref=e8087] [cursor=pointer]:
+                        - img
+                  - cell "UBA COTE D'IVOIRE UBA COTE D'IVOIRE" [ref=e8088]:
+                    - generic [ref=e8089]:
+                      - paragraph [ref=e8090]: UBA COTE D'IVOIRE
+                      - paragraph [ref=e8091]: UBA COTE D'IVOIRE
+                  - cell "NEANT +(225) 27 20 20 39 80" [ref=e8092]:
+                    - generic [ref=e8093]:
+                      - generic [ref=e8094]: NEANT
+                      - generic [ref=e8095]: +(225) 27 20 20 39 80
+                  - cell "-" [ref=e8096]
+                  - cell "-" [ref=e8097]
+                  - cell "Actif" [ref=e8098]:
+                    - generic [ref=e8099]: Actif
+                  - cell [ref=e8100]:
+                    - button [ref=e8101] [cursor=pointer]:
+                      - img
+                - row "PREST-UID-0123 UNION INTERNATIONALE DES TRANSPORTS PUBLICS UITP - - Actif" [ref=e8102]:
+                  - cell "PREST-UID-0123" [ref=e8103]:
+                    - generic [ref=e8104]:
+                      - generic [ref=e8105]: PREST-UID-0123
+                      - button [ref=e8106] [cursor=pointer]:
+                        - img
+                  - cell "UNION INTERNATIONALE DES TRANSPORTS PUBLICS UITP" [ref=e8107]:
+                    - generic [ref=e8108]:
+                      - paragraph [ref=e8109]: UNION INTERNATIONALE DES TRANSPORTS PUBLICS
+                      - paragraph [ref=e8110]: UITP
+                  - cell [ref=e8111]
+                  - cell "-" [ref=e8112]
+                  - cell "-" [ref=e8113]
+                  - cell "Actif" [ref=e8114]:
+                    - generic [ref=e8115]: Actif
+                  - cell [ref=e8116]:
+                    - button [ref=e8117] [cursor=pointer]:
+                      - img
+                - row "PREST-UNS-0189 UNIVERSITE NORD SUD UNIVERSITE NORD SUD qitaaofficiel@gmail.com 0798957567 - - Actif" [ref=e8118]:
+                  - cell "PREST-UNS-0189" [ref=e8119]:
+                    - generic [ref=e8120]:
+                      - generic [ref=e8121]: PREST-UNS-0189
+                      - button [ref=e8122] [cursor=pointer]:
+                        - img
+                  - cell "UNIVERSITE NORD SUD UNIVERSITE NORD SUD" [ref=e8123]:
+                    - generic [ref=e8124]:
+                      - paragraph [ref=e8125]: UNIVERSITE NORD SUD
+                      - paragraph [ref=e8126]: UNIVERSITE NORD SUD
+                  - cell "qitaaofficiel@gmail.com 0798957567" [ref=e8127]:
+                    - generic [ref=e8128]:
+                      - generic [ref=e8129]: qitaaofficiel@gmail.com
+                      - generic [ref=e8130]: "0798957567"
+                  - cell "-" [ref=e8131]
+                  - cell "-" [ref=e8132]
+                  - cell "Actif" [ref=e8133]:
+                    - generic [ref=e8134]: Actif
+                  - cell [ref=e8135]:
+                    - button [ref=e8136] [cursor=pointer]:
+                      - img
+                - row "PREST-VM-0198 VALEUR MONDE VALEUR MONDE valeurmonde@gmail.com 2722202544 - - Actif" [ref=e8137]:
+                  - cell "PREST-VM-0198" [ref=e8138]:
+                    - generic [ref=e8139]:
+                      - generic [ref=e8140]: PREST-VM-0198
+                      - button [ref=e8141] [cursor=pointer]:
+                        - img
+                  - cell "VALEUR MONDE VALEUR MONDE" [ref=e8142]:
+                    - generic [ref=e8143]:
+                      - paragraph [ref=e8144]: VALEUR MONDE
+                      - paragraph [ref=e8145]: VALEUR MONDE
+                  - cell "valeurmonde@gmail.com 2722202544" [ref=e8146]:
+                    - generic [ref=e8147]:
+                      - generic [ref=e8148]: valeurmonde@gmail.com
+                      - generic [ref=e8149]: "2722202544"
+                  - cell "-" [ref=e8150]
+                  - cell "-" [ref=e8151]
+                  - cell "Actif" [ref=e8152]:
+                    - generic [ref=e8153]: Actif
+                  - cell [ref=e8154]:
+                    - button [ref=e8155] [cursor=pointer]:
+                      - img
+                - row "PREST-VDA-0354 VENAME (DOMAINE ARTI CI) VENAM (DOMAINE ARTI CI) NEANT NEANT - - Actif" [ref=e8156]:
+                  - cell "PREST-VDA-0354" [ref=e8157]:
+                    - generic [ref=e8158]:
+                      - generic [ref=e8159]: PREST-VDA-0354
+                      - button [ref=e8160] [cursor=pointer]:
+                        - img
+                  - cell "VENAME (DOMAINE ARTI CI) VENAM (DOMAINE ARTI CI)" [ref=e8161]:
+                    - generic [ref=e8162]:
+                      - paragraph [ref=e8163]: VENAME (DOMAINE ARTI CI)
+                      - paragraph [ref=e8164]: VENAM (DOMAINE ARTI CI)
+                  - cell "NEANT NEANT" [ref=e8165]:
+                    - generic [ref=e8166]:
+                      - generic [ref=e8167]: NEANT
+                      - generic [ref=e8168]: NEANT
+                  - cell "-" [ref=e8169]
+                  - cell "-" [ref=e8170]
+                  - cell "Actif" [ref=e8171]:
+                    - generic [ref=e8172]: Actif
+                  - cell [ref=e8173]:
+                    - button [ref=e8174] [cursor=pointer]:
+                      - img
+                - row "PREST-VIP-0275 VIPNET VIPNET +225 27 22 52 62 00 - - Actif" [ref=e8175]:
+                  - cell "PREST-VIP-0275" [ref=e8176]:
+                    - generic [ref=e8177]:
+                      - generic [ref=e8178]: PREST-VIP-0275
+                      - button [ref=e8179] [cursor=pointer]:
+                        - img
+                  - cell "VIPNET VIPNET" [ref=e8180]:
+                    - generic [ref=e8181]:
+                      - paragraph [ref=e8182]: VIPNET
+                      - paragraph [ref=e8183]: VIPNET
+                  - cell "+225 27 22 52 62 00" [ref=e8184]:
+                    - generic [ref=e8186]: +225 27 22 52 62 00
+                  - cell "-" [ref=e8187]
+                  - cell "-" [ref=e8188]
+                  - cell "Actif" [ref=e8189]:
+                    - generic [ref=e8190]: Actif
+                  - cell [ref=e8191]:
+                    - button [ref=e8192] [cursor=pointer]:
+                      - img
+                - row "PREST-VC-0212 VISUEL CONCEPT VISUEL CONCEPT infi@visuelconcepts.com 2722598333 - - Actif" [ref=e8193]:
+                  - cell "PREST-VC-0212" [ref=e8194]:
+                    - generic [ref=e8195]:
+                      - generic [ref=e8196]: PREST-VC-0212
+                      - button [ref=e8197] [cursor=pointer]:
+                        - img
+                  - cell "VISUEL CONCEPT VISUEL CONCEPT" [ref=e8198]:
+                    - generic [ref=e8199]:
+                      - paragraph [ref=e8200]: VISUEL CONCEPT
+                      - paragraph [ref=e8201]: VISUEL CONCEPT
+                  - cell "infi@visuelconcepts.com 2722598333" [ref=e8202]:
+                    - generic [ref=e8203]:
+                      - generic [ref=e8204]: infi@visuelconcepts.com
+                      - generic [ref=e8205]: "2722598333"
+                  - cell "-" [ref=e8206]
+                  - cell "-" [ref=e8207]
+                  - cell "Actif" [ref=e8208]:
+                    - generic [ref=e8209]: Actif
+                  - cell [ref=e8210]:
+                    - button [ref=e8211] [cursor=pointer]:
+                      - img
+                - row "PREST-WM-0216 W MEDIA WEBLOGY MEDIA SARL info@webblogymedia.com 2522010122 - - Actif" [ref=e8212]:
+                  - cell "PREST-WM-0216" [ref=e8213]:
+                    - generic [ref=e8214]:
+                      - generic [ref=e8215]: PREST-WM-0216
+                      - button [ref=e8216] [cursor=pointer]:
+                        - img
+                  - cell "W MEDIA WEBLOGY MEDIA SARL" [ref=e8217]:
+                    - generic [ref=e8218]:
+                      - paragraph [ref=e8219]: W MEDIA
+                      - paragraph [ref=e8220]: WEBLOGY MEDIA SARL
+                  - cell "info@webblogymedia.com 2522010122" [ref=e8221]:
+                    - generic [ref=e8222]:
+                      - generic [ref=e8223]: info@webblogymedia.com
+                      - generic [ref=e8224]: "2522010122"
+                  - cell "-" [ref=e8225]
+                  - cell "-" [ref=e8226]
+                  - cell "Actif" [ref=e8227]:
+                    - generic [ref=e8228]: Actif
+                  - cell [ref=e8229]:
+                    - button [ref=e8230] [cursor=pointer]:
+                      - img
+                - row "PREST-WG-0309 WINCOM GROUP WINCOM GROUP commercial.wicom@wicom.ci 0749446312 - - Actif" [ref=e8231]:
+                  - cell "PREST-WG-0309" [ref=e8232]:
+                    - generic [ref=e8233]:
+                      - generic [ref=e8234]: PREST-WG-0309
+                      - button [ref=e8235] [cursor=pointer]:
+                        - img
+                  - cell "WINCOM GROUP WINCOM GROUP" [ref=e8236]:
+                    - generic [ref=e8237]:
+                      - paragraph [ref=e8238]: WINCOM GROUP
+                      - paragraph [ref=e8239]: WINCOM GROUP
+                  - cell "commercial.wicom@wicom.ci 0749446312" [ref=e8240]:
+                    - generic [ref=e8241]:
+                      - generic [ref=e8242]: commercial.wicom@wicom.ci
+                      - generic [ref=e8243]: "0749446312"
+                  - cell "-" [ref=e8244]
+                  - cell "-" [ref=e8245]
+                  - cell "Actif" [ref=e8246]:
+                    - generic [ref=e8247]: Actif
+                  - cell [ref=e8248]:
+                    - button [ref=e8249] [cursor=pointer]:
+                      - img
+                - row "PREST-WR-0364 WV REELCOM W V REELCOM NEANT 2722557409 - - Actif" [ref=e8250]:
+                  - cell "PREST-WR-0364" [ref=e8251]:
+                    - generic [ref=e8252]:
+                      - generic [ref=e8253]: PREST-WR-0364
+                      - button [ref=e8254] [cursor=pointer]:
+                        - img
+                  - cell "WV REELCOM W V REELCOM" [ref=e8255]:
+                    - generic [ref=e8256]:
+                      - paragraph [ref=e8257]: WV REELCOM
+                      - paragraph [ref=e8258]: W V REELCOM
+                  - cell "NEANT 2722557409" [ref=e8259]:
+                    - generic [ref=e8260]:
+                      - generic [ref=e8261]: NEANT
+                      - generic [ref=e8262]: "2722557409"
+                  - cell "-" [ref=e8263]
+                  - cell "-" [ref=e8264]
+                  - cell "Actif" [ref=e8265]:
+                    - generic [ref=e8266]: Actif
+                  - cell [ref=e8267]:
+                    - button [ref=e8268] [cursor=pointer]:
+                      - img
+                - row "PREST-YI-0115 YAHAYA ISSIAKA YAHAYA ISSIAKA - - Actif" [ref=e8269]:
+                  - cell "PREST-YI-0115" [ref=e8270]:
+                    - generic [ref=e8271]:
+                      - generic [ref=e8272]: PREST-YI-0115
+                      - button [ref=e8273] [cursor=pointer]:
+                        - img
+                  - cell "YAHAYA ISSIAKA YAHAYA ISSIAKA" [ref=e8274]:
+                    - generic [ref=e8275]:
+                      - paragraph [ref=e8276]: YAHAYA ISSIAKA
+                      - paragraph [ref=e8277]: YAHAYA ISSIAKA
+                  - cell [ref=e8278]
+                  - cell "-" [ref=e8279]
+                  - cell "-" [ref=e8280]
+                  - cell "Actif" [ref=e8281]:
+                    - generic [ref=e8282]: Actif
+                  - cell [ref=e8283]:
+                    - button [ref=e8284] [cursor=pointer]:
+                      - img
+                - row "PREST-YSP-0116 YAM SERVICES PLUS YAM SERVICES PLUS mairieneyao.m@gmail.com 7.0751e+008 - - Actif" [ref=e8285]:
+                  - cell "PREST-YSP-0116" [ref=e8286]:
+                    - generic [ref=e8287]:
+                      - generic [ref=e8288]: PREST-YSP-0116
+                      - button [ref=e8289] [cursor=pointer]:
+                        - img
+                  - cell "YAM SERVICES PLUS YAM SERVICES PLUS" [ref=e8290]:
+                    - generic [ref=e8291]:
+                      - paragraph [ref=e8292]: YAM SERVICES PLUS
+                      - paragraph [ref=e8293]: YAM SERVICES PLUS
+                  - cell "mairieneyao.m@gmail.com 7.0751e+008" [ref=e8294]:
+                    - generic [ref=e8295]:
+                      - generic [ref=e8296]: mairieneyao.m@gmail.com
+                      - generic [ref=e8297]: "7.0751e+008"
+                  - cell "-" [ref=e8298]
+                  - cell "-" [ref=e8299]
+                  - cell "Actif" [ref=e8300]:
+                    - generic [ref=e8301]: Actif
+                  - cell [ref=e8302]:
+                    - button [ref=e8303] [cursor=pointer]:
+                      - img
+                - row "PREST-YS-0117 YESHI SERVICES YESHI SERVICES 0709905925 - - Actif" [ref=e8304]:
+                  - cell "PREST-YS-0117" [ref=e8305]:
+                    - generic [ref=e8306]:
+                      - generic [ref=e8307]: PREST-YS-0117
+                      - button [ref=e8308] [cursor=pointer]:
+                        - img
+                  - cell "YESHI SERVICES YESHI SERVICES" [ref=e8309]:
+                    - generic [ref=e8310]:
+                      - paragraph [ref=e8311]: YESHI SERVICES
+                      - paragraph [ref=e8312]: YESHI SERVICES
+                  - cell "0709905925" [ref=e8313]:
+                    - generic [ref=e8315]: "0709905925"
+                  - cell "-" [ref=e8316]
+                  - cell "-" [ref=e8317]
+                  - cell "Actif" [ref=e8318]:
+                    - generic [ref=e8319]: Actif
+                  - cell [ref=e8320]:
+                    - button [ref=e8321] [cursor=pointer]:
+                      - img
+                - row "PREST-YQ-0118 YOUBA QUINCAILLERIE YOUBA QUINCAILLERIE - - Actif" [ref=e8322]:
+                  - cell "PREST-YQ-0118" [ref=e8323]:
+                    - generic [ref=e8324]:
+                      - generic [ref=e8325]: PREST-YQ-0118
+                      - button [ref=e8326] [cursor=pointer]:
+                        - img
+                  - cell "YOUBA QUINCAILLERIE YOUBA QUINCAILLERIE" [ref=e8327]:
+                    - generic [ref=e8328]:
+                      - paragraph [ref=e8329]: YOUBA QUINCAILLERIE
+                      - paragraph [ref=e8330]: YOUBA QUINCAILLERIE
+                  - cell [ref=e8331]
+                  - cell "-" [ref=e8332]
+                  - cell "-" [ref=e8333]
+                  - cell "Actif" [ref=e8334]:
+                    - generic [ref=e8335]: Actif
+                  - cell [ref=e8336]:
+                    - button [ref=e8337] [cursor=pointer]:
+                      - img

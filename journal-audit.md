@@ -1,0 +1,1042 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Paramétrage" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Journal d'Audit" [disabled] [ref=e282]
+            - generic [ref=e284]:
+              - button "Retour" [ref=e285] [cursor=pointer]:
+                - img
+              - img [ref=e288]
+              - generic [ref=e291]:
+                - heading "Journal d'Audit" [level=1] [ref=e292]
+                - paragraph [ref=e293]: Traçabilité des actions dans le système - Exercice 2026
+          - generic [ref=e294]:
+            - tablist [ref=e295]:
+              - tab "Logs" [selected] [ref=e296] [cursor=pointer]:
+                - img [ref=e297]
+                - text: Logs
+              - tab "Statistiques" [ref=e301] [cursor=pointer]:
+                - img [ref=e302]
+                - text: Statistiques
+            - tabpanel "Logs" [ref=e304]:
+              - generic [ref=e305]:
+                - generic [ref=e306]:
+                  - generic [ref=e307]:
+                    - heading "Journal d'audit" [level=3] [ref=e308]
+                    - paragraph [ref=e309]: Historique des actions dans le système
+                  - button "Exporter" [ref=e310] [cursor=pointer]:
+                    - img
+                    - text: Exporter
+                - generic [ref=e311]:
+                  - generic [ref=e312]:
+                    - generic [ref=e313]:
+                      - text: Type d'entité
+                      - combobox [ref=e314] [cursor=pointer]:
+                        - generic: Toutes
+                        - img [ref=e315]
+                    - generic [ref=e317]:
+                      - text: Action
+                      - combobox [ref=e318] [cursor=pointer]:
+                        - generic: Toutes
+                        - img [ref=e319]
+                    - generic [ref=e321]:
+                      - text: Utilisateur
+                      - combobox [ref=e322] [cursor=pointer]:
+                        - generic: Tous
+                        - img [ref=e323]
+                    - generic [ref=e325]:
+                      - text: Date début
+                      - textbox [ref=e326]
+                    - generic [ref=e327]:
+                      - text: Date fin
+                      - textbox [ref=e328]
+                  - table [ref=e331]:
+                    - rowgroup [ref=e332]:
+                      - row "Date/Heure Utilisateur Action Entité ID Entité" [ref=e333]:
+                        - columnheader "Date/Heure" [ref=e334]
+                        - columnheader "Utilisateur" [ref=e335]
+                        - columnheader "Action" [ref=e336]
+                        - columnheader "Entité" [ref=e337]
+                        - columnheader "ID Entité" [ref=e338]
+                        - columnheader [ref=e339]
+                    - rowgroup [ref=e340]:
+                      - row "19/02/2026 13:00:05 Directeur GENERAL dg@arti.ci engagement_valide budget_engagements fbb39d40" [ref=e341]:
+                        - cell "19/02/2026 13:00:05" [ref=e342]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e343]:
+                          - generic [ref=e344]:
+                            - generic [ref=e345]: Directeur GENERAL
+                            - generic [ref=e346]: dg@arti.ci
+                        - cell "engagement_valide" [ref=e347]:
+                          - generic [ref=e348]: engagement_valide
+                        - cell "budget_engagements" [ref=e349]
+                        - cell "fbb39d40" [ref=e350]
+                        - cell [ref=e351]:
+                          - button [ref=e352] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 13:35:21 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_APPROUVE passation_marche 21758a7a" [ref=e353]:
+                        - cell "18/02/2026 13:35:21" [ref=e354]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e355]:
+                          - generic [ref=e356]:
+                            - generic [ref=e357]: Directeur GENERAL
+                            - generic [ref=e358]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_APPROUVE" [ref=e359]:
+                          - generic [ref=e360]: TRANSITION_PASSATION_APPROUVE
+                        - cell "passation_marche" [ref=e361]
+                        - cell "21758a7a" [ref=e362]
+                        - cell [ref=e363]:
+                          - button [ref=e364] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 13:34:27 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_ATTRIBUE passation_marche 21758a7a" [ref=e365]:
+                        - cell "18/02/2026 13:34:27" [ref=e366]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e367]:
+                          - generic [ref=e368]:
+                            - generic [ref=e369]: Directeur GENERAL
+                            - generic [ref=e370]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_ATTRIBUE" [ref=e371]:
+                          - generic [ref=e372]: TRANSITION_PASSATION_ATTRIBUE
+                        - cell "passation_marche" [ref=e373]
+                        - cell "21758a7a" [ref=e374]
+                        - cell [ref=e375]:
+                          - button [ref=e376] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:53:51 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_SIGNE passation_marche deaf4704" [ref=e377]:
+                        - cell "18/02/2026 12:53:51" [ref=e378]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e379]:
+                          - generic [ref=e380]:
+                            - generic [ref=e381]: Directeur GENERAL
+                            - generic [ref=e382]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_SIGNE" [ref=e383]:
+                          - generic [ref=e384]: TRANSITION_PASSATION_SIGNE
+                        - cell "passation_marche" [ref=e385]
+                        - cell "deaf4704" [ref=e386]
+                        - cell [ref=e387]:
+                          - button [ref=e388] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:53:50 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_APPROUVE passation_marche deaf4704" [ref=e389]:
+                        - cell "18/02/2026 12:53:50" [ref=e390]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e391]:
+                          - generic [ref=e392]:
+                            - generic [ref=e393]: Directeur GENERAL
+                            - generic [ref=e394]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_APPROUVE" [ref=e395]:
+                          - generic [ref=e396]: TRANSITION_PASSATION_APPROUVE
+                        - cell "passation_marche" [ref=e397]
+                        - cell "deaf4704" [ref=e398]
+                        - cell [ref=e399]:
+                          - button [ref=e400] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:53:40 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_ATTRIBUE passation_marche deaf4704" [ref=e401]:
+                        - cell "18/02/2026 12:53:40" [ref=e402]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e403]:
+                          - generic [ref=e404]:
+                            - generic [ref=e405]: Directeur GENERAL
+                            - generic [ref=e406]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_ATTRIBUE" [ref=e407]:
+                          - generic [ref=e408]: TRANSITION_PASSATION_ATTRIBUE
+                        - cell "passation_marche" [ref=e409]
+                        - cell "deaf4704" [ref=e410]
+                        - cell [ref=e411]:
+                          - button [ref=e412] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:52:33 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_EN_EVALUATION passation_marche deaf4704" [ref=e413]:
+                        - cell "18/02/2026 12:52:33" [ref=e414]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e415]:
+                          - generic [ref=e416]:
+                            - generic [ref=e417]: Directeur GENERAL
+                            - generic [ref=e418]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_EN_EVALUATION" [ref=e419]:
+                          - generic [ref=e420]: TRANSITION_PASSATION_EN_EVALUATION
+                        - cell "passation_marche" [ref=e421]
+                        - cell "deaf4704" [ref=e422]
+                        - cell [ref=e423]:
+                          - button [ref=e424] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:52:11 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_BROUILLON passation_marche deaf4704" [ref=e425]:
+                        - cell "18/02/2026 12:52:11" [ref=e426]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e427]:
+                          - generic [ref=e428]:
+                            - generic [ref=e429]: Directeur GENERAL
+                            - generic [ref=e430]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_BROUILLON" [ref=e431]:
+                          - generic [ref=e432]: TRANSITION_PASSATION_BROUILLON
+                        - cell "passation_marche" [ref=e433]
+                        - cell "deaf4704" [ref=e434]
+                        - cell [ref=e435]:
+                          - button [ref=e436] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:50:01 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_EN_EVALUATION passation_marche deaf4704" [ref=e437]:
+                        - cell "18/02/2026 12:50:01" [ref=e438]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e439]:
+                          - generic [ref=e440]:
+                            - generic [ref=e441]: Directeur GENERAL
+                            - generic [ref=e442]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_EN_EVALUATION" [ref=e443]:
+                          - generic [ref=e444]: TRANSITION_PASSATION_EN_EVALUATION
+                        - cell "passation_marche" [ref=e445]
+                        - cell "deaf4704" [ref=e446]
+                        - cell [ref=e447]:
+                          - button [ref=e448] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:49:40 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_BROUILLON passation_marche deaf4704" [ref=e449]:
+                        - cell "18/02/2026 12:49:40" [ref=e450]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e451]:
+                          - generic [ref=e452]:
+                            - generic [ref=e453]: Directeur GENERAL
+                            - generic [ref=e454]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_BROUILLON" [ref=e455]:
+                          - generic [ref=e456]: TRANSITION_PASSATION_BROUILLON
+                        - cell "passation_marche" [ref=e457]
+                        - cell "deaf4704" [ref=e458]
+                        - cell [ref=e459]:
+                          - button [ref=e460] [cursor=pointer]:
+                            - img
+                      - row "18/02/2026 12:46:16 Directeur GENERAL dg@arti.ci TRANSITION_PASSATION_EN_EVALUATION passation_marche deaf4704" [ref=e461]:
+                        - cell "18/02/2026 12:46:16" [ref=e462]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e463]:
+                          - generic [ref=e464]:
+                            - generic [ref=e465]: Directeur GENERAL
+                            - generic [ref=e466]: dg@arti.ci
+                        - cell "TRANSITION_PASSATION_EN_EVALUATION" [ref=e467]:
+                          - generic [ref=e468]: TRANSITION_PASSATION_EN_EVALUATION
+                        - cell "passation_marche" [ref=e469]
+                        - cell "deaf4704" [ref=e470]
+                        - cell [ref=e471]:
+                          - button [ref=e472] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:34:07 Directeur GENERAL dg@arti.ci Soumission expression_besoin 29fb2d66" [ref=e473]:
+                        - cell "16/02/2026 16:34:07" [ref=e474]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e475]:
+                          - generic [ref=e476]:
+                            - generic [ref=e477]: Directeur GENERAL
+                            - generic [ref=e478]: dg@arti.ci
+                        - cell "Soumission" [ref=e479]:
+                          - generic [ref=e480]: Soumission
+                        - cell "expression_besoin" [ref=e481]
+                        - cell "29fb2d66" [ref=e482]
+                        - cell [ref=e483]:
+                          - button [ref=e484] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:34:02 Directeur GENERAL dg@arti.ci Création expression_besoin 29fb2d66" [ref=e485]:
+                        - cell "16/02/2026 16:34:02" [ref=e486]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e487]:
+                          - generic [ref=e488]:
+                            - generic [ref=e489]: Directeur GENERAL
+                            - generic [ref=e490]: dg@arti.ci
+                        - cell "Création" [ref=e491]:
+                          - generic [ref=e492]: Création
+                        - cell "expression_besoin" [ref=e493]
+                        - cell "29fb2d66" [ref=e494]
+                        - cell [ref=e495]:
+                          - button [ref=e496] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:33:29 Directeur GENERAL dg@arti.ci Rejet expression_besoin 4b687cf4" [ref=e497]:
+                        - cell "16/02/2026 16:33:29" [ref=e498]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e499]:
+                          - generic [ref=e500]:
+                            - generic [ref=e501]: Directeur GENERAL
+                            - generic [ref=e502]: dg@arti.ci
+                        - cell "Rejet" [ref=e503]:
+                          - generic [ref=e504]: Rejet
+                        - cell "expression_besoin" [ref=e505]
+                        - cell "4b687cf4" [ref=e506]
+                        - cell [ref=e507]:
+                          - button [ref=e508] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:33:06 Directeur GENERAL dg@arti.ci Soumission expression_besoin 4b687cf4" [ref=e509]:
+                        - cell "16/02/2026 16:33:06" [ref=e510]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e511]:
+                          - generic [ref=e512]:
+                            - generic [ref=e513]: Directeur GENERAL
+                            - generic [ref=e514]: dg@arti.ci
+                        - cell "Soumission" [ref=e515]:
+                          - generic [ref=e516]: Soumission
+                        - cell "expression_besoin" [ref=e517]
+                        - cell "4b687cf4" [ref=e518]
+                        - cell [ref=e519]:
+                          - button [ref=e520] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:32:55 Directeur GENERAL dg@arti.ci Création expression_besoin 4b687cf4" [ref=e521]:
+                        - cell "16/02/2026 16:32:55" [ref=e522]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e523]:
+                          - generic [ref=e524]:
+                            - generic [ref=e525]: Directeur GENERAL
+                            - generic [ref=e526]: dg@arti.ci
+                        - cell "Création" [ref=e527]:
+                          - generic [ref=e528]: Création
+                        - cell "expression_besoin" [ref=e529]
+                        - cell "4b687cf4" [ref=e530]
+                        - cell [ref=e531]:
+                          - button [ref=e532] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:32:09 Directeur GENERAL dg@arti.ci Rejet expression_besoin 6a4c7080" [ref=e533]:
+                        - cell "16/02/2026 16:32:09" [ref=e534]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e535]:
+                          - generic [ref=e536]:
+                            - generic [ref=e537]: Directeur GENERAL
+                            - generic [ref=e538]: dg@arti.ci
+                        - cell "Rejet" [ref=e539]:
+                          - generic [ref=e540]: Rejet
+                        - cell "expression_besoin" [ref=e541]
+                        - cell "6a4c7080" [ref=e542]
+                        - cell [ref=e543]:
+                          - button [ref=e544] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:31:47 Directeur GENERAL dg@arti.ci Soumission expression_besoin 6a4c7080" [ref=e545]:
+                        - cell "16/02/2026 16:31:47" [ref=e546]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e547]:
+                          - generic [ref=e548]:
+                            - generic [ref=e549]: Directeur GENERAL
+                            - generic [ref=e550]: dg@arti.ci
+                        - cell "Soumission" [ref=e551]:
+                          - generic [ref=e552]: Soumission
+                        - cell "expression_besoin" [ref=e553]
+                        - cell "6a4c7080" [ref=e554]
+                        - cell [ref=e555]:
+                          - button [ref=e556] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:31:36 Directeur GENERAL dg@arti.ci Création expression_besoin 6a4c7080" [ref=e557]:
+                        - cell "16/02/2026 16:31:36" [ref=e558]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e559]:
+                          - generic [ref=e560]:
+                            - generic [ref=e561]: Directeur GENERAL
+                            - generic [ref=e562]: dg@arti.ci
+                        - cell "Création" [ref=e563]:
+                          - generic [ref=e564]: Création
+                        - cell "expression_besoin" [ref=e565]
+                        - cell "6a4c7080" [ref=e566]
+                        - cell [ref=e567]:
+                          - button [ref=e568] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:30:33 Directeur GENERAL dg@arti.ci Soumission expression_besoin 1410bf4c" [ref=e569]:
+                        - cell "16/02/2026 16:30:33" [ref=e570]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e571]:
+                          - generic [ref=e572]:
+                            - generic [ref=e573]: Directeur GENERAL
+                            - generic [ref=e574]: dg@arti.ci
+                        - cell "Soumission" [ref=e575]:
+                          - generic [ref=e576]: Soumission
+                        - cell "expression_besoin" [ref=e577]
+                        - cell "1410bf4c" [ref=e578]
+                        - cell [ref=e579]:
+                          - button [ref=e580] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:30:29 Directeur GENERAL dg@arti.ci Création expression_besoin 1410bf4c" [ref=e581]:
+                        - cell "16/02/2026 16:30:29" [ref=e582]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e583]:
+                          - generic [ref=e584]:
+                            - generic [ref=e585]: Directeur GENERAL
+                            - generic [ref=e586]: dg@arti.ci
+                        - cell "Création" [ref=e587]:
+                          - generic [ref=e588]: Création
+                        - cell "expression_besoin" [ref=e589]
+                        - cell "1410bf4c" [ref=e590]
+                        - cell [ref=e591]:
+                          - button [ref=e592] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:29:58 Directeur GENERAL dg@arti.ci Rejet expression_besoin b3a4fa2f" [ref=e593]:
+                        - cell "16/02/2026 16:29:58" [ref=e594]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e595]:
+                          - generic [ref=e596]:
+                            - generic [ref=e597]: Directeur GENERAL
+                            - generic [ref=e598]: dg@arti.ci
+                        - cell "Rejet" [ref=e599]:
+                          - generic [ref=e600]: Rejet
+                        - cell "expression_besoin" [ref=e601]
+                        - cell "b3a4fa2f" [ref=e602]
+                        - cell [ref=e603]:
+                          - button [ref=e604] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:29:36 Directeur GENERAL dg@arti.ci Soumission expression_besoin b3a4fa2f" [ref=e605]:
+                        - cell "16/02/2026 16:29:36" [ref=e606]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e607]:
+                          - generic [ref=e608]:
+                            - generic [ref=e609]: Directeur GENERAL
+                            - generic [ref=e610]: dg@arti.ci
+                        - cell "Soumission" [ref=e611]:
+                          - generic [ref=e612]: Soumission
+                        - cell "expression_besoin" [ref=e613]
+                        - cell "b3a4fa2f" [ref=e614]
+                        - cell [ref=e615]:
+                          - button [ref=e616] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:29:24 Directeur GENERAL dg@arti.ci Création expression_besoin b3a4fa2f" [ref=e617]:
+                        - cell "16/02/2026 16:29:24" [ref=e618]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e619]:
+                          - generic [ref=e620]:
+                            - generic [ref=e621]: Directeur GENERAL
+                            - generic [ref=e622]: dg@arti.ci
+                        - cell "Création" [ref=e623]:
+                          - generic [ref=e624]: Création
+                        - cell "expression_besoin" [ref=e625]
+                        - cell "b3a4fa2f" [ref=e626]
+                        - cell [ref=e627]:
+                          - button [ref=e628] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:28:09 Directeur GENERAL dg@arti.ci Soumission expression_besoin 8d2b8867" [ref=e629]:
+                        - cell "16/02/2026 16:28:09" [ref=e630]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e631]:
+                          - generic [ref=e632]:
+                            - generic [ref=e633]: Directeur GENERAL
+                            - generic [ref=e634]: dg@arti.ci
+                        - cell "Soumission" [ref=e635]:
+                          - generic [ref=e636]: Soumission
+                        - cell "expression_besoin" [ref=e637]
+                        - cell "8d2b8867" [ref=e638]
+                        - cell [ref=e639]:
+                          - button [ref=e640] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:28:05 Directeur GENERAL dg@arti.ci Création expression_besoin 8d2b8867" [ref=e641]:
+                        - cell "16/02/2026 16:28:05" [ref=e642]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e643]:
+                          - generic [ref=e644]:
+                            - generic [ref=e645]: Directeur GENERAL
+                            - generic [ref=e646]: dg@arti.ci
+                        - cell "Création" [ref=e647]:
+                          - generic [ref=e648]: Création
+                        - cell "expression_besoin" [ref=e649]
+                        - cell "8d2b8867" [ref=e650]
+                        - cell [ref=e651]:
+                          - button [ref=e652] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:27:37 Directeur GENERAL dg@arti.ci Rejet expression_besoin 5329892d" [ref=e653]:
+                        - cell "16/02/2026 16:27:37" [ref=e654]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e655]:
+                          - generic [ref=e656]:
+                            - generic [ref=e657]: Directeur GENERAL
+                            - generic [ref=e658]: dg@arti.ci
+                        - cell "Rejet" [ref=e659]:
+                          - generic [ref=e660]: Rejet
+                        - cell "expression_besoin" [ref=e661]
+                        - cell "5329892d" [ref=e662]
+                        - cell [ref=e663]:
+                          - button [ref=e664] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:27:15 Directeur GENERAL dg@arti.ci Soumission expression_besoin 5329892d" [ref=e665]:
+                        - cell "16/02/2026 16:27:15" [ref=e666]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e667]:
+                          - generic [ref=e668]:
+                            - generic [ref=e669]: Directeur GENERAL
+                            - generic [ref=e670]: dg@arti.ci
+                        - cell "Soumission" [ref=e671]:
+                          - generic [ref=e672]: Soumission
+                        - cell "expression_besoin" [ref=e673]
+                        - cell "5329892d" [ref=e674]
+                        - cell [ref=e675]:
+                          - button [ref=e676] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:27:03 Directeur GENERAL dg@arti.ci Création expression_besoin 5329892d" [ref=e677]:
+                        - cell "16/02/2026 16:27:03" [ref=e678]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e679]:
+                          - generic [ref=e680]:
+                            - generic [ref=e681]: Directeur GENERAL
+                            - generic [ref=e682]: dg@arti.ci
+                        - cell "Création" [ref=e683]:
+                          - generic [ref=e684]: Création
+                        - cell "expression_besoin" [ref=e685]
+                        - cell "5329892d" [ref=e686]
+                        - cell [ref=e687]:
+                          - button [ref=e688] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:25:50 Directeur GENERAL dg@arti.ci Création expression_besoin 3042bd36" [ref=e689]:
+                        - cell "16/02/2026 16:25:50" [ref=e690]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e691]:
+                          - generic [ref=e692]:
+                            - generic [ref=e693]: Directeur GENERAL
+                            - generic [ref=e694]: dg@arti.ci
+                        - cell "Création" [ref=e695]:
+                          - generic [ref=e696]: Création
+                        - cell "expression_besoin" [ref=e697]
+                        - cell "3042bd36" [ref=e698]
+                        - cell [ref=e699]:
+                          - button [ref=e700] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:25:22 Directeur GENERAL dg@arti.ci Rejet expression_besoin 983aaf76" [ref=e701]:
+                        - cell "16/02/2026 16:25:22" [ref=e702]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e703]:
+                          - generic [ref=e704]:
+                            - generic [ref=e705]: Directeur GENERAL
+                            - generic [ref=e706]: dg@arti.ci
+                        - cell "Rejet" [ref=e707]:
+                          - generic [ref=e708]: Rejet
+                        - cell "expression_besoin" [ref=e709]
+                        - cell "983aaf76" [ref=e710]
+                        - cell [ref=e711]:
+                          - button [ref=e712] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:24:59 Directeur GENERAL dg@arti.ci Soumission expression_besoin 983aaf76" [ref=e713]:
+                        - cell "16/02/2026 16:24:59" [ref=e714]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e715]:
+                          - generic [ref=e716]:
+                            - generic [ref=e717]: Directeur GENERAL
+                            - generic [ref=e718]: dg@arti.ci
+                        - cell "Soumission" [ref=e719]:
+                          - generic [ref=e720]: Soumission
+                        - cell "expression_besoin" [ref=e721]
+                        - cell "983aaf76" [ref=e722]
+                        - cell [ref=e723]:
+                          - button [ref=e724] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:24:47 Directeur GENERAL dg@arti.ci Création expression_besoin 983aaf76" [ref=e725]:
+                        - cell "16/02/2026 16:24:47" [ref=e726]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e727]:
+                          - generic [ref=e728]:
+                            - generic [ref=e729]: Directeur GENERAL
+                            - generic [ref=e730]: dg@arti.ci
+                        - cell "Création" [ref=e731]:
+                          - generic [ref=e732]: Création
+                        - cell "expression_besoin" [ref=e733]
+                        - cell "983aaf76" [ref=e734]
+                        - cell [ref=e735]:
+                          - button [ref=e736] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:24:21 Directeur GENERAL dg@arti.ci Soumission expression_besoin 495c42fe" [ref=e737]:
+                        - cell "16/02/2026 16:24:21" [ref=e738]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e739]:
+                          - generic [ref=e740]:
+                            - generic [ref=e741]: Directeur GENERAL
+                            - generic [ref=e742]: dg@arti.ci
+                        - cell "Soumission" [ref=e743]:
+                          - generic [ref=e744]: Soumission
+                        - cell "expression_besoin" [ref=e745]
+                        - cell "495c42fe" [ref=e746]
+                        - cell [ref=e747]:
+                          - button [ref=e748] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:24:10 Directeur GENERAL dg@arti.ci Création expression_besoin 495c42fe" [ref=e749]:
+                        - cell "16/02/2026 16:24:10" [ref=e750]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e751]:
+                          - generic [ref=e752]:
+                            - generic [ref=e753]: Directeur GENERAL
+                            - generic [ref=e754]: dg@arti.ci
+                        - cell "Création" [ref=e755]:
+                          - generic [ref=e756]: Création
+                        - cell "expression_besoin" [ref=e757]
+                        - cell "495c42fe" [ref=e758]
+                        - cell [ref=e759]:
+                          - button [ref=e760] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:23:40 Directeur GENERAL dg@arti.ci Soumission expression_besoin 790c68bf" [ref=e761]:
+                        - cell "16/02/2026 16:23:40" [ref=e762]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e763]:
+                          - generic [ref=e764]:
+                            - generic [ref=e765]: Directeur GENERAL
+                            - generic [ref=e766]: dg@arti.ci
+                        - cell "Soumission" [ref=e767]:
+                          - generic [ref=e768]: Soumission
+                        - cell "expression_besoin" [ref=e769]
+                        - cell "790c68bf" [ref=e770]
+                        - cell [ref=e771]:
+                          - button [ref=e772] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:23:35 Directeur GENERAL dg@arti.ci Création expression_besoin 790c68bf" [ref=e773]:
+                        - cell "16/02/2026 16:23:35" [ref=e774]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e775]:
+                          - generic [ref=e776]:
+                            - generic [ref=e777]: Directeur GENERAL
+                            - generic [ref=e778]: dg@arti.ci
+                        - cell "Création" [ref=e779]:
+                          - generic [ref=e780]: Création
+                        - cell "expression_besoin" [ref=e781]
+                        - cell "790c68bf" [ref=e782]
+                        - cell [ref=e783]:
+                          - button [ref=e784] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:23:08 Directeur GENERAL dg@arti.ci Soumission expression_besoin 29f32aeb" [ref=e785]:
+                        - cell "16/02/2026 16:23:08" [ref=e786]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e787]:
+                          - generic [ref=e788]:
+                            - generic [ref=e789]: Directeur GENERAL
+                            - generic [ref=e790]: dg@arti.ci
+                        - cell "Soumission" [ref=e791]:
+                          - generic [ref=e792]: Soumission
+                        - cell "expression_besoin" [ref=e793]
+                        - cell "29f32aeb" [ref=e794]
+                        - cell [ref=e795]:
+                          - button [ref=e796] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:23:03 Directeur GENERAL dg@arti.ci Création expression_besoin 29f32aeb" [ref=e797]:
+                        - cell "16/02/2026 16:23:03" [ref=e798]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e799]:
+                          - generic [ref=e800]:
+                            - generic [ref=e801]: Directeur GENERAL
+                            - generic [ref=e802]: dg@arti.ci
+                        - cell "Création" [ref=e803]:
+                          - generic [ref=e804]: Création
+                        - cell "expression_besoin" [ref=e805]
+                        - cell "29f32aeb" [ref=e806]
+                        - cell [ref=e807]:
+                          - button [ref=e808] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:22:50 Directeur GENERAL dg@arti.ci Création expression_besoin be278c18" [ref=e809]:
+                        - cell "16/02/2026 16:22:50" [ref=e810]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e811]:
+                          - generic [ref=e812]:
+                            - generic [ref=e813]: Directeur GENERAL
+                            - generic [ref=e814]: dg@arti.ci
+                        - cell "Création" [ref=e815]:
+                          - generic [ref=e816]: Création
+                        - cell "expression_besoin" [ref=e817]
+                        - cell "be278c18" [ref=e818]
+                        - cell [ref=e819]:
+                          - button [ref=e820] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:22:49 Directeur GENERAL dg@arti.ci Soumission expression_besoin f8e0ddfb" [ref=e821]:
+                        - cell "16/02/2026 16:22:49" [ref=e822]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e823]:
+                          - generic [ref=e824]:
+                            - generic [ref=e825]: Directeur GENERAL
+                            - generic [ref=e826]: dg@arti.ci
+                        - cell "Soumission" [ref=e827]:
+                          - generic [ref=e828]: Soumission
+                        - cell "expression_besoin" [ref=e829]
+                        - cell "f8e0ddfb" [ref=e830]
+                        - cell [ref=e831]:
+                          - button [ref=e832] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:22:44 Directeur GENERAL dg@arti.ci Création expression_besoin f8e0ddfb" [ref=e833]:
+                        - cell "16/02/2026 16:22:44" [ref=e834]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e835]:
+                          - generic [ref=e836]:
+                            - generic [ref=e837]: Directeur GENERAL
+                            - generic [ref=e838]: dg@arti.ci
+                        - cell "Création" [ref=e839]:
+                          - generic [ref=e840]: Création
+                        - cell "expression_besoin" [ref=e841]
+                        - cell "f8e0ddfb" [ref=e842]
+                        - cell [ref=e843]:
+                          - button [ref=e844] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:22:31 Directeur GENERAL dg@arti.ci Création expression_besoin b32814c7" [ref=e845]:
+                        - cell "16/02/2026 16:22:31" [ref=e846]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e847]:
+                          - generic [ref=e848]:
+                            - generic [ref=e849]: Directeur GENERAL
+                            - generic [ref=e850]: dg@arti.ci
+                        - cell "Création" [ref=e851]:
+                          - generic [ref=e852]: Création
+                        - cell "expression_besoin" [ref=e853]
+                        - cell "b32814c7" [ref=e854]
+                        - cell [ref=e855]:
+                          - button [ref=e856] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:22:31 Directeur GENERAL dg@arti.ci Création expression_besoin e3cd2339" [ref=e857]:
+                        - cell "16/02/2026 16:22:31" [ref=e858]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e859]:
+                          - generic [ref=e860]:
+                            - generic [ref=e861]: Directeur GENERAL
+                            - generic [ref=e862]: dg@arti.ci
+                        - cell "Création" [ref=e863]:
+                          - generic [ref=e864]: Création
+                        - cell "expression_besoin" [ref=e865]
+                        - cell "e3cd2339" [ref=e866]
+                        - cell [ref=e867]:
+                          - button [ref=e868] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:17:00 Directeur GENERAL dg@arti.ci Création expression_besoin b8f6bdb7" [ref=e869]:
+                        - cell "16/02/2026 16:17:00" [ref=e870]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e871]:
+                          - generic [ref=e872]:
+                            - generic [ref=e873]: Directeur GENERAL
+                            - generic [ref=e874]: dg@arti.ci
+                        - cell "Création" [ref=e875]:
+                          - generic [ref=e876]: Création
+                        - cell "expression_besoin" [ref=e877]
+                        - cell "b8f6bdb7" [ref=e878]
+                        - cell [ref=e879]:
+                          - button [ref=e880] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:14:39 Directeur GENERAL dg@arti.ci Création expression_besoin ed0bb86f" [ref=e881]:
+                        - cell "16/02/2026 16:14:39" [ref=e882]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e883]:
+                          - generic [ref=e884]:
+                            - generic [ref=e885]: Directeur GENERAL
+                            - generic [ref=e886]: dg@arti.ci
+                        - cell "Création" [ref=e887]:
+                          - generic [ref=e888]: Création
+                        - cell "expression_besoin" [ref=e889]
+                        - cell "ed0bb86f" [ref=e890]
+                        - cell [ref=e891]:
+                          - button [ref=e892] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:10:23 Directeur GENERAL dg@arti.ci Création expression_besoin 5bc458c5" [ref=e893]:
+                        - cell "16/02/2026 16:10:23" [ref=e894]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e895]:
+                          - generic [ref=e896]:
+                            - generic [ref=e897]: Directeur GENERAL
+                            - generic [ref=e898]: dg@arti.ci
+                        - cell "Création" [ref=e899]:
+                          - generic [ref=e900]: Création
+                        - cell "expression_besoin" [ref=e901]
+                        - cell "5bc458c5" [ref=e902]
+                        - cell [ref=e903]:
+                          - button [ref=e904] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:08:44 Directeur GENERAL dg@arti.ci Création expression_besoin 84ac7c6e" [ref=e905]:
+                        - cell "16/02/2026 16:08:44" [ref=e906]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e907]:
+                          - generic [ref=e908]:
+                            - generic [ref=e909]: Directeur GENERAL
+                            - generic [ref=e910]: dg@arti.ci
+                        - cell "Création" [ref=e911]:
+                          - generic [ref=e912]: Création
+                        - cell "expression_besoin" [ref=e913]
+                        - cell "84ac7c6e" [ref=e914]
+                        - cell [ref=e915]:
+                          - button [ref=e916] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:02:25 Directeur GENERAL dg@arti.ci Création expression_besoin 674e0965" [ref=e917]:
+                        - cell "16/02/2026 16:02:25" [ref=e918]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e919]:
+                          - generic [ref=e920]:
+                            - generic [ref=e921]: Directeur GENERAL
+                            - generic [ref=e922]: dg@arti.ci
+                        - cell "Création" [ref=e923]:
+                          - generic [ref=e924]: Création
+                        - cell "expression_besoin" [ref=e925]
+                        - cell "674e0965" [ref=e926]
+                        - cell [ref=e927]:
+                          - button [ref=e928] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 16:01:15 Directeur GENERAL dg@arti.ci Création expression_besoin 25f310c8" [ref=e929]:
+                        - cell "16/02/2026 16:01:15" [ref=e930]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e931]:
+                          - generic [ref=e932]:
+                            - generic [ref=e933]: Directeur GENERAL
+                            - generic [ref=e934]: dg@arti.ci
+                        - cell "Création" [ref=e935]:
+                          - generic [ref=e936]: Création
+                        - cell "expression_besoin" [ref=e937]
+                        - cell "25f310c8" [ref=e938]
+                        - cell [ref=e939]:
+                          - button [ref=e940] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 15:56:36 Directeur GENERAL dg@arti.ci Création expression_besoin 4bc4bbfb" [ref=e941]:
+                        - cell "16/02/2026 15:56:36" [ref=e942]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e943]:
+                          - generic [ref=e944]:
+                            - generic [ref=e945]: Directeur GENERAL
+                            - generic [ref=e946]: dg@arti.ci
+                        - cell "Création" [ref=e947]:
+                          - generic [ref=e948]: Création
+                        - cell "expression_besoin" [ref=e949]
+                        - cell "4bc4bbfb" [ref=e950]
+                        - cell [ref=e951]:
+                          - button [ref=e952] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 14:49:22 Directeur GENERAL dg@arti.ci Création expression_besoin 2a6aa6e5" [ref=e953]:
+                        - cell "16/02/2026 14:49:22" [ref=e954]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e955]:
+                          - generic [ref=e956]:
+                            - generic [ref=e957]: Directeur GENERAL
+                            - generic [ref=e958]: dg@arti.ci
+                        - cell "Création" [ref=e959]:
+                          - generic [ref=e960]: Création
+                        - cell "expression_besoin" [ref=e961]
+                        - cell "2a6aa6e5" [ref=e962]
+                        - cell [ref=e963]:
+                          - button [ref=e964] [cursor=pointer]:
+                            - img
+                      - row "16/02/2026 14:42:33 Directeur GENERAL dg@arti.ci Création expression_besoin 332df00d" [ref=e965]:
+                        - cell "16/02/2026 14:42:33" [ref=e966]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e967]:
+                          - generic [ref=e968]:
+                            - generic [ref=e969]: Directeur GENERAL
+                            - generic [ref=e970]: dg@arti.ci
+                        - cell "Création" [ref=e971]:
+                          - generic [ref=e972]: Création
+                        - cell "expression_besoin" [ref=e973]
+                        - cell "332df00d" [ref=e974]
+                        - cell [ref=e975]:
+                          - button [ref=e976] [cursor=pointer]:
+                            - img
+                      - row "13/02/2026 12:17:56 Directeur GENERAL dg@arti.ci AEF_REJECT Notes AEF a5b4b8e5" [ref=e977]:
+                        - cell "13/02/2026 12:17:56" [ref=e978]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e979]:
+                          - generic [ref=e980]:
+                            - generic [ref=e981]: Directeur GENERAL
+                            - generic [ref=e982]: dg@arti.ci
+                        - cell "AEF_REJECT" [ref=e983]:
+                          - generic [ref=e984]: AEF_REJECT
+                        - cell "Notes AEF" [ref=e985]
+                        - cell "a5b4b8e5" [ref=e986]
+                        - cell [ref=e987]:
+                          - button [ref=e988] [cursor=pointer]:
+                            - img
+                      - row "13/02/2026 12:17:30 Directeur GENERAL dg@arti.ci AEF_SUBMIT Notes AEF a5b4b8e5" [ref=e989]:
+                        - cell "13/02/2026 12:17:30" [ref=e990]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e991]:
+                          - generic [ref=e992]:
+                            - generic [ref=e993]: Directeur GENERAL
+                            - generic [ref=e994]: dg@arti.ci
+                        - cell "AEF_SUBMIT" [ref=e995]:
+                          - generic [ref=e996]: AEF_SUBMIT
+                        - cell "Notes AEF" [ref=e997]
+                        - cell "a5b4b8e5" [ref=e998]
+                        - cell [ref=e999]:
+                          - button [ref=e1000] [cursor=pointer]:
+                            - img
+                      - row "13/02/2026 12:17:04 Directeur GENERAL dg@arti.ci AEF_DEFER Notes AEF a5b4b8e5" [ref=e1001]:
+                        - cell "13/02/2026 12:17:04" [ref=e1002]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e1003]:
+                          - generic [ref=e1004]:
+                            - generic [ref=e1005]: Directeur GENERAL
+                            - generic [ref=e1006]: dg@arti.ci
+                        - cell "AEF_DEFER" [ref=e1007]:
+                          - generic [ref=e1008]: AEF_DEFER
+                        - cell "Notes AEF" [ref=e1009]
+                        - cell "a5b4b8e5" [ref=e1010]
+                        - cell [ref=e1011]:
+                          - button [ref=e1012] [cursor=pointer]:
+                            - img
+                      - row "13/02/2026 12:16:11 Directeur GENERAL dg@arti.ci AEF_VALIDATE Notes AEF 213b5d22" [ref=e1013]:
+                        - cell "13/02/2026 12:16:11" [ref=e1014]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e1015]:
+                          - generic [ref=e1016]:
+                            - generic [ref=e1017]: Directeur GENERAL
+                            - generic [ref=e1018]: dg@arti.ci
+                        - cell "AEF_VALIDATE" [ref=e1019]:
+                          - generic [ref=e1020]: AEF_VALIDATE
+                        - cell "Notes AEF" [ref=e1021]
+                        - cell "213b5d22" [ref=e1022]
+                        - cell [ref=e1023]:
+                          - button [ref=e1024] [cursor=pointer]:
+                            - img
+                      - row "13/02/2026 12:10:01 Directeur GENERAL dg@arti.ci test_cast test 213b5d22" [ref=e1025]:
+                        - cell "13/02/2026 12:10:01" [ref=e1026]
+                        - cell "Directeur GENERAL dg@arti.ci" [ref=e1027]:
+                          - generic [ref=e1028]:
+                            - generic [ref=e1029]: Directeur GENERAL
+                            - generic [ref=e1030]: dg@arti.ci
+                        - cell "test_cast" [ref=e1031]:
+                          - generic [ref=e1032]: test_cast
+                        - cell "test" [ref=e1033]
+                        - cell "213b5d22" [ref=e1034]
+                        - cell [ref=e1035]:
+                          - button [ref=e1036] [cursor=pointer]:
+                            - img
+                  - generic [ref=e1037]: 58 entrées affichées (max 500)

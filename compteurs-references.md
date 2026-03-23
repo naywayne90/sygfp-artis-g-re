@@ -1,0 +1,460 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - img [ref=e271]
+              - generic [ref=e274]:
+                - heading "Compteurs & Références" [level=1] [ref=e275]
+                - paragraph [ref=e276]: Exercice 2026
+            - paragraph [ref=e277]: Gestion centralisée des compteurs de numérotation pour tous les types de documents
+          - generic [ref=e278]:
+            - heading "Format de numérotation" [level=3] [ref=e280]:
+              - img [ref=e281]
+              - text: Format de numérotation
+            - generic [ref=e285]:
+              - generic [ref=e286]:
+                - generic [ref=e287]: "{ANNEE}"
+                - generic [ref=e288]: → Année de l'exercice
+              - generic [ref=e289]:
+                - generic [ref=e290]: "{SEQ:5}"
+                - generic [ref=e291]: → Séquence sur 5 chiffres
+              - generic [ref=e292]:
+                - generic [ref=e293]: "{DIR}"
+                - generic [ref=e294]: → Code direction (optionnel)
+          - generic [ref=e295]:
+            - generic [ref=e296]:
+              - heading "État des compteurs" [level=3] [ref=e297]
+              - paragraph [ref=e298]: Dernière valeur générée pour chaque type de document
+            - table [ref=e301]:
+              - rowgroup [ref=e302]:
+                - row "Type Format Dernier N° Prochain code Mise à jour Actions" [ref=e303]:
+                  - columnheader "Type" [ref=e304]
+                  - columnheader "Format" [ref=e305]
+                  - columnheader "Dernier N°" [ref=e306]
+                  - columnheader "Prochain code" [ref=e307]
+                  - columnheader "Mise à jour" [ref=e308]
+                  - columnheader "Actions" [ref=e309]
+              - rowgroup [ref=e310]:
+                - 'row "Notes SEF SEF/{ANNEE}/{SEQ:5} 0 SEF/2026/00001 -" [ref=e311]':
+                  - cell "Notes SEF" [ref=e312]:
+                    - generic [ref=e313]:
+                      - img [ref=e314]
+                      - generic [ref=e317]: Notes SEF
+                  - 'cell "SEF/{ANNEE}/{SEQ:5}" [ref=e318]':
+                    - code [ref=e319]: "SEF/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e320]:
+                    - generic [ref=e321]: "0"
+                  - cell "SEF/2026/00001" [ref=e322]:
+                    - generic [ref=e323]:
+                      - img [ref=e324]
+                      - code [ref=e326]: SEF/2026/00001
+                  - cell "-" [ref=e327]
+                  - cell [ref=e328]:
+                    - button [ref=e330] [cursor=pointer]:
+                      - img
+                - 'row "Notes AEF AEF/{ANNEE}/{SEQ:5} 0 AEF/2026/00001 -" [ref=e331]':
+                  - cell "Notes AEF" [ref=e332]:
+                    - generic [ref=e333]:
+                      - img [ref=e334]
+                      - generic [ref=e337]: Notes AEF
+                  - 'cell "AEF/{ANNEE}/{SEQ:5}" [ref=e338]':
+                    - code [ref=e339]: "AEF/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e340]:
+                    - generic [ref=e341]: "0"
+                  - cell "AEF/2026/00001" [ref=e342]:
+                    - generic [ref=e343]:
+                      - img [ref=e344]
+                      - code [ref=e346]: AEF/2026/00001
+                  - cell "-" [ref=e347]
+                  - cell [ref=e348]:
+                    - button [ref=e350] [cursor=pointer]:
+                      - img
+                - 'row "Expression Besoin EB/{ANNEE}/{SEQ:5} 0 EB/2026/00001 -" [ref=e351]':
+                  - cell "Expression Besoin" [ref=e352]:
+                    - generic [ref=e353]:
+                      - img [ref=e354]
+                      - generic [ref=e357]: Expression Besoin
+                  - 'cell "EB/{ANNEE}/{SEQ:5}" [ref=e358]':
+                    - code [ref=e359]: "EB/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e360]:
+                    - generic [ref=e361]: "0"
+                  - cell "EB/2026/00001" [ref=e362]:
+                    - generic [ref=e363]:
+                      - img [ref=e364]
+                      - code [ref=e366]: EB/2026/00001
+                  - cell "-" [ref=e367]
+                  - cell [ref=e368]:
+                    - button [ref=e370] [cursor=pointer]:
+                      - img
+                - 'row "Engagements ENG/{ANNEE}/{SEQ:5} 0 ENG/2026/00001 -" [ref=e371]':
+                  - cell "Engagements" [ref=e372]:
+                    - generic [ref=e373]:
+                      - img [ref=e374]
+                      - generic [ref=e376]: Engagements
+                  - 'cell "ENG/{ANNEE}/{SEQ:5}" [ref=e377]':
+                    - code [ref=e378]: "ENG/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e379]:
+                    - generic [ref=e380]: "0"
+                  - cell "ENG/2026/00001" [ref=e381]:
+                    - generic [ref=e382]:
+                      - img [ref=e383]
+                      - code [ref=e385]: ENG/2026/00001
+                  - cell "-" [ref=e386]
+                  - cell [ref=e387]:
+                    - button [ref=e389] [cursor=pointer]:
+                      - img
+                - 'row "Liquidations LIQ/{ANNEE}/{SEQ:5} 0 LIQ/2026/00001 -" [ref=e390]':
+                  - cell "Liquidations" [ref=e391]:
+                    - generic [ref=e392]:
+                      - img [ref=e393]
+                      - generic [ref=e396]: Liquidations
+                  - 'cell "LIQ/{ANNEE}/{SEQ:5}" [ref=e397]':
+                    - code [ref=e398]: "LIQ/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e399]:
+                    - generic [ref=e400]: "0"
+                  - cell "LIQ/2026/00001" [ref=e401]:
+                    - generic [ref=e402]:
+                      - img [ref=e403]
+                      - code [ref=e405]: LIQ/2026/00001
+                  - cell "-" [ref=e406]
+                  - cell [ref=e407]:
+                    - button [ref=e409] [cursor=pointer]:
+                      - img
+                - 'row "Ordonnancements ORD/{ANNEE}/{SEQ:5} 0 ORD/2026/00001 -" [ref=e410]':
+                  - cell "Ordonnancements" [ref=e411]:
+                    - generic [ref=e412]:
+                      - img [ref=e413]
+                      - generic [ref=e417]: Ordonnancements
+                  - 'cell "ORD/{ANNEE}/{SEQ:5}" [ref=e418]':
+                    - code [ref=e419]: "ORD/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e420]:
+                    - generic [ref=e421]: "0"
+                  - cell "ORD/2026/00001" [ref=e422]:
+                    - generic [ref=e423]:
+                      - img [ref=e424]
+                      - code [ref=e426]: ORD/2026/00001
+                  - cell "-" [ref=e427]
+                  - cell [ref=e428]:
+                    - button [ref=e430] [cursor=pointer]:
+                      - img
+                - 'row "Règlements PAY/{ANNEE}/{SEQ:5} 0 PAY/2026/00001 -" [ref=e431]':
+                  - cell "Règlements" [ref=e432]:
+                    - generic [ref=e433]:
+                      - img [ref=e434]
+                      - generic [ref=e437]: Règlements
+                  - 'cell "PAY/{ANNEE}/{SEQ:5}" [ref=e438]':
+                    - code [ref=e439]: "PAY/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e440]:
+                    - generic [ref=e441]: "0"
+                  - cell "PAY/2026/00001" [ref=e442]:
+                    - generic [ref=e443]:
+                      - img [ref=e444]
+                      - code [ref=e446]: PAY/2026/00001
+                  - cell "-" [ref=e447]
+                  - cell [ref=e448]:
+                    - button [ref=e450] [cursor=pointer]:
+                      - img
+                - 'row "Marchés MARCH/{ANNEE}/{SEQ:4} 0 MARCH/2026/0001 -" [ref=e451]':
+                  - cell "Marchés" [ref=e452]:
+                    - generic [ref=e453]:
+                      - img [ref=e454]
+                      - generic [ref=e458]: Marchés
+                  - 'cell "MARCH/{ANNEE}/{SEQ:4}" [ref=e459]':
+                    - code [ref=e460]: "MARCH/{ANNEE}/{SEQ:4}"
+                  - cell "0" [ref=e461]:
+                    - generic [ref=e462]: "0"
+                  - cell "MARCH/2026/0001" [ref=e463]:
+                    - generic [ref=e464]:
+                      - img [ref=e465]
+                      - code [ref=e467]: MARCH/2026/0001
+                  - cell "-" [ref=e468]
+                  - cell [ref=e469]:
+                    - button [ref=e471] [cursor=pointer]:
+                      - img
+                - 'row "Contrats CTR/{ANNEE}/{SEQ:4} 0 CTR/2026/0001 -" [ref=e472]':
+                  - cell "Contrats" [ref=e473]:
+                    - generic [ref=e474]:
+                      - img [ref=e475]
+                      - generic [ref=e479]: Contrats
+                  - 'cell "CTR/{ANNEE}/{SEQ:4}" [ref=e480]':
+                    - code [ref=e481]: "CTR/{ANNEE}/{SEQ:4}"
+                  - cell "0" [ref=e482]:
+                    - generic [ref=e483]: "0"
+                  - cell "CTR/2026/0001" [ref=e484]:
+                    - generic [ref=e485]:
+                      - img [ref=e486]
+                      - code [ref=e488]: CTR/2026/0001
+                  - cell "-" [ref=e489]
+                  - cell [ref=e490]:
+                    - button [ref=e492] [cursor=pointer]:
+                      - img
+                - 'row "Dossiers DOS/{ANNEE}/{SEQ:5} 0 DOS/2026/00001 -" [ref=e493]':
+                  - cell "Dossiers" [ref=e494]:
+                    - generic [ref=e495]:
+                      - img [ref=e496]
+                      - generic [ref=e499]: Dossiers
+                  - 'cell "DOS/{ANNEE}/{SEQ:5}" [ref=e500]':
+                    - code [ref=e501]: "DOS/{ANNEE}/{SEQ:5}"
+                  - cell "0" [ref=e502]:
+                    - generic [ref=e503]: "0"
+                  - cell "DOS/2026/00001" [ref=e504]:
+                    - generic [ref=e505]:
+                      - img [ref=e506]
+                      - code [ref=e508]: DOS/2026/00001
+                  - cell "-" [ref=e509]
+                  - cell [ref=e510]:
+                    - button [ref=e512] [cursor=pointer]:
+                      - img
+                - 'row "Demandes Achat DA/{ANNEE}/{SEQ:4} 0 DA/2026/0001 -" [ref=e513]':
+                  - cell "Demandes Achat" [ref=e514]:
+                    - generic [ref=e515]:
+                      - img [ref=e516]
+                      - generic [ref=e520]: Demandes Achat
+                  - 'cell "DA/{ANNEE}/{SEQ:4}" [ref=e521]':
+                    - code [ref=e522]: "DA/{ANNEE}/{SEQ:4}"
+                  - cell "0" [ref=e523]:
+                    - generic [ref=e524]: "0"
+                  - cell "DA/2026/0001" [ref=e525]:
+                    - generic [ref=e526]:
+                      - img [ref=e527]
+                      - code [ref=e529]: DA/2026/0001
+                  - cell "-" [ref=e530]
+                  - cell [ref=e531]:
+                    - button [ref=e533] [cursor=pointer]:
+                      - img
+                - 'row "Virements VIR/{ANNEE}/{SEQ:4} 0 VIR/2026/0001 -" [ref=e534]':
+                  - cell "Virements" [ref=e535]:
+                    - generic [ref=e536]:
+                      - img [ref=e537]
+                      - generic [ref=e542]: Virements
+                  - 'cell "VIR/{ANNEE}/{SEQ:4}" [ref=e543]':
+                    - code [ref=e544]: "VIR/{ANNEE}/{SEQ:4}"
+                  - cell "0" [ref=e545]:
+                    - generic [ref=e546]: "0"
+                  - cell "VIR/2026/0001" [ref=e547]:
+                    - generic [ref=e548]:
+                      - img [ref=e549]
+                      - code [ref=e551]: VIR/2026/0001
+                  - cell "-" [ref=e552]
+                  - cell [ref=e553]:
+                    - button [ref=e555] [cursor=pointer]:
+                      - img
+          - generic [ref=e558]:
+            - img [ref=e560]
+            - generic [ref=e563]:
+              - heading "Information importante" [level=4] [ref=e564]
+              - paragraph [ref=e565]: Les compteurs sont automatiquement incrémentés lors de la création de nouveaux documents. La modification manuelle doit être réservée aux cas de synchronisation avec des données importées ou de correction d'erreurs. Une mauvaise manipulation peut entraîner des doublons de références.

@@ -1,0 +1,431 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - img "ARTI" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]: SYGFP
+          - generic [ref=e20]: Gestion Financière
+      - generic [ref=e21]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Tableau de bord" [ref=e26] [cursor=pointer]:
+              - /url: /
+              - img [ref=e27]
+              - generic [ref=e30]: Tableau de bord
+          - listitem [ref=e31]:
+            - link "Recherche Dossier" [ref=e32] [cursor=pointer]:
+              - /url: /recherche
+              - img [ref=e33]
+              - generic [ref=e36]: Recherche Dossier
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - text: Chaîne de la Dépense
+          - list [ref=e43]:
+            - listitem [ref=e45]:
+              - button "Flux de dépense 15" [expanded] [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]:
+                  - img [ref=e48]
+                  - generic [ref=e51]: Flux de dépense
+                - generic [ref=e52]:
+                  - generic [ref=e53]: "15"
+                  - img [ref=e54]
+              - list [ref=e57]:
+                - listitem [ref=e58]:
+                  - link "1 Notes SEF 6" [ref=e59] [cursor=pointer]:
+                    - /url: /notes-sef
+                    - generic [ref=e60]:
+                      - generic [ref=e61]: "1"
+                      - generic [ref=e62]: Notes SEF
+                    - generic [ref=e63]: "6"
+                - listitem [ref=e64]:
+                  - link "2 Notes AEF" [ref=e65] [cursor=pointer]:
+                    - /url: /notes-aef
+                    - generic [ref=e66]:
+                      - generic [ref=e67]: "2"
+                      - generic [ref=e68]: Notes AEF
+                - listitem [ref=e69]:
+                  - link "3 Imputation 1" [ref=e70] [cursor=pointer]:
+                    - /url: /execution/imputation
+                    - generic [ref=e71]:
+                      - generic [ref=e72]: "3"
+                      - generic [ref=e73]: Imputation
+                    - generic [ref=e74]: "1"
+                - listitem [ref=e75]:
+                  - link "4 Expression Besoin" [ref=e76] [cursor=pointer]:
+                    - /url: /execution/expression-besoin
+                    - generic [ref=e77]:
+                      - generic [ref=e78]: "4"
+                      - generic [ref=e79]: Expression Besoin
+                - listitem [ref=e80]:
+                  - link "5 Passation Marché 5" [ref=e81] [cursor=pointer]:
+                    - /url: /execution/passation-marche
+                    - generic [ref=e82]:
+                      - generic [ref=e83]: "5"
+                      - generic [ref=e84]: Passation Marché
+                    - generic [ref=e85]: "5"
+                - listitem [ref=e86]:
+                  - link "6 Engagement 2" [ref=e87] [cursor=pointer]:
+                    - /url: /engagements
+                    - generic [ref=e88]:
+                      - generic [ref=e89]: "6"
+                      - generic [ref=e90]: Engagement
+                    - generic [ref=e91]: "2"
+                - listitem [ref=e92]:
+                  - link "7 Liquidation 1" [ref=e93] [cursor=pointer]:
+                    - /url: /liquidations
+                    - generic [ref=e94]:
+                      - generic [ref=e95]: "7"
+                      - generic [ref=e96]: Liquidation
+                    - generic [ref=e97]: "1"
+                - listitem [ref=e98]:
+                  - link "8 Ordonnancement" [ref=e99] [cursor=pointer]:
+                    - /url: /ordonnancements
+                    - generic [ref=e100]:
+                      - generic [ref=e101]: "8"
+                      - generic [ref=e102]: Ordonnancement
+                - listitem [ref=e103]:
+                  - link "9 Règlement" [ref=e104] [cursor=pointer]:
+                    - /url: /reglements
+                    - generic [ref=e105]:
+                      - generic [ref=e106]: "9"
+                      - generic [ref=e107]: Règlement
+        - generic [ref=e108]:
+          - generic [ref=e109]: Budget
+          - list [ref=e111]:
+            - listitem [ref=e112]:
+              - link "Structure Budgétaire" [ref=e113] [cursor=pointer]:
+                - /url: /planification/structure
+                - generic [ref=e114]:
+                  - img [ref=e115]
+                  - generic [ref=e118]: Structure Budgétaire
+            - listitem [ref=e119]:
+              - link "Plan de Travail" [ref=e120] [cursor=pointer]:
+                - /url: /planification/plan-travail
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - generic [ref=e125]: Plan de Travail
+            - listitem [ref=e126]:
+              - link "Virements" [ref=e127] [cursor=pointer]:
+                - /url: /planification/virements
+                - generic [ref=e128]:
+                  - img [ref=e129]
+                  - generic [ref=e132]: Virements
+            - listitem [ref=e133]:
+              - link "Import / Export" [ref=e134] [cursor=pointer]:
+                - /url: /planification/import-export
+                - generic [ref=e135]:
+                  - img [ref=e136]
+                  - generic [ref=e140]: Import / Export
+            - listitem [ref=e141]:
+              - link "Historique Imports" [ref=e142] [cursor=pointer]:
+                - /url: /planification/historique-imports
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e148]: Historique Imports
+        - generic [ref=e149]:
+          - generic [ref=e150]: Partenaires
+          - list [ref=e152]:
+            - listitem [ref=e153]:
+              - link "Prestataires" [ref=e154] [cursor=pointer]:
+                - /url: /contractualisation/prestataires
+                - img [ref=e155]
+                - generic [ref=e159]: Prestataires
+            - listitem [ref=e160]:
+              - link "Contrats" [ref=e161] [cursor=pointer]:
+                - /url: /contractualisation/contrats
+                - img [ref=e162]
+                - generic [ref=e165]: Contrats
+        - generic [ref=e166]:
+          - generic [ref=e167]: Gestion
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - link "Approvisionnement" [ref=e171] [cursor=pointer]:
+                - /url: /approvisionnement
+                - img [ref=e172]
+                - generic [ref=e177]: Approvisionnement
+            - listitem [ref=e178]:
+              - link "Trésorerie" [ref=e179] [cursor=pointer]:
+                - /url: /tresorerie
+                - img [ref=e180]
+                - generic [ref=e182]: Trésorerie
+            - listitem [ref=e183]:
+              - link "Recettes" [ref=e184] [cursor=pointer]:
+                - /url: /recettes
+                - img [ref=e185]
+                - generic [ref=e187]: Recettes
+            - listitem [ref=e188]:
+              - link "Comptabilité Matière" [ref=e189] [cursor=pointer]:
+                - /url: /contractualisation/comptabilite-matiere
+                - img [ref=e190]
+                - generic [ref=e193]: Comptabilité Matière
+        - generic [ref=e194]:
+          - generic [ref=e195]: Rapports
+          - list [ref=e197]:
+            - listitem [ref=e198]:
+              - link "États d'exécution" [ref=e199] [cursor=pointer]:
+                - /url: /etats-execution
+                - img [ref=e200]
+                - generic [ref=e202]: États d'exécution
+            - listitem [ref=e203]:
+              - link "Alertes Budgétaires" [ref=e204] [cursor=pointer]:
+                - /url: /alertes-budgetaires
+                - img [ref=e205]
+                - generic [ref=e209]: Alertes Budgétaires
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - img [ref=e212]
+            - text: Paramétrage
+          - list [ref=e224]:
+            - listitem [ref=e226]:
+              - button "Configuration" [ref=e227] [cursor=pointer]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - generic [ref=e232]: Configuration
+                - img [ref=e233]
+    - generic [ref=e235]:
+      - banner [ref=e236]:
+        - generic [ref=e237]:
+          - img "ARTI" [ref=e239]
+          - generic [ref=e240]:
+            - generic [ref=e241]: SYGFP
+            - generic [ref=e242]: Gestion Financière
+        - button "Rechercher... Ctrl K" [ref=e243] [cursor=pointer]:
+          - img
+          - generic [ref=e244]: Rechercher...
+          - generic:
+            - generic: Ctrl
+            - text: K
+        - button "10 à traiter" [ref=e245] [cursor=pointer]:
+          - generic [ref=e249]: 10 à traiter
+        - button "2026 Ouvert" [ref=e250] [cursor=pointer]:
+          - img [ref=e251]
+          - generic [ref=e253]: "2026"
+          - generic [ref=e254]: Ouvert
+          - img [ref=e255]
+        - button "9+" [ref=e261] [cursor=pointer]:
+          - img
+          - generic [ref=e262]: 9+
+        - button "DG" [ref=e263] [cursor=pointer]:
+          - generic [ref=e265]: DG
+      - main [ref=e266]:
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - navigation "breadcrumb" [ref=e269]:
+              - list [ref=e270]:
+                - listitem [ref=e271]:
+                  - link "Accueil" [ref=e272] [cursor=pointer]:
+                    - /url: /
+                - listitem [ref=e273]:
+                  - img [ref=e274]
+                - listitem [ref=e276]:
+                  - link "Budget" [disabled] [ref=e277]
+                - listitem [ref=e278]:
+                  - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Plan de Travail" [disabled] [ref=e282]
+            - generic [ref=e283]:
+              - generic [ref=e284]:
+                - button "Retour" [ref=e285] [cursor=pointer]:
+                  - img
+                - img [ref=e288]
+                - generic [ref=e291]:
+                  - heading "Plan de Travail" [level=1] [ref=e292]
+                  - paragraph [ref=e293]: Suivi de l'exécution budgétaire par objectif stratégique et par direction
+              - generic [ref=e295]: Exercice 2026
+          - generic [ref=e296]:
+            - generic [ref=e299]:
+              - img [ref=e300]
+              - generic [ref=e303]:
+                - paragraph [ref=e304]: 11 444 200 019 FCFA
+                - paragraph [ref=e305]: Dotation totale
+            - generic [ref=e308]:
+              - img [ref=e309]
+              - generic [ref=e312]:
+                - paragraph [ref=e313]: 5 500 000 FCFA
+                - paragraph [ref=e314]: Engagé (0.0%)
+            - generic [ref=e317]:
+              - img [ref=e318]
+              - generic [ref=e320]:
+                - paragraph [ref=e321]: 250 000 FCFA
+                - paragraph [ref=e322]: Liquidé (4.5%)
+            - generic [ref=e325]:
+              - img [ref=e326]
+              - generic [ref=e329]:
+                - paragraph [ref=e330]: 0 FCFA
+                - paragraph [ref=e331]: Ordonnancé (0.0%)
+            - generic [ref=e334]:
+              - img [ref=e335]
+              - generic [ref=e338]:
+                - paragraph [ref=e339]: 0 FCFA
+                - paragraph [ref=e340]: Payé (0.0%)
+            - generic [ref=e343]:
+              - img [ref=e344]
+              - generic [ref=e347]:
+                - paragraph [ref=e348]: 11 438 700 019 FCFA
+                - paragraph [ref=e349]: Disponible
+          - generic [ref=e352]:
+            - generic [ref=e353]:
+              - generic [ref=e354]:
+                - img [ref=e355]
+                - text: Recherche
+              - textbox "Code ou libellé..." [ref=e358]
+            - generic [ref=e359]:
+              - generic [ref=e360]:
+                - img [ref=e361]
+                - text: Direction
+              - combobox [ref=e365] [cursor=pointer]:
+                - generic: Toutes les directions
+                - img [ref=e366]
+            - generic [ref=e368]:
+              - generic [ref=e369]:
+                - img [ref=e370]
+                - text: Objectif Stratégique
+              - combobox [ref=e374] [cursor=pointer]:
+                - generic: Tous les OS
+                - img [ref=e375]
+            - generic [ref=e377]:
+              - button "Réinitialiser" [disabled]:
+                - img
+                - text: Réinitialiser
+          - generic [ref=e378]:
+            - tablist [ref=e379]:
+              - tab "Par Objectif Stratégique" [selected] [ref=e380] [cursor=pointer]:
+                - img [ref=e381]
+                - text: Par Objectif Stratégique
+              - tab "Par Direction" [ref=e385] [cursor=pointer]:
+                - img [ref=e386]
+                - text: Par Direction
+              - tab "Détail lignes (278)" [ref=e390] [cursor=pointer]:
+                - img [ref=e391]
+                - text: Détail lignes (278)
+            - tabpanel "Par Objectif Stratégique" [ref=e394]:
+              - generic [ref=e395]:
+                - generic [ref=e396]:
+                  - generic [ref=e397]:
+                    - heading "Exécution par Objectif Stratégique" [level=3] [ref=e398]
+                    - paragraph [ref=e399]: "6 élément(s) - 278 ligne(s) - Total: 11 444 200 019 FCFA"
+                  - button "Exporter" [ref=e400] [cursor=pointer]:
+                    - img
+                    - text: Exporter
+                    - img
+                - table [ref=e404]:
+                  - rowgroup [ref=e405]:
+                    - row "Code Libellé Lignes Dotation Engagé Liquidé Ordonnancé Payé Disponible Exécution" [ref=e406]:
+                      - columnheader "Code" [ref=e407]
+                      - columnheader "Libellé" [ref=e408]
+                      - columnheader "Lignes" [ref=e409]
+                      - columnheader "Dotation" [ref=e410]
+                      - columnheader "Engagé" [ref=e411]
+                      - columnheader "Liquidé" [ref=e412]
+                      - columnheader "Ordonnancé" [ref=e413]
+                      - columnheader "Payé" [ref=e414]
+                      - columnheader "Disponible" [ref=e415]
+                      - columnheader "Exécution" [ref=e416]
+                  - rowgroup [ref=e417]:
+                    - row "- Non affecté 205 4 806 200 019 FCFA 5 000 000 FCFA 0 FCFA 0 FCFA 0 FCFA 4 801 200 019 FCFA 0.0%" [ref=e418]:
+                      - cell "-" [ref=e419]:
+                        - generic [ref=e420]: "-"
+                      - cell "Non affecté" [ref=e421]
+                      - cell "205" [ref=e422]
+                      - cell "4 806 200 019 FCFA" [ref=e423]
+                      - cell "5 000 000 FCFA" [ref=e424]
+                      - cell "0 FCFA" [ref=e425]
+                      - cell "0 FCFA" [ref=e426]
+                      - cell "0 FCFA" [ref=e427]
+                      - cell "4 801 200 019 FCFA" [ref=e428]
+                      - cell "0.0%" [ref=e429]:
+                        - generic [ref=e430]:
+                          - progressbar [ref=e431]
+                          - generic [ref=e433]: 0.0%
+                    - row "11 Construire la structure fonctionnelle et de pilotage de l'autorité 43 4 510 000 000 FCFA 500 000 FCFA 250 000 FCFA 0 FCFA 0 FCFA 4 509 500 000 FCFA 0.0%" [ref=e434]:
+                      - cell "11" [ref=e435]:
+                        - generic [ref=e436]: "11"
+                      - cell "Construire la structure fonctionnelle et de pilotage de l'autorité" [ref=e437]
+                      - cell "43" [ref=e438]
+                      - cell "4 510 000 000 FCFA" [ref=e439]
+                      - cell "500 000 FCFA" [ref=e440]
+                      - cell "250 000 FCFA" [ref=e441]
+                      - cell "0 FCFA" [ref=e442]
+                      - cell "0 FCFA" [ref=e443]
+                      - cell "4 509 500 000 FCFA" [ref=e444]
+                      - cell "0.0%" [ref=e445]:
+                        - generic [ref=e446]:
+                          - progressbar [ref=e447]
+                          - generic [ref=e449]: 0.0%
+                    - row "12 Construire les outils de collectes, de traitement et de production de données statistiques fiables 6 270 000 000 FCFA 0 FCFA 0 FCFA 0 FCFA 0 FCFA 270 000 000 FCFA 0.0%" [ref=e450]:
+                      - cell "12" [ref=e451]:
+                        - generic [ref=e452]: "12"
+                      - cell "Construire les outils de collectes, de traitement et de production de données statistiques fiables" [ref=e453]
+                      - cell "6" [ref=e454]
+                      - cell "270 000 000 FCFA" [ref=e455]
+                      - cell "0 FCFA" [ref=e456]
+                      - cell "0 FCFA" [ref=e457]
+                      - cell "0 FCFA" [ref=e458]
+                      - cell "0 FCFA" [ref=e459]
+                      - cell "270 000 000 FCFA" [ref=e460]
+                      - cell "0.0%" [ref=e461]:
+                        - generic [ref=e462]:
+                          - progressbar [ref=e463]
+                          - generic [ref=e465]: 0.0%
+                    - row "13 Renforcer le contrôle et la Régulation des acteurs du transport intérieur et continuer de construire l'organisation des secteurs à réguler 10 853 000 000 FCFA 0 FCFA 0 FCFA 0 FCFA 0 FCFA 853 000 000 FCFA 0.0%" [ref=e466]:
+                      - cell "13" [ref=e467]:
+                        - generic [ref=e468]: "13"
+                      - cell "Renforcer le contrôle et la Régulation des acteurs du transport intérieur et continuer de construire l'organisation des secteurs à réguler" [ref=e469]
+                      - cell "10" [ref=e470]
+                      - cell "853 000 000 FCFA" [ref=e471]
+                      - cell "0 FCFA" [ref=e472]
+                      - cell "0 FCFA" [ref=e473]
+                      - cell "0 FCFA" [ref=e474]
+                      - cell "0 FCFA" [ref=e475]
+                      - cell "853 000 000 FCFA" [ref=e476]
+                      - cell "0.0%" [ref=e477]:
+                        - generic [ref=e478]:
+                          - progressbar [ref=e479]
+                          - generic [ref=e481]: 0.0%
+                    - row "14 Faire mieux appliquer le cadre régulatoire actuel dans le secteur du transport intérieur et élaborer une vision prospective de l'évolution des secteurs et de leur régulation 4 160 000 000 FCFA 0 FCFA 0 FCFA 0 FCFA 0 FCFA 160 000 000 FCFA 0.0%" [ref=e482]:
+                      - cell "14" [ref=e483]:
+                        - generic [ref=e484]: "14"
+                      - cell "Faire mieux appliquer le cadre régulatoire actuel dans le secteur du transport intérieur et élaborer une vision prospective de l'évolution des secteurs et de leur régulation" [ref=e485]
+                      - cell "4" [ref=e486]
+                      - cell "160 000 000 FCFA" [ref=e487]
+                      - cell "0 FCFA" [ref=e488]
+                      - cell "0 FCFA" [ref=e489]
+                      - cell "0 FCFA" [ref=e490]
+                      - cell "0 FCFA" [ref=e491]
+                      - cell "160 000 000 FCFA" [ref=e492]
+                      - cell "0.0%" [ref=e493]:
+                        - generic [ref=e494]:
+                          - progressbar [ref=e495]
+                          - generic [ref=e497]: 0.0%
+                    - row "15 Utiliser plus efficacement l'ensemble des pouvoirs dévolus au régulateur et contribuer à l'évolution des textes et leur interprétation au service de la mission de régulation de l'autorité 10 845 000 000 FCFA 0 FCFA 0 FCFA 0 FCFA 0 FCFA 845 000 000 FCFA 0.0%" [ref=e498]:
+                      - cell "15" [ref=e499]:
+                        - generic [ref=e500]: "15"
+                      - cell "Utiliser plus efficacement l'ensemble des pouvoirs dévolus au régulateur et contribuer à l'évolution des textes et leur interprétation au service de la mission de régulation de l'autorité" [ref=e501]
+                      - cell "10" [ref=e502]
+                      - cell "845 000 000 FCFA" [ref=e503]
+                      - cell "0 FCFA" [ref=e504]
+                      - cell "0 FCFA" [ref=e505]
+                      - cell "0 FCFA" [ref=e506]
+                      - cell "0 FCFA" [ref=e507]
+                      - cell "845 000 000 FCFA" [ref=e508]
+                      - cell "0.0%" [ref=e509]:
+                        - generic [ref=e510]:
+                          - progressbar [ref=e511]
+                          - generic [ref=e513]: 0.0%
+                  - rowgroup [ref=e514]:
+                    - row "TOTAL 278 11 444 200 019 FCFA 5 500 000 FCFA 250 000 FCFA 0 FCFA 0 FCFA 11 438 700 019 FCFA 0.0%" [ref=e515]:
+                      - cell "TOTAL" [ref=e516]
+                      - cell "278" [ref=e517]
+                      - cell "11 444 200 019 FCFA" [ref=e518]
+                      - cell "5 500 000 FCFA" [ref=e519]
+                      - cell "250 000 FCFA" [ref=e520]
+                      - cell "0 FCFA" [ref=e521]
+                      - cell "0 FCFA" [ref=e522]
+                      - cell "11 438 700 019 FCFA" [ref=e523]
+                      - cell "0.0%" [ref=e524]:
+                        - generic [ref=e525]: 0.0%

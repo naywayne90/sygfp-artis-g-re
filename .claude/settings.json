@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx supabase --version)",
+      "Bash(kill 2628760 2628761)",
+      "Bash(kill 2629135 2629136)",
+      "Bash(npx supabase projects list)",
+      "Bash(npx supabase login --help)",
+      "Bash(npx supabase gen types --help)",
+      "mcp__playwright__browser_snapshot",
+      "Bash(npx supabase login --token sbp_b6d543ec3cef5285e6087a5c2ffa40d6f3bdece4)",
+      "Read(//tmp/**)",
+      "mcp__supabase__postgrestRequest",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(node -e \"const pkg = require\\(''/home/angeyannick/sygfp-artis-g-re/node_modules/@supabase/supabase-js/package.json''\\); console.log\\(pkg.version\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(npx vite build)",
+      "Bash(npx vitest run)",
+      "Bash(npx eslint --max-warnings 0 src/hooks/useExportDossierComplet.ts src/hooks/useMarches.ts src/hooks/useNotesAEF.ts src/lib/notes-aef/notesAefService.ts src/pages/TestNonRegression.tsx)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080)",
+      "Bash(npx eslint:*)",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_run_code",
+      "mcp__claude_ai_Supabase__execute_sql"
+    ]
+  }
+}
