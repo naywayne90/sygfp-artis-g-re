@@ -48,7 +48,6 @@ import {
   Mail,
   Clock,
   AlertTriangle,
-  Calculator,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -176,7 +175,6 @@ const PARAMETRAGE_REFERENTIELS = [
   { title: "Paramètres d'Exercice", url: '/admin/parametres-exercice', icon: CalendarCog },
   { title: 'Paramètres Programmatiques', url: '/admin/parametres-programmatiques', icon: Target },
   { title: 'Codification', url: '/admin/codification', icon: Hash },
-  { title: 'Seuils de Validation', url: '/admin/seuils-validation', icon: Shield },
   { title: 'Documents Requis', url: '/admin/documents-requis', icon: FileCheck },
   { title: "Secteurs d'Activité", url: '/admin/secteurs-activite', icon: Layers },
 ];
@@ -185,6 +183,7 @@ const PARAMETRAGE_UTILISATEURS = [
   { title: 'Utilisateurs', url: '/admin/utilisateurs', icon: Users },
   { title: 'Profils & Rôles', url: '/admin/roles', icon: Shield },
   { title: 'Autorisations', url: '/admin/autorisations', icon: Lock },
+  { title: 'Seuils de Validation', url: '/admin/seuils-validation', icon: Shield },
   { title: 'Délégations', url: '/admin/delegations', icon: UserCog },
   { title: 'Intérims', url: '/admin/interims', icon: UserCheck },
   { title: 'Notifications par Rôle', url: '/admin/notification-roles', icon: BellRing },
@@ -193,11 +192,10 @@ const PARAMETRAGE_UTILISATEURS = [
 const PARAMETRAGE_SYSTEME = [
   { title: 'Paramètres Système', url: '/admin/parametres', icon: Settings },
   { title: 'Comptes Bancaires', url: '/admin/comptes-bancaires', icon: Building },
+  { title: 'Comptes Prestataires', url: '/admin/banques-fournisseurs', icon: Building2 },
   { title: 'Templates Email', url: '/admin/email-templates', icon: Mail },
-  { title: 'Banques Fournisseurs', url: '/admin/banques-fournisseurs', icon: Building2 },
   { title: 'Rappels Automatiques', url: '/admin/rappels', icon: Clock },
   { title: 'Alertes DMG', url: '/admin/alertes-dmg', icon: AlertTriangle },
-  { title: 'Paramètres Fiscaux', url: '/admin/parametres-fiscaux', icon: Calculator },
   { title: 'Compteurs Références', url: '/admin/compteurs-references', icon: Hash },
   { title: "Journal d'Audit", url: '/admin/journal-audit', icon: ClipboardList },
   { title: 'Gestion Doublons', url: '/admin/doublons', icon: Copy },
