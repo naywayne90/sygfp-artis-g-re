@@ -197,6 +197,6 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 | Audit technique                 | `docs/AUDIT_TECHNIQUE_COMPLET.md`        |
 | Migration SQL Server            | `docs/RAPPORT_MIGRATION_COMPLETE.md`     |
 
-### Metriques cles (22/03/2026)
+### Metriques cles (23/03/2026)
 
-116 pages | 426 composants/50 modules | 169 hooks | 201 tables | 526 RLS policies | 277 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E
+124 pages | 426 composants/50 modules | 177 hooks | 203 tables | 526 RLS policies | 278 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E

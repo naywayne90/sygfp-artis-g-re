@@ -1,6 +1,6 @@
 # TESTS_REGISTRY.md — SYGFP
 
-**Derniere MAJ :** 22 mars 2026
+**Derniere MAJ :** 23 mars 2026
 **Total : 80 fichiers | 704 unit + 71 E2E specs**
 
 ---

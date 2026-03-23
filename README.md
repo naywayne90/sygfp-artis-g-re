@@ -39,16 +39,16 @@ Application web moderne de gestion budgetaire et financiere pour **ARTI** (Autor
 
 | Metrique        | Valeur   |
 | --------------- | -------- |
-| Pages           | 116      |
+| Pages           | 124      |
 | Composants      | 426      |
-| Hooks           | 169      |
+| Hooks           | 177      |
 | Services        | 19       |
-| Routes          | 114      |
-| Migrations SQL  | 277      |
+| Routes          | 117      |
+| Migrations SQL  | 278      |
 | Edge Functions  | 12       |
 | Tests unitaires | 704 PASS |
 | Specs E2E       | 71       |
-| Tables          | 201      |
+| Tables          | 203      |
 | Policies RLS    | 526      |
 
 ## Stack technique
@@ -143,6 +143,15 @@ npm run verify           # typecheck + lint + test
 
 ## Changelog
 
+### v4.1.0 (23/03/2026)
+
+- 8 nouveaux modules admin (Seuils, Documents Requis, Notifications Role, Templates Email, Banques Fournisseurs, Rappels, Alertes DMG, Params Fiscaux)
+- Gestion Doublons complete (persistence DB, 4 strategies detection)
+- Compteurs References fonctionnels (reset via RPC)
+- Codification amelioree (preview live, test BUDGETAIRE, DA ajoutee)
+- Restructuration sidebar Parametrage (22 items organises)
+- Types Supabase regeneres (106 erreurs corrigees)
+
 ### v4.0.0 (22/02/2026)
 
 - Liquidation certifiee 100/100 (104 unit + 60 E2E)
@@ -198,5 +207,5 @@ Propriete de ARTI Cote d'Ivoire. Tous droits reserves.
 
 ---
 
-**Version:** 4.0.0
-**Derniere mise a jour:** 22/03/2026
+**Version:** 4.1.0
+**Derniere mise a jour:** 23/03/2026
