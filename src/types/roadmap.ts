@@ -16,6 +16,8 @@ export interface PlanTravail {
   budget_alloue: number;
   budget_consomme: number;
   responsable_id: string | null;
+  os_id: string | null;
+  priorite: 'basse' | 'normale' | 'haute' | 'urgente';
   validateur_id: string | null;
   date_validation: string | null;
   est_actif: boolean;
@@ -25,6 +27,7 @@ export interface PlanTravail {
   // Jointures
   direction?: { id: string; code: string; nom: string };
   responsable?: { id: string; nom: string; prenom: string };
+  objectif_strategique?: { id: string; code: string; libelle: string };
 }
 
 export type PlanTravailStatut = PlanTravail['statut'];
@@ -40,6 +43,8 @@ export interface PlanTravailInput {
   date_fin?: string | null;
   budget_alloue?: number;
   responsable_id?: string | null;
+  os_id?: string | null;
+  priorite?: 'basse' | 'normale' | 'haute' | 'urgente';
 }
 
 export interface Tache {

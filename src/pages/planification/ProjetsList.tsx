@@ -53,6 +53,13 @@ const STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'o
   cloture: 'outline',
 };
 
+const PRIORITE_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  basse: 'outline',
+  normale: 'secondary',
+  haute: 'default',
+  urgente: 'destructive',
+};
+
 export default function ProjetsList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -76,6 +83,37 @@ export default function ProjetsList() {
     staleTime: 30_000,
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabaseUntyped = supabase as any;
+
+  const { data: objectifs = [] } = useQuery({
+    queryKey: ['objectifs-strategiques-active'],
+    queryFn: async () => {
+      const { data, error } = await supabaseUntyped
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .eq('est_actif', true)
+        .order('code');
+      if (error) throw error;
+      return (data ?? []) as { id: string; code: string; libelle: string }[];
+    },
+    staleTime: 30_000,
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['profiles-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, first_name, last_name')
+        .eq('is_active', true)
+        .order('full_name');
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 30_000,
+  });
+
   const [search, setSearch] = useState('');
   const [statutFilter, setStatutFilter] = useState<string>('all');
   const [formOpen, setFormOpen] = useState(false);
@@ -87,6 +125,9 @@ export default function ProjetsList() {
     libelle: '',
     description: '',
     direction_id: '',
+    os_id: '',
+    responsable_id: '',
+    priorite: 'normale' as 'basse' | 'normale' | 'haute' | 'urgente',
     date_debut: '',
     date_fin: '',
     budget_alloue: 0,
@@ -114,6 +155,9 @@ export default function ProjetsList() {
       libelle: '',
       description: '',
       direction_id: directionFilter || '',
+      os_id: '',
+      responsable_id: '',
+      priorite: 'normale',
       date_debut: '',
       date_fin: '',
       budget_alloue: 0,
@@ -129,6 +173,9 @@ export default function ProjetsList() {
       libelle: plan.libelle,
       description: plan.description ?? '',
       direction_id: plan.direction_id,
+      os_id: plan.os_id ?? '',
+      responsable_id: plan.responsable_id ?? '',
+      priorite: plan.priorite ?? 'normale',
       date_debut: plan.date_debut ?? '',
       date_fin: plan.date_fin ?? '',
       budget_alloue: plan.budget_alloue,
@@ -155,6 +202,9 @@ export default function ProjetsList() {
           libelle: formData.libelle,
           description: formData.description || null,
           direction_id: formData.direction_id,
+          os_id: formData.os_id || null,
+          responsable_id: formData.responsable_id || null,
+          priorite: formData.priorite,
           date_debut: formData.date_debut || null,
           date_fin: formData.date_fin || null,
           budget_alloue: formData.budget_alloue,
@@ -167,6 +217,9 @@ export default function ProjetsList() {
           description: formData.description || null,
           exercice_id: exerciceId,
           direction_id: formData.direction_id,
+          os_id: formData.os_id || null,
+          responsable_id: formData.responsable_id || null,
+          priorite: formData.priorite,
           date_debut: formData.date_debut || null,
           date_fin: formData.date_fin || null,
           budget_alloue: formData.budget_alloue,
@@ -249,11 +302,13 @@ export default function ProjetsList() {
                   <TableHead>Code</TableHead>
                   <TableHead>Libelle</TableHead>
                   <TableHead>Direction</TableHead>
+                  <TableHead>OS</TableHead>
+                  <TableHead>Responsable</TableHead>
+                  <TableHead>Priorite</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="text-right">Budget alloue</TableHead>
                   <TableHead className="text-right">Consomme</TableHead>
                   <TableHead>% Budget</TableHead>
-                  <TableHead>Responsable</TableHead>
                   <TableHead>Dates</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -274,6 +329,19 @@ export default function ProjetsList() {
                           {plan.direction?.code ?? plan.direction_id.slice(0, 8)}
                         </Badge>
                       </TableCell>
+                      <TableCell className="text-sm">
+                        {plan.objectif_strategique ? plan.objectif_strategique.code : '-'}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {plan.responsable
+                          ? `${plan.responsable.prenom} ${plan.responsable.nom}`
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={PRIORITE_COLORS[plan.priorite] ?? 'outline'}>
+                          {plan.priorite ?? 'normale'}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={STATUT_COLORS[plan.statut] ?? 'outline'}>
                           {plan.statut}
@@ -290,11 +358,6 @@ export default function ProjetsList() {
                           <Progress value={pctBudget} className="w-16" />
                           <span className="text-sm">{pctBudget}%</span>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {plan.responsable
-                          ? `${plan.responsable.prenom} ${plan.responsable.nom}`
-                          : '-'}
                       </TableCell>
                       <TableCell className="text-xs">
                         {plan.date_debut ?? '-'} / {plan.date_fin ?? '-'}
@@ -327,7 +390,7 @@ export default function ProjetsList() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
               {editingPlan ? 'Modifier le plan' : 'Nouveau plan de travail'}
@@ -401,6 +464,70 @@ export default function ProjetsList() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Objectif Strategique</Label>
+              <Select
+                value={formData.os_id}
+                onValueChange={(v) => setFormData((prev) => ({ ...prev, os_id: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner un objectif strategique" />
+                </SelectTrigger>
+                <SelectContent>
+                  {objectifs.map((os) => (
+                    <SelectItem key={os.id} value={os.id}>
+                      {os.code} — {os.libelle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Responsable</Label>
+                <Select
+                  value={formData.responsable_id}
+                  onValueChange={(v) => setFormData((prev) => ({ ...prev, responsable_id: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selectionner un responsable" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.full_name ||
+                          `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim() ||
+                          u.id.slice(0, 8)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priorite</Label>
+                <Select
+                  value={formData.priorite}
+                  onValueChange={(v) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      priorite: v as 'basse' | 'normale' | 'haute' | 'urgente',
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basse">Basse</SelectItem>
+                    <SelectItem value="normale">Normale</SelectItem>
+                    <SelectItem value="haute">Haute</SelectItem>
+                    <SelectItem value="urgente">Urgente</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
