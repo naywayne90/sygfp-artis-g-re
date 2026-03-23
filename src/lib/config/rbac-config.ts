@@ -859,6 +859,18 @@ export const ROUTE_ACCESS_MATRIX: Record<
     allowedProfiles: ['ADMIN', 'DAAF'],
     description: 'Import/Export budget',
   },
+  '/planification/roadmap-dashboard': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB'],
+    description: 'Tableau de bord feuille de route',
+  },
+  '/planification/roadmap-direction': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'OPERATEUR'],
+    description: 'Espace direction feuille de route',
+  },
+  '/planification/projets': {
+    allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'DIRECTEUR', 'CB', 'OPERATEUR'],
+    description: 'Projets et plans de travail',
+  },
   '/planification/feuilles-route': {
     allowedProfiles: ['ADMIN', 'DAAF', 'DIRECTEUR'],
     description: 'Import des feuilles de route par direction',

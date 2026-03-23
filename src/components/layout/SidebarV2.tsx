@@ -48,6 +48,11 @@ import {
   Mail,
   Clock,
   AlertTriangle,
+  Map,
+  FolderKanban,
+  Upload,
+  CheckSquare,
+  LayoutDashboard,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -153,6 +158,14 @@ const BUDGET_ITEMS = [
   { title: 'Historique Imports', url: '/planification/historique-imports', icon: History },
 ];
 
+const FEUILLE_ROUTE_ITEMS = [
+  { title: 'Tableau de Bord', url: '/planification/roadmap-dashboard', icon: LayoutDashboard },
+  { title: 'Mon Espace Direction', url: '/planification/roadmap-direction', icon: Map },
+  { title: 'Projets & Plans', url: '/planification/projets', icon: FolderKanban },
+  { title: 'Soumissions', url: '/planification/soumissions-feuilles-route', icon: CheckSquare },
+  { title: 'Import Activités', url: '/planification/feuilles-route', icon: Upload },
+];
+
 const PARTENAIRES_ITEMS = [
   { title: 'Prestataires', url: '/contractualisation/prestataires', icon: Building2 },
   { title: 'Contrats', url: '/contractualisation/contrats', icon: FileSignature },
@@ -244,6 +257,7 @@ export function SidebarV2() {
   // Filter menu items by RBAC permissions
   const visibleChaineDepense = CHAINE_DEPENSE.filter((item) => canAccess(item.url));
   const visibleBudgetItems = BUDGET_ITEMS.filter((item) => canAccess(item.url));
+  const visibleFeuilleRouteItems = FEUILLE_ROUTE_ITEMS.filter((item) => canAccess(item.url));
   const visiblePartenairesItems = PARTENAIRES_ITEMS.filter((item) => canAccess(item.url));
   const visibleGestionItems = GESTION_ITEMS.filter((item) => canAccess(item.url));
   const visibleRapportsItems = RAPPORTS_ITEMS.filter((item) => canAccess(item.url));
@@ -465,6 +479,39 @@ export function SidebarV2() {
                     </SidebarMenuItem>
                   );
                 })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* ========== FEUILLE DE ROUTE ========== */}
+        {visibleFeuilleRouteItems.length > 0 && (
+          <SidebarGroup className="mt-4">
+            {!collapsed && (
+              <SidebarGroupLabel className="text-sidebar-foreground/60 uppercase text-[10px] font-semibold tracking-wider mb-1 px-3">
+                Feuille de Route
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleFeuilleRouteItems.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                      <NavLink
+                        to={item.url}
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                          isActive(item.url)
+                            ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
