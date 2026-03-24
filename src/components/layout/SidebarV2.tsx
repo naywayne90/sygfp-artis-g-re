@@ -54,6 +54,7 @@ import {
   CheckSquare,
   LayoutDashboard,
   Eye,
+  ScanLine,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -177,6 +178,8 @@ const GESTION_ITEMS = [
   { title: 'Trésorerie', url: '/tresorerie', icon: Landmark },
   { title: 'Recettes', url: '/recettes', icon: DollarSign },
   { title: 'Comptabilité Matière', url: '/contractualisation/comptabilite-matiere', icon: Archive },
+  { title: 'Scanning Engagements', url: '/scanning-engagement', icon: ScanLine },
+  { title: 'Scanning Liquidations', url: '/scanning-liquidation', icon: ScanLine },
 ];
 
 const RAPPORTS_ITEMS = [

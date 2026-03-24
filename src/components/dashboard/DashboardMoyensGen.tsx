@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +12,8 @@ import {
   FileText,
   ClipboardList,
   ShoppingCart,
+  ScanLine,
+  Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -248,6 +249,91 @@ export function DashboardMoyensGen() {
                 <p className="text-xs text-muted-foreground">Rapports</p>
               </div>
             </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Scanning & Archivage */}
+      <Card className="border-l-4 border-l-blue-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ScanLine className="h-5 w-5 text-blue-600" />
+            Scanning & Archivage
+          </CardTitle>
+          <CardDescription>
+            Numérisation des pièces justificatives (Engagements & Liquidations)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Link to="/scanning-engagement" className="block">
+              <div className="p-4 rounded-lg border hover:bg-blue-50/50 transition-colors flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <ScanLine className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Scanning Engagements</p>
+                  <p className="text-xs text-muted-foreground">Numériser les pièces d'engagement</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </Link>
+            <Link to="/scanning-liquidation" className="block">
+              <div className="p-4 rounded-lg border hover:bg-blue-50/50 transition-colors flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <ScanLine className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Scanning Liquidations</p>
+                  <p className="text-xs text-muted-foreground">Numériser les factures et pièces</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Hiérarchie DMG */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Organisation DMG
+          </CardTitle>
+          <CardDescription>Direction des Moyens Généraux — 3 niveaux hiérarchiques</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-primary text-primary-foreground">Directeur</Badge>
+              </div>
+              <p className="text-sm font-medium">Directeur DMG</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Supervision générale, validation des demandes à fort montant, alertes budgétaires
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="outline" className="border-blue-400 text-blue-700">
+                  Sous-Directeur
+                </Badge>
+              </div>
+              <p className="text-sm font-medium">Sous-Directeur MG</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Scanning documents, gestion quotidienne approvisionnement, validation réceptions
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50 border">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="secondary">Chefs de Service</Badge>
+              </div>
+              <p className="text-sm font-medium">Chefs de Service</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Opérations terrain, création des demandes, réception matériel, inventaires
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

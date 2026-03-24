@@ -886,6 +886,16 @@ export const ROUTE_ACCESS_MATRIX: Record<
     description: 'Gestion trésorerie',
   },
 
+  // Scanning DMG
+  '/scanning-engagement': {
+    allowedProfiles: ['ADMIN', 'DMG', 'DAAF'],
+    description: 'Scanning pièces engagements (DMG)',
+  },
+  '/scanning-liquidation': {
+    allowedProfiles: ['ADMIN', 'DMG', 'DAAF'],
+    description: 'Scanning pièces liquidations (DMG)',
+  },
+
   // Rapports
   '/etats-execution': {
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB', 'DIRECTEUR', 'TRESORERIE', 'AUDITEUR'],

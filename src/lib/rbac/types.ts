@@ -7,91 +7,81 @@
 // ENUMS (mirroir des enums Supabase)
 // ============================================
 
-export type RoleHierarchique =
-  | "Agent"
-  | "Chef de Service"
-  | "Sous-Directeur"
-  | "Directeur"
-  | "DG";
+export type RoleHierarchique = 'Agent' | 'Chef de Service' | 'Sous-Directeur' | 'Directeur' | 'DG';
 
-export type ProfilFonctionnel =
-  | "Admin"
-  | "Validateur"
-  | "Operationnel"
-  | "Controleur"
-  | "Auditeur";
+export type ProfilFonctionnel = 'Admin' | 'Validateur' | 'Operationnel' | 'Controleur' | 'Auditeur';
 
 export type AppRole =
-  | "ADMIN"
-  | "DG"
-  | "DAAF"
-  | "DGPEC"
-  | "SDMG"
-  | "CB"
-  | "OPERATEUR"
-  | "TRESORIER"
-  | "INVITE"
-  | "BUDGET_PLANNER"
-  | "BUDGET_VALIDATOR"
-  | "EXPENSE_REQUESTER"
-  | "EXPENSE_VALIDATOR"
-  | "AUDITOR"
-  | "DAF"
-  | "SDCT"
-  | "SAF"
-  | "SDPM"
-  | "TRESORERIE"
-  | "COMPTABILITE";
+  | 'ADMIN'
+  | 'DG'
+  | 'DAAF'
+  | 'DGPEC'
+  | 'DMG'
+  | 'CB'
+  | 'OPERATEUR'
+  | 'TRESORIER'
+  | 'INVITE'
+  | 'BUDGET_PLANNER'
+  | 'BUDGET_VALIDATOR'
+  | 'EXPENSE_REQUESTER'
+  | 'EXPENSE_VALIDATOR'
+  | 'AUDITOR'
+  | 'DAF'
+  | 'SDCT'
+  | 'SAF'
+  | 'SDPM'
+  | 'TRESORERIE'
+  | 'COMPTABILITE';
 
 // ============================================
 // MODULES ET ACTIONS
 // ============================================
 
 export type ModuleCode =
-  | "notes_sef"
-  | "notes_aef"
-  | "imputation"
-  | "expression_besoin"
-  | "passation_marche"
-  | "engagement"
-  | "liquidation"
-  | "ordonnancement"
-  | "reglement"
-  | "budget"
-  | "planification"
-  | "tresorerie"
-  | "recettes"
-  | "approvisionnement"
-  | "contractualisation"
-  | "admin"
-  | "audit";
+  | 'notes_sef'
+  | 'notes_aef'
+  | 'imputation'
+  | 'expression_besoin'
+  | 'passation_marche'
+  | 'engagement'
+  | 'liquidation'
+  | 'ordonnancement'
+  | 'reglement'
+  | 'budget'
+  | 'planification'
+  | 'tresorerie'
+  | 'recettes'
+  | 'approvisionnement'
+  | 'contractualisation'
+  | 'admin'
+  | 'audit';
 
 export type ActionCode =
-  | "create"
-  | "read"
-  | "update"
-  | "delete"
-  | "validate"
-  | "reject"
-  | "sign"
-  | "export"
-  | "import"
-  | "archive";
+  | 'create'
+  | 'read'
+  | 'update'
+  | 'delete'
+  | 'validate'
+  | 'reject'
+  | 'sign'
+  | 'export'
+  | 'import'
+  | 'archive';
 
 // ============================================
 // ÉTAPES DU WORKFLOW
 // ============================================
 
 export type WorkflowStep =
-  | "SEF"      // Note SEF
-  | "AEF"      // Note AEF/DG
-  | "IMP"      // Imputation
-  | "EXP"      // Expression de besoin
-  | "PAS"      // Passation de marché
-  | "ENG"      // Engagement
-  | "LIQ"      // Liquidation
-  | "ORD"      // Ordonnancement
-  | "REG";     // Règlement
+  | 'SEF' // Note SEF
+  | 'AEF' // Note AEF/DG
+  | 'IMP' // Imputation
+  | 'EXP' // Expression de besoin
+  | 'PAS' // Passation de marché
+  | 'ENG' // Engagement
+  | 'LIQ' // Liquidation
+  | 'ORD' // Ordonnancement
+  | 'REG'; // Règlement
 
 // ============================================
 // PROFIL UTILISATEUR
@@ -143,11 +133,14 @@ export interface RBACConfig {
   // Qui peut créer dans un module
   canCreate: Record<ModuleCode, ProfilFonctionnel[]>;
   // Qui peut valider à chaque étape
-  canValidateStep: Record<WorkflowStep, {
-    roles: AppRole[];
-    roleHierarchique?: RoleHierarchique[];
-    profilFonctionnel?: ProfilFonctionnel[];
-  }>;
+  canValidateStep: Record<
+    WorkflowStep,
+    {
+      roles: AppRole[];
+      roleHierarchique?: RoleHierarchique[];
+      profilFonctionnel?: ProfilFonctionnel[];
+    }
+  >;
   // Qui peut exporter
   canExport: Record<ModuleCode, ProfilFonctionnel[]>;
 }

@@ -21324,7 +21324,7 @@ export type Database = {
         | 'DG'
         | 'DAAF'
         | 'DGPEC'
-        | 'SDMG'
+        | 'DMG'
         | 'CB'
         | 'OPERATEUR'
         | 'TRESORIER'
@@ -21495,7 +21495,7 @@ export const Constants = {
         'DG',
         'DAAF',
         'DGPEC',
-        'SDMG',
+        'DMG',
         'CB',
         'OPERATEUR',
         'TRESORIER',

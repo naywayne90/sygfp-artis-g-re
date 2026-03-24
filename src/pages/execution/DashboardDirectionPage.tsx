@@ -318,7 +318,14 @@ function RecentActivities({ directionId }: { directionId: string }) {
         .limit(10);
 
       if (error) throw error;
-      return (data || []) as { id: string; activite_code: string; activite_libelle: string; status: string; taux_avancement: number | null; updated_at: string | null }[];
+      return (data || []) as {
+        id: string;
+        activite_code: string;
+        activite_libelle: string;
+        status: string;
+        taux_avancement: number | null;
+        updated_at: string | null;
+      }[];
     },
     enabled: !!exerciceId && !!directionId,
   });
@@ -453,8 +460,8 @@ export default function DashboardDirectionPage() {
   }
 
   // Pour les directions sans dashboard spécialisé mais avec directionId, utiliser DashboardGeneric
-  // sauf pour certaines directions qui ont déjà des dashboards existants (DG, DAAF, CB, DSI, SDMG)
-  const existingDashboards = ['DG', 'DAAF', 'CB', 'DSI', 'SDMG', 'DMG'];
+  // sauf pour certaines directions qui ont déjà des dashboards existants (DG, DAAF, CB, DSI, DMG)
+  const existingDashboards = ['DG', 'DAAF', 'CB', 'DSI', 'DMG'];
   if (directionId && directionInfo && !existingDashboards.includes(directionCode)) {
     return (
       <DashboardGeneric

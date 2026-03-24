@@ -122,8 +122,8 @@ export default function Dashboard() {
     return <DashboardDSI />;
   }
 
-  // Direction SDMG / DMG (Moyens Généraux)
-  if (directionCode === 'SDMG' || directionCode === 'DMG') {
+  // Direction DMG (Direction des Moyens Généraux)
+  if (directionCode === 'DMG') {
     return <DashboardMoyensGen />;
   }
 

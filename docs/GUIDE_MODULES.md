@@ -294,7 +294,7 @@ Note SEF → Note AEF → Imputation → Expression Besoin → Passation Marché
 - **Fonctionnalités :**
   - **Import :** Upload Excel avec wizard 4 étapes (sélection fichier → aperçu → validation → résultat)
   - **Export :** 4 types (template vide, lignes budgétaires, référentiels, erreurs d'import)
-  - Sécurité : seuls les rôles DAAF, SDMG, CB peuvent importer
+  - Sécurité : seuls les rôles DAAF, DMG, CB peuvent importer
   - Template téléchargeable avec les référentiels pré-remplis
   - Historique des imports (`/planification/historique-imports`)
   - Documentation (`/planification/documentation-import`)
