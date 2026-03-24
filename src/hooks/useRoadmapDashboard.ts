@@ -43,7 +43,7 @@ export function useRoadmapDashboard() {
     queryFn: async () => {
       const { data, error } = await supabaseUntyped
         .from('plans_travail')
-        .select('*, direction:directions(id, code, nom)')
+        .select('*, direction:directions(id, code, label, sigle)')
         .eq('est_actif', true)
         .eq('exercice_id', exerciceId);
 
@@ -59,7 +59,7 @@ export function useRoadmapDashboard() {
       const { data, error } = await supabase
         .from('taches')
         .select(
-          '*, responsable:profiles!responsable_id(id, nom, prenom), sous_activite:sous_activites(id, code, libelle)'
+          '*, responsable:profiles!responsable_id(id, first_name, last_name, full_name), sous_activite:sous_activites(id, code, libelle)'
         )
         .eq('est_active', true)
         .eq('exercice', exercice);

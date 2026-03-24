@@ -24,16 +24,46 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { usePlansTravail } from '@/hooks/usePlansTravail';
 import { useProjetTaches } from '@/hooks/useProjetTaches';
+import { useLivrableValidation } from '@/hooks/useLivrableValidation';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { TacheForm } from '@/components/roadmap/TacheForm';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { ArrowLeft, Pencil, Plus, Send, Trash2, ListChecks, Wallet, Users } from 'lucide-react';
+import {
+  ArrowLeft,
+  Check,
+  Pencil,
+  Plus,
+  Package,
+  Send,
+  Trash2,
+  X,
+  ListChecks,
+  Wallet,
+  Users,
+} from 'lucide-react';
 import type { Tache, TacheInput } from '@/types/roadmap';
 
 const formatCurrency = (amount: number) =>
@@ -59,6 +89,16 @@ const PRIORITE_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 
   critique: 'destructive',
 };
 
+const LIVRABLE_STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> =
+  {
+    planifie: 'secondary',
+    en_cours: 'secondary',
+    soumis: 'default',
+    valide: 'default',
+    rejete: 'destructive',
+    en_retard: 'destructive',
+  };
+
 export default function ProjetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -75,8 +115,23 @@ export default function ProjetDetail() {
     isCreating,
     isUpdating,
   } = useProjetTaches(undefined, id);
+  const {
+    livrables,
+    stats: livrableStats,
+    createLivrable,
+    submitLivrable,
+    validateLivrable,
+    rejectLivrable,
+  } = useLivrableValidation({ planId: id });
   const [tacheFormOpen, setTacheFormOpen] = useState(false);
   const [editingTache, setEditingTache] = useState<Tache | null>(null);
+  const [livrableFormOpen, setLivrableFormOpen] = useState(false);
+  const [livrableNom, setLivrableNom] = useState('');
+  const [livrableDescription, setLivrableDescription] = useState('');
+  const [livrableDatePrevue, setLivrableDatePrevue] = useState('');
+  const [livrableTacheId, setLivrableTacheId] = useState('');
+  const [rejectingLivrableId, setRejectingLivrableId] = useState<string | null>(null);
+  const [motifRejet, setMotifRejet] = useState('');
 
   const plan = plans.find((p) => p.id === id);
 
@@ -308,6 +363,10 @@ export default function ProjetDetail() {
             <Users className="h-4 w-4" />
             Equipe
           </TabsTrigger>
+          <TabsTrigger value="livrables" className="gap-2">
+            <Package className="h-4 w-4" />
+            Livrables ({livrableStats.total})
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab: Taches */}
@@ -499,7 +558,244 @@ export default function ProjetDetail() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Tab: Livrables */}
+        <TabsContent value="livrables" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
+              <Badge variant="secondary">{livrableStats.planifie} planifie(s)</Badge>
+              <Badge variant="default">{livrableStats.soumis} soumis</Badge>
+              <Badge variant="default">{livrableStats.valide} valide(s)</Badge>
+              <Badge variant="destructive">{livrableStats.rejete} rejete(s)</Badge>
+              {livrableStats.enRetard > 0 && (
+                <Badge variant="destructive">{livrableStats.enRetard} en retard</Badge>
+              )}
+            </div>
+            <Button onClick={() => setLivrableFormOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter Livrable
+            </Button>
+          </div>
+
+          {livrables.length === 0 ? (
+            <EmptyStateNoData entityName="livrable" />
+          ) : (
+            <Card>
+              <CardContent className="pt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nom</TableHead>
+                      <TableHead>Tache</TableHead>
+                      <TableHead>Date prevue</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {livrables.map((livrable) => (
+                      <TableRow key={livrable.id}>
+                        <TableCell className="font-medium">{livrable.nom}</TableCell>
+                        <TableCell className="text-sm">
+                          {livrable.tache?.code ? `${livrable.tache.code} - ` : ''}
+                          {livrable.tache?.libelle ?? '-'}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {livrable.date_prevue
+                            ? new Date(livrable.date_prevue).toLocaleDateString('fr-FR')
+                            : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={LIVRABLE_STATUT_COLORS[livrable.statut] ?? 'outline'}>
+                            {livrable.statut}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {(livrable.statut === 'planifie' || livrable.statut === 'en_cours') && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                                onClick={() => submitLivrable.mutate({ id: livrable.id })}
+                              >
+                                <Send className="h-4 w-4 mr-1" />
+                                Soumettre
+                              </Button>
+                            )}
+                            {livrable.statut === 'soumis' && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-green-600 border-green-600 hover:bg-green-50"
+                                  onClick={() => validateLivrable.mutate({ id: livrable.id })}
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Valider
+                                </Button>
+                                {rejectingLivrableId === livrable.id ? (
+                                  <div className="flex items-center gap-1">
+                                    <Input
+                                      placeholder="Motif de rejet"
+                                      value={motifRejet}
+                                      onChange={(e) => setMotifRejet(e.target.value)}
+                                      className="h-8 w-40"
+                                    />
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      disabled={!motifRejet.trim()}
+                                      onClick={() => {
+                                        rejectLivrable.mutate({
+                                          id: livrable.id,
+                                          motif: motifRejet,
+                                        });
+                                        setRejectingLivrableId(null);
+                                        setMotifRejet('');
+                                      }}
+                                    >
+                                      Confirmer
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setRejectingLivrableId(null);
+                                        setMotifRejet('');
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 border-red-600 hover:bg-red-50"
+                                    onClick={() => setRejectingLivrableId(livrable.id)}
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Rejeter
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                            {livrable.statut === 'valide' && (
+                              <Badge variant="default" className="bg-green-600">
+                                <Check className="h-3 w-3 mr-1" />
+                                Valide
+                              </Badge>
+                            )}
+                            {livrable.statut === 'rejete' && (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="destructive">
+                                  <X className="h-3 w-3 mr-1" />
+                                  Rejete
+                                </Badge>
+                                {livrable.motif_rejet && (
+                                  <span className="text-xs text-muted-foreground italic">
+                                    {livrable.motif_rejet}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
+
+      {/* Livrable Form Dialog */}
+      <Dialog open={livrableFormOpen} onOpenChange={setLivrableFormOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un livrable</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="livrable-nom">Nom</Label>
+              <Input
+                id="livrable-nom"
+                value={livrableNom}
+                onChange={(e) => setLivrableNom(e.target.value)}
+                placeholder="Nom du livrable"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="livrable-description">Description</Label>
+              <Textarea
+                id="livrable-description"
+                value={livrableDescription}
+                onChange={(e) => setLivrableDescription(e.target.value)}
+                placeholder="Description du livrable"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="livrable-date">Date prevue</Label>
+              <Input
+                id="livrable-date"
+                type="date"
+                value={livrableDatePrevue}
+                onChange={(e) => setLivrableDatePrevue(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="livrable-tache">Tache</Label>
+              <Select value={livrableTacheId} onValueChange={setLivrableTacheId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectionner une tache" />
+                </SelectTrigger>
+                <SelectContent>
+                  {taches.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.code} - {t.libelle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setLivrableFormOpen(false);
+                setLivrableNom('');
+                setLivrableDescription('');
+                setLivrableDatePrevue('');
+                setLivrableTacheId('');
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              disabled={!livrableNom.trim() || !livrableTacheId}
+              onClick={() => {
+                createLivrable.mutate({
+                  nom: livrableNom,
+                  description: livrableDescription,
+                  date_prevue: livrableDatePrevue || undefined,
+                  tache_id: livrableTacheId,
+                });
+                setLivrableFormOpen(false);
+                setLivrableNom('');
+                setLivrableDescription('');
+                setLivrableDatePrevue('');
+                setLivrableTacheId('');
+              }}
+            >
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Tache Form Dialog */}
       <TacheForm

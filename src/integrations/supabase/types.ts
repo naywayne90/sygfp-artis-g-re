@@ -12150,6 +12150,8 @@ export type Database = {
           exercice_id: string | null;
           id: string;
           libelle: string;
+          os_id: string | null;
+          priorite: string | null;
           responsable_id: string | null;
           statut: string;
           updated_at: string;
@@ -12170,6 +12172,8 @@ export type Database = {
           exercice_id?: string | null;
           id?: string;
           libelle: string;
+          os_id?: string | null;
+          priorite?: string | null;
           responsable_id?: string | null;
           statut?: string;
           updated_at?: string;
@@ -12190,6 +12194,8 @@ export type Database = {
           exercice_id?: string | null;
           id?: string;
           libelle?: string;
+          os_id?: string | null;
+          priorite?: string | null;
           responsable_id?: string | null;
           statut?: string;
           updated_at?: string;
@@ -12230,6 +12236,20 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'exercices_budgetaires';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_os_id_fkey';
+            columns: ['os_id'];
+            isOneToOne: false;
+            referencedRelation: 'objectifs_strategiques';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'plans_travail_os_id_fkey';
+            columns: ['os_id'];
+            isOneToOne: false;
+            referencedRelation: 'v_top_os_imputations';
+            referencedColumns: ['os_id'];
           },
           {
             foreignKeyName: 'plans_travail_responsable_id_fkey';
@@ -15266,6 +15286,65 @@ export type Database = {
             columns: ['uploaded_by'];
             isOneToOne: false;
             referencedRelation: 'profiles_display';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      tache_livrables: {
+        Row: {
+          created_at: string | null;
+          date_prevue: string | null;
+          description: string | null;
+          id: string;
+          motif_rejet: string | null;
+          nom: string;
+          piece_jointe_path: string | null;
+          soumis_at: string | null;
+          soumis_par: string | null;
+          statut: string;
+          tache_id: string;
+          updated_at: string | null;
+          valide_at: string | null;
+          valide_par: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          date_prevue?: string | null;
+          description?: string | null;
+          id?: string;
+          motif_rejet?: string | null;
+          nom: string;
+          piece_jointe_path?: string | null;
+          soumis_at?: string | null;
+          soumis_par?: string | null;
+          statut?: string;
+          tache_id: string;
+          updated_at?: string | null;
+          valide_at?: string | null;
+          valide_par?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          date_prevue?: string | null;
+          description?: string | null;
+          id?: string;
+          motif_rejet?: string | null;
+          nom?: string;
+          piece_jointe_path?: string | null;
+          soumis_at?: string | null;
+          soumis_par?: string | null;
+          statut?: string;
+          tache_id?: string;
+          updated_at?: string | null;
+          valide_at?: string | null;
+          valide_par?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tache_livrables_tache_id_fkey';
+            columns: ['tache_id'];
+            isOneToOne: false;
+            referencedRelation: 'taches';
             referencedColumns: ['id'];
           },
         ];
@@ -21260,7 +21339,8 @@ export type Database = {
         | 'SAF'
         | 'SDPM'
         | 'TRESORERIE'
-        | 'COMPTABILITE';
+        | 'COMPTABILITE'
+        | 'CHARGE_MISSION';
       log_action_type:
         | 'CREATE'
         | 'SUBMIT'
@@ -21431,6 +21511,7 @@ export const Constants = {
         'SDPM',
         'TRESORERIE',
         'COMPTABILITE',
+        'CHARGE_MISSION',
       ],
       log_action_type: [
         'CREATE',

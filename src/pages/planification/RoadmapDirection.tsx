@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/table';
 import { usePlansTravail } from '@/hooks/usePlansTravail';
 import { useProjetTaches } from '@/hooks/useProjetTaches';
+import { useLivrableValidation } from '@/hooks/useLivrableValidation';
 import { useRBAC } from '@/hooks/useRBAC';
 import { EmptyStateNoData } from '@/components/shared/EmptyState';
 import {
@@ -29,6 +30,7 @@ import {
   Calendar,
   Users,
   Download,
+  FileCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Tache } from '@/types/roadmap';
@@ -87,7 +89,10 @@ export default function RoadmapDirection() {
   const { plans, isLoading: plansLoading } = usePlansTravail(directionId);
   const { taches: allTaches, isLoading: tachesLoading } = useProjetTaches();
 
-  const isLoading = plansLoading || tachesLoading;
+  // Livrables summary across all direction plans
+  const { livrables, isLoading: livrablesLoading } = useLivrableValidation();
+
+  const isLoading = plansLoading || tachesLoading || livrablesLoading;
 
   // Filter tasks to only those belonging to this direction's plans
   const directionPlanIds = useMemo(() => new Set(plans?.map((p) => p.id) || []), [plans]);
@@ -161,8 +166,8 @@ export default function RoadmapDirection() {
       } else {
         map.set(key, {
           id: t.responsable.id,
-          nom: t.responsable.nom,
-          prenom: t.responsable.prenom,
+          nom: t.responsable.last_name ?? '',
+          prenom: t.responsable.first_name ?? '',
           taskCount: 1,
           avgAvancement: t.avancement || 0,
         });
@@ -177,6 +182,37 @@ export default function RoadmapDirection() {
     [plans]
   );
   const pctBudget = budgetTotal > 0 ? Math.round((budgetConsomme / budgetTotal) * 100) : 0;
+
+  // Submission status summary (proxy from plans statut)
+  const submissionSummary = useMemo(
+    () => ({
+      total: plans.length,
+      brouillon: plans.filter((p) => p.statut === 'brouillon').length,
+      soumis: plans.filter((p) => p.statut === 'soumis').length,
+      valide: plans.filter((p) => p.statut === 'valide').length,
+      enCours: plans.filter((p) => p.statut === 'en_cours').length,
+    }),
+    [plans]
+  );
+
+  const directionLivrables = useMemo(
+    () =>
+      (livrables || []).filter(
+        (l) => l.tache?.plan_travail_id && directionPlanIds.has(l.tache.plan_travail_id)
+      ),
+    [livrables, directionPlanIds]
+  );
+  const livrablesSummary = useMemo(
+    () => ({
+      total: directionLivrables.length,
+      planifie: directionLivrables.filter((l) => l.statut === 'planifie').length,
+      en_cours: directionLivrables.filter((l) => l.statut === 'en_cours').length,
+      soumis: directionLivrables.filter((l) => l.statut === 'soumis').length,
+      valide: directionLivrables.filter((l) => l.statut === 'valide').length,
+      rejete: directionLivrables.filter((l) => l.statut === 'rejete').length,
+    }),
+    [directionLivrables]
+  );
 
   // PieChart data for avancement
   const pieData = useMemo(
@@ -217,7 +253,10 @@ export default function RoadmapDirection() {
     lines.push('');
     lines.push('Code Tache,Libelle,Statut,Avancement,Priorite,Date Fin,Responsable');
     directionTaches.forEach((t) => {
-      const resp = t.responsable ? `${t.responsable.prenom} ${t.responsable.nom}` : '';
+      const resp = t.responsable
+        ? t.responsable.full_name ||
+          `${t.responsable.first_name ?? ''} ${t.responsable.last_name ?? ''}`.trim()
+        : '';
       lines.push(
         `"${t.code}","${t.libelle}",${t.statut},${t.avancement}%,${t.priorite},${t.date_fin ?? ''},"${resp}"`
       );
@@ -232,7 +271,11 @@ export default function RoadmapDirection() {
   }, [plans, directionTaches]);
 
   const getResponsableName = (t: Tache) =>
-    t.responsable ? `${t.responsable.prenom} ${t.responsable.nom}` : '-';
+    t.responsable
+      ? t.responsable.full_name ||
+        `${t.responsable.first_name ?? ''} ${t.responsable.last_name ?? ''}`.trim() ||
+        '-'
+      : '-';
 
   if (isLoading) {
     return (
@@ -279,6 +322,47 @@ export default function RoadmapDirection() {
           Importer Activites
         </Button>
       </div>
+
+      {/* Submission Status Banner */}
+      {plans.length > 0 && (
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">Statut de vos soumissions</h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {submissionSummary.brouillon > 0 && (
+                    <Badge variant="secondary">
+                      {submissionSummary.brouillon} brouillon
+                      {submissionSummary.brouillon > 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                  {submissionSummary.soumis > 0 && (
+                    <Badge className="bg-amber-100 text-amber-800">
+                      {submissionSummary.soumis} en attente
+                    </Badge>
+                  )}
+                  {submissionSummary.valide > 0 && (
+                    <Badge className="bg-green-100 text-green-800">
+                      {submissionSummary.valide} valide{submissionSummary.valide > 1 ? 's' : ''}
+                    </Badge>
+                  )}
+                  {submissionSummary.enCours > 0 && (
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {submissionSummary.enCours} en cours
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              {submissionSummary.brouillon > 0 && (
+                <Button size="sm" onClick={() => navigate('/planification/projets')}>
+                  Finaliser et soumettre
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPI */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -537,6 +621,52 @@ export default function RoadmapDirection() {
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">Aucun membre assigne</p>
+        )}
+      </div>
+
+      {/* Livrables summary */}
+      <div>
+        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+          <FileCheck className="h-5 w-5 text-primary" />
+          Livrables
+        </h2>
+        {livrablesSummary.total > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <p className="text-2xl font-bold">{livrablesSummary.total}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <p className="text-2xl font-bold text-slate-600">{livrablesSummary.planifie}</p>
+                <p className="text-xs text-muted-foreground">Planifies</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <p className="text-2xl font-bold text-blue-600">
+                  {livrablesSummary.en_cours + livrablesSummary.soumis}
+                </p>
+                <p className="text-xs text-muted-foreground">En cours / Soumis</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <p className="text-2xl font-bold text-green-600">{livrablesSummary.valide}</p>
+                <p className="text-xs text-muted-foreground">Valides</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 text-center">
+                <p className="text-2xl font-bold text-destructive">{livrablesSummary.rejete}</p>
+                <p className="text-xs text-muted-foreground">Rejetes</p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Aucun livrable enregistre</p>
         )}
       </div>
 

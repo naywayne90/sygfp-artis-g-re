@@ -46,6 +46,7 @@ import {
   Plus,
   Clock,
   Percent,
+  ClipboardCheck,
 } from 'lucide-react';
 import type { TacheStatut } from '@/types/roadmap';
 
@@ -160,7 +161,7 @@ function getExecutionProgressClass(rate: number): string {
 
 export default function RoadmapDashboard() {
   const navigate = useNavigate();
-  const { globalStats, directionStats, topTachesEnRetard, taches, isLoading } =
+  const { globalStats, directionStats, topTachesEnRetard, plans, taches, isLoading } =
     useRoadmapDashboard();
 
   const tauxExecution = useMemo(() => {
@@ -199,6 +200,43 @@ export default function RoadmapDashboard() {
       .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
       .slice(0, 5);
   }, [taches]);
+
+  // Submission status overview per direction
+  const submissionOverview = useMemo(() => {
+    const byDirection = new Map<
+      string,
+      {
+        code: string;
+        nom: string;
+        brouillon: number;
+        soumis: number;
+        valide: number;
+        enCours: number;
+      }
+    >();
+
+    for (const plan of plans) {
+      const dirId = plan.direction_id;
+      if (!byDirection.has(dirId)) {
+        byDirection.set(dirId, {
+          code: plan.direction?.code || plan.direction?.sigle || '?',
+          nom: plan.direction?.label || 'Direction',
+          brouillon: 0,
+          soumis: 0,
+          valide: 0,
+          enCours: 0,
+        });
+      }
+      const entry = byDirection.get(dirId);
+      if (!entry) continue;
+      if (plan.statut === 'brouillon') entry.brouillon++;
+      else if (plan.statut === 'en_cours') entry.enCours++;
+      else if (plan.statut === 'valide') entry.valide++;
+      else if ((plan.statut as string) === 'soumis') entry.soumis++;
+    }
+
+    return Array.from(byDirection.values());
+  }, [plans]);
 
   if (isLoading) {
     return (
@@ -398,6 +436,64 @@ export default function RoadmapDashboard() {
         </Card>
       </div>
 
+      {/* Statut des soumissions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ClipboardCheck className="h-5 w-5" />
+            Statut des soumissions par direction
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {submissionOverview.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Direction</TableHead>
+                  <TableHead>Brouillon</TableHead>
+                  <TableHead>En attente</TableHead>
+                  <TableHead>Valide</TableHead>
+                  <TableHead>En cours</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {submissionOverview.map((dir) => (
+                  <TableRow key={dir.code}>
+                    <TableCell className="font-medium">{dir.nom}</TableCell>
+                    <TableCell>
+                      {dir.brouillon > 0 ? <Badge variant="secondary">{dir.brouillon}</Badge> : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {dir.soumis > 0 ? (
+                        <Badge className="bg-amber-100 text-amber-800">{dir.soumis}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {dir.valide > 0 ? (
+                        <Badge className="bg-green-100 text-green-800">{dir.valide}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {dir.enCours > 0 ? (
+                        <Badge className="bg-blue-100 text-blue-800">{dir.enCours}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune soumission</p>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Direction Cards */}
       <div>
         <h2 className="text-lg font-semibold mb-3">Progression par direction</h2>
@@ -471,7 +567,9 @@ export default function RoadmapDashboard() {
                       <TableCell>{tache.libelle}</TableCell>
                       <TableCell className="text-sm">
                         {tache.responsable
-                          ? `${tache.responsable.prenom ?? ''} ${tache.responsable.nom}`.trim()
+                          ? tache.responsable.full_name ||
+                            `${tache.responsable.first_name ?? ''} ${tache.responsable.last_name ?? ''}`.trim() ||
+                            '-'
                           : '-'}
                       </TableCell>
                       <TableCell>{tache.date_fin}</TableCell>
@@ -533,7 +631,8 @@ export default function RoadmapDashboard() {
                         <>
                           <span>-</span>
                           <span>
-                            {tache.responsable.prenom ?? ''} {tache.responsable.nom}
+                            {tache.responsable.full_name ||
+                              `${tache.responsable.first_name ?? ''} ${tache.responsable.last_name ?? ''}`.trim()}
                           </span>
                         </>
                       )}

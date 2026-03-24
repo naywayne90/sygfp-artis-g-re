@@ -452,7 +452,9 @@ export default function ProjetsList() {
                       </TableCell>
                       <TableCell className="text-sm">
                         {plan.responsable
-                          ? `${plan.responsable.prenom} ${plan.responsable.nom}`
+                          ? plan.responsable.full_name ||
+                            `${plan.responsable.first_name ?? ''} ${plan.responsable.last_name ?? ''}`.trim() ||
+                            '-'
                           : '-'}
                       </TableCell>
                       <TableCell>
