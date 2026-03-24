@@ -1,389 +1,109 @@
-# Marchés Publics - Documentation Technique
+# Module Passation de Marche — SYGFP (Etape 5/9)
 
-> **Version**: 1.0 | **Dernière mise à jour**: 2026-01-15 | **Statut**: ✅ Opérationnel
+> Derniere mise a jour : 24/03/2026
 
 ## 1. Vue d'ensemble
 
-Le module **Marchés** gère la passation des marchés publics selon les procédures réglementaires. Il permet de créer, suivre et valider les marchés avant leur exécution.
+Le module **Passation de Marche** gere le cycle complet d'un marche public : de la publication a la signature. Il suit un workflow en 7 etapes (brouillon > publie > cloture > en_evaluation > attribue > approuve > signe). Le module est **certifie 100/100** avec 94 tests unitaires et 66 tests E2E.
 
-### Position dans la chaîne
+**Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > **Passation Marche** > Engagement > Liquidation > Ordonnancement > Reglement
 
-```
-... → Imputation → Expression Besoin → [Marché] → Engagement → ...
-```
+## 2. Routes et acces
 
-### Rôle principal
+| Route                                       | Page                                         | Roles     |
+| ------------------------------------------- | -------------------------------------------- | --------- |
+| `/execution/passation-marche`               | Liste principale (KPIs, onglets, pagination) | Tous      |
+| `/execution/passation-marche?sourceEB={id}` | Pre-selection EB source                      | Tous      |
+| `/execution/passation-marche/approbation`   | Espace approbation DG                        | DG, ADMIN |
 
-- Créer les marchés avec les informations de passation
-- Gérer les différents types de procédures
-- Suivre les offres et attribuer les marchés
-- Valider les marchés avant engagement
-- Générer les documents contractuels
+## 3. Composants
 
----
+| Composant                    | Fichier                                                   | Role                                                 |
+| ---------------------------- | --------------------------------------------------------- | ---------------------------------------------------- |
+| `PassationMarchePage` (page) | `src/pages/execution/PassationMarche.tsx`                 | Page principale avec KPIs, onglets, pagination       |
+| `PassationMarcheForm`        | `src/components/passation-marche/PassationMarcheForm.tsx` | Dialog creation (selection EB, mode passation, lots) |
+| `PassationDetails`           | `src/components/passation-marche/PassationDetails.tsx`    | Sheet/Dialog detail avec workflow visuel             |
+| `PassationApprobation`       | `src/pages/execution/PassationApprobation.tsx`            | Page dediee approbation DG                           |
+| `NotesPagination`            | `src/components/shared/NotesPagination.tsx`               | Pagination serveur-side                              |
+| `WorkflowStepIndicator`      | `src/components/workflow/WorkflowStepIndicator.tsx`       | Barre horizontale etape 5 active                     |
 
-## 2. Architecture
+## 4. Boutons et actions
 
-### 2.1 Tables principales
+| Bouton              | Visible si                     | Action                                    | Effet                                                                              |
+| ------------------- | ------------------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| Creer PM            | Onglet "A traiter", EB validee | Ouvre `PassationMarcheForm` pre-rempli    | Cree passation brouillon liee a l'EB                                               |
+| Voir (oeil)         | Toute passation                | Ouvre `PassationDetails`                  | Consultation                                                                       |
+| Publier             | PM brouillon, role DAAF        | `publishPassation(id)`                    | Passe en `publie`. Pre-requis : EB liee, mode passation, dates publication/cloture |
+| Cloturer            | PM publiee, role DAAF          | `closePassation(id)`                      | Passe en `cloture`                                                                 |
+| Evaluer             | PM cloturee, role DAAF         | `startEvaluationPassation(id)`            | Passe en `en_evaluation`                                                           |
+| Attribuer           | PM en evaluation, role DAAF    | `proposeAttributionPassation(id, data)`   | Passe en `attribue`, propose attribution au prestataire                            |
+| Approuver           | PM attribuee, role DG          | `approvePassation(id)`                    | Passe en `approuve`                                                                |
+| Rejeter attribution | PM attribuee, role DG          | `rejectAttributionPassation(id, motif)`   | Retour en `en_evaluation` avec motif                                               |
+| Signer              | PM approuvee, role DG          | `signPassation(id)`                       | Passe en `signe`, marche finalise                                                  |
+| Modifier            | PM brouillon                   | Ouvre `PassationMarcheForm` edition       | Mise a jour                                                                        |
+| Supprimer           | PM brouillon                   | `deletePassation(id)`                     | Suppression definitive                                                             |
+| Creer engagement    | PM signee, menu contextuel     | Navigue vers `/engagements?sourcePM={id}` | Chaine vers etape suivante                                                         |
+| Exporter > Excel    | Toujours                       | `exportExcel()`                           | Export .xlsx                                                                       |
+| Exporter > PDF      | Toujours                       | `exportPDF()`                             | Export PDF                                                                         |
+| Exporter > CSV      | Toujours                       | `exportCSV()`                             | Export CSV                                                                         |
 
-| Table | Description | Clé primaire |
-|-------|-------------|--------------|
-| `marches` | Marchés publics | `id` (UUID) |
-| `marche_validations` | Étapes de validation | `id` (UUID) |
-| `marche_lots` | Allotissement | `id` (UUID) |
-| `marche_offres` | Offres reçues | `id` (UUID) |
-| `soumissions` | Soumissions (ancien) | `id` (UUID) |
-
-### 2.2 Colonnes clés de `marches`
-
-| Colonne | Type | Nullable | Description |
-|---------|------|----------|-------------|
-| `id` | uuid | Non | Identifiant unique |
-| `numero` | text | Oui | Numéro auto-généré |
-| `objet` | text | Non | Objet du marché |
-| `montant` | numeric | Non | Montant total |
-| `type_marche` | varchar | Oui | Type de marché |
-| `type_procedure` | varchar | Oui | Procédure de passation |
-| `mode_passation` | varchar | Oui | Mode de passation |
-| `prestataire_id` | uuid | Oui | Attributaire |
-| `note_id` | uuid | Oui | Note d'origine |
-| `dossier_id` | uuid | Oui | Dossier lié |
-| `validation_status` | varchar | Oui | État de validation |
-| `current_step` | integer | Oui | Étape actuelle |
-| `date_attribution` | date | Oui | Date d'attribution |
-| `duree_execution` | integer | Oui | Durée en jours |
-| `exercice` | integer | Oui | Exercice budgétaire |
-
-### 2.3 Types de marchés
-
-```typescript
-export const TYPES_MARCHE = [
-  { value: "fourniture", label: "Fournitures" },
-  { value: "services", label: "Services" },
-  { value: "travaux", label: "Travaux" },
-  { value: "prestations_intellectuelles", label: "Prestations intellectuelles" },
-];
-```
-
-### 2.4 Types de procédures
-
-```typescript
-export const TYPES_PROCEDURE = [
-  { value: "appel_offres_ouvert", label: "Appel d'offres ouvert" },
-  { value: "appel_offres_restreint", label: "Appel d'offres restreint" },
-  { value: "consultation", label: "Consultation restreinte" },
-  { value: "gre_a_gre", label: "Gré à gré" },
-  { value: "demande_cotation", label: "Demande de cotation" },
-];
-```
-
----
-
-## 3. Workflow de validation
-
-### 3.1 Étapes (4 étapes)
-
-| Étape | Rôle | Action |
-|-------|------|--------|
-| 1 | `ASSISTANT_SDPM` | Préparation technique |
-| 2 | `SDPM` | Validation procédure |
-| 3 | `SDCT` | Contrôle technique |
-| 4 | `CB` | Validation budgétaire finale |
-
-### 3.2 Diagramme
+## 5. Statuts et transitions
 
 ```
-┌─────────────────┐
-│   BROUILLON     │ ← Création
-└────────┬────────┘
-         │ Soumettre
-         ▼
-┌─────────────────┐
-│ ÉTAPE 1:        │
-│ ASSISTANT_SDPM  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ ÉTAPE 2: SDPM   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ ÉTAPE 3: SDCT   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ ÉTAPE 4: CB     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│     VALIDE      │ → Vers Expression Besoin / Engagement
-└─────────────────┘
+   ┌──────────┐  publier  ┌──────────┐  cloturer  ┌──────────┐  evaluer  ┌──────────────┐
+   │ brouillon├─────────>│  publie  ├──────────>│ cloture  ├────────>│en_evaluation │
+   └──────────┘          └──────────┘           └──────────┘         └──────┬───────┘
+                                                                           │
+                                                                  attribuer│
+                                                                           v
+                         ┌──────────┐  signer  ┌──────────┐  approuver  ┌──────────┐
+                         │  signe  │<─────────│ approuve │<───────────│ attribue │
+                         └──────────┘          └──────────┘            └────┬─────┘
+                                                                           │
+                                                              rejeter attr.│
+                                                                           v
+                                                                    en_evaluation
+                                                                    (retour)
 ```
 
----
+**Statuts lifecycle** : `brouillon` > `publie` > `cloture` > `en_evaluation` > `attribue` > `approuve` > `signe`
+**Statuts legacy** : `soumis`, `en_analyse`, `valide`, `rejete`, `differe`
 
-## 4. Documents requis
+## 6. Workflow de validation
 
-```typescript
-export const DOCUMENTS_REQUIS_MARCHE = [
-  { code: "proforma", label: "Proforma / Devis", obligatoire: true },
-  { code: "fiche_contrat", label: "Fiche de contrat", obligatoire: true },
-  { code: "bon_commande", label: "Bon de commande", obligatoire: true },
-  { code: "pv_reception", label: "PV de réception", obligatoire: false },
-  { code: "attestation_service_fait", label: "Attestation service fait", obligatoire: false },
-];
-```
+| Etape          | Role       | Action                          | Pre-requis                                                 |
+| -------------- | ---------- | ------------------------------- | ---------------------------------------------------------- |
+| 1. Creation    | Agent DAAF | Cree PM depuis EB validee       | EB `valide`                                                |
+| 2. Publication | DAAF       | Publie le marche                | EB liee, mode passation, dates pub/cloture, lots si alloti |
+| 3. Cloture     | DAAF       | Cloture reception offres        | Statut `publie`                                            |
+| 4. Evaluation  | DAAF       | Demarre evaluation              | Statut `cloture`                                           |
+| 5. Attribution | DAAF       | Propose attribution prestataire | Statut `en_evaluation`                                     |
+| 6. Approbation | DG         | Approuve ou rejette attribution | Statut `attribue`                                          |
+| 7. Signature   | DG         | Signe le marche                 | Statut `approuve`                                          |
 
----
+**Modes de passation** : Appel d'offres ouvert, Appel d'offres restreint, Gre a gre, Consultation restreinte, etc. (definis dans `PROCEDURES_PASSATION` / `MODES_PASSATION`)
 
-## 5. Gestion des offres
+## 7. Donnees Supabase
 
-### 5.1 Table `marche_offres`
+| Table                | Colonnes cles                                                                                                                                                                                                                                                                       |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `passations_marche`  | `id`, `numero`, `objet`, `expression_besoin_id`, `mode_passation`, `montant_estime`, `montant_marche`, `date_publication`, `date_cloture`, `statut`, `allotissement`, `lots` (JSONB), `prestataire_id`, `motif_attribution`, `dossier_id`, `direction_id`, `exercice`, `created_by` |
+| `expressions_besoin` | EB source liee via `expression_besoin_id`                                                                                                                                                                                                                                           |
+| `prestataires`       | Prestataire attributaire                                                                                                                                                                                                                                                            |
+| `directions`         | Direction demandeuse                                                                                                                                                                                                                                                                |
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `marche_id` | uuid | Marché concerné |
-| `prestataire_id` | uuid | Soumissionnaire |
-| `montant_offre` | numeric | Montant proposé |
-| `note_technique` | numeric | Note technique |
-| `note_financiere` | numeric | Note financière |
-| `note_globale` | numeric | Note pondérée |
-| `is_selected` | boolean | Offre retenue |
+## 8. Hooks
 
-### 5.2 Calcul de la note globale
+| Hook                  | Fichier                                  | Role                                                                                                                                                                                                                    |
+| --------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `usePassationsMarche` | `src/hooks/usePassationsMarche.ts`       | Query paginee serveur + mutations : delete, publish, close, startEvaluation, proposeAttribution, approve, rejectAttribution, sign. Compteurs par statut. EB validees. Types `PassationMarche`, `EBValidee`, `LotMarche` |
+| `usePassationExport`  | `src/hooks/usePassationExport.ts`        | Export Excel, PDF, CSV                                                                                                                                                                                                  |
+| `exportPassationPDF`  | `src/services/passationExportService.ts` | Service export PDF unitaire                                                                                                                                                                                             |
+| `canPublish(p)`       | Dans `usePassationsMarche`               | Verifie pre-requis publication                                                                                                                                                                                          |
+| `canClose(p)`         | Dans `usePassationsMarche`               | Verifie pre-requis cloture                                                                                                                                                                                              |
 
-```typescript
-note_globale = (note_technique * 0.7) + (note_financiere * 0.3)
-```
+## 9. Tests
 
-### 5.3 Sélection du lauréat
-
-```typescript
-const selectWinner = async (offreId: string) => {
-  // 1. Marquer l'offre comme sélectionnée
-  await supabase
-    .from("marche_offres")
-    .update({ is_selected: true })
-    .eq("id", offreId);
-
-  // 2. Mettre à jour le marché avec le prestataire
-  await supabase
-    .from("marches")
-    .update({ 
-      prestataire_id: offre.prestataire_id,
-      validation_status: "attribue"
-    })
-    .eq("id", marcheId);
-};
-```
-
----
-
-## 6. Procédure de gré à gré
-
-### 6.1 Justification obligatoire
-
-Quand `type_procedure === "gre_a_gre"`, une justification est **obligatoire** :
-
-```typescript
-if (needsJustification && !formData.justification_derogation) {
-  return; // Bloquer la soumission
-}
-```
-
-### 6.2 Cas autorisés
-
-- Urgence impérieuse
-- Fournisseur unique
-- Montant < seuil réglementaire
-- Extension de marché existant
-
----
-
-## 7. Hooks React
-
-### 7.1 Hook principal : `useMarches`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `marches` | `Marche[]` | Liste des marchés |
-| `prestataires` | `Prestataire[]` | Fournisseurs actifs |
-| `notesImputees` | `Note[]` | Notes imputées disponibles |
-| `createMarche` | `function` | Créer un marché |
-| `updateMarche` | `function` | Modifier |
-| `submitMarche` | `function` | Soumettre |
-| `validateMarche` | `function` | Valider étape |
-| `rejectMarche` | `function` | Rejeter |
-| `isCreating` | `boolean` | État |
-
-### 7.2 Hook des offres : `useMarcheOffres`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `offres` | `MarcheOffre[]` | Offres du marché |
-| `winnerOffre` | `MarcheOffre?` | Offre sélectionnée |
-| `createOffre` | `function` | Ajouter une offre |
-| `updateOffre` | `function` | Modifier offre |
-| `selectWinner` | `function` | Sélectionner lauréat |
-| `deleteOffre` | `function` | Supprimer offre |
-
-### 7.3 Fichiers sources
-
-```
-src/hooks/useMarches.ts        # Hook principal (~513 lignes)
-src/hooks/useMarcheOffres.ts   # Gestion offres (~193 lignes)
-```
-
----
-
-## 8. Pages et Composants
-
-### 8.1 Pages
-
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/marches` | `Marches.tsx` | Liste et gestion |
-
-### 8.2 Composants
-
-| Composant | Description |
-|-----------|-------------|
-| `MarcheForm.tsx` | Formulaire création (~506 lignes) |
-| `MarcheList.tsx` | Liste avec filtres |
-| `MarcheDetails.tsx` | Vue détaillée |
-| `MarcheOffresList.tsx` | Gestion des offres |
-| `MarcheValidateDialog.tsx` | Dialog validation |
-| `MarcheRejectDialog.tsx` | Dialog rejet |
-| `MarcheDeferDialog.tsx` | Dialog report |
-
-### 8.3 Arborescence
-
-```
-src/
-├── pages/
-│   └── Marches.tsx
-└── components/
-    └── marches/
-        ├── MarcheForm.tsx
-        ├── MarcheList.tsx
-        ├── MarcheDetails.tsx
-        ├── MarcheOffresList.tsx
-        ├── MarcheValidateDialog.tsx
-        ├── MarcheRejectDialog.tsx
-        └── MarcheDeferDialog.tsx
-```
-
----
-
-## 9. API Supabase - Exemples
-
-### 9.1 Créer un marché
-
-```typescript
-const { data, error } = await supabase
-  .from("marches")
-  .insert({
-    objet: "Fourniture de matériel informatique",
-    montant: 10000000,
-    type_marche: "fourniture",
-    type_procedure: "consultation",
-    mode_passation: "consultation",
-    note_id: "uuid-note",
-    prestataire_id: "uuid-prestataire",
-    nombre_lots: 1,
-    duree_execution: 45,
-    exercice: 2026,
-    validation_status: "brouillon",
-    current_step: 0,
-  })
-  .select()
-  .single();
-```
-
-### 9.2 Récupérer avec relations
-
-```typescript
-const { data, error } = await supabase
-  .from("marches")
-  .select(`
-    *,
-    prestataire:prestataires(id, raison_sociale, code),
-    note:notes_dg(id, numero, objet),
-    offres:marche_offres(*, prestataire:prestataires(raison_sociale))
-  `)
-  .eq("exercice", 2026)
-  .order("created_at", { ascending: false });
-```
-
----
-
-## 10. Allotissement
-
-### 10.1 Table `marche_lots`
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `marche_id` | uuid | Marché parent |
-| `numero_lot` | integer | N° du lot |
-| `intitule` | text | Description |
-| `montant` | numeric | Montant du lot |
-| `prestataire_id` | uuid | Attributaire du lot |
-
-### 10.2 Usage
-
-```typescript
-// Marché avec plusieurs lots
-const marche = {
-  objet: "Réhabilitation bâtiment",
-  nombre_lots: 3,
-  // Lots créés séparément
-};
-
-// Créer les lots
-const lots = [
-  { numero_lot: 1, intitule: "Gros œuvre", montant: 5000000 },
-  { numero_lot: 2, intitule: "Électricité", montant: 2000000 },
-  { numero_lot: 3, intitule: "Plomberie", montant: 1500000 },
-];
-```
-
----
-
-## 11. Intégration avec autres modules
-
-### 11.1 Entrées
-
-| Module source | Données reçues |
-|---------------|----------------|
-| Notes DG | Note imputée (objet, montant) |
-| Prestataires | Fournisseur sélectionné |
-
-### 11.2 Sorties
-
-| Module cible | Données envoyées |
-|--------------|------------------|
-| Expression Besoin | Marché validé |
-| Contrats | Marché attribué |
-| Engagements | Référence marché |
-
----
-
-## 12. Points ouverts / TODOs
-
-- [ ] Génération PDF des documents de marché
-- [ ] Gestion des avenants de marché
-- [ ] Publication appel d'offres
-- [ ] Portail fournisseurs pour soumissions
-- [ ] Signature électronique
-
----
-
-## 13. Changelog
-
-| Date | Version | Modifications |
-|------|---------|---------------|
-| 2026-01-15 | 1.0 | Documentation initiale |
+- **94 tests unitaires** + **66 tests E2E** Playwright
+- **Certifie 100/100** — voir `docs/CERTIFICATION_PASSATION_MARCHE.md`
+- Verification : `npx vitest run --grep "passation"`

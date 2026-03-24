@@ -53,6 +53,7 @@ import {
   Upload,
   CheckSquare,
   LayoutDashboard,
+  Eye,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -179,6 +180,7 @@ const GESTION_ITEMS = [
 ];
 
 const RAPPORTS_ITEMS = [
+  { title: 'Suivi DG', url: '/suivi-dg', icon: Eye },
   { title: "États d'exécution", url: '/etats-execution', icon: BarChart3 },
   { title: 'Alertes Budgétaires', url: '/alertes-budgetaires', icon: Target },
 ];

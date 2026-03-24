@@ -10,20 +10,36 @@ React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query
 
 ## 3. Etat des modules
 
-| Module               | Statut               | Tests                 | Doc                                       |
-| -------------------- | -------------------- | --------------------- | ----------------------------------------- |
-| Note SEF             | Production           | 91+ RBAC              | -                                         |
-| Note AEF             | Production           | E2E                   | `docs/CERTIFICATION_NOTES_AEF.md`         |
-| Imputation           | Production           | E2E                   | `docs/CERTIFICATION_IMPUTATION.md`        |
-| Expression Besoin    | Production           | E2E                   | `docs/CERTIFICATION_EXPRESSION_BESOIN.md` |
-| **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/CERTIFICATION_PASSATION_MARCHE.md`  |
-| **Engagement**       | **Certifie 100/100** | **231 unit + 60 E2E** | `docs/CERTIFICATION_ENGAGEMENT.md`        |
-| **Liquidation**      | **Certifie 100/100** | **104 unit + 60 E2E** | `docs/CERTIFICATION_LIQUIDATION.md`       |
-| Ordonnancement       | Production (legacy)  | E2E                   | -                                         |
-| Reglement            | Production (legacy)  | 138 E2E               | -                                         |
-| Budget/Planification | Production           | 52 unit               | -                                         |
-| Workflow Engine      | Production           | 95 unit               | -                                         |
-| RBAC                 | Production           | 91 unit               | -                                         |
+### Chaine de depense (9 etapes)
+
+| #   | Module               | Statut               | Tests                 | Doc                                        |
+| --- | -------------------- | -------------------- | --------------------- | ------------------------------------------ |
+| 1   | Note SEF             | Production           | 91+ RBAC              | `docs/modules/MODULE_NOTES_SEF.md`         |
+| 2   | Note AEF             | Production           | E2E                   | `docs/modules/MODULE_NOTES_AEF.md`         |
+| 3   | Imputation           | Production           | E2E                   | `docs/modules/MODULE_IMPUTATION.md`        |
+| 4   | Expression Besoin    | Production           | E2E                   | `docs/modules/MODULE_EXPRESSION_BESOIN.md` |
+| 5   | **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/modules/MODULE_MARCHES.md`           |
+| 6   | **Engagement**       | **Certifie 100/100** | **231 unit + 60 E2E** | `docs/modules/MODULE_ENGAGEMENTS.md`       |
+| 7   | **Liquidation**      | **Certifie 100/100** | **104 unit + 60 E2E** | `docs/modules/MODULE_LIQUIDATIONS.md`      |
+| 8   | Ordonnancement       | Production (legacy)  | E2E                   | `docs/modules/MODULE_ORDONNANCEMENTS.md`   |
+| 9   | Reglement            | Production (legacy)  | 138 E2E               | `docs/modules/MODULE_REGLEMENTS.md`        |
+
+### Modules transversaux
+
+| Module                   | Statut     | Tests   | Doc                                          |
+| ------------------------ | ---------- | ------- | -------------------------------------------- |
+| Budget/Planification     | Production | 52 unit | `docs/modules/MODULE_BUDGET.md`              |
+| Feuille de Route         | Production | -       | `docs/modules/MODULE_FEUILLE_ROUTE.md`       |
+| Suivi DG                 | Production | -       | `docs/modules/MODULE_SUIVI_DG.md`            |
+| Tresorerie               | Production | -       | `docs/modules/MODULE_TRESORERIE.md`          |
+| Recettes                 | Production | -       | `docs/modules/MODULE_RECETTES.md`            |
+| Approvisionnement        | Production | -       | `docs/modules/MODULE_APPROVISIONNEMENT.md`   |
+| Prestataires/Contrats    | Production | -       | `docs/modules/MODULE_PRESTATAIRES.md`        |
+| Alertes Budgetaires      | Production | -       | `docs/modules/MODULE_ALERTES_BUDGETAIRES.md` |
+| Etats d'Execution        | Production | -       | `docs/modules/MODULE_ETATS_EXECUTION.md`     |
+| Parametrage (22 modules) | Production | -       | `docs/modules/MODULE_PARAMETRAGE.md`         |
+| Workflow Engine          | Production | 95 unit | -                                            |
+| RBAC                     | Production | 91 unit | -                                            |
 
 ## 4. Conventions de code (resume)
 
@@ -65,7 +81,7 @@ Voir `docs/CONVENTIONS.md` sections 10-19 pour toutes les regles frontend detail
 ```bash
 npx tsc --noEmit         # 0 erreurs TypeScript
 npx vite build           # Build OK
-npx vitest run           # 704/704 tests PASS (au 22/03/2026)
+npx vitest run           # 704/704 tests PASS (au 24/03/2026)
 ```
 
 **INTERDIT :**
@@ -121,40 +137,48 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8080   # 200 = serveur O
 
 **URLs a tester (navigateur ou Playwright) :**
 
-| URL                                                            | Page attendue            |
-| -------------------------------------------------------------- | ------------------------ |
-| `http://localhost:8080/auth`                                   | Connexion                |
-| `http://localhost:8080/`                                       | Tableau de Bord DG       |
-| `http://localhost:8080/notes-sef`                              | Notes SEF                |
-| `http://localhost:8080/notes-aef`                              | Notes AEF                |
-| `http://localhost:8080/execution/imputation`                   | Imputation               |
-| `http://localhost:8080/execution/expression-besoin`            | Expressions de Besoin    |
-| `http://localhost:8080/execution/passation-marche`             | Passation de Marche      |
-| `http://localhost:8080/execution/passation-marche/approbation` | Approbation DG           |
-| `http://localhost:8080/engagements`                            | Engagements              |
-| `http://localhost:8080/liquidations`                           | Liquidations             |
-| `http://localhost:8080/ordonnancements`                        | Ordonnancements          |
-| `http://localhost:8080/reglements`                             | Reglements               |
-| `http://localhost:8080/planification/structure`                | Structure Budgetaire     |
-| `http://localhost:8080/planification/budget`                   | Planification Budgetaire |
-| `http://localhost:8080/planification/plan-travail`             | Plan de Travail          |
-| `http://localhost:8080/planification/virements`                | Virements                |
-| `http://localhost:8080/planification/import-export`            | Import / Export          |
-| `http://localhost:8080/recherche`                              | Recherche Dossier        |
-| `http://localhost:8080/notifications`                          | Notifications            |
-| `http://localhost:8080/alertes-budgetaires`                    | Alertes Budgetaires      |
-| `http://localhost:8080/mon-profil`                             | Mon Profil               |
-| `http://localhost:8080/admin/exercices`                        | Exercices Budgetaires    |
-| `http://localhost:8080/admin/utilisateurs`                     | Gestion Utilisateurs     |
-| `http://localhost:8080/contractualisation/prestataires`        | Prestataires             |
-| `http://localhost:8080/contractualisation/contrats`            | Gestion Contrats         |
-| `http://localhost:8080/approvisionnement`                      | Approvisionnement        |
-| `http://localhost:8080/tresorerie`                             | Tresorerie               |
-| `http://localhost:8080/recettes`                               | Declaration Recettes     |
-| `http://localhost:8080/etats-execution`                        | Etats d'Execution        |
-| `http://localhost:8080/suivi-dossiers`                         | Suivi des Dossiers       |
+| URL                                                              | Page attendue            |
+| ---------------------------------------------------------------- | ------------------------ |
+| `http://localhost:8080/auth`                                     | Connexion                |
+| `http://localhost:8080/`                                         | Tableau de Bord DG       |
+| `http://localhost:8080/notes-sef`                                | Notes SEF                |
+| `http://localhost:8080/notes-aef`                                | Notes AEF                |
+| `http://localhost:8080/execution/imputation`                     | Imputation               |
+| `http://localhost:8080/execution/expression-besoin`              | Expressions de Besoin    |
+| `http://localhost:8080/execution/passation-marche`               | Passation de Marche      |
+| `http://localhost:8080/execution/passation-marche/approbation`   | Approbation DG           |
+| `http://localhost:8080/engagements`                              | Engagements              |
+| `http://localhost:8080/liquidations`                             | Liquidations             |
+| `http://localhost:8080/ordonnancements`                          | Ordonnancements          |
+| `http://localhost:8080/reglements`                               | Reglements               |
+| `http://localhost:8080/planification/structure`                  | Structure Budgetaire     |
+| `http://localhost:8080/planification/budget`                     | Planification Budgetaire |
+| `http://localhost:8080/planification/plan-travail`               | Plan de Travail          |
+| `http://localhost:8080/planification/virements`                  | Virements                |
+| `http://localhost:8080/planification/import-export`              | Import / Export          |
+| `http://localhost:8080/recherche`                                | Recherche Dossier        |
+| `http://localhost:8080/notifications`                            | Notifications            |
+| `http://localhost:8080/alertes-budgetaires`                      | Alertes Budgetaires      |
+| `http://localhost:8080/mon-profil`                               | Mon Profil               |
+| `http://localhost:8080/admin/exercices`                          | Exercices Budgetaires    |
+| `http://localhost:8080/admin/utilisateurs`                       | Gestion Utilisateurs     |
+| `http://localhost:8080/contractualisation/prestataires`          | Prestataires             |
+| `http://localhost:8080/contractualisation/contrats`              | Gestion Contrats         |
+| `http://localhost:8080/approvisionnement`                        | Approvisionnement        |
+| `http://localhost:8080/tresorerie`                               | Tresorerie               |
+| `http://localhost:8080/recettes`                                 | Declaration Recettes     |
+| `http://localhost:8080/etats-execution`                          | Etats d'Execution        |
+| `http://localhost:8080/suivi-dossiers`                           | Suivi des Dossiers       |
+| `http://localhost:8080/suivi-dg`                                 | Suivi DG (validations)   |
+| `http://localhost:8080/planification/roadmap-dashboard`          | Feuille Route Dashboard  |
+| `http://localhost:8080/planification/roadmap-direction`          | Mon Espace Direction     |
+| `http://localhost:8080/planification/projets`                    | Projets & Plans          |
+| `http://localhost:8080/planification/soumissions-feuilles-route` | Soumissions FR           |
+| `http://localhost:8080/planification/feuilles-route`             | Import Activites         |
+| `http://localhost:8080/planification/historique-imports`         | Historique Imports       |
+| `http://localhost:8080/contractualisation/comptabilite-matiere`  | Comptabilite Matiere     |
 
-Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critiques**.
+Toutes ces routes ont ete testees le 24/03/2026 : **38/38 OK, 0 erreurs critiques**.
 
 ## 7. MCP disponibles
 
@@ -197,6 +221,6 @@ Toutes ces routes ont ete testees le 19/02/2026 : **29/29 OK, 0 erreurs critique
 | Audit technique                 | `docs/AUDIT_TECHNIQUE_COMPLET.md`        |
 | Migration SQL Server            | `docs/RAPPORT_MIGRATION_COMPLETE.md`     |
 
-### Metriques cles (23/03/2026)
+### Metriques cles (24/03/2026)
 
-124 pages | 426 composants/50 modules | 177 hooks | 203 tables | 526 RLS policies | 278 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E
+125 pages | 426 composants | 179 hooks | 201 tables | 671 RLS policies | 281 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E | 103 routes | 50 items sidebar

@@ -1,298 +1,116 @@
-# Notes AEF (Avec Effet Financier) - Documentation Technique
+# Module Notes AEF — SYGFP (Etape 2/9)
 
-> **Version**: 1.0 | **Dernière mise à jour**: 2026-01-15 | **Statut**: ✅ Opérationnel
+> Derniere mise a jour : 24/03/2026
 
 ## 1. Vue d'ensemble
 
-Les **Notes AEF** (Notes Avec Effet Financier) constituent la deuxième étape de la chaîne de dépense. Elles formalisent une demande validée (Note SEF) en y ajoutant les informations financières nécessaires pour l'imputation budgétaire.
+Les **Notes Avec Effet Financier (AEF)** constituent la deuxieme etape de la chaine de depense. Elles transforment un besoin valide (Note SEF) en demande a impact budgetaire. Une Note AEF peut etre creee de deux facons :
 
-### Position dans la chaîne
+- **Depuis une Note SEF validee** (`origin: FROM_SEF`) : la reference pivot est heritee de la SEF
+- **AEF directe DG** (`origin: DIRECT`) : le DG/ADMIN cree une AEF autonome qui genere automatiquement une SEF shadow (statut `valide_auto`)
 
-```
-Note SEF (validée) → [Note AEF] → Imputation → Expression Besoin → ...
-```
+La table Supabase sous-jacente est `notes_dg`.
 
-### Rôle principal
+**Chaine** : Note SEF > **Note AEF** > Imputation > Expression Besoin > Passation Marche > Engagement > Liquidation > Ordonnancement > Reglement
 
-- Transformer une Note SEF validée en demande financière formelle
-- Estimer le montant de la dépense
-- Préparer l'imputation budgétaire
-- Assurer la traçabilité entre SEF et AEF
+## 2. Routes et acces
 
----
+| Route                        | Page                                         | Roles           |
+| ---------------------------- | -------------------------------------------- | --------------- |
+| `/notes-aef`                 | Liste principale (KPIs, onglets, pagination) | Tous            |
+| `/notes-aef/validation`      | Espace validation DAAF/DG                    | ADMIN, DG, DAAF |
+| `/notes-aef/:id`             | Detail complet d'une note                    | Tous            |
+| `/notes-aef?prefill={sefId}` | Pre-remplissage depuis Note SEF              | Tous            |
 
-## 2. Architecture
+## 3. Composants
 
-### 2.1 Tables principales
+| Composant               | Fichier                                             | Role                                                     |
+| ----------------------- | --------------------------------------------------- | -------------------------------------------------------- |
+| `NotesAEF` (page)       | `src/pages/NotesAEF.tsx`                            | Page principale avec KPIs, onglets, exports, pagination  |
+| `NoteAEFForm`           | `src/components/notes-aef/NoteAEFForm.tsx`          | Dialog creation/edition, liaison Note SEF ou AEF directe |
+| `NoteAEFList`           | `src/components/notes-aef/NoteAEFList.tsx`          | Tableau avec actions contextuelles par statut            |
+| `NoteAEFDetailSheet`    | `src/components/notes-aef/NoteAEFDetailSheet.tsx`   | Sheet lateral de detail                                  |
+| `NoteAEFRejectDialog`   | `src/components/notes-aef/NoteAEFRejectDialog.tsx`  | Dialog de saisie motif de rejet                          |
+| `NoteAEFDeferDialog`    | `src/components/notes-aef/NoteAEFDeferDialog.tsx`   | Dialog de report (motif + deadline correction)           |
+| `NoteAEFImputeDialog`   | `src/components/notes-aef/NoteAEFImputeDialog.tsx`  | Dialog d'imputation sur ligne budgetaire                 |
+| `WorkflowStepIndicator` | `src/components/workflow/WorkflowStepIndicator.tsx` | Barre horizontale etape 2 active                         |
+| `NotesFiltersBar`       | `src/components/shared/NotesFiltersBar.tsx`         | Recherche + filtres avances (urgence, direction, dates)  |
+| `NotesPagination`       | `src/components/shared/NotesPagination.tsx`         | Pagination serveur-side                                  |
 
-| Table | Description | Clé primaire |
-|-------|-------------|--------------|
-| `notes_dg` | Stocke les notes AEF | `id` (UUID) |
-| `note_attachments` | Pièces jointes | `id` (UUID) |
+## 4. Boutons et actions
 
-### 2.2 Colonnes clés de `notes_dg`
+| Bouton            | Visible si                                  | Action                                           | Effet                                                                                                                                                       |
+| ----------------- | ------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nouvelle note AEF | `canWrite` (exercice ouvert)                | Ouvre `NoteAEFForm`                              | Cree brouillon depuis SEF validee ou AEF directe                                                                                                            |
+| Validation (N)    | Role ADMIN, DG ou DAAF                      | Navigue vers `/notes-aef/validation`             | Badge indiquant le nombre en attente                                                                                                                        |
+| Excel             | Toujours                                    | `exportNotesAEF()`                               | Export .xlsx avec filtres actifs                                                                                                                            |
+| PDF               | Toujours                                    | `exportNotesAEFPDF()`                            | Export PDF avec en-tete ARTI                                                                                                                                |
+| CSV               | Toujours                                    | `exportNotesAEFCSV()`                            | Export CSV                                                                                                                                                  |
+| Soumettre         | Note en brouillon                           | `submitNote(noteId)`                             | Machine a etats : verifie transition valide, champs obligatoires (objet, direction, urgence, montant, contenu), assure liaison SEF (auto-cree shadow si DG) |
+| Valider           | Note soumis/a_valider/differe, role DG/DAAF | `validateNote(noteId)`                           | Passe en `a_imputer`                                                                                                                                        |
+| Rejeter           | Note soumis/a_valider, role DG/DAAF         | `rejectNote({noteId, motif})`                    | Passe en `rejete`, motif obligatoire                                                                                                                        |
+| Differer          | Note soumis/a_valider, role DG/DAAF         | `deferNote({noteId, motif, deadlineCorrection})` | Passe en `differe`                                                                                                                                          |
+| Imputer           | Note en `a_imputer`                         | `imputeNote({noteId, budgetLineId})`             | Associe une ligne budgetaire, passe en `impute`                                                                                                             |
+| Modifier          | Note en brouillon                           | Ouvre `NoteAEFForm` edition                      | Mise a jour                                                                                                                                                 |
+| Supprimer         | Note en brouillon                           | `deleteNote(noteId)`                             | Suppression definitive                                                                                                                                      |
 
-| Colonne | Type | Nullable | Description |
-|---------|------|----------|-------------|
-| `id` | uuid | Non | Identifiant unique |
-| `numero` | text | Oui | Numéro généré automatiquement |
-| `objet` | text | Non | Objet de la note |
-| `contenu` | text | Oui | Description détaillée |
-| `montant_estime` | numeric | Oui | Montant estimé (FCFA) |
-| `priorite` | varchar | Oui | `basse`, `normale`, `haute`, `urgente` |
-| `statut` | varchar | Oui | État du workflow |
-| `direction_id` | uuid | Oui | Direction concernée |
-| `note_sef_id` | uuid | Oui | **Liaison obligatoire** vers Note SEF |
-| `budget_line_id` | uuid | Oui | Ligne budgétaire (après imputation) |
-| `exercice` | integer | Oui | Exercice budgétaire |
-| `created_by` | uuid | Oui | Créateur |
-| `created_at` | timestamptz | Non | Date de création |
-
-### 2.3 Statuts possibles
-
-```
-brouillon → soumis → valide → impute
-                  ↘ rejete
-                  ↘ differe
-```
-
-| Statut | Description |
-|--------|-------------|
-| `brouillon` | En cours de rédaction |
-| `soumis` | Soumis pour validation DG |
-| `valide` | Validé par le DG |
-| `impute` | Imputé sur une ligne budgétaire |
-| `rejete` | Refusé (avec motif) |
-| `differe` | Reporté (avec date de reprise) |
-
----
-
-## 3. Workflow de validation
-
-### 3.1 Diagramme
+## 5. Statuts et transitions
 
 ```
-┌─────────────────┐
-│   BROUILLON     │ ← Création par Agent
-└────────┬────────┘
-         │ Soumettre
-         ▼
-┌─────────────────┐
-│     SOUMIS      │ ← En attente validation DG
-└────────┬────────┘
-         │
-    ┌────┴────┬─────────┐
-    ▼         ▼         ▼
-┌───────┐ ┌───────┐ ┌───────┐
-│VALIDE │ │REJETE │ │DIFFERE│
-└───┬───┘ └───────┘ └───────┘
-    │
-    ▼ Imputation CB
-┌─────────────────┐
-│     IMPUTE      │ → Vers Expression Besoin
-└─────────────────┘
+   ┌──────────┐  soumettre  ┌──────────┐  valider  ┌───────────┐  imputer  ┌──────────┐
+   │ brouillon├────────────>│  soumis  ├─────────>│ a_imputer ├────────>│  impute  │
+   └──────────┘             └────┬─────┘          └───────────┘         └──────────┘
+                                 │
+                          rejeter│  differer
+                                 │       │
+                           ┌─────v───┐   │
+                           │ rejete  │   │
+                           └─────────┘   │
+                                         v
+                                   ┌──────────┐
+                                   │ differe  │
+                                   └──────────┘
+
+   Machine a etats : chaque transition validee via isValidTransitionAEF()
+   Transitions definies dans src/lib/notes-aef/constants.ts
 ```
 
-### 3.2 Rôles et actions
+**Statuts** : `brouillon`, `soumis`, `a_valider`, `a_imputer`, `impute`, `rejete`, `differe`
 
-| Rôle | Actions possibles |
-|------|-------------------|
-| `AGENT` | Créer, modifier (brouillon), soumettre |
-| `DG` | Valider, rejeter, différer |
-| `CB` | Imputer sur ligne budgétaire |
+## 6. Workflow de validation
 
----
+| Etape                 | Role              | Action                                                | Details                                                                                                               |
+| --------------------- | ----------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 1. Creation           | Agent ou DG       | Cree brouillon lie a une SEF validee (ou AEF directe) | Verifie que la SEF est `valide`                                                                                       |
+| 2. Soumission         | Createur          | Soumet pour validation                                | Champs obligatoires : objet, direction, urgence, montant, contenu. Regle : SEF liee obligatoire (auto-creation si DG) |
+| 3. Validation DAAF/DG | DAAF, DG, ADMIN   | Valide la note                                        | Passe en `a_imputer`                                                                                                  |
+| 3a. Rejet             | DAAF, DG, ADMIN   | Rejette avec motif                                    | Motif obligatoire                                                                                                     |
+| 3b. Report            | DAAF, DG, ADMIN   | Differe avec deadline                                 | Motif obligatoire                                                                                                     |
+| 4. Imputation         | DAAF, SDPM, ADMIN | Associe ligne budgetaire                              | Verifie disponibilite budget, passe en `impute`                                                                       |
 
-## 4. Sécurité (RLS)
+**Regle metier** : Toute AEF soumise DOIT avoir `note_sef_id` + `reference_pivot`. Si le DG soumet sans lien SEF, une SEF shadow est auto-creee avec statut `valide_auto`.
 
-### 4.1 Policies principales
+## 7. Donnees Supabase
 
-```sql
--- Lecture : Utilisateurs authentifiés
-CREATE POLICY "notes_dg_select" ON notes_dg
-FOR SELECT USING (true);
+| Table          | Colonnes cles                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `notes_dg`     | `id`, `numero`, `reference_pivot`, `exercice`, `direction_id`, `objet`, `contenu`, `priorite`, `montant_estime`, `type_depense`, `justification`, `statut`, `origin` (FROM_SEF/DIRECT), `is_direct_aef`, `note_sef_id`, `budget_line_id`, `beneficiaire_id`, `ligne_budgetaire_id`, `os_id`, `action_id`, `activite_id`, `budget_bloque`, `budget_bloque_raison`, `rejection_reason`, `motif_differe`, `date_differe`, `deadline_correction`, `differe_by`, `validated_by`, `validated_at`, `submitted_at`, `imputed_at`, `imputed_by`, `dossier_id`, `created_by` |
+| `notes_sef`    | Table source liee via `note_sef_id`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `budget_lines` | `id`, `code`, `label`, `dotation_initiale`, `dotation_modifiee`, `statut`, `direction_id`, `exercice`, `is_active`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `directions`   | `id`, `code`, `label`, `sigle`, `est_active`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `prestataires` | `id`, `raison_sociale`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
--- Création : Utilisateurs authentifiés
-CREATE POLICY "notes_dg_insert" ON notes_dg
-FOR INSERT WITH CHECK (true);
+## 8. Hooks
 
--- Modification : Créateur ou rôles autorisés
-CREATE POLICY "notes_dg_update" ON notes_dg
-FOR UPDATE USING (
-  auth.uid() = created_by 
-  OR has_role(auth.uid(), 'DG') 
-  OR has_role(auth.uid(), 'CB')
-);
-```
+| Hook                                             | Fichier                          | Role                                                                                                                                                                                                                |
+| ------------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useNotesAEF`                                    | `src/hooks/useNotesAEF.ts`       | Mutations : create, createDirectDG, update, submit, validate, reject, defer, impute, delete. Queries : notes, directions, notesSEFValidees, notesSEFDisponibles, beneficiaires, budgetLines, budgetValidationStatus |
+| `useNotesAEFList`                                | `src/hooks/useNotesAEFList.ts`   | Liste paginee serveur-side avec filtres et compteurs par statut                                                                                                                                                     |
+| `useNotesAEFExport`                              | `src/hooks/useNotesAEFExport.ts` | Export Excel, PDF, CSV                                                                                                                                                                                              |
+| `checkBudgetAvailability(budgetLineId, montant)` | Dans `useNotesAEF`               | Verifie disponibilite budgetaire : dotation - total engagements                                                                                                                                                     |
 
----
+## 9. Tests
 
-## 5. Hooks React
-
-### 5.1 Hook principal : `useNotesAEF`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `notes` | `NoteAEF[]` | Liste des notes AEF |
-| `notesSEFValidees` | `NoteSEF[]` | Notes SEF validées disponibles |
-| `directions` | `Direction[]` | Directions pour sélection |
-| `createNote` | `function` | Créer une note |
-| `updateNote` | `function` | Modifier une note |
-| `submitNote` | `function` | Soumettre pour validation |
-| `validateNote` | `function` | Valider (DG) |
-| `rejectNote` | `function` | Rejeter avec motif |
-| `deferNote` | `function` | Différer avec date |
-| `imputeNote` | `function` | Imputer sur budget |
-| `isCreating` | `boolean` | État de création |
-| `isUpdating` | `boolean` | État de modification |
-
-### 5.2 Fichiers sources
-
-```
-src/hooks/useNotesAEF.ts        # Hook principal (~635 lignes)
-```
-
----
-
-## 6. Pages et Composants
-
-### 6.1 Pages
-
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/notes-aef` | `NotesAEF.tsx` | Liste et gestion des notes AEF |
-
-### 6.2 Composants
-
-| Composant | Description |
-|-----------|-------------|
-| `NoteAEFForm.tsx` | Formulaire création/édition |
-| `NoteAEFList.tsx` | Liste avec filtres et actions |
-| `NoteAEFDetails.tsx` | Vue détaillée d'une note |
-| `NoteAEFDeferDialog.tsx` | Dialog de report |
-| `NoteAEFRejectDialog.tsx` | Dialog de rejet avec motif |
-| `NoteAEFImputeDialog.tsx` | Dialog d'imputation budgétaire |
-
-### 6.3 Arborescence
-
-```
-src/
-├── pages/
-│   └── NotesAEF.tsx
-└── components/
-    └── notes-aef/
-        ├── NoteAEFForm.tsx
-        ├── NoteAEFList.tsx
-        ├── NoteAEFDetails.tsx
-        ├── NoteAEFDeferDialog.tsx
-        ├── NoteAEFRejectDialog.tsx
-        └── NoteAEFImputeDialog.tsx
-```
-
----
-
-## 7. API Supabase - Exemples
-
-### 7.1 Créer une Note AEF
-
-```typescript
-const { data, error } = await supabase
-  .from("notes_dg")
-  .insert({
-    objet: "Achat fournitures bureau",
-    contenu: "Description détaillée...",
-    montant_estime: 500000,
-    priorite: "normale",
-    direction_id: "uuid-direction",
-    note_sef_id: "uuid-note-sef",  // OBLIGATOIRE
-    exercice: 2026,
-    statut: "brouillon"
-  })
-  .select()
-  .single();
-```
-
-### 7.2 Récupérer les Notes AEF
-
-```typescript
-const { data, error } = await supabase
-  .from("notes_dg")
-  .select(`
-    *,
-    direction:directions(id, label, sigle),
-    note_sef:notes_sef!note_sef_id(id, numero, objet),
-    created_by_profile:profiles(first_name, last_name)
-  `)
-  .eq("exercice", 2026)
-  .order("created_at", { ascending: false });
-```
-
-### 7.3 Valider une Note
-
-```typescript
-const { error } = await supabase
-  .from("notes_dg")
-  .update({ 
-    statut: "valide",
-    validated_at: new Date().toISOString(),
-    validated_by: userId
-  })
-  .eq("id", noteId);
-```
-
----
-
-## 8. Règles métier
-
-### 8.1 Liaison obligatoire avec Note SEF
-
-- ⚠️ Une Note AEF **doit obligatoirement** être liée à une Note SEF validée
-- La Note SEF source pré-remplit certains champs (objet, direction)
-- La traçabilité est maintenue via `note_sef_id`
-
-### 8.2 Génération du numéro
-
-Format : `AEF-{EXERCICE}-{SEQUENCE}`
-
-Exemple : `AEF-2026-0042`
-
-### 8.3 Montant estimé
-
-- Le montant est une estimation pour l'imputation
-- Le montant définitif sera fixé lors de l'engagement
-- Sert à vérifier la disponibilité budgétaire
-
----
-
-## 9. Intégration avec autres modules
-
-### 9.1 Entrées
-
-| Module source | Données reçues |
-|---------------|----------------|
-| Notes SEF | `note_sef_id`, objet, direction |
-
-### 9.2 Sorties
-
-| Module cible | Données envoyées |
-|--------------|------------------|
-| Imputation | Note AEF validée avec montant |
-| Dossier | Création automatique après imputation |
-
----
-
-## 10. Points ouverts / TODOs
-
-- [ ] Ajouter workflow multi-étapes (si nécessaire)
-- [ ] Notifications email à la validation/rejet
-- [ ] Export PDF de la note
-- [ ] Historique des modifications
-- [ ] Pièces jointes (attachments)
-
----
-
-## 11. Changelog
-
-| Date | Version | Modifications |
-|------|---------|---------------|
-| 2026-01-15 | 1.0 | Documentation initiale |
+- Tests E2E via Playwright
+- Certification documentee dans `docs/CERTIFICATION_NOTES_AEF.md`
+- Verification : `npx vitest run`

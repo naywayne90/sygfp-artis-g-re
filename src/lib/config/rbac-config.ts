@@ -895,6 +895,10 @@ export const ROUTE_ACCESS_MATRIX: Record<
     allowedProfiles: ['ADMIN', 'DG', 'DAAF', 'CB'],
     description: 'Alertes budgétaires',
   },
+  '/suivi-dg': {
+    allowedProfiles: ['ADMIN', 'DG'],
+    description: 'Suivi DG - Tableau de bord des validations',
+  },
 
   // Administration
   '/admin/exercices': {

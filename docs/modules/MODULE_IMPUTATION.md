@@ -1,369 +1,97 @@
-# Imputation Budgétaire - Documentation Technique
+# Module Imputation — SYGFP (Etape 3/9)
 
-> **Version**: 1.0 | **Dernière mise à jour**: 2026-01-15 | **Statut**: ✅ Opérationnel
+> Derniere mise a jour : 24/03/2026
 
 ## 1. Vue d'ensemble
 
-L'**Imputation** est l'étape critique qui rattache une demande financière (Note AEF validée) à une ligne budgétaire spécifique. Elle vérifie la disponibilité des crédits et crée le dossier de dépense.
+Le module **Imputation** assure le rattachement budgetaire des depenses. Il recoit les Notes AEF validees (statut `a_imputer`) et les associe a une **ligne budgetaire** avec un code d'imputation structure (OS/Mission/Action/Activite/Sous-activite/NBE/SYSCO). L'imputation validee debouche sur la creation d'une Expression de Besoin.
 
-### Position dans la chaîne
+**Chaine** : Note SEF > Note AEF > **Imputation** > Expression Besoin > Passation Marche > Engagement > Liquidation > Ordonnancement > Reglement
 
-```
-Note SEF → Note AEF → [Imputation] → Expression Besoin → Marché → ...
-```
+## 2. Routes et acces
 
-### Rôle principal
+| Route                                     | Page                                        | Roles |
+| ----------------------------------------- | ------------------------------------------- | ----- |
+| `/execution/imputation`                   | Page principale (KPIs, onglets, pagination) | Tous  |
+| `/execution/imputation?sourceAef={aefId}` | Pre-selection note AEF a imputer            | Tous  |
 
-- Rattacher la note à la hiérarchie programmatique (OS/Mission/Action/Activité)
-- Affecter une ligne budgétaire avec les nomenclatures (NBE, SYSCO)
-- Vérifier la disponibilité budgétaire avant engagement
-- Créer automatiquement le dossier de dépense
-- Construire le code d'imputation
+## 3. Composants
 
----
+| Composant                    | Fichier                                                    | Role                                                                          |
+| ---------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ImputationPage` (page)      | `src/pages/execution/ImputationPage.tsx`                   | Page principale avec KPIs, onglets, exports, pagination                       |
+| `ImputationForm`             | `src/components/imputation/ImputationForm.tsx`             | Formulaire de creation d'imputation (choix ligne budgetaire, code imputation) |
+| `ImputationDetailSheet`      | `src/components/imputation/ImputationDetailSheet.tsx`      | Sheet lateral de detail                                                       |
+| `ImputationRejectDialog`     | `src/components/imputation/ImputationRejectDialog.tsx`     | Dialog de saisie motif de rejet                                               |
+| `ImputationDeferDialog`      | `src/components/imputation/ImputationDeferDialog.tsx`      | Dialog de report (motif + date reprise)                                       |
+| `ImputationValidationDialog` | `src/components/imputation/ImputationValidationDialog.tsx` | Dialog de confirmation de validation                                          |
+| `BudgetFormulas`             | `src/components/budget/BudgetFormulas.tsx`                 | Formules de reference budgetaire (compact)                                    |
+| `WorkflowStepIndicator`      | `src/components/workflow/WorkflowStepIndicator.tsx`        | Barre horizontale etape 3 active                                              |
+| `NotesPagination`            | `src/components/shared/NotesPagination.tsx`                | Pagination serveur-side                                                       |
 
-## 2. Architecture
+## 4. Boutons et actions
 
-### 2.1 Tables concernées
+| Bouton                     | Visible si                                                   | Action                                                            | Effet                                                            |
+| -------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Imputer                    | Onglet "A imputer", note AEF statut `a_imputer`              | Ouvre dialog `ImputationForm`                                     | Cree une imputation brouillon puis a_valider                     |
+| Voir (oeil)                | Toute note/imputation                                        | Navigue vers detail AEF ou ouvre `ImputationDetailSheet`          | Consultation                                                     |
+| Valider (check)            | Onglet "A valider", role ADMIN/DG/DAAF/SDPM                  | Ouvre `ImputationValidationDialog`                                | `validateImputation(id)` — passe en `valide`                     |
+| Differer                   | Onglet "A valider", menu contextuel, role ADMIN/DG/DAAF/SDPM | Ouvre `ImputationDeferDialog`                                     | `deferImputation({id, motif, dateReprise})` — passe en `differe` |
+| Rejeter                    | Onglet "A valider", menu contextuel, role ADMIN/DG/DAAF/SDPM | Ouvre `ImputationRejectDialog`                                    | `rejectImputation({id, motif})` — passe en `rejete`              |
+| Soumettre                  | Imputation en brouillon, menu contextuel                     | `submitImputation(id)`                                            | Passe en `a_valider`                                             |
+| Supprimer                  | Imputation en brouillon, menu contextuel                     | `deleteImputation(id)`                                            | Suppression definitive                                           |
+| Creer expression de besoin | Imputation validee, menu contextuel                          | Navigue vers `/execution/expression-besoin?sourceImputation={id}` | Chaine vers etape suivante                                       |
+| Voir le dossier            | Imputation avec `dossier_id`, menu contextuel                | Navigue vers `/recherche?dossier={dossierId}`                     | Consultation dossier                                             |
+| Exporter > Excel/CSV/PDF   | Toujours                                                     | `exportExcel/CSV/PDF(filters, activeTab)`                         | Export filtre                                                    |
 
-| Table | Rôle dans l'imputation |
-|-------|------------------------|
-| `notes_dg` | Note source (mise à jour statut → `impute`) |
-| `budget_lines` | Ligne budgétaire cible |
-| `dossiers` | Dossier créé automatiquement |
-| `dossier_etapes` | Étapes du dossier |
-| `objectifs_strategiques` | Référentiel OS |
-| `missions` | Référentiel Mission |
-| `actions` | Référentiel Action |
-| `activites` | Référentiel Activité |
-| `sous_activites` | Référentiel Sous-activité |
-| `nomenclature_nbe` | Nomenclature budgétaire |
-| `plan_comptable_sysco` | Plan comptable SYSCOHADA |
-| `directions` | Directions |
-
-### 2.2 Données d'imputation
-
-| Champ | Description | Obligatoire |
-|-------|-------------|-------------|
-| `os_id` | Objectif Stratégique | Non |
-| `mission_id` | Mission | Non |
-| `action_id` | Action | Non |
-| `activite_id` | Activité | Non |
-| `sous_activite_id` | Sous-activité | Non |
-| `direction_id` | Direction | Non |
-| `nbe_id` | Code NBE | Non |
-| `sysco_id` | Compte SYSCO | Non |
-| `source_financement` | Source des fonds | Oui |
-| `montant` | Montant à imputer | Oui |
-
-### 2.3 Sources de financement
-
-```typescript
-const SOURCES_FINANCEMENT = [
-  { value: "budget_etat", label: "Budget de l'État" },
-  { value: "ressources_propres", label: "Ressources propres" },
-  { value: "subventions", label: "Subventions" },
-  { value: "dons_legs", label: "Dons et legs" },
-  { value: "emprunts", label: "Emprunts" },
-  { value: "partenaires", label: "Partenaires techniques et financiers" },
-];
-```
-
----
-
-## 3. Code d'imputation
-
-### 3.1 Construction
-
-Le code d'imputation est construit à partir des éléments sélectionnés :
+## 5. Statuts et transitions
 
 ```
-{OS_CODE}-{MISSION_CODE}-{ACTION_CODE}-{ACTIVITE_CODE}-{NBE_CODE}-{SYSCO_CODE}
+   ┌──────────┐  soumettre  ┌───────────┐  valider  ┌──────────┐
+   │ brouillon├────────────>│ a_valider ├─────────>│  valide  │
+   └──────────┘             └─────┬─────┘          └──────────┘
+                                  │
+                           rejeter│  differer
+                                  │       │
+                            ┌─────v───┐   │
+                            │ rejete  │   │
+                            └─────────┘   │
+                                          v
+                                    ┌──────────┐
+                                    │ differe  │
+                                    └──────────┘
 ```
 
-### 3.2 Exemple
+**Statuts** : `brouillon`, `a_valider`, `valide`, `rejete`, `differe`
 
-```
-OS01-M02-A03-ACT04-622-6241
-```
+## 6. Workflow de validation
 
-### 3.3 Fonction de construction
+| Etape         | Role                  | Action                                               | Details                                             |
+| ------------- | --------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| 1. Creation   | Agent DAAF/SDPM       | Impute une note AEF validee sur une ligne budgetaire | Selection ligne + montant + code imputation         |
+| 2. Soumission | Createur              | Soumet pour validation                               | Passe en `a_valider`                                |
+| 3. Validation | ADMIN, DG, DAAF, SDPM | Valide l'imputation                                  | Verifie disponibilite budgetaire, passe en `valide` |
+| 3a. Rejet     | ADMIN, DG, DAAF, SDPM | Rejette avec motif                                   | Motif obligatoire                                   |
+| 3b. Report    | ADMIN, DG, DAAF, SDPM | Differe avec date reprise                            | Motif obligatoire                                   |
 
-```typescript
-const buildImputationCode = (data: ImputationData): string => {
-  const parts = [];
-  if (data.os_id) parts.push(getOSCode(data.os_id));
-  if (data.mission_id) parts.push(getMissionCode(data.mission_id));
-  if (data.nbe_id) parts.push(getNBECode(data.nbe_id));
-  if (data.sysco_id) parts.push(getSYSCOCode(data.sysco_id));
-  return parts.length > 0 ? parts.join("-") : "N/A";
-};
-```
+## 7. Donnees Supabase
 
----
+| Table          | Colonnes cles                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `imputations`  | `id`, `reference`, `note_aef_id`, `budget_line_id`, `dossier_id`, `objet`, `montant`, `direction_id`, `os_id`, `mission_id`, `action_id`, `activite_id`, `sous_activite_id`, `nbe_id`, `sysco_id`, `source_financement`, `code_imputation`, `commentaire`, `statut`, `exercice`, `submitted_at`, `validated_at`, `rejected_at`, `motif_rejet`, `motif_differe`, `is_migrated`, `created_by` |
+| `notes_dg`     | Notes AEF source (statut `a_imputer`)                                                                                                                                                                                                                                                                                                                                                       |
+| `budget_lines` | `id`, `code`, `label`, `dotation_initiale`, `dotation_modifiee`, `total_engage`, `montant_reserve`                                                                                                                                                                                                                                                                                          |
 
-## 4. Calcul de disponibilité
+## 8. Hooks
 
-### 4.1 Formule
+| Hook                   | Fichier                             | Role                                                                                                   |
+| ---------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `useImputations`       | `src/hooks/useImputations.ts`       | Query paginee serveur-side + mutations : submit, validate, reject, defer, delete. Compteurs par statut |
+| `useImputation`        | `src/hooks/useImputation.ts`        | Notes AEF a imputer (`notesAImputer`)                                                                  |
+| `useImputationsExport` | `src/hooks/useImputationsExport.ts` | Export Excel, CSV, PDF                                                                                 |
 
-```
-Disponible = Dotation + Virements reçus - Virements émis - Engagements antérieurs
-```
+## 9. Tests
 
-### 4.2 Interface de résultat
-
-```typescript
-interface BudgetAvailability {
-  budget_line_id: string;
-  budget_line_code: string;
-  dotation_initiale: number;
-  virements_recus: number;
-  virements_emis: number;
-  engagements_anterieurs: number;
-  disponible: number;
-  montant_demande: number;
-  is_sufficient: boolean;
-}
-```
-
-### 4.3 Affichage dans l'interface
-
-```
-┌────────────┬────────────┬────────────┬────────────┬────────────┐
-│ (A) Dotat. │ (B) Vir +  │ (C) Vir -  │ (D) Eng.   │ (E) Dispo  │
-│ 10 000 000 │ 1 000 000  │ 500 000    │ 3 000 000  │ 7 500 000  │
-└────────────┴────────────┴────────────┴────────────┴────────────┘
-```
-
----
-
-## 5. Workflow d'imputation
-
-### 5.1 Diagramme
-
-```
-┌─────────────────┐
-│ Note AEF VALIDE │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────┐
-│           Formulaire d'imputation           │
-│  ┌─────────────────┐  ┌──────────────────┐  │
-│  │ Rattachement    │  │ Nomenclatures    │  │
-│  │ programmatique  │  │ NBE + SYSCO      │  │
-│  │ OS/Mission/...  │  │                  │  │
-│  └─────────────────┘  └──────────────────┘  │
-└────────────────────────┬────────────────────┘
-                         │
-                         ▼
-              ┌──────────────────┐
-              │ Calcul dispo ?   │
-              └────────┬─────────┘
-                       │
-           ┌───────────┴───────────┐
-           ▼                       ▼
-    ┌─────────────┐         ┌─────────────┐
-    │ SUFFISANT   │         │ INSUFFISANT │
-    │ → Imputer   │         │ → Bloquer   │
-    └──────┬──────┘         │ ou Forcer   │
-           │                └─────────────┘
-           ▼
-┌─────────────────────────────────────────────┐
-│  1. Note → statut = "impute"                │
-│  2. Création Dossier automatique            │
-│  3. Création Dossier_Etape (imputation)     │
-│  4. Audit log                               │
-└─────────────────────────────────────────────┘
-```
-
-### 5.2 Option de forçage
-
-Si le disponible est insuffisant, un utilisateur autorisé peut "forcer" l'imputation avec justification :
-
-```typescript
-interface ImputationData {
-  // ...
-  forcer_imputation: boolean;
-  justification_depassement: string;
-}
-```
-
----
-
-## 6. Hooks React
-
-### 6.1 Hook principal : `useImputation`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `objectifsStrategiques` | `OS[]` | Liste des OS |
-| `missions` | `Mission[]` | Liste des missions |
-| `directions` | `Direction[]` | Liste des directions |
-| `nomenclaturesNBE` | `NBE[]` | Nomenclature budgétaire |
-| `planComptableSYSCO` | `SYSCO[]` | Plan comptable |
-| `fetchActions` | `function` | Charger actions (dépend mission/OS) |
-| `fetchActivites` | `function` | Charger activités (dépend action) |
-| `fetchSousActivites` | `function` | Charger sous-activités |
-| `calculateAvailability` | `function` | Calculer disponibilité |
-| `buildImputationCode` | `function` | Construire code imputation |
-| `imputeNote` | `function` | Exécuter l'imputation |
-| `isImputing` | `boolean` | État en cours |
-
-### 6.2 Fichiers sources
-
-```
-src/hooks/useImputation.ts     # Hook principal (~489 lignes)
-```
-
----
-
-## 7. Pages et Composants
-
-### 7.1 Pages
-
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/imputation` | `Imputation.tsx` | Page d'imputation |
-
-### 7.2 Composants
-
-| Composant | Description |
-|-----------|-------------|
-| `ImputationForm.tsx` | Formulaire complet (~605 lignes) |
-| `ImputationList.tsx` | Liste des imputations |
-
-### 7.3 Arborescence
-
-```
-src/
-├── pages/
-│   └── execution/
-│       └── Imputation.tsx
-└── components/
-    └── imputation/
-        ├── ImputationForm.tsx
-        └── ImputationList.tsx
-```
-
----
-
-## 8. Création automatique du Dossier
-
-### 8.1 Lors de l'imputation
-
-```typescript
-const imputeNote = async (data: ImputationData) => {
-  // 1. Créer le dossier
-  const { data: dossier } = await supabase
-    .from("dossiers")
-    .insert({
-      note_id: data.noteId,
-      budget_line_id: budgetLineId,
-      montant_initial: data.montant,
-      statut_global: "en_cours",
-      exercice: exercice,
-    })
-    .select()
-    .single();
-
-  // 2. Créer l'étape d'imputation
-  await supabase
-    .from("dossier_etapes")
-    .insert({
-      dossier_id: dossier.id,
-      etape: "imputation",
-      statut: "valide",
-      montant: data.montant,
-      validated_at: new Date().toISOString(),
-    });
-
-  // 3. Mettre à jour la note
-  await supabase
-    .from("notes_dg")
-    .update({ statut: "impute" })
-    .eq("id", data.noteId);
-
-  return { dossier };
-};
-```
-
----
-
-## 9. Sécurité (RLS)
-
-### 9.1 Qui peut imputer ?
-
-- Rôle `CB` (Contrôleur Budgétaire) : principal acteur
-- Rôle `ADMIN` : accès complet
-
-```sql
-CREATE POLICY "cb_can_impute" ON notes_dg
-FOR UPDATE USING (
-  has_role(auth.uid(), 'CB') 
-  OR has_role(auth.uid(), 'ADMIN')
-);
-```
-
----
-
-## 10. API Supabase - Exemples
-
-### 10.1 Récupérer les données pour le formulaire
-
-```typescript
-// Charger tous les référentiels en parallèle
-const [os, missions, directions, nbe, sysco] = await Promise.all([
-  supabase.from("objectifs_strategiques").select("*").eq("est_active", true),
-  supabase.from("missions").select("*").eq("est_active", true),
-  supabase.from("directions").select("*").eq("est_active", true),
-  supabase.from("nomenclature_nbe").select("*"),
-  supabase.from("plan_comptable_sysco").select("*"),
-]);
-```
-
-### 10.2 Charger les actions filtrées
-
-```typescript
-const { data: actions } = await supabase
-  .from("actions")
-  .select("id, code, libelle")
-  .eq("est_active", true)
-  .or(`mission_id.eq.${missionId},os_id.eq.${osId}`);
-```
-
----
-
-## 11. Intégration avec autres modules
-
-### 11.1 Entrées
-
-| Module source | Données reçues |
-|---------------|----------------|
-| Notes AEF | Note validée avec montant estimé |
-
-### 11.2 Sorties
-
-| Module cible | Données envoyées |
-|--------------|------------------|
-| Dossiers | Dossier créé avec référence note |
-| Budget Lines | Réservation prévisionnelle |
-| Marchés | Dossier ID pour rattachement |
-
----
-
-## 12. Points ouverts / TODOs
-
-- [ ] Validation multi-niveaux avant imputation
-- [ ] Alertes si seuil budgétaire atteint
-- [ ] Historique des imputations modifiées
-- [ ] Annulation d'imputation (avec conditions)
-- [ ] Suggestion automatique de ligne budgétaire
-
----
-
-## 13. Changelog
-
-| Date | Version | Modifications |
-|------|---------|---------------|
-| 2026-01-15 | 1.0 | Documentation initiale |
+- Tests E2E via Playwright
+- Certification documentee dans `docs/CERTIFICATION_IMPUTATION.md`
+- Verification : `npx vitest run`

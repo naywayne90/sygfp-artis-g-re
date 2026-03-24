@@ -1,383 +1,121 @@
-# Liquidations - Documentation Technique
+# Module Liquidations — SYGFP (Etape 7/9)
 
-> **Version**: 1.0 | **Dernière mise à jour**: 2026-01-15 | **Statut**: ✅ Opérationnel
+> Derniere mise a jour : 24/03/2026
 
 ## 1. Vue d'ensemble
 
-La **Liquidation** est l'opération qui consiste à vérifier la réalité de la dette (service fait) et à arrêter le montant exact de la dépense. Elle fait suite à l'engagement et précède l'ordonnancement.
+Le module **Liquidation** constate le service fait et determine le montant exact a payer. Il recoit les Engagements valides et certifie la realisation de la prestation. Le workflow de validation comporte 2 etapes : **DAAF** puis **DG** (conditionnel au-dela de 50 000 000 FCFA). Le module est **certifie 100/100** avec 104 tests unitaires et 60 tests E2E.
 
-### Position dans la chaîne
+**Chaine** : Note SEF > Note AEF > Imputation > Expression Besoin > Passation Marche > Engagement > **Liquidation** > Ordonnancement > Reglement
 
-```
-... → Engagement → [Liquidation] → Ordonnancement → Règlement
-```
+## 2. Routes et acces
 
-### Rôle principal
+| Route                                 | Page                                         | Roles |
+| ------------------------------------- | -------------------------------------------- | ----- |
+| `/liquidations`                       | Liste principale (KPIs, onglets, pagination) | Tous  |
+| `/liquidations?sourceEngagement={id}` | Pre-selection engagement source              | Tous  |
 
-- Constater le service fait (livraison, prestation)
-- Vérifier les documents justificatifs (facture, PV, BL)
-- Calculer les retenues fiscales (TVA, AIRSI, retenue source)
-- Déterminer le net à payer
+## 3. Composants
 
----
+| Composant                   | Fichier                                                    | Role                                                                             |
+| --------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `Liquidations` (page)       | `src/pages/Liquidations.tsx`                               | Page principale avec KPIs, onglets, dashboard DAAF, alertes urgentes, pagination |
+| `LiquidationForm`           | `src/components/liquidation/LiquidationForm.tsx`           | Dialog creation depuis engagement valide                                         |
+| `LiquidationList`           | `src/components/liquidation/LiquidationList.tsx`           | Tableau avec actions contextuelles, role-based                                   |
+| `LiquidationDetails`        | `src/components/liquidation/LiquidationDetails.tsx`        | Sheet detail                                                                     |
+| `LiquidationValidationDAAF` | `src/components/liquidation/LiquidationValidationDAAF.tsx` | Dashboard validation DAAF                                                        |
+| `LiquidationValidateDialog` | `src/components/liquidation/LiquidationValidateDialog.tsx` | Dialog de validation                                                             |
+| `LiquidationRejectDialog`   | `src/components/liquidation/LiquidationRejectDialog.tsx`   | Dialog de rejet avec motif                                                       |
+| `LiquidationDeferDialog`    | `src/components/liquidation/LiquidationDeferDialog.tsx`    | Dialog de report                                                                 |
+| `UrgentLiquidationList`     | `src/components/liquidations/UrgentLiquidationList.tsx`    | Liste liquidations urgentes                                                      |
+| `BudgetChainExportButton`   | `src/components/export/BudgetChainExportButton.tsx`        | Export chaine budgetaire                                                         |
+| `WorkflowStepIndicator`     | `src/components/workflow/WorkflowStepIndicator.tsx`        | Barre horizontale etape 7 active                                                 |
+| `NotesPagination`           | `src/components/shared/NotesPagination.tsx`                | Pagination serveur-side                                                          |
 
-## 2. Architecture
+## 4. Boutons et actions
 
-### 2.1 Tables principales
+| Bouton                 | Visible si                                         | Action                                                 | Effet                                        |
+| ---------------------- | -------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------- |
+| Nouvelle liquidation   | Engagement valide disponible                       | Ouvre `LiquidationForm`                                | Cree liquidation en brouillon                |
+| Soumettre              | Liquidation brouillon                              | `submitLiquidation(id)`                                | Passe en `soumis`                            |
+| Valider DAAF           | Liquidation soumise, role DAAF                     | `validateLiquidation(id)`                              | Passe en `valide_daaf`                       |
+| Valider DG             | Liquidation `valide_daaf`, role DG, montant >= 50M | `validateLiquidation(id)`                              | Passe en `valide_dg`                         |
+| Rejeter                | En validation, role concerne                       | Ouvre `LiquidationRejectDialog`                        | Passe en `rejete`, motif obligatoire         |
+| Differer               | En validation, role concerne                       | Ouvre `LiquidationDeferDialog`                         | Passe en `differe`                           |
+| Reprendre              | Liquidation differee                               | `resumeLiquidation(id)`                                | Re-soumet                                    |
+| Voir detail            | Toute liquidation                                  | Ouvre `LiquidationDetails`                             | Consultation                                 |
+| Filtre urgent          | Toujours                                           | Switch `urgentOnlyFilter`                              | Affiche uniquement les liquidations urgentes |
+| Exporter > Excel       | Toujours                                           | `exportExcel()`                                        | Export .xlsx                                 |
+| Exporter > CSV         | Toujours                                           | `exportCSV()`                                          | Export CSV                                   |
+| Exporter > PDF         | Toujours                                           | `exportPDF()`                                          | Export PDF                                   |
+| Exporter > Attestation | Liquidation validee                                | `exportAttestation()`                                  | Attestation de service fait                  |
+| Creer ordonnancement   | Liquidation validee DG, menu contextuel            | Navigue vers `/ordonnancements?sourceLiquidation={id}` | Chaine vers etape suivante                   |
 
-| Table | Description | Clé primaire |
-|-------|-------------|--------------|
-| `budget_liquidations` | Liquidations | `id` (UUID) |
-| `liquidation_validations` | Étapes validation | `id` (UUID) |
-| `liquidation_attachments` | Pièces jointes | `id` (UUID) |
-
-### 2.2 Colonnes clés de `budget_liquidations`
-
-| Colonne | Type | Nullable | Description |
-|---------|------|----------|-------------|
-| `id` | uuid | Non | Identifiant unique |
-| `numero` | text | Non | Numéro auto-généré |
-| `engagement_id` | uuid | Non | **Engagement source** |
-| `montant` | numeric | Non | Montant TTC liquidé |
-| `montant_ht` | numeric | Oui | Montant HT |
-| `tva_taux` | numeric | Oui | Taux TVA (%) |
-| `tva_montant` | numeric | Oui | Montant TVA |
-| `airsi_taux` | numeric | Oui | Taux AIRSI (%) |
-| `airsi_montant` | numeric | Oui | Montant AIRSI |
-| `retenue_source_taux` | numeric | Oui | Taux retenue source |
-| `retenue_source_montant` | numeric | Oui | Montant retenue |
-| `net_a_payer` | numeric | Oui | Net à payer |
-| `regime_fiscal` | varchar | Oui | Régime fiscal |
-| `reference_facture` | text | Oui | N° facture |
-| `service_fait` | boolean | Oui | Service fait certifié |
-| `service_fait_date` | date | Oui | Date service fait |
-| `statut` | varchar | Oui | État workflow |
-| `current_step` | integer | Oui | Étape actuelle |
-| `exercice` | integer | Oui | Exercice |
-
-### 2.3 Calculs fiscaux
-
-```typescript
-// TVA (standard 18%)
-tva_montant = montant_ht * (tva_taux / 100);
-
-// AIRSI (Acompte d'Impôt sur le Revenu des Services Immatériels)
-airsi_montant = montant_ht * (airsi_taux / 100);
-
-// Retenue à la source
-retenue_source_montant = montant_ht * (retenue_source_taux / 100);
-
-// Net à payer
-net_a_payer = montant - airsi_montant - retenue_source_montant;
-```
-
----
-
-## 3. Documents obligatoires
-
-```typescript
-export const DOCUMENTS_REQUIS = [
-  { code: "facture", label: "Facture", obligatoire: true },
-  { code: "pv_reception", label: "PV de réception", obligatoire: true },
-  { code: "bon_livraison", label: "Bon de livraison", obligatoire: true },
-  { code: "attestation_service_fait", label: "Attestation service fait", obligatoire: false },
-  { code: "rapport_execution", label: "Rapport d'exécution", obligatoire: false },
-  { code: "autres", label: "Autres documents", obligatoire: false },
-];
-```
-
-⚠️ **Les 3 premiers documents sont OBLIGATOIRES pour soumettre la liquidation.**
-
----
-
-## 4. Calcul du restant à liquider
-
-### 4.1 Formule
+## 5. Statuts et transitions
 
 ```
-Restant à liquider = Montant engagé - Liquidations antérieures
+   ┌──────────┐  soumettre  ┌──────────┐  valider DAAF  ┌────────────┐  valider DG  ┌───────────┐
+   │ brouillon├────────────>│  soumis  ├──────────────>│ valide_daaf├────────────>│ valide_dg │
+   └──────────┘             └────┬─────┘               └─────┬──────┘            └───────────┘
+                                 │                           │
+                          rejeter│  differer          rejeter│  differer
+                                 │       │                   │       │
+                           ┌─────v───┐   │             ┌────v────┐  │
+                           │ rejete  │   │             │ rejete  │  │
+                           └─────────┘   │             └─────────┘  │
+                                         v                          v
+                                   ┌──────────┐              ┌──────────┐
+                                   │ differe  │              │ differe  │
+                                   └──────────┘              └──────────┘
+
+   Note: Si montant < 50 000 000 FCFA, la validation DG est optionnelle (skip possible)
 ```
 
-### 4.2 Interface TypeScript
+**Statuts** : `brouillon`, `soumis`, `valide_daaf`, `valide_dg`, `rejete`, `differe`
+**Seuil validation DG** : `SEUIL_VALIDATION_DG = 50 000 000 FCFA`
 
-```typescript
-interface LiquidationAvailability {
-  montant_engage: number;
-  liquidations_anterieures: number;
-  liquidation_actuelle: number;
-  cumul: number;
-  restant_a_liquider: number;
-  is_valid: boolean;
-}
-```
+## 6. Workflow de validation
 
-### 4.3 Affichage visuel
+| Etape                             | Role       | Statut        | Details                                                                |
+| --------------------------------- | ---------- | ------------- | ---------------------------------------------------------------------- |
+| 1. Creation                       | Agent/SDCT | `brouillon`   | Certification service fait, montant, pieces justificatives             |
+| 2. Soumission                     | Createur   | `soumis`      | Demarre validation                                                     |
+| 3. Validation DAAF                | DAAF       | `valide_daaf` | Visa `visa_daaf_user_id`, `visa_daaf_date`                             |
+| 4. Validation DG (conditionnelle) | DG         | `valide_dg`   | Requise si montant >= 50M FCFA. Visa `visa_dg_user_id`, `visa_dg_date` |
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│ Eng. │ Liq. ant. │ Liq. actuelle │    Cumul    │ Restant à liquider   │
-│ 5M   │    2M     │     1.5M      │    3.5M     │      1.5M ✓          │
-└────────────────────────────────────────────────────────────────────────┘
-```
+**Delegation** : La validation peut etre effectuee par delegation via `useCanValidateLiquidation()`.
 
-### 4.4 Règle
+**Etapes simplifiees du workflow** (`VALIDATION_FLOW_STEPS`) :
 
-⚠️ **Le montant de la liquidation ne peut pas dépasser le restant à liquider.**
+1. Certifie SF — role AUTEUR/SDCT
+2. Validation DAAF — role DAAF
+3. Validation DG — role DG (conditionnel)
 
----
+## 7. Donnees Supabase
 
-## 5. Workflow de validation
+| Table                      | Colonnes cles                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `liquidations`             | `id`, `numero`, `engagement_id`, `montant`, `montant_service_fait`, `objet`, `date_service_fait`, `statut`, `exercice`, `dossier_id`, `direction_id`, `is_urgent`, `tranche_numero`, `tranche_libelle`, `visa_daaf_user_id/date`, `visa_dg_user_id/date`, `rejection_reason`, `rejected_by`, `motif_differe`, `differe_by`, `submitted_at`, `created_by` |
+| `budget_engagements`       | Engagement source (statut `valide`) — lie via `engagement_id`                                                                                                                                                                                                                                                                                            |
+| `liquidation_counts` (vue) | `brouillon`, `soumis`, `valide_daaf`, `valide_dg`, `rejete`, `differe`, `service_fait`, `total_montant`, `a_valider`                                                                                                                                                                                                                                     |
 
-### 5.1 Étapes (4 étapes)
+## 8. Hooks
 
-| Étape | Rôle | Action |
-|-------|------|--------|
-| 1 | `SAF` | Vérification documents |
-| 2 | `CB` | Contrôle budgétaire |
-| 3 | `DAF` | Validation financière |
-| 4 | `DG` | Validation finale |
+| Hook                            | Fichier                              | Role                                                                                                                                                                       |
+| ------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useLiquidations`               | `src/hooks/useLiquidations.ts`       | Query paginee serveur + mutations : submit, validate, reject, defer, resume. Engagements valides. Constants : VALIDATION_STEPS, SEUIL_VALIDATION_DG, VALIDATION_FLOW_STEPS |
+| `useLiquidationCounts`          | `src/hooks/useLiquidations.ts`       | Compteurs par statut (vue materialisee)                                                                                                                                    |
+| `useLiquidationLight`           | `src/hooks/useLiquidations.ts`       | Donnees legeres pour dashboard                                                                                                                                             |
+| `useOverdueUrgentLiquidations`  | `src/hooks/useLiquidations.ts`       | Liquidations urgentes en retard                                                                                                                                            |
+| `useEngagementsSansLiquidation` | `src/hooks/useLiquidations.ts`       | Engagements valides sans liquidation                                                                                                                                       |
+| `useUrgentLiquidations`         | `src/hooks/useUrgentLiquidations.ts` | Compteur urgences                                                                                                                                                          |
+| `useLiquidationExport`          | `src/hooks/useLiquidationExport.ts`  | Export Excel, CSV, PDF, Attestation                                                                                                                                        |
+| `useCanValidateLiquidation`     | `src/hooks/useDelegations.ts`        | Verification delegation                                                                                                                                                    |
+| `computeEngagementProgress`     | Dans `useLiquidations`               | Calcul progression liquidation/engagement                                                                                                                                  |
+| `requiresDgValidation(montant)` | Dans `useLiquidations`               | `true` si montant >= 50M FCFA                                                                                                                                              |
 
-### 5.2 Diagramme
+## 9. Tests
 
-```
-┌─────────────────┐
-│   BROUILLON     │ ← Agent crée + upload documents
-└────────┬────────┘
-         │ (Documents obligatoires OK ?)
-         │ Soumettre
-         ▼
-┌─────────────────┐
-│ ÉTAPE 1: SAF    │ ← Vérifie facture, PV, BL
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ ÉTAPE 2: CB     │ ← Contrôle imputation
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ ÉTAPE 3: DAF    │ ← Calculs fiscaux OK
-└────────┬────────┘
-         ▼
-┌─────────────────┐
-│ ÉTAPE 4: DG     │
-└────────┬────────┘
-         │ Valider finale
-         ▼
-┌─────────────────┐
-│     VALIDE      │ → Vers Ordonnancement
-└─────────────────┘
-         │
-         ▼ Mise à jour budget_line.total_liquide
-```
-
----
-
-## 6. Sécurité (RLS)
-
-```sql
--- Lecture : Tous authentifiés
-CREATE POLICY "liquidations_select" ON budget_liquidations
-FOR SELECT USING (true);
-
--- Modification : Créateur ou validateurs
-CREATE POLICY "liquidations_update" ON budget_liquidations
-FOR UPDATE USING (
-  auth.uid() = created_by 
-  OR has_role(auth.uid(), 'CB')
-  OR has_role(auth.uid(), 'DAF')
-);
-```
-
----
-
-## 7. Hooks React
-
-### 7.1 Hook principal : `useLiquidations`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `liquidations` | `Liquidation[]` | Liste |
-| `engagementsValides` | `Engagement[]` | Engagements disponibles |
-| `createLiquidation` | `function` | Créer |
-| `validateLiquidation` | `function` | Valider étape |
-| `rejectLiquidation` | `function` | Rejeter |
-| `calculateAvailability` | `function` | Calculer restant |
-| `isCreating` | `boolean` | État |
-
-### 7.2 Constantes exportées
-
-```typescript
-export const DOCUMENTS_REQUIS = [...];
-```
-
-### 7.3 Fichiers sources
-
-```
-src/hooks/useLiquidations.ts   # Hook principal (~602 lignes)
-```
-
----
-
-## 8. Pages et Composants
-
-### 8.1 Pages
-
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/liquidations` | `Liquidations.tsx` | Liste et gestion |
-
-### 8.2 Composants
-
-| Composant | Description |
-|-----------|-------------|
-| `LiquidationForm.tsx` | Formulaire avec upload (~477 lignes) |
-| `LiquidationList.tsx` | Liste avec filtres |
-| `LiquidationDetails.tsx` | Vue détaillée |
-| `LiquidationValidateDialog.tsx` | Dialog validation |
-| `LiquidationRejectDialog.tsx` | Dialog rejet |
-| `LiquidationDeferDialog.tsx` | Dialog report |
-
-### 8.3 Arborescence
-
-```
-src/
-├── pages/
-│   └── Liquidations.tsx
-└── components/
-    └── liquidation/
-        ├── LiquidationForm.tsx
-        ├── LiquidationList.tsx
-        ├── LiquidationDetails.tsx
-        ├── LiquidationValidateDialog.tsx
-        ├── LiquidationRejectDialog.tsx
-        └── LiquidationDeferDialog.tsx
-```
-
----
-
-## 9. API Supabase - Exemples
-
-### 9.1 Créer une liquidation
-
-```typescript
-const { data, error } = await supabase
-  .from("budget_liquidations")
-  .insert({
-    engagement_id: "uuid-engagement",
-    montant: 5000000,
-    montant_ht: 4237288,
-    tva_taux: 18,
-    tva_montant: 762712,
-    airsi_taux: 5.5,
-    airsi_montant: 233050,
-    retenue_source_taux: 0,
-    retenue_source_montant: 0,
-    net_a_payer: 4766950,
-    regime_fiscal: "reel_normal",
-    reference_facture: "FAC-2026-001234",
-    service_fait: true,
-    service_fait_date: "2026-02-20",
-    exercice: 2026,
-    statut: "brouillon",
-    current_step: 0,
-  })
-  .select()
-  .single();
-```
-
-### 9.2 Récupérer avec relations
-
-```typescript
-const { data, error } = await supabase
-  .from("budget_liquidations")
-  .select(`
-    *,
-    engagement:budget_engagements(
-      id, numero, objet, montant, fournisseur,
-      budget_line:budget_lines(code, label),
-      marche:marches(numero, prestataire:prestataires(raison_sociale))
-    ),
-    attachments:liquidation_attachments(*)
-  `)
-  .eq("exercice", 2026)
-  .order("created_at", { ascending: false });
-```
-
-### 9.3 Calculer disponibilité
-
-```typescript
-const calculateAvailability = async (engagementId: string, montant: number) => {
-  // Montant de l'engagement
-  const { data: engagement } = await supabase
-    .from("budget_engagements")
-    .select("montant")
-    .eq("id", engagementId)
-    .single();
-
-  // Liquidations antérieures sur cet engagement
-  const { data: liquidations } = await supabase
-    .from("budget_liquidations")
-    .select("montant")
-    .eq("engagement_id", engagementId)
-    .in("statut", ["valide", "en_validation"]);
-
-  const montantEngage = engagement.montant;
-  const liquidationsAnterieures = liquidations?.reduce((s, l) => s + l.montant, 0) || 0;
-  const restant = montantEngage - liquidationsAnterieures;
-
-  return {
-    montant_engage: montantEngage,
-    liquidations_anterieures: liquidationsAnterieures,
-    liquidation_actuelle: montant,
-    cumul: liquidationsAnterieures + montant,
-    restant_a_liquider: restant - montant,
-    is_valid: montant <= restant,
-  };
-};
-```
-
----
-
-## 10. Régimes fiscaux
-
-| Régime | Description |
-|--------|-------------|
-| `reel_normal` | Régime réel normal |
-| `reel_simplifie` | Régime réel simplifié |
-| `synthetique` | Impôt synthétique |
-| `exonere` | Exonéré |
-
----
-
-## 11. Intégration avec autres modules
-
-### 11.1 Entrées
-
-| Module source | Données reçues |
-|---------------|----------------|
-| Engagements | Engagement validé |
-
-### 11.2 Sorties
-
-| Module cible | Données envoyées |
-|--------------|------------------|
-| Ordonnancements | Liquidation validée |
-| Budget Lines | Mise à jour `total_liquide` |
-
----
-
-## 12. Points ouverts / TODOs
-
-- [ ] Stockage réel des fichiers (Supabase Storage)
-- [ ] Scan OCR des factures
-- [ ] Calcul automatique des retenues selon fournisseur
-- [ ] Génération PDF bordereau de liquidation
-- [ ] Workflow de service fait séparé
-
----
-
-## 13. Changelog
-
-| Date | Version | Modifications |
-|------|---------|---------------|
-| 2026-01-15 | 1.0 | Documentation initiale |
+- **104 tests unitaires** + **60 tests E2E** Playwright
+- **Certifie 100/100** — voir `docs/CERTIFICATION_LIQUIDATION.md`
+- Verification : `npx vitest run --grep "liquidation"`

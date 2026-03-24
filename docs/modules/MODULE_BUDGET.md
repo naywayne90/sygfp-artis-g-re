@@ -1,413 +1,122 @@
-# Gestion Budgétaire - Documentation Technique
+# Module Budget / Planification — SYGFP
 
-> **Version**: 1.0 | **Dernière mise à jour**: 2026-01-15 | **Statut**: ✅ Opérationnel
+> Derniere mise a jour : 24/03/2026
 
 ## 1. Vue d'ensemble
 
-Le module **Budget** est le cœur du système SYGFP. Il gère la structure budgétaire, les dotations, les virements de crédits, et le suivi de l'exécution budgétaire.
+Le module **Budget / Planification** est le coeur du systeme SYGFP. Il couvre trois sous-modules :
 
-### Rôle principal
+- **Structure Budgetaire** : organisation hierarchique du budget (lignes, directions, objectifs strategiques, missions)
+- **Planification Budgetaire** : elaboration du budget previsionnel, imports, virements de credits, validation globale
+- **Plan de Travail** : suivi de l'execution budgetaire agregee par objectif strategique et par direction
 
-- Définir la structure hiérarchique du budget
-- Gérer les dotations initiales et modifiées
-- Suivre l'exécution (engagé, liquidé, ordonnancé, payé)
-- Gérer les virements de crédits
-- Importer les budgets depuis Excel
+Le module alimente directement les etapes d'imputation, d'engagement et le tableau de bord.
 
----
+## 2. Routes et acces
 
-## 2. Architecture
+| Route                         | Page                     | Composant                     |
+| ----------------------------- | ------------------------ | ----------------------------- |
+| `/planification/structure`    | Structure Budgetaire     | `StructureBudgetaire.tsx`     |
+| `/planification/budget`       | Planification Budgetaire | `PlanificationBudgetaire.tsx` |
+| `/planification/plan-travail` | Plan de Travail          | `PlanTravail.tsx`             |
 
-### 2.1 Tables principales
+## 3. Composants
 
-| Table | Description | Clé primaire |
-|-------|-------------|--------------|
-| `budget_lines` | Lignes budgétaires | `id` (UUID) |
-| `budget_line_history` | Historique modifications | `id` (UUID) |
-| `budget_versions` | Versions du budget | `id` (UUID) |
-| `credit_transfers` | Virements de crédits | `id` (UUID) |
-| `budget_history` | Historique mouvements | `id` (UUID) |
-| `budget_imports` | Jobs d'import | `id` (UUID) |
-| `import_runs` | Exécutions d'import | `id` (UUID) |
+| Composant                      | Fichier                                                | Description                                 |
+| ------------------------------ | ------------------------------------------------------ | ------------------------------------------- |
+| BudgetLineTable                | `components/budget/BudgetLineTable.tsx`                | Tableau des lignes budgetaires avec actions |
+| BudgetTreeView                 | `components/budget/BudgetTreeView.tsx`                 | Vue arborescente des lignes                 |
+| BudgetLineForm                 | `components/budget/BudgetLineForm.tsx`                 | Formulaire creation/edition ligne           |
+| BudgetFilters                  | `components/budget/BudgetFilters.tsx`                  | Filtres (direction, OS, statut, etc.)       |
+| BudgetFormulas                 | `components/budget/BudgetFormulas.tsx`                 | Formules de reference affichees             |
+| BudgetValidation               | `components/budget/BudgetValidation.tsx`               | Dialog de validation globale du budget      |
+| BudgetVersionHistory           | `components/budget/BudgetVersionHistory.tsx`           | Historique des versions du budget           |
+| BudgetLineHistory              | `components/budget/BudgetLineHistory.tsx`              | Historique d'une ligne                      |
+| BudgetLineEditDialog           | `components/budget/BudgetLineEditDialog.tsx`           | Edition avec versioning                     |
+| BudgetLineVersionHistoryDialog | `components/budget/BudgetLineVersionHistoryDialog.tsx` | Versions d'une ligne                        |
+| BudgetLineDetailSheet          | `components/budget/BudgetLineDetailSheet.tsx`          | Detail d'une ligne (Sheet)                  |
+| BudgetImportAdvanced           | `components/budget/BudgetImportAdvanced.tsx`           | Import CSV avance                           |
+| BudgetImportHistory            | `components/budget/BudgetImportHistory.tsx`            | Historique des imports                      |
+| ImportExcelWizard              | `components/budget/ImportExcelWizard.tsx`              | Wizard import Excel en 4 etapes             |
+| CreditTransferForm             | `components/budget/CreditTransferForm.tsx`             | Formulaire virement de credits              |
+| CreditTransferList             | `components/budget/CreditTransferList.tsx`             | Liste des virements                         |
+| BudgetMovementJournal          | `components/budget/BudgetMovementJournal.tsx`          | Journal des mouvements budgetaires          |
+| NotesPagination                | `components/shared/NotesPagination.tsx`                | Pagination partagee                         |
+| EmptyStateNoData               | `components/shared/EmptyState.tsx`                     | Etat vide                                   |
 
-### 2.2 Colonnes clés de `budget_lines`
+## 4. Boutons et actions
 
-| Colonne | Type | Nullable | Description |
-|---------|------|----------|-------------|
-| `id` | uuid | Non | Identifiant unique |
-| `code` | text | Non | Code budgétaire |
-| `label` | text | Non | Libellé |
-| `level` | varchar | Non | Niveau hiérarchique |
-| `parent_id` | uuid | Oui | Ligne parente |
-| `dotation_initiale` | numeric | Non | Dotation initiale |
-| `dotation_modifiee` | numeric | Oui | Après virements |
-| `total_engage` | numeric | Oui | Montant engagé |
-| `total_liquide` | numeric | Oui | Montant liquidé |
-| `total_ordonnance` | numeric | Oui | Montant ordonnancé |
-| `total_paye` | numeric | Oui | Montant payé |
-| `disponible_calcule` | numeric | Oui | Disponible temps réel |
-| `direction_id` | uuid | Oui | Direction |
-| `os_id` | uuid | Oui | Objectif Stratégique |
-| `mission_id` | uuid | Oui | Mission |
-| `action_id` | uuid | Oui | Action |
-| `activite_id` | uuid | Oui | Activité |
-| `nbe_id` | uuid | Oui | Code NBE |
-| `sysco_id` | uuid | Oui | Compte SYSCO |
-| `exercice` | integer | Non | Exercice budgétaire |
-| `statut` | varchar | Oui | État de validation |
+### 4.1 Page Planification Budgetaire (`/planification/budget`)
 
-### 2.3 Niveaux hiérarchiques
+| Bouton              | Visible si                    | Action                       | Effet                                       |
+| ------------------- | ----------------------------- | ---------------------------- | ------------------------------------------- |
+| Historique          | Toujours                      | Ouvre `BudgetVersionHistory` | Affiche l'historique des versions du budget |
+| Valider le budget   | Toujours                      | Ouvre `BudgetValidation`     | Validation globale du budget                |
+| Nouvelle ligne      | Onglet "Lignes budgetaires"   | Ouvre `BudgetLineForm`       | Creation d'une nouvelle ligne               |
+| Importer Excel      | Onglet "Lignes budgetaires"   | Ouvre `ImportExcelWizard`    | Import depuis fichier Excel                 |
+| Importer CSV        | Onglet "Lignes budgetaires"   | Ouvre `BudgetImportAdvanced` | Import depuis fichier CSV                   |
+| Historique imports  | Onglet "Lignes budgetaires"   | Ouvre `BudgetImportHistory`  | Consulte l'historique des imports           |
+| Exporter CSV        | Onglet "Lignes budgetaires"   | `handleExport()`             | Telecharge un CSV des lignes                |
+| Virement de credits | Onglet "Lignes budgetaires"   | Ouvre `CreditTransferForm`   | Creation d'un virement                      |
+| Vue Liste (icone)   | Onglet "Lignes budgetaires"   | `setViewMode('table')`       | Basculer en vue tableau                     |
+| Vue Arbre (icone)   | Onglet "Lignes budgetaires"   | `setViewMode('tree')`        | Basculer en vue arborescente                |
+| Nouvelle demande    | Onglet "Virements de credits" | Ouvre `CreditTransferForm`   | Creation d'un virement                      |
 
-```
-level = "os"        → Objectif Stratégique
-level = "mission"   → Mission
-level = "action"    → Action
-level = "activite"  → Activité
-level = "ligne"     → Ligne budgétaire
-```
+### 4.2 Page Structure Budgetaire (`/planification/structure`)
 
----
+| Bouton              | Visible si                  | Action                 | Effet                        |
+| ------------------- | --------------------------- | ---------------------- | ---------------------------- |
+| Nouvelle ligne      | Onglet "Lignes budgetaires" | Ouvre `BudgetLineForm` | Creation d'une ligne         |
+| Exporter (dropdown) | Onglet "Lignes budgetaires" | Menu CSV / Excel / PDF | Export dans le format choisi |
+| Rechercher          | Onglet "Lignes budgetaires" | Champ texte            | Filtre par code ou libelle   |
+| Vue Liste (icone)   | Onglet "Lignes budgetaires" | `setViewMode('table')` | Basculer en vue tableau      |
+| Vue Arbre (icone)   | Onglet "Lignes budgetaires" | `setViewMode('tree')`  | Basculer en vue arborescente |
 
-## 3. Calcul du disponible
+### 4.3 Page Plan de Travail (`/planification/plan-travail`)
 
-### 3.1 Formule standard
+| Bouton              | Visible si                                 | Action                        | Effet                     |
+| ------------------- | ------------------------------------------ | ----------------------------- | ------------------------- |
+| Reinitialiser       | Filtres actifs                             | Remet tous les filtres a zero | Affiche toutes les lignes |
+| Exporter (dropdown) | Chaque vue (par OS, par Direction, Detail) | Menu CSV / Excel / PDF        | Export agregat ou detail  |
 
-```
-Disponible = Dotation Initiale 
-           + Virements Reçus 
-           - Virements Émis 
-           - Total Engagé
-```
+## 5. Statuts et transitions
 
-### 3.2 Formule complète
-
-```
-Dotation Modifiée = Dotation Initiale + Virements Reçus - Virements Émis
-Disponible = Dotation Modifiée - Total Engagé
-```
-
-### 3.3 Colonnes calculées
-
-```typescript
-interface BudgetLine {
-  dotation_initiale: number;
-  dotation_modifiee: number;  // Après virements
-  total_engage: number;
-  total_liquide: number;
-  total_ordonnance: number;
-  total_paye: number;
-  disponible_calcule: number;
-}
-```
-
----
-
-## 4. Virements de crédits
-
-### 4.1 Table `credit_transfers`
-
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `from_budget_line_id` | uuid | Ligne source (débit) |
-| `to_budget_line_id` | uuid | Ligne destination (crédit) |
-| `amount` | numeric | Montant transféré |
-| `type_transfer` | varchar | `virement` ou `ajustement` |
-| `motif` | text | Justification |
-| `status` | varchar | État du virement |
-
-### 4.2 Types de transfert
-
-| Type | Description |
-|------|-------------|
-| `virement` | Transfert entre 2 lignes (source → destination) |
-| `ajustement` | Augmentation sans source (budget rectificatif) |
-
-### 4.3 Statuts de virement
+### 5.1 Lignes budgetaires
 
 ```
-brouillon → soumis → valide → execute
-                  ↘ rejete
-                  ↘ annule
+brouillon --> soumis --> valide
+                    \--> rejete
 ```
 
-### 4.4 Hook `useBudgetTransfers`
-
-```typescript
-const {
-  transfers,
-  stats,
-  createTransfer,
-  submitTransfer,
-  validateTransfer,
-  executeTransfer,
-  rejectTransfer,
-  cancelTransfer,
-} = useBudgetTransfers();
-```
-
----
-
-## 5. Import Excel
-
-### 5.1 Wizard en 4 étapes
-
-| Étape | Composant | Description |
-|-------|-----------|-------------|
-| 1 | `StepExerciceUpload` | Sélection exercice + upload fichier |
-| 2 | `StepSheetSelection` | Choix de la feuille Excel |
-| 3 | `StepPreviewMapping` | Mapping des colonnes |
-| 4 | `StepValidationImport` | Validation et import |
-
-### 5.2 Colonnes attendues
-
-```typescript
-const COLONNES_BUDGET = [
-  "code",                // Code budgétaire
-  "libelle",             // Libellé
-  "dotation_initiale",   // Montant
-  "direction",           // Code direction
-  "os",                  // Code OS
-  "mission",             // Code mission
-  "action",              // Code action
-  "activite",            // Code activité
-  "nbe",                 // Code NBE
-  "sysco",               // Code SYSCO
-];
-```
-
-### 5.3 Staging et validation
-
-```typescript
-// 1. Charger dans staging
-await supabase.from("budget_import_staging").insert(rows);
-
-// 2. Valider les données
-const { data: validated } = await supabase.rpc("validate_budget_import", {
-  p_job_id: jobId,
-});
-
-// 3. Importer les données validées
-await supabase.rpc("execute_budget_import", {
-  p_job_id: jobId,
-});
-```
-
----
-
-## 6. Hooks React
-
-### 6.1 Hook principal : `useBudgetLines`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `budgetLines` | `BudgetLine[]` | Lignes budgétaires |
-| `createBudgetLine` | `function` | Créer une ligne |
-| `updateBudgetLine` | `function` | Modifier |
-| `deleteBudgetLine` | `function` | Supprimer |
-| `calculateAvailability` | `function` | Calculer disponible |
-
-### 6.2 Hook virements : `useBudgetTransfers`
-
-| Export | Type | Description |
-|--------|------|-------------|
-| `transfers` | `BudgetTransfer[]` | Liste virements |
-| `stats` | `object` | Statistiques |
-| `createTransfer` | `function` | Créer |
-| `executeTransfer` | `function` | Exécuter |
-
-### 6.3 Hook historique : `useBudgetHistory`
-
-```typescript
-const { history, isLoading } = useBudgetHistory(budgetLineId);
-```
-
-### 6.4 Fichiers sources
+### 5.2 Virements de credits (dans PlanificationBudgetaire)
 
 ```
-src/hooks/useBudgetLines.ts      # Lignes budgétaires
-src/hooks/useBudgetTransfers.ts  # Virements (~424 lignes)
-src/hooks/useBudgetAvailability.ts
-src/hooks/useBudgetAlerts.ts
+en_attente --> approuve
+          \--> rejete
 ```
 
----
+## 6. Donnees Supabase
 
-## 7. Pages et Composants
+| Table                    | Colonnes cles                                                                                                                                                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `budget_lines`           | id, code, label, level, parent_id, dotation_initiale, dotation_modifiee, total_engage, total_liquide, total_ordonnance, total_paye, disponible_calcule, direction_id, os_id, mission_id, exercice, statut, source_financement |
+| `budget_line_history`    | id, budget_line_id, event_type, delta, dotation_avant, dotation_apres                                                                                                                                                         |
+| `budget_versions`        | id, exercice, version, statut                                                                                                                                                                                                 |
+| `credit_transfers`       | id, from_budget_line_id, to_budget_line_id, amount, type_transfer, motif, status, exercice                                                                                                                                    |
+| `budget_history`         | id, budget_line_id, event_type, delta, ref_code, commentaire                                                                                                                                                                  |
+| `budget_imports`         | id, exercice, statut                                                                                                                                                                                                          |
+| `import_runs`            | id, job_id, statut                                                                                                                                                                                                            |
+| `directions`             | id, code, label, sigle, est_active                                                                                                                                                                                            |
+| `objectifs_strategiques` | id, code, libelle                                                                                                                                                                                                             |
+| `missions`               | id, code, libelle                                                                                                                                                                                                             |
 
-### 7.1 Pages
+## 7. Hooks
 
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/planification-budgetaire` | `PlanificationBudgetaire.tsx` | Budget |
-| `/virements` | `Virements.tsx` | Virements |
-| `/import-export` | `ImportExport.tsx` | Import/Export |
-
-### 7.2 Composants principaux
-
-| Composant | Description |
-|-----------|-------------|
-| `BudgetLineTable.tsx` | Tableau des lignes |
-| `BudgetLineForm.tsx` | Formulaire ligne |
-| `BudgetTreeView.tsx` | Vue arborescente |
-| `BudgetFilters.tsx` | Filtres |
-| `BudgetValidation.tsx` | Validation budget |
-| `CreditTransferForm.tsx` | Formulaire virement |
-| `CreditTransferList.tsx` | Liste virements |
-| `ImportExcelWizard.tsx` | Wizard import |
-| `BudgetMovementHistory.tsx` | Historique |
-| `TopOSWidget.tsx` | Top OS par exécution |
-
-### 7.3 Arborescence
-
-```
-src/
-├── pages/
-│   └── planification/
-│       ├── PlanificationBudgetaire.tsx
-│       ├── Virements.tsx
-│       └── ImportExport.tsx
-└── components/
-    └── budget/
-        ├── BudgetLineTable.tsx
-        ├── BudgetLineForm.tsx
-        ├── BudgetTreeView.tsx
-        ├── BudgetFilters.tsx
-        ├── BudgetValidation.tsx
-        ├── CreditTransferForm.tsx
-        ├── CreditTransferList.tsx
-        ├── ImportExcelWizard.tsx
-        ├── BudgetMovementHistory.tsx
-        └── TopOSWidget.tsx
-```
-
----
-
-## 8. API Supabase - Exemples
-
-### 8.1 Récupérer les lignes budgétaires
-
-```typescript
-const { data, error } = await supabase
-  .from("budget_lines")
-  .select(`
-    *,
-    direction:directions(id, label, sigle),
-    os:objectifs_strategiques(id, code, libelle),
-    mission:missions(id, code, libelle),
-    nbe:nomenclature_nbe(id, code, libelle),
-    sysco:plan_comptable_sysco(id, code, libelle)
-  `)
-  .eq("exercice", 2026)
-  .eq("is_active", true)
-  .order("code");
-```
-
-### 8.2 Créer un virement
-
-```typescript
-const { data, error } = await supabase
-  .from("credit_transfers")
-  .insert({
-    from_budget_line_id: "uuid-source",
-    to_budget_line_id: "uuid-destination",
-    amount: 1000000,
-    type_transfer: "virement",
-    motif: "Réallocation pour projet urgent",
-    exercice: 2026,
-    status: "brouillon",
-  })
-  .select()
-  .single();
-```
-
-### 8.3 Exécuter un virement
-
-```typescript
-const { data, error } = await supabase.rpc("execute_credit_transfer", {
-  p_transfer_id: transferId,
-});
-```
-
----
-
-## 9. Alertes budgétaires
-
-### 9.1 Table `budg_alert_rules`
-
-| Colonne | Description |
-|---------|-------------|
-| `seuil_pct` | Seuil d'alerte (%) |
-| `scope` | `GLOBAL` ou `DIRECTION` |
-| `actif` | Règle active |
-
-### 9.2 Seuils standards
-
-| Seuil | Niveau | Couleur |
-|-------|--------|---------|
-| 50% | Info | Bleu |
-| 75% | Warning | Orange |
-| 90% | Danger | Rouge |
-
----
-
-## 10. Historique des mouvements
-
-### 10.1 Table `budget_history`
-
-| Colonne | Description |
-|---------|-------------|
-| `budget_line_id` | Ligne concernée |
-| `event_type` | Type d'événement |
-| `delta` | Variation (+/-) |
-| `dotation_avant` | Dotation avant |
-| `dotation_apres` | Dotation après |
-| `ref_code` | Code référence (engagement, virement) |
-| `commentaire` | Commentaire |
-
-### 10.2 Types d'événements
-
-| Type | Description |
-|------|-------------|
-| `creation` | Création ligne |
-| `virement_in` | Virement reçu |
-| `virement_out` | Virement émis |
-| `engagement` | Engagement créé |
-| `liquidation` | Liquidation créée |
-| `modification` | Modification manuelle |
-
----
-
-## 11. Intégration avec autres modules
-
-### 11.1 Entrées
-
-| Module source | Données reçues |
-|---------------|----------------|
-| Import Excel | Lignes budgétaires |
-| Référentiels | OS, Missions, NBE, SYSCO |
-
-### 11.2 Sorties
-
-| Module cible | Données envoyées |
-|--------------|------------------|
-| Imputation | Lignes disponibles |
-| Engagements | Disponibilité |
-| Dashboard | Indicateurs |
-
----
-
-## 12. Points ouverts / TODOs
-
-- [ ] Budget pluriannuel
-- [ ] Versions comparatives
-- [ ] Export vers SIGFIP
-- [ ] Consolidation multi-directions
-- [ ] Prévisions automatiques
-
----
-
-## 13. Changelog
-
-| Date | Version | Modifications |
-|------|---------|---------------|
-| 2026-01-15 | 1.0 | Documentation initiale |
+| Hook                  | Fichier                        | Description                              |
+| --------------------- | ------------------------------ | ---------------------------------------- |
+| `useBudgetLines`      | `hooks/useBudgetLines.ts`      | CRUD lignes budgetaires, totaux, filtres |
+| `useCreditTransfers`  | `hooks/useBudgetLines.ts`      | Virements dans PlanificationBudgetaire   |
+| `useBaseReferentiels` | `hooks/useBaseReferentiels.ts` | Directions, OS, missions                 |
+| `useBudgetTransfers`  | `hooks/useBudgetTransfers.ts`  | Virements (page Virements dediee)        |
+| `useBudgetHistory`    | `hooks/useBudgetHistory.ts`    | Historique mouvements                    |
+| `useBudgetAlerts`     | `hooks/useBudgetAlerts.ts`     | Alertes budgetaires                      |
