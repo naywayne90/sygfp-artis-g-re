@@ -33,7 +33,9 @@
       "Bash(do git:*)",
       "Bash(echo \"MODIFIED: $f\")",
       "Bash(done)",
-      "Bash(for f:*)"
+      "Bash(for f:*)",
+      "Bash(pkill -f \"chrome.*mcp-chrome\")",
+      "Bash(rm -rf /home/angeyannick/.cache/ms-playwright/mcp-chrome-b95acc2/SingletonLock)"
     ],
     "additionalDirectories": ["/tmp"]
   }
