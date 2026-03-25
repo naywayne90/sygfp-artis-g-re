@@ -1,12 +1,12 @@
 /**
- * InlineDocumentUpload — Upload de document inline avec drag-and-drop
+ * InlineDocumentUpload — Upload inline avec react-dropzone
  *
- * Remplace le dialog d'upload complexe (6 clics) par un composant inline (1 clic).
- * L'utilisateur glisse un fichier ou clique pour ouvrir le file picker.
- * L'upload demarre automatiquement apres selection.
+ * Utilise react-dropzone (deja installe) pour un file picker fiable
+ * dans tous les navigateurs + drag-and-drop.
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
 import { Upload, CheckCircle2, Loader2, FileText, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,25 +45,17 @@ export function InlineDocumentUpload({
   onRemove,
   disabled = false,
 }: InlineDocumentUploadProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const validateFile = (file: File): string | null => {
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      return 'Format non accepté. Utilisez PDF, JPG, PNG, GIF ou WEBP.';
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return 'Fichier trop volumineux (max 10 Mo).';
-    }
-    return null;
-  };
 
-  const uploadFile = useCallback(
-    async (file: File) => {
-      const validationError = validateFile(file);
-      if (validationError) {
-        setError(validationError);
-        toast.error(validationError);
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
+
+      if (file.size > MAX_FILE_SIZE) {
+        setError('Fichier trop volumineux (max 10 Mo).');
+        toast.error('Fichier trop volumineux (max 10 Mo).');
         return;
       }
 
@@ -73,20 +65,14 @@ export function InlineDocumentUpload({
       try {
         const filePath = `engagements/${engagementId}/${Date.now()}_${file.name}`;
 
-        // Upload vers Supabase Storage
         const { error: uploadError } = await supabase.storage
           .from('engagement-documents')
-          .upload(filePath, file, {
-            contentType: file.type,
-            upsert: true,
-          });
+          .upload(filePath, file, { contentType: file.type, upsert: true });
 
-        // Si le bucket n'existe pas, on continue quand même (fallback metadata-only)
         if (uploadError && !uploadError.message?.includes('not found')) {
           console.warn('Storage upload warning:', uploadError.message);
         }
 
-        // Mettre à jour les métadonnées en base
         onUploadSuccess(documentId, filePath, file.name, file.size, file.type);
         toast.success(`${label} ajouté`);
       } catch (err) {
@@ -100,57 +86,22 @@ export function InlineDocumentUpload({
     [documentId, engagementId, label, onUploadSuccess]
   );
 
-  const handleDragOver = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!disabled && !isFourni) setIsDragging(true);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/gif': ['.gif'],
+      'image/webp': ['.webp'],
     },
-    [disabled, isFourni]
-  );
+    maxFiles: 1,
+    multiple: false,
+    disabled: disabled || isUploading || isFourni,
+    noKeyboard: true,
+  });
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-
-      if (disabled || isUploading) return;
-
-      const file = e.dataTransfer.files[0];
-      if (file) uploadFile(file);
-    },
-    [disabled, isUploading, uploadFile]
-  );
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleClick = useCallback(() => {
-    if (disabled || isUploading) return;
-    fileInputRef.current?.click();
-  }, [disabled, isUploading]);
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) uploadFile(file);
-      // Reset pour permettre de re-sélectionner le même fichier
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    },
-    [uploadFile]
-  );
-
-  const handleRemove = useCallback(() => {
-    if (onRemove) onRemove(documentId);
-  }, [documentId, onRemove]);
-
-  // Document déjà fourni — afficher le résultat
+  // Document deja fourni
   if (isFourni) {
     return (
       <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 bg-green-50/50">
@@ -175,7 +126,7 @@ export function InlineDocumentUpload({
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleRemove}
+            onClick={() => onRemove(documentId)}
             className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
           >
             <X className="h-4 w-4" />
@@ -185,19 +136,14 @@ export function InlineDocumentUpload({
     );
   }
 
-  // Zone d'upload — utilise <label> pour déclencher nativement le file picker
-  const inputId = `file-upload-${documentId}`;
-
+  // Zone d'upload avec react-dropzone
   return (
-    <label
-      htmlFor={disabled || isUploading ? undefined : inputId}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+    <div
+      {...getRootProps()}
       className={cn(
         'flex items-center gap-3 p-3 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200',
-        isDragging && 'border-primary bg-primary/5 scale-[1.01]',
-        !isDragging &&
+        isDragActive && 'border-primary bg-primary/5 scale-[1.01]',
+        !isDragActive &&
           !error &&
           'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30',
         error && 'border-destructive/50 bg-destructive/5',
@@ -205,6 +151,8 @@ export function InlineDocumentUpload({
         disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
+      <input {...getInputProps()} />
+
       {isUploading ? (
         <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
       ) : error ? (
@@ -227,23 +175,13 @@ export function InlineDocumentUpload({
             ? 'Téléversement en cours...'
             : error
               ? error
-              : isDragging
+              : isDragActive
                 ? 'Déposez le fichier ici'
                 : 'Glissez un fichier ici ou cliquez pour sélectionner'}
         </p>
       </div>
 
       <FileText className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-
-      <input
-        ref={fileInputRef}
-        id={inputId}
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
-        onChange={handleFileChange}
-        className="absolute opacity-0 w-px h-px overflow-hidden"
-        tabIndex={-1}
-      />
-    </label>
+    </div>
   );
 }
