@@ -241,7 +241,7 @@ export function InlineDocumentUpload({
         type="file"
         accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
         onChange={handleFileChange}
-        className="hidden"
+        className="absolute opacity-0 w-px h-px overflow-hidden"
         tabIndex={-1}
       />
     </label>
