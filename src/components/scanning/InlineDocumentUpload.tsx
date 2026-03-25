@@ -131,16 +131,22 @@ export function InlineDocumentUpload({
 
   const handleClick = useCallback(() => {
     if (disabled || isUploading) return;
-    // Créer un input file dynamique au lieu de le monter dans le DOM
+    // Créer un input file dynamique et l'ajouter au DOM (requis par certains navigateurs)
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.jpg,.jpeg,.png,.gif,.webp';
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    input.style.pointerEvents = 'none';
+    input.style.left = '-9999px';
+    document.body.appendChild(input);
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) uploadFile(file);
-      input.remove();
+      document.body.removeChild(input);
     };
-    input.click();
+    // Timeout nécessaire pour que le DOM soit prêt
+    setTimeout(() => input.click(), 0);
   }, [disabled, isUploading, uploadFile]);
 
   const handleRemove = useCallback(() => {
