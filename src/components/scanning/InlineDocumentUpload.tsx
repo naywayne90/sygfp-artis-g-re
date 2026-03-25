@@ -185,13 +185,15 @@ export function InlineDocumentUpload({
     );
   }
 
-  // Zone d'upload (drag-drop + click)
+  // Zone d'upload — utilise <label> pour déclencher nativement le file picker
+  const inputId = `file-upload-${documentId}`;
+
   return (
-    <div
+    <label
+      htmlFor={disabled || isUploading ? undefined : inputId}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
       className={cn(
         'flex items-center gap-3 p-3 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200',
         isDragging && 'border-primary bg-primary/5 scale-[1.01]',
@@ -235,13 +237,13 @@ export function InlineDocumentUpload({
 
       <input
         ref={fileInputRef}
+        id={inputId}
         type="file"
         accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
         onChange={handleFileChange}
-        className="sr-only"
+        className="hidden"
         tabIndex={-1}
-        aria-hidden="true"
       />
-    </div>
+    </label>
   );
 }
