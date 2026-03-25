@@ -6,7 +6,7 @@
  * L'upload demarre automatiquement apres selection.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Upload, CheckCircle2, Loader2, FileText, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -129,25 +129,22 @@ export function InlineDocumentUpload({
     [disabled, isUploading, uploadFile]
   );
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleClick = useCallback(() => {
     if (disabled || isUploading) return;
-    // Créer un input file dynamique et l'ajouter au DOM (requis par certains navigateurs)
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.pdf,.jpg,.jpeg,.png,.gif,.webp';
-    input.style.position = 'fixed';
-    input.style.opacity = '0';
-    input.style.pointerEvents = 'none';
-    input.style.left = '-9999px';
-    document.body.appendChild(input);
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+    fileInputRef.current?.click();
+  }, [disabled, isUploading]);
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
       if (file) uploadFile(file);
-      document.body.removeChild(input);
-    };
-    // Timeout nécessaire pour que le DOM soit prêt
-    setTimeout(() => input.click(), 0);
-  }, [disabled, isUploading, uploadFile]);
+      // Reset pour permettre de re-sélectionner le même fichier
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+    [uploadFile]
+  );
 
   const handleRemove = useCallback(() => {
     if (onRemove) onRemove(documentId);
@@ -235,6 +232,16 @@ export function InlineDocumentUpload({
       </div>
 
       <FileText className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
+        onChange={handleFileChange}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
     </div>
   );
 }
