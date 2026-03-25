@@ -2,7 +2,7 @@
  * NotificationBudgetaireDetails - Affichage détaillé d'une notification
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -59,14 +59,7 @@ export function NotificationBudgetaireDetails({
   const [attachments, setAttachments] = useState<EntityAttachment[]>([]);
   const [loadingAttachments, setLoadingAttachments] = useState(false);
 
-  // Load attachments when dialog opens
-  useEffect(() => {
-    if (open && notification) {
-      loadAttachments();
-    }
-  }, [open, notification]);
-
-  const loadAttachments = async () => {
+  const loadAttachments = useCallback(async () => {
     if (!notification) return;
     setLoadingAttachments(true);
     try {
@@ -77,7 +70,14 @@ export function NotificationBudgetaireDetails({
     } finally {
       setLoadingAttachments(false);
     }
-  };
+  }, [notification, getAttachments]);
+
+  // Load attachments when dialog opens
+  useEffect(() => {
+    if (open && notification) {
+      loadAttachments();
+    }
+  }, [open, notification, loadAttachments]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!notification || !e.target.files?.length) return;
@@ -90,7 +90,7 @@ export function NotificationBudgetaireDetails({
         category: 'document',
       });
       loadAttachments();
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
     e.target.value = '';

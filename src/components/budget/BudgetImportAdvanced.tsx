@@ -193,8 +193,8 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       });
       setColumnMapping(autoMapping);
       setCurrentStep(2);
-    } catch (error: any) {
-      toast.error('Erreur de lecture: ' + error.message);
+    } catch (error: unknown) {
+      toast.error('Erreur de lecture: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsProcessing(false);
     }
@@ -383,8 +383,8 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       const validRows = parsedRows.filter((r) => r.isValid);
 
       // Prepare all budget lines for batch operations
-      const toInsert: any[] = [];
-      const toUpdate: { id: string; data: any }[] = [];
+      const toInsert: Record<string, unknown>[] = [];
+      const toUpdate: { id: string; data: Record<string, unknown> }[] = [];
 
       for (const row of validRows) {
         const data = row.data;
@@ -499,19 +499,20 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
         `Import terminé: ${successCount} ligne(s) importée(s)${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`
       );
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
       // Mark import as failed if record exists
       if (importRecordId) {
         await supabase
           .from('budget_imports')
           .update({
             status: 'echec',
-            errors: [{ row: 0, message: error.message }],
+            errors: [{ row: 0, message: errMsg }],
             completed_at: new Date().toISOString(),
           })
           .eq('id', importRecordId);
       }
-      toast.error("Erreur d'import: " + error.message);
+      toast.error("Erreur d'import: " + errMsg);
     } finally {
       setIsProcessing(false);
     }
@@ -910,7 +911,7 @@ function Card({
 }: {
   value: number;
   label: string;
-  icon: any;
+  icon: React.ElementType;
   color?: string;
 }) {
   return (

@@ -17,7 +17,6 @@ import {
   canExecuteReglement,
   getRequiredRoleForAction,
   getAccessDeniedMessage,
-  type RoleCode,
   type UserContext,
   type EntityContext,
 } from '../permissions';

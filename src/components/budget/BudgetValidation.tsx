@@ -110,8 +110,10 @@ export function BudgetValidation({
       toast.success(`Budget validé avec succès (Version ${nextVersion})`);
       onSuccess();
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error('Erreur de validation: ' + error.message);
+    } catch (error: unknown) {
+      toast.error(
+        'Erreur de validation: ' + (error instanceof Error ? error.message : String(error))
+      );
     } finally {
       setIsValidating(false);
     }
@@ -135,8 +137,8 @@ export function BudgetValidation({
       toast.success('Budget verrouillé - Les modifications nécessiteront un avenant');
       onSuccess();
       onOpenChange(false);
-    } catch (error: any) {
-      toast.error('Erreur: ' + error.message);
+    } catch (error: unknown) {
+      toast.error('Erreur: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsValidating(false);
     }

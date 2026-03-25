@@ -181,7 +181,7 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
       const { data, error } = await supabase
         .from('roadmap_submissions')
         .select('status')
-        .eq('exercice_id', exerciceId!);
+        .eq('exercice_id', exerciceId ?? '');
 
       if (error) throw error;
 
@@ -360,7 +360,7 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
           rejected_by_profile:profiles!roadmap_submissions_rejected_by_fkey(id, full_name)
         `
         )
-        .eq('id', submissionId!)
+        .eq('id', submissionId ?? '')
         .single();
 
       if (error) throw error;
@@ -381,7 +381,7 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
           activite:activites(id, code, libelle, montant_prevu, est_active, updated_at)
         `
         )
-        .eq('submission_id', submissionId!)
+        .eq('submission_id', submissionId ?? '')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -402,7 +402,7 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
           performed_by_profile:profiles!roadmap_submission_history_performed_by_fkey(id, full_name)
         `
         )
-        .eq('submission_id', submissionId!)
+        .eq('submission_id', submissionId ?? '')
         .order('performed_at', { ascending: false });
 
       if (error) throw error;

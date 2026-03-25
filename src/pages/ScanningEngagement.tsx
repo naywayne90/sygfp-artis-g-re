@@ -40,7 +40,6 @@ import {
   FileCheck,
   FileX,
   Upload,
-  Eye,
   Filter,
   FolderOpen,
   Send,

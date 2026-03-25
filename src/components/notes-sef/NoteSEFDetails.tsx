@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +41,6 @@ import {
   Paperclip,
   FileIcon,
   MessageSquare,
-  CreditCard,
   ChevronDown,
   FileEdit,
   ThumbsUp,
@@ -180,21 +179,7 @@ export function NoteSEFDetails({
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (note && open) {
-      // Fetch history
-      setLoadingHistory(true);
-      fetchHistory(note.id)
-        .then(setHistory)
-        .catch(console.error)
-        .finally(() => setLoadingHistory(false));
-
-      // Fetch attachments
-      fetchAttachments();
-    }
-  }, [note, open]);
-
-  const fetchAttachments = async () => {
+  const fetchAttachments = useCallback(async () => {
     if (!note) return;
 
     setLoadingAttachments(true);
@@ -212,7 +197,21 @@ export function NoteSEFDetails({
     } finally {
       setLoadingAttachments(false);
     }
-  };
+  }, [note]);
+
+  useEffect(() => {
+    if (note && open) {
+      // Fetch history
+      setLoadingHistory(true);
+      fetchHistory(note.id)
+        .then(setHistory)
+        .catch(console.error)
+        .finally(() => setLoadingHistory(false));
+
+      // Fetch attachments
+      fetchAttachments();
+    }
+  }, [note, open, fetchAttachments, fetchHistory]);
 
   // Types de fichiers autorisés
   const ALLOWED_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|jpg|jpeg|png|gif|webp|bmp)$/i;

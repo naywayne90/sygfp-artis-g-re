@@ -292,22 +292,26 @@ export function NoteDGList({
                   <TableCell className="hidden xl:table-cell max-w-[150px]">
                     <span
                       className="line-clamp-1 text-sm text-muted-foreground"
-                      title={(note as any).expose || ''}
+                      title={(note as unknown as Record<string, string>).expose || ''}
                     >
-                      {(note as any).expose
-                        ? (note as any).expose.substring(0, 50) +
-                          ((note as any).expose.length > 50 ? '...' : '')
+                      {(note as unknown as Record<string, string>).expose
+                        ? (note as unknown as Record<string, string>).expose.substring(0, 50) +
+                          ((note as unknown as Record<string, string>).expose.length > 50
+                            ? '...'
+                            : '')
                         : '-'}
                     </span>
                   </TableCell>
                   <TableCell className="hidden xl:table-cell max-w-[150px]">
                     <span
                       className="line-clamp-1 text-sm text-muted-foreground"
-                      title={(note as any).avis || ''}
+                      title={(note as unknown as Record<string, string>).avis || ''}
                     >
-                      {(note as any).avis
-                        ? (note as any).avis.substring(0, 50) +
-                          ((note as any).avis.length > 50 ? '...' : '')
+                      {(note as unknown as Record<string, string>).avis
+                        ? (note as unknown as Record<string, string>).avis.substring(0, 50) +
+                          ((note as unknown as Record<string, string>).avis.length > 50
+                            ? '...'
+                            : '')
                         : '-'}
                     </span>
                   </TableCell>

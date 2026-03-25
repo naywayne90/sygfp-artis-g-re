@@ -66,7 +66,7 @@ export function EngagementTimeline({
     if (engagement?.id) {
       getValidationSteps(engagement.id).then(setValidationSteps);
     }
-  }, [engagement?.id]);
+  }, [engagement?.id, getValidationSteps]);
 
   // Build timeline steps based on engagement status
   const buildTimelineSteps = (): TimelineStep[] => {

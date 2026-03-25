@@ -39,7 +39,6 @@ import {
   Upload,
   FileText,
   AlertCircle,
-  Save,
   Send,
 } from 'lucide-react';
 import { FileList, validateFile, type UploadedFile } from './FilePreview';
@@ -57,7 +56,7 @@ export function NoteSEFForm({
   open,
   onOpenChange,
   note,
-  allowSubmitOnCreate = true,
+  allowSubmitOnCreate: _allowSubmitOnCreate = true,
 }: NoteSEFFormProps) {
   const { exercice } = useExercice();
   const {

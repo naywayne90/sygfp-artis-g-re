@@ -332,7 +332,11 @@ export function InventaireList() {
                             placeholder="Motif..."
                             defaultValue={ligne.justification || ''}
                             onBlur={(e) => {
-                              handleUpdateLigne(ligne.id, ligne.stock_physique!, e.target.value);
+                              handleUpdateLigne(
+                                ligne.id,
+                                ligne.stock_physique ?? 0,
+                                e.target.value
+                              );
                             }}
                           />
                         ) : (

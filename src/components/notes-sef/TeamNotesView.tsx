@@ -99,10 +99,13 @@ export function TeamNotesView({ className, depth = 1, limit = 50 }: TeamNotesVie
     queryKey: ['team-members', userId, depth],
     queryFn: async (): Promise<Collaborator[]> => {
       // Essayer d'utiliser la fonction RPC si disponible
-      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('get_team_members', {
-        p_supervisor_id: userId,
-        p_depth: depth,
-      });
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        'get_team_members' as never,
+        {
+          p_supervisor_id: userId,
+          p_depth: depth,
+        } as never
+      );
 
       if (!rpcError && rpcData) {
         return rpcData as Collaborator[];
@@ -117,11 +120,16 @@ export function TeamNotesView({ className, depth = 1, limit = 50 }: TeamNotesVie
         direction_id: string | null;
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query = supabase
-        .from('profiles')
-        .select('id, last_name, first_name, email, direction_id') as any;
-      const { data, error: queryError } = await query.eq('supervisor_id', userId);
+      const { data, error: queryError } = await (
+        supabase
+          .from('profiles')
+          .select('id, last_name, first_name, email, direction_id') as unknown as {
+          eq: (
+            col: string,
+            val: string
+          ) => Promise<{ data: ProfileRow[] | null; error: { message: string } | null }>;
+        }
+      ).eq('supervisor_id', userId);
 
       if (queryError) {
         // Si la colonne n'existe pas, retourner un tableau vide

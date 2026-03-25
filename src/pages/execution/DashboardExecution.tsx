@@ -20,7 +20,6 @@ import {
   BarChart3,
   PieChartIcon,
   Calendar,
-  AlertTriangle,
   FolderOpen,
   ArrowDownRight,
 } from 'lucide-react';
@@ -38,7 +37,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  Line,
 } from 'recharts';
 import { useExecutionDashboard } from '@/hooks/useExecutionDashboard';
 import { useExercice } from '@/contexts/ExerciceContext';
@@ -90,8 +88,13 @@ interface StepCardProps {
 }
 
 function StepCard({ title, icon: Icon, stats, color, validKey, pendingKey, href }: StepCardProps) {
-  const validStats = (stats as any)[validKey] || { count: 0, montant: 0 };
-  const pendingStats = (stats as any)[pendingKey] || { count: 0, montant: 0 };
+  const validStats = (stats as Record<string, { count: number; montant: number }>)[validKey] || {
+    count: 0,
+    montant: 0,
+  };
+  const pendingStats = (stats as Record<string, { count: number; montant: number }>)[
+    pendingKey
+  ] || { count: 0, montant: 0 };
   const rejectedStats = stats.rejete || stats.annule || { count: 0, montant: 0 };
   const totalStats = stats.total;
 

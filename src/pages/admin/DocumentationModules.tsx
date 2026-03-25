@@ -12,7 +12,6 @@ import {
   BookOpen,
   FileText,
   Database,
-  Settings,
   Download,
   RefreshCw,
   Save,

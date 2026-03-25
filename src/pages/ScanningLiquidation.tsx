@@ -43,7 +43,6 @@ import {
   FileCheck,
   FileX,
   Upload,
-  Eye,
   Filter,
   Send,
   CheckCircle2,
@@ -170,7 +169,7 @@ export default function ScanningLiquidation() {
   const [selectedLiquidation, setSelectedLiquidation] = useState<ScanningLiquidation | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [isChecklistComplete, setIsChecklistComplete] = useState(false);
-  const [isChecklistVerified, setIsChecklistVerified] = useState(false);
+  const [_isChecklistVerified, setIsChecklistVerified] = useState(false);
 
   // Fetch directions for filter
   const { data: directions = [] } = useQuery({
@@ -234,12 +233,17 @@ export default function ScanningLiquidation() {
       const liqIds = liqData.map((l) => l.id);
 
       // Try to get from liquidation_documents table
-      let docsData: any[] = [];
+      interface LiquidationDoc {
+        liquidation_id: string;
+        is_provided: boolean;
+        is_required: boolean;
+      }
+      let docsData: LiquidationDoc[] = [];
       try {
         const { data } = await (supabase
-          .from('liquidation_documents' as any)
+          .from('liquidation_documents' as never)
           .select('liquidation_id, is_provided, is_required')
-          .in('liquidation_id', liqIds) as any);
+          .in('liquidation_id', liqIds) as unknown as { data: LiquidationDoc[] | null });
         docsData = data || [];
       } catch {
         // Table may not exist yet
@@ -255,7 +259,7 @@ export default function ScanningLiquidation() {
         docStats[id] = { total: 0, provided: 0, required: 0, requiredProvided: 0 };
       });
 
-      docsData?.forEach((doc: any) => {
+      docsData?.forEach((doc: LiquidationDoc) => {
         const stats = docStats[doc.liquidation_id];
         if (stats) {
           stats.total++;
@@ -269,11 +273,11 @@ export default function ScanningLiquidation() {
 
       // Map to result type
       return liqData.map((liq) => {
-        const engagement = liq.engagement as any;
-        const budgetLine = engagement?.budget_line;
-        const direction = budgetLine?.direction;
-        const activite = budgetLine?.activite;
-        const os = budgetLine?.os;
+        const engagement = liq.engagement as Record<string, unknown> | null;
+        const budgetLine = engagement?.budget_line as Record<string, unknown> | undefined;
+        const direction = budgetLine?.direction as Record<string, unknown> | undefined;
+        const activite = budgetLine?.activite as Record<string, unknown> | undefined;
+        const os = budgetLine?.os as Record<string, unknown> | undefined;
         const stats = docStats[liq.id] || {
           total: 0,
           provided: 0,

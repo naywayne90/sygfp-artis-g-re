@@ -54,7 +54,7 @@ export function useWorkflowTransitions(options: UseWorkflowTransitionsOptions) {
     refetch: refetchHistory,
   } = useQuery({
     queryKey: ['workflow-history', module, entityId],
-    queryFn: () => getTransitionHistory(module, entityId!),
+    queryFn: () => getTransitionHistory(module, entityId ?? ''),
     enabled: !!entityId,
     staleTime: 60000,
   });

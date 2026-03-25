@@ -48,7 +48,7 @@ interface ImportLog {
   timestamp: string;
   level: string;
   message: string;
-  details: any;
+  details: Record<string, unknown> | null;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {

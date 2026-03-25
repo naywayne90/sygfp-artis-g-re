@@ -105,7 +105,7 @@ export function BudgetVersionHistory({ open, onOpenChange }: BudgetVersionHistor
                 <p className="text-muted-foreground text-sm">Aucune version validée</p>
               ) : (
                 <div className="space-y-3">
-                  {versions?.map((version: any) => (
+                  {versions?.map((version) => (
                     <div key={version.id} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div>
@@ -163,7 +163,7 @@ export function BudgetVersionHistory({ open, onOpenChange }: BudgetVersionHistor
                 <p className="text-muted-foreground text-sm">Aucun import effectué</p>
               ) : (
                 <div className="space-y-2">
-                  {imports?.map((imp: any) => (
+                  {imports?.map((imp) => (
                     <div
                       key={imp.id}
                       className="border rounded-lg p-3 flex items-center justify-between"

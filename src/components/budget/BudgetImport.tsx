@@ -190,9 +190,10 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
         toast.success(`Import terminé: ${importResult.success} ligne(s) importée(s)`);
         onSuccess();
       }
-    } catch (error: any) {
-      toast.error("Erreur d'import: " + error.message);
-      importResult.details.push(error.message);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      toast.error("Erreur d'import: " + errMsg);
+      importResult.details.push(errMsg);
       setResult(importResult);
     } finally {
       setIsImporting(false);

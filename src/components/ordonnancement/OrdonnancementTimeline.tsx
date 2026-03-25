@@ -41,8 +41,33 @@ interface TimelineStep {
   hash?: string | null;
 }
 
+interface OrdonnancementRecord {
+  id: string;
+  statut: string;
+  created_at?: string | null;
+  date_soumission?: string | null;
+  soumis_par?: string | null;
+  [key: string]: unknown;
+}
+
+interface ValidationRecord {
+  role?: string;
+  statut?: string;
+  date_validation?: string;
+  validated_by_name?: string;
+  commentaire?: string;
+}
+
+interface SignatureRecord {
+  role?: string;
+  statut?: string;
+  signed_at?: string;
+  signed_by_name?: string;
+  hash?: string;
+}
+
 interface OrdonnancementTimelineProps {
-  ordonnancement: any;
+  ordonnancement: OrdonnancementRecord;
   compact?: boolean;
   className?: string;
 }
@@ -52,8 +77,8 @@ export function OrdonnancementTimeline({
   compact = false,
   className,
 }: OrdonnancementTimelineProps) {
-  const [validations, setValidations] = useState<any[]>([]);
-  const [signatures, setSignatures] = useState<any[]>([]);
+  const [validations, setValidations] = useState<ValidationRecord[]>([]);
+  const [signatures, setSignatures] = useState<SignatureRecord[]>([]);
   const { getValidations, getSignatures } = useOrdonnancements();
 
   useEffect(() => {
@@ -63,7 +88,7 @@ export function OrdonnancementTimeline({
         .then(setSignatures)
         .catch(() => setSignatures([]));
     }
-  }, [ordonnancement?.id]);
+  }, [ordonnancement?.id, getValidations, getSignatures]);
 
   // Build timeline steps based on ordonnancement status
   const buildTimelineSteps = (): TimelineStep[] => {

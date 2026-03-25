@@ -100,7 +100,7 @@ export function ContratList() {
       lot_id: null,
       exercice: new Date().getFullYear(),
       created_by: null,
-    } as any);
+    } as Parameters<typeof createContrat.mutateAsync>[0]);
     setOpen(false);
     resetForm();
   };
