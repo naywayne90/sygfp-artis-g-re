@@ -1,13 +1,26 @@
-import { useState, useCallback, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useCallback, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -16,9 +29,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/dialog';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   FileCheck,
   Plus,
@@ -31,14 +44,15 @@ import {
   X,
   FileImage,
   Lock,
-  AlertCircle
-} from "lucide-react";
+  AlertCircle,
+} from 'lucide-react';
+import { InlineDocumentUpload } from '@/components/scanning/InlineDocumentUpload';
 import {
   useEngagementDocuments,
   TYPES_DOCUMENTS_ENGAGEMENT,
   ACCEPTED_FILE_TYPES,
-  MAX_FILE_SIZE
-} from "@/hooks/useEngagementDocuments";
+  MAX_FILE_SIZE,
+} from '@/hooks/useEngagementDocuments';
 
 interface EngagementChecklistProps {
   engagementId: string;
@@ -55,7 +69,7 @@ export function EngagementChecklist({
   canEdit = true,
   showProgress = true,
   onCompletenessChange,
-  blockSubmitIfIncomplete = true
+  blockSubmitIfIncomplete = true,
 }: EngagementChecklistProps) {
   const {
     documents,
@@ -66,11 +80,11 @@ export function EngagementChecklist({
     verifyDocument,
     isMarking,
     isAdding,
-    isVerifying
+    isVerifying,
   } = useEngagementDocuments(engagementId);
 
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [newDoc, setNewDoc] = useState({ type_document: "", libelle: "", est_obligatoire: false });
+  const [newDoc, setNewDoc] = useState({ type_document: '', libelle: '', est_obligatoire: false });
 
   // Upload dialog state
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -99,20 +113,20 @@ export function EngagementChecklist({
 
     // Validate file type
     if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      setUploadError("Type de fichier non accepté. Utilisez PDF, JPG, PNG, GIF ou WEBP.");
+      setUploadError('Type de fichier non accepté. Utilisez PDF, JPG, PNG, GIF ou WEBP.');
       return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError("Fichier trop volumineux (max 10 Mo).");
+      setUploadError('Fichier trop volumineux (max 10 Mo).');
       return;
     }
 
     setSelectedFile(file);
 
     // Create preview for images
-    if (file.type.startsWith("image/")) {
+    if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = (e) => {
         setFilePreview(e.target?.result as string);
@@ -172,12 +186,12 @@ export function EngagementChecklist({
   const handleAddDocument = async () => {
     if (!newDoc.type_document || !newDoc.libelle) return;
     await addDocument(newDoc);
-    setNewDoc({ type_document: "", libelle: "", est_obligatoire: false });
+    setNewDoc({ type_document: '', libelle: '', est_obligatoire: false });
     setShowAddDialog(false);
   };
 
   const getTypeLabel = (type: string) => {
-    return TYPES_DOCUMENTS_ENGAGEMENT.find(t => t.value === type)?.label || type;
+    return TYPES_DOCUMENTS_ENGAGEMENT.find((t) => t.value === type)?.label || type;
   };
 
   if (isLoading) {
@@ -199,9 +213,7 @@ export function EngagementChecklist({
               <FileCheck className="h-5 w-5" />
               Pièces justificatives
             </CardTitle>
-            <CardDescription>
-              Documents requis pour la validation de l'engagement
-            </CardDescription>
+            <CardDescription>Documents requis pour la validation de l'engagement</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {checklistStatus.isComplete ? (
@@ -235,14 +247,16 @@ export function EngagementChecklist({
                       <Label>Type de document</Label>
                       <Select
                         value={newDoc.type_document}
-                        onValueChange={(v) => setNewDoc(prev => ({ ...prev, type_document: v }))}
+                        onValueChange={(v) => setNewDoc((prev) => ({ ...prev, type_document: v }))}
                       >
                         <SelectTrigger className="mt-1.5">
                           <SelectValue placeholder="Sélectionner" />
                         </SelectTrigger>
                         <SelectContent>
-                          {TYPES_DOCUMENTS_ENGAGEMENT.map(t => (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                          {TYPES_DOCUMENTS_ENGAGEMENT.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>
+                              {t.label}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -251,7 +265,9 @@ export function EngagementChecklist({
                       <Label>Libellé</Label>
                       <Input
                         value={newDoc.libelle}
-                        onChange={(e) => setNewDoc(prev => ({ ...prev, libelle: e.target.value }))}
+                        onChange={(e) =>
+                          setNewDoc((prev) => ({ ...prev, libelle: e.target.value }))
+                        }
                         className="mt-1.5"
                         placeholder="Description du document"
                       />
@@ -261,7 +277,7 @@ export function EngagementChecklist({
                         id="obligatoire"
                         checked={newDoc.est_obligatoire}
                         onCheckedChange={(checked) =>
-                          setNewDoc(prev => ({ ...prev, est_obligatoire: checked === true }))
+                          setNewDoc((prev) => ({ ...prev, est_obligatoire: checked === true }))
                         }
                       />
                       <Label htmlFor="obligatoire" className="text-sm font-normal">
@@ -293,7 +309,7 @@ export function EngagementChecklist({
             </div>
             <Progress
               value={checklistStatus.percentage}
-              className={checklistStatus.isComplete ? "bg-green-100" : ""}
+              className={checklistStatus.isComplete ? 'bg-green-100' : ''}
             />
           </div>
         )}
@@ -304,89 +320,32 @@ export function EngagementChecklist({
             <p>Aucun document requis</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {documents.map((doc) => (
-              <div
+              <InlineDocumentUpload
                 key={doc.id}
-                className={`flex items-start gap-3 p-3 rounded-lg border ${
-                  doc.verified_at
-                    ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900"
-                    : doc.est_fourni
-                      ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900"
-                      : doc.est_obligatoire
-                        ? "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900"
-                        : "bg-muted/50"
-                }`}
-              >
-                <Checkbox
-                  checked={doc.est_fourni}
-                  onCheckedChange={(checked) =>
-                    canEdit && handleMarkProvided(doc.id, checked === true)
-                  }
-                  disabled={!canEdit || isMarking}
-                  className="mt-0.5"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`font-medium ${doc.est_fourni ? "line-through text-muted-foreground" : ""}`}>
-                      {doc.libelle}
-                    </span>
-                    {doc.est_obligatoire && (
-                      <Badge variant="outline" className="text-xs">
-                        Obligatoire
-                      </Badge>
-                    )}
-                    <Badge variant="secondary" className="text-xs">
-                      {getTypeLabel(doc.type_document)}
-                    </Badge>
-                  </div>
-                  {doc.file_name && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Fichier: {doc.file_name}
-                    </p>
-                  )}
-                  {doc.uploaded_at && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Fourni le {format(new Date(doc.uploaded_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
-                    </p>
-                  )}
-                  {doc.verified_at && (
-                    <div className="flex items-center gap-1 mt-1 text-xs text-green-600">
-                      <Shield className="h-3 w-3" />
-                      Vérifié le {format(new Date(doc.verified_at), "dd/MM/yyyy", { locale: fr })}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-1">
-                  {doc.est_fourni && !doc.verified_at && canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => verifyDocument(doc.id)}
-                      disabled={isVerifying}
-                      className="text-green-600 hover:text-green-700"
-                      title="Vérifier le document"
-                    >
-                      {isVerifying ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Shield className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
-                  {!doc.est_fourni && canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openUploadDialog(doc.id)}
-                      disabled={isMarking}
-                      title="Scanner/Téléverser"
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
+                documentId={doc.id}
+                engagementId={engagementId}
+                label={doc.libelle}
+                isObligatoire={doc.est_obligatoire}
+                isFourni={doc.est_fourni}
+                fileName={doc.file_name}
+                uploadedAt={doc.uploaded_at}
+                disabled={!canEdit}
+                onUploadSuccess={(docId, filePath, fileName, fileSize, fileType) => {
+                  markProvided({
+                    documentId: docId,
+                    provided: true,
+                    filePath,
+                    fileName,
+                    fileSize,
+                    fileType,
+                  });
+                }}
+                onRemove={(docId) => {
+                  markProvided({ documentId: docId, provided: false });
+                }}
+              />
             ))}
           </div>
         )}
@@ -397,11 +356,12 @@ export function EngagementChecklist({
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle className="text-warning">Documents manquants</AlertTitle>
             <AlertDescription className="text-muted-foreground">
-              {checklistStatus.missingLabels.join(", ")}
+              {checklistStatus.missingLabels.join(', ')}
               {blockSubmitIfIncomplete && (
                 <span className="block mt-2 text-sm font-medium text-destructive">
                   <Lock className="h-3 w-3 inline mr-1" />
-                  La soumission est bloquée tant que tous les documents obligatoires ne sont pas fournis.
+                  La soumission est bloquée tant que tous les documents obligatoires ne sont pas
+                  fournis.
                 </span>
               )}
             </AlertDescription>
@@ -414,7 +374,8 @@ export function EngagementChecklist({
             <Shield className="h-4 w-4 text-blue-600" />
             <AlertTitle className="text-blue-700">Vérification en attente</AlertTitle>
             <AlertDescription className="text-muted-foreground">
-              {checklistStatus.providedAll - checklistStatus.verified} document(s) fourni(s) mais non encore vérifié(s).
+              {checklistStatus.providedAll - checklistStatus.verified} document(s) fourni(s) mais
+              non encore vérifié(s).
             </AlertDescription>
           </Alert>
         )}
@@ -441,110 +402,14 @@ export function EngagementChecklist({
                 </>
               )}
             </div>
-            <Badge variant={checklistStatus.isComplete ? "default" : "destructive"}>
+            <Badge variant={checklistStatus.isComplete ? 'default' : 'destructive'}>
               {checklistStatus.provided}/{checklistStatus.total} obligatoires
             </Badge>
           </div>
         </CardFooter>
       )}
 
-      {/* Upload dialog with preview */}
-      <Dialog open={uploadDialogOpen} onOpenChange={handleCloseUploadDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Scanner / Téléverser un document
-            </DialogTitle>
-            <DialogDescription>
-              Sélectionnez ou scannez le document à joindre. Formats acceptés : PDF, JPG, PNG, GIF, WEBP (max 10 Mo).
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {/* File selection zone */}
-            <div>
-              <Label htmlFor="file-upload">Fichier</Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
-                onChange={handleFileSelect}
-                className="mt-1.5"
-              />
-            </div>
-
-            {/* Error */}
-            {uploadError && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{uploadError}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Image preview */}
-            {filePreview && (
-              <div className="relative">
-                <Label>Aperçu</Label>
-                <div className="mt-1.5 border rounded-lg overflow-hidden bg-muted/50 p-2">
-                  <img
-                    src={filePreview}
-                    alt="Aperçu du document"
-                    className="max-h-48 mx-auto object-contain rounded"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-6 right-2"
-                  onClick={() => {
-                    setSelectedFile(null);
-                    setFilePreview(null);
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-
-            {/* PDF file info */}
-            {selectedFile && !filePreview && (
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <FileImage className="h-8 w-8 text-primary" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{selectedFile.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(selectedFile.size / 1024).toFixed(1)} Ko - {selectedFile.type}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseUploadDialog}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleConfirmUpload}
-              disabled={!selectedFile || isMarking}
-            >
-              {isMarking ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Envoi...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Téléverser
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Dialog d'upload supprimé — remplacé par InlineDocumentUpload avec drag-drop */}
     </Card>
   );
 }
