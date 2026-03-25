@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -25,20 +25,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useRecettes, ORIGINES_RECETTES, CATEGORIES_RECETTES, Recette } from "@/hooks/useRecettes";
-import { useTresorerie } from "@/hooks/useTresorerie";
-import { Plus, Eye, Check, Banknote, Download } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useRecettes, ORIGINES_RECETTES, CATEGORIES_RECETTES, Recette } from '@/hooks/useRecettes';
+import { useTresorerie } from '@/hooks/useTresorerie';
+import { Plus, Eye, Check, Banknote, Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const STATUT_COLORS: Record<string, string> = {
-  brouillon: "bg-gray-100 text-gray-800",
-  validee: "bg-blue-100 text-blue-800",
-  encaissee: "bg-green-100 text-green-800",
-  annulee: "bg-red-100 text-red-800",
+  soumis: 'bg-gray-100 text-gray-800',
+  validee: 'bg-blue-100 text-blue-800',
+  encaissee: 'bg-green-100 text-green-800',
+  annulee: 'bg-red-100 text-red-800',
 };
 
 export function RecetteList() {
@@ -48,25 +48,25 @@ export function RecetteList() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [encaisserOpen, setEncaisserOpen] = useState(false);
   const [selectedRecette, setSelectedRecette] = useState<Recette | null>(null);
-  const [encaissementCompte, setEncaissementCompte] = useState("");
-  const [filter, setFilter] = useState({ origine: "", statut: "" });
+  const [encaissementCompte, setEncaissementCompte] = useState('');
+  const [filter, setFilter] = useState({ origine: '', statut: '' });
   const [form, setForm] = useState({
-    date_recette: new Date().toISOString().split("T")[0],
-    origine: "",
-    categorie: "",
-    description: "",
+    date_recette: new Date().toISOString().split('T')[0],
+    origine: '',
+    categorie: '',
+    description: '',
     montant: 0,
-    reference_justificatif: "",
+    reference_justificatif: '',
   });
 
   const resetForm = () => {
     setForm({
-      date_recette: new Date().toISOString().split("T")[0],
-      origine: "",
-      categorie: "",
-      description: "",
+      date_recette: new Date().toISOString().split('T')[0],
+      origine: '',
+      categorie: '',
+      description: '',
       montant: 0,
-      reference_justificatif: "",
+      reference_justificatif: '',
     });
   };
 
@@ -81,36 +81,45 @@ export function RecetteList() {
       await encaisserRecette.mutateAsync({ id: selectedRecette.id, compte_id: encaissementCompte });
       setEncaisserOpen(false);
       setSelectedRecette(null);
-      setEncaissementCompte("");
+      setEncaissementCompte('');
     }
   };
 
   const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
-  const filteredRecettes = recettes.data?.filter(r => {
-    if (filter.origine && filter.origine !== "all" && r.origine !== filter.origine) return false;
-    if (filter.statut && filter.statut !== "all" && r.statut !== filter.statut) return false;
-    return true;
-  }) || [];
+  const filteredRecettes =
+    recettes.data?.filter((r) => {
+      if (filter.origine && filter.origine !== 'all' && r.origine !== filter.origine) return false;
+      if (filter.statut && filter.statut !== 'all' && r.statut !== filter.statut) return false;
+      return true;
+    }) || [];
 
   const exportCSV = () => {
-    const headers = ["Numéro", "Date", "Origine", "Catégorie", "Montant", "Statut", "Date encaissement"];
-    const rows = filteredRecettes.map(r => [
+    const headers = [
+      'Numéro',
+      'Date',
+      'Origine',
+      'Catégorie',
+      'Montant',
+      'Statut',
+      'Date encaissement',
+    ];
+    const rows = filteredRecettes.map((r) => [
       r.numero,
       r.date_recette,
       r.origine,
-      r.categorie || "",
+      r.categorie || '',
       r.montant,
       r.statut,
-      r.date_encaissement || "",
+      r.date_encaissement || '',
     ]);
-    const csv = [headers, ...rows].map(row => row.join(";")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const csv = [headers, ...rows].map((row) => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `recettes_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `recettes_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
@@ -126,7 +135,13 @@ export function RecetteList() {
             <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
-          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+          <Dialog
+            open={open}
+            onOpenChange={(o) => {
+              setOpen(o);
+              if (!o) resetForm();
+            }}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -159,26 +174,36 @@ export function RecetteList() {
                 </div>
                 <div className="space-y-2">
                   <Label>Origine *</Label>
-                  <Select value={form.origine} onValueChange={(v) => setForm({ ...form, origine: v })}>
+                  <Select
+                    value={form.origine}
+                    onValueChange={(v) => setForm({ ...form, origine: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner l'origine" />
                     </SelectTrigger>
                     <SelectContent>
                       {ORIGINES_RECETTES.map((o) => (
-                        <SelectItem key={o} value={o}>{o}</SelectItem>
+                        <SelectItem key={o} value={o}>
+                          {o}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Catégorie</Label>
-                  <Select value={form.categorie} onValueChange={(v) => setForm({ ...form, categorie: v })}>
+                  <Select
+                    value={form.categorie}
+                    onValueChange={(v) => setForm({ ...form, categorie: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner la catégorie" />
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES_RECETTES.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -202,7 +227,13 @@ export function RecetteList() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => { setOpen(false); resetForm(); }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    resetForm();
+                  }}
+                >
                   Annuler
                 </Button>
                 <Button onClick={handleSubmit} disabled={!form.origine || !form.montant}>
@@ -216,14 +247,19 @@ export function RecetteList() {
       <CardContent>
         {/* Filtres */}
         <div className="flex gap-4 mb-4">
-          <Select value={filter.origine} onValueChange={(v) => setFilter({ ...filter, origine: v })}>
+          <Select
+            value={filter.origine}
+            onValueChange={(v) => setFilter({ ...filter, origine: v })}
+          >
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Toutes origines" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes origines</SelectItem>
               {ORIGINES_RECETTES.map((o) => (
-                <SelectItem key={o} value={o}>{o}</SelectItem>
+                <SelectItem key={o} value={o}>
+                  {o}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -233,7 +269,7 @@ export function RecetteList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous statuts</SelectItem>
-              <SelectItem value="brouillon">Brouillon</SelectItem>
+              <SelectItem value="soumis">Soumis</SelectItem>
               <SelectItem value="validee">Validée</SelectItem>
               <SelectItem value="encaissee">Encaissée</SelectItem>
             </SelectContent>
@@ -243,9 +279,7 @@ export function RecetteList() {
         {recettes.isLoading ? (
           <div className="text-center py-8 text-muted-foreground">Chargement...</div>
         ) : !filteredRecettes.length ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune recette trouvée
-          </div>
+          <div className="text-center py-8 text-muted-foreground">Aucune recette trouvée</div>
         ) : (
           <Table>
             <TableHeader>
@@ -263,27 +297,30 @@ export function RecetteList() {
               {filteredRecettes.map((recette) => (
                 <TableRow key={recette.id}>
                   <TableCell className="font-mono text-sm">{recette.numero}</TableCell>
-                  <TableCell>{format(new Date(recette.date_recette), "dd/MM/yyyy", { locale: fr })}</TableCell>
+                  <TableCell>
+                    {format(new Date(recette.date_recette), 'dd/MM/yyyy', { locale: fr })}
+                  </TableCell>
                   <TableCell>{recette.origine}</TableCell>
-                  <TableCell>{recette.categorie || "-"}</TableCell>
+                  <TableCell>{recette.categorie || '-'}</TableCell>
                   <TableCell className="text-right font-medium text-success">
                     +{formatMontant(recette.montant)}
                   </TableCell>
                   <TableCell>
-                    <Badge className={STATUT_COLORS[recette.statut] || ""}>
-                      {recette.statut}
-                    </Badge>
+                    <Badge className={STATUT_COLORS[recette.statut] || ''}>{recette.statut}</Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => { setSelectedRecette(recette); setDetailsOpen(true); }}
+                        onClick={() => {
+                          setSelectedRecette(recette);
+                          setDetailsOpen(true);
+                        }}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {recette.statut === "brouillon" && (
+                      {recette.statut === 'soumis' && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -293,11 +330,14 @@ export function RecetteList() {
                           <Check className="h-4 w-4 text-primary" />
                         </Button>
                       )}
-                      {recette.statut === "validee" && (
+                      {recette.statut === 'validee' && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => { setSelectedRecette(recette); setEncaisserOpen(true); }}
+                          onClick={() => {
+                            setSelectedRecette(recette);
+                            setEncaisserOpen(true);
+                          }}
                           title="Encaisser"
                         >
                           <Banknote className="h-4 w-4 text-success" />
@@ -323,11 +363,15 @@ export function RecetteList() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">Date</Label>
-                  <p className="font-medium">{format(new Date(selectedRecette.date_recette), "dd MMMM yyyy", { locale: fr })}</p>
+                  <p className="font-medium">
+                    {format(new Date(selectedRecette.date_recette), 'dd MMMM yyyy', { locale: fr })}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Montant</Label>
-                  <p className="font-medium text-success">{formatMontant(selectedRecette.montant)}</p>
+                  <p className="font-medium text-success">
+                    {formatMontant(selectedRecette.montant)}
+                  </p>
                 </div>
               </div>
               <div>
@@ -355,7 +399,11 @@ export function RecetteList() {
               {selectedRecette.date_encaissement && (
                 <div>
                   <Label className="text-muted-foreground">Date d'encaissement</Label>
-                  <p>{format(new Date(selectedRecette.date_encaissement), "dd MMMM yyyy", { locale: fr })}</p>
+                  <p>
+                    {format(new Date(selectedRecette.date_encaissement), 'dd MMMM yyyy', {
+                      locale: fr,
+                    })}
+                  </p>
                 </div>
               )}
             </div>
@@ -372,7 +420,9 @@ export function RecetteList() {
           <div className="space-y-4 py-4">
             <div>
               <Label className="text-muted-foreground">Montant à encaisser</Label>
-              <p className="text-2xl font-bold text-success">{formatMontant(selectedRecette?.montant || 0)}</p>
+              <p className="text-2xl font-bold text-success">
+                {formatMontant(selectedRecette?.montant || 0)}
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Compte de destination *</Label>
@@ -381,11 +431,13 @@ export function RecetteList() {
                   <SelectValue placeholder="Sélectionner le compte" />
                 </SelectTrigger>
                 <SelectContent>
-                  {comptes.data?.filter(c => c.est_actif).map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.code} - {c.libelle}
-                    </SelectItem>
-                  ))}
+                  {comptes.data
+                    ?.filter((c) => c.est_actif)
+                    .map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.code} - {c.libelle}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>

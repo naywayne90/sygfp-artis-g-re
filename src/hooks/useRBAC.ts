@@ -4,9 +4,9 @@
  * Fournit les helpers: canCreate, canValidate, canExport, etc.
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 import type {
   ModuleCode,
   WorkflowStep,
@@ -14,14 +14,14 @@ import type {
   RoleHierarchique,
   AppRole,
   UserProfile,
-} from "@/lib/rbac/types";
+} from '@/lib/rbac/types';
 import {
   CREATE_PERMISSIONS,
   VALIDATION_PERMISSIONS,
   EXPORT_PERMISSIONS,
   PERMISSION_MESSAGES,
   ROLE_HIERARCHY_LEVELS,
-} from "@/lib/rbac/config";
+} from '@/lib/rbac/config';
 
 // ============================================
 // TYPES INTERNES
@@ -82,9 +82,11 @@ export function useRBAC(): RBACContext {
 
   // Récupérer l'utilisateur authentifié
   const { data: authUser, isLoading: isLoadingAuth } = useQuery({
-    queryKey: ["auth-user"],
+    queryKey: ['auth-user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return user;
     },
     staleTime: 5 * 60 * 1000,
@@ -92,18 +94,18 @@ export function useRBAC(): RBACContext {
 
   // Récupérer le profil complet
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ["user-profile", authUser?.id],
+    queryKey: ['user-profile', authUser?.id],
     queryFn: async () => {
       if (!authUser?.id) return null;
 
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", authUser.id)
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
         .single();
 
       if (error) {
-        console.error("Erreur chargement profil:", error);
+        console.error('Erreur chargement profil:', error);
         return null;
       }
 
@@ -114,22 +116,22 @@ export function useRBAC(): RBACContext {
 
   // Récupérer les rôles actifs
   const { data: userRoles, isLoading: isLoadingRoles } = useQuery({
-    queryKey: ["user-roles-rbac", authUser?.id],
+    queryKey: ['user-roles-rbac', authUser?.id],
     queryFn: async () => {
       if (!authUser?.id) return [];
 
       const { data, error } = await supabase
-        .from("user_roles")
-        .select("role, is_active")
-        .eq("user_id", authUser.id)
-        .eq("is_active", true);
+        .from('user_roles')
+        .select('role, is_active')
+        .eq('user_id', authUser.id)
+        .eq('is_active', true);
 
       if (error) {
-        console.error("Erreur chargement rôles:", error);
+        console.error('Erreur chargement rôles:', error);
         return [];
       }
 
-      return data.map(r => r.role as AppRole);
+      return data.map((r) => r.role as AppRole);
     },
     enabled: !!authUser?.id,
   });
@@ -146,14 +148,12 @@ export function useRBAC(): RBACContext {
   const directionId = profile?.direction_id || null;
 
   // Flags pratiques
-  const isAdmin = roles.includes("ADMIN") ||
-    profilFonctionnel === "Admin" ||
-    exerciceAdmin;
-  const isDG = roles.includes("DG") || roleHierarchique === "DG";
-  const isCB = roles.includes("CB");
-  const isDAF = roles.includes("DAAF") || roles.includes("DAF");
-  const isTresorerie = roles.includes("TRESORERIE") || roles.includes("TRESORIER");
-  const isAuditeur = roles.includes("AUDITOR") || profilFonctionnel === "Auditeur";
+  const isAdmin = roles.includes('ADMIN') || profilFonctionnel === 'Admin' || exerciceAdmin;
+  const isDG = roles.includes('DG') || roleHierarchique === 'DG';
+  const isCB = roles.includes('CB');
+  const isDAF = roles.includes('DAAF') || roles.includes('DAF');
+  const isTresorerie = roles.includes('TRESORERIE') || roles.includes('TRESORIER');
+  const isAuditeur = roles.includes('AUDITOR') || profilFonctionnel === 'Auditeur';
 
   // ============================================
   // HELPERS DE RÔLE
@@ -166,7 +166,7 @@ export function useRBAC(): RBACContext {
 
   const hasAnyRole = (checkRoles: AppRole[]): boolean => {
     if (isAdmin) return true;
-    return checkRoles.some(r => roles.includes(r));
+    return checkRoles.some((r) => roles.includes(r));
   };
 
   const hasProfil = (profil: ProfilFonctionnel): boolean => {
@@ -235,7 +235,7 @@ export function useRBAC(): RBACContext {
     if (createdBy && createdBy === authUser?.id) return true;
 
     // Les validateurs peuvent aussi modifier dans certains cas
-    if (profilFonctionnel === "Validateur" || profilFonctionnel === "Controleur") {
+    if (profilFonctionnel === 'Validateur' || profilFonctionnel === 'Controleur') {
       return true;
     }
 
@@ -245,7 +245,7 @@ export function useRBAC(): RBACContext {
   const canDelete = (module: ModuleCode, createdBy?: string): boolean => {
     if (isAdmin) return true;
 
-    // Seul le créateur peut supprimer (et uniquement les brouillons)
+    // Seul le créateur peut supprimer (et uniquement les soumis)
     if (createdBy && createdBy === authUser?.id) return true;
 
     return false;
@@ -262,7 +262,7 @@ export function useRBAC(): RBACContext {
     if (!config) return false;
 
     // Vérifier par rôle
-    if (config.roles.some(r => roles.includes(r))) return true;
+    if (config.roles.some((r) => roles.includes(r))) return true;
 
     // Vérifier par rôle hiérarchique
     if (config.roleHierarchique && roleHierarchique) {
@@ -298,20 +298,20 @@ export function useRBAC(): RBACContext {
   // ============================================
 
   const getErrorMessage = (action: keyof typeof PERMISSION_MESSAGES): string => {
-    return PERMISSION_MESSAGES[action] || "Action non autorisée";
+    return PERMISSION_MESSAGES[action] || 'Action non autorisée';
   };
 
   const getRequiredRole = (step: WorkflowStep): string => {
     const config = VALIDATION_PERMISSIONS[step];
-    if (!config) return "Administrateur";
+    if (!config) return 'Administrateur';
 
     // Retourner le premier rôle autorisé
     const roleLabels: Partial<Record<AppRole, string>> = {
-      DG: "Directeur Général",
-      CB: "Contrôleur Budgétaire",
-      DAAF: "DAAF",
-      TRESORERIE: "Trésorerie",
-      ADMIN: "Administrateur",
+      DG: 'Directeur Général',
+      CB: 'Contrôleur Budgétaire',
+      DAAF: 'DAAF',
+      TRESORERIE: 'Trésorerie',
+      ADMIN: 'Administrateur',
     };
 
     return roleLabels[config.roles[0]] || config.roles[0];

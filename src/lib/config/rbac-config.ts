@@ -445,7 +445,6 @@ export const WORKFLOW_STEPS = {
   NOTE_SEF: {
     label: 'Note SEF',
     steps: [
-      { state: 'brouillon', label: 'Brouillon', nextStates: ['soumis'], notifyOnEnter: [] },
       {
         state: 'soumis',
         label: 'Soumis',
@@ -461,7 +460,7 @@ export const WORKFLOW_STEPS = {
       {
         state: 'rejete',
         label: 'Rejeté',
-        nextStates: ['brouillon'],
+        nextStates: ['soumis'],
         notifyOnEnter: ['creator'],
         requireMotif: true,
       },
@@ -474,13 +473,12 @@ export const WORKFLOW_STEPS = {
       },
       { state: 'impute', label: 'Imputé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
-    initialState: 'brouillon',
+    initialState: 'soumis',
     finalStates: ['impute', 'rejete'],
   },
   NOTE_AEF: {
     label: 'Note AEF',
     steps: [
-      { state: 'brouillon', label: 'Brouillon', nextStates: ['soumis'], notifyOnEnter: [] },
       {
         state: 'soumis',
         label: 'Soumis',
@@ -496,7 +494,7 @@ export const WORKFLOW_STEPS = {
       {
         state: 'rejete',
         label: 'Rejeté',
-        nextStates: ['brouillon'],
+        nextStates: ['soumis'],
         notifyOnEnter: ['creator'],
         requireMotif: true,
       },
@@ -509,13 +507,12 @@ export const WORKFLOW_STEPS = {
       },
       { state: 'impute', label: 'Imputé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
-    initialState: 'brouillon',
+    initialState: 'soumis',
     finalStates: ['impute', 'rejete'],
   },
   ENGAGEMENT: {
     label: 'Engagement',
     steps: [
-      { state: 'brouillon', label: 'Brouillon', nextStates: ['valide'], notifyOnEnter: [] },
       {
         state: 'valide',
         label: 'Validé',
@@ -531,7 +528,7 @@ export const WORKFLOW_STEPS = {
       },
       { state: 'paye', label: 'Payé', nextStates: [], notifyOnEnter: ['creator', 'DAAF'] },
     ],
-    initialState: 'brouillon',
+    initialState: 'soumis',
     finalStates: ['paye'],
   },
   DOSSIER: {

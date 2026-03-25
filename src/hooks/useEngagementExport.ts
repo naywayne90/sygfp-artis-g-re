@@ -59,7 +59,6 @@ export function fmtDateExport(iso: string | null | undefined): string {
 
 export function statutLabel(statut: string | null | undefined): string {
   const labels: Record<string, string> = {
-    brouillon: 'Brouillon',
     soumis: 'Soumis',
     visa_saf: 'Visa SAF',
     visa_cb: 'Visa CB',

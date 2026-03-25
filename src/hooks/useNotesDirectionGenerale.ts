@@ -236,7 +236,7 @@ export function useNotesDirectionGenerale() {
             nb_pages: input.nb_pages || 0,
             exercice: exercice || new Date().getFullYear(),
             created_by: user.id,
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
           },
         ])
         .select()
@@ -279,8 +279,8 @@ export function useNotesDirectionGenerale() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      // Ne peut modifier que si brouillon ou rejetée
-      if (!['brouillon', 'dg_rejetee'].includes(oldData.statut)) {
+      // Ne peut modifier que si soumis/brouillon ou rejetée
+      if (!['brouillon', 'soumis', 'dg_rejetee'].includes(oldData.statut)) {
         throw new Error('Cette note ne peut plus être modifiée');
       }
 
@@ -558,7 +558,7 @@ export function useNotesDirectionGenerale() {
     },
   });
 
-  // Revenir en brouillon (après rejet)
+  // Revenir en soumis (après rejet)
   const revertToDraftMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const {
@@ -575,7 +575,7 @@ export function useNotesDirectionGenerale() {
       if (fetchError) throw new Error('Note introuvable');
 
       if (!isValidTransition(note.statut as NoteDGStatut, 'brouillon')) {
-        throw new Error(`Transition invalide: ${note.statut} → brouillon`);
+        throw new Error(`Transition invalide: ${note.statut} → soumis`);
       }
 
       const { data, error } = await supabaseUntyped
@@ -597,21 +597,21 @@ export function useNotesDirectionGenerale() {
         entityId: noteId,
         action: 'revert_draft',
         oldValues: { statut: note.statut },
-        newValues: { statut: 'brouillon' },
+        newValues: { statut: 'soumis' },
       });
 
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes-direction-generale'] });
-      toast({ title: 'Note remise en brouillon pour correction' });
+      toast({ title: 'Note remise en soumis pour correction' });
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     },
   });
 
-  // Delete note (brouillon only)
+  // Delete note (soumis only)
   const deleteMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const { data: note, error: fetchError } = await supabaseUntyped
@@ -622,8 +622,8 @@ export function useNotesDirectionGenerale() {
 
       if (fetchError) throw new Error('Note introuvable');
 
-      if (note.statut !== 'brouillon') {
-        throw new Error('Seules les notes en brouillon peuvent être supprimées');
+      if (note.statut !== 'brouillon' && note.statut !== 'soumis') {
+        throw new Error('Seules les notes soumises peuvent être supprimées');
       }
 
       const { error } = await supabaseUntyped
@@ -655,7 +655,7 @@ export function useNotesDirectionGenerale() {
   // ──────────────────────────────────────────────────────────────────────────
 
   const notesByStatus = {
-    brouillon: notes.filter((n) => n.statut === 'brouillon'),
+    brouillon: notes.filter((n) => n.statut === 'brouillon' || n.statut === 'soumis'),
     soumise_dg: notes.filter((n) => n.statut === 'soumise_dg'),
     dg_valide: notes.filter((n) => n.statut === 'dg_valide'),
     dg_rejetee: notes.filter((n) => n.statut === 'dg_rejetee'),

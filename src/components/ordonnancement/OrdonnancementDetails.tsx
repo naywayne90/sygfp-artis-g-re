@@ -41,8 +41,10 @@ interface OrdonnancementDetailsProps {
 
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string; icon?: React.ReactNode }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
-    soumis: { label: 'Soumis', className: 'bg-secondary/10 text-secondary border-secondary/20' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     en_validation: {
       label: 'En validation',
       className: 'bg-warning/10 text-warning border-warning/20',
@@ -60,7 +62,7 @@ const getStatusBadge = (status: string) => {
     differe: { label: 'Différé', className: 'bg-orange-100 text-orange-700 border-orange-200' },
     transmis: { label: 'Transmis', className: 'bg-primary/10 text-primary border-primary/20' },
   };
-  const variant = variants[status] || variants.brouillon;
+  const variant = variants[status] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}

@@ -1,31 +1,49 @@
-import { useState, useCallback } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Calendar, Plus, Upload, Copy, FileSpreadsheet, CheckCircle2, 
-  AlertTriangle, Loader2, ArrowRight, Lock, Unlock, HelpCircle, Info
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
-import * as XLSX from "xlsx";
+import { useState, useCallback } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Calendar,
+  Plus,
+  Upload,
+  Copy,
+  FileSpreadsheet,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2,
+  ArrowRight,
+  Lock,
+  Unlock,
+  HelpCircle,
+  Info,
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface ExerciceInitWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type InitMethod = "import" | "copy" | "empty";
-type Step = "select" | "method" | "config" | "summary";
+type InitMethod = 'import' | 'copy' | 'empty';
+type Step = 'select' | 'method' | 'config' | 'summary';
 
 interface BudgetSummary {
   lignes_count: number;
@@ -36,11 +54,11 @@ interface BudgetSummary {
 export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardProps) {
   const queryClient = useQueryClient();
   const { exercice: currentExercice, setExercice } = useExercice();
-  
-  const [step, setStep] = useState<Step>("select");
+
+  const [step, setStep] = useState<Step>('select');
   const [selectedExercice, setSelectedExercice] = useState<number | null>(null);
   const [createNewYear, setCreateNewYear] = useState(new Date().getFullYear() + 1);
-  const [initMethod, setInitMethod] = useState<InitMethod>("import");
+  const [initMethod, setInitMethod] = useState<InitMethod>('import');
   const [copyDotations, setCopyDotations] = useState(false);
   const [parsedBudgetData, setParsedBudgetData] = useState<unknown[]>([]);
   const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
@@ -48,12 +66,12 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
 
   // Fetch available exercices
   const { data: exercices = [] } = useQuery({
-    queryKey: ["exercices-wizard"],
+    queryKey: ['exercices-wizard'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("exercices_budgetaires")
-        .select("*")
-        .order("annee", { ascending: false });
+        .from('exercices_budgetaires')
+        .select('*')
+        .order('annee', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -61,12 +79,14 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   });
 
   // Get source exercice for copy
-  const sourceExercice = exercices.find(e => e.annee === (selectedExercice ? selectedExercice - 1 : currentExercice));
+  const sourceExercice = exercices.find(
+    (e) => e.annee === (selectedExercice ? selectedExercice - 1 : currentExercice)
+  );
 
   const resetWizard = () => {
-    setStep("select");
+    setStep('select');
     setSelectedExercice(null);
-    setInitMethod("import");
+    setInitMethod('import');
     setCopyDotations(false);
     setParsedBudgetData([]);
     setBudgetSummary(null);
@@ -77,12 +97,12 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   const createExerciceMutation = useMutation({
     mutationFn: async (annee: number) => {
       const { data, error } = await supabase
-        .from("exercices_budgetaires")
+        .from('exercices_budgetaires')
         .insert({
           annee,
           code_exercice: `EX${annee}`,
           libelle: `Exercice budgétaire ${annee}`,
-          statut: "ouvert",
+          statut: 'ouvert',
           est_actif: true,
           date_ouverture: `${annee}-01-01`,
         })
@@ -92,11 +112,11 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["exercices-wizard"] });
-      queryClient.invalidateQueries({ queryKey: ["exercices-budgetaires"] });
+      queryClient.invalidateQueries({ queryKey: ['exercices-wizard'] });
+      queryClient.invalidateQueries({ queryKey: ['exercices-budgetaires'] });
       setSelectedExercice(data.annee);
       setIsCreatingNew(false);
-      setStep("method");
+      setStep('method');
       toast.success(`Exercice ${data.annee} créé`);
     },
     onError: (error: Error) => {
@@ -107,10 +127,10 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   // Copy budget structure
   const copyBudgetMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedExercice || !sourceExercice) throw new Error("Exercice non sélectionné");
-      
+      if (!selectedExercice || !sourceExercice) throw new Error('Exercice non sélectionné');
+
       const { data: userData } = await supabase.auth.getUser();
-      const { data, error } = await supabase.rpc("copy_budget_structure", {
+      const { data, error } = await supabase.rpc('copy_budget_structure', {
         p_source_exercice: sourceExercice.annee,
         p_target_exercice: selectedExercice,
         p_user_id: userData.user?.id,
@@ -121,7 +141,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
     },
     onSuccess: async () => {
       await loadBudgetSummary();
-      toast.success("Structure budgétaire copiée");
+      toast.success('Structure budgétaire copiée');
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -131,10 +151,10 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   // Validate budget
   const validateBudgetMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedExercice) throw new Error("Exercice non sélectionné");
-      
+      if (!selectedExercice) throw new Error('Exercice non sélectionné');
+
       const { data: userData } = await supabase.auth.getUser();
-      const { data, error } = await supabase.rpc("validate_budget", {
+      const { data, error } = await supabase.rpc('validate_budget', {
         p_exercice: selectedExercice,
         p_user_id: userData.user?.id,
       });
@@ -142,10 +162,10 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["exercices"] });
-      queryClient.invalidateQueries({ queryKey: ["budget-lines"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
-      toast.success("Budget validé et verrouillé");
+      queryClient.invalidateQueries({ queryKey: ['exercices'] });
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      toast.success('Budget validé et verrouillé');
       setExercice(selectedExercice!, true);
       onOpenChange(false);
       resetWizard();
@@ -158,7 +178,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   // Load budget summary
   const loadBudgetSummary = async () => {
     if (!selectedExercice) return;
-    const { data } = await supabase.rpc("get_exercice_budget_summary", {
+    const { data } = await supabase.rpc('get_exercice_budget_summary', {
       p_exercice: selectedExercice,
     });
     if (data) {
@@ -172,34 +192,39 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
     reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-        
+
         setParsedBudgetData(jsonData);
-        
+
         // Calculate summary
         let totalDotation = 0;
         const niveaux: Record<string, number> = {};
-        
+
         jsonData.forEach((row: any) => {
-          const dotation = parseFloat(String(row.dotation_initiale || row.dotation || row.montant || 0).replace(/\s/g, '').replace(',', '.')) || 0;
+          const dotation =
+            parseFloat(
+              String(row.dotation_initiale || row.dotation || row.montant || 0)
+                .replace(/\s/g, '')
+                .replace(',', '.')
+            ) || 0;
           totalDotation += dotation;
-          
-          const niveau = row.level || row.niveau || "ligne";
+
+          const niveau = row.level || row.niveau || 'ligne';
           niveaux[niveau] = (niveaux[niveau] || 0) + 1;
         });
-        
+
         setBudgetSummary({
           lignes_count: jsonData.length,
           dotation_totale: totalDotation,
           lignes_par_niveau: niveaux,
         });
-        
-        setStep("summary");
-      } catch (err) {
-        toast.error("Erreur lors de la lecture du fichier");
+
+        setStep('summary');
+      } catch (_err) {
+        toast.error('Erreur lors de la lecture du fichier');
       }
     };
     reader.readAsArrayBuffer(file);
@@ -209,38 +234,41 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
   const importBudgetMutation = useMutation({
     mutationFn: async () => {
       if (!selectedExercice || parsedBudgetData.length === 0) {
-        throw new Error("Données manquantes");
+        throw new Error('Données manquantes');
       }
-      
+
       // Transform and insert budget lines
       const budgetLines = parsedBudgetData.map((row: any, index) => ({
         code: row.code || `BL-${selectedExercice}-${String(index + 1).padStart(4, '0')}`,
-        label: row.label || row.libelle || row.designation || "Ligne budgétaire",
-        level: row.level || row.niveau || "ligne",
+        label: row.label || row.libelle || row.designation || 'Ligne budgétaire',
+        level: row.level || row.niveau || 'ligne',
         exercice: selectedExercice,
-        dotation_initiale: parseFloat(String(row.dotation_initiale || row.dotation || row.montant || 0).replace(/\s/g, '').replace(',', '.')) || 0,
+        dotation_initiale:
+          parseFloat(
+            String(row.dotation_initiale || row.dotation || row.montant || 0)
+              .replace(/\s/g, '')
+              .replace(',', '.')
+          ) || 0,
         source_financement: row.source_financement || row.source || null,
         commentaire: row.commentaire || row.observation || null,
-        statut: "brouillon",
+        statut: 'soumis',
         is_active: true,
       }));
-      
-      const { error } = await supabase
-        .from("budget_lines")
-        .insert(budgetLines);
-      
+
+      const { error } = await supabase.from('budget_lines').insert(budgetLines);
+
       if (error) throw error;
-      
+
       // Update exercice stats
       const totalDotation = budgetLines.reduce((sum, bl) => sum + bl.dotation_initiale, 0);
       await supabase
-        .from("exercices_budgetaires")
+        .from('exercices_budgetaires')
         .update({
           budget_lignes_count: budgetLines.length,
           budget_total: totalDotation,
         })
-        .eq("annee", selectedExercice);
-      
+        .eq('annee', selectedExercice);
+
       return { count: budgetLines.length, total: totalDotation };
     },
     onSuccess: async (result) => {
@@ -254,31 +282,31 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
 
   const handleNext = async () => {
     switch (step) {
-      case "select":
+      case 'select':
         if (isCreatingNew) {
           createExerciceMutation.mutate(createNewYear);
         } else if (selectedExercice) {
-          setStep("method");
+          setStep('method');
         }
         break;
-      case "method":
-        if (initMethod === "empty") {
-          setStep("summary");
+      case 'method':
+        if (initMethod === 'empty') {
+          setStep('summary');
           await loadBudgetSummary();
-        } else if (initMethod === "copy") {
-          setStep("config");
+        } else if (initMethod === 'copy') {
+          setStep('config');
         } else {
-          setStep("config");
+          setStep('config');
         }
         break;
-      case "config":
-        if (initMethod === "copy") {
+      case 'config':
+        if (initMethod === 'copy') {
           await copyBudgetMutation.mutateAsync();
-          setStep("summary");
+          setStep('summary');
         }
         break;
-      case "summary":
-        if (parsedBudgetData.length > 0 && initMethod === "import") {
+      case 'summary':
+        if (parsedBudgetData.length > 0 && initMethod === 'import') {
           await importBudgetMutation.mutateAsync();
         }
         break;
@@ -298,74 +326,96 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
     }
   };
 
-  const formatMontant = (montant: number) => 
+  const formatMontant = (montant: number) =>
     new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) resetWizard(); onOpenChange(o); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) resetWizard();
+        onOpenChange(o);
+      }}
+    >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            {step === "select" && "Changer d'exercice"}
-            {step === "method" && "Méthode d'initialisation"}
-            {step === "config" && "Configuration"}
-            {step === "summary" && "Récapitulatif"}
+            {step === 'select' && "Changer d'exercice"}
+            {step === 'method' && "Méthode d'initialisation"}
+            {step === 'config' && 'Configuration'}
+            {step === 'summary' && 'Récapitulatif'}
           </DialogTitle>
           <DialogDescription>
-            {step === "select" && "Sélectionnez ou créez un exercice budgétaire"}
-            {step === "method" && `Exercice ${selectedExercice} - Comment charger la structure ?`}
-            {step === "config" && "Configurez les options d'initialisation"}
-            {step === "summary" && "Vérifiez avant de valider le budget"}
+            {step === 'select' && 'Sélectionnez ou créez un exercice budgétaire'}
+            {step === 'method' && `Exercice ${selectedExercice} - Comment charger la structure ?`}
+            {step === 'config' && "Configurez les options d'initialisation"}
+            {step === 'summary' && 'Vérifiez avant de valider le budget'}
           </DialogDescription>
         </DialogHeader>
 
         {/* Progress */}
         <div className="flex gap-2 px-1">
-          {["select", "method", "config", "summary"].map((s, i) => (
-            <div key={s} className={`h-1 flex-1 rounded-full ${
-              ["select", "method", "config", "summary"].indexOf(step) >= i 
-                ? "bg-primary" 
-                : "bg-muted"
-            }`} />
+          {['select', 'method', 'config', 'summary'].map((s, i) => (
+            <div
+              key={s}
+              className={`h-1 flex-1 rounded-full ${
+                ['select', 'method', 'config', 'summary'].indexOf(step) >= i
+                  ? 'bg-primary'
+                  : 'bg-muted'
+              }`}
+            />
           ))}
         </div>
 
         <ScrollArea className="flex-1 pr-4">
           {/* Step: Select Exercice */}
-          {step === "select" && (
+          {step === 'select' && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 {exercices.map((ex) => (
-                  <Card 
+                  <Card
                     key={ex.id}
                     className={`cursor-pointer transition-all ${
                       selectedExercice === ex.annee && !isCreatingNew
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "hover:border-primary/50"
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'hover:border-primary/50'
                     }`}
                     onClick={() => handleSelectExercice(ex.annee)}
                   >
                     <CardContent className="p-4 flex justify-between items-center">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          ex.statut === "en_cours" ? "bg-green-100 text-green-700" :
-                          ex.statut === "ouvert" ? "bg-blue-100 text-blue-700" :
-                          "bg-gray-100 text-gray-500"
-                        }`}>
-                          {ex.budget_valide ? <Lock className="h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+                        <div
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            ex.statut === 'en_cours'
+                              ? 'bg-green-100 text-green-700'
+                              : ex.statut === 'ouvert'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-gray-100 text-gray-500'
+                          }`}
+                        >
+                          {ex.budget_valide ? (
+                            <Lock className="h-5 w-5" />
+                          ) : (
+                            <Unlock className="h-5 w-5" />
+                          )}
                         </div>
                         <div>
                           <p className="font-semibold">Exercice {ex.annee}</p>
                           <p className="text-sm text-muted-foreground">
-                            {ex.budget_lignes_count || 0} lignes • {formatMontant(ex.budget_total || 0)}
+                            {ex.budget_lignes_count || 0} lignes •{' '}
+                            {formatMontant(ex.budget_total || 0)}
                           </p>
                         </div>
                       </div>
-                      <Badge variant={ex.statut === "en_cours" ? "default" : "outline"}>
-                        {ex.statut === "en_cours" ? "En cours" :
-                         ex.statut === "ouvert" ? "Ouvert" :
-                         ex.statut === "cloture" ? "Clôturé" : ex.statut}
+                      <Badge variant={ex.statut === 'en_cours' ? 'default' : 'outline'}>
+                        {ex.statut === 'en_cours'
+                          ? 'En cours'
+                          : ex.statut === 'ouvert'
+                            ? 'Ouvert'
+                            : ex.statut === 'cloture'
+                              ? 'Clôturé'
+                              : ex.statut}
                       </Badge>
                     </CardContent>
                   </Card>
@@ -373,9 +423,11 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
               </div>
 
               <div className="border-t pt-4">
-                <Card 
+                <Card
                   className={`cursor-pointer transition-all ${
-                    isCreatingNew ? "border-primary ring-2 ring-primary/20" : "hover:border-primary/50"
+                    isCreatingNew
+                      ? 'border-primary ring-2 ring-primary/20'
+                      : 'hover:border-primary/50'
                   }`}
                   onClick={() => setIsCreatingNew(true)}
                 >
@@ -409,7 +461,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           )}
 
           {/* Step: Method */}
-          {step === "method" && (
+          {step === 'method' && (
             <div className="space-y-4 py-4">
               {/* Aide contextuelle */}
               <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
@@ -417,22 +469,35 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                 <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
                   <strong>Comment choisir ?</strong>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
-                    <li><strong>Import Excel</strong> : Idéal si vous avez déjà un fichier avec votre structure budgétaire.</li>
-                    <li><strong>Copier N-1</strong> : Récupère la structure de l'année précédente (codes, libellés). Utile pour la continuité.</li>
-                    <li><strong>Vide</strong> : Créez les lignes manuellement après. Pour repartir de zéro.</li>
+                    <li>
+                      <strong>Import Excel</strong> : Idéal si vous avez déjà un fichier avec votre
+                      structure budgétaire.
+                    </li>
+                    <li>
+                      <strong>Copier N-1</strong> : Récupère la structure de l'année précédente
+                      (codes, libellés). Utile pour la continuité.
+                    </li>
+                    <li>
+                      <strong>Vide</strong> : Créez les lignes manuellement après. Pour repartir de
+                      zéro.
+                    </li>
                   </ul>
                 </AlertDescription>
               </Alert>
 
               <RadioGroup value={initMethod} onValueChange={(v) => setInitMethod(v as InitMethod)}>
-                <Card className={`cursor-pointer ${initMethod === "import" ? "border-primary ring-2 ring-primary/20" : ""}`}>
+                <Card
+                  className={`cursor-pointer ${initMethod === 'import' ? 'border-primary ring-2 ring-primary/20' : ''}`}
+                >
                   <CardContent className="p-4 flex items-start gap-4">
                     <RadioGroupItem value="import" id="import" className="mt-1" />
                     <Label htmlFor="import" className="flex-1 cursor-pointer">
                       <div className="flex items-center gap-2">
                         <FileSpreadsheet className="h-5 w-5 text-green-600" />
                         <span className="font-semibold">Importer un fichier Excel</span>
-                        <Badge variant="outline" className="ml-2">Recommandé</Badge>
+                        <Badge variant="outline" className="ml-2">
+                          Recommandé
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
                         Chargez votre structure budgétaire depuis un fichier Excel préparé.
@@ -441,7 +506,9 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                   </CardContent>
                 </Card>
 
-                <Card className={`cursor-pointer ${initMethod === "copy" ? "border-primary ring-2 ring-primary/20" : ""}`}>
+                <Card
+                  className={`cursor-pointer ${initMethod === 'copy' ? 'border-primary ring-2 ring-primary/20' : ''}`}
+                >
                   <CardContent className="p-4 flex items-start gap-4">
                     <RadioGroupItem value="copy" id="copy" className="mt-1" />
                     <Label htmlFor="copy" className="flex-1 cursor-pointer">
@@ -450,15 +517,17 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                         <span className="font-semibold">Copier la structure de N-1</span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {sourceExercice 
+                        {sourceExercice
                           ? `Copier depuis l'exercice ${sourceExercice.annee} (${sourceExercice.budget_lignes_count || 0} lignes)`
-                          : "Aucun exercice précédent disponible"}
+                          : 'Aucun exercice précédent disponible'}
                       </p>
                     </Label>
                   </CardContent>
                 </Card>
 
-                <Card className={`cursor-pointer ${initMethod === "empty" ? "border-primary ring-2 ring-primary/20" : ""}`}>
+                <Card
+                  className={`cursor-pointer ${initMethod === 'empty' ? 'border-primary ring-2 ring-primary/20' : ''}`}
+                >
                   <CardContent className="p-4 flex items-start gap-4">
                     <RadioGroupItem value="empty" id="empty" className="mt-1" />
                     <Label htmlFor="empty" className="flex-1 cursor-pointer">
@@ -477,9 +546,9 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           )}
 
           {/* Step: Config */}
-          {step === "config" && (
+          {step === 'config' && (
             <div className="space-y-4 py-4">
-              {initMethod === "import" && (
+              {initMethod === 'import' && (
                 <>
                   <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
                     <Info className="h-4 w-4 text-blue-600" />
@@ -489,14 +558,32 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                         Votre fichier doit contenir au minimum les colonnes suivantes :
                       </p>
                       <ul className="list-disc list-inside mt-1 text-xs space-y-0.5">
-                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">code</code> : Code unique de la ligne budgétaire</li>
-                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">label</code> ou <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">libelle</code> : Intitulé de la ligne</li>
-                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">dotation_initiale</code> : Montant alloué (peut être 0)</li>
-                        <li><code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">level</code> ou <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">niveau</code> : Niveau hiérarchique (ex: ligne, section)</li>
+                        <li>
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">code</code> :
+                          Code unique de la ligne budgétaire
+                        </li>
+                        <li>
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">label</code>{' '}
+                          ou{' '}
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">libelle</code>{' '}
+                          : Intitulé de la ligne
+                        </li>
+                        <li>
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">
+                            dotation_initiale
+                          </code>{' '}
+                          : Montant alloué (peut être 0)
+                        </li>
+                        <li>
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">level</code>{' '}
+                          ou{' '}
+                          <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">niveau</code>{' '}
+                          : Niveau hiérarchique (ex: ligne, section)
+                        </li>
                       </ul>
                     </AlertDescription>
                   </Alert>
-                  <label 
+                  <label
                     htmlFor="budget-file-import"
                     className="border-2 border-dashed rounded-lg p-8 text-center block cursor-pointer hover:border-primary/50 transition-colors"
                   >
@@ -519,19 +606,20 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                 </>
               )}
 
-              {initMethod === "copy" && (
+              {initMethod === 'copy' && (
                 <div className="space-y-4">
                   <Alert>
                     <Copy className="h-4 w-4" />
                     <AlertDescription>
-                      La structure de l'exercice {sourceExercice?.annee} sera copiée vers {selectedExercice}.
-                      Les données d'exécution (engagements, liquidations) ne seront pas copiées.
+                      La structure de l'exercice {sourceExercice?.annee} sera copiée vers{' '}
+                      {selectedExercice}. Les données d'exécution (engagements, liquidations) ne
+                      seront pas copiées.
                     </AlertDescription>
                   </Alert>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="copy-dotations" 
+                    <Checkbox
+                      id="copy-dotations"
                       checked={copyDotations}
                       onCheckedChange={(c) => setCopyDotations(c === true)}
                     />
@@ -543,7 +631,9 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                   {sourceExercice && (
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Exercice source: {sourceExercice.annee}</CardTitle>
+                        <CardTitle className="text-sm">
+                          Exercice source: {sourceExercice.annee}
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="text-sm">
                         <p>{sourceExercice.budget_lignes_count || 0} lignes budgétaires</p>
@@ -557,7 +647,7 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
           )}
 
           {/* Step: Summary */}
-          {step === "summary" && (
+          {step === 'summary' && (
             <div className="space-y-4 py-4">
               {/* Aide sur les options de finalisation */}
               <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
@@ -568,18 +658,26 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <strong>Valider le budget</strong> : Verrouille la structure budgétaire. 
-                        Toute modification ultérieure nécessitera un virement ou mouvement budgétaire officiel. 
-                        <span className="text-amber-700 dark:text-amber-300"> Recommandé après vérification complète.</span>
+                        <strong>Valider le budget</strong> : Verrouille la structure budgétaire.
+                        Toute modification ultérieure nécessitera un virement ou mouvement
+                        budgétaire officiel.
+                        <span className="text-amber-700 dark:text-amber-300">
+                          {' '}
+                          Recommandé après vérification complète.
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <Unlock className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <strong>Terminer sans validation</strong> : L'exercice est créé mais le budget reste modifiable. 
-                        Vous pourrez ensuite ajouter/modifier des lignes depuis le module <strong>Planification → Planification Budgétaire</strong>, 
-                        puis valider le budget quand il sera finalisé. 
-                        <span className="text-amber-700 dark:text-amber-300"> Utile si le budget n'est pas encore finalisé.</span>
+                        <strong>Terminer sans validation</strong> : L'exercice est créé mais le
+                        budget reste modifiable. Vous pourrez ensuite ajouter/modifier des lignes
+                        depuis le module <strong>Planification → Planification Budgétaire</strong>,
+                        puis valider le budget quand il sera finalisé.
+                        <span className="text-amber-700 dark:text-amber-300">
+                          {' '}
+                          Utile si le budget n'est pas encore finalisé.
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -605,44 +703,49 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
 
               {budgetSummary && budgetSummary.lignes_count > 0 && (
                 <>
-                  {budgetSummary.lignes_par_niveau && Object.keys(budgetSummary.lignes_par_niveau).length > 0 && (
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Répartition par niveau</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {Object.entries(budgetSummary.lignes_par_niveau).map(([niveau, count]) => (
-                            <div key={niveau} className="flex justify-between text-sm">
-                              <span className="capitalize">{niveau}</span>
-                              <Badge variant="secondary">{count as number}</Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  {budgetSummary.lignes_par_niveau &&
+                    Object.keys(budgetSummary.lignes_par_niveau).length > 0 && (
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">Répartition par niveau</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {Object.entries(budgetSummary.lignes_par_niveau).map(
+                              ([niveau, count]) => (
+                                <div key={niveau} className="flex justify-between text-sm">
+                                  <span className="capitalize">{niveau}</span>
+                                  <Badge variant="secondary">{count as number}</Badge>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
 
                   <Alert>
                     <Lock className="h-4 w-4" />
                     <AlertDescription>
-                      <strong>Validation du budget</strong> : Une fois validé, la structure sera verrouillée.
-                      Les modifications passeront par les virements/mouvements budgétaires.
+                      <strong>Validation du budget</strong> : Une fois validé, la structure sera
+                      verrouillée. Les modifications passeront par les virements/mouvements
+                      budgétaires.
                     </AlertDescription>
                   </Alert>
                 </>
               )}
 
-              {(!budgetSummary || budgetSummary.lignes_count === 0) && initMethod !== "empty" && (
+              {(!budgetSummary || budgetSummary.lignes_count === 0) && initMethod !== 'empty' && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    Aucune ligne budgétaire chargée. Revenez à l'étape précédente pour importer ou copier des données.
+                    Aucune ligne budgétaire chargée. Revenez à l'étape précédente pour importer ou
+                    copier des données.
                   </AlertDescription>
                 </Alert>
               )}
 
-              {initMethod === "empty" && (
+              {initMethod === 'empty' && (
                 <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
                   <Info className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
@@ -663,26 +766,29 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
         </ScrollArea>
 
         <DialogFooter className="flex-shrink-0 gap-2">
-          {step !== "select" && (
-            <Button variant="outline" onClick={() => {
-              const steps: Step[] = ["select", "method", "config", "summary"];
-              const currentIndex = steps.indexOf(step);
-              if (currentIndex > 0) setStep(steps[currentIndex - 1]);
-            }}>
+          {step !== 'select' && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                const steps: Step[] = ['select', 'method', 'config', 'summary'];
+                const currentIndex = steps.indexOf(step);
+                if (currentIndex > 0) setStep(steps[currentIndex - 1]);
+              }}
+            >
               Retour
             </Button>
           )}
-          
+
           <div className="flex-1" />
-          
-          {step === "select" && selectedExercice && !isCreatingNew && (
+
+          {step === 'select' && selectedExercice && !isCreatingNew && (
             <Button variant="outline" onClick={handleSwitchExercice}>
               Basculer sans initialiser
             </Button>
           )}
-          
-          {step === "summary" && budgetSummary && budgetSummary.lignes_count > 0 ? (
-            <Button 
+
+          {step === 'summary' && budgetSummary && budgetSummary.lignes_count > 0 ? (
+            <Button
               onClick={() => validateBudgetMutation.mutate()}
               disabled={validateBudgetMutation.isPending}
             >
@@ -693,21 +799,19 @@ export function ExerciceInitWizard({ open, onOpenChange }: ExerciceInitWizardPro
               )}
               Valider le budget
             </Button>
-          ) : step === "summary" ? (
-            <Button onClick={handleSwitchExercice}>
-              Terminer sans validation
-            </Button>
+          ) : step === 'summary' ? (
+            <Button onClick={handleSwitchExercice}>Terminer sans validation</Button>
           ) : (
-            <Button 
+            <Button
               onClick={handleNext}
               disabled={
-                (step === "select" && !selectedExercice && !isCreatingNew) ||
-                (step === "method" && initMethod === "copy" && !sourceExercice) ||
+                (step === 'select' && !selectedExercice && !isCreatingNew) ||
+                (step === 'method' && initMethod === 'copy' && !sourceExercice) ||
                 createExerciceMutation.isPending ||
                 copyBudgetMutation.isPending
               }
             >
-              {(createExerciceMutation.isPending || copyBudgetMutation.isPending) ? (
+              {createExerciceMutation.isPending || copyBudgetMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <ArrowRight className="h-4 w-4 mr-2" />

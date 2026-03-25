@@ -3,13 +3,10 @@
  * Centralise la logique d'autorisation pour l'application SYGFP
  */
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { usePermissions } from "./usePermissions";
-import { 
-  VALIDATION_MATRIX, 
-  type ValidationType 
-} from "@/lib/config/rbac-config";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { usePermissions } from './usePermissions';
+import { VALIDATION_MATRIX, type ValidationType } from '@/lib/config/rbac-config';
 
 interface UserContext {
   userId: string | null;
@@ -43,18 +40,18 @@ interface EntityContext {
 }
 
 export function useRoleBasedAccess() {
-  const { 
-    userId, 
-    userRoles, 
-    isAdmin, 
-    hasRole, 
+  const {
+    userId,
+    userRoles,
+    isAdmin,
+    hasRole,
     hasAnyRole,
-    isLoading: permissionsLoading 
+    isLoading: permissionsLoading,
   } = usePermissions();
 
   // Récupérer le contexte utilisateur complet
   const { data: userContext, isLoading: contextLoading } = useQuery({
-    queryKey: ["user-context", userId],
+    queryKey: ['user-context', userId],
     queryFn: async (): Promise<UserContext> => {
       if (!userId) {
         return {
@@ -68,13 +65,13 @@ export function useRoleBasedAccess() {
       }
 
       const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("id, direction_id, role_hierarchique, profil_fonctionnel")
-        .eq("id", userId)
+        .from('profiles')
+        .select('id, direction_id, role_hierarchique, profil_fonctionnel')
+        .eq('id', userId)
         .single();
 
       if (error) {
-        console.error("Error fetching user context:", error);
+        console.error('Error fetching user context:', error);
         return {
           userId,
           directionId: null,
@@ -105,11 +102,11 @@ export function useRoleBasedAccess() {
    */
   const canValidateEntity = (entityType: ValidationType): boolean => {
     if (isAdmin) return true;
-    
+
     const rule = VALIDATION_MATRIX[entityType];
     if (!rule) return false;
 
-    return userRoles.some(role => (rule.validators as readonly string[]).includes(role));
+    return userRoles.some((role) => (rule.validators as readonly string[]).includes(role));
   };
 
   /**
@@ -154,7 +151,7 @@ export function useRoleBasedAccess() {
     const _isSameDirection = entity.directionId === userContext?.directionId;
     const isDG = hasRole('DG');
     const isCB = hasAnyRole(['CB', 'DAAF']);
-    const statut = entity.statut || 'brouillon';
+    const statut = entity.statut || 'soumis';
     const visibilityLevel = getUserVisibilityLevel();
 
     // Accès par défaut
@@ -196,19 +193,19 @@ export function useRoleBasedAccess() {
       return access;
     }
 
-    // Édition (brouillon uniquement par créateur)
-    access.canEdit = (isOwner || isAdmin) && statut === 'brouillon';
+    // Édition (soumis uniquement par créateur)
+    access.canEdit = (isOwner || isAdmin) && statut === 'soumis';
 
-    // Suppression (brouillon uniquement)
-    access.canDelete = (isOwner || isAdmin) && statut === 'brouillon';
+    // Suppression (soumis uniquement)
+    access.canDelete = (isOwner || isAdmin) && statut === 'soumis';
 
-    // Soumission (brouillon par créateur)
-    access.canSubmit = (isOwner || isAdmin) && statut === 'brouillon';
+    // Soumission (déjà soumis à la création)
+    access.canSubmit = (isOwner || isAdmin) && statut === 'soumis';
 
     // Validation (selon la matrice)
     if (entityType) {
-      access.canValidate = canValidateEntity(entityType) && 
-                           ['soumis', 'a_valider', 'en_attente'].includes(statut);
+      access.canValidate =
+        canValidateEntity(entityType) && ['soumis', 'a_valider', 'en_attente'].includes(statut);
       access.canReject = access.canValidate;
       access.canDefer = access.canValidate;
     } else {
@@ -231,7 +228,7 @@ export function useRoleBasedAccess() {
    */
   const canModifyAfterValidation = (statut: string): boolean => {
     if (isAdmin) return true;
-    
+
     // Seuls les admins peuvent modifier après validation
     const finalStatuses = ['valide', 'impute', 'ordonnance', 'regle', 'solde'];
     return !finalStatuses.includes(statut);
@@ -242,8 +239,8 @@ export function useRoleBasedAccess() {
    */
   const getAccessDeniedMessage = (entityType: ValidationType): string => {
     const rule = VALIDATION_MATRIX[entityType];
-    if (!rule) return "Accès refusé";
-    
+    if (!rule) return 'Accès refusé';
+
     return `Cette action nécessite le rôle ${rule.requiredRole}. ${rule.description}`;
   };
 
@@ -252,24 +249,24 @@ export function useRoleBasedAccess() {
     userContext,
     isLoading,
     isAdmin,
-    
+
     // Vérifications principales
     canValidateEntity,
     canAccessEntity,
     getEntityAccess,
     getUserVisibilityLevel,
     canModifyAfterValidation,
-    
+
     // Helpers
     getAccessDeniedMessage,
-    
+
     // Raccourcis courants
     isDG: hasRole('DG'),
     isCB: hasAnyRole(['CB', 'DAAF']),
     isDirecteur: hasRole('DIRECTEUR'),
     isTresorerie: hasAnyRole(['TRESORERIE', 'AGENT_COMPTABLE', 'AC']),
     isAuditeur: hasRole('AUDITEUR'),
-    
+
     // Validations spécifiques
     canValidateNoteSEF: () => canValidateEntity('NOTE_SEF'),
     canValidateNoteAEF: () => canValidateEntity('NOTE_AEF'),

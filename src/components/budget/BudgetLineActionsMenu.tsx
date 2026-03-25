@@ -62,22 +62,22 @@ export function BudgetLineActionsMenu({
   const [rejectOpen, setRejectOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const statut = line.statut || 'brouillon';
+  const statut = line.statut || 'soumis';
 
   // RBAC checks
   const canEdit =
-    (statut === 'brouillon' || statut === 'rejete') &&
+    (statut === 'soumis' || statut === 'rejete') &&
     (isAdmin || isOperateur || isDG || isDAF || isCB);
 
   const canDuplicate = isAdmin || isOperateur || isDAF || isCB;
 
-  const canSubmit = statut === 'brouillon' && (isAdmin || isOperateur || isDAF || isCB);
+  const canSubmit = statut === 'soumis' && (isAdmin || isOperateur || isDAF || isCB);
 
   const canValidate = statut === 'soumis' && (isAdmin || isDG || isCB);
 
   const canReject = statut === 'soumis' && (isAdmin || isDG || isCB);
 
-  const canDelete = statut === 'brouillon' && (isAdmin || isOperateur);
+  const canDelete = statut === 'soumis' && (isAdmin || isOperateur);
 
   const showModificationGroup = canEdit || (canDuplicate && onDuplicate) || onEditWithVersioning;
   const showWorkflowGroup = canSubmit || canValidate || canReject;

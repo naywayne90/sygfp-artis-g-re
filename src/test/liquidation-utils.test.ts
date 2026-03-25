@@ -738,7 +738,7 @@ describe('Export helpers', () => {
 
   describe('liquidationStatutLabel', () => {
     it('traduit brouillon', () => {
-      expect(liquidationStatutLabel('brouillon')).toBe('Brouillon');
+      expect(liquidationStatutLabel('brouillon')).toBe('brouillon');
     });
 
     it('traduit certifié_sf', () => {

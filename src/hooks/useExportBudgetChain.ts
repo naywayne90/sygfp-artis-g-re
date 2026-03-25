@@ -630,7 +630,6 @@ export function useExportBudgetChain() {
             const statut = ((row.statut as string) || '').toLowerCase();
             if (statut.includes('valid')) entry.nb_valide += 1;
             else if (statut === 'soumis') entry.nb_soumis += 1;
-            else if (statut === 'brouillon') entry.nb_brouillon += 1;
             else if (statut === 'rejete') entry.nb_rejete += 1;
             if ((row.reglement_urgent_label as string) === 'Oui') entry.nb_urgent += 1;
           }

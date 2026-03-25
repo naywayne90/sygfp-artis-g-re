@@ -2,14 +2,13 @@
  * DashboardGeneric - Template de dashboard pour toutes les directions
  * Utilisé comme fallback pour les directions sans dashboard spécialisé
  */
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Loader2,
   FileText,
   CreditCard,
   Receipt,
@@ -23,10 +22,10 @@ import {
   RefreshCw,
   Building2,
   ChevronRight,
-} from "lucide-react";
-import { useDirectionDashboard } from "@/hooks/dashboard/useDirectionDashboard";
-import { formatMontant } from "@/lib/config/sygfp-constants";
-import { cn } from "@/lib/utils";
+} from 'lucide-react';
+import { useDirectionDashboard } from '@/hooks/dashboard/useDirectionDashboard';
+import { formatMontant } from '@/lib/config/sygfp-constants';
+import { cn } from '@/lib/utils';
 
 interface DashboardGenericProps {
   directionId: string;
@@ -40,8 +39,7 @@ export function DashboardGeneric({
   directionNom,
 }: DashboardGenericProps) {
   const navigate = useNavigate();
-  const { kpis, alertes, dossiersRecents, isLoading, refetch } =
-    useDirectionDashboard(directionId);
+  const { kpis, alertes, dossiersRecents, isLoading, refetch } = useDirectionDashboard(directionId);
 
   if (isLoading) {
     return <DashboardSkeleton />;
@@ -50,7 +48,7 @@ export function DashboardGeneric({
   // Valeurs par défaut si pas de KPIs
   const safeKpis = kpis || {
     exercice: new Date().getFullYear(),
-    notes_sef: { total: 0, brouillon: 0, soumis: 0, valide: 0, rejete: 0 },
+    notes_sef: { total: 0, soumis: 0, valide: 0, rejete: 0 },
     engagements: { total: 0, montant_total: 0, en_cours: 0, valide: 0 },
     liquidations: { total: 0, montant_total: 0, en_cours: 0, valide: 0 },
     ordonnancements: { total: 0, montant_total: 0, en_cours: 0, valide: 0 },
@@ -105,10 +103,10 @@ export function DashboardGeneric({
                 <li
                   key={i}
                   className={cn(
-                    "flex items-center gap-2 text-sm p-2 rounded-lg",
-                    alerte.niveau === "danger" && "bg-destructive/10 text-destructive",
-                    alerte.niveau === "warning" && "bg-warning/10 text-warning",
-                    alerte.niveau === "info" && "bg-primary/10 text-primary"
+                    'flex items-center gap-2 text-sm p-2 rounded-lg',
+                    alerte.niveau === 'danger' && 'bg-destructive/10 text-destructive',
+                    alerte.niveau === 'warning' && 'bg-warning/10 text-warning',
+                    alerte.niveau === 'info' && 'bg-primary/10 text-primary'
                   )}
                 >
                   <span className="font-medium">{alerte.nombre}</span>
@@ -127,13 +125,10 @@ export function DashboardGeneric({
           title="Notes SEF"
           icon={FileText}
           value={safeKpis.notes_sef.total}
-          onClick={() => navigate("/notes-sef")}
+          onClick={() => navigate('/notes-sef')}
         >
           <div className="flex flex-wrap gap-1.5 mt-2">
             <Badge variant="outline" className="text-xs">
-              {safeKpis.notes_sef.brouillon} brouillon
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
               {safeKpis.notes_sef.soumis} soumis
             </Badge>
             <Badge className="bg-success text-success-foreground text-xs">
@@ -152,14 +147,12 @@ export function DashboardGeneric({
           title="Engagements"
           icon={CreditCard}
           value={formatMontant(safeKpis.engagements.montant_total)}
-          onClick={() => navigate("/engagements")}
+          onClick={() => navigate('/engagements')}
         >
           <p className="text-xs text-muted-foreground mt-1">
             {safeKpis.engagements.total} dossiers
             {safeKpis.engagements.en_cours > 0 && (
-              <span className="text-warning ml-1">
-                ({safeKpis.engagements.en_cours} en cours)
-              </span>
+              <span className="text-warning ml-1">({safeKpis.engagements.en_cours} en cours)</span>
             )}
           </p>
         </KPICard>
@@ -169,14 +162,12 @@ export function DashboardGeneric({
           title="Liquidations"
           icon={Receipt}
           value={formatMontant(safeKpis.liquidations.montant_total)}
-          onClick={() => navigate("/liquidations")}
+          onClick={() => navigate('/liquidations')}
         >
           <p className="text-xs text-muted-foreground mt-1">
             {safeKpis.liquidations.total} dossiers
             {safeKpis.liquidations.en_cours > 0 && (
-              <span className="text-warning ml-1">
-                ({safeKpis.liquidations.en_cours} en cours)
-              </span>
+              <span className="text-warning ml-1">({safeKpis.liquidations.en_cours} en cours)</span>
             )}
           </p>
         </KPICard>
@@ -186,7 +177,7 @@ export function DashboardGeneric({
           title="Ordonnancements"
           icon={FileCheck}
           value={formatMontant(safeKpis.ordonnancements.montant_total)}
-          onClick={() => navigate("/ordonnancements")}
+          onClick={() => navigate('/ordonnancements')}
         >
           <p className="text-xs text-muted-foreground mt-1">
             {safeKpis.ordonnancements.total} dossiers
@@ -218,8 +209,8 @@ export function DashboardGeneric({
               <span className="text-sm text-muted-foreground">Crédits disponibles</span>
               <span
                 className={cn(
-                  "font-semibold",
-                  safeKpis.budget.credits_disponibles < 0 && "text-destructive"
+                  'font-semibold',
+                  safeKpis.budget.credits_disponibles < 0 && 'text-destructive'
                 )}
               >
                 {formatMontant(safeKpis.budget.credits_disponibles)}
@@ -239,9 +230,7 @@ export function DashboardGeneric({
               <TrendingUp className="h-4 w-4" />
               Taux d'exécution
             </CardTitle>
-            <CardDescription>
-              Ratio ordonnancements validés / notes SEF créées
-            </CardDescription>
+            <CardDescription>Ratio ordonnancements validés / notes SEF créées</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-4">
             <div className="relative w-32 h-32">
@@ -285,7 +274,7 @@ export function DashboardGeneric({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/recherche")}
+              onClick={() => navigate('/recherche')}
               className="gap-1"
             >
               Voir tout
@@ -304,9 +293,7 @@ export function DashboardGeneric({
                     <EtapeIcon etape={dossier.etape_actuelle} />
                     <div>
                       <p className="font-medium text-sm">{dossier.numero_dossier}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {dossier.objet}
-                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{dossier.objet}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -330,7 +317,7 @@ export function DashboardGeneric({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/notes-sef?action=new")}
+              onClick={() => navigate('/notes-sef?action=new')}
             >
               <FileText className="h-4 w-4" />
               Nouvelle Note SEF
@@ -338,7 +325,7 @@ export function DashboardGeneric({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/engagements")}
+              onClick={() => navigate('/engagements')}
             >
               <CreditCard className="h-4 w-4" />
               Mes Engagements
@@ -346,7 +333,7 @@ export function DashboardGeneric({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/workflow-tasks")}
+              onClick={() => navigate('/workflow-tasks')}
             >
               <Clock className="h-4 w-4" />
               Tâches à traiter
@@ -354,7 +341,7 @@ export function DashboardGeneric({
             <Button
               variant="outline"
               className="justify-start gap-2"
-              onClick={() => navigate("/recherche")}
+              onClick={() => navigate('/recherche')}
             >
               <FileCheck className="h-4 w-4" />
               Rechercher un dossier
@@ -378,10 +365,7 @@ interface KPICardProps {
 function KPICard({ title, icon: Icon, value, children, onClick }: KPICardProps) {
   return (
     <Card
-      className={cn(
-        "transition-colors",
-        onClick && "cursor-pointer hover:bg-muted/50"
-      )}
+      className={cn('transition-colors', onClick && 'cursor-pointer hover:bg-muted/50')}
       onClick={onClick}
     >
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -398,31 +382,31 @@ function KPICard({ title, icon: Icon, value, children, onClick }: KPICardProps) 
 
 // Icône selon l'étape
 function EtapeIcon({ etape }: { etape: string }) {
-  const iconClass = "h-8 w-8 p-1.5 rounded-lg";
+  const iconClass = 'h-8 w-8 p-1.5 rounded-lg';
 
-  if (etape.includes("rejete")) {
+  if (etape.includes('rejete')) {
     return (
-      <div className={cn(iconClass, "bg-destructive/10 text-destructive")}>
+      <div className={cn(iconClass, 'bg-destructive/10 text-destructive')}>
         <XCircle className="h-full w-full" />
       </div>
     );
   }
-  if (etape === "ordonnance") {
+  if (etape === 'ordonnance') {
     return (
-      <div className={cn(iconClass, "bg-success/10 text-success")}>
+      <div className={cn(iconClass, 'bg-success/10 text-success')}>
         <CheckCircle2 className="h-full w-full" />
       </div>
     );
   }
-  if (etape.includes("en_cours") || etape.includes("soumis")) {
+  if (etape.includes('en_cours') || etape.includes('soumis')) {
     return (
-      <div className={cn(iconClass, "bg-warning/10 text-warning")}>
+      <div className={cn(iconClass, 'bg-warning/10 text-warning')}>
         <Clock className="h-full w-full" />
       </div>
     );
   }
   return (
-    <div className={cn(iconClass, "bg-primary/10 text-primary")}>
+    <div className={cn(iconClass, 'bg-primary/10 text-primary')}>
       <FileText className="h-full w-full" />
     </div>
   );
@@ -430,17 +414,19 @@ function EtapeIcon({ etape }: { etape: string }) {
 
 // Badge selon l'étape
 function EtapeBadge({ etape }: { etape: string }) {
-  const etapeLabels: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    sef_brouillon: { label: "Brouillon", variant: "outline" },
-    sef_soumis: { label: "Soumis", variant: "secondary" },
-    sef_valide: { label: "SEF validé", variant: "default" },
-    engagement: { label: "Engagement", variant: "secondary" },
-    liquidation: { label: "Liquidation", variant: "secondary" },
-    ordonnance: { label: "Ordonnancé", variant: "default" },
-    sef_rejete: { label: "Rejeté", variant: "destructive" },
+  const etapeLabels: Record<
+    string,
+    { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+  > = {
+    sef_soumis: { label: 'Soumis', variant: 'outline' },
+    sef_valide: { label: 'SEF validé', variant: 'default' },
+    engagement: { label: 'Engagement', variant: 'secondary' },
+    liquidation: { label: 'Liquidation', variant: 'secondary' },
+    ordonnance: { label: 'Ordonnancé', variant: 'default' },
+    sef_rejete: { label: 'Rejeté', variant: 'destructive' },
   };
 
-  const config = etapeLabels[etape] || { label: etape, variant: "outline" as const };
+  const config = etapeLabels[etape] || { label: etape, variant: 'outline' as const };
 
   return <Badge variant={config.variant}>{config.label}</Badge>;
 }

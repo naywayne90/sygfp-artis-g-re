@@ -61,9 +61,8 @@ export function fmtDate(iso: string | null | undefined): string {
 
 export function liquidationStatutLabel(statut: string | null | undefined): string {
   const labels: Record<string, string> = {
-    brouillon: 'Brouillon',
-    certifié_sf: 'SF Certifié',
     soumis: 'Soumis',
+    certifié_sf: 'SF Certifié',
     validé_daaf: 'Validé DAAF',
     validé_dg: 'Validé DG',
     rejete: 'Rejeté',

@@ -106,7 +106,7 @@ export function useNotesSEFAudit() {
       await logAuditEvent({
         noteId,
         action: 'creation',
-        newStatut: 'brouillon',
+        newStatut: 'soumis',
         details,
       });
     },
@@ -187,7 +187,7 @@ export function useNotesSEFAudit() {
       await logAuditEvent({
         noteId: note.id,
         action: 'soumission',
-        oldStatut: 'brouillon',
+        oldStatut: 'soumis',
         newStatut: 'soumis',
         commentaire: note.reference_pivot ? `Référence: ${note.reference_pivot}` : undefined,
       });

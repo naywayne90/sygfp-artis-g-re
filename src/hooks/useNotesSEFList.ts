@@ -104,7 +104,7 @@ export function useNotesSEFList(options: UseNotesSEFListOptions = {}): UseNotesS
   const statutFilter = useMemo(() => {
     switch (activeTab) {
       case 'brouillons':
-        return 'brouillon';
+        return 'soumis';
       case 'a_valider':
         return ['soumis', 'a_valider']; // Soumis + À valider
       case 'validees':

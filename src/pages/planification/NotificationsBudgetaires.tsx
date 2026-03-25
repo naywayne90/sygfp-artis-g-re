@@ -9,11 +9,11 @@
  * - Pièces jointes
  */
 
-import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState, useRef } from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -21,21 +21,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,9 +45,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   FileText,
   Plus,
@@ -71,26 +71,26 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   useBudgetNotifications,
   BudgetNotification,
   NotificationStatut,
   NOTIFICATION_STATUTS,
-} from "@/hooks/useBudgetNotifications";
-import { useFundingSources } from "@/hooks/useFundingSources";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { NotificationBudgetaireForm } from "@/components/notification/NotificationBudgetaireForm";
-import { NotificationBudgetaireDetails } from "@/components/notification/NotificationBudgetaireDetails";
+} from '@/hooks/useBudgetNotifications';
+import { useFundingSources } from '@/hooks/useFundingSources';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { NotificationBudgetaireForm } from '@/components/notification/NotificationBudgetaireForm';
+import { NotificationBudgetaireDetails } from '@/components/notification/NotificationBudgetaireDetails';
 
 export default function NotificationsBudgetaires() {
   const { exercice, isReadOnly } = useExercice();
   const tableRef = useRef<HTMLTableElement>(null);
 
   // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statutFilter, setStatutFilter] = useState<NotificationStatut | "all">("all");
-  const [origineFondsFilter, setOrigineFondsFilter] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statutFilter, setStatutFilter] = useState<NotificationStatut | 'all'>('all');
+  const [origineFondsFilter, setOrigineFondsFilter] = useState<string>('');
 
   // Dialogs
   const [showFormDialog, setShowFormDialog] = useState(false);
@@ -98,7 +98,7 @@ export default function NotificationsBudgetaires() {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<BudgetNotification | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
 
   // Hooks
   const {
@@ -156,7 +156,7 @@ export default function NotificationsBudgetaires() {
 
   const handleRejectClick = (notification: BudgetNotification) => {
     setSelectedNotification(notification);
-    setRejectReason("");
+    setRejectReason('');
     setShowRejectDialog(true);
   };
 
@@ -185,7 +185,7 @@ export default function NotificationsBudgetaires() {
 
     const text = notifications
       .map((n) => `${n.reference}\t${n.date_notification}\t${n.objet}\t${n.montant}`)
-      .join("\n");
+      .join('\n');
 
     navigator.clipboard.writeText(text);
   };
@@ -260,7 +260,7 @@ export default function NotificationsBudgetaires() {
               <div>
                 <p className="text-sm text-muted-foreground">En attente</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {(stats?.byStatut?.brouillon?.count || 0) + (stats?.byStatut?.soumis?.count || 0)}
+                  {(stats?.byStatut?.soumis?.count || 0) + (stats?.byStatut?.soumis?.count || 0)}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-blue-500" />
@@ -286,7 +286,7 @@ export default function NotificationsBudgetaires() {
               </div>
               <Select
                 value={statutFilter}
-                onValueChange={(v) => setStatutFilter(v as NotificationStatut | "all")}
+                onValueChange={(v) => setStatutFilter(v as NotificationStatut | 'all')}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Statut" />
@@ -300,10 +300,7 @@ export default function NotificationsBudgetaires() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select
-                value={origineFondsFilter}
-                onValueChange={setOrigineFondsFilter}
-              >
+              <Select value={origineFondsFilter} onValueChange={setOrigineFondsFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Origine fonds" />
                 </SelectTrigger>
@@ -373,7 +370,7 @@ export default function NotificationsBudgetaires() {
                       {notification.reference}
                     </TableCell>
                     <TableCell>
-                      {new Date(notification.date_notification).toLocaleDateString("fr-FR")}
+                      {new Date(notification.date_notification).toLocaleDateString('fr-FR')}
                     </TableCell>
                     <TableCell>
                       <div className="max-w-[300px] truncate" title={notification.objet}>
@@ -386,7 +383,7 @@ export default function NotificationsBudgetaires() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {notification.origine_fonds_libelle || notification.origine_fonds_code || "-"}
+                      {notification.origine_fonds_libelle || notification.origine_fonds_code || '-'}
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatMontant(notification.montant)}
@@ -403,7 +400,7 @@ export default function NotificationsBudgetaires() {
                           <span className="text-sm">{notification.attachments_count}</span>
                         </div>
                       ) : (
-                        "-"
+                        '-'
                       )}
                     </TableCell>
                     <TableCell>
@@ -418,7 +415,7 @@ export default function NotificationsBudgetaires() {
                             <Eye className="mr-2 h-4 w-4" />
                             Voir détails
                           </DropdownMenuItem>
-                          {notification.statut === "brouillon" && !isReadOnly && (
+                          {notification.statut === 'soumis' && !isReadOnly && (
                             <>
                               <DropdownMenuItem onClick={() => handleEdit(notification)}>
                                 <Edit className="mr-2 h-4 w-4" />
@@ -438,7 +435,7 @@ export default function NotificationsBudgetaires() {
                               </DropdownMenuItem>
                             </>
                           )}
-                          {notification.statut === "soumis" && !isReadOnly && (
+                          {notification.statut === 'soumis' && !isReadOnly && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleValidate(notification)}>
@@ -454,7 +451,7 @@ export default function NotificationsBudgetaires() {
                               </DropdownMenuItem>
                             </>
                           )}
-                          {notification.statut === "rejete" && !isReadOnly && (
+                          {notification.statut === 'rejete' && !isReadOnly && (
                             <>
                               <DropdownMenuItem onClick={() => handleEdit(notification)}>
                                 <Edit className="mr-2 h-4 w-4" />
@@ -502,7 +499,7 @@ export default function NotificationsBudgetaires() {
             <AlertDialogTitle>Rejeter cette notification ?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               <p>
-                Vous allez rejeter la notification{" "}
+                Vous allez rejeter la notification{' '}
                 <strong>{selectedNotification?.reference}</strong>.
               </p>
               <div className="space-y-2">
@@ -537,9 +534,8 @@ export default function NotificationsBudgetaires() {
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer cette notification ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Vous allez annuler la notification{" "}
-              <strong>{selectedNotification?.reference}</strong>. Cette action est
-              irréversible.
+              Vous allez annuler la notification <strong>{selectedNotification?.reference}</strong>.
+              Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

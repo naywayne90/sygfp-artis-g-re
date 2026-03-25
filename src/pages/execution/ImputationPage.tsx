@@ -75,7 +75,10 @@ interface SourceAefNote {
 
 const getStatusBadge = (status: string) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
     valide: { label: 'Validée', className: 'bg-success/10 text-success border-success/20' },
     rejete: {
@@ -87,7 +90,7 @@ const getStatusBadge = (status: string) => {
       className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     },
   };
-  const variant = variants[status] || variants.brouillon;
+  const variant = variants[status] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -752,7 +755,7 @@ export default function ImputationPage() {
                                     </DropdownMenuItem>
                                   )}
 
-                                  {imp.statut === 'brouillon' && (
+                                  {imp.statut === 'soumis' && (
                                     <>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem onClick={() => submitImputation(imp.id)}>

@@ -56,8 +56,10 @@ interface EngagementListProps {
 
 const getStatusBadge = (statut: string | null, _workflowStatus: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground border-muted' },
-    soumis: { label: 'A valider (SAF)', className: 'bg-warning/10 text-warning border-warning/20' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     visa_saf: { label: 'Visa SAF', className: 'bg-blue-100 text-blue-700 border-blue-200' },
     visa_cb: { label: 'Visa CB', className: 'bg-blue-100 text-blue-700 border-blue-200' },
     visa_daaf: { label: 'Visa DAAF', className: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -68,7 +70,7 @@ const getStatusBadge = (statut: string | null, _workflowStatus: string | null) =
     },
     differe: { label: 'Différé', className: 'bg-secondary/10 text-secondary border-secondary/20' },
   };
-  const variant = variants[statut || 'brouillon'] || variants.brouillon;
+  const variant = variants[statut || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -228,8 +230,8 @@ export function EngagementList({
                           </DropdownMenuItem>
                         )}
 
-                        {/* Modifier — brouillon uniquement */}
-                        {statut === 'brouillon' && onEdit && (
+                        {/* Modifier — soumis uniquement */}
+                        {statut === 'soumis' && onEdit && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onEdit(engagement)}>
@@ -239,8 +241,8 @@ export function EngagementList({
                           </>
                         )}
 
-                        {/* Soumettre — brouillon uniquement */}
-                        {statut === 'brouillon' && onSubmit && (
+                        {/* Soumettre — soumis uniquement */}
+                        {statut === 'soumis' && onSubmit && (
                           <DropdownMenuItem onClick={() => onSubmit(engagement.id)}>
                             <Send className="mr-2 h-4 w-4" />
                             Soumettre

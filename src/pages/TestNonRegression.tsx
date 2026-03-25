@@ -218,7 +218,7 @@ export default function TestNonRegression() {
             exercice: Number(exerciceId),
             objet: `[TEST] Note SEF de test non-régression - ${reference}`,
             montant_estime: 5000000,
-            statut: 'brouillon',
+            statut: 'soumis',
           } as any)
           .select()
           .single();
@@ -264,7 +264,7 @@ export default function TestNonRegression() {
             direction_id: directionId,
             objet: `[TEST] Note AEF de test non-régression - ${reference}`,
             montant_demande: 2500000,
-            statut: 'brouillon',
+            statut: 'soumis',
           })
           .select()
           .single();

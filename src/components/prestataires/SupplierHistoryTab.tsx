@@ -1,18 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  FileSignature, 
-  CreditCard, 
-  FileCheck, 
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  FileSignature,
+  CreditCard,
+  FileCheck,
   Clock,
   CheckCircle2,
   XCircle,
-  AlertCircle
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+  AlertCircle,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface SupplierHistoryTabProps {
   supplierId: string;
@@ -51,14 +58,16 @@ interface Marche {
 export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistoryTabProps) {
   // Fetch contrats
   const { data: contrats, isLoading: loadingContrats } = useQuery({
-    queryKey: ["supplier-contrats", supplierId],
+    queryKey: ['supplier-contrats', supplierId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("contrats")
-        .select("id, numero, objet, montant_initial, montant_actuel, statut, date_signature, created_at")
-        .eq("prestataire_id", supplierId)
-        .order("created_at", { ascending: false });
-      
+        .from('contrats')
+        .select(
+          'id, numero, objet, montant_initial, montant_actuel, statut, date_signature, created_at'
+        )
+        .eq('prestataire_id', supplierId)
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
       return data as Contrat[];
     },
@@ -66,15 +75,15 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
 
   // Fetch engagements by fournisseur name
   const { data: engagements, isLoading: loadingEngagements } = useQuery({
-    queryKey: ["supplier-engagements", supplierName],
+    queryKey: ['supplier-engagements', supplierName],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("budget_engagements")
-        .select("id, numero, objet, montant, statut, date_engagement")
-        .ilike("fournisseur", `%${supplierName}%`)
-        .order("date_engagement", { ascending: false })
+        .from('budget_engagements')
+        .select('id, numero, objet, montant, statut, date_engagement')
+        .ilike('fournisseur', `%${supplierName}%`)
+        .order('date_engagement', { ascending: false })
         .limit(20);
-      
+
       if (error) throw error;
       return data as Engagement[];
     },
@@ -83,15 +92,15 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
 
   // Fetch marchés directly assigned to this supplier
   const { data: marches, isLoading: loadingMarches } = useQuery<Marche[]>({
-    queryKey: ["supplier-marches", supplierId],
+    queryKey: ['supplier-marches', supplierId],
     queryFn: async () => {
       // Marchés directly assigned to this supplier
       const { data, error } = await supabase
-        .from("marches")
-        .select("id, numero, objet, montant, statut, date_lancement")
-        .eq("prestataire_id", supplierId)
-        .order("date_lancement", { ascending: false });
-      
+        .from('marches')
+        .select('id, numero, objet, montant, statut, date_lancement')
+        .eq('prestataire_id', supplierId)
+        .order('date_lancement', { ascending: false });
+
       if (error) throw error;
       return (data || []) as unknown as Marche[];
     },
@@ -101,38 +110,58 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
 
   const getStatusBadge = (statut: string | null) => {
     switch (statut?.toLowerCase()) {
-      case "valide":
-      case "validé":
-      case "en_cours":
-      case "actif":
-        return <Badge className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Actif</Badge>;
-      case "termine":
-      case "terminé":
-      case "solde":
-        return <Badge variant="secondary"><CheckCircle2 className="h-3 w-3 mr-1" />Terminé</Badge>;
-      case "rejete":
-      case "annule":
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Annulé</Badge>;
-      case "brouillon":
-      case "soumis":
-        return <Badge variant="outline"><Clock className="h-3 w-3 mr-1" />En cours</Badge>;
+      case 'valide':
+      case 'validé':
+      case 'en_cours':
+      case 'actif':
+        return (
+          <Badge className="bg-green-600">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Actif
+          </Badge>
+        );
+      case 'termine':
+      case 'terminé':
+      case 'solde':
+        return (
+          <Badge variant="secondary">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Terminé
+          </Badge>
+        );
+      case 'rejete':
+      case 'annule':
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Annulé
+          </Badge>
+        );
+      case 'soumis':
+        return (
+          <Badge variant="outline">
+            <Clock className="h-3 w-3 mr-1" />
+            En cours
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">{statut || "N/A"}</Badge>;
+        return <Badge variant="outline">{statut || 'N/A'}</Badge>;
     }
   };
 
   const formatMontant = (value: number | null) => {
-    if (value === null) return "-";
-    return new Intl.NumberFormat("fr-FR").format(value) + " FCFA";
+    if (value === null) return '-';
+    return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
   };
 
   const formatDate = (date: string | null) => {
-    if (!date) return "-";
-    return format(new Date(date), "dd MMM yyyy", { locale: fr });
+    if (!date) return '-';
+    return format(new Date(date), 'dd MMM yyyy', { locale: fr });
   };
 
   // Calculate totals
-  const totalContrats = contrats?.reduce((sum, c) => sum + (c.montant_actuel || c.montant_initial || 0), 0) || 0;
+  const totalContrats =
+    contrats?.reduce((sum, c) => sum + (c.montant_actuel || c.montant_initial || 0), 0) || 0;
   const totalEngagements = engagements?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
 
   if (isLoading) {
@@ -151,7 +180,9 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
       <div className="text-center py-12 text-muted-foreground">
         <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
         <p className="font-medium">Aucun historique</p>
-        <p className="text-sm">Ce prestataire n'a pas encore de marchés, contrats ou engagements enregistrés.</p>
+        <p className="text-sm">
+          Ce prestataire n'a pas encore de marchés, contrats ou engagements enregistrés.
+        </p>
       </div>
     );
   }
@@ -170,7 +201,9 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
           <CreditCard className="h-6 w-6 mx-auto mb-2 text-blue-600" />
           <p className="text-2xl font-bold">{engagements?.length || 0}</p>
           <p className="text-sm text-muted-foreground">Engagements</p>
-          <p className="text-xs text-blue-600 font-medium mt-1">{formatMontant(totalEngagements)}</p>
+          <p className="text-xs text-blue-600 font-medium mt-1">
+            {formatMontant(totalEngagements)}
+          </p>
         </div>
         <div className="bg-muted/50 rounded-lg p-4 text-center">
           <FileCheck className="h-6 w-6 mx-auto mb-2 text-green-600" />
@@ -201,7 +234,9 @@ export function SupplierHistoryTab({ supplierId, supplierName }: SupplierHistory
                 <TableRow key={contrat.id}>
                   <TableCell className="font-mono text-sm">{contrat.numero}</TableCell>
                   <TableCell className="max-w-[200px] truncate">{contrat.objet}</TableCell>
-                  <TableCell>{formatMontant(contrat.montant_actuel || contrat.montant_initial)}</TableCell>
+                  <TableCell>
+                    {formatMontant(contrat.montant_actuel || contrat.montant_initial)}
+                  </TableCell>
                   <TableCell>{formatDate(contrat.date_signature)}</TableCell>
                   <TableCell>{getStatusBadge(contrat.statut)}</TableCell>
                 </TableRow>

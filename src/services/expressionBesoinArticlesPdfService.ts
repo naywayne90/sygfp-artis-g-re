@@ -137,7 +137,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
   doc.setFontSize(PDF_FONTS.size.body);
   doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.normal);
   doc.setTextColor(...PDF_COLORS.secondary);
-  doc.text(`Expression de besoin N° ${expression.numero || 'Brouillon'}`, centerX, yPos, {
+  doc.text(`Expression de besoin N° ${expression.numero || 'Soumis'}`, centerX, yPos, {
     align: 'center',
   });
   yPos += 10;
@@ -266,7 +266,7 @@ export async function generateArticlesPdf(expression: ExpressionBesoin): Promise
   }
 
   // ─── MÉTADONNÉES ─────────────────────────────────────────────────────────
-  const ref = expression.numero || 'BROUILLON';
+  const ref = expression.numero || 'SOUMIS';
   doc.setProperties({
     title: `ARTI_ARTICLES_EB_${ref}`,
     subject: expression.objet || '',

@@ -379,7 +379,7 @@ export const LIFECYCLE_STEPS: PassationStatut[] = [
 
 export function canPublish(p: PassationMarche): { ok: boolean; errors: string[] } {
   const errors: string[] = [];
-  if (p.statut !== 'brouillon') errors.push('Le statut doit être "brouillon"');
+  if (p.statut !== 'soumis') errors.push('Le statut doit être "soumis"');
   if (!p.expression_besoin_id) errors.push('Expression de besoin liée obligatoire');
   if (!p.mode_passation) errors.push('Mode de passation obligatoire');
   if (!p.date_publication) errors.push('Date de publication obligatoire');
@@ -687,7 +687,7 @@ export function usePassationsMarche() {
         seuil_montant: seuil?.code || null,
         dossier_id: eb?.dossier_id || null,
         exercice: exercice || new Date().getFullYear(),
-        statut: 'brouillon',
+        // statut defaults to 'soumis' via DB default
         created_by: user?.id || null,
         date_publication: data.date_publication || null,
         date_cloture: data.date_cloture || null,
@@ -883,7 +883,7 @@ export function usePassationsMarche() {
     },
   });
 
-  // Publish (brouillon → publie)
+  // Publish (soumis → publie)
   const publishMutation = useMutation({
     mutationFn: async ({ id, dateCloture }: { id: string; dateCloture?: string }) => {
       const {

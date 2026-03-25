@@ -170,7 +170,7 @@ export function useNotesSEF() {
     },
   });
 
-  // Create note - brouillon sans référence (référence générée à la soumission)
+  // Create note - soumis directement (référence sera générée par le DB default)
   const createMutation = useMutation({
     mutationFn: async (noteData: Partial<NoteSEF>) => {
       const {
@@ -200,7 +200,7 @@ export function useNotesSEF() {
             mission_id: noteData.mission_id,
             exercice: currentExercice,
             created_by: user.id,
-            // Pas de référence pour les brouillons
+            // La référence sera générée par le DB default
             // La référence sera générée à la soumission via RPC
           },
         ])
@@ -214,7 +214,7 @@ export function useNotesSEF() {
         {
           note_id: data.id,
           action: 'création',
-          new_statut: 'brouillon',
+          new_statut: 'soumis',
           performed_by: user.id,
         },
       ]);
@@ -232,7 +232,7 @@ export function useNotesSEF() {
       queryClient.invalidateQueries({ queryKey: ['notes-sef'] });
       toast({
         title: 'Note créée',
-        description: 'La note a été enregistrée en brouillon',
+        description: 'La note a été créée et soumise',
       });
     },
     onError: (error: Error) => {
@@ -771,7 +771,7 @@ export function useNotesSEF() {
     },
   });
 
-  // Duplicate note - crée un brouillon sans référence (sera générée à la soumission)
+  // Duplicate note - crée une copie soumise (référence générée par le DB default)
   const duplicateMutation = useMutation({
     mutationFn: async (noteId: string) => {
       const {
@@ -801,7 +801,7 @@ export function useNotesSEF() {
             commentaire: original.commentaire,
             exercice: currentExercice,
             created_by: user.id,
-            // Pas de référence pour les brouillons
+            // La référence sera générée par le DB default
           },
         ])
         .select()
@@ -820,7 +820,7 @@ export function useNotesSEF() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes-sef'] });
-      toast({ title: 'Note dupliquée (brouillon)' });
+      toast({ title: 'Note dupliquée (soumise)' });
     },
     onError: (error: Error) => {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
@@ -861,7 +861,6 @@ export function useNotesSEF() {
 
   // Filter notes by status
   const notesByStatus = {
-    brouillon: notes.filter((n) => n.statut === 'brouillon'),
     soumis: notes.filter((n) => n.statut === 'soumis'),
     a_valider: notes.filter((n) => n.statut === 'a_valider' || n.statut === 'soumis'),
     valide: notes.filter((n) => n.statut === 'valide'),

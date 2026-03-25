@@ -42,7 +42,6 @@ interface NoteAEFDetailsProps {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
     soumis: { label: 'Soumis', className: 'bg-blue-100 text-blue-700' },
     a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning' },
     valide: { label: 'Validé', className: 'bg-success/10 text-success' },
@@ -50,7 +49,7 @@ const getStatusBadge = (status: string | null) => {
     rejete: { label: 'Rejeté', className: 'bg-destructive/10 text-destructive' },
     differe: { label: 'Différé', className: 'bg-orange-100 text-orange-700' },
   };
-  const variant = variants[status || 'brouillon'] || variants.brouillon;
+  const variant = variants[status || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -124,7 +123,6 @@ export function NoteAEFDetails({ open, onOpenChange, note }: NoteAEFDetailsProps
 
   const getStatusLabel = (status: string | null) => {
     const labels: Record<string, string> = {
-      brouillon: 'Brouillon',
       soumis: 'Soumis',
       a_valider: 'À valider',
       valide: 'Validé',

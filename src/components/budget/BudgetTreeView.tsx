@@ -80,8 +80,6 @@ const getVersionBadge = (version: string) => {
 
 const getStatusBadge = (status: string | null) => {
   switch (status) {
-    case 'brouillon':
-      return <Badge variant="secondary">Brouillon</Badge>;
     case 'soumis':
       return (
         <Badge variant="default" className="bg-blue-500">
@@ -97,7 +95,7 @@ const getStatusBadge = (status: string | null) => {
     case 'rejete':
       return <Badge variant="destructive">Rejeté</Badge>;
     default:
-      return <Badge variant="secondary">Brouillon</Badge>;
+      return <Badge variant="secondary">Soumis</Badge>;
   }
 };
 
@@ -392,7 +390,7 @@ export function BudgetTreeView({
                               Historique versions
                             </DropdownMenuItem>
                           )}
-                          {line.statut === 'brouillon' && (
+                          {line.statut === 'soumis' && (
                             <DropdownMenuItem onClick={() => onSubmit(line.id)}>
                               <Send className="mr-2 h-4 w-4" />
                               Soumettre
@@ -415,7 +413,7 @@ export function BudgetTreeView({
                               </DropdownMenuItem>
                             </>
                           )}
-                          {line.statut === 'brouillon' && (
+                          {line.statut === 'soumis' && (
                             <DropdownMenuItem
                               onClick={() => {
                                 if (confirm('Supprimer cette ligne ?')) onDelete(line.id);

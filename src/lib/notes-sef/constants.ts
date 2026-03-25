@@ -12,9 +12,7 @@
  * Statuts possibles d'une Note SEF dans son cycle de vie
  */
 export const NoteSEFStatut = {
-  /** Brouillon - note en cours de rédaction, modifiable */
-  DRAFT: 'brouillon',
-  /** Soumis - note envoyée pour examen */
+  /** Soumis - note envoyée pour examen (statut initial depuis suppression brouillon) */
   SUBMITTED: 'soumis',
   /** À valider - en attente de décision du validateur */
   PENDING_VALIDATION: 'a_valider',
@@ -32,7 +30,6 @@ export type NoteSEFStatutType = (typeof NoteSEFStatut)[keyof typeof NoteSEFStatu
  * Labels français pour les statuts
  */
 export const STATUT_LABELS: Record<NoteSEFStatutType, string> = {
-  [NoteSEFStatut.DRAFT]: 'Brouillon',
   [NoteSEFStatut.SUBMITTED]: 'Soumis',
   [NoteSEFStatut.PENDING_VALIDATION]: 'À valider',
   [NoteSEFStatut.APPROVED]: 'Validée',
@@ -47,10 +44,6 @@ export const STATUT_BADGE_VARIANTS: Record<
   NoteSEFStatutType,
   { className: string; icon?: string }
 > = {
-  [NoteSEFStatut.DRAFT]: {
-    className: 'bg-muted text-muted-foreground',
-    icon: 'FileEdit',
-  },
   [NoteSEFStatut.SUBMITTED]: {
     className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     icon: 'Send',
@@ -199,7 +192,6 @@ export type ValidatorRole = (typeof VALIDATOR_ROLES)[number];
  * Clé = statut actuel, Valeur = statuts cibles possibles
  */
 export const STATUT_TRANSITIONS: Record<NoteSEFStatutType, NoteSEFStatutType[]> = {
-  [NoteSEFStatut.DRAFT]: [NoteSEFStatut.SUBMITTED],
   [NoteSEFStatut.SUBMITTED]: [
     NoteSEFStatut.PENDING_VALIDATION,
     NoteSEFStatut.APPROVED,
@@ -246,7 +238,7 @@ export const NOTES_SEF_CONFIG = {
    * Exemple : ARTI0002260001 pour la 1ère note SEF de février 2026
    *
    * La génération est faite côté DB via RPC submit_note_sef_with_reference
-   * au moment de la SOUMISSION (les brouillons n'ont pas de référence)
+   * au moment de la SOUMISSION (creation = soumission directe)
    */
   REFERENCE_PREFIX: 'ARTI',
   /** Code étape pour Note SEF (2 chiffres) */

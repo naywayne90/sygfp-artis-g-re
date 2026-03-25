@@ -8,8 +8,7 @@
 // ===== Statuts génériques (toutes étapes) =====
 
 export const STATUTS_WORKFLOW = {
-  // Phase création
-  BROUILLON: 'brouillon', // En cours de saisie
+  // Phase validation (brouillon supprime — creation = soumis)
 
   // Phase validation
   SOUMIS: 'soumis', // Soumis pour validation
@@ -47,14 +46,13 @@ export type StatutWorkflow = (typeof STATUTS_WORKFLOW)[keyof typeof STATUTS_WORK
 // ===== Mapping statuts par table =====
 
 export const STATUTS_PAR_TABLE = {
-  notes_sef: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
-  notes_dg: ['brouillon', 'soumis', 'valide', 'rejete', 'differe', 'impute'] as const,
+  notes_sef: ['soumis', 'valide', 'rejete', 'differe'] as const,
+  notes_dg: ['soumis', 'valide', 'rejete', 'differe', 'impute'] as const,
   imputations: ['en_attente', 'impute', 'rejete', 'differe'] as const,
-  expressions_besoin: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
-  marches: ['brouillon', 'en_cours', 'attribue', 'infructueux', 'annule'] as const,
-  budget_engagements: ['brouillon', 'soumis', 'valide', 'rejete', 'differe'] as const,
+  expressions_besoin: ['soumis', 'valide', 'rejete', 'differe'] as const,
+  marches: ['en_cours', 'attribue', 'infructueux', 'annule'] as const,
+  budget_engagements: ['soumis', 'valide', 'rejete', 'differe'] as const,
   budget_liquidations: [
-    'brouillon',
     'certifié_sf',
     'soumis',
     'validé_daaf',
@@ -76,7 +74,6 @@ export interface StatutConfig {
 }
 
 export const STATUT_CONFIG: Record<string, StatutConfig> = {
-  brouillon: { label: 'Brouillon', color: 'text-gray-600', bgColor: 'bg-gray-100' },
   soumis: { label: 'Soumis', color: 'text-blue-600', bgColor: 'bg-blue-100' },
   en_attente: { label: 'En attente', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
   en_cours: { label: 'En cours', color: 'text-orange-600', bgColor: 'bg-orange-100' },

@@ -70,8 +70,7 @@ const STATUS_CONFIG: Record<
   string,
   { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }
 > = {
-  brouillon: { variant: 'outline', label: 'Brouillon' },
-  soumis: { variant: 'secondary', label: 'Soumis' },
+  soumis: { variant: 'outline', label: 'Soumis' },
   a_valider: { variant: 'default', label: 'À valider' },
   valide: { variant: 'default', label: 'Validé' },
   validé: { variant: 'default', label: 'Validé' },
@@ -85,11 +84,7 @@ const STATUS_CONFIG: Record<
 // COMPOSANT PRINCIPAL
 // ============================================================================
 
-export function TeamNotesView({
-  className,
-  depth = 1,
-  limit = 50,
-}: TeamNotesViewProps) {
+export function TeamNotesView({ className, depth = 1, limit = 50 }: TeamNotesViewProps) {
   const navigate = useNavigate();
   const { userId } = usePermissions();
   const [selectedCollaborator, setSelectedCollaborator] = useState<string>('all');
@@ -104,20 +99,28 @@ export function TeamNotesView({
     queryKey: ['team-members', userId, depth],
     queryFn: async (): Promise<Collaborator[]> => {
       // Essayer d'utiliser la fonction RPC si disponible
-      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)(
-        'get_team_members',
-        { p_supervisor_id: userId, p_depth: depth }
-      );
+      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('get_team_members', {
+        p_supervisor_id: userId,
+        p_depth: depth,
+      });
 
       if (!rpcError && rpcData) {
         return rpcData as Collaborator[];
       }
 
       // Fallback: requête directe si la fonction n'existe pas
-      type ProfileRow = { id: string; last_name: string | null; first_name: string | null; email: string | null; direction_id: string | null };
+      type ProfileRow = {
+        id: string;
+        last_name: string | null;
+        first_name: string | null;
+        email: string | null;
+        direction_id: string | null;
+      };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query = supabase.from('profiles').select('id, last_name, first_name, email, direction_id') as any;
+      const query = supabase
+        .from('profiles')
+        .select('id, last_name, first_name, email, direction_id') as any;
       const { data, error: queryError } = await query.eq('supervisor_id', userId);
 
       if (queryError) {
@@ -153,10 +156,7 @@ export function TeamNotesView({
       if (collaboratorIds.length === 0) return [];
 
       // Filtrer par collaborateur si sélectionné
-      const idsToQuery =
-        selectedCollaborator === 'all'
-          ? collaboratorIds
-          : [selectedCollaborator];
+      const idsToQuery = selectedCollaborator === 'all' ? collaboratorIds : [selectedCollaborator];
 
       const { data, error } = await supabase
         .from('notes_sef')
@@ -186,7 +186,7 @@ export function TeamNotesView({
 
   // Obtenir le badge de statut
   const getStatusBadge = (statut: string | null) => {
-    const key = statut?.toLowerCase() || 'brouillon';
+    const key = statut?.toLowerCase() || 'soumis';
     const config = STATUS_CONFIG[key] || { variant: 'outline' as const, label: statut || '-' };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -200,7 +200,7 @@ export function TeamNotesView({
 
   // Obtenir la référence affichable
   const getReference = (note: TeamNote): string => {
-    return note.numero || note.reference_pivot || 'Brouillon';
+    return note.numero || note.reference_pivot || 'Soumis';
   };
 
   // État de chargement initial
@@ -249,12 +249,9 @@ export function TeamNotesView({
       <Card className={className}>
         <CardContent className="py-12 text-center">
           <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p className="text-gray-500 font-medium">
-            Vous n'avez pas de collaborateurs directs.
-          </p>
+          <p className="text-gray-500 font-medium">Vous n'avez pas de collaborateurs directs.</p>
           <p className="text-sm text-gray-400 mt-2">
-            Les notes de vos N-1 apparaîtront ici lorsque la hiérarchie sera
-            configurée.
+            Les notes de vos N-1 apparaîtront ici lorsque la hiérarchie sera configurée.
           </p>
         </CardContent>
       </Card>
@@ -263,9 +260,8 @@ export function TeamNotesView({
 
   // Compteurs
   const pendingCount =
-    teamNotes?.filter((n) =>
-      ['brouillon', 'soumis', 'a_valider'].includes(n.statut?.toLowerCase() || '')
-    ).length || 0;
+    teamNotes?.filter((n) => ['soumis', 'a_valider'].includes(n.statut?.toLowerCase() || ''))
+      .length || 0;
 
   const totalNotes = teamNotes?.length || 0;
 
@@ -283,17 +279,12 @@ export function TeamNotesView({
         </CardTitle>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={selectedCollaborator}
-            onValueChange={setSelectedCollaborator}
-          >
+          <Select value={selectedCollaborator} onValueChange={setSelectedCollaborator}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrer par collaborateur" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                Tous ({collaborators.length} collaborateurs)
-              </SelectItem>
+              <SelectItem value="all">Tous ({collaborators.length} collaborateurs)</SelectItem>
               {collaborators.map((collab) => (
                 <SelectItem key={collab.id} value={collab.id}>
                   {collab.prenom} {collab.nom}
@@ -340,12 +331,7 @@ export function TeamNotesView({
           <div className="text-center py-8">
             <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-400" />
             <p className="text-red-600">Erreur lors du chargement des notes</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => refetchNotes()}
-            >
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchNotes()}>
               Réessayer
             </Button>
           </div>
@@ -354,11 +340,7 @@ export function TeamNotesView({
             <FileText className="h-8 w-8 mx-auto mb-2 text-gray-300" />
             <p>Aucune note de vos collaborateurs</p>
             {selectedCollaborator !== 'all' && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={() => setSelectedCollaborator('all')}
-              >
+              <Button variant="link" size="sm" onClick={() => setSelectedCollaborator('all')}>
                 Voir toutes les notes
               </Button>
             )}
@@ -373,9 +355,7 @@ export function TeamNotesView({
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="font-medium text-sm">
-                      {getReference(note)}
-                    </span>
+                    <span className="font-medium text-sm">{getReference(note)}</span>
                     {getStatusBadge(note.statut)}
                     <Badge
                       variant="outline"

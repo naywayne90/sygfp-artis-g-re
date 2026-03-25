@@ -800,7 +800,7 @@ describe('fmtDateExport', () => {
 // ===========================================================================
 describe('statutLabel', () => {
   it('traduit brouillon', () => {
-    expect(statutLabel('brouillon')).toBe('Brouillon');
+    expect(statutLabel('brouillon')).toBe('brouillon');
   });
 
   it('traduit soumis', () => {

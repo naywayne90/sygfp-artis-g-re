@@ -69,7 +69,7 @@ export default function NotesDirectionGenerale() {
   // Compteurs
   const counts = {
     total: notes.length,
-    brouillon: notesByStatus.brouillon.length,
+    soumis: notesByStatus.soumis.length,
     soumise_dg: notesByStatus.soumise_dg.length,
     dg_valide: notesByStatus.dg_valide.length,
     dg_rejetee: notesByStatus.dg_rejetee.length,
@@ -83,8 +83,8 @@ export default function NotesDirectionGenerale() {
 
     // Filtrer par onglet
     switch (activeTab) {
-      case 'brouillons':
-        notesToFilter = notesByStatus.brouillon;
+      case 'soumis':
+        notesToFilter = notesByStatus.soumis;
         break;
       case 'soumises':
         notesToFilter = notesByStatus.soumise_dg;
@@ -223,8 +223,8 @@ export default function NotesDirectionGenerale() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Brouillons</p>
-                <p className="text-2xl font-bold text-muted-foreground">{counts.brouillon}</p>
+                <p className="text-sm text-muted-foreground">Soumis</p>
+                <p className="text-2xl font-bold text-muted-foreground">{counts.soumis}</p>
               </div>
               <Edit className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -295,7 +295,7 @@ export default function NotesDirectionGenerale() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
-          <TabsTrigger value="brouillons">Brouillons ({counts.brouillon})</TabsTrigger>
+          <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
           <TabsTrigger value="soumises">Soumises ({counts.soumise_dg})</TabsTrigger>
           <TabsTrigger value="validees">Validées ({counts.dg_valide})</TabsTrigger>
           <TabsTrigger value="rejetees">Rejetées ({counts.dg_rejetee})</TabsTrigger>
@@ -321,10 +321,10 @@ export default function NotesDirectionGenerale() {
           />
         </TabsContent>
 
-        <TabsContent value="brouillons">
+        <TabsContent value="soumis">
           <NoteDGList
             notes={filteredNotes}
-            title="Brouillons"
+            title="Soumis"
             description="Notes en cours de rédaction"
             onView={setViewingNote}
             onEdit={handleEdit}
@@ -333,7 +333,7 @@ export default function NotesDirectionGenerale() {
             onCreate={() => setFormOpen(true)}
             onRetry={refetch}
             isLoading={isLoading}
-            emptyMessage="Aucun brouillon"
+            emptyMessage="Aucun soumis"
           />
         </TabsContent>
 

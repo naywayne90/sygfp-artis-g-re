@@ -104,8 +104,6 @@ interface VisaProfile {
 
 function getStatutBadge(statut: string | null) {
   switch (statut) {
-    case 'brouillon':
-      return <Badge variant="outline">Brouillon</Badge>;
     case 'soumis':
       return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Soumis</Badge>;
     case 'visa_saf':

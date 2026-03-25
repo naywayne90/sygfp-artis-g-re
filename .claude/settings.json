@@ -22,7 +22,19 @@
       "mcp__playwright__browser_wait_for",
       "mcp__playwright__browser_select_option",
       "mcp__playwright__browser_run_code",
-      "mcp__claude_ai_Supabase__execute_sql"
-    ]
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__playwright__browser_console_messages",
+      "Read(//home/angeyannick/sygfp-artis-g-re __NEW_LINE_c1c9ef4128b837fe__ echo === Remaining brouillon in components/pages/services === grep -rl brouillon src/components/ src/pages/ src/**)",
+      "Read(//home/angeyannick/sygfp-artis-g-re/**)",
+      "WebSearch",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(git status:*)",
+      "Bash(while read:*)",
+      "Bash(do git:*)",
+      "Bash(echo \"MODIFIED: $f\")",
+      "Bash(done)",
+      "Bash(for f:*)"
+    ],
+    "additionalDirectories": ["/tmp"]
   }
 }

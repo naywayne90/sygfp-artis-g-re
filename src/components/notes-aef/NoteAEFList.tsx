@@ -68,8 +68,10 @@ interface NoteAEFListProps {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
-    soumis: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     a_valider: { label: 'À valider', className: 'bg-warning/10 text-warning border-warning/20' },
     a_imputer: { label: 'À imputer', className: 'bg-success/10 text-success border-success/20' },
     valide: { label: 'Validé', className: 'bg-success/10 text-success border-success/20' },
@@ -83,7 +85,7 @@ const getStatusBadge = (status: string | null) => {
       className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     },
   };
-  const variant = variants[status || 'brouillon'] || variants.brouillon;
+  const variant = variants[status || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -399,15 +401,15 @@ export function NoteAEFList({
                               </DropdownMenuItem>
                             )}
 
-                            {/* Actions pour BROUILLON */}
-                            {note.statut === 'brouillon' && onEdit && (
+                            {/* Actions pour SOUMIS */}
+                            {note.statut === 'soumis' && onEdit && (
                               <DropdownMenuItem onClick={() => onEdit(note)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
                             )}
 
-                            {note.statut === 'brouillon' && onSubmit && (
+                            {note.statut === 'soumis' && onSubmit && (
                               <DropdownMenuItem onClick={() => onSubmit(note.id)}>
                                 <Send className="mr-2 h-4 w-4" />
                                 Soumettre
@@ -460,8 +462,8 @@ export function NoteAEFList({
                               </>
                             )}
 
-                            {/* Suppression pour brouillons */}
-                            {note.statut === 'brouillon' && onDelete && (
+                            {/* Suppression pour soumis */}
+                            {note.statut === 'soumis' && onDelete && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem

@@ -1,55 +1,96 @@
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  FileSpreadsheet, 
-  Eye, 
-  Download, 
-  RefreshCw, 
-  CheckCircle2, 
-  XCircle, 
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  FileSpreadsheet,
+  Eye,
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
   Clock,
   Loader2,
   Filter,
   History,
   RotateCcw,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useImportJobs, ImportJob, ImportRow } from "@/hooks/useImportJobs";
-import { useExercice } from "@/contexts/ExerciceContext";
-import logoArti from "@/assets/logo-arti.jpg";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useImportJobs, ImportJob, ImportRow } from '@/hooks/useImportJobs';
+import { useExercice } from '@/contexts/ExerciceContext';
+import logoArti from '@/assets/logo-arti.jpg';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  draft: { label: "Brouillon", color: "bg-gray-100 text-gray-800", icon: <Clock className="h-3 w-3" /> },
-  parsed: { label: "Analysé", color: "bg-blue-100 text-blue-800", icon: <FileSpreadsheet className="h-3 w-3" /> },
-  validated: { label: "Validé", color: "bg-purple-100 text-purple-800", icon: <CheckCircle2 className="h-3 w-3" /> },
-  importing: { label: "En cours", color: "bg-yellow-100 text-yellow-800", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
-  completed: { label: "Terminé", color: "bg-green-100 text-green-800", icon: <CheckCircle2 className="h-3 w-3" /> },
-  failed: { label: "Échoué", color: "bg-red-100 text-red-800", icon: <XCircle className="h-3 w-3" /> },
-  rolled_back: { label: "Annulé", color: "bg-orange-100 text-orange-800", icon: <RotateCcw className="h-3 w-3" /> },
+  draft: {
+    label: 'Soumis',
+    color: 'bg-gray-100 text-gray-800',
+    icon: <Clock className="h-3 w-3" />,
+  },
+  parsed: {
+    label: 'Analysé',
+    color: 'bg-blue-100 text-blue-800',
+    icon: <FileSpreadsheet className="h-3 w-3" />,
+  },
+  validated: {
+    label: 'Validé',
+    color: 'bg-purple-100 text-purple-800',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  importing: {
+    label: 'En cours',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: <Loader2 className="h-3 w-3 animate-spin" />,
+  },
+  completed: {
+    label: 'Terminé',
+    color: 'bg-green-100 text-green-800',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  failed: {
+    label: 'Échoué',
+    color: 'bg-red-100 text-red-800',
+    icon: <XCircle className="h-3 w-3" />,
+  },
+  rolled_back: {
+    label: 'Annulé',
+    color: 'bg-orange-100 text-orange-800',
+    icon: <RotateCcw className="h-3 w-3" />,
+  },
 };
 
 export default function HistoriqueImports() {
   const { exercice: _exercice } = useExercice();
   const { fetchAllJobs, fetchImportRows, exportErrors, retryImport } = useImportJobs();
-  
+
   const [jobs, setJobs] = useState<ImportJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filterExercice, setFilterExercice] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  
+  const [filterExercice, setFilterExercice] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+
   // Detail dialog
   const [selectedJob, setSelectedJob] = useState<ImportJob | null>(null);
   const [detailRows, setDetailRows] = useState<ImportRow[]>([]);
-  const [detailTab, setDetailTab] = useState<"summary" | "rows" | "errors">("summary");
+  const [detailTab, setDetailTab] = useState<'summary' | 'rows' | 'errors'>('summary');
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
   // Fetch jobs
@@ -57,10 +98,10 @@ export default function HistoriqueImports() {
     setIsLoading(true);
     try {
       const options: Parameters<typeof fetchAllJobs>[0] = {};
-      if (filterExercice !== "all") {
+      if (filterExercice !== 'all') {
         options.exercice = Number(filterExercice);
       }
-      if (filterStatus !== "all") {
+      if (filterStatus !== 'all') {
         options.status = filterStatus;
       }
       const data = await fetchAllJobs(options);
@@ -77,9 +118,9 @@ export default function HistoriqueImports() {
   // View job details
   const handleViewDetails = async (job: ImportJob) => {
     setSelectedJob(job);
-    setDetailTab("summary");
+    setDetailTab('summary');
     setIsLoadingDetail(true);
-    
+
     try {
       const { rows } = await fetchImportRows(job.id, { limit: 200 });
       setDetailRows(rows);
@@ -107,9 +148,11 @@ export default function HistoriqueImports() {
 
   // Stats
   const statsTotal = jobs.length;
-  const statsCompleted = jobs.filter(j => j.status === "completed").length;
-  const statsFailed = jobs.filter(j => j.status === "failed").length;
-  const statsPending = jobs.filter(j => ["draft", "parsed", "validated", "importing"].includes(j.status)).length;
+  const statsCompleted = jobs.filter((j) => j.status === 'completed').length;
+  const statsFailed = jobs.filter((j) => j.status === 'failed').length;
+  const statsPending = jobs.filter((j) =>
+    ['draft', 'parsed', 'validated', 'importing'].includes(j.status)
+  ).length;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -128,7 +171,7 @@ export default function HistoriqueImports() {
           </div>
         </div>
         <Button variant="outline" onClick={loadJobs} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
           Actualiser
         </Button>
       </div>
@@ -178,7 +221,7 @@ export default function HistoriqueImports() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les exercices</SelectItem>
-                  {availableYears.map(year => (
+                  {availableYears.map((year) => (
                     <SelectItem key={year} value={String(year)}>
                       Exercice {year}
                     </SelectItem>
@@ -195,7 +238,7 @@ export default function HistoriqueImports() {
                   <SelectItem value="all">Tous les statuts</SelectItem>
                   <SelectItem value="completed">Terminés</SelectItem>
                   <SelectItem value="failed">Échoués</SelectItem>
-                  <SelectItem value="draft">Brouillons</SelectItem>
+                  <SelectItem value="draft">Soumis</SelectItem>
                   <SelectItem value="importing">En cours</SelectItem>
                 </SelectContent>
               </Select>
@@ -243,17 +286,17 @@ export default function HistoriqueImports() {
                   return (
                     <TableRow key={job.id}>
                       <TableCell className="font-mono text-sm">
-                        {format(new Date(job.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                        {format(new Date(job.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{job.exercice_id || "—"}</Badge>
+                        <Badge variant="outline">{job.exercice_id || '—'}</Badge>
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate" title={job.filename}>
                         {job.filename}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="capitalize">
-                          {job.module?.replace(/_/g, " ") || "budget"}
+                          {job.module?.replace(/_/g, ' ') || 'budget'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -273,20 +316,12 @@ export default function HistoriqueImports() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(job)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleViewDetails(job)}>
                             <Eye className="h-4 w-4 mr-1" />
                             Détails
                           </Button>
-                          {job.status === "failed" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRetry(job)}
-                            >
+                          {job.status === 'failed' && (
+                            <Button variant="ghost" size="sm" onClick={() => handleRetry(job)}>
                               <RotateCcw className="h-4 w-4 mr-1" />
                               Rejouer
                             </Button>
@@ -313,12 +348,16 @@ export default function HistoriqueImports() {
           </DialogHeader>
 
           {selectedJob && (
-            <Tabs value={detailTab} onValueChange={(v) => setDetailTab(v as typeof detailTab)} className="flex-1 flex flex-col overflow-hidden">
+            <Tabs
+              value={detailTab}
+              onValueChange={(v) => setDetailTab(v as typeof detailTab)}
+              className="flex-1 flex flex-col overflow-hidden"
+            >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="summary">Résumé</TabsTrigger>
                 <TabsTrigger value="rows">Lignes ({detailRows.length})</TabsTrigger>
                 <TabsTrigger value="errors">
-                  Erreurs ({detailRows.filter(r => r.status === "error").length})
+                  Erreurs ({detailRows.filter((r) => r.status === 'error').length})
                 </TabsTrigger>
               </TabsList>
 
@@ -340,7 +379,11 @@ export default function HistoriqueImports() {
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Date d'import</span>
-                        <span>{format(new Date(selectedJob.created_at), "dd MMMM yyyy à HH:mm", { locale: fr })}</span>
+                        <span>
+                          {format(new Date(selectedJob.created_at), 'dd MMMM yyyy à HH:mm', {
+                            locale: fr,
+                          })}
+                        </span>
                       </div>
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Statut</span>
@@ -351,7 +394,11 @@ export default function HistoriqueImports() {
                       {selectedJob.completed_at && (
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Terminé le</span>
-                          <span>{format(new Date(selectedJob.completed_at), "dd MMMM yyyy à HH:mm", { locale: fr })}</span>
+                          <span>
+                            {format(new Date(selectedJob.completed_at), 'dd MMMM yyyy à HH:mm', {
+                              locale: fr,
+                            })}
+                          </span>
                         </div>
                       )}
                       {selectedJob.notes && (
@@ -370,19 +417,27 @@ export default function HistoriqueImports() {
                     <CardContent>
                       <div className="grid grid-cols-4 gap-4 text-center">
                         <div>
-                          <div className="text-2xl font-bold">{selectedJob.stats?.rows_total || 0}</div>
+                          <div className="text-2xl font-bold">
+                            {selectedJob.stats?.rows_total || 0}
+                          </div>
                           <div className="text-sm text-muted-foreground">Total</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-green-600">{selectedJob.stats?.rows_new || 0}</div>
+                          <div className="text-2xl font-bold text-green-600">
+                            {selectedJob.stats?.rows_new || 0}
+                          </div>
                           <div className="text-sm text-muted-foreground">Nouvelles</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-blue-600">{selectedJob.stats?.rows_update || 0}</div>
+                          <div className="text-2xl font-bold text-blue-600">
+                            {selectedJob.stats?.rows_update || 0}
+                          </div>
                           <div className="text-sm text-muted-foreground">Mises à jour</div>
                         </div>
                         <div>
-                          <div className="text-2xl font-bold text-red-600">{selectedJob.stats?.rows_error || 0}</div>
+                          <div className="text-2xl font-bold text-red-600">
+                            {selectedJob.stats?.rows_error || 0}
+                          </div>
                           <div className="text-sm text-muted-foreground">Erreurs</div>
                         </div>
                       </div>
@@ -396,7 +451,7 @@ export default function HistoriqueImports() {
                         Exporter erreurs (CSV)
                       </Button>
                     )}
-                    {selectedJob.status === "failed" && (
+                    {selectedJob.status === 'failed' && (
                       <Button variant="outline" onClick={() => handleRetry(selectedJob)}>
                         <RotateCcw className="h-4 w-4 mr-2" />
                         Rejouer l'import
@@ -424,10 +479,21 @@ export default function HistoriqueImports() {
                       </TableHeader>
                       <TableBody>
                         {detailRows.slice(0, 100).map((row) => (
-                          <TableRow key={row.id} className={row.status === "error" ? "bg-red-50/50" : ""}>
+                          <TableRow
+                            key={row.id}
+                            className={row.status === 'error' ? 'bg-red-50/50' : ''}
+                          >
                             <TableCell className="font-mono text-xs">{row.row_index}</TableCell>
                             <TableCell>
-                              <Badge variant={row.status === "error" ? "destructive" : row.status === "imported" ? "default" : "secondary"}>
+                              <Badge
+                                variant={
+                                  row.status === 'error'
+                                    ? 'destructive'
+                                    : row.status === 'imported'
+                                      ? 'default'
+                                      : 'secondary'
+                                }
+                              >
                                 {row.status}
                               </Badge>
                             </TableCell>
@@ -454,22 +520,22 @@ export default function HistoriqueImports() {
                   </div>
                 ) : (
                   <ScrollArea className="h-[400px]">
-                    {detailRows.filter(r => r.status === "error").length === 0 ? (
+                    {detailRows.filter((r) => r.status === 'error').length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground">
                         <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500" />
                         <p>Aucune erreur</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {detailRows.filter(r => r.status === "error").map((row) => (
-                          <Alert key={row.id} variant="destructive">
-                            <XCircle className="h-4 w-4" />
-                            <AlertTitle>Ligne {row.row_index}</AlertTitle>
-                            <AlertDescription>
-                              {row.error_messages.join("; ")}
-                            </AlertDescription>
-                          </Alert>
-                        ))}
+                        {detailRows
+                          .filter((r) => r.status === 'error')
+                          .map((row) => (
+                            <Alert key={row.id} variant="destructive">
+                              <XCircle className="h-4 w-4" />
+                              <AlertTitle>Ligne {row.row_index}</AlertTitle>
+                              <AlertDescription>{row.error_messages.join('; ')}</AlertDescription>
+                            </Alert>
+                          ))}
                       </div>
                     )}
                   </ScrollArea>

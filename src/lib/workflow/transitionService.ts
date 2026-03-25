@@ -1,11 +1,11 @@
 /**
  * Service de gestion des transitions de workflow
- * 
+ *
  * Gère les transitions de statut avec vérification des droits,
  * validation des conditions et journalisation complète.
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 // ===== Types =====
 
@@ -57,7 +57,7 @@ export interface TransitionPayload {
 
 // ===== Modules supportés =====
 
-export type WorkflowModule = 
+export type WorkflowModule =
   | 'notes_sef'
   | 'notes_dg'
   | 'expressions_besoin'
@@ -90,10 +90,7 @@ export const WORKFLOW_ACTIONS = {
  * Récupère tous les statuts configurés
  */
 export async function getAllStatuses(): Promise<WorkflowStatus[]> {
-  const { data, error } = await supabase
-    .from('workflow_statuses')
-    .select('*')
-    .order('ordre');
+  const { data, error } = await supabase.from('workflow_statuses').select('*').order('ordre');
 
   if (error) {
     console.error('Erreur chargement statuts:', error);
@@ -204,13 +201,13 @@ export async function executeTransition(
 export async function transitionEntity(
   module: WorkflowModule,
   tableName: string,
-  payload: TransitionPayload & { 
+  payload: TransitionPayload & {
     additionalUpdates?: Record<string, unknown>;
   }
 ): Promise<TransitionResult> {
   // 1. Vérifier et logger la transition
   const transitionResult = await executeTransition(module, payload);
-  
+
   if (!transitionResult.success) {
     return transitionResult;
   }
@@ -227,7 +224,7 @@ export async function transitionEntity(
     updates.date_differe = new Date().toISOString();
     updates.differe_by = (await supabase.auth.getUser()).data.user?.id;
   }
-  
+
   if (payload.toStatus === 'rejete' && payload.motif) {
     updates.rejection_reason = payload.motif;
     updates.rejected_at = new Date().toISOString();
@@ -239,7 +236,7 @@ export async function transitionEntity(
     updates.validated_by = (await supabase.auth.getUser()).data.user?.id;
   }
 
-  if (payload.toStatus === 'soumis' && payload.fromStatus === 'brouillon') {
+  if (payload.toStatus === 'soumis' && (!payload.fromStatus || payload.fromStatus === 'soumis')) {
     updates.submitted_at = new Date().toISOString();
     updates.submitted_by = (await supabase.auth.getUser()).data.user?.id;
   }
@@ -252,10 +249,10 @@ export async function transitionEntity(
 
   if (updateError) {
     console.error('Erreur mise à jour entité:', updateError);
-    return { 
-      success: false, 
-      actionCode: transitionResult.actionCode, 
-      message: `Transition loguée mais erreur mise à jour: ${updateError.message}` 
+    return {
+      success: false,
+      actionCode: transitionResult.actionCode,
+      message: `Transition loguée mais erreur mise à jour: ${updateError.message}`,
     };
   }
 
@@ -300,11 +297,16 @@ export const workflowActions = {
     transitionEntity(module, getTableName(module), {
       entityId,
       entityCode,
-      fromStatus: 'brouillon',
+      fromStatus: 'soumis',
       toStatus: 'soumis',
     }),
 
-  validate: (module: WorkflowModule, entityId: string, fromStatus = 'soumis', entityCode?: string) =>
+  validate: (
+    module: WorkflowModule,
+    entityId: string,
+    fromStatus = 'soumis',
+    entityCode?: string
+  ) =>
     transitionEntity(module, getTableName(module), {
       entityId,
       entityCode,
@@ -312,7 +314,13 @@ export const workflowActions = {
       toStatus: 'valide',
     }),
 
-  reject: (module: WorkflowModule, entityId: string, motif: string, fromStatus = 'soumis', entityCode?: string) =>
+  reject: (
+    module: WorkflowModule,
+    entityId: string,
+    motif: string,
+    fromStatus = 'soumis',
+    entityCode?: string
+  ) =>
     transitionEntity(module, getTableName(module), {
       entityId,
       entityCode,
@@ -321,7 +329,13 @@ export const workflowActions = {
       motif,
     }),
 
-  defer: (module: WorkflowModule, entityId: string, motif: string, fromStatus = 'soumis', entityCode?: string) =>
+  defer: (
+    module: WorkflowModule,
+    entityId: string,
+    motif: string,
+    fromStatus = 'soumis',
+    entityCode?: string
+  ) =>
     transitionEntity(module, getTableName(module), {
       entityId,
       entityCode,

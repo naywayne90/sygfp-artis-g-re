@@ -138,11 +138,11 @@ export function WorkflowGuidancePanel({
       };
     }
 
-    // En brouillon
-    if (currentStatus === 'brouillon') {
+    // En soumis
+    if (currentStatus === 'soumis') {
       return {
         type: 'info' as const,
-        title: 'Brouillon',
+        title: 'Soumis',
         message: 'Cet élément est en cours de rédaction.',
         suggestion: 'Complétez toutes les informations requises puis soumettez pour validation.',
         actionLabel: 'Soumettre',

@@ -15,12 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,10 +38,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import type { NoteSEFEntity } from '@/lib/notes-sef/types';
-import {
-  STATUT_LABELS,
-  STATUT_BADGE_VARIANTS,
-} from '@/lib/notes-sef/constants';
+import { STATUT_LABELS, STATUT_BADGE_VARIANTS } from '@/lib/notes-sef/constants';
 import { ValidationButtons } from '@/components/validation';
 
 interface NotesSEFTableProps {
@@ -60,13 +52,7 @@ type SortKey = 'reference' | 'objet' | 'direction' | 'montant' | 'statut' | 'cre
 type SortOrder = 'asc' | 'desc';
 
 // Tronquer le texte avec tooltip
-function TruncatedText({
-  text,
-  maxLength = 100,
-}: {
-  text: string | null;
-  maxLength?: number;
-}) {
+function TruncatedText({ text, maxLength = 100 }: { text: string | null; maxLength?: number }) {
   if (!text) return <span className="text-muted-foreground">—</span>;
 
   if (text.length <= maxLength) {
@@ -100,25 +86,37 @@ function StatutBadge({ statut }: { statut: string | null }) {
   const config = STATUT_BADGE_VARIANTS[statut as keyof typeof STATUT_BADGE_VARIANTS];
   const label = STATUT_LABELS[statut as keyof typeof STATUT_LABELS] || statut;
 
-  return (
-    <Badge className={cn('font-medium', config?.className || 'bg-muted')}>
-      {label}
-    </Badge>
-  );
+  return <Badge className={cn('font-medium', config?.className || 'bg-muted')}>{label}</Badge>;
 }
 
 // Skeleton de ligne
 function TableRowSkeleton() {
   return (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-      <TableCell><Skeleton className="h-6 w-28" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-8" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-6 w-28" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-48" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-6 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-32" />
+      </TableCell>
     </TableRow>
   );
 }
@@ -250,9 +248,7 @@ export function NotesSEFTable({
                 className="hover:bg-muted/30 cursor-pointer"
                 onClick={() => navigate(`/notes-sef/${note.id}`)}
               >
-                <TableCell className="font-medium text-muted-foreground">
-                  {index + 1}
-                </TableCell>
+                <TableCell className="font-medium text-muted-foreground">{index + 1}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="font-mono">
                     {note.reference_pivot || note.numero || '—'}
@@ -280,7 +276,7 @@ export function NotesSEFTable({
                     <ValidationButtons
                       entityType="notes_sef"
                       entityId={note.id}
-                      currentStatus={note.statut || 'brouillon'}
+                      currentStatus={note.statut || 'soumis'}
                       onSuccess={onRefresh}
                       size="sm"
                     />

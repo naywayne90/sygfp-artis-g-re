@@ -609,7 +609,7 @@ export async function generateNoteDGPdf(options: GeneratePdfOptions): Promise<Pd
 
   // Ajouter métadonnées
   doc.setProperties({
-    title: `Note DG - ${note.reference || 'Brouillon'}`,
+    title: `Note DG - ${note.reference || 'Soumis'}`,
     subject: note.objet || '',
     author: 'ARTI - SYGFP',
     creator: 'SYGFP - Système de Gestion des Finances Publiques',

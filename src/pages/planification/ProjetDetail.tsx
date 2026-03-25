@@ -292,7 +292,7 @@ export default function ProjetDetail() {
             <Pencil className="h-4 w-4 mr-2" />
             Modifier
           </Button>
-          {plan.statut === 'brouillon' && (
+          {plan.statut === 'soumis' && (
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleSoumettre}>
               <Send className="h-4 w-4 mr-2" />
               Soumettre

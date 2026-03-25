@@ -58,7 +58,7 @@ const formatCurrency = (amount: number) =>
   }).format(amount) + ' FCFA';
 
 const STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  brouillon: 'secondary',
+  soumis: 'secondary',
   valide: 'default',
   en_cours: 'default',
   cloture: 'outline',
@@ -142,7 +142,7 @@ export default function ProjetsList() {
     date_debut: '',
     date_fin: '',
     budget_alloue: 0,
-    statut: 'brouillon' as PlanTravailStatut,
+    statut: 'soumis' as PlanTravailStatut,
   });
 
   const stats = useMemo(
@@ -221,7 +221,7 @@ export default function ProjetsList() {
       date_debut: '',
       date_fin: '',
       budget_alloue: 0,
-      statut: 'brouillon',
+      statut: 'soumis',
     });
     setFormOpen(true);
   };
@@ -400,7 +400,7 @@ export default function ProjetsList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="brouillon">Brouillon</SelectItem>
+            <SelectItem value="soumis">Soumis</SelectItem>
             <SelectItem value="valide">Valide</SelectItem>
             <SelectItem value="en_cours">En cours</SelectItem>
             <SelectItem value="cloture">Cloture</SelectItem>
@@ -547,7 +547,7 @@ export default function ProjetsList() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="brouillon">Brouillon</SelectItem>
+                    <SelectItem value="soumis">Soumis</SelectItem>
                     <SelectItem value="valide">Valide</SelectItem>
                     <SelectItem value="en_cours">En cours</SelectItem>
                     <SelectItem value="cloture">Cloture</SelectItem>

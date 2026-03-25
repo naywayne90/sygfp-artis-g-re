@@ -201,7 +201,7 @@ export default function ScanningEngagement() {
         `
         )
         .eq('exercice', exercice)
-        .in('statut', ['brouillon', 'soumis'])
+        .eq('statut', 'soumis')
         .order('created_at', { ascending: false });
 
       if (engError) throw engError;
@@ -357,8 +357,7 @@ export default function ScanningEngagement() {
     });
   }, [engagements, searchQuery, selectedDirection, selectedActivite, selectedStatus]);
 
-  // Separate brouillon and soumis
-  const brouillonEngagements = filteredEngagements.filter((e) => e.statut === 'brouillon');
+  // Filter soumis engagements
   const soumisEngagements = filteredEngagements.filter((e) => e.statut === 'soumis');
 
   // Stats
@@ -567,134 +566,20 @@ export default function ScanningEngagement() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="brouillon" className="space-y-4">
+      <Tabs defaultValue="soumis" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="brouillon" className="gap-1">
-            À scanner ({brouillonEngagements.length})
-          </TabsTrigger>
           <TabsTrigger value="soumis" className="gap-1">
-            Soumis ({soumisEngagements.length})
+            À scanner ({soumisEngagements.length})
           </TabsTrigger>
         </TabsList>
-
-        {/* Brouillon tab */}
-        <TabsContent value="brouillon">
-          <Card>
-            <CardHeader>
-              <CardTitle>Engagements à numériser</CardTitle>
-              <CardDescription>
-                {brouillonEngagements.length} engagement(s) en attente de documents
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : brouillonEngagements.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <ScanLine className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun engagement à numériser</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Numéro</TableHead>
-                      <TableHead>Objet</TableHead>
-                      <TableHead>Fournisseur</TableHead>
-                      <TableHead>Direction</TableHead>
-                      <TableHead className="text-right">Dotation</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
-                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
-                      <TableHead className="text-center">Documents</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {brouillonEngagements.map((eng) => (
-                      <TableRow key={eng.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-mono text-sm">{eng.numero}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {format(new Date(eng.date_engagement), 'dd/MM/yyyy', { locale: fr })}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[200px] truncate">{eng.objet || '-'}</TableCell>
-                        <TableCell>{eng.fournisseur || '-'}</TableCell>
-                        <TableCell>
-                          {eng.direction_code ? (
-                            <Badge variant="outline">{eng.direction_code}</Badge>
-                          ) : (
-                            '-'
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {formatCurrency(eng.dotation_initiale)}
-                        </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
-                          {formatCurrency(eng.cumul_engagements)}
-                        </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell">
-                          <span
-                            className={
-                              eng.disponible < 0
-                                ? 'text-destructive font-medium'
-                                : 'text-muted-foreground'
-                            }
-                          >
-                            {formatCurrency(eng.disponible)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(eng.montant)}
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.activite_code || '-'}
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.os_code || '-'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {getDocumentStatusBadge(
-                            eng.documents_provided,
-                            eng.documents_count,
-                            eng.documents_obligatory_provided,
-                            eng.documents_obligatory
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => handleOpenDetail(eng)}
-                          >
-                            <Upload className="h-4 w-4" />
-                            Scanner
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Soumis tab */}
         <TabsContent value="soumis">
           <Card>
             <CardHeader>
-              <CardTitle>Engagements soumis</CardTitle>
+              <CardTitle>Engagements à numériser</CardTitle>
               <CardDescription>
-                {soumisEngagements.length} engagement(s) soumis pour validation
+                {soumisEngagements.length} engagement(s) en attente de documents
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -704,8 +589,8 @@ export default function ScanningEngagement() {
                 </div>
               ) : soumisEngagements.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <Send className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucun engagement soumis</p>
+                  <ScanLine className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Aucun engagement à numériser</p>
                 </div>
               ) : (
                 <Table>
@@ -780,8 +665,14 @@ export default function ScanningEngagement() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" variant="ghost" onClick={() => handleOpenDetail(eng)}>
-                            <Eye className="h-4 w-4" />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1"
+                            onClick={() => handleOpenDetail(eng)}
+                          >
+                            <Upload className="h-4 w-4" />
+                            Scanner
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -834,7 +725,7 @@ export default function ScanningEngagement() {
               {/* Checklist */}
               <EngagementChecklist
                 engagementId={selectedEngagement.id}
-                canEdit={selectedEngagement.statut === 'brouillon'}
+                canEdit={selectedEngagement.statut === 'soumis'}
                 showProgress={true}
                 onCompletenessChange={handleChecklistChange}
                 blockSubmitIfIncomplete={true}
@@ -846,7 +737,7 @@ export default function ScanningEngagement() {
             <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
               Fermer
             </Button>
-            {selectedEngagement?.statut === 'brouillon' && (
+            {selectedEngagement?.statut === 'soumis' && (
               <Button
                 onClick={handleSubmit}
                 disabled={!isChecklistComplete || submitMutation.isPending}

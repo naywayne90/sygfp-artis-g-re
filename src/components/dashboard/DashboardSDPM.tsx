@@ -1,15 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useSDPMDashboard } from "@/hooks/useDashboardByRole";
-import { 
-  ShoppingCart, 
-  FileText, 
-  Clock, 
-  Users, 
-  ArrowRight
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useSDPMDashboard } from '@/hooks/useDashboardByRole';
+import { ShoppingCart, FileText, Clock, Users, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const formatMontant = (montant: number): string => {
   if (montant >= 1_000_000_000) return `${(montant / 1_000_000_000).toFixed(1)} Mds`;
@@ -25,9 +19,15 @@ export function DashboardSDPM() {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i}><CardContent className="p-6"><Skeleton className="h-20" /></CardContent></Card>
-          ))}
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-20" />
+                </CardContent>
+              </Card>
+            ))}
         </div>
       </div>
     );
@@ -99,17 +99,19 @@ export function DashboardSDPM() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Brouillons</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.marchesBrouillon || 0}</div>
+            <div className="text-2xl font-bold">{stats?.marchesSoumis || 0}</div>
             <p className="text-xs text-muted-foreground">En préparation</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">En validation</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              En validation
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">{stats?.marchesEnValidation || 0}</div>
@@ -119,7 +121,9 @@ export function DashboardSDPM() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Validés/Signés</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Validés/Signés
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{stats?.marchesValides || 0}</div>
@@ -129,10 +133,14 @@ export function DashboardSDPM() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Montant total</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Montant total
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatMontant(stats?.marchesMontantTotal || 0)}</div>
+            <div className="text-2xl font-bold">
+              {formatMontant(stats?.marchesMontantTotal || 0)}
+            </div>
             <p className="text-xs text-muted-foreground">FCFA</p>
           </CardContent>
         </Card>
@@ -175,12 +183,21 @@ export function DashboardSDPM() {
           <CardContent>
             <div className="space-y-3">
               {stats?.topFournisseurs.map((fournisseur, index) => (
-                <div key={fournisseur.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                <div
+                  key={fournisseur.id}
+                  className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50"
+                >
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-muted-foreground w-4">{index + 1}.</span>
+                    <span className="text-sm font-medium text-muted-foreground w-4">
+                      {index + 1}.
+                    </span>
                     <div>
-                      <p className="font-medium text-sm truncate max-w-[200px]">{fournisseur.nom}</p>
-                      <p className="text-xs text-muted-foreground">{fournisseur.nombreMarches} marché(s)</p>
+                      <p className="font-medium text-sm truncate max-w-[200px]">
+                        {fournisseur.nom}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {fournisseur.nombreMarches} marché(s)
+                      </p>
                     </div>
                   </div>
                   <span className="font-medium">{formatMontant(fournisseur.montantTotal)}</span>

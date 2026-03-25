@@ -1,22 +1,22 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -24,14 +24,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useContrats, useContratAvenants, TYPES_AVENANT, STATUTS_CONTRAT, Contrat, Avenant } from "@/hooks/useContrats";
-import { Plus, FileText, History } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  useContrats,
+  useContratAvenants,
+  TYPES_AVENANT,
+  STATUTS_CONTRAT,
+  Contrat,
+  Avenant,
+} from '@/hooks/useContrats';
+import { Plus, FileText, History } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ContratDetailsProps {
   open: boolean;
@@ -40,31 +47,36 @@ interface ContratDetailsProps {
   prestataireName: string;
 }
 
-export function ContratDetails({ open, onOpenChange, contrat, prestataireName }: ContratDetailsProps) {
+export function ContratDetails({
+  open,
+  onOpenChange,
+  contrat,
+  prestataireName,
+}: ContratDetailsProps) {
   const { createAvenant } = useContrats();
   const avenants = useContratAvenants(contrat?.id ?? null);
   const [avenantOpen, setAvenantOpen] = useState(false);
   const [avenantForm, setAvenantForm] = useState({
-    objet: "",
-    type_avenant: "",
+    objet: '',
+    type_avenant: '',
     montant_modification: 0,
     nouveau_montant: 0,
     nouveau_delai: 0,
-    nouvelle_date_fin: "",
-    date_signature: "",
-    statut: "brouillon",
+    nouvelle_date_fin: '',
+    date_signature: '',
+    statut: 'soumis',
   });
 
   const resetAvenantForm = () => {
     setAvenantForm({
-      objet: "",
-      type_avenant: "",
+      objet: '',
+      type_avenant: '',
       montant_modification: 0,
       nouveau_montant: contrat?.montant_actuel || contrat?.montant_initial || 0,
       nouveau_delai: 0,
-      nouvelle_date_fin: "",
-      date_signature: "",
-      statut: "brouillon",
+      nouvelle_date_fin: '',
+      date_signature: '',
+      statut: 'soumis',
     });
   };
 
@@ -83,12 +95,12 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
   };
 
   const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
   const getStatutBadge = (statut: string) => {
-    const s = STATUTS_CONTRAT.find(x => x.value === statut);
-    return <Badge className={s?.color || ""}>{s?.label || statut}</Badge>;
+    const s = STATUTS_CONTRAT.find((x) => x.value === statut);
+    return <Badge className={s?.color || ''}>{s?.label || statut}</Badge>;
   };
 
   if (!contrat) return null;
@@ -106,9 +118,7 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
         <Tabs defaultValue="details">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="details">Détails</TabsTrigger>
-            <TabsTrigger value="avenants">
-              Avenants ({avenants.data?.length || 0})
-            </TabsTrigger>
+            <TabsTrigger value="avenants">Avenants ({avenants.data?.length || 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-4 mt-4">
@@ -135,36 +145,54 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
               </div>
               <div>
                 <Label className="text-muted-foreground">Montant actuel</Label>
-                <p className="font-medium text-primary">{formatMontant(contrat.montant_actuel || contrat.montant_initial)}</p>
+                <p className="font-medium text-primary">
+                  {formatMontant(contrat.montant_actuel || contrat.montant_initial)}
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Date de signature</Label>
-                <p>{contrat.date_signature ? format(new Date(contrat.date_signature), "dd MMMM yyyy", { locale: fr }) : "-"}</p>
+                <p>
+                  {contrat.date_signature
+                    ? format(new Date(contrat.date_signature), 'dd MMMM yyyy', { locale: fr })
+                    : '-'}
+                </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Date de notification</Label>
-                <p>{contrat.date_notification ? format(new Date(contrat.date_notification), "dd MMMM yyyy", { locale: fr }) : "-"}</p>
+                <p>
+                  {contrat.date_notification
+                    ? format(new Date(contrat.date_notification), 'dd MMMM yyyy', { locale: fr })
+                    : '-'}
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Date début</Label>
-                <p>{contrat.date_debut ? format(new Date(contrat.date_debut), "dd MMMM yyyy", { locale: fr }) : "-"}</p>
+                <p>
+                  {contrat.date_debut
+                    ? format(new Date(contrat.date_debut), 'dd MMMM yyyy', { locale: fr })
+                    : '-'}
+                </p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Date fin</Label>
-                <p>{contrat.date_fin ? format(new Date(contrat.date_fin), "dd MMMM yyyy", { locale: fr }) : "-"}</p>
+                <p>
+                  {contrat.date_fin
+                    ? format(new Date(contrat.date_fin), 'dd MMMM yyyy', { locale: fr })
+                    : '-'}
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-muted-foreground">Délai d'exécution</Label>
-                <p>{contrat.delai_execution ? `${contrat.delai_execution} jours` : "-"}</p>
+                <p>{contrat.delai_execution ? `${contrat.delai_execution} jours` : '-'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Statut</Label>
@@ -180,7 +208,13 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                   <History className="h-4 w-4" />
                   Historique des avenants
                 </CardTitle>
-                <Button size="sm" onClick={() => { resetAvenantForm(); setAvenantOpen(true); }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    resetAvenantForm();
+                    setAvenantOpen(true);
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-1" />
                   Nouvel avenant
                 </Button>
@@ -208,10 +242,10 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                           <TableCell>{avenant.type_avenant}</TableCell>
                           <TableCell className="max-w-[200px] truncate">{avenant.objet}</TableCell>
                           <TableCell className="text-right">
-                            {avenant.nouveau_montant ? formatMontant(avenant.nouveau_montant) : "-"}
+                            {avenant.nouveau_montant ? formatMontant(avenant.nouveau_montant) : '-'}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={avenant.statut === "signe" ? "default" : "secondary"}>
+                            <Badge variant={avenant.statut === 'signe' ? 'default' : 'secondary'}>
                               {avenant.statut}
                             </Badge>
                           </TableCell>
@@ -234,13 +268,18 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label>Type d'avenant *</Label>
-                <Select value={avenantForm.type_avenant} onValueChange={(v) => setAvenantForm({ ...avenantForm, type_avenant: v })}>
+                <Select
+                  value={avenantForm.type_avenant}
+                  onValueChange={(v) => setAvenantForm({ ...avenantForm, type_avenant: v })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner..." />
                   </SelectTrigger>
                   <SelectContent>
                     {TYPES_AVENANT.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -262,10 +301,11 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                     value={avenantForm.montant_modification}
                     onChange={(e) => {
                       const mod = Number(e.target.value);
-                      setAvenantForm({ 
-                        ...avenantForm, 
+                      setAvenantForm({
+                        ...avenantForm,
                         montant_modification: mod,
-                        nouveau_montant: (contrat?.montant_actuel || contrat?.montant_initial || 0) + mod,
+                        nouveau_montant:
+                          (contrat?.montant_actuel || contrat?.montant_initial || 0) + mod,
                       });
                     }}
                     placeholder="+/- montant"
@@ -276,7 +316,9 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                   <Input
                     type="number"
                     value={avenantForm.nouveau_montant}
-                    onChange={(e) => setAvenantForm({ ...avenantForm, nouveau_montant: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setAvenantForm({ ...avenantForm, nouveau_montant: Number(e.target.value) })
+                    }
                   />
                 </div>
               </div>
@@ -286,7 +328,9 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                   <Input
                     type="number"
                     value={avenantForm.nouveau_delai}
-                    onChange={(e) => setAvenantForm({ ...avenantForm, nouveau_delai: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setAvenantForm({ ...avenantForm, nouveau_delai: Number(e.target.value) })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -294,7 +338,9 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                   <Input
                     type="date"
                     value={avenantForm.nouvelle_date_fin}
-                    onChange={(e) => setAvenantForm({ ...avenantForm, nouvelle_date_fin: e.target.value })}
+                    onChange={(e) =>
+                      setAvenantForm({ ...avenantForm, nouvelle_date_fin: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -304,17 +350,22 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
                   <Input
                     type="date"
                     value={avenantForm.date_signature}
-                    onChange={(e) => setAvenantForm({ ...avenantForm, date_signature: e.target.value })}
+                    onChange={(e) =>
+                      setAvenantForm({ ...avenantForm, date_signature: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Statut</Label>
-                  <Select value={avenantForm.statut} onValueChange={(v) => setAvenantForm({ ...avenantForm, statut: v })}>
+                  <Select
+                    value={avenantForm.statut}
+                    onValueChange={(v) => setAvenantForm({ ...avenantForm, statut: v })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="brouillon">Brouillon</SelectItem>
+                      <SelectItem value="soumis">Soumis</SelectItem>
                       <SelectItem value="en_negociation">En négociation</SelectItem>
                       <SelectItem value="signe">Signé</SelectItem>
                     </SelectContent>
@@ -326,7 +377,10 @@ export function ContratDetails({ open, onOpenChange, contrat, prestataireName }:
               <Button variant="outline" onClick={() => setAvenantOpen(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleCreateAvenant} disabled={!avenantForm.type_avenant || !avenantForm.objet}>
+              <Button
+                onClick={handleCreateAvenant}
+                disabled={!avenantForm.type_avenant || !avenantForm.objet}
+              >
                 Créer l'avenant
               </Button>
             </DialogFooter>

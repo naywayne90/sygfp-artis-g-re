@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   FileText,
   ShoppingCart,
@@ -11,7 +11,7 @@ import {
   Clock,
   XCircle,
   ArrowRight,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface EtapeInfo {
   id: string | null;
@@ -33,32 +33,35 @@ interface ChaineDepenseTimelineProps {
 }
 
 const ETAPES = [
-  { key: "note", label: "Note DG", icon: FileText, color: "text-blue-600" },
-  { key: "expressionBesoin", label: "Exp. Besoin", icon: FileText, color: "text-indigo-600" },
-  { key: "marche", label: "Marché", icon: ShoppingCart, color: "text-purple-600" },
-  { key: "engagement", label: "Engagement", icon: CreditCard, color: "text-orange-600" },
-  { key: "liquidation", label: "Liquidation", icon: Receipt, color: "text-emerald-600" },
-  { key: "ordonnancement", label: "Ordonnancement", icon: Wallet, color: "text-cyan-600" },
-  { key: "reglement", label: "Règlement", icon: CheckCircle2, color: "text-green-600" },
+  { key: 'note', label: 'Note DG', icon: FileText, color: 'text-blue-600' },
+  { key: 'expressionBesoin', label: 'Exp. Besoin', icon: FileText, color: 'text-indigo-600' },
+  { key: 'marche', label: 'Marché', icon: ShoppingCart, color: 'text-purple-600' },
+  { key: 'engagement', label: 'Engagement', icon: CreditCard, color: 'text-orange-600' },
+  { key: 'liquidation', label: 'Liquidation', icon: Receipt, color: 'text-emerald-600' },
+  { key: 'ordonnancement', label: 'Ordonnancement', icon: Wallet, color: 'text-cyan-600' },
+  { key: 'reglement', label: 'Règlement', icon: CheckCircle2, color: 'text-green-600' },
 ];
 
 const getStatutBadge = (statut: string | null | undefined) => {
   if (!statut) return null;
-  
-  const statusMap: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
-    "validé": { variant: "default", icon: CheckCircle2 },
-    "valide": { variant: "default", icon: CheckCircle2 },
-    "attribue": { variant: "default", icon: CheckCircle2 },
-    "impute": { variant: "default", icon: CheckCircle2 },
-    "soumis": { variant: "secondary", icon: Clock },
-    "en_attente": { variant: "secondary", icon: Clock },
-    "en_preparation": { variant: "outline", icon: Clock },
-    "brouillon": { variant: "outline", icon: FileText },
-    "rejeté": { variant: "destructive", icon: XCircle },
-    "rejete": { variant: "destructive", icon: XCircle },
+
+  const statusMap: Record<
+    string,
+    { variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }
+  > = {
+    validé: { variant: 'default', icon: CheckCircle2 },
+    valide: { variant: 'default', icon: CheckCircle2 },
+    attribue: { variant: 'default', icon: CheckCircle2 },
+    impute: { variant: 'default', icon: CheckCircle2 },
+    soumis: { variant: 'secondary', icon: Clock },
+    en_attente: { variant: 'secondary', icon: Clock },
+    en_preparation: { variant: 'outline', icon: Clock },
+    en_validation: { variant: 'outline', icon: Clock },
+    rejeté: { variant: 'destructive', icon: XCircle },
+    rejete: { variant: 'destructive', icon: XCircle },
   };
 
-  const config = statusMap[statut] || { variant: "outline" as const, icon: Clock };
+  const config = statusMap[statut] || { variant: 'outline' as const, icon: Clock };
   const Icon = config.icon;
 
   return (
@@ -70,8 +73,8 @@ const getStatutBadge = (statut: string | null | undefined) => {
 };
 
 const formatMontant = (montant: number | null | undefined) => {
-  if (!montant) return "-";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  if (!montant) return '-';
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 export function ChaineDepenseTimeline({
@@ -95,7 +98,7 @@ export function ChaineDepenseTimeline({
   };
 
   // Find active step index
-  const _activeStepIndex = ETAPES.findIndex(e => e.key === currentEtape);
+  const _activeStepIndex = ETAPES.findIndex((e) => e.key === currentEtape);
 
   return (
     <Card>
@@ -111,12 +114,12 @@ export function ChaineDepenseTimeline({
             const data = etapesData[etape.key];
             const Icon = etape.icon;
             const isActive = etape.key === currentEtape;
-            const isCompleted = data?.id && (
-              data.statut === "validé" || 
-              data.statut === "valide" || 
-              data.statut === "attribue" ||
-              data.statut === "impute"
-            );
+            const isCompleted =
+              data?.id &&
+              (data.statut === 'validé' ||
+                data.statut === 'valide' ||
+                data.statut === 'attribue' ||
+                data.statut === 'impute');
             const isPending = data?.id && !isCompleted;
 
             return (
@@ -124,19 +127,19 @@ export function ChaineDepenseTimeline({
                 <div
                   className={`
                     flex flex-col items-center min-w-[80px] p-2 rounded-lg transition-all
-                    ${isActive ? "bg-primary/10 ring-2 ring-primary" : ""}
-                    ${isCompleted ? "bg-success/10" : ""}
-                    ${isPending ? "bg-warning/10" : ""}
-                    ${!data?.id ? "opacity-50" : ""}
+                    ${isActive ? 'bg-primary/10 ring-2 ring-primary' : ''}
+                    ${isCompleted ? 'bg-success/10' : ''}
+                    ${isPending ? 'bg-warning/10' : ''}
+                    ${!data?.id ? 'opacity-50' : ''}
                   `}
                 >
                   <div
                     className={`
                       w-10 h-10 rounded-full flex items-center justify-center mb-1
-                      ${isCompleted ? "bg-success text-success-foreground" : ""}
-                      ${isPending ? "bg-warning text-warning-foreground" : ""}
-                      ${isActive && !isCompleted && !isPending ? "bg-primary text-primary-foreground" : ""}
-                      ${!data?.id && !isActive ? "bg-muted text-muted-foreground" : ""}
+                      ${isCompleted ? 'bg-success text-success-foreground' : ''}
+                      ${isPending ? 'bg-warning text-warning-foreground' : ''}
+                      ${isActive && !isCompleted && !isPending ? 'bg-primary text-primary-foreground' : ''}
+                      ${!data?.id && !isActive ? 'bg-muted text-muted-foreground' : ''}
                     `}
                   >
                     {isCompleted ? (
@@ -151,11 +154,7 @@ export function ChaineDepenseTimeline({
                       {data.numero}
                     </span>
                   )}
-                  {data?.statut && (
-                    <div className="mt-1">
-                      {getStatutBadge(data.statut)}
-                    </div>
-                  )}
+                  {data?.statut && <div className="mt-1">{getStatutBadge(data.statut)}</div>}
                 </div>
                 {index < ETAPES.length - 1 && (
                   <ArrowRight className="h-4 w-4 text-muted-foreground mx-1 flex-shrink-0" />

@@ -64,7 +64,7 @@ function makePassation(overrides: Partial<PassationMarche> = {}): PassationMarch
     prestataire_retenu_id: null,
     montant_retenu: null,
     motif_selection: null,
-    statut: 'brouillon',
+    statut: 'soumis',
     exercice: 2026,
     created_by: 'user-1',
     created_at: '2026-01-01T00:00:00Z',
@@ -272,7 +272,7 @@ describe('B. Prérequis Workflow', () => {
   describe('canPublish', () => {
     it('réussit avec toutes les conditions remplies', () => {
       const p = makePassation({
-        statut: 'brouillon',
+        statut: 'soumis',
         expression_besoin_id: 'eb-1',
         mode_passation: 'AO_ouvert',
         date_publication: '2026-02-01',
@@ -283,11 +283,11 @@ describe('B. Prérequis Workflow', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('échoue si statut != brouillon', () => {
+    it('échoue si statut != soumis', () => {
       const p = makePassation({ statut: 'publie' });
       const result = canPublish(p);
       expect(result.ok).toBe(false);
-      expect(result.errors).toContain('Le statut doit être "brouillon"');
+      expect(result.errors).toContain('Le statut doit être "soumis"');
     });
 
     it('échoue sans expression de besoin', () => {

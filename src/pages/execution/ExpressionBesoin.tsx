@@ -57,7 +57,7 @@ import { MoreHorizontal } from 'lucide-react';
 // Tab -> server statut filter mapping
 const TAB_STATUT: Record<string, string | undefined> = {
   a_traiter: undefined,
-  brouillons: 'brouillon',
+  soumis: 'soumis',
   a_verifier: 'soumis',
   a_valider: 'verifie',
   validees: 'valide',
@@ -210,11 +210,11 @@ export default function ExpressionBesoin() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Brouillons</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Soumis</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{counts.brouillon}</div>
+            <div className="text-2xl font-bold">{counts.soumis}</div>
             <p className="text-xs text-muted-foreground">En cours</p>
           </CardContent>
         </Card>
@@ -342,7 +342,7 @@ export default function ExpressionBesoin() {
                   {imputationsValidees.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="brouillons">Brouillons ({counts.brouillon})</TabsTrigger>
+              <TabsTrigger value="soumis">Soumis ({counts.soumis})</TabsTrigger>
               {canVerifyEB() && (
                 <TabsTrigger value="a_verifier" className="gap-1">
                   <ShieldCheck className="h-3 w-3" />À vérifier
@@ -499,7 +499,7 @@ export default function ExpressionBesoin() {
             {/* Autres onglets — server-filtered data from the hook */}
             {[
               'toutes',
-              'brouillons',
+              'soumis',
               'a_verifier',
               'a_valider',
               'satisfaites',

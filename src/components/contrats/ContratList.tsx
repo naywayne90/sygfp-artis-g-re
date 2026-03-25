@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -10,14 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -25,34 +25,34 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useContrats, TYPES_CONTRAT, STATUTS_CONTRAT, Contrat } from "@/hooks/useContrats";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Plus, Eye, FileSignature, Download } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { ContratDetails } from "./ContratDetails";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useContrats, TYPES_CONTRAT, STATUTS_CONTRAT, Contrat } from '@/hooks/useContrats';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Eye, FileSignature, Download } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { ContratDetails } from './ContratDetails';
 
 export function ContratList() {
   const { contrats, createContrat, updateContrat: _updateContrat } = useContrats();
   const [open, setOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedContrat, setSelectedContrat] = useState<Contrat | null>(null);
-  const [filter, setFilter] = useState({ type: "", statut: "" });
+  const [filter, setFilter] = useState({ type: '', statut: '' });
   const [form, setForm] = useState({
-    prestataire_id: "",
-    type_contrat: "",
-    objet: "",
+    prestataire_id: '',
+    type_contrat: '',
+    objet: '',
     montant_initial: 0,
-    date_signature: "",
-    date_notification: "",
-    date_debut: "",
-    date_fin: "",
+    date_signature: '',
+    date_notification: '',
+    date_debut: '',
+    date_fin: '',
     delai_execution: 0,
-    statut: "brouillon",
+    statut: 'soumis',
     marche_id: null as string | null,
     dossier_id: null as string | null,
     engagement_id: null as string | null,
@@ -61,14 +61,14 @@ export function ContratList() {
   // Récupérer les prestataires
   // Récupérer les prestataires
   const prestatairesQuery = useQuery({
-    queryKey: ["prestataires-list"],
+    queryKey: ['prestataires-list'],
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
-        .from("prestataires")
-        .select("id, raison_sociale")
-        .eq("est_actif", true)
-        .order("raison_sociale");
+        .from('prestataires')
+        .select('id, raison_sociale')
+        .eq('est_actif', true)
+        .order('raison_sociale');
       if (error) throw error;
       return (data || []) as { id: string; raison_sociale: string }[];
     },
@@ -77,16 +77,16 @@ export function ContratList() {
 
   const resetForm = () => {
     setForm({
-      prestataire_id: "",
-      type_contrat: "",
-      objet: "",
+      prestataire_id: '',
+      type_contrat: '',
+      objet: '',
       montant_initial: 0,
-      date_signature: "",
-      date_notification: "",
-      date_debut: "",
-      date_fin: "",
+      date_signature: '',
+      date_notification: '',
+      date_debut: '',
+      date_fin: '',
       delai_execution: 0,
-      statut: "brouillon",
+      statut: 'soumis',
       marche_id: null,
       dossier_id: null,
       engagement_id: null,
@@ -106,41 +106,50 @@ export function ContratList() {
   };
 
   const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   };
 
   const getStatutBadge = (statut: string) => {
-    const s = STATUTS_CONTRAT.find(x => x.value === statut);
-    return <Badge className={s?.color || ""}>{s?.label || statut}</Badge>;
+    const s = STATUTS_CONTRAT.find((x) => x.value === statut);
+    return <Badge className={s?.color || ''}>{s?.label || statut}</Badge>;
   };
 
   const getPrestataireName = (id: string) => {
-    const p = prestataires.find(x => x.id === id);
-    return p?.raison_sociale || "-";
+    const p = prestataires.find((x) => x.id === id);
+    return p?.raison_sociale || '-';
   };
 
-  const filteredContrats = contrats.data?.filter(c => {
-    if (filter.type && filter.type !== "all" && c.type_contrat !== filter.type) return false;
-    if (filter.statut && filter.statut !== "all" && c.statut !== filter.statut) return false;
-    return true;
-  }) || [];
+  const filteredContrats =
+    contrats.data?.filter((c) => {
+      if (filter.type && filter.type !== 'all' && c.type_contrat !== filter.type) return false;
+      if (filter.statut && filter.statut !== 'all' && c.statut !== filter.statut) return false;
+      return true;
+    }) || [];
 
   const exportCSV = () => {
-    const headers = ["Numéro", "Objet", "Prestataire", "Type", "Montant", "Date signature", "Statut"];
-    const rows = filteredContrats.map(c => [
+    const headers = [
+      'Numéro',
+      'Objet',
+      'Prestataire',
+      'Type',
+      'Montant',
+      'Date signature',
+      'Statut',
+    ];
+    const rows = filteredContrats.map((c) => [
       c.numero,
       c.objet,
       getPrestataireName(c.prestataire_id),
       c.type_contrat,
       c.montant_actuel || c.montant_initial,
-      c.date_signature || "",
+      c.date_signature || '',
       c.statut,
     ]);
-    const csv = [headers, ...rows].map(row => row.join(";")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const csv = [headers, ...rows].map((row) => row.join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `contrats_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `contrats_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   };
 
@@ -160,7 +169,13 @@ export function ContratList() {
               <Download className="h-4 w-4 mr-2" />
               Exporter
             </Button>
-            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
+            <Dialog
+              open={open}
+              onOpenChange={(o) => {
+                setOpen(o);
+                if (!o) resetForm();
+              }}
+            >
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -175,26 +190,36 @@ export function ContratList() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Type de contrat *</Label>
-                      <Select value={form.type_contrat} onValueChange={(v) => setForm({ ...form, type_contrat: v })}>
+                      <Select
+                        value={form.type_contrat}
+                        onValueChange={(v) => setForm({ ...form, type_contrat: v })}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner..." />
                         </SelectTrigger>
                         <SelectContent>
                           {TYPES_CONTRAT.map((t) => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>Prestataire *</Label>
-                      <Select value={form.prestataire_id} onValueChange={(v) => setForm({ ...form, prestataire_id: v })}>
+                      <Select
+                        value={form.prestataire_id}
+                        onValueChange={(v) => setForm({ ...form, prestataire_id: v })}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner..." />
                         </SelectTrigger>
                         <SelectContent>
                           {prestataires.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>{p.raison_sociale}</SelectItem>
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.raison_sociale}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -215,7 +240,9 @@ export function ContratList() {
                       <Input
                         type="number"
                         value={form.montant_initial}
-                        onChange={(e) => setForm({ ...form, montant_initial: Number(e.target.value) })}
+                        onChange={(e) =>
+                          setForm({ ...form, montant_initial: Number(e.target.value) })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -223,7 +250,9 @@ export function ContratList() {
                       <Input
                         type="number"
                         value={form.delai_execution}
-                        onChange={(e) => setForm({ ...form, delai_execution: Number(e.target.value) })}
+                        onChange={(e) =>
+                          setForm({ ...form, delai_execution: Number(e.target.value) })
+                        }
                       />
                     </div>
                   </div>
@@ -265,23 +294,42 @@ export function ContratList() {
                   </div>
                   <div className="space-y-2">
                     <Label>Statut</Label>
-                    <Select value={form.statut} onValueChange={(v) => setForm({ ...form, statut: v })}>
+                    <Select
+                      value={form.statut}
+                      onValueChange={(v) => setForm({ ...form, statut: v })}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {STATUTS_CONTRAT.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => { setOpen(false); resetForm(); }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setOpen(false);
+                      resetForm();
+                    }}
+                  >
                     Annuler
                   </Button>
-                  <Button onClick={handleSubmit} disabled={!form.prestataire_id || !form.type_contrat || !form.objet || !form.montant_initial}>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={
+                      !form.prestataire_id ||
+                      !form.type_contrat ||
+                      !form.objet ||
+                      !form.montant_initial
+                    }
+                  >
                     Créer
                   </Button>
                 </DialogFooter>
@@ -299,18 +347,25 @@ export function ContratList() {
               <SelectContent>
                 <SelectItem value="all">Tous types</SelectItem>
                 {TYPES_CONTRAT.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filter.statut} onValueChange={(v) => setFilter({ ...filter, statut: v })}>
+            <Select
+              value={filter.statut}
+              onValueChange={(v) => setFilter({ ...filter, statut: v })}
+            >
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="Tous statuts" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous statuts</SelectItem>
                 {STATUTS_CONTRAT.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -349,13 +404,18 @@ export function ContratList() {
                     </TableCell>
                     <TableCell>{getStatutBadge(contrat.statut)}</TableCell>
                     <TableCell>
-                      {contrat.date_fin ? format(new Date(contrat.date_fin), "dd/MM/yyyy", { locale: fr }) : "-"}
+                      {contrat.date_fin
+                        ? format(new Date(contrat.date_fin), 'dd/MM/yyyy', { locale: fr })
+                        : '-'}
                     </TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => { setSelectedContrat(contrat); setDetailsOpen(true); }}
+                        onClick={() => {
+                          setSelectedContrat(contrat);
+                          setDetailsOpen(true);
+                        }}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -373,7 +433,7 @@ export function ContratList() {
         open={detailsOpen}
         onOpenChange={setDetailsOpen}
         contrat={selectedContrat}
-        prestataireName={selectedContrat ? getPrestataireName(selectedContrat.prestataire_id) : ""}
+        prestataireName={selectedContrat ? getPrestataireName(selectedContrat.prestataire_id) : ''}
       />
     </>
   );

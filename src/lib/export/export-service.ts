@@ -108,8 +108,8 @@ export const formatters = {
   status: (value: unknown): string => {
     if (!value) return '-';
     const statusMap: Record<string, string> = {
-      draft: 'Brouillon',
-      brouillon: 'Brouillon',
+      draft: 'Soumis',
+      brouillon: 'Soumis',
       pending: 'En attente',
       en_attente: 'En attente',
       en_attente_validation: 'En attente de validation',

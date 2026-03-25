@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Styles réutilisables pour les exports Excel SYGFP
  * Conforme à la charte graphique ARTI
@@ -210,7 +209,6 @@ export const EXCEL_STYLES: Record<string, CellStyle> = {
 // ============================================================================
 
 export const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  brouillon: { bg: EXCEL_COLORS.rowOddBg, text: '666666' },
   soumis: { bg: EXCEL_COLORS.statusSubmitted, text: '1F4E79' },
   a_valider: { bg: EXCEL_COLORS.statusPending, text: '9C5700' },
   valide: { bg: EXCEL_COLORS.statusValid, text: '006100' },

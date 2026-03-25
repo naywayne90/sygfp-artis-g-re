@@ -125,7 +125,7 @@ export function PassationDetails({
     MODES_PASSATION.find((m) => m.value === value)?.label || value;
 
   const getStatusBadge = (statut: string) => {
-    const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.brouillon;
+    const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.soumis;
     return <Badge className={config.color}>{config.label}</Badge>;
   };
 
@@ -784,7 +784,7 @@ export function PassationDetails({
                     (lots.find((l) => l.id === selectedLotId)?.soumissionnaires ||
                       []) as Soumissionnaire[]
                   }
-                  readOnly={!['brouillon', 'publie', 'cloture'].includes(passation.statut)}
+                  readOnly={!['soumis', 'publie', 'cloture'].includes(passation.statut)}
                   onAdd={addSoumissionnaire}
                   onUpdate={updateSoumissionnaire}
                   onDelete={deleteSoumissionnaire}
@@ -811,9 +811,7 @@ export function PassationDetails({
                             lotId={lot.id}
                             modePassation={passation.mode_passation}
                             soumissionnaires={lotSoums}
-                            readOnly={
-                              !['brouillon', 'publie', 'cloture'].includes(passation.statut)
-                            }
+                            readOnly={!['soumis', 'publie', 'cloture'].includes(passation.statut)}
                             onAdd={addSoumissionnaire}
                             onUpdate={updateSoumissionnaire}
                             onDelete={deleteSoumissionnaire}
@@ -830,7 +828,7 @@ export function PassationDetails({
                 lotId={null}
                 modePassation={passation.mode_passation}
                 soumissionnaires={allSoumissionnaires.filter((s) => !s.lot_marche_id)}
-                readOnly={!['brouillon', 'publie', 'cloture'].includes(passation.statut)}
+                readOnly={!['soumis', 'publie', 'cloture'].includes(passation.statut)}
                 onAdd={addSoumissionnaire}
                 onUpdate={updateSoumissionnaire}
                 onDelete={deleteSoumissionnaire}
@@ -952,7 +950,7 @@ export function PassationDetails({
               passationId={passation.id}
               modePassation={passation.mode_passation}
               piecesJointes={passation.pieces_jointes || []}
-              readOnly={!['brouillon', 'publie'].includes(passation.statut)}
+              readOnly={!['soumis', 'publie'].includes(passation.statut)}
               onValidationChange={(complete, missing) => {
                 setChecklistComplete(complete);
                 setMissingDocs(missing);
@@ -1059,7 +1057,7 @@ export function PassationDetails({
                 check: () => { ok: boolean; errors: string[] };
               }
             > = {
-              brouillon: {
+              soumis: {
                 label: 'Publier',
                 action: 'publish',
                 icon: Send,

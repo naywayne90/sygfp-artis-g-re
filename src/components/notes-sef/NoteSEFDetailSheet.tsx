@@ -65,7 +65,6 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
     soumis: {
       label: 'Soumis',
       className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -85,7 +84,7 @@ const getStatusBadge = (status: string | null) => {
       className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     },
   };
-  const variant = variants[status || 'brouillon'] || variants.brouillon;
+  const variant = variants[status || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -287,7 +286,7 @@ function TabInformations({
 
         {/* Actions */}
         <div className="flex gap-2">
-          {note.statut === 'brouillon' && onEdit && (
+          {note.statut === 'soumis' && onEdit && (
             <Button
               variant="outline"
               size="sm"

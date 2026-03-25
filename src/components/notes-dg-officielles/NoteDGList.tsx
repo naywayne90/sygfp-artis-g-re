@@ -3,10 +3,10 @@
  * Affiche les notes avec filtres, tri et actions
  */
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -14,21 +14,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  NoteDirectionGenerale,
-  NoteDGStatut,
-} from "@/hooks/useNotesDirectionGenerale";
-import { usePermissions } from "@/hooks/usePermissions";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/components/ui/dropdown-menu';
+import { NoteDirectionGenerale, NoteDGStatut } from '@/hooks/useNotesDirectionGenerale';
+import { usePermissions } from '@/hooks/usePermissions';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   MoreHorizontal,
   Eye,
@@ -43,7 +40,7 @@ import {
   RefreshCw,
   Share2,
   RotateCcw,
-} from "lucide-react";
+} from 'lucide-react';
 
 interface NoteDGListProps {
   notes: NoteDirectionGenerale[];
@@ -67,29 +64,63 @@ interface NoteDGListProps {
 
 const getStatusBadge = (status: NoteDGStatut) => {
   const variants: Record<NoteDGStatut, { label: string; className: string }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    soumise_dg: { label: "Soumise au DG", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-    dg_valide: { label: "Validée DG", className: "bg-success/10 text-success border-success/20" },
-    dg_rejetee: { label: "Rejetée", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    diffusee: { label: "Diffusée", className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
+    soumise_dg: {
+      label: 'Soumise au DG',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
+    dg_valide: { label: 'Validée DG', className: 'bg-success/10 text-success border-success/20' },
+    dg_rejetee: {
+      label: 'Rejetée',
+      className: 'bg-destructive/10 text-destructive border-destructive/20',
+    },
+    diffusee: {
+      label: 'Diffusée',
+      className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    },
   };
-  const variant = variants[status] || variants.brouillon;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  const variant = variants[status] || variants.soumis;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
 // Composant skeleton pour le chargement
 function TableRowSkeleton() {
   return (
     <TableRow>
-      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-40" /></TableCell>
-      <TableCell className="hidden lg:table-cell"><Skeleton className="h-4 w-28" /></TableCell>
-      <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-32" /></TableCell>
-      <TableCell className="hidden xl:table-cell"><Skeleton className="h-4 w-32" /></TableCell>
-      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-      <TableCell className="hidden 2xl:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-      <TableCell><Skeleton className="h-8 w-8 rounded" /></TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-24" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        <Skeleton className="h-4 w-40" />
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <Skeleton className="h-4 w-28" />
+      </TableCell>
+      <TableCell className="hidden xl:table-cell">
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell className="hidden xl:table-cell">
+        <Skeleton className="h-4 w-32" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-5 w-20" />
+      </TableCell>
+      <TableCell className="hidden 2xl:table-cell">
+        <Skeleton className="h-4 w-20" />
+      </TableCell>
+      <TableCell>
+        <Skeleton className="h-8 w-8 rounded" />
+      </TableCell>
     </TableRow>
   );
 }
@@ -109,12 +140,12 @@ export function NoteDGList({
   onCreate,
   onRetry,
   showActions = true,
-  emptyMessage = "Aucune note trouvée",
+  emptyMessage = 'Aucune note trouvée',
   isLoading = false,
   error = null,
 }: NoteDGListProps) {
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["Admin", "DG"]);
+  const canValidate = hasAnyRole(['Admin', 'DG']);
 
   // État d'erreur
   if (error) {
@@ -242,13 +273,11 @@ export function NoteDGList({
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => onView?.(note)}
                 >
-                  <TableCell className="font-mono text-sm">
-                    {note.reference || "-"}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{note.reference || '-'}</TableCell>
                   <TableCell>
                     {note.date_note
-                      ? format(new Date(note.date_note), "dd/MM/yyyy", { locale: fr })
-                      : "-"}
+                      ? format(new Date(note.date_note), 'dd/MM/yyyy', { locale: fr })
+                      : '-'}
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-[300px]">
                     <span className="line-clamp-1" title={note.objet}>
@@ -261,20 +290,30 @@ export function NoteDGList({
                     </span>
                   </TableCell>
                   <TableCell className="hidden xl:table-cell max-w-[150px]">
-                    <span className="line-clamp-1 text-sm text-muted-foreground" title={(note as any).expose || ""}>
-                      {(note as any).expose ? (note as any).expose.substring(0, 50) + ((note as any).expose.length > 50 ? "..." : "") : "-"}
+                    <span
+                      className="line-clamp-1 text-sm text-muted-foreground"
+                      title={(note as any).expose || ''}
+                    >
+                      {(note as any).expose
+                        ? (note as any).expose.substring(0, 50) +
+                          ((note as any).expose.length > 50 ? '...' : '')
+                        : '-'}
                     </span>
                   </TableCell>
                   <TableCell className="hidden xl:table-cell max-w-[150px]">
-                    <span className="line-clamp-1 text-sm text-muted-foreground" title={(note as any).avis || ""}>
-                      {(note as any).avis ? (note as any).avis.substring(0, 50) + ((note as any).avis.length > 50 ? "..." : "") : "-"}
+                    <span
+                      className="line-clamp-1 text-sm text-muted-foreground"
+                      title={(note as any).avis || ''}
+                    >
+                      {(note as any).avis
+                        ? (note as any).avis.substring(0, 50) +
+                          ((note as any).avis.length > 50 ? '...' : '')
+                        : '-'}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    {getStatusBadge(note.statut)}
-                  </TableCell>
+                  <TableCell>{getStatusBadge(note.statut)}</TableCell>
                   <TableCell className="hidden 2xl:table-cell text-muted-foreground">
-                    {format(new Date(note.created_at), "dd/MM/yyyy", { locale: fr })}
+                    {format(new Date(note.created_at), 'dd/MM/yyyy', { locale: fr })}
                   </TableCell>
                   {showActions && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -293,8 +332,8 @@ export function NoteDGList({
                             </DropdownMenuItem>
                           )}
 
-                          {/* Modifier (brouillon ou rejeté) */}
-                          {onEdit && ["brouillon", "dg_rejetee"].includes(note.statut) && (
+                          {/* Modifier (soumis ou rejeté) */}
+                          {onEdit && ['soumis', 'dg_rejetee'].includes(note.statut) && (
                             <DropdownMenuItem onClick={() => onEdit(note)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
@@ -303,24 +342,24 @@ export function NoteDGList({
 
                           <DropdownMenuSeparator />
 
-                          {/* Soumettre au DG (brouillon) */}
-                          {onSubmit && note.statut === "brouillon" && (
+                          {/* Soumettre au DG (soumis) */}
+                          {onSubmit && note.statut === 'soumis' && (
                             <DropdownMenuItem onClick={() => onSubmit(note.id)}>
                               <Send className="h-4 w-4 mr-2" />
                               Soumettre au DG
                             </DropdownMenuItem>
                           )}
 
-                          {/* Revenir en brouillon (rejeté) */}
-                          {onRevertToDraft && note.statut === "dg_rejetee" && (
+                          {/* Revenir en soumis (rejeté) */}
+                          {onRevertToDraft && note.statut === 'dg_rejetee' && (
                             <DropdownMenuItem onClick={() => onRevertToDraft(note.id)}>
                               <RotateCcw className="h-4 w-4 mr-2" />
-                              Reprendre en brouillon
+                              Reprendre en soumis
                             </DropdownMenuItem>
                           )}
 
                           {/* Valider (DG only, soumise) */}
-                          {onValidate && canValidate && note.statut === "soumise_dg" && (
+                          {onValidate && canValidate && note.statut === 'soumise_dg' && (
                             <DropdownMenuItem onClick={() => onValidate(note.id)}>
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Valider
@@ -328,7 +367,7 @@ export function NoteDGList({
                           )}
 
                           {/* Rejeter (DG only, soumise) */}
-                          {onReject && canValidate && note.statut === "soumise_dg" && (
+                          {onReject && canValidate && note.statut === 'soumise_dg' && (
                             <DropdownMenuItem
                               onClick={() => onReject(note)}
                               className="text-destructive"
@@ -339,15 +378,15 @@ export function NoteDGList({
                           )}
 
                           {/* Diffuser (validée) */}
-                          {onDiffuse && note.statut === "dg_valide" && (
+                          {onDiffuse && note.statut === 'dg_valide' && (
                             <DropdownMenuItem onClick={() => onDiffuse(note.id)}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Diffuser
                             </DropdownMenuItem>
                           )}
 
-                          {/* Supprimer (brouillon uniquement) */}
-                          {onDelete && note.statut === "brouillon" && (
+                          {/* Supprimer (soumis uniquement) */}
+                          {onDelete && note.statut === 'soumis' && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem

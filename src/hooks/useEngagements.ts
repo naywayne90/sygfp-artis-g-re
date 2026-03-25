@@ -603,7 +603,7 @@ export function useEngagements() {
           passation_marche_id: data.passation_marche_id || null,
           dossier_id: dossierId || null,
           exercice,
-          statut: 'brouillon',
+          // statut defaults to 'soumis' via DB default
           workflow_status: 'en_attente',
           current_step: 0,
           created_by: user.id,
@@ -649,7 +649,7 @@ export function useEngagements() {
           .eq('id', dossierId);
       }
 
-      // NOTE: total_engage is NOT updated here at creation (brouillon).
+      // NOTE: total_engage is NOT updated here at creation (soumis).
       // It is updated by the SQL trigger fn_update_engagement_rate
       // only when the engagement reaches statut='valide' after workflow validation.
 
@@ -1237,8 +1237,8 @@ export function useEngagements() {
 
       if (error) throw error;
 
-      // Update multi-lignes if provided and engagement is brouillon
-      if (lignes && oldEngagement?.statut === 'brouillon') {
+      // Update multi-lignes if provided and engagement is soumis
+      if (lignes && oldEngagement?.statut === 'soumis') {
         // Delete old lignes
         await supabase.from('engagement_lignes').delete().eq('engagement_id', id);
 

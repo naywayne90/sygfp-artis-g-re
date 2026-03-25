@@ -1,34 +1,34 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Calendar, 
-  Check, 
-  Loader2, 
-  Lock, 
-  Search, 
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Calendar,
+  Check,
+  Loader2,
+  Lock,
+  Search,
   Settings2,
   Wallet,
   TrendingUp,
   Receipt,
-  Banknote
-} from "lucide-react";
-import { ExerciceInitWizard } from "./ExerciceInitWizard";
-import { formatMontantCompact } from "@/lib/config/sygfp-constants";
+  Banknote,
+} from 'lucide-react';
+import { ExerciceInitWizard } from './ExerciceInitWizard';
+import { formatMontantCompact } from '@/lib/config/sygfp-constants';
 
 interface ExerciceChangeModalProps {
   open: boolean;
@@ -56,22 +56,22 @@ interface ExerciceWithStats {
 
 export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalProps) {
   const { exercice, setExercice } = useExercice();
-  const [search, setSearch] = useState("");
-  const [statutFilter, setStatutFilter] = useState<string>("tous");
+  const [search, setSearch] = useState('');
+  const [statutFilter, setStatutFilter] = useState<string>('tous');
   const [showInitWizard, setShowInitWizard] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState<number | null>(null);
 
   // Fetch exercices avec leurs stats financières
   const { data: exercices, isLoading } = useQuery({
-    queryKey: ["exercices-modal-with-stats", statutFilter],
+    queryKey: ['exercices-modal-with-stats', statutFilter],
     queryFn: async () => {
       let query = supabase
-        .from("exercices_budgetaires")
-        .select("*")
-        .order("annee", { ascending: false });
+        .from('exercices_budgetaires')
+        .select('*')
+        .order('annee', { ascending: false });
 
-      if (statutFilter !== "tous") {
-        query = query.eq("statut", statutFilter);
+      if (statutFilter !== 'tous') {
+        query = query.eq('statut', statutFilter);
       }
 
       const { data: exercicesData, error } = await query;
@@ -82,45 +82,50 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
         (exercicesData || []).map(async (ex) => {
           // Budget total
           const { data: budgetLines } = await supabase
-            .from("budget_lines")
-            .select("dotation_initiale")
-            .eq("exercice", ex.annee);
-          
-          const budgetTotal = budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
+            .from('budget_lines')
+            .select('dotation_initiale')
+            .eq('exercice', ex.annee);
+
+          const budgetTotal =
+            budgetLines?.reduce((sum, bl) => sum + (bl.dotation_initiale || 0), 0) || 0;
 
           // Engagements validés
           const { data: engagements } = await supabase
-            .from("budget_engagements")
-            .select("montant, statut")
-            .eq("exercice", ex.annee);
-          
-          const budgetEngage = engagements
-            ?.filter(e => e.statut === "valide")
-            .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
+            .from('budget_engagements')
+            .select('montant, statut')
+            .eq('exercice', ex.annee);
+
+          const budgetEngage =
+            engagements
+              ?.filter((e) => e.statut === 'valide')
+              .reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
 
           // Liquidations validées
           const { data: liquidations } = await supabase
-            .from("budget_liquidations")
-            .select("montant, statut")
-            .eq("exercice", ex.annee);
-          
-          const budgetLiquide = liquidations
-            ?.filter(l => l.statut === "valide")
-            .reduce((sum, l) => sum + (l.montant || 0), 0) || 0;
+            .from('budget_liquidations')
+            .select('montant, statut')
+            .eq('exercice', ex.annee);
+
+          const budgetLiquide =
+            liquidations
+              ?.filter((l) => l.statut === 'valide')
+              .reduce((sum, l) => sum + (l.montant || 0), 0) || 0;
 
           // Règlements payés
           const { data: reglements } = await supabase
-            .from("reglements")
-            .select("montant, statut")
-            .eq("exercice", ex.annee);
-          
-          const budgetPaye = reglements
-            ?.filter(r => r.statut === "paye")
-            .reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
+            .from('reglements')
+            .select('montant, statut')
+            .eq('exercice', ex.annee);
+
+          const budgetPaye =
+            reglements
+              ?.filter((r) => r.statut === 'paye')
+              .reduce((sum, r) => sum + (r.montant || 0), 0) || 0;
 
           // Calculs dérivés
           const budgetDisponible = Math.max(0, budgetTotal - budgetEngage);
-          const tauxEngagement = budgetTotal > 0 ? Math.round((budgetEngage / budgetTotal) * 100) : 0;
+          const tauxEngagement =
+            budgetTotal > 0 ? Math.round((budgetEngage / budgetTotal) * 100) : 0;
 
           return {
             ...ex,
@@ -139,7 +144,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
     enabled: open,
   });
 
-  const filteredExercices = exercices?.filter(ex => {
+  const filteredExercices = exercices?.filter((ex) => {
     if (!search) return true;
     return (
       ex.annee.toString().includes(search) ||
@@ -155,16 +160,28 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
 
   const getStatutBadge = (statut: string) => {
     switch (statut) {
-      case "en_cours":
-        return <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/10">En cours</Badge>;
-      case "ouvert":
-        return <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Ouvert</Badge>;
-      case "cloture":
-        return <Badge className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/10">Clôturé</Badge>;
-      case "archive":
+      case 'en_cours':
+        return (
+          <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/10">
+            En cours
+          </Badge>
+        );
+      case 'ouvert':
+        return (
+          <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
+            Ouvert
+          </Badge>
+        );
+      case 'cloture':
+        return (
+          <Badge className="bg-warning/10 text-warning border-warning/20 hover:bg-warning/10">
+            Clôturé
+          </Badge>
+        );
+      case 'archive':
         return <Badge variant="secondary">Archivé</Badge>;
-      case "brouillon":
-        return <Badge variant="outline">Brouillon</Badge>;
+      case 'soumis':
+        return <Badge variant="outline">Soumis</Badge>;
       default:
         return <Badge variant="outline">{statut}</Badge>;
     }
@@ -173,7 +190,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
   // Récupérer l'exercice sélectionné pour preview
   const previewExercice = useMemo(() => {
     const target = selectedPreview ?? exercice;
-    return exercices?.find(ex => ex.annee === target);
+    return exercices?.find((ex) => ex.annee === target);
   }, [exercices, selectedPreview, exercice]);
 
   return (
@@ -185,8 +202,8 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
             Changer d'exercice budgétaire
           </DialogTitle>
           <DialogDescription>
-            Sélectionnez l'exercice sur lequel vous souhaitez travailler.
-            Les exercices clôturés sont en lecture seule.
+            Sélectionnez l'exercice sur lequel vous souhaitez travailler. Les exercices clôturés
+            sont en lecture seule.
           </DialogDescription>
         </DialogHeader>
 
@@ -207,10 +224,18 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
             {/* Filtres par statut */}
             <Tabs value={statutFilter} onValueChange={setStatutFilter} className="mb-3">
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="tous" className="text-xs">Tous</TabsTrigger>
-                <TabsTrigger value="ouvert" className="text-xs">Ouverts</TabsTrigger>
-                <TabsTrigger value="cloture" className="text-xs">Clôturés</TabsTrigger>
-                <TabsTrigger value="archive" className="text-xs">Archivés</TabsTrigger>
+                <TabsTrigger value="tous" className="text-xs">
+                  Tous
+                </TabsTrigger>
+                <TabsTrigger value="ouvert" className="text-xs">
+                  Ouverts
+                </TabsTrigger>
+                <TabsTrigger value="cloture" className="text-xs">
+                  Clôturés
+                </TabsTrigger>
+                <TabsTrigger value="archive" className="text-xs">
+                  Archivés
+                </TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -223,7 +248,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
               ) : filteredExercices && filteredExercices.length > 0 ? (
                 filteredExercices.map((ex) => {
                   const isSelected = ex.annee === exercice;
-                  const isReadOnly = ex.statut === "cloture" || ex.statut === "archive";
+                  const isReadOnly = ex.statut === 'cloture' || ex.statut === 'archive';
                   const isPreviewing = ex.annee === selectedPreview;
 
                   return (
@@ -234,27 +259,31 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
                       onMouseLeave={() => setSelectedPreview(null)}
                       className={`w-full p-3 rounded-lg border text-left transition-all ${
                         isSelected
-                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary'
                           : isPreviewing
-                          ? "border-primary/50 bg-muted/50"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                            ? 'border-primary/50 bg-muted/50'
+                            : 'border-border hover:border-primary/50 hover:bg-muted/50'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className={`p-1.5 rounded-md ${isSelected ? "bg-primary/10" : "bg-muted"}`}>
-                            <Calendar className={`h-3.5 w-3.5 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                          <div
+                            className={`p-1.5 rounded-md ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}
+                          >
+                            <Calendar
+                              className={`h-3.5 w-3.5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
+                            />
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
                               <span className="font-semibold text-sm">Exercice {ex.annee}</span>
-                              {isReadOnly && (
-                                <Lock className="h-3 w-3 text-muted-foreground" />
-                              )}
+                              {isReadOnly && <Lock className="h-3 w-3 text-muted-foreground" />}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {ex.budgetTotal > 0 ? (
-                                <span className="text-success">{formatMontantCompact(ex.budgetTotal)}</span>
+                                <span className="text-success">
+                                  {formatMontantCompact(ex.budgetTotal)}
+                                </span>
                               ) : (
                                 <span className="text-warning">Non chargé</span>
                               )}
@@ -266,18 +295,14 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
                         </div>
                         <div className="flex items-center gap-2">
                           {getStatutBadge(ex.statut)}
-                          {isSelected && (
-                            <Check className="h-4 w-4 text-primary" />
-                          )}
+                          {isSelected && <Check className="h-4 w-4 text-primary" />}
                         </div>
                       </div>
                     </button>
                   );
                 })
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Aucun exercice trouvé
-                </div>
+                <div className="text-center py-8 text-muted-foreground">Aucun exercice trouvé</div>
               )}
             </div>
           </div>
@@ -288,7 +313,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
               <Wallet className="h-4 w-4 text-primary" />
               Résumé financier
             </h4>
-            
+
             {isLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-16" />
@@ -304,10 +329,11 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
                     <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
                   </div>
                   <div className="font-semibold">
-                    {previewExercice.budgetTotal > 0 
-                      ? formatMontantCompact(previewExercice.budgetTotal)
-                      : <span className="text-warning text-sm">Non chargé</span>
-                    }
+                    {previewExercice.budgetTotal > 0 ? (
+                      formatMontantCompact(previewExercice.budgetTotal)
+                    ) : (
+                      <span className="text-warning text-sm">Non chargé</span>
+                    )}
                   </div>
                 </div>
 
@@ -357,7 +383,9 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-muted-foreground">Disponible</span>
                   </div>
-                  <div className={`font-semibold ${previewExercice.budgetDisponible > 0 ? "text-success" : "text-destructive"}`}>
+                  <div
+                    className={`font-semibold ${previewExercice.budgetDisponible > 0 ? 'text-success' : 'text-destructive'}`}
+                  >
                     {formatMontantCompact(previewExercice.budgetDisponible)}
                   </div>
                 </div>
@@ -376,8 +404,8 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
             <Lock className="h-3.5 w-3.5 shrink-0" />
             <span>Exercices clôturés = lecture seule</span>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => {
               onOpenChange(false);
@@ -391,10 +419,7 @@ export function ExerciceChangeModal({ open, onOpenChange }: ExerciceChangeModalP
       </DialogContent>
 
       {/* Wizard d'initialisation */}
-      <ExerciceInitWizard 
-        open={showInitWizard} 
-        onOpenChange={setShowInitWizard} 
-      />
+      <ExerciceInitWizard open={showInitWizard} onOpenChange={setShowInitWizard} />
     </Dialog>
   );
 }

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,21 +7,14 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  Lock, 
-  Loader2,
-  FileCheck,
-  ShieldCheck
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { CheckCircle, AlertTriangle, Lock, Loader2, FileCheck, ShieldCheck } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 interface BudgetValidationProps {
   open: boolean;
@@ -33,18 +26,18 @@ interface BudgetValidationProps {
   onSuccess: () => void;
 }
 
-export function BudgetValidation({ 
-  open, 
-  onOpenChange, 
+export function BudgetValidation({
+  open,
+  onOpenChange,
   totalLines,
   validatedLines,
   pendingLines,
   totalDotation,
-  onSuccess 
+  onSuccess,
 }: BudgetValidationProps) {
   const { exercice } = useExercice();
   const [isValidating, setIsValidating] = useState(false);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState('');
 
   const allValidated = validatedLines === totalLines && totalLines > 0;
   const hasPending = pendingLines > 0;
@@ -54,38 +47,38 @@ export function BudgetValidation({
     setIsValidating(true);
 
     try {
-      // First, validate all individual lines that are in "brouillon" or "soumis" status
+      // First, validate all individual lines that are in "soumis" or "soumis" status
       const { error: updateError } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
-          statut: "valide",
+          statut: 'valide',
           validated_at: new Date().toISOString(),
         })
-        .eq("exercice", exercice || new Date().getFullYear())
-        .in("statut", ["brouillon", "soumis"]);
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('statut', 'soumis');
 
       if (updateError) throw updateError;
 
       // Get current version number for this exercise
       const { data: existingVersions } = await supabase
-        .from("budget_versions")
-        .select("version")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .order("version", { ascending: false })
+        .from('budget_versions')
+        .select('version')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .order('version', { ascending: false })
         .limit(1);
 
       const nextVersion = (existingVersions?.[0]?.version || 0) + 1;
 
       // Create a new validated budget version
       const { data: version, error: versionError } = await supabase
-        .from("budget_versions")
+        .from('budget_versions')
         .insert({
           exercice: exercice || new Date().getFullYear(),
           version: nextVersion,
           label: `Budget ${exercice} - Version ${nextVersion}`,
           description: description || `Validation globale du budget exercice ${exercice}`,
           total_dotation: totalDotation,
-          status: "valide",
+          status: 'valide',
           validated_at: new Date().toISOString(),
         })
         .select()
@@ -95,17 +88,17 @@ export function BudgetValidation({
 
       // Link all budget lines to this version
       const { error: linkError } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({ budget_version_id: version.id })
-        .eq("exercice", exercice || new Date().getFullYear());
+        .eq('exercice', exercice || new Date().getFullYear());
 
       if (linkError) throw linkError;
 
       // Log audit
-      await supabase.rpc("log_audit_with_exercice", {
-        p_entity_type: "budget_version",
+      await supabase.rpc('log_audit_with_exercice', {
+        p_entity_type: 'budget_version',
         p_entity_id: version.id,
-        p_action: "BUDGET_VALIDE",
+        p_action: 'BUDGET_VALIDE',
         p_new_values: {
           version: nextVersion,
           total_lines: totalLines,
@@ -118,7 +111,7 @@ export function BudgetValidation({
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error("Erreur de validation: " + error.message);
+      toast.error('Erreur de validation: ' + error.message);
     } finally {
       setIsValidating(false);
     }
@@ -130,31 +123,33 @@ export function BudgetValidation({
     try {
       // Lock all validated budget lines
       const { error } = await supabase
-        .from("budget_lines")
+        .from('budget_lines')
         .update({
           locked_at: new Date().toISOString(),
         })
-        .eq("exercice", exercice || new Date().getFullYear())
-        .eq("statut", "valide");
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('statut', 'valide');
 
       if (error) throw error;
 
-      toast.success("Budget verrouillé - Les modifications nécessiteront un avenant");
+      toast.success('Budget verrouillé - Les modifications nécessiteront un avenant');
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     } finally {
       setIsValidating(false);
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount) + " FCFA";
+    return (
+      new Intl.NumberFormat('fr-FR', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(amount) + ' FCFA'
+    );
   };
 
   return (
@@ -206,7 +201,8 @@ export function BudgetValidation({
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Lignes en attente</AlertTitle>
               <AlertDescription>
-                {pendingLines} ligne(s) sont en attente de validation. Vous devez d'abord les valider individuellement.
+                {pendingLines} ligne(s) sont en attente de validation. Vous devez d'abord les
+                valider individuellement.
               </AlertDescription>
             </Alert>
           ) : (
@@ -214,7 +210,7 @@ export function BudgetValidation({
               <FileCheck className="h-4 w-4" />
               <AlertTitle>Prêt pour validation globale</AlertTitle>
               <AlertDescription>
-                Vous pouvez valider globalement toutes les lignes budgétaires en brouillon.
+                Vous pouvez valider globalement toutes les lignes budgétaires en soumis.
               </AlertDescription>
             </Alert>
           )}
@@ -236,8 +232,8 @@ export function BudgetValidation({
             <Lock className="h-4 w-4" />
             <AlertTitle>Important</AlertTitle>
             <AlertDescription>
-              Une fois validé, le budget alimentera le tableau de bord et les calculs de disponibilité.
-              Après verrouillage, toute modification nécessitera un avenant.
+              Une fois validé, le budget alimentera le tableau de bord et les calculs de
+              disponibilité. Après verrouillage, toute modification nécessitera un avenant.
             </AlertDescription>
           </Alert>
         </div>
@@ -246,7 +242,7 @@ export function BudgetValidation({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
-          
+
           {allValidated ? (
             <Button onClick={handleLockBudget} disabled={isValidating}>
               {isValidating ? (
@@ -257,8 +253,8 @@ export function BudgetValidation({
               Verrouiller le budget
             </Button>
           ) : (
-            <Button 
-              onClick={handleValidateAll} 
+            <Button
+              onClick={handleValidateAll}
               disabled={isValidating || hasPending || totalLines === 0}
             >
               {isValidating ? (

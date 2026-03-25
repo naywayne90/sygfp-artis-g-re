@@ -117,12 +117,13 @@ function formatDateShort(date: string | Date | null): string {
 /**
  * Obtient le nom complet d'un profil
  */
-function getFullName(profile: { first_name?: string | null; last_name?: string | null } | null): string {
+function getFullName(
+  profile: { first_name?: string | null; last_name?: string | null } | null
+): string {
   if (!profile) return '-';
   const parts = [profile.first_name, profile.last_name].filter(Boolean);
   return parts.length > 0 ? parts.join(' ') : '-';
 }
-
 
 // ============================================================================
 // GÉNÉRATION DE LA PAGE 1 - INFORMATIONS
@@ -161,7 +162,7 @@ async function generatePage1(
   // INFORMATIONS DU DOCUMENT
   // ────────────────────────────────────────────────────────────────────────────
 
-  const reference = note.numero || note.reference_pivot || 'BROUILLON';
+  const reference = note.numero || note.reference_pivot || 'SANS REFERENCE';
 
   autoTable(doc, {
     startY: yPos,
@@ -195,7 +196,9 @@ async function generatePage1(
     tableWidth: 'auto',
   });
 
-  yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + PDF_DIMENSIONS.spacing.lg;
+  yPos =
+    (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY +
+    PDF_DIMENSIONS.spacing.lg;
 
   // ────────────────────────────────────────────────────────────────────────────
   // DESTINATAIRE
@@ -311,7 +314,7 @@ async function generatePage2(
   doc.setFontSize(PDF_FONTS.size.body);
   doc.setFont(PDF_FONTS.family, PDF_FONTS.styles.normal);
   doc.setTextColor(...PDF_COLORS.secondary);
-  const reference = note.numero || note.reference_pivot || 'BROUILLON';
+  const reference = note.numero || note.reference_pivot || 'SANS REFERENCE';
   doc.text(`Réf: ${reference}`, PDF_PAGE.width / 2, yPos, { align: 'center' });
 
   yPos += PDF_DIMENSIONS.spacing.xl;
@@ -358,12 +361,14 @@ async function generatePage2(
     doc.text('HISTORIQUE DES ACTIONS', PDF_MARGINS.left, yPos);
     yPos += PDF_DIMENSIONS.spacing.md;
 
-    const historyData = validations.slice(0, 8).map((v) => [
-      formatDateShort(v.performed_at),
-      v.action || '-',
-      getFullName(v.performer),
-      v.commentaire || '-',
-    ]);
+    const historyData = validations
+      .slice(0, 8)
+      .map((v) => [
+        formatDateShort(v.performed_at),
+        v.action || '-',
+        getFullName(v.performer),
+        v.commentaire || '-',
+      ]);
 
     autoTable(doc, {
       startY: yPos,
@@ -388,7 +393,9 @@ async function generatePage2(
       margin: { left: PDF_MARGINS.left, right: PDF_MARGINS.right },
     });
 
-    yPos = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + PDF_DIMENSIONS.spacing.lg;
+    yPos =
+      (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY +
+      PDF_DIMENSIONS.spacing.lg;
   }
 
   // ────────────────────────────────────────────────────────────────────────────
@@ -414,7 +421,7 @@ async function generatePage2(
     try {
       doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
     } catch (error) {
-      console.warn('[generateNotePDF] Impossible d\'ajouter le QR code:', error);
+      console.warn("[generateNotePDF] Impossible d'ajouter le QR code:", error);
     }
 
     // Note de sécurité
@@ -431,9 +438,7 @@ async function generatePage2(
 /**
  * Génère un PDF professionnel pour une Note SEF
  */
-export async function generateNotePDF(
-  options: GenerateNotePDFOptions
-): Promise<Blob> {
+export async function generateNotePDF(options: GenerateNotePDFOptions): Promise<Blob> {
   const {
     note,
     validations = [],
@@ -481,7 +486,7 @@ export async function generateNotePDF(
   });
 
   // Métadonnées du document
-  const reference = note.numero || note.reference_pivot || 'BROUILLON';
+  const reference = note.numero || note.reference_pivot || 'SANS REFERENCE';
   doc.setProperties({
     title: `Note SEF - ${reference}`,
     subject: note.objet || '',
@@ -500,7 +505,7 @@ export async function generateNotePDF(
 export async function downloadNotePDF(options: GenerateNotePDFOptions): Promise<void> {
   const blob = await generateNotePDF(options);
 
-  const reference = options.note.numero || options.note.reference_pivot || 'BROUILLON';
+  const reference = options.note.numero || options.note.reference_pivot || 'SANS REFERENCE';
   const dateStr = format(new Date(), 'yyyyMMdd_HHmmss');
   const filename = `ARTI_NOTE_SEF_${reference.replace(/[^a-zA-Z0-9]/g, '_')}_${dateStr}.pdf`;
 

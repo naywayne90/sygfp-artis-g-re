@@ -40,8 +40,7 @@ export interface LinkedNAEFListProps {
 // ============================================================================
 
 const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  brouillon: 'secondary',
-  soumis: 'outline',
+  soumis: 'secondary',
   a_valider: 'default',
   valide: 'default',
   validé: 'default',
@@ -52,7 +51,6 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  brouillon: 'Brouillon',
   soumis: 'Soumis',
   a_valider: 'À valider',
   valide: 'Validé',
@@ -94,7 +92,7 @@ export function LinkedNAEFList({ nsefId, compact = false, className }: LinkedNAE
 
   // Obtenir la référence affichable
   const getReference = (naef: LinkedNAEF): string => {
-    return naef.numero || naef.reference_pivot || 'Brouillon';
+    return naef.numero || naef.reference_pivot || 'Soumis';
   };
 
   // Obtenir le label de statut

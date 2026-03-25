@@ -133,9 +133,9 @@ export const STEP_PERMISSIONS: Record<
       'DIRECTEUR',
       'DAAF',
     ],
-    validateRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
-    rejectRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
-    deferRoles: ['ADMIN', 'DIRECTEUR', 'DAAF'],
+    validateRoles: ['ADMIN', 'DAAF', 'CB'],
+    rejectRoles: ['ADMIN', 'DAAF', 'CB'],
+    deferRoles: ['ADMIN', 'DAAF', 'CB'],
   },
   [ETAPES_CHAINE_DEPENSE.PASSATION_MARCHE]: {
     createRoles: ['ADMIN', 'DAAF', 'CB'],
@@ -289,7 +289,7 @@ export function canSubmitStep(
   }
 
   // Vérifier le statut
-  if (statut && statut !== 'brouillon') {
+  if (statut && statut !== 'soumis') {
     return false;
   }
 
@@ -314,7 +314,7 @@ export function canUploadPiece(userContext: UserContext, entity: EntityContext):
   if (userContext.isAdmin) return true;
 
   // Vérifier si l'entité est modifiable
-  const editableStatuts = ['brouillon', 'differe', 'en_correction'];
+  const editableStatuts = ['soumis', 'differe', 'en_correction'];
   if (entity.statut && !editableStatuts.includes(entity.statut)) {
     // Seuls certains rôles peuvent ajouter des pièces après soumission
     const canAddAfterSubmit = ['CB', 'DAAF', 'DG'] as RoleCode[];
@@ -334,8 +334,8 @@ export function canEditDossier(userContext: UserContext, entity: EntityContext):
   // Admin bypass
   if (userContext.isAdmin) return true;
 
-  // Seul le créateur peut modifier un brouillon
-  if (entity.statut === 'brouillon') {
+  // Seul le créateur peut modifier un document soumis
+  if (entity.statut === 'soumis') {
     return entity.createdBy === userContext.userId;
   }
 
@@ -355,8 +355,8 @@ export function canDeleteDossier(userContext: UserContext, entity: EntityContext
   // Admin peut tout supprimer
   if (userContext.isAdmin) return true;
 
-  // Seuls les brouillons peuvent être supprimés par leur créateur
-  if (entity.statut === 'brouillon' && entity.createdBy === userContext.userId) {
+  // Seuls les documents soumis peuvent être supprimés par leur créateur
+  if (entity.statut === 'soumis' && entity.createdBy === userContext.userId) {
     return true;
   }
 

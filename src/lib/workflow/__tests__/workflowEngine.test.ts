@@ -77,9 +77,15 @@ describe('getStepByModule', () => {
 
   it('should find all 9 modules by table name', () => {
     const tables = [
-      'notes_sef', 'notes_dg', 'imputations', 'expressions_besoin',
-      'marches', 'budget_engagements', 'budget_liquidations',
-      'ordonnancements', 'reglements',
+      'notes_sef',
+      'notes_dg',
+      'imputations',
+      'expressions_besoin',
+      'marches',
+      'budget_engagements',
+      'budget_liquidations',
+      'ordonnancements',
+      'reglements',
     ];
     tables.forEach((table) => {
       expect(getStepByModule(table)).toBeDefined();
@@ -187,7 +193,15 @@ describe('canValidate', () => {
 
 describe('checkPrerequisites', () => {
   const emptyState: Record<WorkflowStep, Statut | null> = {
-    1: null, 2: null, 3: null, 4: null, 5: null, 6: null, 7: null, 8: null, 9: null,
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+    5: null,
+    6: null,
+    7: null,
+    8: null,
+    9: null,
   };
 
   it('should always pass for step 1 (no prerequisites)', () => {
@@ -262,8 +276,8 @@ describe('checkPrerequisites', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('should fail prerequisite check when status is BROUILLON', () => {
-    const state = { ...emptyState, 2: STATUTS.BROUILLON as Statut };
+  it('should fail prerequisite check when status is SOUMIS (not validated)', () => {
+    const state = { ...emptyState, 2: STATUTS.SOUMIS as Statut };
     const result = checkPrerequisites(3, state);
     expect(result.valid).toBe(false);
   });
@@ -301,7 +315,7 @@ describe('isValidatedStatus', () => {
   });
 
   it('should return false for BROUILLON', () => {
-    expect(isValidatedStatus(STATUTS.BROUILLON)).toBe(false);
+    expect(isValidatedStatus(STATUTS.SOUMIS)).toBe(false);
   });
 
   it('should return false for SOUMIS', () => {
@@ -343,7 +357,7 @@ describe('isTerminalStatus', () => {
   });
 
   it('should return false for BROUILLON', () => {
-    expect(isTerminalStatus(STATUTS.BROUILLON)).toBe(false);
+    expect(isTerminalStatus(STATUTS.SOUMIS)).toBe(false);
   });
 });
 
@@ -352,12 +366,6 @@ describe('isTerminalStatus', () => {
 // ============================================
 
 describe('getAvailableTransitions', () => {
-  it('should return SUBMIT transition for brouillon notes_sef', () => {
-    const transitions = getAvailableTransitions('notes_sef', STATUTS.BROUILLON, ['AGENT']);
-    const actions = transitions.map((t) => t.action);
-    expect(actions).toContain('SUBMIT');
-  });
-
   it('should return VALIDATE for soumis notes_sef with DG role', () => {
     const transitions = getAvailableTransitions('notes_sef', STATUTS.SOUMIS, ['DG']);
     const actions = transitions.map((t) => t.action);
@@ -384,12 +392,12 @@ describe('getAvailableTransitions', () => {
   });
 
   it('should return empty for unknown module', () => {
-    const transitions = getAvailableTransitions('unknown', STATUTS.BROUILLON, ['ADMIN']);
+    const transitions = getAvailableTransitions('unknown', STATUTS.SOUMIS, ['ADMIN']);
     expect(transitions).toEqual([]);
   });
 
   it('should return IMPUTE transition for imputations module', () => {
-    const transitions = getAvailableTransitions('imputations', STATUTS.BROUILLON, ['CB']);
+    const transitions = getAvailableTransitions('imputations', STATUTS.SOUMIS, ['CB']);
     const actions = transitions.map((t) => t.action);
     expect(actions).toContain('IMPUTE');
   });
@@ -437,20 +445,9 @@ describe('getAvailableTransitions', () => {
 // ============================================
 
 describe('canTransition', () => {
-  it('should allow brouillon -> soumis for notes_sef', () => {
-    const result = canTransition('notes_sef', STATUTS.BROUILLON, STATUTS.SOUMIS, ['AGENT']);
-    expect(result.valid).toBe(true);
-  });
-
   it('should allow soumis -> valide for notes_sef with DG', () => {
     const result = canTransition('notes_sef', STATUTS.SOUMIS, STATUTS.VALIDE, ['DG']);
     expect(result.valid).toBe(true);
-  });
-
-  it('should deny brouillon -> valide (skipping soumis)', () => {
-    const result = canTransition('notes_sef', STATUTS.BROUILLON, STATUTS.VALIDE, ['DG']);
-    expect(result.valid).toBe(false);
-    expect(result.code).toBe('TRANSITION_NON_AUTORISEE');
   });
 
   it('should allow soumis -> rejete', () => {
@@ -468,13 +465,13 @@ describe('canTransition', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('should allow rejete -> brouillon (revise)', () => {
-    const result = canTransition('notes_sef', STATUTS.REJETE, STATUTS.BROUILLON, ['AGENT']);
+  it('should allow rejete -> soumis (revise)', () => {
+    const result = canTransition('notes_sef', STATUTS.REJETE, STATUTS.SOUMIS, ['AGENT']);
     expect(result.valid).toBe(true);
   });
 
-  it('should deny valide -> brouillon (no backward transition)', () => {
-    const result = canTransition('notes_sef', STATUTS.VALIDE, STATUTS.BROUILLON, ['ADMIN']);
+  it('should deny valide -> soumis (no backward transition)', () => {
+    const result = canTransition('notes_sef', STATUTS.VALIDE, STATUTS.SOUMIS, ['ADMIN']);
     expect(result.valid).toBe(false);
   });
 });
@@ -484,12 +481,6 @@ describe('canTransition', () => {
 // ============================================
 
 describe('getNextAction', () => {
-  it('should recommend SUBMIT for brouillon', () => {
-    const action = getNextAction('notes_sef', STATUTS.BROUILLON, ['AGENT']);
-    expect(action).not.toBeNull();
-    expect(action?.toStatus).toBe(STATUTS.SOUMIS);
-  });
-
   it('should recommend VALIDATE for soumis with validator role', () => {
     const action = getNextAction('notes_sef', STATUTS.SOUMIS, ['DG']);
     expect(action).not.toBeNull();
@@ -513,10 +504,10 @@ describe('getNextAction', () => {
     expect(deferTransition?.requiresMotif).toBe(true);
   });
 
-  it('should have requiresMotif false for submit', () => {
-    const transitions = getAvailableTransitions('notes_sef', STATUTS.BROUILLON, ['AGENT']);
-    const submitTransition = transitions.find((t) => t.action === 'SUBMIT');
-    expect(submitTransition?.requiresMotif).toBe(false);
+  it('should have requiresMotif false for resubmit from differe', () => {
+    const transitions = getAvailableTransitions('notes_sef', STATUTS.DIFFERE, ['AGENT']);
+    const resubmitTransition = transitions.find((t) => t.action === 'RESUBMIT');
+    expect(resubmitTransition?.requiresMotif).toBe(false);
   });
 });
 
@@ -531,9 +522,9 @@ describe('getStatutUIConfig', () => {
     expect(config.icon).toBe('CheckCircle');
   });
 
-  it('should return config for brouillon', () => {
-    const config = getStatutUIConfig(STATUTS.BROUILLON);
-    expect(config.label).toBe('Brouillon');
+  it('should return config for soumis', () => {
+    const config = getStatutUIConfig(STATUTS.SOUMIS);
+    expect(config.label).toBe('Soumis');
   });
 
   it('should return fallback for unknown statut', () => {
@@ -549,12 +540,12 @@ describe('getStatutUIConfig', () => {
 
 describe('getBlockingMessage', () => {
   it('should return a message for unknown module', () => {
-    const msg = getBlockingMessage('unknown', STATUTS.BROUILLON, 'SUBMIT');
+    const msg = getBlockingMessage('unknown', STATUTS.SOUMIS, 'SUBMIT');
     expect(msg).toBe('Module inconnu');
   });
 
   it('should return a string for known module', () => {
-    const msg = getBlockingMessage('notes_sef', STATUTS.BROUILLON, 'VALIDATE');
+    const msg = getBlockingMessage('notes_sef', STATUTS.SOUMIS, 'VALIDATE');
     expect(typeof msg).toBe('string');
     expect(msg.length).toBeGreaterThan(0);
   });
@@ -606,7 +597,6 @@ describe('WORKFLOW_STEPS structure', () => {
 
 describe('STATUTS constants', () => {
   it('should have all expected statut values', () => {
-    expect(STATUTS.BROUILLON).toBe('brouillon');
     expect(STATUTS.SOUMIS).toBe('soumis');
     expect(STATUTS.VALIDE).toBe('valide');
     expect(STATUTS.REJETE).toBe('rejete');

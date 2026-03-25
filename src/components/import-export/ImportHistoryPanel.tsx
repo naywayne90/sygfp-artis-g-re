@@ -1,26 +1,33 @@
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { 
-  FileSpreadsheet, 
-  Eye, 
-  Download, 
-  RefreshCw, 
-  CheckCircle2, 
-  XCircle, 
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  FileSpreadsheet,
+  Eye,
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
   Clock,
   Loader2,
   History,
   Terminal,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ImportRun {
   id: string;
@@ -45,11 +52,31 @@ interface ImportLog {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  draft: { label: "Brouillon", color: "bg-gray-100 text-gray-800", icon: <Clock className="h-3 w-3" /> },
-  validated: { label: "Validé", color: "bg-purple-100 text-purple-800", icon: <CheckCircle2 className="h-3 w-3" /> },
-  importing: { label: "En cours", color: "bg-yellow-100 text-yellow-800", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
-  imported: { label: "Importé", color: "bg-green-100 text-green-800", icon: <CheckCircle2 className="h-3 w-3" /> },
-  failed: { label: "Échoué", color: "bg-red-100 text-red-800", icon: <XCircle className="h-3 w-3" /> },
+  draft: {
+    label: 'Soumis',
+    color: 'bg-gray-100 text-gray-800',
+    icon: <Clock className="h-3 w-3" />,
+  },
+  validated: {
+    label: 'Validé',
+    color: 'bg-purple-100 text-purple-800',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  importing: {
+    label: 'En cours',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: <Loader2 className="h-3 w-3 animate-spin" />,
+  },
+  imported: {
+    label: 'Importé',
+    color: 'bg-green-100 text-green-800',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+  },
+  failed: {
+    label: 'Échoué',
+    color: 'bg-red-100 text-red-800',
+    icon: <XCircle className="h-3 w-3" />,
+  },
 };
 
 interface ImportHistoryPanelProps {
@@ -67,15 +94,15 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("import_runs")
-        .select("*")
-        .order("created_at", { ascending: false })
+        .from('import_runs')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
       setRuns(data || []);
     } catch (error) {
-      console.error("Error loading import runs:", error);
+      console.error('Error loading import runs:', error);
       toast.error("Erreur lors du chargement de l'historique");
     } finally {
       setIsLoading(false);
@@ -90,15 +117,15 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
     setIsLoadingLogs(true);
     try {
       const { data, error } = await supabase
-        .from("import_logs")
-        .select("*")
-        .eq("run_id", runId)
-        .order("timestamp", { ascending: true });
+        .from('import_logs')
+        .select('*')
+        .eq('run_id', runId)
+        .order('timestamp', { ascending: true });
 
       if (error) throw error;
       setLogs(data || []);
     } catch (error) {
-      console.error("Error loading logs:", error);
+      console.error('Error loading logs:', error);
     } finally {
       setIsLoadingLogs(false);
     }
@@ -112,49 +139,46 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
   const exportRunErrors = async (run: ImportRun) => {
     try {
       const { data, error } = await supabase
-        .from("import_budget_staging")
-        .select("*")
-        .eq("run_id", run.id)
-        .eq("validation_status", "error");
+        .from('import_budget_staging')
+        .select('*')
+        .eq('run_id', run.id)
+        .eq('validation_status', 'error');
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        toast.info("Aucune erreur à exporter");
+        toast.info('Aucune erreur à exporter');
         return;
       }
 
       // Create CSV
-      const headers = ["Ligne", "Imputation", "Montant", "Erreurs"];
-      const rows = data.map(row => [
+      const headers = ['Ligne', 'Imputation', 'Montant', 'Erreurs'];
+      const rows = data.map((row) => [
         row.row_number,
-        row.computed_imputation || row.raw_imputation || "",
-        row.raw_montant || "",
-        row.validation_errors || "",
+        row.computed_imputation || row.raw_imputation || '',
+        row.raw_montant || '',
+        row.validation_errors || '',
       ]);
 
-      const csvContent = [
-        headers.join(";"),
-        ...rows.map(r => r.join(";")),
-      ].join("\n");
+      const csvContent = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
 
-      const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `erreurs_import_${run.id.slice(0, 8)}.csv`;
       link.click();
       URL.revokeObjectURL(link.href);
-      toast.success("Erreurs exportées");
+      toast.success('Erreurs exportées');
     } catch (error) {
-      console.error("Error exporting errors:", error);
+      console.error('Error exporting errors:', error);
       toast.error("Erreur lors de l'export");
     }
   };
 
   // Stats
   const statsTotal = runs.length;
-  const statsImported = runs.filter(r => r.status === "imported").length;
-  const statsFailed = runs.filter(r => r.status === "failed").length;
+  const statsImported = runs.filter((r) => r.status === 'imported').length;
+  const statsFailed = runs.filter((r) => r.status === 'failed').length;
 
   return (
     <div className="space-y-4">
@@ -181,7 +205,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
         <Card>
           <CardContent className="pt-4 flex items-center justify-center">
             <Button variant="outline" onClick={loadRuns} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Actualiser
             </Button>
           </CardContent>
@@ -195,9 +219,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
             <History className="h-5 w-5" />
             Historique des imports
           </CardTitle>
-          <CardDescription>
-            Traçabilité complète des imports budgétaires avec logs
-          </CardDescription>
+          <CardDescription>Traçabilité complète des imports budgétaires avec logs</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -229,7 +251,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
                   return (
                     <TableRow key={run.id}>
                       <TableCell className="font-mono text-sm">
-                        {format(new Date(run.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                        {format(new Date(run.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{run.exercice}</Badge>
@@ -243,9 +265,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
                           {statusConfig.label}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {run.total_rows || 0}
-                      </TableCell>
+                      <TableCell className="text-right font-mono">{run.total_rows || 0}</TableCell>
                       <TableCell className="text-right font-mono text-green-600">
                         {run.ok_rows || 0}
                       </TableCell>
@@ -254,20 +274,12 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(run)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => handleViewDetails(run)}>
                             <Eye className="h-4 w-4 mr-1" />
                             Détails
                           </Button>
                           {run.error_rows > 0 && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => exportRunErrors(run)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => exportRunErrors(run)}>
                               <Download className="h-4 w-4" />
                             </Button>
                           )}
@@ -305,7 +317,7 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Statut:</span>
-                  <Badge className={STATUS_CONFIG[selectedRun.status]?.color || ""}>
+                  <Badge className={STATUS_CONFIG[selectedRun.status]?.color || ''}>
                     {STATUS_CONFIG[selectedRun.status]?.label || selectedRun.status}
                   </Badge>
                 </div>
@@ -321,23 +333,30 @@ export function ImportHistoryPanel({ exercice: _exercice }: ImportHistoryPanelPr
                 ) : (
                   <div className="space-y-1 font-mono text-sm">
                     {logs.map((log) => (
-                      <div 
-                        key={log.id} 
+                      <div
+                        key={log.id}
                         className={`flex gap-2 ${
-                          log.level === "error" ? "text-red-400" :
-                          log.level === "warn" ? "text-yellow-400" :
-                          log.level === "info" ? "text-blue-400" :
-                          "text-slate-300"
+                          log.level === 'error'
+                            ? 'text-red-400'
+                            : log.level === 'warn'
+                              ? 'text-yellow-400'
+                              : log.level === 'info'
+                                ? 'text-blue-400'
+                                : 'text-slate-300'
                         }`}
                       >
                         <span className="text-slate-500">
-                          {format(new Date(log.timestamp), "HH:mm:ss")}
+                          {format(new Date(log.timestamp), 'HH:mm:ss')}
                         </span>
-                        <span className={`uppercase w-12 ${
-                          log.level === "error" ? "text-red-500" :
-                          log.level === "warn" ? "text-yellow-500" :
-                          "text-blue-500"
-                        }`}>
+                        <span
+                          className={`uppercase w-12 ${
+                            log.level === 'error'
+                              ? 'text-red-500'
+                              : log.level === 'warn'
+                                ? 'text-yellow-500'
+                                : 'text-blue-500'
+                          }`}
+                        >
                           [{log.level}]
                         </span>
                         <span>{log.message}</span>

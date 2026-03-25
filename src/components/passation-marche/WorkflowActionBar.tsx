@@ -105,7 +105,7 @@ export function WorkflowActionBar({ passation }: WorkflowActionBarProps) {
   const actions = useMemo((): ActionConfig[] => {
     const result: ActionConfig[] = [];
 
-    if (passation.statut === 'brouillon' && isDAAF) {
+    if (passation.statut === 'soumis' && isDAAF) {
       const hasSoums = allSoumissionnaires.length > 0;
       result.push({
         type: 'publish',

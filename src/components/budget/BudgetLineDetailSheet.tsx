@@ -44,8 +44,6 @@ const formatDate = (dateStr: string | null) => {
 
 const getStatusBadge = (status: string | null) => {
   switch (status) {
-    case 'brouillon':
-      return <Badge variant="secondary">Brouillon</Badge>;
     case 'soumis':
       return (
         <Badge variant="default" className="bg-blue-500">
@@ -61,7 +59,7 @@ const getStatusBadge = (status: string | null) => {
     case 'rejete':
       return <Badge variant="destructive">Rejeté</Badge>;
     default:
-      return <Badge variant="secondary">Brouillon</Badge>;
+      return <Badge variant="secondary">Soumis</Badge>;
   }
 };
 

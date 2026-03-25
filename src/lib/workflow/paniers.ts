@@ -1,9 +1,8 @@
 /**
  * Configuration des paniers de tâches par rôle
- * 
+ *
  * Chaque rôle a un ensemble de "paniers" représentant les actions en attente.
  */
-
 
 // ===== Types =====
 
@@ -79,7 +78,7 @@ export const PANIERS_CONFIG: Record<string, RolePaniers> = {
         table: 'marches',
         statutFiltre: ['a_approuver', 'en_cours'],
         label: 'Marchés à approuver',
-        description: 'Marchés publics en attente d\'approbation',
+        description: "Marchés publics en attente d'approbation",
         route: '/marches?statut=a_approuver',
         priorite: 'normale',
       },
@@ -161,10 +160,10 @@ export const PANIERS_CONFIG: Record<string, RolePaniers> = {
         id: 'sdpm_liquidations',
         module: 'liquidations',
         table: 'budget_liquidations',
-        statutFiltre: 'brouillon',
+        statutFiltre: 'soumis',
         label: 'Liquidations à saisir',
         description: 'Liquidations en cours de préparation',
-        route: '/liquidations?statut=brouillon',
+        route: '/liquidations?statut=soumis',
         priorite: 'normale',
       },
       {
@@ -191,7 +190,7 @@ export const PANIERS_CONFIG: Record<string, RolePaniers> = {
         table: 'reglements',
         statutFiltre: 'en_cours',
         label: 'Règlements à effectuer',
-        description: 'Paiements en attente d\'exécution',
+        description: "Paiements en attente d'exécution",
         route: '/reglements?statut=en_cours',
         priorite: 'haute',
       },
@@ -232,13 +231,13 @@ export const PANIERS_CONFIG: Record<string, RolePaniers> = {
     label: 'Agent / Gestionnaire',
     paniers: [
       {
-        id: 'agent_notes_brouillon',
+        id: 'agent_notes_soumis',
         module: 'notes_sef',
         table: 'notes_sef',
-        statutFiltre: 'brouillon',
-        label: 'Mes brouillons SEF',
-        description: 'Notes SEF en cours de rédaction',
-        route: '/notes-sef?statut=brouillon',
+        statutFiltre: 'soumis',
+        label: 'Mes notes SEF soumises',
+        description: 'Notes SEF soumises en attente de validation',
+        route: '/notes-sef?statut=soumis',
         priorite: 'normale',
       },
       {
@@ -262,9 +261,9 @@ export function getPaniersForRole(roleCode: string): PanierConfig[] {
 }
 
 export function getAllPaniers(): PanierConfig[] {
-  return Object.values(PANIERS_CONFIG).flatMap(role => role.paniers);
+  return Object.values(PANIERS_CONFIG).flatMap((role) => role.paniers);
 }
 
 export function getPanierById(id: string): PanierConfig | undefined {
-  return getAllPaniers().find(p => p.id === id);
+  return getAllPaniers().find((p) => p.id === id);
 }

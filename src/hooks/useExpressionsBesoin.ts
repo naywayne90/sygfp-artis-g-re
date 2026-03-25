@@ -132,10 +132,17 @@ export const VALIDATION_STEPS = [
 ];
 
 // Legacy : ancien workflow 3 niveaux hiérarchiques (pour les 189 EB existantes)
-export const LEGACY_VALIDATION_STEPS = [
-  { order: 1, role: 'CHEF_SERVICE', label: 'Chef de Service' },
-  { order: 2, role: 'SOUS_DIRECTEUR', label: 'Sous-Directeur' },
-  { order: 3, role: 'DIRECTEUR', label: 'Directeur' },
+/**
+ * Circuit de validation EB à l'ARTI (3 étapes) :
+ * 1. Sous-Dir DAAF (HIEN Issa) → vérifie la complétude
+ * 2. CB → contrôle les crédits
+ * 3. DAAF (TOURE Souleymane) → approuve
+ * Le DG n'intervient PAS sur les EB (seulement sur l'engagement)
+ */
+export const EB_VALIDATION_STEPS = [
+  { order: 1, role: 'DAAF', label: 'Sous-Direction DAAF', description: 'Vérification complétude' },
+  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire', description: 'Contrôle crédits' },
+  { order: 3, role: 'DAAF', label: 'Directeur DAAF', description: 'Approbation finale' },
 ];
 
 export const URGENCE_OPTIONS = [
@@ -183,9 +190,8 @@ export interface ExpressionBesoinFilters {
 // ---------------------------------------------------------------------------
 
 export interface ExpressionBesoinCounts {
-  brouillon: number;
   soumis: number;
-  verifie: number;
+  en_validation: number;
   valide: number;
   rejete: number;
   differe: number;
@@ -194,9 +200,8 @@ export interface ExpressionBesoinCounts {
 }
 
 const EMPTY_COUNTS: ExpressionBesoinCounts = {
-  brouillon: 0,
   soumis: 0,
-  verifie: 0,
+  en_validation: 0,
   valide: 0,
   rejete: 0,
   differe: 0,
@@ -300,7 +305,7 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
 
       const result: ExpressionBesoinCounts = { ...EMPTY_COUNTS };
       for (const row of data || []) {
-        const s = (row.statut || 'brouillon') as keyof Omit<ExpressionBesoinCounts, 'total'>;
+        const s = (row.statut || 'soumis') as keyof Omit<ExpressionBesoinCounts, 'total'>;
         if (s in result) {
           result[s]++;
         }
@@ -430,7 +435,7 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
           ...data,
           numero,
           exercice,
-          statut: 'brouillon',
+          // statut defaults to 'soumis' via DB default
         })
         .select()
         .single();
@@ -476,7 +481,7 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
           ...rest,
           liste_articles: articlesJson,
           exercice: exercice || new Date().getFullYear(),
-          statut: 'brouillon',
+          // statut defaults to 'soumis' via DB default
           created_by: userId,
         })
         .select()
@@ -561,106 +566,92 @@ export function useExpressionsBesoin(filters?: ExpressionBesoinFilters) {
     },
   });
 
-  // Verify expression (CB vérifie couverture budgétaire : soumis -> verifie)
+  // Valider une étape de l'EB (3 étapes : Sous-Dir DAAF → CB → DAAF)
+  // Même pattern que l'engagement — statut = 'en_validation' + etape_validation incrémenté
   const verifyMutation = useMutation({
-    mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
-      // Enregistrer la validation CB (step 1)
-      await supabase.from('expression_besoin_validations').insert({
-        expression_besoin_id: id,
-        step_order: 1,
-        role: 'CB',
-        status: 'approved',
-        validated_at: new Date().toISOString(),
-        comments: comments || null,
-      });
-
-      const userId = (await supabase.auth.getUser()).data.user?.id;
-      const { error } = await supabase
-        .from('expressions_besoin')
-        .update({
-          statut: 'verifie',
-          verified_at: new Date().toISOString(),
-          verified_by: userId,
-          current_validation_step: 2,
-          rejection_reason: null,
-          date_differe: null,
-          motif_differe: null,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      invalidateAll(queryClient);
-      toast.success('Couverture budgétaire vérifiée, transmis au DG/DAAF');
-    },
-    onError: (error) => {
-      toast.error('Erreur lors de la vérification: ' + error.message);
-    },
-  });
-
-  // Validate expression (DG/DAAF valide : verifie -> valide)
-  const validateMutation = useMutation({
-    mutationFn: async ({ id, comments }: { id: string; comments?: string }) => {
-      // Enregistrer la validation DG/DAAF (step 2)
-      await supabase.from('expression_besoin_validations').insert({
-        expression_besoin_id: id,
-        step_order: 2,
-        role: 'DG',
-        status: 'approved',
-        validated_at: new Date().toISOString(),
-        comments: comments || null,
-      });
-
+    mutationFn: async ({
+      id,
+      comments,
+      stepNumber,
+    }: {
+      id: string;
+      comments?: string;
+      stepNumber?: number;
+    }) => {
       const userId = (await supabase.auth.getUser()).data.user?.id;
 
-      // Fetch EB details for QR code registration
-      const { data: ebData } = await supabase
+      // Récupérer l'EB pour connaître l'étape courante
+      const { data: eb } = await supabase
         .from('expressions_besoin')
-        .select('numero, objet, direction_id')
+        .select('statut, etape_validation, current_validation_step')
         .eq('id', id)
         .single();
 
-      const { error } = await supabase
-        .from('expressions_besoin')
-        .update({
-          statut: 'valide',
-          validated_at: new Date().toISOString(),
-          validated_by: userId,
-          current_validation_step: 2,
-          rejection_reason: null,
-          date_differe: null,
-          motif_differe: null,
-        })
-        .eq('id', id);
+      const currentStep = stepNumber || eb?.etape_validation || eb?.current_validation_step || 1;
+      const step = EB_VALIDATION_STEPS[currentStep - 1];
+      const isLastStep = currentStep >= EB_VALIDATION_STEPS.length;
+      const nextStep = isLastStep ? currentStep : currentStep + 1;
+
+      // Enregistrer la validation dans l'audit trail
+      await supabase.from('expression_besoin_validations').insert({
+        expression_besoin_id: id,
+        step_order: currentStep,
+        role: step?.role || 'DAAF',
+        status: 'approved',
+        validated_at: new Date().toISOString(),
+        validated_by: userId,
+        comments: comments || null,
+      });
+
+      // Mettre à jour le statut
+      const updateData: Record<string, unknown> = {
+        current_validation_step: nextStep,
+        etape_validation: nextStep,
+        rejection_reason: null,
+        date_differe: null,
+        motif_differe: null,
+      };
+
+      if (isLastStep) {
+        // Dernière étape (DAAF) → passe en validé
+        updateData.statut = 'valide';
+        updateData.validated_at = new Date().toISOString();
+        updateData.validated_by = userId;
+      } else if (currentStep === 1) {
+        // Étape 1 (Sous-Dir) → en_validation + verified
+        updateData.statut = 'en_validation';
+        updateData.verified_at = new Date().toISOString();
+        updateData.verified_by = userId;
+      } else {
+        // Étape intermédiaire (CB) → reste en_validation
+        updateData.statut = 'en_validation';
+      }
+
+      // Écrire les colonnes visa si elles existent
+      if (currentStep === 2) {
+        updateData.visa_cb_user_id = userId;
+        updateData.visa_cb_date = new Date().toISOString();
+      } else if (currentStep === 3) {
+        updateData.visa_daaf_user_id = userId;
+        updateData.visa_daaf_date = new Date().toISOString();
+      }
+
+      const { error } = await supabase.from('expressions_besoin').update(updateData).eq('id', id);
 
       if (error) throw error;
-
-      // Register QR code document for anti-falsification
-      try {
-        await supabase.rpc('register_generated_document', {
-          p_entity_type: 'expressions_besoin',
-          p_entity_id: id,
-          p_type_document: 'pdf_expression_besoin',
-          p_reference: ebData?.numero || id,
-          p_nom_fichier: `ARTI_EB_${ebData?.numero || 'UNKNOWN'}.pdf`,
-          p_exercice: exercice || new Date().getFullYear(),
-          p_direction_id: ebData?.direction_id || undefined,
-          p_metadata: JSON.parse(JSON.stringify({ validated_by: userId, objet: ebData?.objet })),
-        });
-      } catch (qrError) {
-        // QR registration failure should not block validation
-        console.warn('[EB Validate] QR registration failed:', qrError);
-      }
     },
     onSuccess: () => {
       invalidateAll(queryClient);
-      toast.success('Expression de besoin validée définitivement !');
+      toast.success('Validation effectuée');
     },
     onError: (error) => {
       toast.error('Erreur lors de la validation: ' + error.message);
     },
   });
+
+  // Alias pour rétrocompatibilité — validateMutation appelle verifyMutation
+  // avec le numéro d'étape courant (détecté automatiquement)
+  const validateMutation = verifyMutation;
 
   // Reject expression
   const rejectMutation = useMutation({

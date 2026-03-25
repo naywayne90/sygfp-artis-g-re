@@ -700,7 +700,7 @@ export async function generateNoteSEFPdf(options: NoteSEFPdfOptions): Promise<Pd
   await generatePage2(doc, note, validation, qrDataUrl, validationUrl, signataire);
 
   // Ajouter métadonnées
-  const noteRef = note.dossier_ref || note.reference_pivot || 'Brouillon';
+  const noteRef = note.dossier_ref || note.reference_pivot || 'Soumis';
   doc.setProperties({
     title: `ARTI_NOTE_DG_SYGFP - ${noteRef}`,
     subject: note.objet || '',

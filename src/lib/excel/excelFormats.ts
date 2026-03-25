@@ -114,7 +114,6 @@ export function parseDate(value: string | Date | null | undefined): Date | null 
 // ============================================================================
 
 export const STATUS_LABELS: Record<string, string> = {
-  brouillon: 'Brouillon',
   soumis: 'Soumis',
   a_valider: 'À valider',
   valide: 'Validé',

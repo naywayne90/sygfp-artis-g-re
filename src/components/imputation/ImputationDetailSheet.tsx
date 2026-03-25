@@ -82,7 +82,10 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     a_valider: {
       label: '\u00C0 valider',
       className: 'bg-warning/10 text-warning border-warning/20',
@@ -97,7 +100,7 @@ const getStatusBadge = (status: string | null) => {
       className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     },
   };
-  const variant = variants[status || 'brouillon'] || variants.brouillon;
+  const variant = variants[status || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}
@@ -171,7 +174,7 @@ const getCompletedSteps = (statut: string): number[] => {
     case 'valide':
       return [1, 2, 3]; // SEF + AEF + Imputation
     case 'a_valider':
-    case 'brouillon':
+    case 'soumis':
       return [1, 2]; // SEF + AEF done
     case 'rejete':
     case 'differe':
@@ -881,7 +884,7 @@ function ActionMenu({
   deleteImputation: (id: string) => Promise<unknown>;
 }) {
   const { toast } = useToast();
-  const isBrouillon = imputation.statut === 'brouillon';
+  const isSoumis = imputation.statut === 'soumis';
   const isAValider = imputation.statut === 'a_valider';
   const isValide = imputation.statut === 'valide';
 
@@ -913,8 +916,8 @@ function ActionMenu({
           Exporter PDF
         </DropdownMenuItem>
 
-        {/* Modifier (cr\u00E9ateur + brouillon) */}
-        {isCreator && isBrouillon && (
+        {/* Modifier (cr\u00E9ateur + soumis) */}
+        {isCreator && isSoumis && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -928,8 +931,8 @@ function ActionMenu({
           </>
         )}
 
-        {/* Soumettre (cr\u00E9ateur + brouillon) */}
-        {isCreator && isBrouillon && (
+        {/* Soumettre (cr\u00E9ateur + soumis) */}
+        {isCreator && isSoumis && (
           <DropdownMenuItem
             onClick={() => handleAction(() => submitImputation(imputation.id), 'Soumission')}
           >
@@ -938,8 +941,8 @@ function ActionMenu({
           </DropdownMenuItem>
         )}
 
-        {/* Supprimer (cr\u00E9ateur + brouillon) */}
-        {isCreator && isBrouillon && (
+        {/* Supprimer (cr\u00E9ateur + soumis) */}
+        {isCreator && isSoumis && (
           <DropdownMenuItem
             className="text-destructive"
             onClick={() => handleAction(() => deleteImputation(imputation.id), 'Suppression')}

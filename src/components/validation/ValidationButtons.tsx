@@ -18,7 +18,7 @@ import type {
 } from '@/types/validation';
 
 // Statuts qui permettent la validation
-const VALIDATABLE_STATUSES = ['en_attente', 'soumis', 'brouillon', 'en_cours', 'pending'];
+const VALIDATABLE_STATUSES = ['en_attente', 'soumis', 'en_cours', 'pending'];
 
 export function ValidationButtons({
   entityType,
@@ -31,15 +31,8 @@ export function ValidationButtons({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentAction, setCurrentAction] = useState<ValidationAction | null>(null);
 
-  const {
-    validate,
-    differ,
-    reject,
-    isValidating,
-    isDiffering,
-    isRejecting,
-    isLoading,
-  } = useValidation(entityType);
+  const { validate, differ, reject, isValidating, isDiffering, isRejecting, isLoading } =
+    useValidation(entityType);
 
   // Vérifier si l'entité peut être validée
   const canValidate = VALIDATABLE_STATUSES.includes(currentStatus.toLowerCase());

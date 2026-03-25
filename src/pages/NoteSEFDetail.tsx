@@ -5,7 +5,7 @@
  * - Affiche tous les champs de la note
  * - Pièces jointes avec téléchargement (URL signée)
  * - Historique (timeline)
- * - Édition si brouillon et créateur/admin
+ * - Édition si soumis et créateur/admin
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -99,15 +99,10 @@ interface NoteSEFExtended extends NoteSEF {
 
 const getStatusBadge = (status: string | null) => {
   const variants: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    brouillon: {
-      label: 'Brouillon',
-      className: 'bg-muted text-muted-foreground',
-      icon: <Edit className="h-3 w-3" />,
-    },
     soumis: {
       label: 'Soumis',
-      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      icon: <Send className="h-3 w-3" />,
+      className: 'bg-muted text-muted-foreground',
+      icon: <Edit className="h-3 w-3" />,
     },
     a_valider: {
       label: 'À valider',
@@ -130,7 +125,7 @@ const getStatusBadge = (status: string | null) => {
       icon: <Clock className="h-3 w-3" />,
     },
   };
-  const variant = variants[status || 'brouillon'] || variants.brouillon;
+  const variant = variants[status || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={`${variant.className} flex items-center gap-1.5`}>
       {variant.icon}
@@ -168,8 +163,8 @@ const getActionDescription = (
     : 'Système';
 
   const descriptions: Record<string, { title: string; detail?: string }> = {
-    création: { title: `${actorName} a créé le brouillon` },
-    creation: { title: `${actorName} a créé le brouillon` },
+    création: { title: `${actorName} a créé le soumis` },
+    creation: { title: `${actorName} a créé le soumis` },
     soumission: { title: `${actorName} a soumis la note pour validation` },
     resoumission: { title: `${actorName} a re-soumis la note` },
     validation: { title: `${actorName} a validé la note`, detail: 'Dossier créé automatiquement' },
@@ -202,8 +197,8 @@ const getActionDescription = (
 // Legacy label pour rétrocompatibilité
 const _getActionLabel = (action: string) => {
   const labels: Record<string, string> = {
-    création: 'Création du brouillon',
-    creation: 'Création du brouillon',
+    création: 'Création du soumis',
+    creation: 'Création du soumis',
     soumission: 'Soumis pour validation',
     validation: 'Validé',
     rejet: 'Rejeté',
@@ -836,7 +831,7 @@ export default function NoteSEFDetail() {
         <PrintButton entityType="note_sef" entityId={note.id} label="Imprimer" />
       </PageHeader>
 
-      {/* Actions bar pour brouillon */}
+      {/* Actions bar pour soumis */}
       {(canModify || canSubmit) && !isEditing && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-4">

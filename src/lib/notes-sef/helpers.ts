@@ -52,16 +52,20 @@ export function getBeneficiaireTypeLabel(type: string | null): string {
  * Obtenir les classes CSS du badge pour un statut
  */
 export function getStatutBadgeClassName(statut: string | null): string {
-  return STATUT_BADGE_VARIANTS[statut as NoteSEFStatutType]?.className || 
-         STATUT_BADGE_VARIANTS[NoteSEFStatut.DRAFT].className;
+  return (
+    STATUT_BADGE_VARIANTS[statut as NoteSEFStatutType]?.className ||
+    STATUT_BADGE_VARIANTS[NoteSEFStatut.SUBMITTED].className
+  );
 }
 
 /**
  * Obtenir les classes CSS du badge pour une urgence
  */
 export function getUrgenceBadgeClassName(urgence: string | null): string {
-  return URGENCE_BADGE_VARIANTS[urgence as NoteSEFUrgenceType]?.className || 
-         URGENCE_BADGE_VARIANTS[NoteSEFUrgence.NORMAL].className;
+  return (
+    URGENCE_BADGE_VARIANTS[urgence as NoteSEFUrgenceType]?.className ||
+    URGENCE_BADGE_VARIANTS[NoteSEFUrgence.NORMAL].className
+  );
 }
 
 // ============================================
@@ -72,10 +76,10 @@ export function getUrgenceBadgeClassName(urgence: string | null): string {
  * Vérifier si une transition de statut est autorisée
  */
 export function isTransitionAllowed(
-  currentStatut: NoteSEFStatutType | null, 
+  currentStatut: NoteSEFStatutType | null,
   targetStatut: NoteSEFStatutType
 ): boolean {
-  const current = currentStatut || NoteSEFStatut.DRAFT;
+  const current = currentStatut || NoteSEFStatut.SUBMITTED;
   const allowedTargets = STATUT_TRANSITIONS[current] || [];
   return allowedTargets.includes(targetStatut);
 }
@@ -84,14 +88,14 @@ export function isTransitionAllowed(
  * Vérifier si une note peut être modifiée
  */
 export function canEditNote(note: NoteSEFEntity): boolean {
-  return note.statut === NoteSEFStatut.DRAFT;
+  return note.statut === NoteSEFStatut.SUBMITTED;
 }
 
 /**
  * Vérifier si une note peut être soumise
  */
 export function canSubmitNote(note: NoteSEFEntity): boolean {
-  return note.statut === NoteSEFStatut.DRAFT;
+  return note.statut === NoteSEFStatut.SUBMITTED;
 }
 
 /**
@@ -99,25 +103,25 @@ export function canSubmitNote(note: NoteSEFEntity): boolean {
  */
 export function canDecideOnNote(note: NoteSEFEntity): boolean {
   const decidableStatuts = [
-    NoteSEFStatut.SUBMITTED, 
-    NoteSEFStatut.PENDING_VALIDATION, 
-    NoteSEFStatut.DEFERRED
+    NoteSEFStatut.SUBMITTED,
+    NoteSEFStatut.PENDING_VALIDATION,
+    NoteSEFStatut.DEFERRED,
   ];
-  return decidableStatuts.includes(note.statut as typeof decidableStatuts[number]);
+  return decidableStatuts.includes(note.statut as (typeof decidableStatuts)[number]);
 }
 
 /**
  * Vérifier si une note peut être supprimée
  */
 export function canDeleteNote(note: NoteSEFEntity): boolean {
-  return note.statut === NoteSEFStatut.DRAFT;
+  return note.statut === NoteSEFStatut.SUBMITTED;
 }
 
 /**
  * Vérifier si un utilisateur a un rôle de validateur
  */
 export function isValidator(roles: string[]): boolean {
-  return roles.some(role => VALIDATOR_ROLES.includes(role as ValidatorRole));
+  return roles.some((role) => VALIDATOR_ROLES.includes(role as ValidatorRole));
 }
 
 // ============================================
@@ -170,9 +174,9 @@ export function calculateCounts(notes: NoteSEFEntity[]): NoteSEFCounts {
 
   for (const note of notes) {
     counts.total++;
-    const statut = note.statut || NoteSEFStatut.DRAFT;
-    if (statut === 'brouillon') counts.brouillon++;
-    else if (statut === 'soumis') counts.soumis++;
+    const statut = note.statut || NoteSEFStatut.SUBMITTED;
+    // brouillon mappe vers soumis (plus de brouillon dans le nouveau systeme)
+    if (statut === 'brouillon' || statut === 'soumis') counts.soumis++;
     else if (statut === 'a_valider') counts.a_valider++;
     else if (statut === 'valide') counts.valide++;
     else if (statut === 'differe') counts.differe++;
@@ -188,7 +192,7 @@ export function calculateCounts(notes: NoteSEFEntity[]): NoteSEFCounts {
 export function groupByStatut(notes: NoteSEFEntity[]): Record<NoteSEFStatutType, NoteSEFEntity[]> {
   return notes.reduce(
     (acc, note) => {
-      const statut = (note.statut as NoteSEFStatutType) || NoteSEFStatut.DRAFT;
+      const statut = (note.statut as NoteSEFStatutType) || NoteSEFStatut.SUBMITTED;
       if (!acc[statut]) {
         acc[statut] = [];
       }
@@ -230,19 +234,19 @@ export function formatBeneficiaire(note: NoteSEFEntity): string {
  */
 export function validateAttachmentFile(file: File): { valid: boolean; error?: string } {
   if (file.size > NOTES_SEF_CONFIG.MAX_ATTACHMENT_SIZE) {
-    return { 
-      valid: false, 
-      error: `Le fichier dépasse la taille maximale de ${NOTES_SEF_CONFIG.MAX_ATTACHMENT_SIZE / (1024 * 1024)} Mo` 
+    return {
+      valid: false,
+      error: `Le fichier dépasse la taille maximale de ${NOTES_SEF_CONFIG.MAX_ATTACHMENT_SIZE / (1024 * 1024)} Mo`,
     };
   }
-  
+
   const allowedTypes: readonly string[] = NOTES_SEF_CONFIG.ALLOWED_ATTACHMENT_TYPES;
   if (!allowedTypes.includes(file.type)) {
-    return { 
-      valid: false, 
-      error: `Type de fichier non autorisé: ${file.type}` 
+    return {
+      valid: false,
+      error: `Type de fichier non autorisé: ${file.type}`,
     };
   }
-  
+
   return { valid: true };
 }

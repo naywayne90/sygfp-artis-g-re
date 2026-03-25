@@ -579,7 +579,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
           reglement_urgent_date: data.reglement_urgent ? new Date().toISOString() : null,
           reglement_urgent_par: data.reglement_urgent ? user.id : null,
           exercice,
-          statut: 'brouillon',
+          // statut defaults to 'soumis' via DB default
           workflow_status: 'en_attente',
           current_step: 0,
           created_by: user.id,
@@ -677,10 +677,7 @@ export function useLiquidations(options?: LiquidationQueryOptions) {
       if (fetchError) throw fetchError;
 
       // Service fait doit être certifié avant soumission
-      if (
-        liquidationBefore?.statut !== 'certifié_sf' &&
-        liquidationBefore?.statut !== 'brouillon'
-      ) {
+      if (liquidationBefore?.statut !== 'certifié_sf' && liquidationBefore?.statut !== 'soumis') {
         throw new Error('Le service fait doit être certifié avant la soumission');
       }
 
@@ -1655,7 +1652,7 @@ export function useLiquidationCounts() {
       const items = data || [];
       return {
         total: items.length,
-        brouillon: items.filter((i) => i.statut === 'brouillon').length,
+        brouillon: items.filter((i) => i.statut === 'soumis').length,
         certifie_sf: items.filter((i) => i.statut === 'certifié_sf').length,
         soumis: items.filter((i) => i.statut === 'soumis').length,
         valide_daaf: items.filter((i) => i.statut === 'validé_daaf').length,

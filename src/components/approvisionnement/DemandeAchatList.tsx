@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -10,69 +10,69 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, MoreHorizontal, Eye, CheckCircle, FileText, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useApprovisionnement } from "@/hooks/useApprovisionnement";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+} from '@/components/ui/dropdown-menu';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Search, MoreHorizontal, Eye, CheckCircle, FileText, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useApprovisionnement } from '@/hooks/useApprovisionnement';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const STATUTS = [
-  { value: "brouillon", label: "Brouillon", variant: "secondary" as const },
-  { value: "soumise", label: "Soumise", variant: "default" as const },
-  { value: "validee", label: "Validée", variant: "default" as const },
-  { value: "rejetee", label: "Rejetée", variant: "destructive" as const },
+  { value: 'soumis', label: 'Soumis', variant: 'secondary' as const },
+  { value: 'soumise', label: 'Soumise', variant: 'default' as const },
+  { value: 'validee', label: 'Validée', variant: 'default' as const },
+  { value: 'rejetee', label: 'Rejetée', variant: 'destructive' as const },
 ];
 
 export function DemandeAchatList() {
-  const {
-    articles,
-    demandesAchat,
-    loadingDemandes,
-    createDemandeAchat,
-    updateDemandeStatut,
-  } = useApprovisionnement();
+  const { articles, demandesAchat, loadingDemandes, createDemandeAchat, updateDemandeStatut } =
+    useApprovisionnement();
 
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions"],
+    queryKey: ['directions'],
     queryFn: async () => {
-      const { data } = await supabase.from("directions").select("id, label, code").eq("est_active", true);
+      const { data } = await supabase
+        .from('directions')
+        .select('id, label, code')
+        .eq('est_active', true);
       return data || [];
     },
   });
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedDemande, setSelectedDemande] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    objet: "",
-    justification: "",
-    urgence: "normale",
-    direction_id: "",
-    lignes: [{ designation: "", quantite: 1, unite: "unité", article_id: "", prix_unitaire_estime: 0 }],
+    objet: '',
+    justification: '',
+    urgence: 'normale',
+    direction_id: '',
+    lignes: [
+      { designation: '', quantite: 1, unite: 'unité', article_id: '', prix_unitaire_estime: 0 },
+    ],
   });
 
   const filteredDemandes = demandesAchat.filter(
@@ -83,11 +83,13 @@ export function DemandeAchatList() {
 
   const resetForm = () => {
     setFormData({
-      objet: "",
-      justification: "",
-      urgence: "normale",
-      direction_id: "",
-      lignes: [{ designation: "", quantite: 1, unite: "unité", article_id: "", prix_unitaire_estime: 0 }],
+      objet: '',
+      justification: '',
+      urgence: 'normale',
+      direction_id: '',
+      lignes: [
+        { designation: '', quantite: 1, unite: 'unité', article_id: '', prix_unitaire_estime: 0 },
+      ],
     });
   };
 
@@ -96,7 +98,7 @@ export function DemandeAchatList() {
       ...formData,
       lignes: [
         ...formData.lignes,
-        { designation: "", quantite: 1, unite: "unité", article_id: "", prix_unitaire_estime: 0 },
+        { designation: '', quantite: 1, unite: 'unité', article_id: '', prix_unitaire_estime: 0 },
       ],
     });
   };
@@ -113,7 +115,7 @@ export function DemandeAchatList() {
     newLignes[index] = { ...newLignes[index], [field]: value };
 
     // If article selected, fill designation
-    if (field === "article_id" && value) {
+    if (field === 'article_id' && value) {
       const article = articles.find((a) => a.id === value);
       if (article) {
         newLignes[index].designation = article.libelle;
@@ -125,7 +127,7 @@ export function DemandeAchatList() {
   };
 
   const calculateTotal = () => {
-    return formData.lignes.reduce((sum, l) => sum + (l.quantite * (l.prix_unitaire_estime || 0)), 0);
+    return formData.lignes.reduce((sum, l) => sum + l.quantite * (l.prix_unitaire_estime || 0), 0);
   };
 
   const handleSubmit = async () => {
@@ -155,16 +157,16 @@ export function DemandeAchatList() {
   };
 
   const handleSubmitDemande = async (id: string) => {
-    await updateDemandeStatut.mutateAsync({ id, statut: "soumise" });
+    await updateDemandeStatut.mutateAsync({ id, statut: 'soumise' });
   };
 
   const handleValidateDemande = async (id: string) => {
-    await updateDemandeStatut.mutateAsync({ id, statut: "validee" });
+    await updateDemandeStatut.mutateAsync({ id, statut: 'validee' });
   };
 
   const getStatutBadge = (statut: string) => {
     const s = STATUTS.find((st) => st.value === statut);
-    return <Badge variant={s?.variant || "secondary"}>{s?.label || statut}</Badge>;
+    return <Badge variant={s?.variant || 'secondary'}>{s?.label || statut}</Badge>;
   };
 
   const viewedDemande = demandesAchat.find((d) => d.id === selectedDemande);
@@ -217,17 +219,17 @@ export function DemandeAchatList() {
                   <TableRow key={demande.id}>
                     <TableCell className="font-mono text-sm">{demande.numero}</TableCell>
                     <TableCell>
-                      {format(new Date(demande.date_demande), "dd/MM/yyyy", { locale: fr })}
+                      {format(new Date(demande.date_demande), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{demande.objet}</TableCell>
-                    <TableCell>{demande.direction?.code || "-"}</TableCell>
+                    <TableCell>{demande.direction?.code || '-'}</TableCell>
                     <TableCell>
-                      <Badge variant={demande.urgence === "urgente" ? "destructive" : "secondary"}>
+                      <Badge variant={demande.urgence === 'urgente' ? 'destructive' : 'secondary'}>
                         {demande.urgence}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {demande.montant_estime?.toLocaleString("fr-FR")} FCFA
+                      {demande.montant_estime?.toLocaleString('fr-FR')} FCFA
                     </TableCell>
                     <TableCell>{getStatutBadge(demande.statut)}</TableCell>
                     <TableCell>
@@ -242,13 +244,13 @@ export function DemandeAchatList() {
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
                           </DropdownMenuItem>
-                          {demande.statut === "brouillon" && (
+                          {demande.statut === 'soumis' && (
                             <DropdownMenuItem onClick={() => handleSubmitDemande(demande.id)}>
                               <FileText className="h-4 w-4 mr-2" />
                               Soumettre
                             </DropdownMenuItem>
                           )}
-                          {demande.statut === "soumise" && (
+                          {demande.statut === 'soumise' && (
                             <DropdownMenuItem onClick={() => handleValidateDemande(demande.id)}>
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Valider
@@ -347,7 +349,7 @@ export function DemandeAchatList() {
                       <Label className="text-xs">Article (optionnel)</Label>
                       <Select
                         value={ligne.article_id}
-                        onValueChange={(v) => updateLigne(index, "article_id", v)}
+                        onValueChange={(v) => updateLigne(index, 'article_id', v)}
                       >
                         <SelectTrigger className="h-9">
                           <SelectValue placeholder="Choisir..." />
@@ -366,7 +368,7 @@ export function DemandeAchatList() {
                       <Input
                         className="h-9"
                         value={ligne.designation}
-                        onChange={(e) => updateLigne(index, "designation", e.target.value)}
+                        onChange={(e) => updateLigne(index, 'designation', e.target.value)}
                         placeholder="Description..."
                       />
                     </div>
@@ -377,7 +379,9 @@ export function DemandeAchatList() {
                         min={1}
                         className="h-9"
                         value={ligne.quantite}
-                        onChange={(e) => updateLigne(index, "quantite", parseInt(e.target.value) || 1)}
+                        onChange={(e) =>
+                          updateLigne(index, 'quantite', parseInt(e.target.value) || 1)
+                        }
                       />
                     </div>
                     <div className="col-span-2">
@@ -388,7 +392,11 @@ export function DemandeAchatList() {
                         className="h-9"
                         value={ligne.prix_unitaire_estime}
                         onChange={(e) =>
-                          updateLigne(index, "prix_unitaire_estime", parseFloat(e.target.value) || 0)
+                          updateLigne(
+                            index,
+                            'prix_unitaire_estime',
+                            parseFloat(e.target.value) || 0
+                          )
                         }
                       />
                     </div>
@@ -413,7 +421,7 @@ export function DemandeAchatList() {
                 ))}
               </div>
               <div className="text-right font-medium">
-                Total estimé: {calculateTotal().toLocaleString("fr-FR")} FCFA
+                Total estimé: {calculateTotal().toLocaleString('fr-FR')} FCFA
               </div>
             </div>
           </div>
@@ -443,7 +451,7 @@ export function DemandeAchatList() {
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p className="font-medium">
-                    {format(new Date(viewedDemande.date_demande), "dd MMMM yyyy", { locale: fr })}
+                    {format(new Date(viewedDemande.date_demande), 'dd MMMM yyyy', { locale: fr })}
                   </p>
                 </div>
                 <div>
@@ -452,12 +460,12 @@ export function DemandeAchatList() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Direction</p>
-                  <p className="font-medium">{viewedDemande.direction?.label || "-"}</p>
+                  <p className="font-medium">{viewedDemande.direction?.label || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Montant estimé</p>
                   <p className="font-medium">
-                    {viewedDemande.montant_estime?.toLocaleString("fr-FR")} FCFA
+                    {viewedDemande.montant_estime?.toLocaleString('fr-FR')} FCFA
                   </p>
                 </div>
               </div>
@@ -491,10 +499,12 @@ export function DemandeAchatList() {
                           <TableCell className="text-right">{l.quantite}</TableCell>
                           <TableCell>{l.unite}</TableCell>
                           <TableCell className="text-right">
-                            {l.prix_unitaire_estime?.toLocaleString("fr-FR")}
+                            {l.prix_unitaire_estime?.toLocaleString('fr-FR')}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {((l.quantite || 0) * (l.prix_unitaire_estime || 0)).toLocaleString("fr-FR")}
+                            {((l.quantite || 0) * (l.prix_unitaire_estime || 0)).toLocaleString(
+                              'fr-FR'
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

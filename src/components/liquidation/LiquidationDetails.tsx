@@ -58,13 +58,15 @@ interface LiquidationDetailsProps {
 
 const getStatusBadge = (statut: string | null) => {
   const variants: Record<string, { label: string; className: string }> = {
-    brouillon: { label: 'Brouillon', className: 'bg-muted text-muted-foreground border-muted' },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
     certifié_sf: {
       label: 'Service fait certifié',
       className:
         'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700',
     },
-    soumis: { label: 'Soumis', className: 'bg-secondary/10 text-secondary border-secondary/20' },
     validé_daaf: {
       label: 'Validé DAAF',
       className:
@@ -77,7 +79,7 @@ const getStatusBadge = (statut: string | null) => {
     },
     differe: { label: 'Différé', className: 'bg-warning/10 text-warning border-warning/20' },
   };
-  const variant = variants[statut || 'brouillon'] || variants.brouillon;
+  const variant = variants[statut || 'soumis'] || variants.soumis;
   return (
     <Badge variant="outline" className={variant.className}>
       {variant.label}

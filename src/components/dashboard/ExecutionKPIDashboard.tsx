@@ -279,8 +279,8 @@ export function ExecutionKPIDashboard({ compact = false }: ExecutionKPIDashboard
           color: PIE_COLORS[2],
         },
         {
-          name: 'Brouillons',
-          value: engagements.filter((e) => e.statut === 'brouillon').length,
+          name: 'Soumis',
+          value: engagements.filter((e) => e.statut === 'soumis').length,
           color: PIE_COLORS[3],
         },
       ];

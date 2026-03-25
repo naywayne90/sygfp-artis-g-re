@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, Download, FileSpreadsheet, CheckCircle, XCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Upload, Download, FileSpreadsheet, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 
 interface BudgetImportProps {
   open: boolean;
@@ -35,57 +35,57 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
 
   const downloadTemplate = () => {
     const headers = [
-      "code",
-      "label",
-      "level",
-      "dotation_initiale",
-      "source_financement",
-      "direction_code",
-      "os_code",
-      "mission_code",
-      "action_code",
-      "nbe_code",
-      "sysco_code",
-      "commentaire",
-    ].join(";");
+      'code',
+      'label',
+      'level',
+      'dotation_initiale',
+      'source_financement',
+      'direction_code',
+      'os_code',
+      'mission_code',
+      'action_code',
+      'nbe_code',
+      'sysco_code',
+      'commentaire',
+    ].join(';');
 
     const example = [
-      "6110001",
-      "Fournitures de bureau",
-      "ligne",
-      "5000000",
-      "budget_etat",
-      "DAAF",
-      "OS1",
-      "M1",
-      "A1",
-      "611",
-      "6011",
-      "Budget fonctionnement",
-    ].join(";");
+      '6110001',
+      'Fournitures de bureau',
+      'ligne',
+      '5000000',
+      'budget_etat',
+      'DAAF',
+      'OS1',
+      'M1',
+      'A1',
+      '611',
+      '6011',
+      'Budget fonctionnement',
+    ].join(';');
 
     const content = `${headers}\n${example}`;
-    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `modele_budget_${exercice}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    toast.success("Modèle téléchargé");
+    toast.success('Modèle téléchargé');
   };
 
   const parseCSV = (content: string): Record<string, string>[] => {
-    const lines = content.trim().split("\n");
+    const lines = content.trim().split('\n');
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(/[;,]/).map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+    const headers = lines[0].split(/[;,]/).map((h) => h.trim().toLowerCase().replace(/"/g, ''));
     const data: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(/[;,]/).map((v) => v.trim().replace(/"/g, ""));
+      const values = lines[i].split(/[;,]/).map((v) => v.trim().replace(/"/g, ''));
       const row: Record<string, string> = {};
       headers.forEach((header, index) => {
-        row[header] = values[index] || "";
+        row[header] = values[index] || '';
       });
       data.push(row);
     }
@@ -104,17 +104,17 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
       const rows = parseCSV(content);
 
       if (rows.length === 0) {
-        throw new Error("Fichier vide ou format invalide");
+        throw new Error('Fichier vide ou format invalide');
       }
 
       // Fetch reference data for code lookups
       const [directions, objectifs, missions, actions, nbe, sysco] = await Promise.all([
-        supabase.from("directions").select("id, code"),
-        supabase.from("objectifs_strategiques").select("id, code"),
-        supabase.from("missions").select("id, code"),
-        supabase.from("actions").select("id, code"),
-        supabase.from("nomenclature_nbe").select("id, code"),
-        supabase.from("plan_comptable_sysco").select("id, code"),
+        supabase.from('directions').select('id, code'),
+        supabase.from('objectifs_strategiques').select('id, code'),
+        supabase.from('missions').select('id, code'),
+        supabase.from('actions').select('id, code'),
+        supabase.from('nomenclature_nbe').select('id, code'),
+        supabase.from('plan_comptable_sysco').select('id, code'),
       ]);
 
       const directionMap = new Map(directions.data?.map((d) => [d.code, d.id]) || []);
@@ -131,16 +131,18 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
         // Validate required fields
         if (!row.code || !row.label || !row.level) {
           importResult.errors++;
-          importResult.details.push(`Ligne ${lineNum}: Champs obligatoires manquants (code, label, level)`);
+          importResult.details.push(
+            `Ligne ${lineNum}: Champs obligatoires manquants (code, label, level)`
+          );
           continue;
         }
 
         // Check for duplicate code
         const { data: existing } = await supabase
-          .from("budget_lines")
-          .select("id")
-          .eq("code", row.code)
-          .eq("exercice", exercice || new Date().getFullYear())
+          .from('budget_lines')
+          .select('id')
+          .eq('code', row.code)
+          .eq('exercice', exercice || new Date().getFullYear())
           .maybeSingle();
 
         const budgetLine = {
@@ -148,7 +150,7 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
           label: row.label,
           level: row.level,
           dotation_initiale: parseFloat(row.dotation_initiale) || 0,
-          source_financement: row.source_financement || "budget_etat",
+          source_financement: row.source_financement || 'budget_etat',
           direction_id: row.direction_code ? directionMap.get(row.direction_code) : null,
           os_id: row.os_code ? osMap.get(row.os_code) : null,
           mission_id: row.mission_code ? missionMap.get(row.mission_code) : null,
@@ -157,22 +159,20 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
           sysco_id: row.sysco_code ? syscoMap.get(row.sysco_code) : null,
           commentaire: row.commentaire || null,
           exercice: exercice || new Date().getFullYear(),
-          statut: "brouillon",
+          statut: 'soumis',
         };
 
         let error;
         if (existing) {
           // Update existing
           const { error: updateError } = await supabase
-            .from("budget_lines")
+            .from('budget_lines')
             .update(budgetLine)
-            .eq("id", existing.id);
+            .eq('id', existing.id);
           error = updateError;
         } else {
           // Insert new
-          const { error: insertError } = await supabase
-            .from("budget_lines")
-            .insert(budgetLine);
+          const { error: insertError } = await supabase.from('budget_lines').insert(budgetLine);
           error = insertError;
         }
 
@@ -236,7 +236,7 @@ export function BudgetImport({ open, onOpenChange, onSuccess }: BudgetImportProp
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="mr-2 h-4 w-4" />
-              {isImporting ? "Import en cours..." : "Sélectionner un fichier"}
+              {isImporting ? 'Import en cours...' : 'Sélectionner un fichier'}
             </Button>
           </div>
 

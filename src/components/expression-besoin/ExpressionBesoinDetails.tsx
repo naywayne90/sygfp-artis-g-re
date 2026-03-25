@@ -89,8 +89,7 @@ const STATUS_CONFIG: Record<
     icon: React.ReactNode;
   }
 > = {
-  brouillon: { label: 'Brouillon', variant: 'secondary', icon: <FileText className="h-4 w-4" /> },
-  soumis: { label: 'À valider', variant: 'outline', icon: <Clock className="h-4 w-4" /> },
+  soumis: { label: 'Soumis', variant: 'secondary', icon: <FileText className="h-4 w-4" /> },
   verifie: {
     label: 'Vérifié CB',
     variant: 'outline',
@@ -180,7 +179,7 @@ export function ExpressionBesoinDetails({
 
   const expression = resolvedExpression;
 
-  const status = STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
+  const status = STATUS_CONFIG[expression.statut || 'soumis'] || STATUS_CONFIG.soumis;
   const urgence = URGENCE_CONFIG[expression.urgence || 'normale'] || URGENCE_CONFIG.normale;
 
   // Use attachments from the hook query (expression_besoin_attachments)
@@ -197,7 +196,7 @@ export function ExpressionBesoinDetails({
   const budgetDepasse = totalArticles > montantImpute && montantImpute > 0;
 
   // Inline editing with ArticlesTableEditor
-  const canEditArticles = expression.statut === 'brouillon' || expression.statut === 'rejete';
+  const canEditArticles = expression.statut === 'soumis' || expression.statut === 'rejete';
 
   // Convert ExpressionBesoinLigne[] to ArticleLigne[] (backward compat)
   const toEditable = (items: ExpressionBesoinLigne[]): ArticleLigne[] =>
@@ -324,8 +323,8 @@ export function ExpressionBesoinDetails({
                     </DropdownMenuItem>
                   )}
 
-                  {/* Brouillon actions */}
-                  {expression.statut === 'brouillon' && (
+                  {/* Soumis actions */}
+                  {expression.statut === 'soumis' && (
                     <>
                       <DropdownMenuSeparator />
                       {onSubmit && (

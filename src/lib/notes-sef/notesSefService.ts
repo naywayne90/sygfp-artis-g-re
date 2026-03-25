@@ -248,7 +248,7 @@ export const notesSefService = {
 
       for (const note of data || []) {
         counts.total++;
-        const statut = note.statut || 'brouillon';
+        const statut = note.statut || 'soumis';
         // Grouper valide_auto avec valide dans le compteur
         if (statut === 'valide_auto') {
           counts.valide++;
@@ -302,7 +302,7 @@ export const notesSefService = {
   // ============================================
 
   /**
-   * Créer une nouvelle note SEF (brouillon) avec pièces jointes
+   * Créer une nouvelle note SEF (soumis) avec pièces jointes
    * @param dto Données de la note
    * @param exercice Année d'exercice
    * @param attachments Fichiers à uploader (optionnel)
@@ -325,7 +325,7 @@ export const notesSefService = {
         return { success: false, error: 'Non authentifié' };
       }
 
-      // 2. Créer la note en brouillon (référence générée à la soumission via RPC)
+      // 2. Créer la note en soumis (référence générée à la soumission via RPC)
       const { data: note, error: insertError } = await supabase
         .from('notes_sef')
         .insert({
@@ -341,7 +341,7 @@ export const notesSefService = {
           commentaire: dto.commentaire || null,
           exercice: exercice,
           created_by: user.id,
-          statut: 'brouillon',
+          statut: 'soumis',
         })
         .select()
         .single();
@@ -354,7 +354,7 @@ export const notesSefService = {
       await supabase.from('notes_sef_history').insert({
         note_id: note.id,
         action: 'création',
-        new_statut: 'brouillon',
+        new_statut: 'soumis',
         performed_by: user.id,
       });
 
@@ -427,7 +427,7 @@ export const notesSefService = {
   },
 
   /**
-   * Créer une nouvelle note SEF (brouillon) - ALIAS pour compatibilité
+   * Créer une nouvelle note SEF (soumis) - ALIAS pour compatibilité
    * @deprecated Utiliser createDraftWithAttachments pour le support des PJ
    */
   async createDraft(

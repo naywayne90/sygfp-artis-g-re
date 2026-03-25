@@ -99,7 +99,7 @@ export function useNoteAccessControl(
     };
   }
 
-  const statut = note.statut || 'brouillon';
+  const statut = note.statut || 'soumis';
 
   // Droits de visualisation
   // - Admin/DG peuvent tout voir
@@ -107,14 +107,14 @@ export function useNoteAccessControl(
   // - Utilisateurs de la même direction peuvent voir
   const canView = isAdmin || isDG || isCB || isCreator || isSameDirection;
 
-  // Droits d'édition (brouillon uniquement par créateur)
-  const canEdit = (isCreator || isAdmin) && statut === 'brouillon';
+  // Droits d'édition (soumis uniquement par créateur)
+  const canEdit = (isCreator || isAdmin) && statut === 'soumis';
 
-  // Droits de suppression (brouillon uniquement par créateur ou admin)
-  const canDelete = (isCreator || isAdmin) && statut === 'brouillon';
+  // Droits de suppression (soumis uniquement par créateur ou admin)
+  const canDelete = (isCreator || isAdmin) && statut === 'soumis';
 
-  // Droits de soumission (brouillon par créateur)
-  const canSubmit = (isCreator || isAdmin) && statut === 'brouillon';
+  // Droits de soumission (déjà soumis à la création)
+  const canSubmit = (isCreator || isAdmin) && statut === 'soumis';
 
   // Droits de validation (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
   const canValidate =

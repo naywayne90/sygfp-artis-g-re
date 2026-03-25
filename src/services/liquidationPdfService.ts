@@ -640,7 +640,7 @@ export async function generateLiquidationPdf(
   await generatePage2(doc, liquidation, qrDataUrl, liquidationUrl);
 
   // Métadonnées
-  const noteRef = liquidation.numero || 'BROUILLON';
+  const noteRef = liquidation.numero || 'SOUMIS';
   doc.setProperties({
     title: `ARTI_ATTESTATION_LIQUIDATION_SYGFP - ${noteRef}`,
     subject: liquidation.engagement?.objet || '',

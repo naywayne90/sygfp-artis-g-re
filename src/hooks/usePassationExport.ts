@@ -89,7 +89,7 @@ async function fetchExportData(exercice: number): Promise<ExportRow[]> {
       montant_estime: eb?.montant_estime || 0,
       montant_retenu: (r.montant_retenu as number) || null,
       attributaire: prest?.raison_sociale || '-',
-      statut: (r.statut as string) || 'brouillon',
+      statut: (r.statut as string) || 'soumis',
       created_at: (r.created_at as string) || '',
       lots,
       soumissionnaires,

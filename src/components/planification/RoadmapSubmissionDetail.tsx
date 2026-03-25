@@ -3,22 +3,24 @@
  * Affiche les activités avec diff et permet validation/rejet
  */
 
-import { useState } from "react";
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   CheckCircle2,
   XCircle,
@@ -33,53 +35,48 @@ import {
   AlertTriangle,
   MessageSquare,
   User,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   useRoadmapSubmissionDetail,
   computeActivityDiff,
   SubmissionStatus,
-} from "@/hooks/useRoadmapSubmissions";
+} from '@/hooks/useRoadmapSubmissions';
 
 // Configuration des statuts
 const STATUS_CONFIG: Record<
   SubmissionStatus,
   { label: string; color: string; icon: React.ReactNode }
 > = {
-  brouillon: {
-    label: "Brouillon",
-    color: "bg-gray-100 text-gray-800",
+  soumis: {
+    label: 'Soumis',
+    color: 'bg-gray-100 text-gray-800',
     icon: <Clock className="h-3 w-3" />,
   },
-  soumis: {
-    label: "En attente",
-    color: "bg-yellow-100 text-yellow-800",
-    icon: <Send className="h-3 w-3" />,
-  },
   en_revision: {
-    label: "En révision",
-    color: "bg-orange-100 text-orange-800",
+    label: 'En révision',
+    color: 'bg-orange-100 text-orange-800',
     icon: <RotateCcw className="h-3 w-3" />,
   },
   valide: {
-    label: "Validé",
-    color: "bg-green-100 text-green-800",
+    label: 'Validé',
+    color: 'bg-green-100 text-green-800',
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   rejete: {
-    label: "Rejeté",
-    color: "bg-red-100 text-red-800",
+    label: 'Rejeté',
+    color: 'bg-red-100 text-red-800',
     icon: <XCircle className="h-3 w-3" />,
   },
 };
 
 // Configuration des statuts d'activité
 const ACTIVITY_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  inclus: { label: "Inclus", color: "bg-gray-100 text-gray-800" },
-  modifie: { label: "Modifié", color: "bg-blue-100 text-blue-800" },
-  nouveau: { label: "Nouveau", color: "bg-green-100 text-green-800" },
-  supprime: { label: "Supprimé", color: "bg-red-100 text-red-800" },
+  inclus: { label: 'Inclus', color: 'bg-gray-100 text-gray-800' },
+  modifie: { label: 'Modifié', color: 'bg-blue-100 text-blue-800' },
+  nouveau: { label: 'Nouveau', color: 'bg-green-100 text-green-800' },
+  supprime: { label: 'Supprimé', color: 'bg-red-100 text-red-800' },
 };
 
 interface RoadmapSubmissionDetailDialogProps {
@@ -105,22 +102,21 @@ export function RoadmapSubmissionDetailDialog({
   isRejecting,
   isRequestingRevision,
 }: RoadmapSubmissionDetailDialogProps) {
-  const { submission, activities, history, isLoading } =
-    useRoadmapSubmissionDetail(submissionId);
+  const { submission, activities, history, isLoading } = useRoadmapSubmissionDetail(submissionId);
 
-  const [activeTab, setActiveTab] = useState<"summary" | "activities" | "history">("summary");
+  const [activeTab, setActiveTab] = useState<'summary' | 'activities' | 'history'>('summary');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showRevisionDialog, setShowRevisionDialog] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [revisionComment, setRevisionComment] = useState("");
-  const [validationComment, setValidationComment] = useState("");
+  const [rejectReason, setRejectReason] = useState('');
+  const [revisionComment, setRevisionComment] = useState('');
+  const [validationComment, setValidationComment] = useState('');
 
   // Formatage montant
   const formatMontant = (montant: number | undefined) => {
-    if (montant === undefined) return "—";
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
+    if (montant === undefined) return '—';
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XOF',
       maximumFractionDigits: 0,
     }).format(montant);
   };
@@ -135,27 +131,25 @@ export function RoadmapSubmissionDetailDialog({
 
   const handleValidate = () => {
     onValidate(validationComment || undefined);
-    setValidationComment("");
+    setValidationComment('');
   };
 
   const handleReject = () => {
     if (!rejectReason.trim()) return;
     onReject(rejectReason);
-    setRejectReason("");
+    setRejectReason('');
     setShowRejectDialog(false);
   };
 
   const handleRequestRevision = () => {
     if (!revisionComment.trim()) return;
     onRequestRevision(revisionComment);
-    setRevisionComment("");
+    setRevisionComment('');
     setShowRevisionDialog(false);
   };
 
-  const statusConfig = submission
-    ? STATUS_CONFIG[submission.status as SubmissionStatus]
-    : null;
-  const canTakeAction = submission?.status === "soumis";
+  const statusConfig = submission ? STATUS_CONFIG[submission.status as SubmissionStatus] : null;
+  const canTakeAction = submission?.status === 'soumis';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -209,14 +203,14 @@ export function RoadmapSubmissionDetailDialog({
                 <AlertTriangle className="h-4 w-4 text-blue-600" />
                 <AlertTitle className="text-blue-800">Modifications détectées</AlertTitle>
                 <AlertDescription className="text-blue-700">
-                  {activitiesWithChanges.length} activité(s) ont été modifiées depuis la
-                  soumission. Consultez l'onglet Activités pour voir les différences.
+                  {activitiesWithChanges.length} activité(s) ont été modifiées depuis la soumission.
+                  Consultez l'onglet Activités pour voir les différences.
                 </AlertDescription>
               </Alert>
             )}
 
             {/* Commentaires de validation/rejet */}
-            {submission.status === "valide" && submission.validation_comment && (
+            {submission.status === 'valide' && submission.validation_comment && (
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-green-800">Commentaire de validation</AlertTitle>
@@ -226,7 +220,7 @@ export function RoadmapSubmissionDetailDialog({
               </Alert>
             )}
 
-            {submission.status === "rejete" && submission.rejection_reason && (
+            {submission.status === 'rejete' && submission.rejection_reason && (
               <Alert variant="destructive">
                 <XCircle className="h-4 w-4" />
                 <AlertTitle>Motif de rejet</AlertTitle>
@@ -271,7 +265,7 @@ export function RoadmapSubmissionDetailDialog({
                       <div className="flex justify-between py-2 border-b">
                         <span className="text-muted-foreground">Créé le</span>
                         <span>
-                          {format(new Date(submission.created_at), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(submission.created_at), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>
@@ -280,7 +274,7 @@ export function RoadmapSubmissionDetailDialog({
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Soumis le</span>
                           <span>
-                            {format(new Date(submission.submitted_at), "dd MMMM yyyy à HH:mm", {
+                            {format(new Date(submission.submitted_at), 'dd MMMM yyyy à HH:mm', {
                               locale: fr,
                             })}
                           </span>
@@ -290,7 +284,7 @@ export function RoadmapSubmissionDetailDialog({
                         <div className="flex justify-between py-2 border-b">
                           <span className="text-muted-foreground">Validé le</span>
                           <span>
-                            {format(new Date(submission.validated_at), "dd MMMM yyyy à HH:mm", {
+                            {format(new Date(submission.validated_at), 'dd MMMM yyyy à HH:mm', {
                               locale: fr,
                             })}
                           </span>
@@ -311,9 +305,7 @@ export function RoadmapSubmissionDetailDialog({
                             <div className="font-medium">
                               {submission.submitted_by_profile.full_name}
                             </div>
-                            <div className="text-sm text-muted-foreground">
-                              Soumis par
-                            </div>
+                            <div className="text-sm text-muted-foreground">Soumis par</div>
                           </div>
                         </div>
                       )}
@@ -412,20 +404,17 @@ export function RoadmapSubmissionDetailDialog({
                     <TableBody>
                       {activitiesWithDiff.map((activity) => {
                         const activityStatusConfig =
-                          ACTIVITY_STATUS_CONFIG[activity.status] ||
-                          ACTIVITY_STATUS_CONFIG.inclus;
+                          ACTIVITY_STATUS_CONFIG[activity.status] || ACTIVITY_STATUS_CONFIG.inclus;
                         return (
                           <TableRow
                             key={activity.id}
-                            className={activity.diff.hasChanges ? "bg-blue-50/50" : ""}
+                            className={activity.diff.hasChanges ? 'bg-blue-50/50' : ''}
                           >
                             <TableCell className="font-mono">
-                              {activity.activite?.code || activity.snapshot_data?.code || "—"}
+                              {activity.activite?.code || activity.snapshot_data?.code || '—'}
                             </TableCell>
                             <TableCell>
-                              {activity.activite?.libelle ||
-                                activity.snapshot_data?.libelle ||
-                                "—"}
+                              {activity.activite?.libelle || activity.snapshot_data?.libelle || '—'}
                             </TableCell>
                             <TableCell className="text-right font-mono">
                               {formatMontant(
@@ -457,18 +446,13 @@ export function RoadmapSubmissionDetailDialog({
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
                     {history.map((entry) => (
-                      <div
-                        key={entry.id}
-                        className="flex items-start gap-3 p-3 border rounded-lg"
-                      >
+                      <div key={entry.id} className="flex items-start gap-3 p-3 border rounded-lg">
                         <div className="mt-1">
                           <HistoryActionIcon action={entry.action} />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                              {getActionLabel(entry.action)}
-                            </span>
+                            <span className="font-medium">{getActionLabel(entry.action)}</span>
                             {entry.old_status && entry.new_status && (
                               <span className="text-sm text-muted-foreground flex items-center gap-1">
                                 <Badge variant="outline" className="text-xs">
@@ -488,8 +472,8 @@ export function RoadmapSubmissionDetailDialog({
                             </p>
                           )}
                           <div className="text-xs text-muted-foreground mt-2">
-                            {entry.performed_by_profile?.full_name || "Système"} -{" "}
-                            {format(new Date(entry.performed_at), "dd/MM/yyyy HH:mm", {
+                            {entry.performed_by_profile?.full_name || 'Système'} -{' '}
+                            {format(new Date(entry.performed_at), 'dd/MM/yyyy HH:mm', {
                               locale: fr,
                             })}
                           </div>
@@ -541,7 +525,7 @@ export function RoadmapSubmissionDetailDialog({
                     variant="outline"
                     onClick={() => {
                       setShowRejectDialog(false);
-                      setRejectReason("");
+                      setRejectReason('');
                     }}
                   >
                     Annuler
@@ -594,7 +578,7 @@ export function RoadmapSubmissionDetailDialog({
                     variant="outline"
                     onClick={() => {
                       setShowRevisionDialog(false);
-                      setRevisionComment("");
+                      setRevisionComment('');
                     }}
                   >
                     Annuler
@@ -622,11 +606,7 @@ export function RoadmapSubmissionDetailDialog({
 }
 
 // Composant pour afficher les badges de diff
-function DiffBadges({
-  changes,
-}: {
-  changes: { field: string; old: unknown; new: unknown }[];
-}) {
+function DiffBadges({ changes }: { changes: { field: string; old: unknown; new: unknown }[] }) {
   return (
     <div className="flex flex-wrap gap-1">
       {changes.map((change, idx) => (
@@ -646,17 +626,17 @@ function DiffBadges({
 // Icône selon l'action
 function HistoryActionIcon({ action }: { action: string }) {
   switch (action) {
-    case "created":
+    case 'created':
       return <FileSpreadsheet className="h-4 w-4 text-gray-500" />;
-    case "submitted":
+    case 'submitted':
       return <Send className="h-4 w-4 text-yellow-600" />;
-    case "validated":
+    case 'validated':
       return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    case "rejected":
+    case 'rejected':
       return <XCircle className="h-4 w-4 text-red-600" />;
-    case "revision_requested":
+    case 'revision_requested':
       return <RotateCcw className="h-4 w-4 text-orange-600" />;
-    case "resubmitted":
+    case 'resubmitted':
       return <Send className="h-4 w-4 text-blue-600" />;
     default:
       return <History className="h-4 w-4 text-gray-500" />;
@@ -666,20 +646,20 @@ function HistoryActionIcon({ action }: { action: string }) {
 // Label de l'action
 function getActionLabel(action: string): string {
   switch (action) {
-    case "created":
-      return "Soumission créée";
-    case "submitted":
-      return "Soumis pour validation";
-    case "validated":
-      return "Validé";
-    case "rejected":
-      return "Rejeté";
-    case "revision_requested":
-      return "Révision demandée";
-    case "resubmitted":
-      return "Resoumis";
-    case "updated":
-      return "Mis à jour";
+    case 'created':
+      return 'Soumission créée';
+    case 'submitted':
+      return 'Soumis pour validation';
+    case 'validated':
+      return 'Validé';
+    case 'rejected':
+      return 'Rejeté';
+    case 'revision_requested':
+      return 'Révision demandée';
+    case 'resubmitted':
+      return 'Resoumis';
+    case 'updated':
+      return 'Mis à jour';
     default:
       return action;
   }

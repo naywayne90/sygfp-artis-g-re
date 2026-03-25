@@ -672,7 +672,7 @@ export async function generateEngagementPdf(
   await generatePage2(doc, engagement, qrDataUrl, engagementUrl);
 
   // Métadonnées
-  const noteRef = engagement.numero || 'BROUILLON';
+  const noteRef = engagement.numero || 'SOUMIS';
   doc.setProperties({
     title: `ARTI_BON_ENGAGEMENT_SYGFP - ${noteRef}`,
     subject: engagement.objet || '',

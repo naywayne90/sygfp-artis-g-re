@@ -549,7 +549,7 @@ export async function generateNoteDirectionPdf(
 
   // Metadata
   doc.setProperties({
-    title: `Note Direction - ${metadata.reference || 'Brouillon'}`,
+    title: `Note Direction - ${metadata.reference || 'Soumis'}`,
     subject: metadata.objet || '',
     author: 'ARTI - SYGFP',
     creator: 'SYGFP - Systeme de Gestion des Finances Publiques',

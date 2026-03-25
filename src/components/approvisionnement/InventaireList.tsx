@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -10,22 +10,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dropdown-menu';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Plus,
   Search,
@@ -34,14 +34,14 @@ import {
   CheckCircle,
   ClipboardList,
   AlertTriangle,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Inventaire, useApprovisionnement } from "@/hooks/useApprovisionnement";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Inventaire, useApprovisionnement } from '@/hooks/useApprovisionnement';
 
 const STATUTS = [
-  { value: "brouillon", label: "En cours", variant: "secondary" as const },
-  { value: "cloture", label: "Clôturé", variant: "default" as const },
+  { value: 'soumis', label: 'En cours', variant: 'secondary' as const },
+  { value: 'cloture', label: 'Clôturé', variant: 'default' as const },
 ];
 
 export function InventaireList() {
@@ -53,12 +53,12 @@ export function InventaireList() {
     applyInventaireAdjustments,
   } = useApprovisionnement();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedInventaire, setSelectedInventaire] = useState<Inventaire | null>(null);
   const [formData, setFormData] = useState({
-    libelle: "",
-    observations: "",
+    libelle: '',
+    observations: '',
   });
 
   const filteredInventaires = inventaires.filter(
@@ -69,8 +69,8 @@ export function InventaireList() {
 
   const resetForm = () => {
     setFormData({
-      libelle: "",
-      observations: "",
+      libelle: '',
+      observations: '',
     });
   };
 
@@ -81,7 +81,11 @@ export function InventaireList() {
     resetForm();
   };
 
-  const handleUpdateLigne = async (ligneId: string, stock_physique: number, justification?: string) => {
+  const handleUpdateLigne = async (
+    ligneId: string,
+    stock_physique: number,
+    justification?: string
+  ) => {
     await updateInventaireLigne.mutateAsync({ id: ligneId, stock_physique, justification });
     // Refresh
     const updated = inventaires.find((i) => i.id === selectedInventaire?.id);
@@ -95,7 +99,7 @@ export function InventaireList() {
 
   const getStatutBadge = (statut: string) => {
     const s = STATUTS.find((st) => st.value === statut);
-    return <Badge variant={s?.variant || "secondary"}>{s?.label || statut}</Badge>;
+    return <Badge variant={s?.variant || 'secondary'}>{s?.label || statut}</Badge>;
   };
 
   const countEcarts = (inventaire: Inventaire) => {
@@ -149,7 +153,7 @@ export function InventaireList() {
                   <TableRow key={inventaire.id}>
                     <TableCell className="font-mono text-sm">{inventaire.numero}</TableCell>
                     <TableCell>
-                      {format(new Date(inventaire.date_inventaire), "dd/MM/yyyy", { locale: fr })}
+                      {format(new Date(inventaire.date_inventaire), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell>{inventaire.libelle}</TableCell>
                     <TableCell className="text-right">{inventaire.lignes?.length || 0}</TableCell>
@@ -174,9 +178,9 @@ export function InventaireList() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setSelectedInventaire(inventaire)}>
                             <Eye className="h-4 w-4 mr-2" />
-                            {inventaire.statut === "brouillon" ? "Saisir" : "Voir"}
+                            {inventaire.statut === 'soumis' ? 'Saisir' : 'Voir'}
                           </DropdownMenuItem>
-                          {inventaire.statut === "brouillon" && (
+                          {inventaire.statut === 'soumis' && (
                             <DropdownMenuItem onClick={() => handleCloturer(inventaire.id)}>
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Clôturer et ajuster
@@ -225,14 +229,18 @@ export function InventaireList() {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Tous les articles actifs seront inclus dans l'inventaire avec leur stock théorique actuel.
+              Tous les articles actifs seront inclus dans l'inventaire avec leur stock théorique
+              actuel.
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForm(false)}>
               Annuler
             </Button>
-            <Button onClick={handleSubmit} disabled={!formData.libelle || createInventaire.isPending}>
+            <Button
+              onClick={handleSubmit}
+              disabled={!formData.libelle || createInventaire.isPending}
+            >
               Créer l'inventaire
             </Button>
           </DialogFooter>
@@ -244,7 +252,7 @@ export function InventaireList() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedInventaire?.statut === "brouillon" ? "Saisie inventaire" : "Détails inventaire"}{" "}
+              {selectedInventaire?.statut === 'soumis' ? 'Saisie inventaire' : 'Détails inventaire'}{' '}
               {selectedInventaire?.numero}
             </DialogTitle>
           </DialogHeader>
@@ -254,7 +262,7 @@ export function InventaireList() {
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p className="font-medium">
-                    {format(new Date(selectedInventaire.date_inventaire), "dd MMMM yyyy", {
+                    {format(new Date(selectedInventaire.date_inventaire), 'dd MMMM yyyy', {
                       locale: fr,
                     })}
                   </p>
@@ -288,12 +296,12 @@ export function InventaireList() {
                       <TableCell>{ligne.article?.libelle}</TableCell>
                       <TableCell className="text-right">{ligne.stock_theorique}</TableCell>
                       <TableCell className="text-right">
-                        {selectedInventaire.statut === "brouillon" ? (
+                        {selectedInventaire.statut === 'soumis' ? (
                           <Input
                             type="number"
                             min={0}
                             className="w-20 h-8 text-right"
-                            defaultValue={ligne.stock_physique ?? ""}
+                            defaultValue={ligne.stock_physique ?? ''}
                             onBlur={(e) => {
                               const val = parseInt(e.target.value);
                               if (!isNaN(val)) {
@@ -302,13 +310,13 @@ export function InventaireList() {
                             }}
                           />
                         ) : (
-                          ligne.stock_physique ?? "-"
+                          (ligne.stock_physique ?? '-')
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         {ligne.stock_physique !== null && ligne.ecart !== 0 ? (
-                          <Badge variant={ligne.ecart > 0 ? "default" : "destructive"}>
-                            {ligne.ecart > 0 ? "+" : ""}
+                          <Badge variant={ligne.ecart > 0 ? 'default' : 'destructive'}>
+                            {ligne.ecart > 0 ? '+' : ''}
                             {ligne.ecart}
                           </Badge>
                         ) : (
@@ -316,23 +324,19 @@ export function InventaireList() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {selectedInventaire.statut === "brouillon" &&
+                        {selectedInventaire.statut === 'soumis' &&
                         ligne.stock_physique !== null &&
                         ligne.ecart !== 0 ? (
                           <Input
                             className="h-8 text-sm"
                             placeholder="Motif..."
-                            defaultValue={ligne.justification || ""}
+                            defaultValue={ligne.justification || ''}
                             onBlur={(e) => {
-                              handleUpdateLigne(
-                                ligne.id,
-                                ligne.stock_physique!,
-                                e.target.value
-                              );
+                              handleUpdateLigne(ligne.id, ligne.stock_physique!, e.target.value);
                             }}
                           />
                         ) : (
-                          ligne.justification || "-"
+                          ligne.justification || '-'
                         )}
                       </TableCell>
                       <TableCell>
@@ -347,7 +351,7 @@ export function InventaireList() {
                 </TableBody>
               </Table>
 
-              {selectedInventaire.statut === "brouillon" && (
+              {selectedInventaire.statut === 'soumis' && (
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setSelectedInventaire(null)}>
                     Fermer

@@ -84,7 +84,7 @@ async function fetchExportData(exercice: number, filters?: ExportFilters): Promi
       nb_articles: articles.length,
       montant_estime: (r.montant_estime as number) || 0,
       urgence: (r.urgence as string) || 'normale',
-      statut: (r.statut as string) || 'brouillon',
+      statut: (r.statut as string) || 'soumis',
       created_at: (r.created_at as string) || '',
       liste_articles: articles,
       prestataire: marche?.prestataire?.raison_sociale || '-',
@@ -97,7 +97,6 @@ async function fetchExportData(exercice: number, filters?: ExportFilters): Promi
 // ---------------------------------------------------------------------------
 
 const STATUS_LABELS: Record<string, string> = {
-  brouillon: 'Brouillon',
   soumis: 'Soumis',
   verifie: 'Vérifié CB',
   valide: 'Validé',

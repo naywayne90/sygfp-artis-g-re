@@ -75,7 +75,7 @@ import { usePassationExport } from '@/hooks/usePassationExport';
 import { NotesPagination } from '@/components/shared/NotesPagination';
 
 const getStatusBadge = (statut: string) => {
-  const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.brouillon;
+  const config = STATUTS[statut as keyof typeof STATUTS] || STATUTS.soumis;
   return <Badge className={config.color}>{config.label}</Badge>;
 };
 
@@ -386,14 +386,14 @@ export default function PassationMarchePage() {
 
         <Card
           className="cursor-pointer hover:ring-2 ring-primary/50"
-          onClick={() => handleTabChange('brouillon')}
+          onClick={() => handleTabChange('soumis')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3 px-3">
-            <CardTitle className="text-xs font-medium text-muted-foreground">Brouillons</CardTitle>
+            <CardTitle className="text-xs font-medium text-muted-foreground">Soumis</CardTitle>
             <FileText className="h-3.5 w-3.5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="pb-3 px-3">
-            <div className="text-xl font-bold">{counts.brouillon}</div>
+            <div className="text-xl font-bold">{counts.soumis}</div>
           </CardContent>
         </Card>
 
@@ -523,8 +523,8 @@ export default function PassationMarchePage() {
                   {directionEBs.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="brouillon" className="text-xs px-2">
-                Brouillons ({counts.brouillon})
+              <TabsTrigger value="soumis" className="text-xs px-2">
+                Soumis ({counts.soumis})
               </TabsTrigger>
               <TabsTrigger value="publie" className="text-xs px-2">
                 Publiés ({counts.publie})
@@ -595,236 +595,230 @@ export default function PassationMarchePage() {
             </TabsContent>
 
             {/* Lifecycle tabs — server-paginated */}
-            {[
-              'brouillon',
-              'publie',
-              'cloture',
-              'en_evaluation',
-              'attribue',
-              'approuve',
-              'signe',
-            ].map((tab) => (
-              <TabsContent key={tab} value={tab} className="mt-4">
-                {activeTab === tab && filteredPassations.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Gavel className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucune passation dans cet onglet</p>
-                  </div>
-                ) : (
-                  <>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Référence</TableHead>
-                          <TableHead>EB Source</TableHead>
-                          <TableHead>Mode</TableHead>
-                          <TableHead className="text-center">Nb lots</TableHead>
-                          <TableHead className="text-right">Montant retenu</TableHead>
-                          <TableHead>Statut</TableHead>
-                          <TableHead>Créé le</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredPassations.map((pm) => (
-                          <TableRow key={pm.id}>
-                            <TableCell className="font-mono text-sm">
-                              {pm.reference || '-'}
-                            </TableCell>
-                            <TableCell className="max-w-[200px] truncate">
-                              {pm.expression_besoin?.numero || pm.expression_besoin?.objet || '-'}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Badge variant="secondary" className="font-mono">
-                                {pm.allotissement && ((pm.lots as LotMarche[]) || []).length > 0
-                                  ? (pm.lots as LotMarche[]).length
-                                  : 1}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right font-medium">
-                              {formatMontant(pm.montant_retenu)}
-                            </TableCell>
-                            <TableCell>{getStatusBadge(pm.statut)}</TableCell>
-                            <TableCell>
-                              {format(new Date(pm.created_at), 'dd MMM yyyy', { locale: fr })}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-popover">
-                                  {/* Tout le monde peut voir les détails */}
-                                  <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    Voir détails
-                                  </DropdownMenuItem>
-
-                                  <DropdownMenuItem onClick={() => exportPassationPDF(pm)}>
-                                    <FileDown className="mr-2 h-4 w-4" />
-                                    Exporter PDF
-                                  </DropdownMenuItem>
-
-                                  {pm.dossier_id && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleGoToDossier(pm.dossier_id as string)}
-                                    >
-                                      <FolderOpen className="mr-2 h-4 w-4" />
-                                      Voir le dossier
-                                    </DropdownMenuItem>
-                                  )}
-
-                                  {/* DAAF: Modifier (brouillon) */}
-                                  {canManageWorkflow && pm.statut === 'brouillon' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
-                                        <Pencil className="mr-2 h-4 w-4" />
-                                        Modifier
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF: Publier (brouillon) */}
-                                  {canManageWorkflow && pm.statut === 'brouillon' && (
-                                    <DropdownMenuItem
-                                      onClick={() => handleTransition('publish', pm)}
-                                    >
-                                      <Send className="mr-2 h-4 w-4" />
-                                      Publier
-                                    </DropdownMenuItem>
-                                  )}
-
-                                  {/* DAAF: Clôturer (publié) */}
-                                  {canManageWorkflow && pm.statut === 'publie' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => handleTransition('close', pm)}
-                                      >
-                                        <Lock className="mr-2 h-4 w-4" />
-                                        Clôturer
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF: Lancer évaluation (clôturé) */}
-                                  {canManageWorkflow && pm.statut === 'cloture' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => handleTransition('startEvaluation', pm)}
-                                      >
-                                        <ClipboardCheck className="mr-2 h-4 w-4" />
-                                        Lancer l'évaluation
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF: Attribuer (en_evaluation) */}
-                                  {canManageWorkflow && pm.statut === 'en_evaluation' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => handleTransition('award', pm)}
-                                      >
-                                        <Award className="mr-2 h-4 w-4" />
-                                        Attribuer
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DG: Approuver / Rejeter (attribué) */}
-                                  {canApprove && pm.statut === 'attribue' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => handleTransition('approve', pm)}
-                                      >
-                                        <ShieldCheck className="mr-2 h-4 w-4" />
-                                        Approuver
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setSelectedPassation(pm);
-                                          setRejectDialogOpen(true);
-                                        }}
-                                        className="text-destructive"
-                                      >
-                                        <XCircle className="mr-2 h-4 w-4" />
-                                        Rejeter l'attribution
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF: Signer le contrat (approuvé) */}
-                                  {canManageWorkflow && pm.statut === 'approuve' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => handleTransition('sign', pm)}
-                                      >
-                                        <FileSignature className="mr-2 h-4 w-4" />
-                                        Signer le contrat
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF/DG: Créer engagement (signé) */}
-                                  {(canManageWorkflow || canApprove) && pm.statut === 'signe' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
-                                      >
-                                        <FileText className="mr-2 h-4 w-4" />
-                                        Créer engagement
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-
-                                  {/* DAAF: Supprimer (brouillon uniquement) */}
-                                  {canManageWorkflow && pm.statut === 'brouillon' && (
-                                    <>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() => deletePassation(pm.id)}
-                                        className="text-destructive"
-                                      >
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Supprimer
-                                      </DropdownMenuItem>
-                                    </>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
+            {['soumis', 'publie', 'cloture', 'en_evaluation', 'attribue', 'approuve', 'signe'].map(
+              (tab) => (
+                <TabsContent key={tab} value={tab} className="mt-4">
+                  {activeTab === tab && filteredPassations.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Gavel className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucune passation dans cet onglet</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Référence</TableHead>
+                            <TableHead>EB Source</TableHead>
+                            <TableHead>Mode</TableHead>
+                            <TableHead className="text-center">Nb lots</TableHead>
+                            <TableHead className="text-right">Montant retenu</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead>Créé le</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    {activeTab === tab && totalPages > 1 && (
-                      <div className="mt-4" data-testid="pagination">
-                        <NotesPagination
-                          page={page}
-                          pageSize={pageSize}
-                          total={total}
-                          totalPages={totalPages}
-                          onPageChange={setPage}
-                          onPageSizeChange={setPageSize}
-                          pageSizeOptions={[10, 20, 50]}
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
-              </TabsContent>
-            ))}
+                        </TableHeader>
+                        <TableBody>
+                          {filteredPassations.map((pm) => (
+                            <TableRow key={pm.id}>
+                              <TableCell className="font-mono text-sm">
+                                {pm.reference || '-'}
+                              </TableCell>
+                              <TableCell className="max-w-[200px] truncate">
+                                {pm.expression_besoin?.numero || pm.expression_besoin?.objet || '-'}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{getModeName(pm.mode_passation)}</Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant="secondary" className="font-mono">
+                                  {pm.allotissement && ((pm.lots as LotMarche[]) || []).length > 0
+                                    ? (pm.lots as LotMarche[]).length
+                                    : 1}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-medium">
+                                {formatMontant(pm.montant_retenu)}
+                              </TableCell>
+                              <TableCell>{getStatusBadge(pm.statut)}</TableCell>
+                              <TableCell>
+                                {format(new Date(pm.created_at), 'dd MMM yyyy', { locale: fr })}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-popover">
+                                    {/* Tout le monde peut voir les détails */}
+                                    <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      Voir détails
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem onClick={() => exportPassationPDF(pm)}>
+                                      <FileDown className="mr-2 h-4 w-4" />
+                                      Exporter PDF
+                                    </DropdownMenuItem>
+
+                                    {pm.dossier_id && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleGoToDossier(pm.dossier_id as string)}
+                                      >
+                                        <FolderOpen className="mr-2 h-4 w-4" />
+                                        Voir le dossier
+                                      </DropdownMenuItem>
+                                    )}
+
+                                    {/* DAAF: Modifier (soumis) */}
+                                    {canManageWorkflow && pm.statut === 'soumis' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => handleViewDetails(pm)}>
+                                          <Pencil className="mr-2 h-4 w-4" />
+                                          Modifier
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF: Publier (soumis) */}
+                                    {canManageWorkflow && pm.statut === 'soumis' && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleTransition('publish', pm)}
+                                      >
+                                        <Send className="mr-2 h-4 w-4" />
+                                        Publier
+                                      </DropdownMenuItem>
+                                    )}
+
+                                    {/* DAAF: Clôturer (publié) */}
+                                    {canManageWorkflow && pm.statut === 'publie' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => handleTransition('close', pm)}
+                                        >
+                                          <Lock className="mr-2 h-4 w-4" />
+                                          Clôturer
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF: Lancer évaluation (clôturé) */}
+                                    {canManageWorkflow && pm.statut === 'cloture' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => handleTransition('startEvaluation', pm)}
+                                        >
+                                          <ClipboardCheck className="mr-2 h-4 w-4" />
+                                          Lancer l'évaluation
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF: Attribuer (en_evaluation) */}
+                                    {canManageWorkflow && pm.statut === 'en_evaluation' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => handleTransition('award', pm)}
+                                        >
+                                          <Award className="mr-2 h-4 w-4" />
+                                          Attribuer
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DG: Approuver / Rejeter (attribué) */}
+                                    {canApprove && pm.statut === 'attribue' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => handleTransition('approve', pm)}
+                                        >
+                                          <ShieldCheck className="mr-2 h-4 w-4" />
+                                          Approuver
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            setSelectedPassation(pm);
+                                            setRejectDialogOpen(true);
+                                          }}
+                                          className="text-destructive"
+                                        >
+                                          <XCircle className="mr-2 h-4 w-4" />
+                                          Rejeter l'attribution
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF: Signer le contrat (approuvé) */}
+                                    {canManageWorkflow && pm.statut === 'approuve' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => handleTransition('sign', pm)}
+                                        >
+                                          <FileSignature className="mr-2 h-4 w-4" />
+                                          Signer le contrat
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF/DG: Créer engagement (signé) */}
+                                    {(canManageWorkflow || canApprove) && pm.statut === 'signe' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => navigate(`/engagements?sourcePM=${pm.id}`)}
+                                        >
+                                          <FileText className="mr-2 h-4 w-4" />
+                                          Créer engagement
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+
+                                    {/* DAAF: Supprimer (soumis uniquement) */}
+                                    {canManageWorkflow && pm.statut === 'soumis' && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => deletePassation(pm.id)}
+                                          className="text-destructive"
+                                        >
+                                          <Trash2 className="mr-2 h-4 w-4" />
+                                          Supprimer
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                      {activeTab === tab && totalPages > 1 && (
+                        <div className="mt-4" data-testid="pagination">
+                          <NotesPagination
+                            page={page}
+                            pageSize={pageSize}
+                            total={total}
+                            totalPages={totalPages}
+                            onPageChange={setPage}
+                            onPageSizeChange={setPageSize}
+                            pageSizeOptions={[10, 20, 50]}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </TabsContent>
+              )
+            )}
           </Tabs>
         </CardContent>
       </Card>
@@ -834,7 +828,7 @@ export default function PassationMarchePage() {
         open={showForm}
         onOpenChange={handleCloseForm}
         sourceEB={sourceEB}
-        onSuccess={() => setActiveTab('brouillon')}
+        onSuccess={() => setActiveTab('soumis')}
       />
 
       {/* Details dialog */}

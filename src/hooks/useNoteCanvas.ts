@@ -269,7 +269,7 @@ export function useNoteCanvas(noteId: string | null, directionId: string): UseNo
             contenu: content,
             contenu_brut: contenuBrut,
             type_note: 'interne',
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
             priorite: 'normale',
             template_id: 'note_descriptive',
             ...dbFields,

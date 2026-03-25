@@ -59,9 +59,8 @@ const STATUS_CONFIG: Record<
   string,
   { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
 > = {
-  brouillon: { label: 'Brouillon', variant: 'secondary' },
-  soumis: { label: 'Soumis', variant: 'outline' },
-  verifie: { label: 'Vérifié CB', variant: 'outline' },
+  soumis: { label: 'Soumis', variant: 'secondary' },
+  en_validation: { label: 'En validation', variant: 'outline' },
   valide: { label: 'Validé', variant: 'default' },
   rejete: { label: 'Rejeté', variant: 'destructive' },
   differe: { label: 'Différé', variant: 'outline' },
@@ -175,8 +174,7 @@ export function ExpressionBesoinList({
         </TableHeader>
         <TableBody>
           {expressions.map((expression) => {
-            const status =
-              STATUS_CONFIG[expression.statut || 'brouillon'] || STATUS_CONFIG.brouillon;
+            const status = STATUS_CONFIG[expression.statut || 'soumis'] || STATUS_CONFIG.soumis;
             const urgence =
               URGENCE_CONFIG[expression.urgence || 'normale'] || URGENCE_CONFIG.normale;
 
@@ -218,8 +216,8 @@ export function ExpressionBesoinList({
                           Voir détails
                         </DropdownMenuItem>
 
-                        {/* Brouillon : Soumettre / Supprimer */}
-                        {expression.statut === 'brouillon' && (
+                        {/* Soumis : Soumettre / Supprimer */}
+                        {expression.statut === 'soumis' && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

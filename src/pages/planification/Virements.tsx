@@ -120,19 +120,12 @@ interface StatusConfig {
 }
 
 const STATUS_CONFIG: Record<string, StatusConfig> = {
-  brouillon: {
-    label: 'Brouillon',
+  soumis: {
+    label: 'Soumis',
     icon: FileText,
     color: 'text-gray-600',
     bgColor: 'bg-gray-100',
     variant: 'secondary',
-  },
-  soumis: {
-    label: 'Soumis',
-    icon: Send,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    variant: 'outline',
   },
   en_attente: {
     label: 'En attente',
@@ -202,7 +195,7 @@ const EXPORT_COLUMNS: ExportColumn[] = [
 // ============================================================================
 
 function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.brouillon;
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG.soumis;
   const Icon = config.icon;
   return (
     <Badge variant={config.variant} className={`gap-1 ${config.color} ${config.bgColor} border-0`}>
@@ -288,7 +281,7 @@ export default function Virements() {
 
     const byStatus = Object.entries(
       transfers.reduce<Record<string, number>>((acc, t) => {
-        const status = t.status || 'brouillon';
+        const status = t.status || 'soumis';
         acc[status] = (acc[status] || 0) + 1;
         return acc;
       }, {})
@@ -765,7 +758,7 @@ export default function Virements() {
                           {formatCurrency(transfer.amount)}
                         </TableCell>
                         <TableCell>
-                          <StatusBadge status={transfer.status || 'brouillon'} />
+                          <StatusBadge status={transfer.status || 'soumis'} />
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-sm text-muted-foreground whitespace-nowrap">
                           {format(new Date(transfer.requested_at), 'dd/MM/yyyy', { locale: fr })}
@@ -1167,7 +1160,7 @@ function TransferActions({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        {transfer.status === 'brouillon' && (
+        {transfer.status === 'soumis' && (
           <>
             <DropdownMenuItem onClick={onSubmit}>
               <Send className="h-4 w-4 mr-2" />
@@ -1472,7 +1465,7 @@ function CreateTransferDialog({
                   Création...
                 </>
               ) : (
-                'Créer le brouillon'
+                'Créer le soumis'
               )}
             </Button>
           </DialogFooter>
@@ -1507,7 +1500,7 @@ function TransferDetailsDialog({
   onCancel: () => void;
   isExecuting: boolean;
 }) {
-  const status = transfer.status || 'brouillon';
+  const status = transfer.status || 'soumis';
 
   // Build workflow timeline steps
   const timelineSteps = [
@@ -1520,8 +1513,8 @@ function TransferDetailsDialog({
     },
     {
       label: 'Soumission',
-      date: status !== 'brouillon' ? transfer.requested_at : null,
-      done: !['brouillon'].includes(status),
+      date: status !== 'soumis' ? transfer.requested_at : null,
+      done: !['soumis'].includes(status),
       icon: Send,
     },
     {
@@ -1546,7 +1539,7 @@ function TransferDetailsDialog({
         <DialogHeader>
           <div className="flex items-center gap-3 flex-wrap">
             <DialogTitle className="font-mono text-base sm:text-lg">
-              {transfer.code || 'Brouillon'}
+              {transfer.code || 'Soumis'}
             </DialogTitle>
             {transfer.code && (
               <Button
@@ -1728,7 +1721,7 @@ function TransferDetailsDialog({
             Fermer
           </Button>
 
-          {status === 'brouillon' && (
+          {status === 'soumis' && (
             <>
               <Button variant="destructive" size="sm" onClick={onCancel}>
                 <Ban className="h-4 w-4 mr-1" />

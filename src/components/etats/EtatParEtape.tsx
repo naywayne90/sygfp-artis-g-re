@@ -1,9 +1,8 @@
-// @ts-nocheck
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ExportButtons } from "./ExportButtons";
-import { EtapeStats } from "@/hooks/useEtatsExecution";
-import { FileText, FileCheck, ClipboardCheck, CreditCard, Banknote } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ExportButtons } from './ExportButtons';
+import { EtapeStats } from '@/hooks/useEtatsExecution';
+import { FileText, FileCheck, ClipboardCheck, CreditCard, Banknote } from 'lucide-react';
 
 interface EtatParEtapeProps {
   data: EtapeStats[];
@@ -11,12 +10,12 @@ interface EtatParEtapeProps {
 
 const formatMontant = (montant: number) => {
   if (montant >= 1000000000) {
-    return (montant / 1000000000).toFixed(2) + " Mds";
+    return (montant / 1000000000).toFixed(2) + ' Mds';
   }
   if (montant >= 1000000) {
-    return (montant / 1000000).toFixed(1) + " M";
+    return (montant / 1000000).toFixed(1) + ' M';
   }
-  return new Intl.NumberFormat("fr-FR").format(montant);
+  return new Intl.NumberFormat('fr-FR').format(montant);
 };
 
 const ETAPE_ICONS: Record<string, React.ReactNode> = {
@@ -28,23 +27,23 @@ const ETAPE_ICONS: Record<string, React.ReactNode> = {
 };
 
 const ETAPE_COLORS: Record<string, string> = {
-  notes_aef: "bg-purple-500/10 text-purple-600 border-purple-200",
-  engagements: "bg-secondary/10 text-secondary border-secondary/20",
-  liquidations: "bg-amber-500/10 text-amber-600 border-amber-200",
-  ordonnancements: "bg-blue-500/10 text-blue-600 border-blue-200",
-  reglements: "bg-success/10 text-success border-success/20",
+  notes_aef: 'bg-purple-500/10 text-purple-600 border-purple-200',
+  engagements: 'bg-secondary/10 text-secondary border-secondary/20',
+  liquidations: 'bg-amber-500/10 text-amber-600 border-amber-200',
+  ordonnancements: 'bg-blue-500/10 text-blue-600 border-blue-200',
+  reglements: 'bg-success/10 text-success border-success/20',
 };
 
 export function EtatParEtape({ data }: EtatParEtapeProps) {
   const exportColumns = [
-    { key: "label", label: "Étape" },
-    { key: "total", label: "Total" },
-    { key: "brouillon", label: "Brouillons" },
-    { key: "soumis", label: "Soumis" },
-    { key: "valide", label: "Validés" },
-    { key: "rejete", label: "Rejetés" },
-    { key: "differe", label: "Différés" },
-    { key: "montant_total", label: "Montant Total" },
+    { key: 'label', label: 'Étape' },
+    { key: 'total', label: 'Total' },
+    { key: 'soumis', label: 'Soumis' },
+    { key: 'soumis', label: 'Soumis' },
+    { key: 'valide', label: 'Validés' },
+    { key: 'rejete', label: 'Rejetés' },
+    { key: 'differe', label: 'Différés' },
+    { key: 'montant_total', label: 'Montant Total' },
   ];
 
   return (
@@ -63,12 +62,10 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
           {data.map((etape) => (
             <div
               key={etape.etape}
-              className={`p-4 rounded-lg border ${ETAPE_COLORS[etape.etape] || "bg-muted"}`}
+              className={`p-4 rounded-lg border ${ETAPE_COLORS[etape.etape] || 'bg-muted'}`}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-background/50">
-                  {ETAPE_ICONS[etape.etape]}
-                </div>
+                <div className="p-2 rounded-lg bg-background/50">{ETAPE_ICONS[etape.etape]}</div>
                 <div>
                   <h3 className="font-semibold">{etape.label}</h3>
                   <p className="text-2xl font-bold">{etape.total}</p>
@@ -77,9 +74,9 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Brouillons</span>
+                  <span className="text-muted-foreground">Soumis</span>
                   <Badge variant="outline" className="bg-background">
-                    {etape.brouillon}
+                    {etape.soumis}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -96,7 +93,10 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Rejetés</span>
-                  <Badge variant="outline" className="bg-destructive/20 text-destructive border-destructive/30">
+                  <Badge
+                    variant="outline"
+                    className="bg-destructive/20 text-destructive border-destructive/30"
+                  >
                     {etape.rejete}
                   </Badge>
                 </div>
@@ -125,7 +125,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
               <tr className="border-b bg-muted/50">
                 <th className="text-left py-3 px-4 font-medium">Étape</th>
                 <th className="text-center py-3 px-4 font-medium">Total</th>
-                <th className="text-center py-3 px-4 font-medium">Brouillons</th>
+                <th className="text-center py-3 px-4 font-medium">Soumis</th>
                 <th className="text-center py-3 px-4 font-medium">Soumis</th>
                 <th className="text-center py-3 px-4 font-medium">Validés</th>
                 <th className="text-center py-3 px-4 font-medium">Rejetés</th>
@@ -138,7 +138,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
                 <tr key={etape.etape} className="border-b hover:bg-muted/30">
                   <td className="py-3 px-4 font-medium">{etape.label}</td>
                   <td className="py-3 px-4 text-center font-bold">{etape.total}</td>
-                  <td className="py-3 px-4 text-center">{etape.brouillon}</td>
+                  <td className="py-3 px-4 text-center">{etape.soumis}</td>
                   <td className="py-3 px-4 text-center text-blue-600">{etape.soumis}</td>
                   <td className="py-3 px-4 text-center text-success">{etape.valide}</td>
                   <td className="py-3 px-4 text-center text-destructive">{etape.rejete}</td>
@@ -156,7 +156,7 @@ export function EtatParEtape({ data }: EtatParEtapeProps) {
                   {data.reduce((sum, e) => sum + e.total, 0)}
                 </td>
                 <td className="py-3 px-4 text-center">
-                  {data.reduce((sum, e) => sum + e.brouillon, 0)}
+                  {data.reduce((sum, e) => sum + e.soumis, 0)}
                 </td>
                 <td className="py-3 px-4 text-center">
                   {data.reduce((sum, e) => sum + e.soumis, 0)}

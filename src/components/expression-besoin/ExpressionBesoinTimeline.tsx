@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import {
   ExpressionBesoin,
   VALIDATION_STEPS,
-  LEGACY_VALIDATION_STEPS,
+  EB_VALIDATION_STEPS,
 } from '@/hooks/useExpressionsBesoin';
 
 interface TimelineStep {
@@ -62,7 +62,7 @@ export function ExpressionBesoinTimeline({
   className,
 }: ExpressionBesoinTimelineProps) {
   const legacy = isLegacyWorkflow(expression);
-  const validationSteps = legacy ? LEGACY_VALIDATION_STEPS : VALIDATION_STEPS;
+  const validationSteps = legacy ? EB_VALIDATION_STEPS : VALIDATION_STEPS;
 
   const buildTimelineSteps = (): TimelineStep[] => {
     const steps: TimelineStep[] = [];
@@ -78,7 +78,7 @@ export function ExpressionBesoinTimeline({
     });
 
     // Step 2: Submission
-    const hasBeenSubmitted = expression.statut !== 'brouillon';
+    const hasBeenSubmitted = expression.statut !== 'soumis';
     steps.push({
       key: 'soumission',
       label: 'Soumission',

@@ -109,7 +109,7 @@ export default function StructureBudgetaire() {
   // Stats
   const validatedLines = budgetLines?.filter((l) => l.statut === 'valide').length || 0;
   const pendingLines = budgetLines?.filter((l) => l.statut === 'soumis').length || 0;
-  const draftLines = budgetLines?.filter((l) => !l.statut || l.statut === 'brouillon').length || 0;
+  const draftLines = budgetLines?.filter((l) => !l.statut || l.statut === 'soumis').length || 0;
 
   // ELOP KPIs from calculated fields
   const totalEngage =
@@ -324,7 +324,7 @@ export default function StructureBudgetaire() {
               <Target className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-2xl font-bold">{draftLines}</p>
-                <p className="text-sm text-muted-foreground">Brouillons</p>
+                <p className="text-sm text-muted-foreground">Soumis</p>
               </div>
             </div>
           </CardContent>

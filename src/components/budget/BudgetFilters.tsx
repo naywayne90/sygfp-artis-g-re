@@ -1,17 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
-import { BudgetLineFilters } from "@/hooks/useBudgetLines";
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
+import { BudgetLineFilters } from '@/hooks/useBudgetLines';
 
 interface BudgetFiltersProps {
   filters: BudgetLineFilters;
@@ -19,92 +19,92 @@ interface BudgetFiltersProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "Tous les statuts" },
-  { value: "brouillon", label: "Brouillon" },
-  { value: "soumis", label: "Soumis" },
-  { value: "valide", label: "Validé" },
-  { value: "rejete", label: "Rejeté" },
+  { value: 'all', label: 'Tous les statuts' },
+  { value: 'soumis', label: 'Soumis' },
+  { value: 'soumis', label: 'Soumis' },
+  { value: 'valide', label: 'Validé' },
+  { value: 'rejete', label: 'Rejeté' },
 ];
 
 const EXECUTION_STATUS_OPTIONS = [
-  { value: "all", label: "Tous" },
-  { value: "OUVERTE", label: "Ouverte" },
-  { value: "FERMEE", label: "Fermée" },
-  { value: "CLOTUREE", label: "Clôturée" },
+  { value: 'all', label: 'Tous' },
+  { value: 'OUVERTE', label: 'Ouverte' },
+  { value: 'FERMEE', label: 'Fermée' },
+  { value: 'CLOTUREE', label: 'Clôturée' },
 ];
 
 const LEVEL_OPTIONS = [
-  { value: "all", label: "Tous les niveaux" },
-  { value: "chapitre", label: "Chapitre" },
-  { value: "article", label: "Article" },
-  { value: "paragraphe", label: "Paragraphe" },
-  { value: "ligne", label: "Ligne" },
+  { value: 'all', label: 'Tous les niveaux' },
+  { value: 'chapitre', label: 'Chapitre' },
+  { value: 'article', label: 'Article' },
+  { value: 'paragraphe', label: 'Paragraphe' },
+  { value: 'ligne', label: 'Ligne' },
 ];
 
 export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) {
   const { data: directions } = useQuery({
-    queryKey: ["directions-filter"],
+    queryKey: ['directions-filter'],
     queryFn: async () => {
       const { data } = await supabase
-        .from("directions")
-        .select("id, code, label")
-        .eq("est_active", true)
-        .order("label");
+        .from('directions')
+        .select('id, code, label')
+        .eq('est_active', true)
+        .order('label');
       return data || [];
     },
   });
 
   const { data: objectifs } = useQuery({
-    queryKey: ["objectifs-filter"],
+    queryKey: ['objectifs-filter'],
     queryFn: async () => {
       const { data } = await supabase
-        .from("objectifs_strategiques")
-        .select("id, code, libelle")
-        .eq("est_actif", true)
-        .order("code");
+        .from('objectifs_strategiques')
+        .select('id, code, libelle')
+        .eq('est_actif', true)
+        .order('code');
       return data || [];
     },
   });
 
   const { data: nves } = useQuery({
-    queryKey: ["ref-nve-filter"],
+    queryKey: ['ref-nve-filter'],
     queryFn: async () => {
       const { data } = await supabase
-        .from("ref_nve")
-        .select("id, code_nve, libelle")
-        .eq("actif", true)
-        .order("code_nve");
+        .from('ref_nve')
+        .select('id, code_nve, libelle')
+        .eq('actif', true)
+        .order('code_nve');
       return data || [];
     },
   });
 
   // Missions - independent filter (no os_id in schema)
   const { data: missions } = useQuery({
-    queryKey: ["missions-filter"],
+    queryKey: ['missions-filter'],
     queryFn: async () => {
       const { data } = await supabase
-        .from("missions")
-        .select("id, code, libelle")
-        .eq("est_active", true)
-        .order("code");
+        .from('missions')
+        .select('id, code, libelle')
+        .eq('est_active', true)
+        .order('code');
       return data || [];
     },
   });
 
   // Actions filtered by selected Mission
   const { data: actions } = useQuery({
-    queryKey: ["actions-filter", filters.mission_id],
+    queryKey: ['actions-filter', filters.mission_id],
     queryFn: async () => {
       let query = supabase
-        .from("actions")
-        .select("id, code, libelle, mission_id")
-        .eq("est_active", true)
-        .order("code");
-      
+        .from('actions')
+        .select('id, code, libelle, mission_id')
+        .eq('est_active', true)
+        .order('code');
+
       if (filters.mission_id) {
-        query = query.eq("mission_id", filters.mission_id);
+        query = query.eq('mission_id', filters.mission_id);
       }
-      
+
       const { data } = await query;
       return data || [];
     },
@@ -112,18 +112,18 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
 
   // Activités filtered by selected Action
   const { data: activites } = useQuery({
-    queryKey: ["activites-filter", filters.action_id],
+    queryKey: ['activites-filter', filters.action_id],
     queryFn: async () => {
       let query = supabase
-        .from("activites")
-        .select("id, code, libelle, action_id")
-        .eq("est_active", true)
-        .order("code");
-      
+        .from('activites')
+        .select('id, code, libelle, action_id')
+        .eq('est_active', true)
+        .order('code');
+
       if (filters.action_id) {
-        query = query.eq("action_id", filters.action_id);
+        query = query.eq('action_id', filters.action_id);
       }
-      
+
       const { data } = await query;
       return data || [];
     },
@@ -131,18 +131,18 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
 
   // Sous-activités filtered by selected Activité
   const { data: sousActivites } = useQuery({
-    queryKey: ["sous-activites-filter", filters.activite_id],
+    queryKey: ['sous-activites-filter', filters.activite_id],
     queryFn: async () => {
       let query = supabase
-        .from("sous_activites")
-        .select("id, code, libelle, activite_id")
-        .eq("est_active", true)
-        .order("code");
-      
+        .from('sous_activites')
+        .select('id, code, libelle, activite_id')
+        .eq('est_active', true)
+        .order('code');
+
       if (filters.activite_id) {
-        query = query.eq("activite_id", filters.activite_id);
+        query = query.eq('activite_id', filters.activite_id);
       }
-      
+
       const { data } = await query;
       return data || [];
     },
@@ -152,14 +152,14 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     onFiltersChange({});
   };
 
-  const hasActiveFilters = 
-    filters.direction_id || 
-    filters.os_id || 
+  const hasActiveFilters =
+    filters.direction_id ||
+    filters.os_id ||
     filters.mission_id ||
     filters.action_id ||
     filters.activite_id ||
     filters.sous_activite_id ||
-    filters.keyword || 
+    filters.keyword ||
     filters.statut ||
     filters.statut_execution ||
     filters.nve_id ||
@@ -185,7 +185,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Code ou libellé..."
-              value={filters.keyword || ""}
+              value={filters.keyword || ''}
               onChange={(e) => onFiltersChange({ ...filters, keyword: e.target.value })}
               className="pl-8"
             />
@@ -195,9 +195,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Niveau</Label>
           <Select
-            value={filters.level || "all"}
+            value={filters.level || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, level: value === "all" ? undefined : value })
+              onFiltersChange({ ...filters, level: value === 'all' ? undefined : value })
             }
           >
             <SelectTrigger>
@@ -216,9 +216,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Direction</Label>
           <Select
-            value={filters.direction_id || "all"}
+            value={filters.direction_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, direction_id: value === "all" ? undefined : value })
+              onFiltersChange({ ...filters, direction_id: value === 'all' ? undefined : value })
             }
           >
             <SelectTrigger>
@@ -238,11 +238,11 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Objectif Stratégique</Label>
           <Select
-            value={filters.os_id || "all"}
+            value={filters.os_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ 
-                ...filters, 
-                os_id: value === "all" ? undefined : value,
+              onFiltersChange({
+                ...filters,
+                os_id: value === 'all' ? undefined : value,
               })
             }
           >
@@ -266,11 +266,11 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Mission</Label>
           <Select
-            value={filters.mission_id || "all"}
+            value={filters.mission_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ 
-                ...filters, 
-                mission_id: value === "all" ? undefined : value,
+              onFiltersChange({
+                ...filters,
+                mission_id: value === 'all' ? undefined : value,
                 action_id: undefined,
                 activite_id: undefined,
               })
@@ -293,11 +293,11 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Action</Label>
           <Select
-            value={filters.action_id || "all"}
+            value={filters.action_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ 
-                ...filters, 
-                action_id: value === "all" ? undefined : value,
+              onFiltersChange({
+                ...filters,
+                action_id: value === 'all' ? undefined : value,
                 activite_id: undefined,
               })
             }
@@ -319,11 +319,11 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Activité</Label>
           <Select
-            value={filters.activite_id || "all"}
+            value={filters.activite_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ 
-                ...filters, 
-                activite_id: value === "all" ? undefined : value,
+              onFiltersChange({
+                ...filters,
+                activite_id: value === 'all' ? undefined : value,
                 sous_activite_id: undefined,
               })
             }
@@ -345,11 +345,11 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Sous-activité</Label>
           <Select
-            value={filters.sous_activite_id || "all"}
+            value={filters.sous_activite_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ 
-                ...filters, 
-                sous_activite_id: value === "all" ? undefined : value,
+              onFiltersChange({
+                ...filters,
+                sous_activite_id: value === 'all' ? undefined : value,
               })
             }
           >
@@ -373,9 +373,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Nature dépense (NVE)</Label>
           <Select
-            value={filters.nve_id || "all"}
+            value={filters.nve_id || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, nve_id: value === "all" ? undefined : value })
+              onFiltersChange({ ...filters, nve_id: value === 'all' ? undefined : value })
             }
           >
             <SelectTrigger>
@@ -395,9 +395,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Statut validation</Label>
           <Select
-            value={filters.statut || "all"}
+            value={filters.statut || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, statut: value === "all" ? undefined : value })
+              onFiltersChange({ ...filters, statut: value === 'all' ? undefined : value })
             }
           >
             <SelectTrigger>
@@ -416,9 +416,9 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
         <div className="space-y-2">
           <Label>Statut exécution</Label>
           <Select
-            value={filters.statut_execution || "all"}
+            value={filters.statut_execution || 'all'}
             onValueChange={(value) =>
-              onFiltersChange({ ...filters, statut_execution: value === "all" ? undefined : value })
+              onFiltersChange({ ...filters, statut_execution: value === 'all' ? undefined : value })
             }
           >
             <SelectTrigger>

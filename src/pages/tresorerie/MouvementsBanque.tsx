@@ -155,8 +155,8 @@ export default function MouvementsBanque() {
     switch (statut) {
       case 'valide':
         return <Badge className="bg-green-100 text-green-800">Validé</Badge>;
-      case 'brouillon':
-        return <Badge variant="secondary">Brouillon</Badge>;
+      case 'soumis':
+        return <Badge variant="secondary">Soumis</Badge>;
       case 'annule':
         return <Badge variant="destructive">Annulé</Badge>;
       default:

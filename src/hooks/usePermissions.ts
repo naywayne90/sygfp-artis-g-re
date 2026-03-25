@@ -174,14 +174,17 @@ export function usePermissions() {
     return isAdmin || hasRole('CB') || hasPermission('virement_approve');
   };
 
-  // Vérifier si l'utilisateur peut vérifier une Expression de Besoin (CB)
+  // Vérifier si l'utilisateur peut agir sur une EB (3 étapes ARTI)
+  // Étape 1 : Sous-Dir DAAF (HIEN) = role DAAF
+  // Étape 2 : CB = role CB
+  // Étape 3 : DAAF (TOURE) = role DAAF
   const canVerifyEB = (): boolean => {
-    return isAdmin || hasRole('CB');
+    return isAdmin || hasRole('CB') || hasRole('DAAF') || hasRole('DAF');
   };
 
-  // Vérifier si l'utilisateur peut valider une Expression de Besoin (DG/DAAF)
+  // Alias pour rétrocompatibilité
   const canValidateEB = (): boolean => {
-    return isAdmin || hasRole('DG') || hasRole('DAAF');
+    return isAdmin || hasRole('DAAF') || hasRole('DAF') || hasRole('CB');
   };
 
   // Message d'erreur pour rôle insuffisant

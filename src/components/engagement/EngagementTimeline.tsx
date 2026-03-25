@@ -7,15 +7,10 @@
  * Avec dates, acteurs et motifs si applicable
  */
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileEdit,
   Send,
@@ -27,17 +22,17 @@ import {
   Users,
   Calculator,
   CreditCard,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { Engagement, VALIDATION_STEPS, useEngagements } from "@/hooks/useEngagements";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { Engagement, VALIDATION_STEPS, useEngagements } from '@/hooks/useEngagements';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: "completed" | "current" | "pending" | "rejected" | "deferred";
+  status: 'completed' | 'current' | 'pending' | 'rejected' | 'deferred';
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
@@ -79,43 +74,43 @@ export function EngagementTimeline({
 
     // Step 1: Creation (always completed)
     steps.push({
-      key: "creation",
-      label: "Création",
+      key: 'creation',
+      label: 'Création',
       icon: FileEdit,
-      status: "completed",
+      status: 'completed',
       date: engagement.created_at,
       actor: engagement.creator?.full_name,
     });
 
     // Step 2: Imputation budgétaire (always completed if engagement exists)
     steps.push({
-      key: "imputation",
-      label: "Imputation",
+      key: 'imputation',
+      label: 'Imputation',
       icon: Calculator,
-      status: "completed",
+      status: 'completed',
       actor: engagement.budget_line?.code,
       comment: engagement.budget_line?.label,
     });
 
     // Step 3: Submission
-    const hasBeenSubmitted = engagement.statut !== "brouillon";
+    const hasBeenSubmitted = engagement.statut !== 'soumis';
     steps.push({
-      key: "soumission",
-      label: "Soumission",
+      key: 'soumission',
+      label: 'Soumission',
       icon: Send,
-      status: hasBeenSubmitted ? "completed" : "current",
+      status: hasBeenSubmitted ? 'completed' : 'current',
     });
 
     // Step 4: Multi-step validation (only if submitted)
-    if (hasBeenSubmitted && engagement.statut !== "rejete" && engagement.statut !== "differe") {
+    if (hasBeenSubmitted && engagement.statut !== 'rejete' && engagement.statut !== 'differe') {
       const currentStep = engagement.current_step || 1;
 
       // Add each validation step
       VALIDATION_STEPS.forEach((step) => {
         const validation = validationSteps.find((v) => v.step_order === step.order);
-        const isCompleted = validation?.status === "valide";
-        const isRejected = validation?.status === "rejete";
-        const isCurrent = step.order === currentStep && engagement.statut === "soumis";
+        const isCompleted = validation?.status === 'valide';
+        const isRejected = validation?.status === 'rejete';
+        const isCurrent = step.order === currentStep && engagement.statut === 'soumis';
         const isPending = step.order > currentStep && !isCompleted;
 
         steps.push({
@@ -123,14 +118,14 @@ export function EngagementTimeline({
           label: step.label,
           icon: Users,
           status: isCompleted
-            ? "completed"
+            ? 'completed'
             : isRejected
-            ? "rejected"
-            : isCurrent
-            ? "current"
-            : isPending
-            ? "pending"
-            : "pending",
+              ? 'rejected'
+              : isCurrent
+                ? 'current'
+                : isPending
+                  ? 'pending'
+                  : 'pending',
           date: validation?.validated_at,
           actor: validation?.validator?.full_name,
           comment: validation?.comments,
@@ -139,31 +134,31 @@ export function EngagementTimeline({
     }
 
     // Final status
-    if (engagement.statut === "valide") {
+    if (engagement.statut === 'valide') {
       steps.push({
-        key: "validation_finale",
-        label: "Engagement validé",
+        key: 'validation_finale',
+        label: 'Engagement validé',
         icon: CheckCircle2,
-        status: "completed",
+        status: 'completed',
       });
-    } else if (engagement.statut === "rejete") {
+    } else if (engagement.statut === 'rejete') {
       // Find rejection reason from validation steps
-      const rejectedStep = validationSteps.find((v) => v.status === "rejete");
+      const rejectedStep = validationSteps.find((v) => v.status === 'rejete');
       steps.push({
-        key: "rejet",
-        label: "Rejeté",
+        key: 'rejet',
+        label: 'Rejeté',
         icon: XCircle,
-        status: "rejected",
+        status: 'rejected',
         comment: rejectedStep?.comments,
         actor: rejectedStep?.validator?.full_name,
         date: rejectedStep?.validated_at,
       });
-    } else if (engagement.statut === "differe") {
+    } else if (engagement.statut === 'differe') {
       steps.push({
-        key: "differe",
-        label: "Différé",
+        key: 'differe',
+        label: 'Différé',
         icon: Clock,
-        status: "deferred",
+        status: 'deferred',
         date: engagement.date_differe,
         comment: engagement.motif_differe,
       });
@@ -174,38 +169,38 @@ export function EngagementTimeline({
 
   const steps = buildTimelineSteps();
 
-  const getStatusColor = (status: TimelineStep["status"]) => {
+  const getStatusColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500 text-white";
-      case "current":
-        return "bg-primary text-white ring-4 ring-primary/30";
-      case "rejected":
-        return "bg-red-500 text-white";
-      case "deferred":
-        return "bg-orange-500 text-white";
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'current':
+        return 'bg-primary text-white ring-4 ring-primary/30';
+      case 'rejected':
+        return 'bg-red-500 text-white';
+      case 'deferred':
+        return 'bg-orange-500 text-white';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLineColor = (status: TimelineStep["status"]) => {
+  const getLineColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "rejected":
-        return "bg-red-500";
-      case "deferred":
-        return "bg-orange-500";
+      case 'completed':
+        return 'bg-green-500';
+      case 'rejected':
+        return 'bg-red-500';
+      case 'deferred':
+        return 'bg-orange-500';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn("flex items-center gap-2 overflow-x-auto", className)}>
+        <div className={cn('flex items-center gap-2 overflow-x-auto', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -214,7 +209,7 @@ export function EngagementTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
                         getStatusColor(step.status)
                       )}
                     >
@@ -226,20 +221,16 @@ export function EngagementTimeline({
                       <p className="font-medium">{step.label}</p>
                       {step.date && (
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(step.date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                          {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.actor && (
-                        <p className="text-xs">Par: {step.actor}</p>
-                      )}
-                      {step.comment && (
-                        <p className="text-xs max-w-xs">{step.comment}</p>
-                      )}
+                      {step.actor && <p className="text-xs">Par: {step.actor}</p>}
+                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn("h-0.5 w-4 mx-1 shrink-0", getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-4 mx-1 shrink-0', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -267,7 +258,7 @@ export function EngagementTimeline({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full -ml-px",
+                      'absolute left-4 top-8 w-0.5 h-full -ml-px',
                       getLineColor(step.status)
                     )}
                   />
@@ -276,7 +267,7 @@ export function EngagementTimeline({
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10",
+                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10',
                     getStatusColor(step.status)
                   )}
                 >
@@ -290,19 +281,19 @@ export function EngagementTimeline({
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-xs",
-                        step.status === "completed" && "border-green-500 text-green-600",
-                        step.status === "current" && "border-primary text-primary",
-                        step.status === "rejected" && "border-red-500 text-red-600",
-                        step.status === "deferred" && "border-orange-500 text-orange-600",
-                        step.status === "pending" && "border-muted-foreground text-muted-foreground"
+                        'text-xs',
+                        step.status === 'completed' && 'border-green-500 text-green-600',
+                        step.status === 'current' && 'border-primary text-primary',
+                        step.status === 'rejected' && 'border-red-500 text-red-600',
+                        step.status === 'deferred' && 'border-orange-500 text-orange-600',
+                        step.status === 'pending' && 'border-muted-foreground text-muted-foreground'
                       )}
                     >
-                      {step.status === "completed" && "Terminé"}
-                      {step.status === "current" && "En cours"}
-                      {step.status === "rejected" && "Rejeté"}
-                      {step.status === "deferred" && "Différé"}
-                      {step.status === "pending" && "En attente"}
+                      {step.status === 'completed' && 'Terminé'}
+                      {step.status === 'current' && 'En cours'}
+                      {step.status === 'rejected' && 'Rejeté'}
+                      {step.status === 'deferred' && 'Différé'}
+                      {step.status === 'pending' && 'En attente'}
                     </Badge>
                   </div>
 
@@ -311,7 +302,7 @@ export function EngagementTimeline({
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(step.date), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>

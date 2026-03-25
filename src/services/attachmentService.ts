@@ -6,13 +6,13 @@
  * - Support R2 (si env vars présentes) ou Supabase Storage (fallback)
  * - URLs signées pour téléchargement sécurisé
  * - Convention de nommage: sygfp/attachments/{exercise}/{dossier_ref}/{step}/...
- * - Suppression contrôlée (brouillon uniquement)
+ * - Suppression contrôlée (soumis uniquement)
  *
  * @module AttachmentService
  */
 
-import { getStorageProvider, type IStorageProvider } from "./storage";
-import { supabase } from "@/integrations/supabase/client";
+import { getStorageProvider, type IStorageProvider } from './storage';
+import { supabase } from '@/integrations/supabase/client';
 
 // The 'attachments' table is not in the generated Supabase types yet
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,17 +23,17 @@ const supabaseUntyped = supabase as any;
 // ============================================
 
 export type AttachmentStep =
-  | "note_sef"
-  | "note_aef"
-  | "imputation"
-  | "expression_besoin"
-  | "passation_marche"
-  | "engagement"
-  | "liquidation"
-  | "ordonnancement"
-  | "reglement"
-  | "marche"
-  | "prestataire";
+  | 'note_sef'
+  | 'note_aef'
+  | 'imputation'
+  | 'expression_besoin'
+  | 'passation_marche'
+  | 'engagement'
+  | 'liquidation'
+  | 'ordonnancement'
+  | 'reglement'
+  | 'marche'
+  | 'prestataire';
 
 export interface AttachmentMetadata {
   id?: string;
@@ -92,27 +92,27 @@ export interface SignedUrlResult {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME_TYPES = [
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/gif",
-  "image/webp",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "text/plain",
-  "text/csv",
-  "application/zip",
-  "application/x-rar-compressed",
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/gif',
+  'image/webp',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/csv',
+  'application/zip',
+  'application/x-rar-compressed',
 ];
 
-const BASE_PATH = "sygfp/attachments";
-const EXPORTS_PATH = "sygfp/exports";
-const IMPORTS_PATH = "sygfp/imports";
+const BASE_PATH = 'sygfp/attachments';
+const EXPORTS_PATH = 'sygfp/exports';
+const IMPORTS_PATH = 'sygfp/imports';
 
 // ============================================
 // CLASSE PRINCIPALE
@@ -152,7 +152,7 @@ class AttachmentServiceClass {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       return {
         valid: false,
-        error: `Type de fichier non autorisé: ${file.type || "inconnu"}`,
+        error: `Type de fichier non autorisé: ${file.type || 'inconnu'}`,
       };
     }
 
@@ -160,7 +160,7 @@ class AttachmentServiceClass {
     if (!file.name || file.name.length > 255) {
       return {
         valid: false,
-        error: "Nom de fichier invalide",
+        error: 'Nom de fichier invalide',
       };
     }
 
@@ -171,9 +171,9 @@ class AttachmentServiceClass {
    * Formate la taille d'un fichier
    */
   formatFileSize(bytes: number): string {
-    if (bytes === 0) return "0 B";
+    if (bytes === 0) return '0 B';
     const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
@@ -222,11 +222,11 @@ class AttachmentServiceClass {
    */
   private sanitizeFilename(filename: string): string {
     return filename
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remove accents
-      .replace(/[^a-zA-Z0-9._-]/g, "_") // Replace special chars
-      .replace(/_+/g, "_") // Collapse underscores
-      .replace(/^_|_$/g, ""); // Trim underscores
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars
+      .replace(/_+/g, '_') // Collapse underscores
+      .replace(/^_|_$/g, ''); // Trim underscores
   }
 
   // ============================================
@@ -253,13 +253,15 @@ class AttachmentServiceClass {
       const result = await this.provider.upload(file, storagePath, onProgress);
 
       if (result.error || !result.data) {
-        return { success: false, error: result.error || "Upload échoué" };
+        return { success: false, error: result.error || 'Upload échoué' };
       }
 
       // Récupérer l'utilisateur courant
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        return { success: false, error: "Non authentifié" };
+        return { success: false, error: 'Non authentifié' };
       }
 
       // Créer les métadonnées
@@ -269,7 +271,7 @@ class AttachmentServiceClass {
         filename: this.sanitizeFilename(file.name),
         original_name: file.name,
         storage_path: storagePath,
-        content_type: file.type || "application/octet-stream",
+        content_type: file.type || 'application/octet-stream',
         size: file.size,
         uploaded_by: user.id,
         uploaded_at: new Date().toISOString(),
@@ -279,7 +281,7 @@ class AttachmentServiceClass {
 
       // Sauvegarder en base de données
       const { data: savedAttachment, error: dbError } = await supabaseUntyped
-        .from("attachments")
+        .from('attachments')
         .insert({
           dossier_ref: metadata.dossier_ref,
           step: metadata.step,
@@ -296,7 +298,7 @@ class AttachmentServiceClass {
         .single();
 
       if (dbError) {
-        console.error("Erreur sauvegarde métadonnées:", dbError);
+        console.error('Erreur sauvegarde métadonnées:', dbError);
         // L'upload a réussi, on continue malgré l'erreur DB
       }
 
@@ -308,10 +310,10 @@ class AttachmentServiceClass {
         },
       };
     } catch (err) {
-      console.error("Erreur upload:", err);
+      console.error('Erreur upload:', err);
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Erreur inconnue",
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
@@ -361,19 +363,16 @@ class AttachmentServiceClass {
   /**
    * Liste les pièces jointes d'un dossier et d'une étape
    */
-  async listAttachments(
-    dossierRef: string,
-    step?: AttachmentStep
-  ): Promise<ListAttachmentsResult> {
+  async listAttachments(dossierRef: string, step?: AttachmentStep): Promise<ListAttachmentsResult> {
     try {
       let query = supabaseUntyped
-        .from("attachments")
-        .select("*")
-        .eq("dossier_ref", dossierRef)
-        .order("created_at", { ascending: false });
+        .from('attachments')
+        .select('*')
+        .eq('dossier_ref', dossierRef)
+        .order('created_at', { ascending: false });
 
       if (step) {
-        query = query.eq("step", step);
+        query = query.eq('step', step);
       }
 
       const { data, error } = await query;
@@ -401,7 +400,7 @@ class AttachmentServiceClass {
     } catch (err) {
       return {
         attachments: [],
-        error: err instanceof Error ? err.message : "Erreur liste attachments",
+        error: err instanceof Error ? err.message : 'Erreur liste attachments',
       };
     }
   }
@@ -412,10 +411,10 @@ class AttachmentServiceClass {
   async listByEntity(entityId: string): Promise<ListAttachmentsResult> {
     try {
       const { data, error } = await supabaseUntyped
-        .from("attachments")
-        .select("*")
-        .eq("entity_id", entityId)
-        .order("created_at", { ascending: false });
+        .from('attachments')
+        .select('*')
+        .eq('entity_id', entityId)
+        .order('created_at', { ascending: false });
 
       if (error) {
         return { attachments: [], error: error.message };
@@ -440,7 +439,7 @@ class AttachmentServiceClass {
     } catch (err) {
       return {
         attachments: [],
-        error: err instanceof Error ? err.message : "Erreur liste attachments",
+        error: err instanceof Error ? err.message : 'Erreur liste attachments',
       };
     }
   }
@@ -454,16 +453,13 @@ class AttachmentServiceClass {
    * @param path Chemin du fichier dans le storage
    * @param expiresInSeconds Durée de validité (défaut: 1 heure)
    */
-  async getSignedUrl(
-    path: string,
-    expiresInSeconds = 3600
-  ): Promise<SignedUrlResult> {
+  async getSignedUrl(path: string, expiresInSeconds = 3600): Promise<SignedUrlResult> {
     try {
       const result = await this.provider.getDownloadUrl(path, expiresInSeconds);
 
       if (result.error || !result.data) {
         return {
-          url: "",
+          url: '',
           expiresAt: new Date(),
           error: result.error || "Impossible de générer l'URL",
         };
@@ -475,9 +471,9 @@ class AttachmentServiceClass {
       };
     } catch (err) {
       return {
-        url: "",
+        url: '',
         expiresAt: new Date(),
-        error: err instanceof Error ? err.message : "Erreur URL signée",
+        error: err instanceof Error ? err.message : 'Erreur URL signée',
       };
     }
   }
@@ -495,7 +491,7 @@ class AttachmentServiceClass {
   // ============================================
 
   /**
-   * Supprime une pièce jointe (contrôle brouillon)
+   * Supprime une pièce jointe (contrôle soumis)
    * @param attachmentId ID de l'attachment en DB
    * @param forceDelete Si true, supprime sans vérifier le statut
    */
@@ -506,24 +502,26 @@ class AttachmentServiceClass {
     try {
       // Récupérer les infos de l'attachment
       const { data: attachment, error: fetchError } = await supabaseUntyped
-        .from("attachments")
-        .select("*")
-        .eq("id", attachmentId)
+        .from('attachments')
+        .select('*')
+        .eq('id', attachmentId)
         .single();
 
       if (fetchError || !attachment) {
-        return { success: false, error: "Pièce jointe introuvable" };
+        return { success: false, error: 'Pièce jointe introuvable' };
       }
 
-      // Vérifier les droits (brouillon ou force)
+      // Vérifier les droits (soumis ou force)
       if (!forceDelete) {
-        // Vérifier que le dossier est en brouillon
+        // Vérifier que le dossier est en soumis
         // Pour l'instant, on autorise la suppression si l'utilisateur est le créateur
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user || user.id !== attachment.uploaded_by) {
           return {
             success: false,
-            error: "Vous ne pouvez supprimer que vos propres fichiers",
+            error: 'Vous ne pouvez supprimer que vos propres fichiers',
           };
         }
       }
@@ -531,15 +529,15 @@ class AttachmentServiceClass {
       // Supprimer du storage
       const deleteResult = await this.provider.delete(attachment.storage_path);
       if (deleteResult.error) {
-        console.warn("Erreur suppression storage:", deleteResult.error);
+        console.warn('Erreur suppression storage:', deleteResult.error);
         // Continuer malgré l'erreur (fichier peut être déjà supprimé)
       }
 
       // Supprimer de la base de données
       const { error: dbError } = await supabaseUntyped
-        .from("attachments")
+        .from('attachments')
         .delete()
-        .eq("id", attachmentId);
+        .eq('id', attachmentId);
 
       if (dbError) {
         return { success: false, error: dbError.message };
@@ -549,7 +547,7 @@ class AttachmentServiceClass {
     } catch (err) {
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Erreur suppression",
+        error: err instanceof Error ? err.message : 'Erreur suppression',
       };
     }
   }
@@ -557,7 +555,9 @@ class AttachmentServiceClass {
   /**
    * Supprime toutes les pièces jointes d'une entité
    */
-  async deleteByEntity(entityId: string): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+  async deleteByEntity(
+    entityId: string
+  ): Promise<{ success: boolean; deletedCount: number; error?: string }> {
     try {
       // Lister les attachments
       const { attachments, error: listError } = await this.listByEntity(entityId);
@@ -578,7 +578,7 @@ class AttachmentServiceClass {
       return {
         success: false,
         deletedCount: 0,
-        error: err instanceof Error ? err.message : "Erreur suppression",
+        error: err instanceof Error ? err.message : 'Erreur suppression',
       };
     }
   }
@@ -591,34 +591,35 @@ class AttachmentServiceClass {
    * Détermine si un fichier est une image
    */
   isImage(contentType: string): boolean {
-    return contentType.startsWith("image/");
+    return contentType.startsWith('image/');
   }
 
   /**
    * Détermine si un fichier est un PDF
    */
   isPdf(contentType: string): boolean {
-    return contentType === "application/pdf";
+    return contentType === 'application/pdf';
   }
 
   /**
    * Retourne l'icône appropriée pour un type de fichier
    */
   getFileIcon(contentType: string): string {
-    if (this.isImage(contentType)) return "image";
-    if (this.isPdf(contentType)) return "file-text";
-    if (contentType.includes("word") || contentType.includes("document")) return "file-text";
-    if (contentType.includes("excel") || contentType.includes("spreadsheet")) return "table";
-    if (contentType.includes("powerpoint") || contentType.includes("presentation")) return "presentation";
-    if (contentType.includes("zip") || contentType.includes("rar")) return "archive";
-    return "file";
+    if (this.isImage(contentType)) return 'image';
+    if (this.isPdf(contentType)) return 'file-text';
+    if (contentType.includes('word') || contentType.includes('document')) return 'file-text';
+    if (contentType.includes('excel') || contentType.includes('spreadsheet')) return 'table';
+    if (contentType.includes('powerpoint') || contentType.includes('presentation'))
+      return 'presentation';
+    if (contentType.includes('zip') || contentType.includes('rar')) return 'archive';
+    return 'file';
   }
 
   /**
    * Retourne les extensions acceptées pour l'input file
    */
   getAcceptedExtensions(): string {
-    return ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.zip,.rar";
+    return '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.txt,.csv,.zip,.rar';
   }
 }
 

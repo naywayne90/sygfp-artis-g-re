@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -10,57 +10,52 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, MoreHorizontal, Eye, CheckCircle, Truck, Trash2 } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useApprovisionnement } from "@/hooks/useApprovisionnement";
+} from '@/components/ui/dropdown-menu';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Search, MoreHorizontal, Eye, CheckCircle, Truck, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useApprovisionnement } from '@/hooks/useApprovisionnement';
 
 const STATUTS = [
-  { value: "brouillon", label: "Brouillon", variant: "secondary" as const },
-  { value: "validee", label: "Validée", variant: "default" as const },
+  { value: 'soumis', label: 'Soumis', variant: 'secondary' as const },
+  { value: 'validee', label: 'Validée', variant: 'default' as const },
 ];
 
 export function ReceptionList() {
-  const {
-    articles,
-    receptions,
-    loadingReceptions,
-    createReception,
-    validateReception,
-  } = useApprovisionnement();
+  const { articles, receptions, loadingReceptions, createReception, validateReception } =
+    useApprovisionnement();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [selectedReception, setSelectedReception] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    fournisseur: "",
-    numero_bl: "",
-    numero_facture: "",
-    observations: "",
-    lignes: [{ article_id: "", quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 }],
+    fournisseur: '',
+    numero_bl: '',
+    numero_facture: '',
+    observations: '',
+    lignes: [{ article_id: '', quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 }],
   });
 
   const filteredReceptions = receptions.filter(
@@ -71,11 +66,11 @@ export function ReceptionList() {
 
   const resetForm = () => {
     setFormData({
-      fournisseur: "",
-      numero_bl: "",
-      numero_facture: "",
-      observations: "",
-      lignes: [{ article_id: "", quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 }],
+      fournisseur: '',
+      numero_bl: '',
+      numero_facture: '',
+      observations: '',
+      lignes: [{ article_id: '', quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 }],
     });
   };
 
@@ -84,7 +79,7 @@ export function ReceptionList() {
       ...formData,
       lignes: [
         ...formData.lignes,
-        { article_id: "", quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 },
+        { article_id: '', quantite_recue: 1, quantite_acceptee: 1, prix_unitaire: 0 },
       ],
     });
   };
@@ -131,7 +126,7 @@ export function ReceptionList() {
 
   const getStatutBadge = (statut: string) => {
     const s = STATUTS.find((st) => st.value === statut);
-    return <Badge variant={s?.variant || "secondary"}>{s?.label || statut}</Badge>;
+    return <Badge variant={s?.variant || 'secondary'}>{s?.label || statut}</Badge>;
   };
 
   const viewedReception = receptions.find((r) => r.id === selectedReception);
@@ -183,10 +178,10 @@ export function ReceptionList() {
                   <TableRow key={reception.id}>
                     <TableCell className="font-mono text-sm">{reception.numero}</TableCell>
                     <TableCell>
-                      {format(new Date(reception.date_reception), "dd/MM/yyyy", { locale: fr })}
+                      {format(new Date(reception.date_reception), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
-                    <TableCell>{reception.fournisseur || "-"}</TableCell>
-                    <TableCell>{reception.numero_bl || "-"}</TableCell>
+                    <TableCell>{reception.fournisseur || '-'}</TableCell>
+                    <TableCell>{reception.numero_bl || '-'}</TableCell>
                     <TableCell>{reception.lignes?.length || 0} article(s)</TableCell>
                     <TableCell>{getStatutBadge(reception.statut)}</TableCell>
                     <TableCell>
@@ -201,7 +196,7 @@ export function ReceptionList() {
                             <Eye className="h-4 w-4 mr-2" />
                             Voir détails
                           </DropdownMenuItem>
-                          {reception.statut === "brouillon" && (
+                          {reception.statut === 'soumis' && (
                             <DropdownMenuItem onClick={() => handleValidate(reception.id)}>
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Valider et mettre en stock
@@ -283,7 +278,7 @@ export function ReceptionList() {
                       <Label className="text-xs">Article *</Label>
                       <Select
                         value={ligne.article_id}
-                        onValueChange={(v) => updateLigne(index, "article_id", v)}
+                        onValueChange={(v) => updateLigne(index, 'article_id', v)}
                       >
                         <SelectTrigger className="h-9">
                           <SelectValue placeholder="Sélectionner..." />
@@ -305,7 +300,7 @@ export function ReceptionList() {
                         className="h-9"
                         value={ligne.quantite_recue}
                         onChange={(e) =>
-                          updateLigne(index, "quantite_recue", parseInt(e.target.value) || 1)
+                          updateLigne(index, 'quantite_recue', parseInt(e.target.value) || 1)
                         }
                       />
                     </div>
@@ -318,7 +313,7 @@ export function ReceptionList() {
                         className="h-9"
                         value={ligne.quantite_acceptee}
                         onChange={(e) =>
-                          updateLigne(index, "quantite_acceptee", parseInt(e.target.value) || 0)
+                          updateLigne(index, 'quantite_acceptee', parseInt(e.target.value) || 0)
                         }
                       />
                     </div>
@@ -330,7 +325,7 @@ export function ReceptionList() {
                         className="h-9"
                         value={ligne.prix_unitaire}
                         onChange={(e) =>
-                          updateLigne(index, "prix_unitaire", parseFloat(e.target.value) || 0)
+                          updateLigne(index, 'prix_unitaire', parseFloat(e.target.value) || 0)
                         }
                       />
                     </div>
@@ -381,7 +376,9 @@ export function ReceptionList() {
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p className="font-medium">
-                    {format(new Date(viewedReception.date_reception), "dd MMMM yyyy", { locale: fr })}
+                    {format(new Date(viewedReception.date_reception), 'dd MMMM yyyy', {
+                      locale: fr,
+                    })}
                   </p>
                 </div>
                 <div>
@@ -390,12 +387,12 @@ export function ReceptionList() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Fournisseur</p>
-                  <p className="font-medium">{viewedReception.fournisseur || "-"}</p>
+                  <p className="font-medium">{viewedReception.fournisseur || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">N° BL / Facture</p>
                   <p className="font-medium">
-                    {viewedReception.numero_bl || "-"} / {viewedReception.numero_facture || "-"}
+                    {viewedReception.numero_bl || '-'} / {viewedReception.numero_facture || '-'}
                   </p>
                 </div>
               </div>
@@ -426,16 +423,19 @@ export function ReceptionList() {
                             <div className="text-xs text-muted-foreground">{l.article?.code}</div>
                           </TableCell>
                           <TableCell className="text-right">{l.quantite_recue}</TableCell>
-                          <TableCell className="text-right">{l.quantite_acceptee || l.quantite_recue}</TableCell>
+                          <TableCell className="text-right">
+                            {l.quantite_acceptee || l.quantite_recue}
+                          </TableCell>
                           <TableCell className="text-right">
                             {l.ecart !== 0 && (
-                              <Badge variant={l.ecart > 0 ? "default" : "destructive"}>
-                                {l.ecart > 0 ? "+" : ""}{l.ecart}
+                              <Badge variant={l.ecart > 0 ? 'default' : 'destructive'}>
+                                {l.ecart > 0 ? '+' : ''}
+                                {l.ecart}
                               </Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
-                            {l.prix_unitaire?.toLocaleString("fr-FR")}
+                            {l.prix_unitaire?.toLocaleString('fr-FR')}
                           </TableCell>
                         </TableRow>
                       ))}

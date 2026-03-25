@@ -332,7 +332,7 @@ export function useImportWordNote() {
           contenu: html,
           contenu_brut: plainText.substring(0, 10000),
           type_note: 'rapport' as TypeNote,
-          statut: 'brouillon' as StatutNote,
+          statut: 'soumis' as StatutNote,
           priorite: 'normale' as PrioriteNote,
           fichier_original_url: fileUrl,
           fichier_original_nom: file.name,
@@ -385,7 +385,7 @@ export function useNotesDirectionStats(directionId: string | undefined) {
       const notes = data || [];
       return {
         total: notes.length,
-        brouillons: notes.filter((n) => n.statut === 'brouillon').length,
+        brouillons: notes.filter((n) => n.statut === 'soumis').length,
         publies: notes.filter((n) => n.statut === 'publie').length,
         parType: {
           interne: notes.filter((n) => n.type_note === 'interne').length,

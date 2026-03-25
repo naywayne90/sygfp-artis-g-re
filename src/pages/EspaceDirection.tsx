@@ -103,7 +103,7 @@ const TYPE_NOTE_COLORS: Record<TypeNote, string> = {
 };
 
 const STATUT_LABELS: Record<StatutNote, string> = {
-  brouillon: 'Brouillon',
+  soumis: 'Soumis',
   publie: 'Publié',
   archive: 'Archivé',
 };
@@ -146,7 +146,7 @@ export default function EspaceDirection() {
   const [formContenu, setFormContenu] = useState('');
   const [formType, setFormType] = useState<TypeNote>('interne');
   const [formPriorite, setFormPriorite] = useState<PrioriteNote>('normale');
-  const [formStatut, setFormStatut] = useState<StatutNote>('brouillon');
+  const [formStatut, setFormStatut] = useState<StatutNote>('soumis');
 
   // Données
   const { data: directions } = useQuery({
@@ -363,9 +363,9 @@ export default function EspaceDirection() {
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-2">
                 <Edit className="h-4 w-4 text-orange-500" />
-                <span className="text-sm text-muted-foreground">Brouillons</span>
+                <span className="text-sm text-muted-foreground">Soumis</span>
               </div>
-              <p className="text-2xl font-bold mt-1">{stats.brouillons}</p>
+              <p className="text-2xl font-bold mt-1">{stats.soumiss}</p>
             </CardContent>
           </Card>
           <Card>
@@ -774,7 +774,7 @@ export default function EspaceDirection() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="brouillon">Brouillon</SelectItem>
+                    <SelectItem value="soumis">Soumis</SelectItem>
                     <SelectItem value="publie">Publié</SelectItem>
                   </SelectContent>
                 </Select>

@@ -52,7 +52,6 @@ const getStatutBadge = (statut: string | null) => {
     case 'soumis':
       return <Badge variant="outline">Soumis</Badge>;
     case 'en_attente':
-    case 'brouillon':
       return <Badge variant="secondary">En attente</Badge>;
     case 'rejete':
       return <Badge variant="destructive">Rejete</Badge>;

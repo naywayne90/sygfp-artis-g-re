@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * useBudgetNotifications - Hook pour gérer les notifications budgétaires
  *
@@ -10,11 +9,11 @@
  * - Export (CSV, Excel, PDF)
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
-import { useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 // ============================================
 // TYPES
@@ -52,10 +51,10 @@ export interface BudgetNotification {
   attachments_count?: number;
 }
 
-export type NotificationStatut = "brouillon" | "soumis" | "valide" | "rejete" | "annule";
+export type NotificationStatut = 'brouillon' | 'soumis' | 'valide' | 'rejete' | 'annule';
 
 export interface NotificationFilters {
-  statut?: NotificationStatut | "all";
+  statut?: NotificationStatut | 'all';
   origine_fonds_id?: string;
   search?: string;
   dateFrom?: string;
@@ -99,11 +98,11 @@ export const NOTIFICATION_STATUTS: {
   label: string;
   color: string;
 }[] = [
-  { value: "brouillon", label: "Brouillon", color: "bg-gray-100 text-gray-800" },
-  { value: "soumis", label: "Soumis", color: "bg-blue-100 text-blue-800" },
-  { value: "valide", label: "Validé", color: "bg-green-100 text-green-800" },
-  { value: "rejete", label: "Rejeté", color: "bg-red-100 text-red-800" },
-  { value: "annule", label: "Annulé", color: "bg-orange-100 text-orange-800" },
+  { value: 'brouillon', label: 'Brouillon', color: 'bg-gray-100 text-gray-800' },
+  { value: 'soumis', label: 'Soumis', color: 'bg-blue-100 text-blue-800' },
+  { value: 'valide', label: 'Validé', color: 'bg-green-100 text-green-800' },
+  { value: 'rejete', label: 'Rejeté', color: 'bg-red-100 text-red-800' },
+  { value: 'annule', label: 'Annulé', color: 'bg-orange-100 text-orange-800' },
 ];
 
 // ============================================
@@ -124,38 +123,40 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["budget-notifications", exerciceId, filters],
+    queryKey: ['budget-notifications', exerciceId, filters],
     queryFn: async () => {
       if (!exerciceId) return [];
 
       let query = supabase
-        .from("budget_notifications")
-        .select(`
+        .from('budget_notifications')
+        .select(
+          `
           *,
           exercice:exercices_budgetaires(libelle),
           origine_fonds:funding_sources(libelle, type),
           created_by_profile:profiles!budget_notifications_created_by_fkey(full_name),
           validated_by_profile:profiles!budget_notifications_validated_by_fkey(full_name)
-        `)
-        .eq("exercice_id", exerciceId)
-        .order("numero_ordre", { ascending: false });
+        `
+        )
+        .eq('exercice_id', exerciceId)
+        .order('numero_ordre', { ascending: false });
 
       // Filtre par statut
-      if (filters?.statut && filters.statut !== "all") {
-        query = query.eq("statut", filters.statut);
+      if (filters?.statut && filters.statut !== 'all') {
+        query = query.eq('statut', filters.statut);
       }
 
       // Filtre par origine
       if (filters?.origine_fonds_id) {
-        query = query.eq("origine_fonds_id", filters.origine_fonds_id);
+        query = query.eq('origine_fonds_id', filters.origine_fonds_id);
       }
 
       // Filtre par date
       if (filters?.dateFrom) {
-        query = query.gte("date_notification", filters.dateFrom);
+        query = query.gte('date_notification', filters.dateFrom);
       }
       if (filters?.dateTo) {
-        query = query.lte("date_notification", filters.dateTo);
+        query = query.lte('date_notification', filters.dateTo);
       }
 
       const { data, error } = await query;
@@ -190,14 +191,14 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
 
   // Statistiques
   const { data: stats } = useQuery({
-    queryKey: ["budget-notifications-stats", exerciceId],
+    queryKey: ['budget-notifications-stats', exerciceId],
     queryFn: async () => {
       if (!exerciceId) return null;
 
       const { data, error } = await supabase
-        .from("budget_notifications")
-        .select("statut, montant")
-        .eq("exercice_id", exerciceId);
+        .from('budget_notifications')
+        .select('statut, montant')
+        .eq('exercice_id', exerciceId);
 
       if (error) throw error;
 
@@ -213,7 +214,7 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       });
 
       const totalMontant = items.reduce((sum, n) => sum + (n.montant || 0), 0);
-      const valideMontant = byStatut["valide"]?.montant || 0;
+      const valideMontant = byStatut['valide']?.montant || 0;
 
       return {
         total: items.length,
@@ -233,11 +234,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
   const createNotification = useMutation({
     mutationFn: async (data: CreateNotificationData) => {
       if (!exerciceId || !exercice) {
-        throw new Error("Aucun exercice sélectionné");
+        throw new Error('Aucun exercice sélectionné');
       }
 
       const { data: result, error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .insert({
           exercice_id: exerciceId,
           annee: exercice,
@@ -246,7 +247,7 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
           origine_fonds_id: data.origine_fonds_id || null,
           origine_fonds_code: data.origine_fonds_code || null,
           nature_depense: data.nature_depense?.trim() || null,
-          date_notification: data.date_notification || new Date().toISOString().split("T")[0],
+          date_notification: data.date_notification || new Date().toISOString().split('T')[0],
           date_reception: data.date_reception || null,
           commentaire: data.commentaire?.trim() || null,
           created_by: (await supabase.auth.getUser()).data.user?.id,
@@ -258,11 +259,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return result as BudgetNotification;
     },
     onSuccess: () => {
-      toast.success("Notification budgétaire créée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification budgétaire créée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -280,19 +281,17 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
         updateData.origine_fonds_code = updates.origine_fonds_code;
       if (updates.nature_depense !== undefined)
         updateData.nature_depense = updates.nature_depense?.trim() || null;
-      if (updates.date_notification)
-        updateData.date_notification = updates.date_notification;
-      if (updates.date_reception !== undefined)
-        updateData.date_reception = updates.date_reception;
+      if (updates.date_notification) updateData.date_notification = updates.date_notification;
+      if (updates.date_reception !== undefined) updateData.date_reception = updates.date_reception;
       if (updates.commentaire !== undefined)
         updateData.commentaire = updates.commentaire?.trim() || null;
 
       updateData.updated_by = (await supabase.auth.getUser()).data.user?.id;
 
       const { data: result, error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .update(updateData)
-        .eq("id", id)
+        .eq('id', id)
         .select()
         .single();
 
@@ -300,11 +299,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return result as BudgetNotification;
     },
     onSuccess: () => {
-      toast.success("Notification mise à jour");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification mise à jour');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -312,13 +311,13 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
   const submitNotification = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .update({
-          statut: "soumis",
+          statut: 'soumis',
           updated_by: (await supabase.auth.getUser()).data.user?.id,
         })
-        .eq("id", id)
-        .eq("statut", "brouillon")
+        .eq('id', id)
+        .eq('statut', 'soumis')
         .select()
         .single();
 
@@ -326,11 +325,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return data as BudgetNotification;
     },
     onSuccess: () => {
-      toast.success("Notification soumise pour validation");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification soumise pour validation');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -339,15 +338,15 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     mutationFn: async (id: string) => {
       const userId = (await supabase.auth.getUser()).data.user?.id;
       const { data, error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .update({
-          statut: "valide",
+          statut: 'valide',
           validated_at: new Date().toISOString(),
           validated_by: userId,
           updated_by: userId,
         })
-        .eq("id", id)
-        .eq("statut", "soumis")
+        .eq('id', id)
+        .eq('statut', 'soumis')
         .select()
         .single();
 
@@ -355,11 +354,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return data as BudgetNotification;
     },
     onSuccess: () => {
-      toast.success("Notification validée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification validée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -368,16 +367,16 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const userId = (await supabase.auth.getUser()).data.user?.id;
       const { data, error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .update({
-          statut: "rejete",
+          statut: 'rejete',
           rejection_reason: reason,
           rejected_at: new Date().toISOString(),
           rejected_by: userId,
           updated_by: userId,
         })
-        .eq("id", id)
-        .eq("statut", "soumis")
+        .eq('id', id)
+        .eq('statut', 'soumis')
         .select()
         .single();
 
@@ -385,11 +384,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return data as BudgetNotification;
     },
     onSuccess: () => {
-      toast.success("Notification rejetée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification rejetée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -397,22 +396,22 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
   const deleteNotification = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("budget_notifications")
+        .from('budget_notifications')
         .update({
-          statut: "annule",
+          statut: 'annule',
           updated_by: (await supabase.auth.getUser()).data.user?.id,
         })
-        .eq("id", id)
-        .in("statut", ["brouillon", "rejete"]);
+        .eq('id', id)
+        .in('statut', ['soumis', 'rejete']);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Notification annulée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Notification annulée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -423,12 +422,12 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
   // Liste des pièces jointes d'une notification
   const getAttachments = useCallback(async (notificationId: string) => {
     const { data, error } = await supabase
-      .from("entity_attachments")
-      .select("*")
-      .eq("entity_type", "budget_notification")
-      .eq("entity_id", notificationId)
-      .is("deleted_at", null)
-      .order("uploaded_at", { ascending: false });
+      .from('entity_attachments')
+      .select('*')
+      .eq('entity_type', 'budget_notification')
+      .eq('entity_id', notificationId)
+      .is('deleted_at', null)
+      .order('uploaded_at', { ascending: false });
 
     if (error) throw error;
     return data as EntityAttachment[];
@@ -439,7 +438,7 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     mutationFn: async ({
       notificationId,
       file,
-      category = "document",
+      category = 'document',
       description,
     }: {
       notificationId: string;
@@ -449,12 +448,12 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
     }) => {
       // Upload via edge function R2
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("entityType", "budget_notification");
-      formData.append("entityId", notificationId);
+      formData.append('file', file);
+      formData.append('entityType', 'budget_notification');
+      formData.append('entityId', notificationId);
 
       const { data: uploadResult, error: uploadError } = await supabase.functions.invoke(
-        "r2-storage",
+        'r2-storage',
         {
           body: formData,
         }
@@ -464,9 +463,9 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
 
       // Créer l'enregistrement
       const { data, error } = await supabase
-        .from("entity_attachments")
+        .from('entity_attachments')
         .insert({
-          entity_type: "budget_notification",
+          entity_type: 'budget_notification',
           entity_id: notificationId,
           filename: uploadResult.filename,
           original_filename: file.name,
@@ -485,11 +484,11 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       return data as EntityAttachment;
     },
     onSuccess: () => {
-      toast.success("Pièce jointe ajoutée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Pièce jointe ajoutée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur upload: " + error.message);
+      toast.error('Erreur upload: ' + error.message);
     },
   });
 
@@ -497,21 +496,21 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
   const deleteAttachment = useMutation({
     mutationFn: async (attachmentId: string) => {
       const { error } = await supabase
-        .from("entity_attachments")
+        .from('entity_attachments')
         .update({
           deleted_at: new Date().toISOString(),
           deleted_by: (await supabase.auth.getUser()).data.user?.id,
         })
-        .eq("id", attachmentId);
+        .eq('id', attachmentId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Pièce jointe supprimée");
-      queryClient.invalidateQueries({ queryKey: ["budget-notifications"] });
+      toast.success('Pièce jointe supprimée');
+      queryClient.invalidateQueries({ queryKey: ['budget-notifications'] });
     },
     onError: (error: Error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
@@ -525,30 +524,29 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
 
   const getStatutColor = useCallback((statut: NotificationStatut): string => {
     return (
-      NOTIFICATION_STATUTS.find((s) => s.value === statut)?.color ||
-      "bg-gray-100 text-gray-800"
+      NOTIFICATION_STATUTS.find((s) => s.value === statut)?.color || 'bg-gray-100 text-gray-800'
     );
   }, []);
 
   const formatMontant = useCallback((montant: number): string => {
-    return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   }, []);
 
   // Export CSV
   const exportToCSV = useCallback(() => {
     if (!notifications || notifications.length === 0) {
-      toast.error("Aucune donnée à exporter");
+      toast.error('Aucune donnée à exporter');
       return;
     }
 
     const headers = [
-      "Référence",
-      "Date",
-      "Objet",
-      "Montant",
-      "Origine des fonds",
-      "Nature dépense",
-      "Statut",
+      'Référence',
+      'Date',
+      'Objet',
+      'Montant',
+      'Origine des fonds',
+      'Nature dépense',
+      'Statut',
     ];
 
     const rows = notifications.map((n) => [
@@ -556,27 +554,27 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       n.date_notification,
       n.objet,
       n.montant.toString(),
-      n.origine_fonds_libelle || n.origine_fonds_code || "",
-      n.nature_depense || "",
+      n.origine_fonds_libelle || n.origine_fonds_code || '',
+      n.nature_depense || '',
       getStatutLabel(n.statut),
     ]);
 
     const csvContent = [
-      headers.join(";"),
-      ...rows.map((r) => r.map((c) => `"${c}"`).join(";")),
-    ].join("\n");
+      headers.join(';'),
+      ...rows.map((r) => r.map((c) => `"${c}"`).join(';')),
+    ].join('\n');
 
-    const blob = new Blob(["\ufeff" + csvContent], {
-      type: "text/csv;charset=utf-8;",
+    const blob = new Blob(['\ufeff' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `notifications_budgetaires_${exercice || ""}_${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `notifications_budgetaires_${exercice || ''}_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
-    toast.success("Export CSV téléchargé");
+    toast.success('Export CSV téléchargé');
   }, [notifications, exercice, getStatutLabel]);
 
   // ============================================

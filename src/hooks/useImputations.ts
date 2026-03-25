@@ -343,7 +343,7 @@ export function useImputations(filters?: ImputationFilters) {
     },
   });
 
-  // Supprimer une imputation (brouillon uniquement)
+  // Supprimer une imputation (soumis uniquement)
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('imputations').delete().eq('id', id);

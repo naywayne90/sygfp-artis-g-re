@@ -507,11 +507,11 @@ export function NoteSEFForm({
               });
             } catch {
               toast.error('Erreur lors de la soumission', {
-                description: 'La note a été créée en brouillon',
+                description: 'La note a été créée en soumis',
               });
             }
           } else {
-            toast.success(`Brouillon créé : ${result.reference_pivot || result.numero}`, {
+            toast.success(`Soumis créé : ${result.reference_pivot || result.numero}`, {
               description:
                 uploadedFiles.length > 0 ? `${uploadedFiles.length} pièce(s) jointe(s)` : undefined,
             });
@@ -623,14 +623,12 @@ export function NoteSEFForm({
                 </div>
               </div>
               {note.statut && (
-                <Badge variant={note.statut === 'brouillon' ? 'secondary' : 'default'}>
-                  {note.statut === 'brouillon'
-                    ? 'Brouillon'
-                    : note.statut === 'soumis'
-                      ? 'Soumis'
-                      : note.statut === 'valide'
-                        ? 'Validé'
-                        : note.statut}
+                <Badge variant={note.statut === 'soumis' ? 'secondary' : 'default'}>
+                  {note.statut === 'soumis'
+                    ? 'Soumis'
+                    : note.statut === 'valide'
+                      ? 'Validé'
+                      : note.statut}
                 </Badge>
               )}
             </div>
@@ -1143,31 +1141,17 @@ export function NoteSEFForm({
                 Annuler
               </Button>
 
-              {/* Enregistrer brouillon */}
+              {/* Soumettre directement */}
               <Button
                 type="submit"
-                variant="outline"
                 disabled={isLoading || hasErrors}
                 className="gap-2"
+                onClick={handleSaveAndSubmit}
               >
-                {isLoading && !submitAfterSave && <Loader2 className="h-4 w-4 animate-spin" />}
-                <Save className="h-4 w-4" />
-                {note ? 'Enregistrer' : 'Brouillon'}
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Send className="h-4 w-4" />
+                {note ? 'Soumettre' : 'Créer et soumettre'}
               </Button>
-
-              {/* Soumettre directement (création seulement ou brouillon existant) */}
-              {(!note || note.statut === 'brouillon') && allowSubmitOnCreate && (
-                <Button
-                  type="submit"
-                  disabled={isLoading || hasErrors}
-                  className="gap-2"
-                  onClick={handleSaveAndSubmit}
-                >
-                  {isLoading && submitAfterSave && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <Send className="h-4 w-4" />
-                  {note ? 'Soumettre' : 'Créer et soumettre'}
-                </Button>
-              )}
             </div>
           </div>
         </form>

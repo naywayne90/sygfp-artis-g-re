@@ -1,8 +1,8 @@
 /**
- * Hook pour l'autosave des Notes SEF en brouillon
+ * Hook pour l'autosave des Notes SEF soumises
  *
  * Sauvegarde automatique avec debounce (3s) quand le formulaire change.
- * Ne s'applique qu'aux notes en statut "brouillon".
+ * Ne s'applique qu'aux notes en statut "soumis".
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -68,7 +68,7 @@ export function useNoteSEFAutosave(options: UseNoteSEFAutosaveOptions = {}) {
             updated_at: new Date().toISOString(),
           })
           .eq('id', noteId)
-          .eq('statut', 'brouillon'); // Ne sauvegarder que les brouillons
+          .eq('statut', 'soumis'); // Ne sauvegarder que les soumis
 
         if (error) {
           throw new Error(error.message);

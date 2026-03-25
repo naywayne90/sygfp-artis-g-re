@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 export interface BudgetLineAvailability {
   id: string;
@@ -35,42 +35,42 @@ export function useBudgetAvailability(budgetLineId?: string) {
 
   // Calcul du disponible pour une ligne spécifique
   const { data: lineAvailability, isLoading: isLoadingLine } = useQuery({
-    queryKey: ["budget-availability", budgetLineId, exercice],
+    queryKey: ['budget-availability', budgetLineId, exercice],
     queryFn: async (): Promise<BudgetLineAvailability | null> => {
       if (!budgetLineId) return null;
 
       // Récupérer la ligne budgétaire
       const { data: line, error: lineError } = await supabase
-        .from("budget_lines")
-        .select("id, code, label, dotation_initiale, dotation_modifiee, total_engage")
-        .eq("id", budgetLineId)
+        .from('budget_lines')
+        .select('id, code, label, dotation_initiale, dotation_modifiee, total_engage')
+        .eq('id', budgetLineId)
         .single();
 
       if (lineError || !line) return null;
 
       // Calculer les virements
       const { data: virementsRecus } = await supabase
-        .from("credit_transfers")
-        .select("amount")
-        .eq("to_budget_line_id", budgetLineId)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('amount')
+        .eq('to_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
       const { data: virementsEmis } = await supabase
-        .from("credit_transfers")
-        .select("amount")
-        .eq("from_budget_line_id", budgetLineId)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('amount')
+        .eq('from_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
       const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
       const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
 
       // Récupérer les engagements en attente (réservations)
       const { data: engagementsEnAttente } = await supabase
-        .from("budget_engagements")
-        .select("montant")
-        .eq("budget_line_id", budgetLineId)
-        .eq("exercice", exercice)
-        .in("statut", ["brouillon", "soumis", "en_attente"]);
+        .from('budget_engagements')
+        .select('montant')
+        .eq('budget_line_id', budgetLineId)
+        .eq('exercice', exercice)
+        .in('statut', ['soumis', 'en_attente']);
 
       const totalReserve = engagementsEnAttente?.reduce((sum, e) => sum + (e.montant || 0), 0) || 0;
 
@@ -113,14 +113,14 @@ export function useBudgetSummary() {
   const { exercice } = useExercice();
 
   const { data: summary, isLoading } = useQuery({
-    queryKey: ["budget-summary", exercice],
+    queryKey: ['budget-summary', exercice],
     queryFn: async (): Promise<BudgetSummary> => {
       // Récupérer toutes les lignes actives
       const { data: lines } = await supabase
-        .from("budget_lines")
-        .select("id, dotation_initiale, dotation_modifiee, total_engage")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .eq("is_active", true);
+        .from('budget_lines')
+        .select('id, dotation_initiale, dotation_modifiee, total_engage')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('is_active', true);
 
       if (!lines || lines.length === 0) {
         return {
@@ -136,15 +136,15 @@ export function useBudgetSummary() {
 
       // Récupérer tous les virements exécutés
       const { data: virements } = await supabase
-        .from("credit_transfers")
-        .select("from_budget_line_id, to_budget_line_id, amount")
-        .eq("exercice", exercice || new Date().getFullYear())
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('from_budget_line_id, to_budget_line_id, amount')
+        .eq('exercice', exercice || new Date().getFullYear())
+        .eq('status', 'execute');
 
       // Calculer les virements par ligne
       const virementsMap = new Map<string, { recus: number; emis: number }>();
-      
-      virements?.forEach(v => {
+
+      virements?.forEach((v) => {
         if (v.from_budget_line_id) {
           const current = virementsMap.get(v.from_budget_line_id) || { recus: 0, emis: 0 };
           current.emis += v.amount || 0;
@@ -162,7 +162,7 @@ export function useBudgetSummary() {
       let total_engage = 0;
       let nb_lignes_depassement = 0;
 
-      lines.forEach(line => {
+      lines.forEach((line) => {
         const dotation_initiale = line.dotation_initiale || 0;
         const virements_ligne = virementsMap.get(line.id) || { recus: 0, emis: 0 };
         const dotation_actuelle = dotation_initiale + virements_ligne.recus - virements_ligne.emis;
@@ -179,7 +179,8 @@ export function useBudgetSummary() {
       });
 
       const total_disponible = total_dotation_actuelle - total_engage;
-      const taux_global = total_dotation_actuelle > 0 ? (total_engage / total_dotation_actuelle) * 100 : 0;
+      const taux_global =
+        total_dotation_actuelle > 0 ? (total_engage / total_dotation_actuelle) * 100 : 0;
 
       return {
         total_dotation_initiale,
@@ -220,27 +221,32 @@ export async function checkEngagementPossible(
 ): Promise<{ possible: boolean; disponible: number; dotation_actuelle: number; message: string }> {
   // Récupérer la ligne
   const { data: line } = await supabase
-    .from("budget_lines")
-    .select("dotation_initiale, dotation_modifiee, total_engage")
-    .eq("id", budgetLineId)
+    .from('budget_lines')
+    .select('dotation_initiale, dotation_modifiee, total_engage')
+    .eq('id', budgetLineId)
     .single();
 
   if (!line) {
-    return { possible: false, disponible: 0, dotation_actuelle: 0, message: "Ligne budgétaire introuvable" };
+    return {
+      possible: false,
+      disponible: 0,
+      dotation_actuelle: 0,
+      message: 'Ligne budgétaire introuvable',
+    };
   }
 
   // Calculer virements
   const { data: virementsRecus } = await supabase
-    .from("credit_transfers")
-    .select("amount")
-    .eq("to_budget_line_id", budgetLineId)
-    .eq("status", "execute");
+    .from('credit_transfers')
+    .select('amount')
+    .eq('to_budget_line_id', budgetLineId)
+    .eq('status', 'execute');
 
   const { data: virementsEmis } = await supabase
-    .from("credit_transfers")
-    .select("amount")
-    .eq("from_budget_line_id", budgetLineId)
-    .eq("status", "execute");
+    .from('credit_transfers')
+    .select('amount')
+    .eq('from_budget_line_id', budgetLineId)
+    .eq('status', 'execute');
 
   const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
   const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
@@ -254,10 +260,11 @@ export async function checkEngagementPossible(
       possible: false,
       disponible,
       dotation_actuelle,
-      message: `❌ ENGAGEMENT BLOQUÉ: Disponible insuffisant.\n` +
-               `Disponible: ${disponible.toLocaleString("fr-FR")} FCFA\n` +
-               `Demandé: ${montant.toLocaleString("fr-FR")} FCFA\n` +
-               `Écart: ${(montant - disponible).toLocaleString("fr-FR")} FCFA`,
+      message:
+        `❌ ENGAGEMENT BLOQUÉ: Disponible insuffisant.\n` +
+        `Disponible: ${disponible.toLocaleString('fr-FR')} FCFA\n` +
+        `Demandé: ${montant.toLocaleString('fr-FR')} FCFA\n` +
+        `Écart: ${(montant - disponible).toLocaleString('fr-FR')} FCFA`,
     };
   }
 
@@ -265,7 +272,7 @@ export async function checkEngagementPossible(
     possible: true,
     disponible,
     dotation_actuelle,
-    message: `✓ Disponible suffisant: ${disponible.toLocaleString("fr-FR")} FCFA`,
+    message: `✓ Disponible suffisant: ${disponible.toLocaleString('fr-FR')} FCFA`,
   };
 }
 
@@ -278,27 +285,32 @@ export async function checkVirementPossible(
   montant: number
 ): Promise<{ possible: boolean; disponible: number; dotation_actuelle: number; message: string }> {
   const { data: line } = await supabase
-    .from("budget_lines")
-    .select("dotation_initiale, dotation_modifiee, total_engage")
-    .eq("id", fromBudgetLineId)
+    .from('budget_lines')
+    .select('dotation_initiale, dotation_modifiee, total_engage')
+    .eq('id', fromBudgetLineId)
     .single();
 
   if (!line) {
-    return { possible: false, disponible: 0, dotation_actuelle: 0, message: "Ligne source introuvable" };
+    return {
+      possible: false,
+      disponible: 0,
+      dotation_actuelle: 0,
+      message: 'Ligne source introuvable',
+    };
   }
 
   // Calculer virements existants
   const { data: virementsRecus } = await supabase
-    .from("credit_transfers")
-    .select("amount")
-    .eq("to_budget_line_id", fromBudgetLineId)
-    .eq("status", "execute");
+    .from('credit_transfers')
+    .select('amount')
+    .eq('to_budget_line_id', fromBudgetLineId)
+    .eq('status', 'execute');
 
   const { data: virementsEmis } = await supabase
-    .from("credit_transfers")
-    .select("amount")
-    .eq("from_budget_line_id", fromBudgetLineId)
-    .eq("status", "execute");
+    .from('credit_transfers')
+    .select('amount')
+    .eq('from_budget_line_id', fromBudgetLineId)
+    .eq('status', 'execute');
 
   const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
   const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
@@ -312,9 +324,10 @@ export async function checkVirementPossible(
       possible: false,
       disponible,
       dotation_actuelle,
-      message: `❌ VIREMENT BLOQUÉ: Disponible insuffisant sur la ligne source.\n` +
-               `Disponible: ${disponible.toLocaleString("fr-FR")} FCFA\n` +
-               `Montant demandé: ${montant.toLocaleString("fr-FR")} FCFA`,
+      message:
+        `❌ VIREMENT BLOQUÉ: Disponible insuffisant sur la ligne source.\n` +
+        `Disponible: ${disponible.toLocaleString('fr-FR')} FCFA\n` +
+        `Montant demandé: ${montant.toLocaleString('fr-FR')} FCFA`,
     };
   }
 
@@ -322,7 +335,7 @@ export async function checkVirementPossible(
     possible: true,
     disponible,
     dotation_actuelle,
-    message: `✓ Virement possible: ${disponible.toLocaleString("fr-FR")} FCFA disponibles`,
+    message: `✓ Virement possible: ${disponible.toLocaleString('fr-FR')} FCFA disponibles`,
   };
 }
 
@@ -333,30 +346,32 @@ export function useBudgetLineDetails(budgetLineId?: string) {
   const { exercice } = useExercice();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["budget-line-details", budgetLineId, exercice],
+    queryKey: ['budget-line-details', budgetLineId, exercice],
     queryFn: async () => {
       if (!budgetLineId) return null;
 
       const { data: line } = await supabase
-        .from("budget_lines")
-        .select("id, code, label, dotation_initiale, dotation_modifiee, total_engage, total_liquide, total_ordonnance, total_paye")
-        .eq("id", budgetLineId)
+        .from('budget_lines')
+        .select(
+          'id, code, label, dotation_initiale, dotation_modifiee, total_engage, total_liquide, total_ordonnance, total_paye'
+        )
+        .eq('id', budgetLineId)
         .single();
 
       if (!line) return null;
 
       // Calculer les virements
       const { data: virementsRecus } = await supabase
-        .from("credit_transfers")
-        .select("amount")
-        .eq("to_budget_line_id", budgetLineId)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('amount')
+        .eq('to_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
       const { data: virementsEmis } = await supabase
-        .from("credit_transfers")
-        .select("amount")
-        .eq("from_budget_line_id", budgetLineId)
-        .eq("status", "execute");
+        .from('credit_transfers')
+        .select('amount')
+        .eq('from_budget_line_id', budgetLineId)
+        .eq('status', 'execute');
 
       const totalRecus = virementsRecus?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;
       const totalEmis = virementsEmis?.reduce((sum, v) => sum + (v.amount || 0), 0) || 0;

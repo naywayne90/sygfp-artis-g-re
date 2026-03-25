@@ -43,7 +43,7 @@ function makeEntity(overrides: Partial<EntityContext> = {}): EntityContext {
     createdBy: 'user-1',
     directionId: 'dir-1',
     serviceId: 'svc-1',
-    statut: 'brouillon',
+    statut: 'soumis',
     ...overrides,
   };
 }
@@ -169,7 +169,8 @@ describe('canViewDossier', () => {
 // ============================================
 
 describe('canValidateStep', () => {
-  const { NOTE_SEF, NOTE_AEF, IMPUTATION, ENGAGEMENT, LIQUIDATION, ORDONNANCEMENT, REGLEMENT } = ETAPES_CHAINE_DEPENSE;
+  const { NOTE_SEF, NOTE_AEF, IMPUTATION, ENGAGEMENT, LIQUIDATION, ORDONNANCEMENT, REGLEMENT } =
+    ETAPES_CHAINE_DEPENSE;
 
   it('should allow ADMIN to validate NOTE_SEF', () => {
     expect(canValidateStep(['ADMIN'], NOTE_SEF)).toBe(true);
@@ -207,8 +208,8 @@ describe('canValidateStep', () => {
     expect(canValidateStep(['TRESORERIE'], REGLEMENT)).toBe(true);
   });
 
-  it('should deny validation when statut is brouillon', () => {
-    expect(canValidateStep(['DG'], NOTE_SEF, 'brouillon')).toBe(false);
+  it('should deny validation when statut is rejete', () => {
+    expect(canValidateStep(['DG'], NOTE_SEF, 'rejete')).toBe(false);
   });
 
   it('should deny validation when statut is valide', () => {
@@ -237,8 +238,8 @@ describe('canRejectStep', () => {
     expect(canRejectStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF)).toBe(false);
   });
 
-  it('should deny rejection when statut is brouillon', () => {
-    expect(canRejectStep(['DG'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, 'brouillon')).toBe(false);
+  it('should deny rejection when statut is rejete', () => {
+    expect(canRejectStep(['DG'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, 'rejete')).toBe(false);
   });
 
   it('should allow rejection when statut is soumis', () => {
@@ -269,20 +270,20 @@ describe('canDeferStep', () => {
 // ============================================
 
 describe('canSubmitStep', () => {
-  it('should allow owner AGENT to submit NOTE_SEF in brouillon', () => {
-    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'brouillon')).toBe(true);
+  it('should allow owner AGENT to submit NOTE_SEF in soumis', () => {
+    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'soumis')).toBe(true);
   });
 
   it('should deny non-owner from submitting', () => {
-    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, false, 'brouillon')).toBe(false);
+    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, false, 'soumis')).toBe(false);
   });
 
   it('should allow ADMIN to submit even if not owner', () => {
-    expect(canSubmitStep(['ADMIN'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, false, 'brouillon')).toBe(true);
+    expect(canSubmitStep(['ADMIN'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, false, 'soumis')).toBe(true);
   });
 
-  it('should deny submission when statut is soumis', () => {
-    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'soumis')).toBe(false);
+  it('should deny submission when statut is valide', () => {
+    expect(canSubmitStep(['AGENT'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'valide')).toBe(false);
   });
 
   it('should deny submission when statut is valide', () => {
@@ -290,11 +291,13 @@ describe('canSubmitStep', () => {
   });
 
   it('should allow OPERATEUR to submit NOTE_SEF', () => {
-    expect(canSubmitStep(['OPERATEUR'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'brouillon')).toBe(true);
+    expect(canSubmitStep(['OPERATEUR'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'soumis')).toBe(true);
   });
 
   it('should deny TRESORERIE from submitting NOTE_SEF', () => {
-    expect(canSubmitStep(['TRESORERIE'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'brouillon')).toBe(false);
+    expect(canSubmitStep(['TRESORERIE'], ETAPES_CHAINE_DEPENSE.NOTE_SEF, true, 'soumis')).toBe(
+      false
+    );
   });
 });
 
@@ -346,15 +349,15 @@ describe('canEditDossier', () => {
     expect(canEditDossier(user, entity)).toBe(true);
   });
 
-  it('should allow creator to edit brouillon', () => {
+  it('should allow creator to edit soumis', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'brouillon', createdBy: 'user-1' });
+    const entity = makeEntity({ statut: 'soumis', createdBy: 'user-1' });
     expect(canEditDossier(user, entity)).toBe(true);
   });
 
-  it('should deny non-creator from editing brouillon', () => {
+  it('should deny non-creator from editing soumis', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'brouillon', createdBy: 'other-user' });
+    const entity = makeEntity({ statut: 'soumis', createdBy: 'other-user' });
     expect(canEditDossier(user, entity)).toBe(false);
   });
 
@@ -364,9 +367,9 @@ describe('canEditDossier', () => {
     expect(canEditDossier(user, entity)).toBe(true);
   });
 
-  it('should deny editing soumis dossier (non-admin)', () => {
+  it('should deny editing rejete dossier (non-admin)', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'soumis', createdBy: 'user-1' });
+    const entity = makeEntity({ statut: 'rejete', createdBy: 'user-1' });
     expect(canEditDossier(user, entity)).toBe(false);
   });
 
@@ -388,21 +391,21 @@ describe('canDeleteDossier', () => {
     expect(canDeleteDossier(user, entity)).toBe(true);
   });
 
-  it('should allow creator to delete brouillon', () => {
+  it('should allow creator to delete soumis', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'brouillon', createdBy: 'user-1' });
+    const entity = makeEntity({ statut: 'soumis', createdBy: 'user-1' });
     expect(canDeleteDossier(user, entity)).toBe(true);
   });
 
-  it('should deny non-creator from deleting brouillon', () => {
+  it('should deny non-creator from deleting soumis', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'brouillon', createdBy: 'other-user' });
+    const entity = makeEntity({ statut: 'soumis', createdBy: 'other-user' });
     expect(canDeleteDossier(user, entity)).toBe(false);
   });
 
-  it('should deny deleting soumis dossier (non-admin)', () => {
+  it('should deny deleting rejete dossier (non-admin)', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'soumis', createdBy: 'user-1' });
+    const entity = makeEntity({ statut: 'rejete', createdBy: 'user-1' });
     expect(canDeleteDossier(user, entity)).toBe(false);
   });
 
@@ -424,9 +427,9 @@ describe('canUploadPiece', () => {
     expect(canUploadPiece(user, entity)).toBe(true);
   });
 
-  it('should allow creator to upload on brouillon', () => {
+  it('should allow creator to upload on soumis', () => {
     const user = makeUser({ userId: 'user-1' });
-    const entity = makeEntity({ statut: 'brouillon', createdBy: 'user-1' });
+    const entity = makeEntity({ statut: 'soumis', createdBy: 'user-1' });
     expect(canUploadPiece(user, entity)).toBe(true);
   });
 
@@ -537,9 +540,9 @@ describe('getRequiredRoleForAction', () => {
   });
 
   it('should return a string for all action types', () => {
-    const actions: Array<'validate' | 'reject' | 'defer' | 'submit' | 'create' | 'sign' | 'execute'> = [
-      'validate', 'reject', 'defer', 'submit', 'create', 'sign', 'execute',
-    ];
+    const actions: Array<
+      'validate' | 'reject' | 'defer' | 'submit' | 'create' | 'sign' | 'execute'
+    > = ['validate', 'reject', 'defer', 'submit', 'create', 'sign', 'execute'];
     actions.forEach((action) => {
       const role = getRequiredRoleForAction(ETAPES_CHAINE_DEPENSE.NOTE_SEF, action);
       expect(typeof role).toBe('string');

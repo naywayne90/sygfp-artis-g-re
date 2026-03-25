@@ -2,19 +2,19 @@
  * Détails d'une Note Direction Générale avec imputations
  */
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { useNoteDGPdf } from "@/hooks/useNoteDGPdf";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { useNoteDGPdf } from '@/hooks/useNoteDGPdf';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   NoteDirectionGenerale,
   NoteDGStatut,
@@ -41,10 +41,10 @@ import {
   useNoteDGImputations,
   InstructionType,
   ImputationPriorite,
-} from "@/hooks/useNotesDirectionGenerale";
-import { usePermissions } from "@/hooks/usePermissions";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/hooks/useNotesDirectionGenerale';
+import { usePermissions } from '@/hooks/usePermissions';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import {
   FileText,
   Calendar,
@@ -61,8 +61,8 @@ import {
   Clock,
   Download,
   Loader2,
-} from "lucide-react";
-import { NoteDGImputationForm } from "./NoteDGImputationForm";
+} from 'lucide-react';
+import { NoteDGImputationForm } from './NoteDGImputationForm';
 
 interface NoteDGDetailsProps {
   open: boolean;
@@ -77,25 +77,36 @@ interface NoteDGDetailsProps {
 
 const getStatusBadge = (status: NoteDGStatut) => {
   const variants: Record<NoteDGStatut, { label: string; className: string }> = {
-    brouillon: { label: "Brouillon", className: "bg-muted text-muted-foreground" },
-    soumise_dg: { label: "Soumise au DG", className: "bg-blue-100 text-blue-700" },
-    dg_valide: { label: "Validée DG", className: "bg-success/10 text-success" },
-    dg_rejetee: { label: "Rejetée", className: "bg-destructive/10 text-destructive" },
-    diffusee: { label: "Diffusée", className: "bg-purple-100 text-purple-700" },
+    soumis: {
+      label: 'Soumis',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    },
+    soumise_dg: { label: 'Soumise au DG', className: 'bg-blue-100 text-blue-700' },
+    dg_valide: { label: 'Validée DG', className: 'bg-success/10 text-success' },
+    dg_rejetee: { label: 'Rejetée', className: 'bg-destructive/10 text-destructive' },
+    diffusee: { label: 'Diffusée', className: 'bg-purple-100 text-purple-700' },
   };
-  const variant = variants[status] || variants.brouillon;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  const variant = variants[status] || variants.soumis;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
 const getPrioriteBadge = (priorite: ImputationPriorite | null) => {
   const variants: Record<ImputationPriorite, { label: string; className: string }> = {
-    normale: { label: "Normale", className: "bg-muted text-muted-foreground" },
-    urgente: { label: "Urgente", className: "bg-warning/10 text-warning" },
-    tres_urgente: { label: "Très urgente", className: "bg-destructive/10 text-destructive" },
+    normale: { label: 'Normale', className: 'bg-muted text-muted-foreground' },
+    urgente: { label: 'Urgente', className: 'bg-warning/10 text-warning' },
+    tres_urgente: { label: 'Très urgente', className: 'bg-destructive/10 text-destructive' },
   };
   if (!priorite) return null;
   const variant = variants[priorite] || variants.normale;
-  return <Badge variant="outline" className={variant.className}>{variant.label}</Badge>;
+  return (
+    <Badge variant="outline" className={variant.className}>
+      {variant.label}
+    </Badge>
+  );
 };
 
 export function NoteDGDetails({
@@ -109,7 +120,7 @@ export function NoteDGDetails({
   onDiffuse,
 }: NoteDGDetailsProps) {
   const { hasAnyRole } = usePermissions();
-  const canValidate = hasAnyRole(["Admin", "DG"]);
+  const canValidate = hasAnyRole(['Admin', 'DG']);
 
   const {
     imputations,
@@ -130,11 +141,11 @@ export function NoteDGDetails({
 
   if (!note) return null;
 
-  const canEdit = ["brouillon", "dg_rejetee"].includes(note.statut);
-  const canSubmit = note.statut === "brouillon";
-  const canValidateNote = canValidate && note.statut === "soumise_dg";
-  const canDiffuse = note.statut === "dg_valide";
-  const canDownloadPdf = ["dg_valide", "diffusee"].includes(note.statut);
+  const canEdit = ['soumis', 'dg_rejetee'].includes(note.statut);
+  const canSubmit = note.statut === 'soumis';
+  const canValidateNote = canValidate && note.statut === 'soumise_dg';
+  const canDiffuse = note.statut === 'dg_valide';
+  const canDownloadPdf = ['dg_valide', 'diffusee'].includes(note.statut);
 
   return (
     <>
@@ -143,7 +154,7 @@ export function NoteDGDetails({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Note DG - {note.reference || "Brouillon"}
+              Note DG - {note.reference || 'Soumis'}
             </DialogTitle>
             <DialogDescription className="flex items-center gap-2">
               {getStatusBadge(note.statut)}
@@ -165,8 +176,8 @@ export function NoteDGDetails({
                     <p className="text-sm font-medium">Date</p>
                     <p className="text-sm text-muted-foreground">
                       {note.date_note
-                        ? format(new Date(note.date_note), "dd MMMM yyyy", { locale: fr })
-                        : "-"}
+                        ? format(new Date(note.date_note), 'dd MMMM yyyy', { locale: fr })
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -217,9 +228,7 @@ export function NoteDGDetails({
                 {note.avis && (
                   <div>
                     <p className="text-sm font-medium mb-1">Avis</p>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {note.avis}
-                    </p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{note.avis}</p>
                   </div>
                 )}
                 {note.recommandations && (
@@ -239,11 +248,7 @@ export function NoteDGDetails({
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Imputations</CardTitle>
                   {canEdit && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowImputationForm(true)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => setShowImputationForm(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       Ajouter
                     </Button>
@@ -293,8 +298,8 @@ export function NoteDGDetails({
                           </TableCell>
                           <TableCell>
                             {imp.delai
-                              ? format(new Date(imp.delai), "dd/MM/yyyy", { locale: fr })
-                              : "-"}
+                              ? format(new Date(imp.delai), 'dd/MM/yyyy', { locale: fr })
+                              : '-'}
                           </TableCell>
                           <TableCell>
                             {imp.accuse_reception ? (
@@ -350,7 +355,7 @@ export function NoteDGDetails({
             </Card>
 
             {/* Motif de rejet si rejetée */}
-            {note.statut === "dg_rejetee" && note.motif_rejet && (
+            {note.statut === 'dg_rejetee' && note.motif_rejet && (
               <Card className="border-destructive">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg text-destructive flex items-center gap-2">
@@ -362,7 +367,8 @@ export function NoteDGDetails({
                   <p className="text-sm">{note.motif_rejet}</p>
                   {note.rejected_at && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Rejetée le {format(new Date(note.rejected_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
+                      Rejetée le{' '}
+                      {format(new Date(note.rejected_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                     </p>
                   )}
                 </CardContent>
@@ -374,11 +380,7 @@ export function NoteDGDetails({
             <div className="flex justify-end gap-2">
               {/* Bouton PDF - visible uniquement pour les notes validées */}
               {canDownloadPdf && (
-                <Button
-                  variant="outline"
-                  onClick={handleDownloadPdf}
-                  disabled={isDownloading}
-                >
+                <Button variant="outline" onClick={handleDownloadPdf} disabled={isDownloading}>
                   {isDownloading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
@@ -400,7 +402,10 @@ export function NoteDGDetails({
                 </Button>
               )}
               {canValidateNote && onValidate && (
-                <Button onClick={() => onValidate(note.id)} className="bg-success hover:bg-success/90">
+                <Button
+                  onClick={() => onValidate(note.id)}
+                  className="bg-success hover:bg-success/90"
+                >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Valider
                 </Button>

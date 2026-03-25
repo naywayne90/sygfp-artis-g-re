@@ -28,7 +28,7 @@ function createDefaultMetadata(): NoteCanvasMetadata {
     objet: '',
     typeNote: 'interne' as TypeNote,
     priorite: 'normale' as PrioriteNote,
-    statut: 'brouillon' as StatutNote,
+    statut: 'soumis' as StatutNote,
     tags: [],
     objectifStrategique: '',
     action: '',

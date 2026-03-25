@@ -36,7 +36,7 @@ interface NotesSEFExportsProps {
 // Mapping des onglets vers labels de fichier
 const TAB_FILE_LABELS: Record<string, string> = {
   toutes: 'toutes',
-  brouillons: 'brouillons',
+  soumis: 'soumis',
   a_valider: 'a_valider',
   validees: 'validees',
   differees: 'differees',
@@ -47,7 +47,7 @@ const TAB_FILE_LABELS: Record<string, string> = {
 // Mapping des onglets vers filtres de statut
 const TAB_TO_STATUT: Record<string, string | string[] | undefined> = {
   toutes: undefined,
-  brouillons: 'brouillon',
+  soumis: 'soumis',
   a_valider: ['soumis', 'a_valider'],
   validees: ['valide', 'valide_auto'],
   differees: 'differe',
@@ -96,7 +96,8 @@ export function NotesSEFExports({
       // Construire la requête
       let query = supabase
         .from('notes_sef')
-        .select(`
+        .select(
+          `
           reference_pivot,
           exercice,
           statut,
@@ -106,7 +107,8 @@ export function NotesSEFExports({
           created_at,
           direction:directions(label, sigle),
           demandeur:profiles!demandeur_id(first_name, last_name)
-        `)
+        `
+        )
         .eq('exercice', exercice)
         .order('created_at', { ascending: false })
         .limit(10000);
@@ -150,7 +152,6 @@ export function NotesSEFExports({
       ];
 
       const STATUT_LABELS: Record<string, string> = {
-        brouillon: 'Brouillon',
         soumis: 'Soumis',
         a_valider: 'À valider',
         valide: 'Validé',
@@ -192,10 +193,8 @@ export function NotesSEFExports({
 
       // Construire le contenu CSV
       const BOM = '\uFEFF'; // UTF-8 BOM
-      const csvContent = BOM + [
-        headers.join(';'),
-        ...rows.map(row => row.join(';')),
-      ].join('\r\n');
+      const csvContent =
+        BOM + [headers.join(';'), ...rows.map((row) => row.join(';'))].join('\r\n');
 
       // Créer et télécharger le fichier
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
@@ -227,7 +226,7 @@ export function NotesSEFExports({
       toast.success(`${notes.length} note(s) exportée(s) en CSV`);
     } catch (error: unknown) {
       console.error('Export CSV error:', error);
-      toast.error('Erreur lors de l\'export CSV: ' + (error as Error).message);
+      toast.error("Erreur lors de l'export CSV: " + (error as Error).message);
     } finally {
       setIsExportingCSV(false);
     }

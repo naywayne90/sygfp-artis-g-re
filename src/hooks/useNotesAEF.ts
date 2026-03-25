@@ -93,10 +93,7 @@ export function useNotesAEF() {
   } = useQuery({
     queryKey: ['notes-aef', exercice],
     queryFn: async () => {
-      let query: any = (
-        supabase // eslint-disable-line @typescript-eslint/no-explicit-any
-          .from('notes_dg') as any
-      ) // eslint-disable-line @typescript-eslint/no-explicit-any
+      let query: any = (supabase.from('notes_dg') as any)
         .select(
           `
           *,
@@ -356,7 +353,7 @@ export function useNotesAEF() {
             activite_id: noteData.activite_id,
             exercice: exercice || new Date().getFullYear(),
             created_by: user.id,
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
           },
         ])
         .select()
@@ -484,7 +481,7 @@ export function useNotesAEF() {
             budget_line_id: noteData.ligne_budgetaire_id || null,
             exercice: exercice || new Date().getFullYear(),
             created_by: user.id,
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
           },
         ])
         .select()
@@ -1339,7 +1336,7 @@ export function useNotesAEF() {
             montant_estime: original.montant_estime,
             exercice: exercice || new Date().getFullYear(),
             created_by: user.id,
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
           },
         ])
         .select()
@@ -1382,7 +1379,6 @@ export function useNotesAEF() {
 
   // Filter notes by status - aligné sur les nouveaux statuts
   const notesByStatus = {
-    brouillon: notes.filter((n) => n.statut === 'brouillon'),
     soumis: notes.filter((n) => n.statut === 'soumis'),
     a_valider: notes.filter((n) => n.statut === 'soumis' || n.statut === 'a_valider'),
     a_imputer: notes.filter((n) => n.statut === 'a_imputer'), // Validé par DG, en attente d'imputation

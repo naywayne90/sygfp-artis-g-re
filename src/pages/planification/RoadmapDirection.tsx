@@ -43,7 +43,7 @@ const formatCurrency = (amount: number) =>
   }).format(amount) + ' FCFA';
 
 const STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  brouillon: 'secondary',
+  soumis: 'secondary',
   valide: 'default',
   en_cours: 'default',
   cloture: 'outline',
@@ -187,7 +187,6 @@ export default function RoadmapDirection() {
   const submissionSummary = useMemo(
     () => ({
       total: plans.length,
-      brouillon: plans.filter((p) => p.statut === 'brouillon').length,
       soumis: plans.filter((p) => p.statut === 'soumis').length,
       valide: plans.filter((p) => p.statut === 'valide').length,
       enCours: plans.filter((p) => p.statut === 'en_cours').length,
@@ -331,15 +330,9 @@ export default function RoadmapDirection() {
               <div>
                 <h3 className="font-medium">Statut de vos soumissions</h3>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {submissionSummary.brouillon > 0 && (
-                    <Badge variant="secondary">
-                      {submissionSummary.brouillon} brouillon
-                      {submissionSummary.brouillon > 1 ? 's' : ''}
-                    </Badge>
-                  )}
                   {submissionSummary.soumis > 0 && (
                     <Badge className="bg-amber-100 text-amber-800">
-                      {submissionSummary.soumis} en attente
+                      {submissionSummary.soumis} soumis
                     </Badge>
                   )}
                   {submissionSummary.valide > 0 && (
@@ -354,7 +347,7 @@ export default function RoadmapDirection() {
                   )}
                 </div>
               </div>
-              {submissionSummary.brouillon > 0 && (
+              {submissionSummary.soumis > 0 && (
                 <Button size="sm" onClick={() => navigate('/planification/projets')}>
                   Finaliser et soumettre
                 </Button>

@@ -24,7 +24,6 @@ interface ExportFilters {
 }
 
 const STATUT_LABELS: Record<string, string> = {
-  brouillon: 'Brouillon',
   soumis: 'Soumis',
   a_valider: 'À valider',
   valide: 'Validé',
@@ -33,7 +32,6 @@ const STATUT_LABELS: Record<string, string> = {
 };
 
 const STATUT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  brouillon: { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' },
   soumis: { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
   a_valider: { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd' },
   valide: { bg: '#dcfce7', text: '#166534', border: '#86efac' },
@@ -58,7 +56,7 @@ const URGENCE_COLORS: Record<string, { bg: string; text: string }> = {
 // Mapping des onglets vers labels de fichier
 const TAB_FILE_LABELS: Record<string, string> = {
   toutes: 'toutes',
-  brouillons: 'brouillons',
+  brouillons: 'soumis',
   a_valider: 'a_valider',
   validees: 'validees',
   differees: 'differees',
@@ -67,7 +65,7 @@ const TAB_FILE_LABELS: Record<string, string> = {
 
 const TAB_DISPLAY_LABELS: Record<string, string> = {
   toutes: 'Toutes les notes',
-  brouillons: 'Brouillons',
+  brouillons: 'Soumis',
   a_valider: 'À valider',
   validees: 'Validées',
   differees: 'Différées',
@@ -655,7 +653,7 @@ function downloadBlob(blob: Blob, fileName: string) {
 }
 
 function getStatutBadgeHtml(statut: string): string {
-  const colors = STATUT_COLORS[statut] || STATUT_COLORS.brouillon;
+  const colors = STATUT_COLORS[statut] || STATUT_COLORS.soumis;
   const label = STATUT_LABELS[statut] || statut;
   return `<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:7px;font-weight:600;background:${colors.bg};color:${colors.text};border:1px solid ${colors.border}">${label}</span>`;
 }
@@ -701,7 +699,7 @@ function generatePdfHtml(opts: PdfHtmlOptions): string {
   const statutSummaryHtml = Object.entries(STATUT_LABELS)
     .filter(([key]) => statutCounts[key])
     .map(([key, label]) => {
-      const colors = STATUT_COLORS[key] || STATUT_COLORS.brouillon;
+      const colors = STATUT_COLORS[key] || STATUT_COLORS.soumis;
       return `<span style="display:inline-block;padding:3px 10px;border-radius:4px;font-size:9px;font-weight:600;background:${colors.bg};color:${colors.text};border:1px solid ${colors.border};margin-right:6px">${label}: ${statutCounts[key]}</span>`;
     })
     .join('');

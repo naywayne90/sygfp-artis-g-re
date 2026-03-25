@@ -98,8 +98,7 @@ const getStatusBadge = (statut: string | null) => {
       className?: string;
     }
   > = {
-    brouillon: { label: 'Brouillon', variant: 'outline' },
-    soumis: { label: 'Soumis', variant: 'secondary', className: 'bg-blue-100 text-blue-700' },
+    soumis: { label: 'Soumis', variant: 'outline' },
     a_valider: {
       label: 'À valider',
       variant: 'secondary',
@@ -112,7 +111,7 @@ const getStatusBadge = (statut: string | null) => {
     differe: { label: 'Différé', variant: 'secondary', className: 'bg-orange-100 text-orange-700' },
   };
 
-  const config = statusConfig[statut || 'brouillon'] || statusConfig.brouillon;
+  const config = statusConfig[statut || 'soumis'] || statusConfig.soumis;
   return (
     <Badge variant={config.variant} className={config.className}>
       {config.label}
@@ -507,8 +506,8 @@ export default function NoteAEFDetail() {
     file_path: string;
     file_name: string;
   }) => {
-    if (!note || note.statut !== 'brouillon') {
-      toast.error('Suppression possible uniquement pour les brouillons');
+    if (!note || note.statut !== 'soumis') {
+      toast.error('Suppression possible uniquement pour les soumis');
       return;
     }
 
@@ -1118,7 +1117,7 @@ export default function NoteAEFDetail() {
                   {attachments.length}
                 </Badge>
               </CardTitle>
-              {note.statut === 'brouillon' && accessControl.canEdit && (
+              {note.statut === 'soumis' && accessControl.canEdit && (
                 <div className="relative">
                   <input
                     ref={fileInputRef}
@@ -1146,7 +1145,7 @@ export default function NoteAEFDetail() {
               )}
             </CardHeader>
             <CardContent>
-              {note.statut === 'brouillon' && accessControl.canEdit && (
+              {note.statut === 'soumis' && accessControl.canEdit && (
                 <p className="text-xs text-muted-foreground mb-3">
                   Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF • Max 10 MB
                 </p>
@@ -1186,7 +1185,7 @@ export default function NoteAEFDetail() {
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        {note.statut === 'brouillon' && accessControl.canEdit && (
+                        {note.statut === 'soumis' && accessControl.canEdit && (
                           <Button
                             variant="ghost"
                             size="icon"

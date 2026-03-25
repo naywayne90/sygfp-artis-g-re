@@ -7,15 +7,10 @@
  * Avec dates, acteurs et statut de signature
  */
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   FileEdit,
   Send,
@@ -29,17 +24,17 @@ import {
   CreditCard,
   Shield,
   QrCode,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { useOrdonnancements, VALIDATION_STEPS, SIGNATURE_STEPS } from "@/hooks/useOrdonnancements";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useOrdonnancements, VALIDATION_STEPS, SIGNATURE_STEPS } from '@/hooks/useOrdonnancements';
 
 interface TimelineStep {
   key: string;
   label: string;
   icon: React.ElementType;
-  status: "completed" | "current" | "pending" | "rejected" | "signed";
+  status: 'completed' | 'current' | 'pending' | 'rejected' | 'signed';
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
@@ -64,7 +59,9 @@ export function OrdonnancementTimeline({
   useEffect(() => {
     if (ordonnancement?.id) {
       getValidations(ordonnancement.id).then(setValidations);
-      getSignatures(ordonnancement.id).then(setSignatures).catch(() => setSignatures([]));
+      getSignatures(ordonnancement.id)
+        .then(setSignatures)
+        .catch(() => setSignatures([]));
     }
   }, [ordonnancement?.id]);
 
@@ -74,34 +71,36 @@ export function OrdonnancementTimeline({
 
     // Step 1: Creation (always completed)
     steps.push({
-      key: "creation",
-      label: "Création",
+      key: 'creation',
+      label: 'Création',
       icon: FileEdit,
-      status: "completed",
+      status: 'completed',
       date: ordonnancement.created_at,
       actor: ordonnancement.created_by_profile?.full_name,
     });
 
     // Step 2: Submission
-    const hasBeenSubmitted = ordonnancement.statut !== "brouillon";
+    const hasBeenSubmitted = ordonnancement.statut !== 'soumis';
     steps.push({
-      key: "soumission",
-      label: "Soumission",
+      key: 'soumission',
+      label: 'Soumission',
       icon: Send,
-      status: hasBeenSubmitted ? "completed" : "current",
+      status: hasBeenSubmitted ? 'completed' : 'current',
       date: ordonnancement.submitted_at,
     });
 
     // Step 3: Multi-step validation (only if submitted)
-    if (hasBeenSubmitted && ordonnancement.statut !== "rejete") {
+    if (hasBeenSubmitted && ordonnancement.statut !== 'rejete') {
       const currentStep = ordonnancement.current_step || 1;
 
       VALIDATION_STEPS.forEach((step) => {
         const validation = validations.find((v) => v.step_order === step.order);
-        const isCompleted = validation?.status === "validated";
-        const isRejected = validation?.status === "rejected";
-        const isCurrent = step.order === currentStep &&
-          (ordonnancement.statut === "soumis" || ordonnancement.workflow_status === "en_validation");
+        const isCompleted = validation?.status === 'validated';
+        const isRejected = validation?.status === 'rejected';
+        const isCurrent =
+          step.order === currentStep &&
+          (ordonnancement.statut === 'soumis' ||
+            ordonnancement.workflow_status === 'en_validation');
         const isPending = step.order > currentStep && !isCompleted;
 
         steps.push({
@@ -109,14 +108,14 @@ export function OrdonnancementTimeline({
           label: `Validation ${step.role}`,
           icon: Users,
           status: isCompleted
-            ? "completed"
+            ? 'completed'
             : isRejected
-            ? "rejected"
-            : isCurrent
-            ? "current"
-            : isPending
-            ? "pending"
-            : "pending",
+              ? 'rejected'
+              : isCurrent
+                ? 'current'
+                : isPending
+                  ? 'pending'
+                  : 'pending',
           date: validation?.validated_at,
           actor: validation?.validated_by_profile?.full_name,
           comment: validation?.comments,
@@ -125,21 +124,22 @@ export function OrdonnancementTimeline({
     }
 
     // Step 4: Signature workflow (only if validation complete)
-    const isInSignature = ordonnancement.statut === "en_signature" ||
-                          ordonnancement.statut === "ordonnance" ||
-                          ordonnancement.statut === "valide";
+    const isInSignature =
+      ordonnancement.statut === 'en_signature' ||
+      ordonnancement.statut === 'ordonnance' ||
+      ordonnancement.statut === 'valide';
 
-    if (isInSignature || ordonnancement.workflow_status === "valide") {
+    if (isInSignature || ordonnancement.workflow_status === 'valide') {
       SIGNATURE_STEPS.forEach((step) => {
         const signature = signatures.find((s) => s.signature_order === step.order);
-        const isSigned = signature?.status === "signed";
-        const isPending = !isSigned && ordonnancement.statut === "en_signature";
+        const isSigned = signature?.status === 'signed';
+        const isPending = !isSigned && ordonnancement.statut === 'en_signature';
 
         steps.push({
           key: `signature_${step.order}`,
           label: `Signature ${step.role}`,
           icon: FileSignature,
-          status: isSigned ? "signed" : isPending ? "current" : "pending",
+          status: isSigned ? 'signed' : isPending ? 'current' : 'pending',
           date: signature?.signed_at,
           actor: signature?.signed_by_profile?.full_name,
           hash: signature?.signature_hash,
@@ -148,31 +148,31 @@ export function OrdonnancementTimeline({
     }
 
     // Final status
-    if (ordonnancement.statut === "ordonnance") {
+    if (ordonnancement.statut === 'ordonnance') {
       steps.push({
-        key: "ordonnance",
-        label: "ORDONNANCÉ",
+        key: 'ordonnance',
+        label: 'ORDONNANCÉ',
         icon: CheckCircle2,
-        status: "completed",
+        status: 'completed',
         date: ordonnancement.date_ordonnancement,
         hash: ordonnancement.signature_hash,
-        comment: ordonnancement.qr_code_data ? "QR Code généré" : undefined,
+        comment: ordonnancement.qr_code_data ? 'QR Code généré' : undefined,
       });
-    } else if (ordonnancement.statut === "rejete") {
+    } else if (ordonnancement.statut === 'rejete') {
       steps.push({
-        key: "rejet",
-        label: "Rejeté",
+        key: 'rejet',
+        label: 'Rejeté',
         icon: XCircle,
-        status: "rejected",
+        status: 'rejected',
         comment: ordonnancement.rejection_reason,
         date: ordonnancement.rejected_at,
       });
-    } else if (ordonnancement.statut === "differe") {
+    } else if (ordonnancement.statut === 'differe') {
       steps.push({
-        key: "differe",
-        label: "Différé",
+        key: 'differe',
+        label: 'Différé',
         icon: Clock,
-        status: "pending",
+        status: 'pending',
         date: ordonnancement.date_differe,
         comment: ordonnancement.motif_differe,
       });
@@ -183,38 +183,38 @@ export function OrdonnancementTimeline({
 
   const steps = buildTimelineSteps();
 
-  const getStatusColor = (status: TimelineStep["status"]) => {
+  const getStatusColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500 text-white";
-      case "signed":
-        return "bg-blue-500 text-white";
-      case "current":
-        return "bg-primary text-white ring-4 ring-primary/30";
-      case "rejected":
-        return "bg-red-500 text-white";
+      case 'completed':
+        return 'bg-green-500 text-white';
+      case 'signed':
+        return 'bg-blue-500 text-white';
+      case 'current':
+        return 'bg-primary text-white ring-4 ring-primary/30';
+      case 'rejected':
+        return 'bg-red-500 text-white';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getLineColor = (status: TimelineStep["status"]) => {
+  const getLineColor = (status: TimelineStep['status']) => {
     switch (status) {
-      case "completed":
-        return "bg-green-500";
-      case "signed":
-        return "bg-blue-500";
-      case "rejected":
-        return "bg-red-500";
+      case 'completed':
+        return 'bg-green-500';
+      case 'signed':
+        return 'bg-blue-500';
+      case 'rejected':
+        return 'bg-red-500';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
   if (compact) {
     return (
       <TooltipProvider>
-        <div className={cn("flex items-center gap-2 overflow-x-auto", className)}>
+        <div className={cn('flex items-center gap-2 overflow-x-auto', className)}>
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -223,7 +223,7 @@ export function OrdonnancementTimeline({
                   <TooltipTrigger asChild>
                     <div
                       className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0",
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
                         getStatusColor(step.status)
                       )}
                     >
@@ -235,23 +235,19 @@ export function OrdonnancementTimeline({
                       <p className="font-medium">{step.label}</p>
                       {step.date && (
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(step.date), "dd/MM/yyyy HH:mm", { locale: fr })}
+                          {format(new Date(step.date), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                       )}
-                      {step.actor && (
-                        <p className="text-xs">Par: {step.actor}</p>
-                      )}
+                      {step.actor && <p className="text-xs">Par: {step.actor}</p>}
                       {step.hash && (
                         <p className="text-xs font-mono">Hash: {step.hash.slice(0, 12)}...</p>
                       )}
-                      {step.comment && (
-                        <p className="text-xs max-w-xs">{step.comment}</p>
-                      )}
+                      {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
                 </Tooltip>
                 {index < steps.length - 1 && (
-                  <div className={cn("h-0.5 w-4 mx-1 shrink-0", getLineColor(step.status))} />
+                  <div className={cn('h-0.5 w-4 mx-1 shrink-0', getLineColor(step.status))} />
                 )}
               </div>
             );
@@ -279,7 +275,7 @@ export function OrdonnancementTimeline({
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full -ml-px",
+                      'absolute left-4 top-8 w-0.5 h-full -ml-px',
                       getLineColor(step.status)
                     )}
                   />
@@ -288,7 +284,7 @@ export function OrdonnancementTimeline({
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10",
+                    'w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10',
                     getStatusColor(step.status)
                   )}
                 >
@@ -302,19 +298,19 @@ export function OrdonnancementTimeline({
                     <Badge
                       variant="outline"
                       className={cn(
-                        "text-xs",
-                        step.status === "completed" && "border-green-500 text-green-600",
-                        step.status === "signed" && "border-blue-500 text-blue-600",
-                        step.status === "current" && "border-primary text-primary",
-                        step.status === "rejected" && "border-red-500 text-red-600",
-                        step.status === "pending" && "border-muted-foreground text-muted-foreground"
+                        'text-xs',
+                        step.status === 'completed' && 'border-green-500 text-green-600',
+                        step.status === 'signed' && 'border-blue-500 text-blue-600',
+                        step.status === 'current' && 'border-primary text-primary',
+                        step.status === 'rejected' && 'border-red-500 text-red-600',
+                        step.status === 'pending' && 'border-muted-foreground text-muted-foreground'
                       )}
                     >
-                      {step.status === "completed" && "Terminé"}
-                      {step.status === "signed" && "Signé"}
-                      {step.status === "current" && "En cours"}
-                      {step.status === "rejected" && "Rejeté"}
-                      {step.status === "pending" && "En attente"}
+                      {step.status === 'completed' && 'Terminé'}
+                      {step.status === 'signed' && 'Signé'}
+                      {step.status === 'current' && 'En cours'}
+                      {step.status === 'rejected' && 'Rejeté'}
+                      {step.status === 'pending' && 'En attente'}
                     </Badge>
                   </div>
 
@@ -323,7 +319,7 @@ export function OrdonnancementTimeline({
                       <div className="flex items-center gap-2">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(step.date), "dd MMMM yyyy à HH:mm", {
+                          {format(new Date(step.date), 'dd MMMM yyyy à HH:mm', {
                             locale: fr,
                           })}
                         </span>
@@ -354,7 +350,7 @@ export function OrdonnancementTimeline({
         </div>
 
         {/* QR Code section if ordonnancé */}
-        {ordonnancement.statut === "ordonnance" && ordonnancement.qr_code_data && (
+        {ordonnancement.statut === 'ordonnance' && ordonnancement.qr_code_data && (
           <div className="mt-4 p-4 border rounded-lg bg-muted/30">
             <div className="flex items-center gap-2 mb-2">
               <QrCode className="h-4 w-4 text-primary" />

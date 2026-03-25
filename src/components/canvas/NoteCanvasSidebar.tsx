@@ -82,7 +82,7 @@ const PRIORITE_LABELS: Record<PrioriteNote, string> = {
 };
 
 const STATUT_LABELS: Record<StatutNote, string> = {
-  brouillon: 'Brouillon',
+  soumis: 'Soumis',
   publie: 'Publie',
   archive: 'Archive',
 };

@@ -86,7 +86,7 @@ export default function NotesSEF() {
   const canValidate = hasAnyRole(['ADMIN', 'DG', 'DAAF']);
 
   // Compteurs dérivés
-  const brouillonsCount = counts.brouillon;
+  const soumisCount = counts.soumis;
   // Compteur "À valider" = soumis + a_valider
   const aValiderCount = counts.soumis + counts.a_valider;
 
@@ -268,8 +268,8 @@ export default function NotesSEF() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Brouillons</p>
-                <p className="text-2xl font-bold text-muted-foreground">{brouillonsCount}</p>
+                <p className="text-sm text-muted-foreground">Soumis</p>
+                <p className="text-2xl font-bold text-muted-foreground">{soumisCount}</p>
               </div>
               <Edit className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -340,7 +340,7 @@ export default function NotesSEF() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="toutes">Toutes ({counts.total})</TabsTrigger>
-          <TabsTrigger value="brouillons">Brouillons ({brouillonsCount})</TabsTrigger>
+          <TabsTrigger value="soumis">Soumis ({soumisCount})</TabsTrigger>
           <TabsTrigger value="a_valider">À valider ({aValiderCount})</TabsTrigger>
           <TabsTrigger value="validees">Validées ({counts.valide})</TabsTrigger>
           <TabsTrigger value="differees">Différées ({counts.differe})</TabsTrigger>
@@ -370,10 +370,10 @@ export default function NotesSEF() {
           />
         </TabsContent>
 
-        <TabsContent value="brouillons">
+        <TabsContent value="soumis">
           <NoteSEFList
             notes={filteredNotes as NoteSEF[]}
-            title="Brouillons"
+            title="Soumis"
             description="Notes en cours de rédaction"
             onView={(note) => setSelectedNote(note)}
             onEdit={handleEdit}
@@ -383,7 +383,7 @@ export default function NotesSEF() {
             onRetry={refetch}
             isLoading={isLoading}
             error={listError}
-            emptyMessage="Aucun brouillon"
+            emptyMessage="Aucun soumis"
           />
         </TabsContent>
 

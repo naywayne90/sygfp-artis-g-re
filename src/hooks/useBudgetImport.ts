@@ -495,7 +495,7 @@ export function useBudgetImport() {
             activite_id: data.activite_code ? activiteMap.get(data.activite_code) : null,
             commentaire: data.commentaire || null,
             exercice: exercice || new Date().getFullYear(),
-            statut: 'brouillon',
+            // statut defaults to 'soumis' via DB default
             budget_import_id: importRecord.id,
           };
 

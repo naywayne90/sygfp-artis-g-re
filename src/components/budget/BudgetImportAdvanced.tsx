@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -9,28 +9,28 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Upload, 
-  Download, 
-  FileSpreadsheet, 
-  CheckCircle, 
-  XCircle, 
+} from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Upload,
+  Download,
+  FileSpreadsheet,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   ArrowRight,
   ArrowLeft,
   Loader2,
   FileText,
-  Eye
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { toast } from "sonner";
+  Eye,
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -38,7 +38,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
 interface BudgetImportAdvancedProps {
   open: boolean;
@@ -64,31 +64,31 @@ interface ValidationResult {
   duplicates: string[];
 }
 
-const REQUIRED_COLUMNS = ["code", "label", "level", "dotation_initiale"];
+const REQUIRED_COLUMNS = ['code', 'label', 'level', 'dotation_initiale'];
 const OPTIONAL_COLUMNS = [
-  "type_ligne",
-  "source_financement", 
-  "direction_code", 
-  "os_code", 
-  "mission_code", 
-  "action_code",
-  "activite_code",
-  "nbe_code",
-  "sysco_code",
-  "commentaire"
+  'type_ligne',
+  'source_financement',
+  'direction_code',
+  'os_code',
+  'mission_code',
+  'action_code',
+  'activite_code',
+  'nbe_code',
+  'sysco_code',
+  'commentaire',
 ];
 
 const STEPS = [
-  { id: 1, title: "Fichier", description: "Charger le fichier" },
-  { id: 2, title: "Mapping", description: "Mapper les colonnes" },
-  { id: 3, title: "Validation", description: "Contrôler les données" },
-  { id: 4, title: "Import", description: "Importer" },
+  { id: 1, title: 'Fichier', description: 'Charger le fichier' },
+  { id: 2, title: 'Mapping', description: 'Mapper les colonnes' },
+  { id: 3, title: 'Validation', description: 'Contrôler les données' },
+  { id: 4, title: 'Import', description: 'Importer' },
 ];
 
 export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetImportAdvancedProps) {
   const { exercice } = useExercice();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [file, setFile] = useState<File | null>(null);
   const [rawData, setRawData] = useState<Record<string, string>[]>([]);
@@ -114,47 +114,48 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
   };
 
   const downloadTemplate = () => {
-    const headers = [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS].join(";");
+    const headers = [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS].join(';');
     const example = [
-      "6110001",
-      "Fournitures de bureau",
-      "ligne",
-      "5000000",
-      "depense",
-      "budget_etat",
-      "DAAF",
-      "OS1",
-      "M1",
-      "A1",
-      "ACT1",
-      "611",
-      "6011",
-      "Budget fonctionnement",
-    ].join(";");
+      '6110001',
+      'Fournitures de bureau',
+      'ligne',
+      '5000000',
+      'depense',
+      'budget_etat',
+      'DAAF',
+      'OS1',
+      'M1',
+      'A1',
+      'ACT1',
+      '611',
+      '6011',
+      'Budget fonctionnement',
+    ].join(';');
 
     const content = `${headers}\n${example}`;
-    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `modele_budget_${exercice}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-    toast.success("Modèle téléchargé");
+    toast.success('Modèle téléchargé');
   };
 
   const parseCSV = (content: string): { headers: string[]; data: Record<string, string>[] } => {
-    const lines = content.trim().split("\n");
+    const lines = content.trim().split('\n');
     if (lines.length < 2) return { headers: [], data: [] };
 
-    const headers = lines[0].split(/[;,\t]/).map((h) => h.trim().toLowerCase().replace(/"/g, ""));
+    const headers = lines[0].split(/[;,\t]/).map((h) => h.trim().toLowerCase().replace(/"/g, ''));
     const data: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(/[;,\t]/).map((v) => v.trim().replace(/"/g, ""));
-      if (values.some(v => v)) { // Skip empty rows
+      const values = lines[i].split(/[;,\t]/).map((v) => v.trim().replace(/"/g, ''));
+      if (values.some((v) => v)) {
+        // Skip empty rows
         const row: Record<string, string> = {};
         headers.forEach((header, index) => {
-          row[header] = values[index] || "";
+          row[header] = values[index] || '';
         });
         data.push(row);
       }
@@ -170,9 +171,9 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     try {
       const content = await selectedFile.text();
       const { headers, data } = parseCSV(content);
-      
+
       if (data.length === 0) {
-        throw new Error("Fichier vide ou format invalide");
+        throw new Error('Fichier vide ou format invalide');
       }
 
       setFileHeaders(headers);
@@ -180,19 +181,20 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
 
       // Auto-map columns that match
       const autoMapping: Record<string, string> = {};
-      [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS].forEach(col => {
-        const match = headers.find(h => 
-          h === col || 
-          h.replace(/_/g, "") === col.replace(/_/g, "") ||
-          h.includes(col) ||
-          col.includes(h)
+      [...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS].forEach((col) => {
+        const match = headers.find(
+          (h) =>
+            h === col ||
+            h.replace(/_/g, '') === col.replace(/_/g, '') ||
+            h.includes(col) ||
+            col.includes(h)
         );
         if (match) autoMapping[col] = match;
       });
       setColumnMapping(autoMapping);
       setCurrentStep(2);
     } catch (error: any) {
-      toast.error("Erreur de lecture: " + error.message);
+      toast.error('Erreur de lecture: ' + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -214,20 +216,24 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     const seenCodes = new Set<string>();
 
     // Fetch reference data
-    const [directions, objectifs, _missions, _actions, _activites, _nbe, _sysco, existingLines] = await Promise.all([
-      supabase.from("directions").select("id, code"),
-      supabase.from("objectifs_strategiques").select("id, code"),
-      supabase.from("missions").select("id, code"),
-      supabase.from("actions").select("id, code"),
-      supabase.from("activites").select("id, code"),
-      supabase.from("nomenclature_nbe").select("id, code"),
-      supabase.from("plan_comptable_sysco").select("id, code"),
-      supabase.from("budget_lines").select("code").eq("exercice", exercice || new Date().getFullYear()),
-    ]);
+    const [directions, objectifs, _missions, _actions, _activites, _nbe, _sysco, existingLines] =
+      await Promise.all([
+        supabase.from('directions').select('id, code'),
+        supabase.from('objectifs_strategiques').select('id, code'),
+        supabase.from('missions').select('id, code'),
+        supabase.from('actions').select('id, code'),
+        supabase.from('activites').select('id, code'),
+        supabase.from('nomenclature_nbe').select('id, code'),
+        supabase.from('plan_comptable_sysco').select('id, code'),
+        supabase
+          .from('budget_lines')
+          .select('code')
+          .eq('exercice', exercice || new Date().getFullYear()),
+      ]);
 
-    const existingCodes = new Set(existingLines.data?.map(l => l.code) || []);
-    const directionCodes = new Set(directions.data?.map(d => d.code) || []);
-    const osCodes = new Set(objectifs.data?.map(o => o.code) || []);
+    const existingCodes = new Set(existingLines.data?.map((l) => l.code) || []);
+    const directionCodes = new Set(directions.data?.map((d) => d.code) || []);
+    const osCodes = new Set(objectifs.data?.map((o) => o.code) || []);
 
     for (let i = 0; i < rawData.length; i++) {
       const row = rawData[i];
@@ -237,11 +243,11 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       // Map data using column mapping
       const mappedData: Record<string, string> = {};
       Object.entries(columnMapping).forEach(([targetCol, sourceCol]) => {
-        mappedData[targetCol] = row[sourceCol] || "";
+        mappedData[targetCol] = row[sourceCol] || '';
       });
 
       // Required field validation
-      REQUIRED_COLUMNS.forEach(col => {
+      REQUIRED_COLUMNS.forEach((col) => {
         if (!mappedData[col]) {
           rowErrors.push(`Champ obligatoire manquant: ${col}`);
         }
@@ -264,9 +270,9 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       // Dotation validation
       const dotation = parseFloat(mappedData.dotation_initiale);
       if (isNaN(dotation)) {
-        rowErrors.push("Dotation initiale invalide (doit être un nombre)");
+        rowErrors.push('Dotation initiale invalide (doit être un nombre)');
       } else if (dotation < 0) {
-        rowErrors.push("Dotation initiale négative non autorisée");
+        rowErrors.push('Dotation initiale négative non autorisée');
       }
 
       // Reference validation
@@ -278,13 +284,15 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       }
 
       // Level validation
-      const validLevels = ["os", "mission", "action", "activite", "sous_activite", "ligne"];
+      const validLevels = ['os', 'mission', 'action', 'activite', 'sous_activite', 'ligne'];
       if (mappedData.level && !validLevels.includes(mappedData.level)) {
-        rowWarnings.push(`Niveau inconnu: ${mappedData.level} (valides: ${validLevels.join(", ")})`);
+        rowWarnings.push(
+          `Niveau inconnu: ${mappedData.level} (valides: ${validLevels.join(', ')})`
+        );
       }
 
       const isValid = rowErrors.length === 0;
-      
+
       parsed.push({
         rowIndex: i + 2,
         data: mappedData,
@@ -300,8 +308,8 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       }
       if (rowWarnings.length > 0) result.warningRows++;
 
-      rowErrors.forEach(e => result.errors.push({ row: i + 2, message: e }));
-      rowWarnings.forEach(w => result.warnings.push({ row: i + 2, message: w }));
+      rowErrors.forEach((e) => result.errors.push({ row: i + 2, message: e }));
+      rowWarnings.forEach((w) => result.warnings.push({ row: i + 2, message: w }));
     }
 
     setParsedRows(parsed);
@@ -321,13 +329,13 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     try {
       // Create import record
       const { data: importRecord, error: importError } = await supabase
-        .from("budget_imports")
+        .from('budget_imports')
         .insert({
           exercice: exercice || new Date().getFullYear(),
-          file_name: file?.name || "import.csv",
+          file_name: file?.name || 'import.csv',
           file_size: file?.size,
           total_rows: validationResult.totalRows,
-          status: "en_cours",
+          status: 'en_cours',
         })
         .select()
         .single();
@@ -337,54 +345,69 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       setImportId(importRecord.id);
 
       // Fetch reference maps in parallel
-      const [directions, objectifs, missions, actions, activites, sousActivites, nbe, sysco, existingLines] = await Promise.all([
-        supabase.from("directions").select("id, code"),
-        supabase.from("objectifs_strategiques").select("id, code"),
-        supabase.from("missions").select("id, code"),
-        supabase.from("actions").select("id, code"),
-        supabase.from("activites").select("id, code"),
-        supabase.from("sous_activites").select("id, code"),
-        supabase.from("nomenclature_nbe").select("id, code"),
-        supabase.from("plan_comptable_sysco").select("id, code"),
-        supabase.from("budget_lines").select("id, code").eq("exercice", exercice || new Date().getFullYear()),
+      const [
+        directions,
+        objectifs,
+        missions,
+        actions,
+        activites,
+        sousActivites,
+        nbe,
+        sysco,
+        existingLines,
+      ] = await Promise.all([
+        supabase.from('directions').select('id, code'),
+        supabase.from('objectifs_strategiques').select('id, code'),
+        supabase.from('missions').select('id, code'),
+        supabase.from('actions').select('id, code'),
+        supabase.from('activites').select('id, code'),
+        supabase.from('sous_activites').select('id, code'),
+        supabase.from('nomenclature_nbe').select('id, code'),
+        supabase.from('plan_comptable_sysco').select('id, code'),
+        supabase
+          .from('budget_lines')
+          .select('id, code')
+          .eq('exercice', exercice || new Date().getFullYear()),
       ]);
 
-      const directionMap = new Map(directions.data?.map(d => [d.code, d.id]) || []);
-      const osMap = new Map(objectifs.data?.map(o => [o.code, o.id]) || []);
-      const missionMap = new Map(missions.data?.map(m => [m.code, m.id]) || []);
-      const actionMap = new Map(actions.data?.map(a => [a.code, a.id]) || []);
-      const activiteMap = new Map(activites.data?.map(a => [a.code, a.id]) || []);
-      const sousActiviteMap = new Map(sousActivites.data?.map(sa => [sa.code, sa.id]) || []);
-      const nbeMap = new Map(nbe.data?.map(n => [n.code, n.id]) || []);
-      const syscoMap = new Map(sysco.data?.map(s => [s.code, s.id]) || []);
-      const existingMap = new Map(existingLines.data?.map(l => [l.code, l.id]) || []);
+      const directionMap = new Map(directions.data?.map((d) => [d.code, d.id]) || []);
+      const osMap = new Map(objectifs.data?.map((o) => [o.code, o.id]) || []);
+      const missionMap = new Map(missions.data?.map((m) => [m.code, m.id]) || []);
+      const actionMap = new Map(actions.data?.map((a) => [a.code, a.id]) || []);
+      const activiteMap = new Map(activites.data?.map((a) => [a.code, a.id]) || []);
+      const sousActiviteMap = new Map(sousActivites.data?.map((sa) => [sa.code, sa.id]) || []);
+      const nbeMap = new Map(nbe.data?.map((n) => [n.code, n.id]) || []);
+      const syscoMap = new Map(sysco.data?.map((s) => [s.code, s.id]) || []);
+      const existingMap = new Map(existingLines.data?.map((l) => [l.code, l.id]) || []);
 
-      const validRows = parsedRows.filter(r => r.isValid);
-      
+      const validRows = parsedRows.filter((r) => r.isValid);
+
       // Prepare all budget lines for batch operations
       const toInsert: any[] = [];
       const toUpdate: { id: string; data: any }[] = [];
-      
+
       for (const row of validRows) {
         const data = row.data;
         const budgetLine = {
           code: data.code,
           label: data.label,
-          level: data.level || "ligne",
-          type_ligne: data.type_ligne || "depense",
+          level: data.level || 'ligne',
+          type_ligne: data.type_ligne || 'depense',
           dotation_initiale: parseFloat(data.dotation_initiale) || 0,
-          source_financement: data.source_financement || "budget_etat",
+          source_financement: data.source_financement || 'budget_etat',
           direction_id: data.direction_code ? directionMap.get(data.direction_code) : null,
           os_id: data.os_code ? osMap.get(data.os_code) : null,
           mission_id: data.mission_code ? missionMap.get(data.mission_code) : null,
           action_id: data.action_code ? actionMap.get(data.action_code) : null,
           activite_id: data.activite_code ? activiteMap.get(data.activite_code) : null,
-          sous_activite_id: data.sous_activite_code ? sousActiviteMap.get(data.sous_activite_code) : null,
+          sous_activite_id: data.sous_activite_code
+            ? sousActiviteMap.get(data.sous_activite_code)
+            : null,
           nbe_id: data.nbe_code ? nbeMap.get(data.nbe_code) : null,
           sysco_id: data.sysco_code ? syscoMap.get(data.sysco_code) : null,
           commentaire: data.commentaire || null,
           exercice: exercice || new Date().getFullYear(),
-          statut: "brouillon",
+          statut: 'soumis',
           budget_import_id: importRecord.id,
         };
 
@@ -404,21 +427,19 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       const errors: { row: number; message: string }[] = [];
 
       if (toInsert.length > 0) {
-        const { error: insertError } = await supabase
-          .from("budget_lines")
-          .insert(toInsert);
+        const { error: insertError } = await supabase.from('budget_lines').insert(toInsert);
 
         if (insertError) {
           // Rollback: delete the import record and mark as failed
           await supabase
-            .from("budget_imports")
+            .from('budget_imports')
             .update({
-              status: "echec",
+              status: 'echec',
               errors: [{ row: 0, message: `Import annulé: ${insertError.message}` }],
               completed_at: new Date().toISOString(),
             })
-            .eq("id", importRecord.id);
-          
+            .eq('id', importRecord.id);
+
           throw new Error(`Rollback: ${insertError.message}. Aucune ligne n'a été importée.`);
         }
         successCount += toInsert.length;
@@ -430,9 +451,9 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
       for (let i = 0; i < toUpdate.length; i++) {
         const { id, data } = toUpdate[i];
         const { error: updateError } = await supabase
-          .from("budget_lines")
+          .from('budget_lines')
           .update(data)
-          .eq("id", id);
+          .eq('id', id);
 
         if (updateError) {
           errorCount++;
@@ -440,29 +461,29 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
         } else {
           successCount++;
         }
-        
-        setImportProgress(60 + Math.round((i + 1) / toUpdate.length * 30));
+
+        setImportProgress(60 + Math.round(((i + 1) / toUpdate.length) * 30));
       }
 
       setImportProgress(95);
 
       // Update import record with final stats
       await supabase
-        .from("budget_imports")
+        .from('budget_imports')
         .update({
           success_rows: successCount,
           error_rows: errorCount,
           errors: errors.length > 0 ? errors : null,
-          status: errorCount > 0 ? "partiel" : "termine",
+          status: errorCount > 0 ? 'partiel' : 'termine',
           completed_at: new Date().toISOString(),
         })
-        .eq("id", importRecord.id);
+        .eq('id', importRecord.id);
 
       // Log to audit
-      await supabase.from("audit_logs").insert({
-        entity_type: "budget_import",
+      await supabase.from('audit_logs').insert({
+        entity_type: 'budget_import',
         entity_id: importRecord.id,
-        action: "import_completed",
+        action: 'import_completed',
         new_values: {
           file_name: file?.name,
           success_rows: successCount,
@@ -474,19 +495,21 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
 
       setImportProgress(100);
       setCurrentStep(4);
-      toast.success(`Import terminé: ${successCount} ligne(s) importée(s)${errorCount > 0 ? `, ${errorCount} erreur(s)` : ""}`);
+      toast.success(
+        `Import terminé: ${successCount} ligne(s) importée(s)${errorCount > 0 ? `, ${errorCount} erreur(s)` : ''}`
+      );
       onSuccess();
     } catch (error: any) {
       // Mark import as failed if record exists
       if (importRecordId) {
         await supabase
-          .from("budget_imports")
+          .from('budget_imports')
           .update({
-            status: "echec",
+            status: 'echec',
             errors: [{ row: 0, message: error.message }],
             completed_at: new Date().toISOString(),
           })
-          .eq("id", importRecordId);
+          .eq('id', importRecordId);
       }
       toast.error("Erreur d'import: " + error.message);
     } finally {
@@ -498,14 +521,14 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
     if (!validationResult) return;
 
     const lines = [
-      "Ligne;Type;Message",
-      ...validationResult.errors.map(e => `${e.row};Erreur;${e.message}`),
-      ...validationResult.warnings.map(w => `${w.row};Avertissement;${w.message}`),
+      'Ligne;Type;Message',
+      ...validationResult.errors.map((e) => `${e.row};Erreur;${e.message}`),
+      ...validationResult.warnings.map((w) => `${w.row};Avertissement;${w.message}`),
     ];
 
-    const content = lines.join("\n");
-    const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
+    const content = lines.join('\n');
+    const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `rapport_erreurs_${exercice}.csv`;
     link.click();
@@ -513,7 +536,13 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => { if (!val) resetState(); onOpenChange(val); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        if (!val) resetState();
+        onOpenChange(val);
+      }}
+    >
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Import de la structure budgétaire</DialogTitle>
@@ -526,11 +555,13 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
         <div className="flex items-center justify-between mb-4">
           {STEPS.map((step, index) => (
             <div key={step.id} className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                currentStep >= step.id 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted text-muted-foreground"
-              }`}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+                  currentStep >= step.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}
+              >
                 {currentStep > step.id ? <CheckCircle className="h-4 w-4" /> : step.id}
               </div>
               <div className="ml-2 hidden sm:block">
@@ -553,13 +584,13 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                 Télécharger le modèle CSV
               </Button>
 
-              <div 
+              <div
                 className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <FileSpreadsheet className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 <p className="text-lg font-medium mb-2">
-                  {file ? file.name : "Glissez un fichier CSV ou cliquez pour sélectionner"}
+                  {file ? file.name : 'Glissez un fichier CSV ou cliquez pour sélectionner'}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Formats acceptés: CSV, TXT (séparateur: ; ou ,)
@@ -598,17 +629,21 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
 
               <div className="grid gap-3">
                 <h4 className="font-medium">Colonnes obligatoires</h4>
-                {REQUIRED_COLUMNS.map(col => (
+                {REQUIRED_COLUMNS.map((col) => (
                   <div key={col} className="flex items-center gap-4">
                     <Label className="w-40 text-right">{col}*</Label>
                     <select
                       className="flex-1 border rounded px-3 py-2 text-sm"
-                      value={columnMapping[col] || ""}
-                      onChange={(e) => setColumnMapping(prev => ({ ...prev, [col]: e.target.value }))}
+                      value={columnMapping[col] || ''}
+                      onChange={(e) =>
+                        setColumnMapping((prev) => ({ ...prev, [col]: e.target.value }))
+                      }
                     >
                       <option value="">-- Sélectionner --</option>
-                      {fileHeaders.map(h => (
-                        <option key={h} value={h}>{h}</option>
+                      {fileHeaders.map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
                       ))}
                     </select>
                     {columnMapping[col] && <CheckCircle className="h-4 w-4 text-green-500" />}
@@ -616,17 +651,21 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                 ))}
 
                 <h4 className="font-medium mt-4">Colonnes optionnelles</h4>
-                {OPTIONAL_COLUMNS.map(col => (
+                {OPTIONAL_COLUMNS.map((col) => (
                   <div key={col} className="flex items-center gap-4">
                     <Label className="w-40 text-right text-muted-foreground">{col}</Label>
                     <select
                       className="flex-1 border rounded px-3 py-2 text-sm"
-                      value={columnMapping[col] || ""}
-                      onChange={(e) => setColumnMapping(prev => ({ ...prev, [col]: e.target.value }))}
+                      value={columnMapping[col] || ''}
+                      onChange={(e) =>
+                        setColumnMapping((prev) => ({ ...prev, [col]: e.target.value }))
+                      }
                     >
                       <option value="">-- Non mappé --</option>
-                      {fileHeaders.map(h => (
-                        <option key={h} value={h}>{h}</option>
+                      {fileHeaders.map((h) => (
+                        <option key={h} value={h}>
+                          {h}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -640,17 +679,21 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {Object.keys(columnMapping).filter(k => columnMapping[k]).map(col => (
-                          <TableHead key={col}>{col}</TableHead>
-                        ))}
+                        {Object.keys(columnMapping)
+                          .filter((k) => columnMapping[k])
+                          .map((col) => (
+                            <TableHead key={col}>{col}</TableHead>
+                          ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {rawData.slice(0, 3).map((row, i) => (
                         <TableRow key={i}>
-                          {Object.entries(columnMapping).filter(([, v]) => v).map(([col, source]) => (
-                            <TableCell key={col}>{row[source] || "-"}</TableCell>
-                          ))}
+                          {Object.entries(columnMapping)
+                            .filter(([, v]) => v)
+                            .map(([col, source]) => (
+                              <TableCell key={col}>{row[source] || '-'}</TableCell>
+                            ))}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -665,9 +708,24 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
             <div className="space-y-4 p-4">
               <div className="grid grid-cols-4 gap-4">
                 <Card value={validationResult.totalRows} label="Total lignes" icon={FileText} />
-                <Card value={validationResult.validRows} label="Valides" icon={CheckCircle} color="text-green-600" />
-                <Card value={validationResult.errorRows} label="Erreurs" icon={XCircle} color="text-red-600" />
-                <Card value={validationResult.warningRows} label="Avertissements" icon={AlertTriangle} color="text-yellow-600" />
+                <Card
+                  value={validationResult.validRows}
+                  label="Valides"
+                  icon={CheckCircle}
+                  color="text-green-600"
+                />
+                <Card
+                  value={validationResult.errorRows}
+                  label="Erreurs"
+                  icon={XCircle}
+                  color="text-red-600"
+                />
+                <Card
+                  value={validationResult.warningRows}
+                  label="Avertissements"
+                  icon={AlertTriangle}
+                  color="text-yellow-600"
+                />
               </div>
 
               {validationResult.duplicates.length > 0 && (
@@ -675,7 +733,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Doublons détectés</AlertTitle>
                   <AlertDescription>
-                    Codes en doublon: {validationResult.duplicates.join(", ")}
+                    Codes en doublon: {validationResult.duplicates.join(', ')}
                   </AlertDescription>
                 </Alert>
               )}
@@ -688,9 +746,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                   <TabsTrigger value="warnings">
                     Avertissements ({validationResult.warnings.length})
                   </TabsTrigger>
-                  <TabsTrigger value="preview">
-                    Aperçu valide
-                  </TabsTrigger>
+                  <TabsTrigger value="preview">Aperçu valide</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="errors" className="max-h-60 overflow-y-auto">
@@ -735,17 +791,24 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {parsedRows.filter(r => r.isValid).slice(0, 10).map((row) => (
-                        <TableRow key={row.rowIndex}>
-                          <TableCell>{row.rowIndex}</TableCell>
-                          <TableCell className="font-mono">{row.data.code}</TableCell>
-                          <TableCell>{row.data.label}</TableCell>
-                          <TableCell>{parseInt(row.data.dotation_initiale).toLocaleString("fr-FR")} FCFA</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-green-600">Valide</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {parsedRows
+                        .filter((r) => r.isValid)
+                        .slice(0, 10)
+                        .map((row) => (
+                          <TableRow key={row.rowIndex}>
+                            <TableCell>{row.rowIndex}</TableCell>
+                            <TableCell className="font-mono">{row.data.code}</TableCell>
+                            <TableCell>{row.data.label}</TableCell>
+                            <TableCell>
+                              {parseInt(row.data.dotation_initiale).toLocaleString('fr-FR')} FCFA
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-green-600">
+                                Valide
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </TabsContent>
@@ -768,11 +831,7 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
               <p className="text-muted-foreground">
                 {validationResult?.validRows} ligne(s) budgétaire(s) importée(s) avec succès.
               </p>
-              {importId && (
-                <p className="text-sm text-muted-foreground">
-                  ID Import: {importId}
-                </p>
-              )}
+              {importId && <p className="text-sm text-muted-foreground">ID Import: {importId}</p>}
             </div>
           )}
         </ScrollArea>
@@ -789,34 +848,51 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
 
         <DialogFooter className="gap-2">
           {currentStep > 1 && currentStep < 4 && (
-            <Button variant="outline" onClick={() => setCurrentStep(prev => prev - 1)} disabled={isProcessing}>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep((prev) => prev - 1)}
+              disabled={isProcessing}
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Précédent
             </Button>
           )}
-          
+
           {currentStep === 2 && (
-            <Button 
-              onClick={validateData} 
-              disabled={isProcessing || REQUIRED_COLUMNS.some(c => !columnMapping[c])}
+            <Button
+              onClick={validateData}
+              disabled={isProcessing || REQUIRED_COLUMNS.some((c) => !columnMapping[c])}
             >
-              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
+              {isProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Eye className="mr-2 h-4 w-4" />
+              )}
               Valider les données
             </Button>
           )}
 
           {currentStep === 3 && validationResult && (
-            <Button 
-              onClick={executeImport} 
+            <Button
+              onClick={executeImport}
               disabled={isProcessing || validationResult.validRows === 0}
             >
-              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {isProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="mr-2 h-4 w-4" />
+              )}
               Importer {validationResult.validRows} ligne(s)
             </Button>
           )}
 
           {currentStep === 4 && (
-            <Button onClick={() => { resetState(); onOpenChange(false); }}>
+            <Button
+              onClick={() => {
+                resetState();
+                onOpenChange(false);
+              }}
+            >
               Fermer
             </Button>
           )}
@@ -826,10 +902,15 @@ export function BudgetImportAdvanced({ open, onOpenChange, onSuccess }: BudgetIm
   );
 }
 
-function Card({ value, label, icon: Icon, color = "text-foreground" }: { 
-  value: number; 
-  label: string; 
-  icon: any; 
+function Card({
+  value,
+  label,
+  icon: Icon,
+  color = 'text-foreground',
+}: {
+  value: number;
+  label: string;
+  icon: any;
   color?: string;
 }) {
   return (

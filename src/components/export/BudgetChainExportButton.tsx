@@ -61,7 +61,7 @@ const STEP_LABELS: Record<ExportStep, string> = {
 const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string }[]> = {
   expression: [
     { value: '', label: 'Tous les statuts' },
-    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
@@ -70,7 +70,7 @@ const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string 
   ],
   engagement: [
     { value: '', label: 'Tous les statuts' },
-    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
@@ -78,7 +78,7 @@ const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string 
   ],
   liquidation: [
     { value: '', label: 'Tous les statuts' },
-    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
@@ -86,7 +86,7 @@ const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string 
   ],
   ordonnancement: [
     { value: '', label: 'Tous les statuts' },
-    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'soumis', label: 'Soumis' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },

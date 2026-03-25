@@ -2,17 +2,17 @@
  * NotificationBudgetaireDetails - Affichage détaillé d'une notification
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   FileText,
   Calendar,
@@ -26,14 +26,14 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   useBudgetNotifications,
   BudgetNotification,
   EntityAttachment,
-} from "@/hooks/useBudgetNotifications";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+} from '@/hooks/useBudgetNotifications';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface NotificationBudgetaireDetailsProps {
   open: boolean;
@@ -73,7 +73,7 @@ export function NotificationBudgetaireDetails({
       const data = await getAttachments(notification.id);
       setAttachments(data);
     } catch (error) {
-      console.error("Error loading attachments:", error);
+      console.error('Error loading attachments:', error);
     } finally {
       setLoadingAttachments(false);
     }
@@ -87,13 +87,13 @@ export function NotificationBudgetaireDetails({
       await addAttachmentAsync({
         notificationId: notification.id,
         file,
-        category: "document",
+        category: 'document',
       });
       loadAttachments();
     } catch (error) {
       // Error handled by mutation
     }
-    e.target.value = "";
+    e.target.value = '';
   };
 
   const handleDeleteAttachment = async (attachmentId: string) => {
@@ -103,10 +103,10 @@ export function NotificationBudgetaireDetails({
   };
 
   const formatFileSize = (bytes: number | null): string => {
-    if (!bytes) return "-";
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    if (!bytes) return '-';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   if (!notification) return null;
@@ -121,9 +121,7 @@ export function NotificationBudgetaireDetails({
                 <FileText className="h-5 w-5" />
                 {notification.reference}
               </DialogTitle>
-              <DialogDescription>
-                Détails de la notification budgétaire
-              </DialogDescription>
+              <DialogDescription>Détails de la notification budgétaire</DialogDescription>
             </div>
             <Badge className={getStatutColor(notification.statut)}>
               {getStatutLabel(notification.statut)}
@@ -158,9 +156,7 @@ export function NotificationBudgetaireDetails({
                 <div>
                   <p className="text-sm text-muted-foreground">Origine des fonds</p>
                   <p className="font-medium">
-                    {notification.origine_fonds_libelle ||
-                      notification.origine_fonds_code ||
-                      "-"}
+                    {notification.origine_fonds_libelle || notification.origine_fonds_code || '-'}
                   </p>
                 </div>
               </div>
@@ -172,7 +168,7 @@ export function NotificationBudgetaireDetails({
                   <div>
                     <p className="text-sm text-muted-foreground">Date de notification</p>
                     <p className="font-medium">
-                      {format(new Date(notification.date_notification), "dd MMMM yyyy", {
+                      {format(new Date(notification.date_notification), 'dd MMMM yyyy', {
                         locale: fr,
                       })}
                     </p>
@@ -186,10 +182,10 @@ export function NotificationBudgetaireDetails({
                     <p className="text-sm text-muted-foreground">Date de réception</p>
                     <p className="font-medium">
                       {notification.date_reception
-                        ? format(new Date(notification.date_reception), "dd MMMM yyyy", {
+                        ? format(new Date(notification.date_reception), 'dd MMMM yyyy', {
                             locale: fr,
                           })
-                        : "-"}
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -214,16 +210,16 @@ export function NotificationBudgetaireDetails({
           </Card>
 
           {/* Validation / Rejet */}
-          {(notification.statut === "valide" || notification.statut === "rejete") && (
+          {(notification.statut === 'valide' || notification.statut === 'rejete') && (
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  {notification.statut === "valide" ? (
+                  {notification.statut === 'valide' ? (
                     <CheckCircle className="h-5 w-5 text-green-500" />
                   ) : (
                     <XCircle className="h-5 w-5 text-red-500" />
                   )}
-                  {notification.statut === "valide" ? "Validation" : "Rejet"}
+                  {notification.statut === 'valide' ? 'Validation' : 'Rejet'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -232,11 +228,9 @@ export function NotificationBudgetaireDetails({
                     <User className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        {notification.statut === "valide" ? "Validé par" : "Rejeté par"}
+                        {notification.statut === 'valide' ? 'Validé par' : 'Rejeté par'}
                       </p>
-                      <p className="font-medium">
-                        {notification.validated_by_name || "-"}
-                      </p>
+                      <p className="font-medium">{notification.validated_by_name || '-'}</p>
                     </div>
                   </div>
                   <div>
@@ -244,11 +238,11 @@ export function NotificationBudgetaireDetails({
                     <p className="font-medium">
                       {notification.validated_at || notification.rejected_at
                         ? format(
-                            new Date(notification.validated_at || notification.rejected_at || ""),
-                            "dd/MM/yyyy à HH:mm",
+                            new Date(notification.validated_at || notification.rejected_at || ''),
+                            'dd/MM/yyyy à HH:mm',
                             { locale: fr }
                           )
-                        : "-"}
+                        : '-'}
                     </p>
                   </div>
                 </div>
@@ -270,7 +264,7 @@ export function NotificationBudgetaireDetails({
                   <Paperclip className="h-5 w-5" />
                   Pièces jointes ({attachments.length})
                 </CardTitle>
-                {notification.statut === "brouillon" && (
+                {notification.statut === 'soumis' && (
                   <div>
                     <input
                       type="file"
@@ -282,7 +276,7 @@ export function NotificationBudgetaireDetails({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => document.getElementById("file-upload")?.click()}
+                      onClick={() => document.getElementById('file-upload')?.click()}
                       disabled={isUploadingAttachment}
                     >
                       {isUploadingAttachment ? (
@@ -317,8 +311,8 @@ export function NotificationBudgetaireDetails({
                         <div>
                           <p className="text-sm font-medium">{attachment.original_filename}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatFileSize(attachment.file_size)} •{" "}
-                            {format(new Date(attachment.uploaded_at), "dd/MM/yyyy", {
+                            {formatFileSize(attachment.file_size)} •{' '}
+                            {format(new Date(attachment.uploaded_at), 'dd/MM/yyyy', {
                               locale: fr,
                             })}
                           </p>
@@ -328,11 +322,11 @@ export function NotificationBudgetaireDetails({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open(attachment.file_url, "_blank")}
+                          onClick={() => window.open(attachment.file_url, '_blank')}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
-                        {notification.statut === "brouillon" && (
+                        {notification.statut === 'soumis' && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -355,8 +349,8 @@ export function NotificationBudgetaireDetails({
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
               <span>
-                Créé par {notification.created_by_name || "Inconnu"} le{" "}
-                {format(new Date(notification.created_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
+                Créé par {notification.created_by_name || 'Inconnu'} le{' '}
+                {format(new Date(notification.created_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
               </span>
             </div>
           </div>

@@ -77,7 +77,7 @@ export function LiquidationTimeline({
   // Build simplified 3-step timeline
   const buildTimelineSteps = (): TimelineStep[] => {
     const steps: TimelineStep[] = [];
-    const statut = liquidation.statut || 'brouillon';
+    const statut = liquidation.statut || 'soumis';
 
     // Step 1: Création (always completed)
     steps.push({
@@ -96,7 +96,7 @@ export function LiquidationTimeline({
       statut === 'soumis' ||
       statut === 'validé_daaf' ||
       statut === 'validé_dg';
-    const sfIsCurrent = statut === 'brouillon' || statut === 'certifié_sf';
+    const sfIsCurrent = statut === 'soumis' || statut === 'certifié_sf';
 
     steps.push({
       key: 'certifie_sf',
@@ -115,7 +115,7 @@ export function LiquidationTimeline({
     });
 
     // Step 3: Soumission
-    const hasBeenSubmitted = !['brouillon', 'certifié_sf'].includes(statut);
+    const hasBeenSubmitted = !['soumis', 'certifié_sf'].includes(statut);
     steps.push({
       key: 'soumission',
       label: 'Soumission',

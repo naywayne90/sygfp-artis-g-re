@@ -125,7 +125,7 @@ export function useExecutionDashboard() {
 
       // Aggregate engagements
       const engagementsStats = aggregateByStatus(engagements, {
-        brouillon: ['brouillon', 'en_cours'],
+        brouillon: ['soumis', 'en_cours'],
         soumis: ['soumis', 'en_attente'],
         valide: ['valide'],
         rejete: ['rejete', 'annule'],
@@ -133,7 +133,7 @@ export function useExecutionDashboard() {
 
       // Aggregate liquidations
       const liquidationsStats = aggregateByStatus(liquidations, {
-        brouillon: ['brouillon'],
+        brouillon: ['soumis'],
         soumis: ['soumis', 'en_attente'],
         valide: ['valide'],
         rejete: ['rejete'],
@@ -141,7 +141,7 @@ export function useExecutionDashboard() {
 
       // Aggregate ordonnancements
       const ordonnancementsStats = aggregateByStatus(ordonnancements, {
-        brouillon: ['brouillon', 'en_attente'],
+        brouillon: ['soumis', 'en_attente'],
         en_signature: ['en_signature', 'soumis'],
         signe: ['signe', 'valide'],
         rejete: ['rejete'],
@@ -149,7 +149,7 @@ export function useExecutionDashboard() {
 
       // Aggregate règlements
       const reglementsStats = aggregateByStatus(reglements, {
-        en_attente: ['en_attente', 'brouillon'],
+        en_attente: ['en_attente', 'soumis'],
         en_cours: ['en_cours', 'soumis'],
         paye: ['paye', 'valide'],
         annule: ['annule', 'rejete'],

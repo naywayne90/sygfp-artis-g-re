@@ -1,31 +1,30 @@
-// @ts-nocheck - Tables/columns not in generated types
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 // Étapes de validation workflow
 export const VALIDATION_STEPS = [
-  { order: 1, role: "SAF", label: "Service Administratif et Financier" },
-  { order: 2, role: "CB", label: "Contrôleur Budgétaire" },
-  { order: 3, role: "DAF", label: "Directeur Administratif et Financier" },
-  { order: 4, role: "DG", label: "Directeur Général" },
+  { order: 1, role: 'SAF', label: 'Service Administratif et Financier' },
+  { order: 2, role: 'CB', label: 'Contrôleur Budgétaire' },
+  { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier' },
+  { order: 4, role: 'DG', label: 'Directeur Général' },
 ];
 
 // Étapes de signature
 export const SIGNATURE_STEPS = [
-  { order: 1, role: "CB", label: "Contrôleur Budgétaire" },
-  { order: 2, role: "DAF", label: "Directeur Administratif et Financier" },
-  { order: 3, role: "DG", label: "Directeur Général (Ordonnateur)" },
-  { order: 4, role: "AC", label: "Agent Comptable" },
+  { order: 1, role: 'CB', label: 'Contrôleur Budgétaire' },
+  { order: 2, role: 'DAF', label: 'Directeur Administratif et Financier' },
+  { order: 3, role: 'DG', label: 'Directeur Général (Ordonnateur)' },
+  { order: 4, role: 'AC', label: 'Agent Comptable' },
 ];
 
 export const MODES_PAIEMENT = [
-  { value: "virement", label: "Virement bancaire" },
-  { value: "cheque", label: "Chèque" },
-  { value: "especes", label: "Espèces" },
-  { value: "mobile_money", label: "Mobile Money" },
+  { value: 'virement', label: 'Virement bancaire' },
+  { value: 'cheque', label: 'Chèque' },
+  { value: 'especes', label: 'Espèces' },
+  { value: 'mobile_money', label: 'Mobile Money' },
 ];
 
 export interface OrdonnancementFormData {
@@ -81,13 +80,13 @@ const generateQRCodeData = (data: {
   signedAt: string;
 }): string => {
   return JSON.stringify({
-    type: "ORDONNANCEMENT_SYGFP",
+    type: 'ORDONNANCEMENT_SYGFP',
     ref: data.numero,
     montant: data.montant,
     beneficiaire: data.beneficiaire,
     hash: data.hash,
     date: data.signedAt,
-    v: "1.0",
+    v: '1.0',
   });
 };
 
@@ -102,11 +101,12 @@ export function useOrdonnancements() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["ordonnancements", exercice],
+    queryKey: ['ordonnancements', exercice],
     queryFn: async () => {
       let query = supabase
-        .from("ordonnancements")
-        .select(`
+        .from('ordonnancements')
+        .select(
+          `
           *,
           liquidation:budget_liquidations(
             id,
@@ -132,11 +132,12 @@ export function useOrdonnancements() {
             last_name,
             full_name
           )
-        `)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .order('created_at', { ascending: false });
 
       if (exercice) {
-        query = query.eq("exercice", exercice);
+        query = query.eq('exercice', exercice);
       }
 
       const { data, error } = await query;
@@ -148,11 +149,12 @@ export function useOrdonnancements() {
 
   // Récupérer les liquidations validées disponibles pour ordonnancement
   const { data: liquidationsValidees = [] } = useQuery({
-    queryKey: ["liquidations-validees-pour-ordonnancement", exercice],
+    queryKey: ['liquidations-validees-pour-ordonnancement', exercice],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("budget_liquidations")
-        .select(`
+        .from('budget_liquidations')
+        .select(
+          `
           id,
           numero,
           montant,
@@ -169,10 +171,11 @@ export function useOrdonnancements() {
               label
             )
           )
-        `)
-        .eq("statut", "valide")
-        .eq("exercice", exercice)
-        .order("date_liquidation", { ascending: false });
+        `
+        )
+        .eq('statut', 'valide')
+        .eq('exercice', exercice)
+        .order('date_liquidation', { ascending: false });
 
       if (error) throw error;
       return data || [];
@@ -181,25 +184,28 @@ export function useOrdonnancements() {
   });
 
   // Calculer le restant à ordonnancer pour une liquidation
-  const calculateOrdonnancementAvailability = async (liquidationId: string, currentOrdonnancementId?: string) => {
+  const calculateOrdonnancementAvailability = async (
+    liquidationId: string,
+    currentOrdonnancementId?: string
+  ) => {
     // Récupérer la liquidation
     const { data: liquidation, error: liqError } = await supabase
-      .from("budget_liquidations")
-      .select("montant")
-      .eq("id", liquidationId)
+      .from('budget_liquidations')
+      .select('montant')
+      .eq('id', liquidationId)
       .single();
 
     if (liqError) throw liqError;
 
     // Récupérer les ordonnancements existants pour cette liquidation
     let query = supabase
-      .from("ordonnancements")
-      .select("id, montant, statut")
-      .eq("liquidation_id", liquidationId)
-      .not("statut", "eq", "rejete");
+      .from('ordonnancements')
+      .select('id, montant, statut')
+      .eq('liquidation_id', liquidationId)
+      .not('statut', 'eq', 'rejete');
 
     if (currentOrdonnancementId) {
-      query = query.not("id", "eq", currentOrdonnancementId);
+      query = query.not('id', 'eq', currentOrdonnancementId);
     }
 
     const { data: existingOrdonnancements, error: ordError } = await query;
@@ -224,25 +230,25 @@ export function useOrdonnancements() {
       const availability = await calculateOrdonnancementAvailability(data.liquidation_id);
       if (data.montant > availability.restantAOrdonnancer) {
         throw new Error(
-          `Montant trop élevé. Restant à ordonnancer: ${availability.restantAOrdonnancer.toLocaleString("fr-FR")} FCFA`
+          `Montant trop élevé. Restant à ordonnancer: ${availability.restantAOrdonnancer.toLocaleString('fr-FR')} FCFA`
         );
       }
 
       // Generate atomic sequence number
-      const { data: seqData, error: seqError } = await supabase.rpc("get_next_sequence", {
-        p_doc_type: "ORD",
+      const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
+        p_doc_type: 'ORD',
         p_exercice: exercice || new Date().getFullYear(),
         p_direction_code: null,
-        p_scope: "global",
+        p_scope: 'global',
       });
 
       if (seqError) throw seqError;
-      if (!seqData || seqData.length === 0) throw new Error("Échec génération numéro");
+      if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
 
       const numero = seqData[0].full_code;
 
       const { data: ordonnancement, error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .insert({
           numero,
           liquidation_id: data.liquidation_id,
@@ -254,8 +260,8 @@ export function useOrdonnancements() {
           objet: data.objet,
           date_prevue_paiement: data.date_prevue_paiement || null,
           observation: data.observation || null,
-          statut: "brouillon",
-          workflow_status: "brouillon",
+          // statut defaults to 'soumis' via DB default
+          workflow_status: 'soumis',
           exercice: exercice,
         })
         .select()
@@ -265,9 +271,9 @@ export function useOrdonnancements() {
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: ordonnancement.id,
-        action: "CREATE",
+        action: 'CREATE',
         newValues: {
           numero,
           montant: data.montant,
@@ -280,11 +286,11 @@ export function useOrdonnancements() {
       return ordonnancement;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement créé avec succès");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement créé avec succès');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la création");
+      toast.error(error.message || 'Erreur lors de la création');
     },
   });
 
@@ -296,42 +302,42 @@ export function useOrdonnancements() {
         ordonnancement_id: id,
         step_order: step.order,
         role: step.role,
-        status: step.order === 1 ? "pending" : "waiting",
+        status: step.order === 1 ? 'pending' : 'waiting',
       }));
 
       const { error: validationError } = await supabase
-        .from("ordonnancement_validations")
+        .from('ordonnancement_validations')
         .insert(validationSteps);
 
       if (validationError) throw validationError;
 
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
+          statut: 'soumis',
+          workflow_status: 'en_validation',
           current_step: 1,
           submitted_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: id,
-        action: "SUBMIT",
-        oldValues: { statut: "brouillon" },
-        newValues: { statut: "soumis", workflow_status: "en_validation" },
+        action: 'SUBMIT',
+        oldValues: { statut: 'soumis' },
+        newValues: { statut: 'soumis', workflow_status: 'en_validation' },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement soumis pour validation");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement soumis pour validation');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la soumission");
+      toast.error(error.message || 'Erreur lors de la soumission');
     },
   });
 
@@ -346,18 +352,18 @@ export function useOrdonnancements() {
       stepOrder: number;
       comments?: string;
     }) => {
-      const currentStep = VALIDATION_STEPS.find(s => s.order === stepOrder);
+      const currentStep = VALIDATION_STEPS.find((s) => s.order === stepOrder);
 
       // Mettre à jour l'étape de validation
       const { error: validationError } = await supabase
-        .from("ordonnancement_validations")
+        .from('ordonnancement_validations')
         .update({
-          status: "validated",
+          status: 'validated',
           validated_at: new Date().toISOString(),
           comments,
         })
-        .eq("ordonnancement_id", ordonnancementId)
-        .eq("step_order", stepOrder);
+        .eq('ordonnancement_id', ordonnancementId)
+        .eq('step_order', stepOrder);
 
       if (validationError) throw validationError;
 
@@ -367,104 +373,98 @@ export function useOrdonnancements() {
       if (isLastStep) {
         // Toutes les étapes validées
         const { error } = await supabase
-          .from("ordonnancements")
+          .from('ordonnancements')
           .update({
-            statut: "valide",
-            workflow_status: "valide",
+            statut: 'valide',
+            workflow_status: 'valide',
             validated_at: new Date().toISOString(),
           })
-          .eq("id", ordonnancementId);
+          .eq('id', ordonnancementId);
 
         if (error) throw error;
       } else {
         // Passer à l'étape suivante
         const { error: nextError } = await supabase
-          .from("ordonnancement_validations")
-          .update({ status: "pending" })
-          .eq("ordonnancement_id", ordonnancementId)
-          .eq("step_order", nextStep);
+          .from('ordonnancement_validations')
+          .update({ status: 'pending' })
+          .eq('ordonnancement_id', ordonnancementId)
+          .eq('step_order', nextStep);
 
         if (nextError) throw nextError;
 
         const { error } = await supabase
-          .from("ordonnancements")
+          .from('ordonnancements')
           .update({ current_step: nextStep })
-          .eq("id", ordonnancementId);
+          .eq('id', ordonnancementId);
 
         if (error) throw error;
       }
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: ordonnancementId,
-        action: "VALIDATE",
+        action: 'VALIDATE',
         newValues: {
           step: stepOrder,
           step_role: currentStep?.role,
           step_label: currentStep?.label,
           comments,
           is_final_validation: isLastStep,
-          new_status: isLastStep ? "valide" : "en_validation",
+          new_status: isLastStep ? 'valide' : 'en_validation',
         },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Étape validée avec succès");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Étape validée avec succès');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la validation");
+      toast.error(error.message || 'Erreur lors de la validation');
     },
   });
 
   // Rejeter un ordonnancement
   const rejectOrdonnancement = useMutation({
-    mutationFn: async ({
-      id,
-      reason,
-    }: {
-      id: string;
-      reason: string;
-    }) => {
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       // Get old values for audit
       const { data: oldData } = await supabase
-        .from("ordonnancements")
-        .select("statut, workflow_status, numero")
-        .eq("id", id)
+        .from('ordonnancements')
+        .select('statut, workflow_status, numero')
+        .eq('id', id)
         .single();
 
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
-          statut: "rejete",
-          workflow_status: "rejete",
+          statut: 'rejete',
+          workflow_status: 'rejete',
           rejection_reason: reason,
           rejected_at: new Date().toISOString(),
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: id,
-        action: "REJECT",
+        action: 'REJECT',
         oldValues: { statut: oldData?.statut, workflow_status: oldData?.workflow_status },
         newValues: {
-          statut: "rejete",
+          statut: 'rejete',
           rejection_reason: reason,
           numero: oldData?.numero,
         },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement rejeté");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement rejeté');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors du rejet");
+      toast.error(error.message || 'Erreur lors du rejet');
     },
   });
 
@@ -481,32 +481,32 @@ export function useOrdonnancements() {
     }) => {
       // Get old values for audit
       const { data: oldData } = await supabase
-        .from("ordonnancements")
-        .select("statut, workflow_status, numero")
-        .eq("id", id)
+        .from('ordonnancements')
+        .select('statut, workflow_status, numero')
+        .eq('id', id)
         .single();
 
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
-          statut: "differe",
-          workflow_status: "differe",
+          statut: 'differe',
+          workflow_status: 'differe',
           motif_differe: motif,
           date_differe: new Date().toISOString(),
           deadline_correction: dateReprise || null,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: id,
-        action: "DEFER",
+        action: 'DEFER',
         oldValues: { statut: oldData?.statut },
         newValues: {
-          statut: "differe",
+          statut: 'differe',
           motif_differe: motif,
           deadline_correction: dateReprise,
           numero: oldData?.numero,
@@ -514,11 +514,11 @@ export function useOrdonnancements() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement différé");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement différé');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors du report");
+      toast.error(error.message || 'Erreur lors du report');
     },
   });
 
@@ -526,33 +526,33 @@ export function useOrdonnancements() {
   const resumeOrdonnancement = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
-          statut: "soumis",
-          workflow_status: "en_validation",
+          statut: 'soumis',
+          workflow_status: 'en_validation',
           motif_differe: null,
           date_differe: null,
           deadline_correction: null,
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: id,
-        action: "RESUME",
-        oldValues: { statut: "differe" },
-        newValues: { statut: "soumis", workflow_status: "en_validation" },
+        action: 'RESUME',
+        oldValues: { statut: 'differe' },
+        newValues: { statut: 'soumis', workflow_status: 'en_validation' },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement repris");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement repris');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la reprise");
+      toast.error(error.message || 'Erreur lors de la reprise');
     },
   });
 
@@ -565,69 +565,70 @@ export function useOrdonnancements() {
         signataire_role: step.role,
         signataire_label: step.label,
         signature_order: step.order,
-        status: "pending",
+        status: 'pending',
       }));
 
       const { error: sigError } = await (supabase
-        .from("ordonnancement_signatures" as any)
+        .from('ordonnancement_signatures' as any)
         .insert(signatureSteps) as any);
 
       if (sigError) throw sigError;
 
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .update({
-          statut: "en_signature",
-          workflow_status: "en_signature",
-          signature_status: "in_progress",
+          statut: 'en_signature',
+          workflow_status: 'en_signature',
+          signature_status: 'in_progress',
         })
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: id,
-        action: "SUBMIT_TO_SIGNATURE",
-        oldValues: { statut: "valide" },
-        newValues: { statut: "en_signature", signature_status: "in_progress" },
+        action: 'SUBMIT_TO_SIGNATURE',
+        oldValues: { statut: 'valide' },
+        newValues: { statut: 'en_signature', signature_status: 'in_progress' },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement soumis à la signature");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement soumis à la signature');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la soumission");
+      toast.error(error.message || 'Erreur lors de la soumission');
     },
   });
 
-  // Supprimer un ordonnancement (brouillon uniquement)
+  // Supprimer un ordonnancement (soumis uniquement)
   const deleteOrdonnancement = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("ordonnancements")
+        .from('ordonnancements')
         .delete()
-        .eq("id", id)
-        .eq("statut", "brouillon");
+        .eq('id', id)
+        .eq('statut', 'soumis');
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      toast.success("Ordonnancement supprimé");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      toast.success('Ordonnancement supprimé');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la suppression");
+      toast.error(error.message || 'Erreur lors de la suppression');
     },
   });
 
   // Récupérer les validations d'un ordonnancement
   const getValidations = async (ordonnancementId: string) => {
     const { data, error } = await supabase
-      .from("ordonnancement_validations")
-      .select(`
+      .from('ordonnancement_validations')
+      .select(
+        `
         *,
         validated_by_profile:profiles!ordonnancement_validations_validated_by_fkey(
           id,
@@ -635,9 +636,10 @@ export function useOrdonnancements() {
           last_name,
           full_name
         )
-      `)
-      .eq("ordonnancement_id", ordonnancementId)
-      .order("step_order", { ascending: true });
+      `
+      )
+      .eq('ordonnancement_id', ordonnancementId)
+      .order('step_order', { ascending: true });
 
     if (error) throw error;
     return data;
@@ -654,22 +656,24 @@ export function useOrdonnancements() {
     }) => {
       // Get ordonnancement data for hash generation
       const { data: ordonnancement, error: ordError } = await supabase
-        .from("ordonnancements")
-        .select("numero, montant, beneficiaire")
-        .eq("id", ordonnancementId)
+        .from('ordonnancements')
+        .select('numero, montant, beneficiaire')
+        .eq('id', ordonnancementId)
         .single();
 
       if (ordError) throw ordError;
 
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Utilisateur non authentifié");
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Utilisateur non authentifié');
 
       // Get user profile
       const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
         .single();
 
       const signedAt = new Date().toISOString();
@@ -680,7 +684,7 @@ export function useOrdonnancements() {
         numero: ordonnancement.numero,
         montant: ordonnancement.montant,
         beneficiaire: ordonnancement.beneficiaire,
-        signataire: profile?.full_name || user.email || "",
+        signataire: profile?.full_name || user.email || '',
         signedAt,
       });
 
@@ -695,110 +699,114 @@ export function useOrdonnancements() {
 
       // Update signature record
       const { error: sigError } = await (supabase
-        .from("ordonnancement_signatures" as any)
+        .from('ordonnancement_signatures' as any)
         .update({
-          status: "signed",
+          status: 'signed',
           signed_at: signedAt,
           signed_by: user.id,
           signature_hash: signatureHash,
           qr_code_data: qrCodeData,
         })
-        .eq("ordonnancement_id", ordonnancementId)
-        .eq("signature_order", signatureOrder) as any);
+        .eq('ordonnancement_id', ordonnancementId)
+        .eq('signature_order', signatureOrder) as any);
 
       if (sigError) throw sigError;
 
       // Check if all signatures are complete
-      const currentSignatureStep = SIGNATURE_STEPS.find(s => s.order === signatureOrder);
+      const currentSignatureStep = SIGNATURE_STEPS.find((s) => s.order === signatureOrder);
       const isLastSignature = signatureOrder >= SIGNATURE_STEPS.length;
 
       if (isLastSignature) {
         // All signatures complete - mark as ORDONNANCÉ
         const { error: updateError } = await supabase
-          .from("ordonnancements")
+          .from('ordonnancements')
           .update({
-            statut: "ordonnance",
-            workflow_status: "ordonnance",
-            signature_status: "complete",
+            statut: 'ordonnance',
+            workflow_status: 'ordonnance',
+            signature_status: 'complete',
             signature_hash: signatureHash,
             qr_code_data: qrCodeData,
             date_ordonnancement: signedAt,
           })
-          .eq("id", ordonnancementId);
+          .eq('id', ordonnancementId);
 
         if (updateError) throw updateError;
 
         // Lock previous steps (engagement, liquidation)
         // This is done by updating the related records to prevent modification
         const { data: ordData } = await supabase
-          .from("ordonnancements")
-          .select("liquidation_id")
-          .eq("id", ordonnancementId)
+          .from('ordonnancements')
+          .select('liquidation_id')
+          .eq('id', ordonnancementId)
           .single();
 
         if (ordData?.liquidation_id) {
           // Mark liquidation as locked
           await supabase
-            .from("budget_liquidations")
+            .from('budget_liquidations')
             .update({ is_locked: true })
-            .eq("id", ordData.liquidation_id);
+            .eq('id', ordData.liquidation_id);
 
           // Get and lock engagement
           const { data: liqData } = await supabase
-            .from("budget_liquidations")
-            .select("engagement_id")
-            .eq("id", ordData.liquidation_id)
+            .from('budget_liquidations')
+            .select('engagement_id')
+            .eq('id', ordData.liquidation_id)
             .single();
 
           if (liqData?.engagement_id) {
             await supabase
-              .from("budget_engagements")
+              .from('budget_engagements')
               .update({ is_locked: true })
-              .eq("id", liqData.engagement_id);
+              .eq('id', liqData.engagement_id);
           }
         }
       }
 
       // Audit log
       await logAction({
-        entityType: "ordonnancement",
+        entityType: 'ordonnancement',
         entityId: ordonnancementId,
-        action: "SIGN",
+        action: 'SIGN',
         newValues: {
           signature_order: signatureOrder,
           signature_role: currentSignatureStep?.role,
           signature_label: currentSignatureStep?.label,
           signature_hash: signatureHash,
           is_final_signature: isLastSignature,
-          new_status: isLastSignature ? "ordonnance" : "en_signature",
+          new_status: isLastSignature ? 'ordonnance' : 'en_signature',
         },
       });
 
       return { signatureHash, qrCodeData };
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["ordonnancements"] });
-      queryClient.invalidateQueries({ queryKey: ["ordonnancement-signatures", variables.ordonnancementId] });
-      toast.success("Signature apposée avec succès");
+      queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
+      queryClient.invalidateQueries({
+        queryKey: ['ordonnancement-signatures', variables.ordonnancementId],
+      });
+      toast.success('Signature apposée avec succès');
     },
     onError: (error: Error) => {
-      toast.error(error.message || "Erreur lors de la signature");
+      toast.error(error.message || 'Erreur lors de la signature');
     },
   });
 
   // Get signatures for an ordonnancement
   const getSignatures = async (ordonnancementId: string) => {
     const { data, error } = await (supabase
-      .from("ordonnancement_signatures" as any)
-      .select(`
+      .from('ordonnancement_signatures' as any)
+      .select(
+        `
         *,
         signed_by_profile:profiles!ordonnancement_signatures_signed_by_fkey(
           id,
           full_name
         )
-      `)
-      .eq("ordonnancement_id", ordonnancementId)
-      .order("signature_order", { ascending: true }) as any);
+      `
+      )
+      .eq('ordonnancement_id', ordonnancementId)
+      .order('signature_order', { ascending: true }) as any);
 
     if (error) throw error;
     return data;
@@ -810,7 +818,10 @@ export function useOrdonnancements() {
     currentAmount: number,
     excludeOrdonnancementId?: string
   ): Promise<OrdonnancementAvailability> => {
-    const result = await calculateOrdonnancementAvailability(liquidationId, excludeOrdonnancementId);
+    const result = await calculateOrdonnancementAvailability(
+      liquidationId,
+      excludeOrdonnancementId
+    );
 
     const cumul = result.ordonnancementsAnterieurs + currentAmount;
     const restant = result.montantLiquide - cumul;

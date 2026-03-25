@@ -216,7 +216,7 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
           motif: data.motif,
           justification_renforcee: data.justification_renforcee,
           exercice: exercice || new Date().getFullYear(),
-          status: 'brouillon',
+          // status defaults to 'soumis' via DB default
         })
         .select()
         .single();

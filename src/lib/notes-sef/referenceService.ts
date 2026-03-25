@@ -9,7 +9,7 @@
  *
  * Règles :
  * - Référence générée à la SOUMISSION via RPC submit_note_sef_with_reference
- * - Les brouillons n'ont PAS de référence (numero = null)
+ * - La reference est generee a la creation (plus de brouillon)
  * - Référence IMMUABLE après génération
  * - Compteur séquentiel par (étape, mois, année) - atomique via UPSERT SQL
  */

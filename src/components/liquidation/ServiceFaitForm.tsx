@@ -178,7 +178,7 @@ export function ServiceFaitForm({
       };
 
       // Si on certifie, on passe le statut à certifié_sf
-      if (formData.service_fait && liquidation.statut === 'brouillon') {
+      if (formData.service_fait && liquidation.statut === 'soumis') {
         updatePayload.statut = 'certifié_sf';
       }
 
@@ -207,7 +207,7 @@ export function ServiceFaitForm({
       });
 
       // Gap 2 — Notification DAAF après certification du service fait
-      if (formData.service_fait && liquidation.statut === 'brouillon') {
+      if (formData.service_fait && liquidation.statut === 'soumis') {
         try {
           const { data: daafUsers } = await supabase
             .from('user_roles')

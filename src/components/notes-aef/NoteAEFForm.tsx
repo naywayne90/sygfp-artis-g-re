@@ -891,8 +891,8 @@ export function NoteAEFForm({ open, onOpenChange, note, initialNoteSEFId }: Note
                         <AlertTriangle className="h-4 w-4 text-orange-600" />
                         <AlertDescription className="text-xs text-orange-700 dark:text-orange-400">
                           Le montant estimé ({montantEstime.toLocaleString('fr-FR')} FCFA) dépasse
-                          le disponible. Vous pouvez enregistrer en brouillon, mais la soumission
-                          sera bloquée.
+                          le disponible. Vous pouvez enregistrer en soumis, mais la soumission sera
+                          bloquée.
                         </AlertDescription>
                       </Alert>
                     )}

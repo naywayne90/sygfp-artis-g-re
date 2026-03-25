@@ -31,11 +31,6 @@ export const ARTI_COLORS = {
 // ============================================================================
 
 export const STATUT_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  brouillon: {
-    label: 'Brouillon',
-    color: ARTI_COLORS.neutral,
-    bgColor: '#f3f4f6',
-  },
   soumis: { label: 'Soumis', color: ARTI_COLORS.info, bgColor: '#eff6ff' },
   en_attente: {
     label: 'En attente',

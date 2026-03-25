@@ -507,7 +507,7 @@ export function useSDPMDashboard() {
 
       const marchesEnCours =
         marches?.filter((m) => m.statut === 'en_cours' || m.statut === 'en_execution').length || 0;
-      const marchesBrouillon = marches?.filter((m) => m.statut === 'brouillon').length || 0;
+      const marchesBrouillon = marches?.filter((m) => m.statut === 'soumis').length || 0;
       const marchesEnValidation =
         marches?.filter((m) => m.statut === 'soumis' || m.statut === 'en_validation').length || 0;
       const marchesValides =
@@ -568,7 +568,7 @@ export function useSDPMDashboard() {
       const expressionsBesoinAValider =
         expressions?.filter((e) => e.statut === 'soumis').length || 0;
       const expressionsBesoinEnCours =
-        expressions?.filter((e) => e.statut === 'en_cours' || e.statut === 'brouillon').length || 0;
+        expressions?.filter((e) => e.statut === 'en_cours' || e.statut === 'soumis').length || 0;
 
       return {
         marchesEnCours,
@@ -685,7 +685,7 @@ export function useControleurDashboard() {
         0;
 
       const engagementsEnCours =
-        engagements?.filter((e) => e.statut === 'en_cours' || e.statut === 'brouillon').length || 0;
+        engagements?.filter((e) => e.statut === 'en_cours' || e.statut === 'soumis').length || 0;
 
       const engagementsValides = engagements?.filter((e) => e.statut === 'valide') || [];
       const montantEngage = engagementsValides.reduce((sum, e) => sum + (e.montant || 0), 0);

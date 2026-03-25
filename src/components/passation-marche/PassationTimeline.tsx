@@ -1,7 +1,7 @@
 /**
  * PassationTimeline - Timeline du workflow 7 étapes de passation de marché
  *
- * brouillon → publié → clôturé → en_évaluation → attribué → approuvé → signé
+ * soumis → publié → clôturé → en_évaluation → attribué → approuvé → signé
  *
  * Avec dates, acteurs et statut visuel par étape.
  */
@@ -36,7 +36,7 @@ interface TimelineStep {
 }
 
 const STEP_ICONS: Record<string, React.ElementType> = {
-  brouillon: FileEdit,
+  soumis: FileEdit,
   publie: Send,
   cloture: Lock,
   en_evaluation: ClipboardCheck,
@@ -46,7 +46,7 @@ const STEP_ICONS: Record<string, React.ElementType> = {
 };
 
 const STEP_DATES: Record<string, (p: PassationMarche) => string | null> = {
-  brouillon: (p) => p.created_at,
+  soumis: (p) => p.created_at,
   publie: (p) => p.publie_at,
   cloture: (p) => p.cloture_at,
   en_evaluation: (p) => p.evaluation_at,

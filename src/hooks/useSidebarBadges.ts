@@ -100,12 +100,12 @@ export function useSidebarBadges() {
           .eq('exercice', exercice)
           .in('statut', ['soumis', 'verifie']),
 
-        // Passations de marché en attente d'action (brouillon + attribué non approuvé)
+        // Passations de marché en attente d'action (soumis + attribué non approuvé)
         supabase
           .from('passation_marche')
           .select('id', { count: 'exact', head: true })
           .eq('exercice', exercice)
-          .in('statut', ['brouillon', 'attribue']),
+          .in('statut', ['soumis', 'attribue']),
 
         // Engagements (inclut tous les statuts de validation : soumis → visa_saf → visa_cb → visa_daaf)
         supabase

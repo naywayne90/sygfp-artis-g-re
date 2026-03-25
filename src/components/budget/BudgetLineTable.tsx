@@ -55,8 +55,6 @@ const formatCurrency = (amount: number) => {
 
 const getStatusBadge = (status: string | null) => {
   switch (status) {
-    case 'brouillon':
-      return <Badge variant="secondary">Brouillon</Badge>;
     case 'soumis':
       return (
         <Badge variant="default" className="bg-blue-500">

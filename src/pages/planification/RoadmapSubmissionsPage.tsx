@@ -57,15 +57,10 @@ const STATUS_CONFIG: Record<
   SubmissionStatus,
   { label: string; color: string; icon: React.ReactNode }
 > = {
-  brouillon: {
-    label: 'Brouillon',
+  soumis: {
+    label: 'Soumis',
     color: 'bg-gray-100 text-gray-800',
     icon: <Clock className="h-3 w-3" />,
-  },
-  soumis: {
-    label: 'En attente',
-    color: 'bg-yellow-100 text-yellow-800',
-    icon: <Send className="h-3 w-3" />,
   },
   en_revision: {
     label: 'En révision',
@@ -256,7 +251,7 @@ export default function RoadmapSubmissionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="brouillon">Brouillons</SelectItem>
+                  <SelectItem value="soumis">Soumis</SelectItem>
                   <SelectItem value="soumis">En attente</SelectItem>
                   <SelectItem value="en_revision">En révision</SelectItem>
                   <SelectItem value="valide">Validés</SelectItem>

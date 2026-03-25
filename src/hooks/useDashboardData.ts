@@ -200,7 +200,7 @@ async function fetchNotesStats(exercice: number) {
   };
 
   notes.forEach((n) => {
-    const s = n.statut?.toLowerCase() || 'brouillon';
+    const s = n.statut?.toLowerCase() || 'soumis';
     if (s in statuts) {
       statuts[s as keyof typeof statuts]++;
     }
@@ -407,7 +407,7 @@ function transformRPCData(rpcData: unknown): DashboardData {
 
 function buildRepartitionStatut(notesSEF: DashboardKPIs['notesSEF']) {
   return [
-    { name: 'Brouillon', value: notesSEF.brouillon, color: STATUS_COLORS.brouillon },
+    { name: 'Soumis (initial)', value: notesSEF.brouillon, color: STATUS_COLORS.brouillon },
     { name: 'Soumis', value: notesSEF.soumis, color: STATUS_COLORS.soumis },
     { name: 'À valider', value: notesSEF.aValider, color: STATUS_COLORS.a_valider },
     { name: 'Validé', value: notesSEF.valide, color: STATUS_COLORS.valide },

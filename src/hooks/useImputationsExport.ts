@@ -23,7 +23,7 @@ export interface ImputationExportFilters {
 }
 
 const STATUT_LABELS: Record<string, string> = {
-  brouillon: 'Brouillon',
+  soumis: 'Soumis',
   a_valider: 'À valider',
   valide: 'Validée',
   rejete: 'Rejetée',

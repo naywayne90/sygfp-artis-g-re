@@ -1,4 +1,3 @@
-// @ts-nocheck - Tables not in generated types
 /**
  * useRoadmapSubmissions - Hook pour la gestion des soumissions de feuilles de route
  *
@@ -6,11 +5,11 @@
  * avec support pour les filtres et les notifications.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { useExercice } from "@/contexts/ExerciceContext";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useExercice } from '@/contexts/ExerciceContext';
 
 // Types
 export type SubmissionStatus = 'brouillon' | 'soumis' | 'en_revision' | 'valide' | 'rejete';
@@ -127,44 +126,46 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
   // Liste des soumissions avec filtres
   const submissionsQuery = useQuery({
-    queryKey: ["roadmap-submissions", exerciceId, filters],
+    queryKey: ['roadmap-submissions', exerciceId, filters],
     queryFn: async () => {
       let query = supabase
-        .from("roadmap_submissions")
-        .select(`
+        .from('roadmap_submissions')
+        .select(
+          `
           *,
           direction:directions(id, label, code),
           exercice:exercices_budgetaires(id, annee, libelle),
           submitted_by_profile:profiles!roadmap_submissions_submitted_by_fkey(id, full_name, email),
           validated_by_profile:profiles!roadmap_submissions_validated_by_fkey(id, full_name),
           rejected_by_profile:profiles!roadmap_submissions_rejected_by_fkey(id, full_name)
-        `)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .order('created_at', { ascending: false });
 
       // Filtre par exercice courant
       if (exerciceId) {
-        query = query.eq("exercice_id", exerciceId);
+        query = query.eq('exercice_id', exerciceId);
       }
 
       // Filtre par direction
       if (filters?.directionId) {
-        query = query.eq("direction_id", filters.directionId);
+        query = query.eq('direction_id', filters.directionId);
       }
 
       // Filtre par statut
       if (filters?.status && filters.status !== 'all') {
-        query = query.eq("status", filters.status);
+        query = query.eq('status', filters.status);
       }
 
       // Recherche textuelle
       if (filters?.search) {
-        query = query.ilike("libelle", `%${filters.search}%`);
+        query = query.ilike('libelle', `%${filters.search}%`);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error("Erreur chargement soumissions:", error);
+        console.error('Erreur chargement soumissions:', error);
         throw error;
       }
 
@@ -175,22 +176,22 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
   // Statistiques par statut
   const statsQuery = useQuery({
-    queryKey: ["roadmap-submissions-stats", exerciceId],
+    queryKey: ['roadmap-submissions-stats', exerciceId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("roadmap_submissions")
-        .select("status")
-        .eq("exercice_id", exerciceId!);
+        .from('roadmap_submissions')
+        .select('status')
+        .eq('exercice_id', exerciceId!);
 
       if (error) throw error;
 
       const stats: SubmissionStats = {
         total: data.length,
-        brouillon: data.filter((s) => s.status === "brouillon").length,
-        soumis: data.filter((s) => s.status === "soumis").length,
-        en_revision: data.filter((s) => s.status === "en_revision").length,
-        valide: data.filter((s) => s.status === "valide").length,
-        rejete: data.filter((s) => s.status === "rejete").length,
+        brouillon: data.filter((s) => s.status === 'soumis').length,
+        soumis: data.filter((s) => s.status === 'soumis').length,
+        en_revision: data.filter((s) => s.status === 'en_revision').length,
+        valide: data.filter((s) => s.status === 'valide').length,
+        rejete: data.filter((s) => s.status === 'rejete').length,
       };
 
       return stats;
@@ -201,7 +202,7 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
   // Mutation pour soumettre une feuille de route
   const submitMutation = useMutation({
     mutationFn: async (submissionId: string) => {
-      const { data, error } = await supabase.rpc("submit_roadmap", {
+      const { data, error } = await supabase.rpc('submit_roadmap', {
         p_submission_id: submissionId,
       });
 
@@ -209,14 +210,14 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
       return data;
     },
     onSuccess: (_, submissionId) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions-stats'] });
       log({
-        action: "roadmap_submitted",
-        entity_type: "roadmap_submission",
+        action: 'roadmap_submitted',
+        entity_type: 'roadmap_submission',
         entity_id: submissionId,
       });
-      toast.success("Feuille de route soumise pour validation");
+      toast.success('Feuille de route soumise pour validation');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -225,14 +226,8 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
   // Mutation pour valider une feuille de route
   const validateMutation = useMutation({
-    mutationFn: async ({
-      submissionId,
-      comment,
-    }: {
-      submissionId: string;
-      comment?: string;
-    }) => {
-      const { data, error } = await supabase.rpc("validate_roadmap", {
+    mutationFn: async ({ submissionId, comment }: { submissionId: string; comment?: string }) => {
+      const { data, error } = await supabase.rpc('validate_roadmap', {
         p_submission_id: submissionId,
         p_comment: comment || null,
       });
@@ -241,14 +236,14 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
       return data;
     },
     onSuccess: (_, { submissionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions-stats'] });
       log({
-        action: "roadmap_validated",
-        entity_type: "roadmap_submission",
+        action: 'roadmap_validated',
+        entity_type: 'roadmap_submission',
         entity_id: submissionId,
       });
-      toast.success("Feuille de route validée avec succès");
+      toast.success('Feuille de route validée avec succès');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -257,18 +252,12 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
   // Mutation pour rejeter une feuille de route
   const rejectMutation = useMutation({
-    mutationFn: async ({
-      submissionId,
-      reason,
-    }: {
-      submissionId: string;
-      reason: string;
-    }) => {
+    mutationFn: async ({ submissionId, reason }: { submissionId: string; reason: string }) => {
       if (!reason?.trim()) {
-        throw new Error("Le motif de rejet est obligatoire");
+        throw new Error('Le motif de rejet est obligatoire');
       }
 
-      const { data, error } = await supabase.rpc("reject_roadmap", {
+      const { data, error } = await supabase.rpc('reject_roadmap', {
         p_submission_id: submissionId,
         p_reason: reason,
       });
@@ -277,14 +266,14 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
       return data;
     },
     onSuccess: (_, { submissionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions-stats'] });
       log({
-        action: "roadmap_rejected",
-        entity_type: "roadmap_submission",
+        action: 'roadmap_rejected',
+        entity_type: 'roadmap_submission',
         entity_id: submissionId,
       });
-      toast.success("Feuille de route rejetée");
+      toast.success('Feuille de route rejetée');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -293,14 +282,8 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
   // Mutation pour demander une révision
   const requestRevisionMutation = useMutation({
-    mutationFn: async ({
-      submissionId,
-      comment,
-    }: {
-      submissionId: string;
-      comment: string;
-    }) => {
-      const { data, error } = await supabase.rpc("request_revision_roadmap", {
+    mutationFn: async ({ submissionId, comment }: { submissionId: string; comment: string }) => {
+      const { data, error } = await supabase.rpc('request_revision_roadmap', {
         p_submission_id: submissionId,
         p_comment: comment,
       });
@@ -309,14 +292,14 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
       return data;
     },
     onSuccess: (_, { submissionId }) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions-stats"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions-stats'] });
       log({
-        action: "roadmap_revision_requested",
-        entity_type: "roadmap_submission",
+        action: 'roadmap_revision_requested',
+        entity_type: 'roadmap_submission',
         entity_id: submissionId,
       });
-      toast.success("Demande de révision envoyée");
+      toast.success('Demande de révision envoyée');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -363,19 +346,21 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 export function useRoadmapSubmissionDetail(submissionId: string | null) {
   // Détail de la soumission
   const submissionQuery = useQuery({
-    queryKey: ["roadmap-submission", submissionId],
+    queryKey: ['roadmap-submission', submissionId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("roadmap_submissions")
-        .select(`
+        .from('roadmap_submissions')
+        .select(
+          `
           *,
           direction:directions(id, label, code),
           exercice:exercices_budgetaires(id, annee, libelle),
           submitted_by_profile:profiles!roadmap_submissions_submitted_by_fkey(id, full_name, email),
           validated_by_profile:profiles!roadmap_submissions_validated_by_fkey(id, full_name),
           rejected_by_profile:profiles!roadmap_submissions_rejected_by_fkey(id, full_name)
-        `)
-        .eq("id", submissionId!)
+        `
+        )
+        .eq('id', submissionId!)
         .single();
 
       if (error) throw error;
@@ -386,16 +371,18 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
 
   // Activités de la soumission avec snapshot pour diff
   const activitiesQuery = useQuery({
-    queryKey: ["roadmap-submission-activities", submissionId],
+    queryKey: ['roadmap-submission-activities', submissionId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("roadmap_submission_activities")
-        .select(`
+        .from('roadmap_submission_activities')
+        .select(
+          `
           *,
           activite:activites(id, code, libelle, montant_prevu, est_active, updated_at)
-        `)
-        .eq("submission_id", submissionId!)
-        .order("created_at", { ascending: true });
+        `
+        )
+        .eq('submission_id', submissionId!)
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data as SubmissionActivity[];
@@ -405,16 +392,18 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
 
   // Historique de la soumission
   const historyQuery = useQuery({
-    queryKey: ["roadmap-submission-history", submissionId],
+    queryKey: ['roadmap-submission-history', submissionId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("roadmap_submission_history")
-        .select(`
+        .from('roadmap_submission_history')
+        .select(
+          `
           *,
           performed_by_profile:profiles!roadmap_submission_history_performed_by_fkey(id, full_name)
-        `)
-        .eq("submission_id", submissionId!)
-        .order("performed_at", { ascending: false });
+        `
+        )
+        .eq('submission_id', submissionId!)
+        .order('performed_at', { ascending: false });
 
       if (error) throw error;
       return data as SubmissionHistoryEntry[];
@@ -426,14 +415,8 @@ export function useRoadmapSubmissionDetail(submissionId: string | null) {
     submission: submissionQuery.data,
     activities: activitiesQuery.data ?? [],
     history: historyQuery.data ?? [],
-    isLoading:
-      submissionQuery.isLoading ||
-      activitiesQuery.isLoading ||
-      historyQuery.isLoading,
-    isError:
-      submissionQuery.isError ||
-      activitiesQuery.isError ||
-      historyQuery.isError,
+    isLoading: submissionQuery.isLoading || activitiesQuery.isLoading || historyQuery.isLoading,
+    isError: submissionQuery.isError || activitiesQuery.isError || historyQuery.isError,
     refetch: () => {
       submissionQuery.refetch();
       activitiesQuery.refetch();
@@ -461,7 +444,7 @@ export function useCreateSubmissionFromImport() {
       exerciceId: string;
       libelle?: string;
     }) => {
-      const { data, error } = await supabase.rpc("create_submission_from_import", {
+      const { data, error } = await supabase.rpc('create_submission_from_import', {
         p_import_batch_id: importBatchId,
         p_direction_id: directionId,
         p_exercice_id: exerciceId,
@@ -472,13 +455,13 @@ export function useCreateSubmissionFromImport() {
       return data as string; // Returns submission ID
     },
     onSuccess: (submissionId) => {
-      queryClient.invalidateQueries({ queryKey: ["roadmap-submissions"] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap-submissions'] });
       log({
-        action: "roadmap_submission_created",
-        entity_type: "roadmap_submission",
+        action: 'roadmap_submission_created',
+        entity_type: 'roadmap_submission',
         entity_id: submissionId,
       });
-      toast.success("Soumission créée avec succès");
+      toast.success('Soumission créée avec succès');
     },
     onError: (error: Error) => {
       toast.error(`Erreur: ${error.message}`);
@@ -504,14 +487,14 @@ export function computeActivityDiff(activity: SubmissionActivity): {
 
   // Comparer les champs clés
   if (snapshot.code !== current.code) {
-    changes.push({ field: "code", old: snapshot.code, new: current.code });
+    changes.push({ field: 'code', old: snapshot.code, new: current.code });
   }
   if (snapshot.libelle !== current.libelle) {
-    changes.push({ field: "libelle", old: snapshot.libelle, new: current.libelle });
+    changes.push({ field: 'libelle', old: snapshot.libelle, new: current.libelle });
   }
   if (snapshot.montant_prevu !== current.montant_prevu) {
     changes.push({
-      field: "montant_prevu",
+      field: 'montant_prevu',
       old: snapshot.montant_prevu,
       new: current.montant_prevu,
     });
@@ -528,12 +511,12 @@ export function computeActivityDiff(activity: SubmissionActivity): {
  */
 export function useSubmissionDirections() {
   return useQuery({
-    queryKey: ["submission-directions"],
+    queryKey: ['submission-directions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, label, code")
-        .order("code");
+        .from('directions')
+        .select('id, label, code')
+        .order('code');
 
       if (error) throw error;
       return data;

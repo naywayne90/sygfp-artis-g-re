@@ -4,12 +4,12 @@
  * RÈGLE: Pas de liquidation sans engagement validé
  */
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Table,
   TableBody,
@@ -17,14 +17,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -32,14 +32,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+} from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Search,
   ScanLine,
@@ -57,17 +53,17 @@ import {
   Receipt,
   ShieldAlert,
   Link2,
-} from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { toast } from "sonner";
-import { LiquidationChecklist } from "@/components/liquidation/LiquidationChecklist";
-import { useAuditLog } from "@/hooks/useAuditLog";
-import { ExportButtons } from "@/components/etats/ExportButtons";
-import { ExportColumn } from "@/lib/export";
+} from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
+import { LiquidationChecklist } from '@/components/liquidation/LiquidationChecklist';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { ExportButtons } from '@/components/etats/ExportButtons';
+import { ExportColumn } from '@/lib/export';
 
 // Types
 interface ScanningLiquidation {
@@ -110,8 +106,8 @@ interface DirectionOption {
 }
 
 const formatMontant = (montant: number | null | undefined) => {
-  if (montant === null || montant === undefined) return "-";
-  return new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+  if (montant === null || montant === undefined) return '-';
+  return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 };
 
 const getDocumentStatusBadge = (providedRequired: number, totalRequired: number) => {
@@ -140,7 +136,7 @@ const getDocumentStatusBadge = (providedRequired: number, totalRequired: number)
 };
 
 const getEngagementStatusBadge = (statut: string | null) => {
-  if (statut === "valide") {
+  if (statut === 'valide') {
     return (
       <Badge className="bg-success/10 text-success border-success/20 text-xs">
         <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -148,7 +144,7 @@ const getEngagementStatusBadge = (statut: string | null) => {
       </Badge>
     );
   }
-  if (statut === "soumis") {
+  if (statut === 'soumis') {
     return (
       <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20 text-xs">
         En cours
@@ -157,7 +153,7 @@ const getEngagementStatusBadge = (statut: string | null) => {
   }
   return (
     <Badge variant="outline" className="text-xs text-muted-foreground">
-      {statut || "N/A"}
+      {statut || 'N/A'}
     </Badge>
   );
 };
@@ -168,9 +164,9 @@ export default function ScanningLiquidation() {
   const { logAction } = useAuditLog();
 
   // State
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDirection, setSelectedDirection] = useState<string>("all");
-  const [selectedDocStatus, setSelectedDocStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDirection, setSelectedDirection] = useState<string>('all');
+  const [selectedDocStatus, setSelectedDocStatus] = useState<string>('all');
   const [selectedLiquidation, setSelectedLiquidation] = useState<ScanningLiquidation | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [isChecklistComplete, setIsChecklistComplete] = useState(false);
@@ -178,25 +174,30 @@ export default function ScanningLiquidation() {
 
   // Fetch directions for filter
   const { data: directions = [] } = useQuery({
-    queryKey: ["directions"],
+    queryKey: ['directions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("directions")
-        .select("id, code, label")
-        .order("code");
+        .from('directions')
+        .select('id, code, label')
+        .order('code');
       if (error) throw error;
       return data as DirectionOption[];
     },
   });
 
   // Fetch liquidations with engagement and document stats
-  const { data: liquidations = [], isLoading, refetch } = useQuery({
-    queryKey: ["scanning-liquidations", exercice],
+  const {
+    data: liquidations = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['scanning-liquidations', exercice],
     queryFn: async () => {
       // Fetch liquidations with engagement details
       const { data: liqData, error: liqError } = await supabase
-        .from("budget_liquidations")
-        .select(`
+        .from('budget_liquidations')
+        .select(
+          `
           id,
           numero,
           montant,
@@ -220,24 +221,25 @@ export default function ScanningLiquidation() {
               os:objectifs_strategiques(id, code, libelle)
             )
           )
-        `)
-        .eq("exercice", exercice)
-        .in("statut", ["brouillon", "soumis"])
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('exercice', exercice)
+        .eq('statut', 'soumis')
+        .order('created_at', { ascending: false });
 
       if (liqError) throw liqError;
       if (!liqData) return [];
 
       // Fetch document counts for each liquidation
-      const liqIds = liqData.map(l => l.id);
+      const liqIds = liqData.map((l) => l.id);
 
       // Try to get from liquidation_documents table
       let docsData: any[] = [];
       try {
         const { data } = await (supabase
-          .from("liquidation_documents" as any)
-          .select("liquidation_id, is_provided, is_required")
-          .in("liquidation_id", liqIds) as any);
+          .from('liquidation_documents' as any)
+          .select('liquidation_id, is_provided, is_required')
+          .in('liquidation_id', liqIds) as any);
         docsData = data || [];
       } catch {
         // Table may not exist yet
@@ -245,8 +247,11 @@ export default function ScanningLiquidation() {
       }
 
       // Calculate document stats per liquidation
-      const docStats: Record<string, { total: number; provided: number; required: number; requiredProvided: number }> = {};
-      liqIds.forEach(id => {
+      const docStats: Record<
+        string,
+        { total: number; provided: number; required: number; requiredProvided: number }
+      > = {};
+      liqIds.forEach((id) => {
         docStats[id] = { total: 0, provided: 0, required: 0, requiredProvided: 0 };
       });
 
@@ -263,13 +268,18 @@ export default function ScanningLiquidation() {
       });
 
       // Map to result type
-      return liqData.map(liq => {
+      return liqData.map((liq) => {
         const engagement = liq.engagement as any;
         const budgetLine = engagement?.budget_line;
         const direction = budgetLine?.direction;
         const activite = budgetLine?.activite;
         const os = budgetLine?.os;
-        const stats = docStats[liq.id] || { total: 0, provided: 0, required: 0, requiredProvided: 0 };
+        const stats = docStats[liq.id] || {
+          total: 0,
+          provided: 0,
+          required: 0,
+          requiredProvided: 0,
+        };
 
         return {
           id: liq.id,
@@ -308,73 +318,79 @@ export default function ScanningLiquidation() {
   const submitMutation = useMutation({
     mutationFn: async (liquidationId: string) => {
       // Vérifier que l'engagement est validé
-      const liq = liquidations.find(l => l.id === liquidationId);
-      if (!liq) throw new Error("Liquidation non trouvée");
+      const liq = liquidations.find((l) => l.id === liquidationId);
+      if (!liq) throw new Error('Liquidation non trouvée');
 
-      if (liq.engagement_statut !== "valide") {
+      if (liq.engagement_statut !== 'valide') {
         throw new Error("L'engagement associé doit être validé avant de soumettre la liquidation");
       }
 
       const { error } = await supabase
-        .from("budget_liquidations")
+        .from('budget_liquidations')
         .update({
-          statut: "soumis",
-          workflow_status: "pending",
+          statut: 'soumis',
+          workflow_status: 'pending',
           current_step: 1,
           submitted_at: new Date().toISOString(),
         })
-        .eq("id", liquidationId);
+        .eq('id', liquidationId);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "liquidation",
+        entityType: 'liquidation',
         entityId: liquidationId,
-        action: "SUBMIT",
-        newValues: { statut: "soumis", engagement_id: liq.engagement_id },
+        action: 'SUBMIT',
+        newValues: { statut: 'soumis', engagement_id: liq.engagement_id },
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["scanning-liquidations"] });
-      queryClient.invalidateQueries({ queryKey: ["liquidations"] });
-      toast.success("Liquidation soumise pour validation");
+      queryClient.invalidateQueries({ queryKey: ['scanning-liquidations'] });
+      queryClient.invalidateQueries({ queryKey: ['liquidations'] });
+      toast.success('Liquidation soumise pour validation');
       setShowDetailDialog(false);
       setSelectedLiquidation(null);
     },
     onError: (error) => {
-      toast.error("Erreur: " + error.message);
+      toast.error('Erreur: ' + error.message);
     },
   });
 
   // Filter liquidations
   const filteredLiquidations = useMemo(() => {
-    return liquidations.filter(liq => {
+    return liquidations.filter((liq) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         if (
           !liq.numero.toLowerCase().includes(query) &&
-          !(liq.engagement_objet?.toLowerCase().includes(query)) &&
-          !(liq.engagement_fournisseur?.toLowerCase().includes(query)) &&
-          !(liq.reference_facture?.toLowerCase().includes(query))
+          !liq.engagement_objet?.toLowerCase().includes(query) &&
+          !liq.engagement_fournisseur?.toLowerCase().includes(query) &&
+          !liq.reference_facture?.toLowerCase().includes(query)
         ) {
           return false;
         }
       }
 
       // Direction filter
-      if (selectedDirection !== "all" && liq.direction_id !== selectedDirection) {
+      if (selectedDirection !== 'all' && liq.direction_id !== selectedDirection) {
         return false;
       }
 
       // Document status filter
-      if (selectedDocStatus !== "all") {
-        if (selectedDocStatus === "complete") {
-          if (liq.documents_required > 0 && liq.documents_required_provided < liq.documents_required) {
+      if (selectedDocStatus !== 'all') {
+        if (selectedDocStatus === 'complete') {
+          if (
+            liq.documents_required > 0 &&
+            liq.documents_required_provided < liq.documents_required
+          ) {
             return false;
           }
-        } else if (selectedDocStatus === "incomplete") {
-          if (liq.documents_required === 0 || liq.documents_required_provided === liq.documents_required) {
+        } else if (selectedDocStatus === 'incomplete') {
+          if (
+            liq.documents_required === 0 ||
+            liq.documents_required_provided === liq.documents_required
+          ) {
             return false;
           }
         }
@@ -384,21 +400,21 @@ export default function ScanningLiquidation() {
     });
   }, [liquidations, searchQuery, selectedDirection, selectedDocStatus]);
 
-  // Separate brouillon and soumis
-  const brouillonLiquidations = filteredLiquidations.filter(l => l.statut === "brouillon");
-  const soumisLiquidations = filteredLiquidations.filter(l => l.statut === "soumis");
+  // Filter soumis liquidations
+  const soumisLiquidations = filteredLiquidations.filter((l) => l.statut === 'soumis');
 
   // Stats
   const totalLiquidations = filteredLiquidations.length;
   const completeLiquidations = filteredLiquidations.filter(
-    l => l.documents_required === 0 || l.documents_required_provided === l.documents_required
+    (l) => l.documents_required === 0 || l.documents_required_provided === l.documents_required
   ).length;
   const incompleteLiquidations = totalLiquidations - completeLiquidations;
-  const completionPercentage = totalLiquidations > 0 ? Math.round((completeLiquidations / totalLiquidations) * 100) : 0;
+  const completionPercentage =
+    totalLiquidations > 0 ? Math.round((completeLiquidations / totalLiquidations) * 100) : 0;
 
   // Liquidations with unvalidated engagements
   const withUnvalidatedEngagement = filteredLiquidations.filter(
-    l => l.engagement_statut !== "valide"
+    (l) => l.engagement_statut !== 'valide'
   ).length;
 
   const handleOpenDetail = (liq: ScanningLiquidation) => {
@@ -418,33 +434,33 @@ export default function ScanningLiquidation() {
   };
 
   const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedDirection("all");
-    setSelectedDocStatus("all");
+    setSearchQuery('');
+    setSelectedDirection('all');
+    setSelectedDocStatus('all');
   };
 
   // Export columns definition
   const exportColumns: ExportColumn[] = [
-    { key: "numero", label: "N° Liquidation", type: "text" },
-    { key: "date_liquidation", label: "Date", type: "date" },
-    { key: "engagement_numero", label: "N° Engagement", type: "text" },
-    { key: "engagement_fournisseur", label: "Fournisseur", type: "text" },
-    { key: "montant", label: "Montant", type: "currency" },
-    { key: "net_a_payer", label: "Net à payer", type: "currency" },
-    { key: "dotation_initiale", label: "Dotation", type: "currency" },
-    { key: "cumul_engagements", label: "Cumul", type: "currency" },
-    { key: "disponible", label: "Disponible", type: "currency" },
-    { key: "direction_code", label: "Direction", type: "text" },
-    { key: "activite_code", label: "Code Activité", type: "text" },
-    { key: "os_code", label: "N° OS", type: "text" },
-    { key: "statut", label: "Statut", type: "text" },
+    { key: 'numero', label: 'N° Liquidation', type: 'text' },
+    { key: 'date_liquidation', label: 'Date', type: 'date' },
+    { key: 'engagement_numero', label: 'N° Engagement', type: 'text' },
+    { key: 'engagement_fournisseur', label: 'Fournisseur', type: 'text' },
+    { key: 'montant', label: 'Montant', type: 'currency' },
+    { key: 'net_a_payer', label: 'Net à payer', type: 'currency' },
+    { key: 'dotation_initiale', label: 'Dotation', type: 'currency' },
+    { key: 'cumul_engagements', label: 'Cumul', type: 'currency' },
+    { key: 'disponible', label: 'Disponible', type: 'currency' },
+    { key: 'direction_code', label: 'Direction', type: 'text' },
+    { key: 'activite_code', label: 'Code Activité', type: 'text' },
+    { key: 'os_code', label: 'N° OS', type: 'text' },
+    { key: 'statut', label: 'Statut', type: 'text' },
   ];
 
   // Check if submit is allowed
   const canSubmit = useMemo(() => {
     if (!selectedLiquidation) return false;
     if (!isChecklistComplete) return false;
-    if (selectedLiquidation.engagement_statut !== "valide") return false;
+    if (selectedLiquidation.engagement_statut !== 'valide') return false;
     return true;
   }, [selectedLiquidation, isChecklistComplete]);
 
@@ -471,7 +487,7 @@ export default function ScanningLiquidation() {
             showCopy
             showPrint
             showTotals
-            totalColumns={["montant", "net_a_payer", "dotation_initiale", "disponible"]}
+            totalColumns={['montant', 'net_a_payer', 'dotation_initiale', 'disponible']}
           />
           <Button variant="outline" onClick={() => refetch()} className="gap-2">
             <RefreshCw className="h-4 w-4" />
@@ -486,8 +502,8 @@ export default function ScanningLiquidation() {
           <ShieldAlert className="h-4 w-4 text-warning" />
           <AlertTitle className="text-warning">Engagements non validés</AlertTitle>
           <AlertDescription className="text-muted-foreground">
-            {withUnvalidatedEngagement} liquidation(s) ont un engagement non encore validé.
-            Ces liquidations ne peuvent pas être soumises tant que l'engagement n'est pas validé.
+            {withUnvalidatedEngagement} liquidation(s) ont un engagement non encore validé. Ces
+            liquidations ne peuvent pas être soumises tant que l'engagement n'est pas validé.
           </AlertDescription>
         </Alert>
       )}
@@ -563,7 +579,7 @@ export default function ScanningLiquidation() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes les directions</SelectItem>
-                {directions.map(dir => (
+                {directions.map((dir) => (
                   <SelectItem key={dir.id} value={dir.id}>
                     {dir.code} - {dir.label}
                   </SelectItem>
@@ -586,7 +602,7 @@ export default function ScanningLiquidation() {
           </div>
 
           {/* Active filters indicator */}
-          {(searchQuery || selectedDirection !== "all" || selectedDocStatus !== "all") && (
+          {(searchQuery || selectedDirection !== 'all' || selectedDocStatus !== 'all') && (
             <div className="mt-4 flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Filtres actifs:</span>
               <Button variant="ghost" size="sm" onClick={resetFilters}>
@@ -598,23 +614,20 @@ export default function ScanningLiquidation() {
       </Card>
 
       {/* Tabs */}
-      <Tabs defaultValue="brouillon" className="space-y-4">
+      <Tabs defaultValue="soumis" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="brouillon" className="gap-1">
-            À scanner ({brouillonLiquidations.length})
-          </TabsTrigger>
           <TabsTrigger value="soumis" className="gap-1">
-            Soumis ({soumisLiquidations.length})
+            À scanner ({soumisLiquidations.length})
           </TabsTrigger>
         </TabsList>
 
-        {/* Brouillon tab */}
-        <TabsContent value="brouillon">
+        {/* Soumis tab */}
+        <TabsContent value="soumis">
           <Card>
             <CardHeader>
               <CardTitle>Liquidations à numériser</CardTitle>
               <CardDescription>
-                {brouillonLiquidations.length} liquidation(s) en attente de documents
+                {soumisLiquidations.length} liquidation(s) en attente de documents
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -622,7 +635,7 @@ export default function ScanningLiquidation() {
                 <div className="flex justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : brouillonLiquidations.length === 0 ? (
+              ) : soumisLiquidations.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <ScanLine className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Aucune liquidation à numériser</p>
@@ -647,30 +660,30 @@ export default function ScanningLiquidation() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {brouillonLiquidations.map((liq) => (
+                    {soumisLiquidations.map((liq) => (
                       <TableRow key={liq.id}>
                         <TableCell>
                           <div>
                             <div className="font-mono text-sm">{liq.numero}</div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(liq.date_liquidation), "dd/MM/yyyy", { locale: fr })}
+                              {format(new Date(liq.date_liquidation), 'dd/MM/yyyy', { locale: fr })}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-mono text-sm">{liq.engagement_numero || "-"}</div>
+                            <div className="font-mono text-sm">{liq.engagement_numero || '-'}</div>
                             <div className="text-xs text-muted-foreground max-w-[150px] truncate">
-                              {liq.engagement_objet || "-"}
+                              {liq.engagement_objet || '-'}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{liq.engagement_fournisseur || "-"}</TableCell>
+                        <TableCell>{liq.engagement_fournisseur || '-'}</TableCell>
                         <TableCell>
                           {liq.direction_code ? (
                             <Badge variant="outline">{liq.direction_code}</Badge>
                           ) : (
-                            "-"
+                            '-'
                           )}
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground">
@@ -680,7 +693,13 @@ export default function ScanningLiquidation() {
                           {formatMontant(liq.cumul_engagements)}
                         </TableCell>
                         <TableCell className="text-right hidden lg:table-cell">
-                          <span className={liq.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                          <span
+                            className={
+                              liq.disponible < 0
+                                ? 'text-destructive font-medium'
+                                : 'text-muted-foreground'
+                            }
+                          >
                             {formatMontant(liq.disponible)}
                           </span>
                         </TableCell>
@@ -688,10 +707,10 @@ export default function ScanningLiquidation() {
                           {formatMontant(liq.montant)}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {liq.activite_code || "-"}
+                          {liq.activite_code || '-'}
                         </TableCell>
                         <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {liq.os_code || "-"}
+                          {liq.os_code || '-'}
                         </TableCell>
                         <TableCell className="text-center">
                           {getEngagementStatusBadge(liq.engagement_statut)}
@@ -715,115 +734,12 @@ export default function ScanningLiquidation() {
                                 Scanner
                               </Button>
                             </TooltipTrigger>
-                            {liq.engagement_statut !== "valide" && (
+                            {liq.engagement_statut !== 'valide' && (
                               <TooltipContent>
                                 <p>Engagement non validé - soumission impossible</p>
                               </TooltipContent>
                             )}
                           </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Soumis tab */}
-        <TabsContent value="soumis">
-          <Card>
-            <CardHeader>
-              <CardTitle>Liquidations soumises</CardTitle>
-              <CardDescription>
-                {soumisLiquidations.length} liquidation(s) soumise(s) pour validation
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : soumisLiquidations.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Send className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Aucune liquidation soumise</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>N° Liquidation</TableHead>
-                      <TableHead>Engagement</TableHead>
-                      <TableHead>Fournisseur</TableHead>
-                      <TableHead>Direction</TableHead>
-                      <TableHead className="text-right">Dotation</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
-                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
-                      <TableHead className="text-center">Documents</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {soumisLiquidations.map((liq) => (
-                      <TableRow key={liq.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-mono text-sm">{liq.numero}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {format(new Date(liq.date_liquidation), "dd/MM/yyyy", { locale: fr })}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-mono text-sm">{liq.engagement_numero || "-"}</div>
-                        </TableCell>
-                        <TableCell>{liq.engagement_fournisseur || "-"}</TableCell>
-                        <TableCell>
-                          {liq.direction_code ? (
-                            <Badge variant="outline">{liq.direction_code}</Badge>
-                          ) : (
-                            "-"
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {formatMontant(liq.dotation_initiale)}
-                        </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell text-muted-foreground">
-                          {formatMontant(liq.cumul_engagements)}
-                        </TableCell>
-                        <TableCell className="text-right hidden lg:table-cell">
-                          <span className={liq.disponible < 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
-                            {formatMontant(liq.disponible)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatMontant(liq.montant)}
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {liq.activite_code || "-"}
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {liq.os_code || "-"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {getDocumentStatusBadge(
-                            liq.documents_required_provided,
-                            liq.documents_required
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleOpenDetail(liq)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -851,13 +767,14 @@ export default function ScanningLiquidation() {
           {selectedLiquidation && (
             <div className="space-y-6">
               {/* Warning if engagement not validated */}
-              {selectedLiquidation.engagement_statut !== "valide" && (
+              {selectedLiquidation.engagement_statut !== 'valide' && (
                 <Alert variant="destructive">
                   <ShieldAlert className="h-4 w-4" />
                   <AlertTitle>Engagement non validé</AlertTitle>
                   <AlertDescription>
-                    L'engagement associé ({selectedLiquidation.engagement_numero}) n'est pas encore validé.
-                    Cette liquidation ne peut pas être soumise tant que l'engagement n'est pas validé.
+                    L'engagement associé ({selectedLiquidation.engagement_numero}) n'est pas encore
+                    validé. Cette liquidation ne peut pas être soumise tant que l'engagement n'est
+                    pas validé.
                   </AlertDescription>
                 </Alert>
               )}
@@ -866,7 +783,7 @@ export default function ScanningLiquidation() {
               <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
                 <div>
                   <p className="text-sm text-muted-foreground">Fournisseur</p>
-                  <p className="font-medium">{selectedLiquidation.engagement_fournisseur || "-"}</p>
+                  <p className="font-medium">{selectedLiquidation.engagement_fournisseur || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Montant</p>
@@ -880,16 +797,18 @@ export default function ScanningLiquidation() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Réf. Facture</p>
-                  <p className="font-medium">{selectedLiquidation.reference_facture || "-"}</p>
+                  <p className="font-medium">{selectedLiquidation.reference_facture || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Direction</p>
-                  <p className="font-medium">{selectedLiquidation.direction_libelle || "-"}</p>
+                  <p className="font-medium">{selectedLiquidation.direction_libelle || '-'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Date liquidation</p>
                   <p className="font-medium">
-                    {format(new Date(selectedLiquidation.date_liquidation), "dd MMMM yyyy", { locale: fr })}
+                    {format(new Date(selectedLiquidation.date_liquidation), 'dd MMMM yyyy', {
+                      locale: fr,
+                    })}
                   </p>
                 </div>
               </div>
@@ -909,7 +828,7 @@ export default function ScanningLiquidation() {
               {/* Checklist */}
               <LiquidationChecklist
                 liquidationId={selectedLiquidation.id}
-                readOnly={selectedLiquidation.statut !== "brouillon"}
+                readOnly={selectedLiquidation.statut !== 'soumis'}
                 onCompletenessChange={handleChecklistChange}
                 blockSubmitIfIncomplete={true}
               />
@@ -920,7 +839,7 @@ export default function ScanningLiquidation() {
             <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
               Fermer
             </Button>
-            {selectedLiquidation?.statut === "brouillon" && (
+            {selectedLiquidation?.statut === 'soumis' && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
@@ -945,9 +864,9 @@ export default function ScanningLiquidation() {
                 </TooltipTrigger>
                 {!canSubmit && (
                   <TooltipContent>
-                    {selectedLiquidation?.engagement_statut !== "valide"
+                    {selectedLiquidation?.engagement_statut !== 'valide'
                       ? "L'engagement doit être validé"
-                      : "Tous les documents obligatoires doivent être fournis"}
+                      : 'Tous les documents obligatoires doivent être fournis'}
                   </TooltipContent>
                 )}
               </Tooltip>

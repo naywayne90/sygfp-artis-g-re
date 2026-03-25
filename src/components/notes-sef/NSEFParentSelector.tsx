@@ -66,7 +66,9 @@ export function NSEFParentSelector({
     try {
       // Exécuter la requête avec filtres conditionnels
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query = supabase.from('notes_sef').select('id, numero, reference_pivot, objet, statut') as any;
+      const query = supabase
+        .from('notes_sef')
+        .select('id, numero, reference_pivot, objet, statut') as any;
       const { data, error: fetchError } = await query
         .eq('type_note', 'NSEF')
         .neq('statut', 'rejete')
@@ -92,13 +94,11 @@ export function NSEFParentSelector({
 
   // Obtenir la référence affichable d'une NSEF
   const getReference = (nsef: NSEFItem): string => {
-    return nsef.numero || nsef.reference_pivot || 'Brouillon';
+    return nsef.numero || nsef.reference_pivot || 'Soumis';
   };
 
   // Trouver la NSEF sélectionnée
-  const selectedNSEF = value
-    ? nsefList.find((n) => n.id === value)
-    : null;
+  const selectedNSEF = value ? nsefList.find((n) => n.id === value) : null;
 
   if (isLoading) {
     return (
@@ -189,15 +189,13 @@ export function NSEFParentSelector({
               Rattachée à : {getReference(selectedNSEF)}
             </span>
           </div>
-          <p className="text-green-700 text-xs mt-1 truncate">
-            {selectedNSEF.objet}
-          </p>
+          <p className="text-green-700 text-xs mt-1 truncate">{selectedNSEF.objet}</p>
         </div>
       )}
 
       <p className="text-xs text-gray-400">
-        Optionnel : Vous pouvez rattacher cette NAEF à une NSEF existante pour
-        les activités complexes impliquant plusieurs dépenses.
+        Optionnel : Vous pouvez rattacher cette NAEF à une NSEF existante pour les activités
+        complexes impliquant plusieurs dépenses.
       </p>
     </div>
   );

@@ -16,7 +16,6 @@
 // ============================================
 
 export const STATUTS = {
-  BROUILLON: 'brouillon',
   SOUMIS: 'soumis',
   A_VALIDER: 'a_valider',
   EN_VALIDATION_DG: 'en_validation_dg',
@@ -68,13 +67,7 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['AGENT', 'OPERATEUR', 'CHEF_SERVICE', 'DIRECTEUR', 'ADMIN'],
     validators: ['DG', 'ADMIN'],
     prerequisSteps: [],
-    validStatuts: [
-      STATUTS.BROUILLON,
-      STATUTS.SOUMIS,
-      STATUTS.VALIDE,
-      STATUTS.REJETE,
-      STATUTS.DIFFERE,
-    ],
+    validStatuts: [STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
     nextStep: 2,
     description: 'Demande sans impact budgétaire immédiat',
   },
@@ -89,7 +82,6 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     prerequisSteps: [1],
     prerequisOptional: true, // SEF optionnelle selon montant
     validStatuts: [
-      STATUTS.BROUILLON,
       STATUTS.SOUMIS,
       STATUTS.A_VALIDER,
       STATUTS.VALIDE,
@@ -109,7 +101,7 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['CB', 'ADMIN'],
     validators: ['CB', 'ADMIN'],
     prerequisSteps: [2],
-    validStatuts: [STATUTS.BROUILLON, STATUTS.IMPUTE, STATUTS.REJETE],
+    validStatuts: [STATUTS.SOUMIS, STATUTS.IMPUTE, STATUTS.REJETE],
     previousStep: 2,
     nextStep: 4,
     description: 'Affectation aux lignes budgétaires',
@@ -120,19 +112,19 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     label: 'Expression de Besoin',
     labelShort: 'Exp. Besoin',
     table: 'expressions_besoin',
-    owners: ['AGENT', 'CHEF_SERVICE', 'DAAF', 'ADMIN'],
-    validators: ['CHEF_SERVICE', 'DIRECTEUR', 'ADMIN'],
+    owners: ['AGENT', 'OPERATEUR', 'CHEF_SERVICE', 'DAAF', 'ADMIN'],
+    validators: ['DAAF', 'CB', 'ADMIN'],
     prerequisSteps: [3],
     validStatuts: [
-      STATUTS.BROUILLON,
       STATUTS.SOUMIS,
+      STATUTS.EN_VALIDATION_DG, // réutilisé pour en_validation
       STATUTS.VALIDE,
       STATUTS.REJETE,
       STATUTS.DIFFERE,
     ],
     previousStep: 3,
     nextStep: 5,
-    description: 'Formalisation détaillée du besoin',
+    description: 'Formalisation détaillée du besoin — 3 étapes : Sous-Dir DAAF → CB → DAAF',
   },
   5: {
     id: 5,
@@ -144,14 +136,7 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     validators: ['DG', 'COMMISSION_MARCHES', 'ADMIN'],
     prerequisSteps: [4],
     prerequisOptional: true, // Marché seulement si montant > seuil
-    validStatuts: [
-      STATUTS.BROUILLON,
-      STATUTS.SOUMIS,
-      STATUTS.VALIDE,
-      STATUTS.REJETE,
-      STATUTS.DIFFERE,
-      STATUTS.ANNULE,
-    ],
+    validStatuts: [STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE, STATUTS.ANNULE],
     previousStep: 4,
     nextStep: 6,
     description: 'Procédure de passation si montant > seuil',
@@ -166,13 +151,7 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['DAAF', 'CB', 'ADMIN'],
     validators: ['CB', 'ADMIN'],
     prerequisSteps: [4], // Après expression de besoin (marché optionnel)
-    validStatuts: [
-      STATUTS.BROUILLON,
-      STATUTS.SOUMIS,
-      STATUTS.VALIDE,
-      STATUTS.REJETE,
-      STATUTS.DIFFERE,
-    ],
+    validStatuts: [STATUTS.SOUMIS, STATUTS.VALIDE, STATUTS.REJETE, STATUTS.DIFFERE],
     previousStep: 5,
     nextStep: 7,
     description: 'Réservation des crédits budgétaires',
@@ -188,7 +167,6 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     validators: ['SDCT', 'DAAF', 'DG', 'ADMIN'],
     prerequisSteps: [6],
     validStatuts: [
-      STATUTS.BROUILLON,
       STATUTS.SOUMIS,
       STATUTS.EN_VALIDATION_DG,
       STATUTS.VALIDE,
@@ -210,7 +188,6 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     validators: ['DG', 'ADMIN'],
     prerequisSteps: [7],
     validStatuts: [
-      STATUTS.BROUILLON,
       STATUTS.SOUMIS,
       STATUTS.EN_SIGNATURE,
       STATUTS.SIGNE,
@@ -231,13 +208,7 @@ export const WORKFLOW_STEPS: Record<WorkflowStep, StepConfig> = {
     owners: ['TRESORERIE', 'AGENT_COMPTABLE', 'ADMIN'],
     validators: ['TRESORERIE', 'AGENT_COMPTABLE', 'ADMIN'],
     prerequisSteps: [8],
-    validStatuts: [
-      STATUTS.BROUILLON,
-      STATUTS.SOUMIS,
-      STATUTS.PAYE,
-      STATUTS.REJETE,
-      STATUTS.CLOTURE,
-    ],
+    validStatuts: [STATUTS.SOUMIS, STATUTS.PAYE, STATUTS.REJETE, STATUTS.CLOTURE],
     previousStep: 8,
     description: 'Exécution du paiement effectif',
   },
@@ -273,16 +244,8 @@ export interface ValidationResult {
   code?: string;
 }
 
-// Transitions communes à toutes les étapes
+// Transitions communes à toutes les étapes (plus de brouillon→soumis, creation = soumis)
 const COMMON_TRANSITIONS: TransitionRule[] = [
-  {
-    from: STATUTS.BROUILLON,
-    to: STATUTS.SOUMIS,
-    action: 'SUBMIT',
-    actionLabel: 'Soumettre',
-    requiredRoles: [],
-    requiresMotif: false,
-  },
   {
     from: STATUTS.SOUMIS,
     to: STATUTS.VALIDE,
@@ -317,7 +280,7 @@ const COMMON_TRANSITIONS: TransitionRule[] = [
   },
   {
     from: STATUTS.REJETE,
-    to: STATUTS.BROUILLON,
+    to: STATUTS.SOUMIS,
     action: 'REVISE',
     actionLabel: 'Corriger',
     requiredRoles: [],
@@ -347,7 +310,7 @@ const MODULE_TRANSITIONS: Record<string, TransitionRule[]> = {
   ],
   imputations: [
     {
-      from: STATUTS.BROUILLON,
+      from: STATUTS.SOUMIS,
       to: STATUTS.IMPUTE,
       action: 'IMPUTE',
       actionLabel: 'Imputer',
@@ -659,7 +622,7 @@ export function getBlockingMessage(
       SUBMIT: `Seuls les profils ${step.owners.join(', ')} peuvent soumettre`,
     },
     STATUT_INVALID: {
-      SUBMIT: `Seuls les brouillons peuvent être soumis`,
+      SUBMIT: `Les documents sont crees directement en statut soumis`,
       VALIDATE: `Seuls les éléments soumis peuvent être validés`,
     },
   };
@@ -680,13 +643,6 @@ export interface StatutUIConfig {
 }
 
 export const STATUT_UI_CONFIG: Record<Statut, StatutUIConfig> = {
-  [STATUTS.BROUILLON]: {
-    label: 'Brouillon',
-    color: 'text-muted-foreground',
-    bgColor: 'bg-muted',
-    borderColor: 'border-muted',
-    icon: 'FileEdit',
-  },
   [STATUTS.SOUMIS]: {
     label: 'Soumis',
     color: 'text-blue-600',
