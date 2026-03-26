@@ -757,7 +757,11 @@ export default function ScanningLiquidation() {
 
       {/* Detail Dialog */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="max-w-3xl max-h-[90vh] overflow-y-auto"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ScanLine className="h-5 w-5" />
