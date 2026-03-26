@@ -4,8 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle2,
   Clock,
@@ -17,41 +15,28 @@ import {
   Lock,
   FolderOpen,
   Link2,
-  ExternalLink,
-  Printer,
-  ArrowRight,
   CalendarDays,
-  Hash,
   AlertTriangle,
-  Loader2,
   Receipt,
-  Download,
   MinusCircle,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Engagement,
   BudgetAvailability,
   VALIDATION_STEPS,
   useEngagements,
-  useEngagementLignes,
 } from '@/hooks/useEngagements';
-import { generateBonEngagementPDF } from '@/lib/pdf/generateBonEngagementPDF';
-import { IndicateurBudget } from './IndicateurBudget';
-import { EngagementPrintDialog } from './EngagementPrintDialog';
-import { EngagementValidationTimeline } from './EngagementValidationTimeline';
-import { EngagementChecklist } from './EngagementChecklist';
-import { DossierGED } from '@/components/ged';
-import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
-import { DossierTimeline } from '@/components/dossier/DossierTimeline';
 import { QRCodeGenerator } from '@/components/qrcode/QRCodeGenerator';
 import { EngagementChainNav } from './EngagementChainNav';
+import { EngagementDetailsBudget } from './EngagementDetailsBudget';
+import { EngagementDetailsValidation } from './EngagementDetailsValidation';
+import { EngagementDetailsDocuments } from './EngagementDetailsDocuments';
+import { EngagementDetailsLiquidations } from './EngagementDetailsLiquidations';
+import { EngagementDetailsChain } from './EngagementDetailsChain';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
 
 interface EngagementDetailsProps {
   engagement: Engagement | null;
@@ -107,7 +92,9 @@ function getStatutBadge(statut: string | null) {
     case 'soumis':
       return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Soumis</Badge>;
     case 'visa_saf':
-      return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Visa SAF</Badge>;
+      return (
+        <Badge className="bg-blue-100 text-blue-700 border-blue-200">Visa Sous-Dir DAAF</Badge>
+      );
     case 'visa_cb':
       return <Badge className="bg-blue-100 text-blue-700 border-blue-200">Visa CB</Badge>;
     case 'visa_daaf':
@@ -126,24 +113,16 @@ function getStatutBadge(statut: string | null) {
 }
 
 export function EngagementDetails({ engagement, open, onOpenChange }: EngagementDetailsProps) {
-  const navigate = useNavigate();
   const { calculateAvailability } = useEngagements();
   const [availability, setAvailability] = useState<BudgetAvailability | null>(null);
   const [isCheckingBudget, setIsCheckingBudget] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [prestataire, setPrestataire] = useState<PrestataireFull | null>(null);
   const [otherEngagements, setOtherEngagements] = useState<OtherEngagement[]>([]);
   const [creditTransfers, setCreditTransfers] = useState<CreditTransfer[]>([]);
   const [visaProfiles, setVisaProfiles] = useState<Record<string, string>>({});
   const [isLoadingOthers, setIsLoadingOthers] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [engLiquidations, setEngLiquidations] = useState<EngagementLiquidation[]>([]);
   const [isLoadingLiquidations, setIsLoadingLiquidations] = useState(false);
-
-  // Fetch multi-lignes
-  const { data: engagementLignes = [] } = useEngagementLignes(
-    engagement?.is_multi_ligne ? engagement.id : null
-  );
 
   // Fetch budget availability
   useEffect(() => {
@@ -300,1049 +279,393 @@ export function EngagementDetails({ engagement, open, onOpenChange }: Engagement
   });
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-              <DialogTitle className="flex items-center gap-2 flex-wrap">
-                <span>Engagement {engagement.numero}</span>
-                {getStatutBadge(engagement.statut)}
-                {isSurMarche ? (
-                  <Badge variant="outline" className="gap-1 bg-blue-50">
-                    <FileText className="h-3 w-3" />
-                    Sur marché
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="gap-1">
-                    Hors marché
-                  </Badge>
-                )}
-                {isLocked && (
-                  <Badge variant="outline" className="gap-1">
-                    <Lock className="h-3 w-3" />
-                    Verrouillé
-                  </Badge>
-                )}
-              </DialogTitle>
-              {/* QR code pour engagements validés */}
-              {engagement.statut === 'valide' && engagement.visa_dg_date && (
-                <QRCodeGenerator
-                  reference={engagement.numero}
-                  type="ENGAGEMENT"
-                  dateValidation={engagement.visa_dg_date}
-                  validateur={
-                    (engagement.visa_dg_user_id && visaProfiles[engagement.visa_dg_user_id]) || 'DG'
-                  }
-                  size="sm"
-                  showHash
-                />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogHeader>
+          <div className="flex items-start justify-between gap-4">
+            <DialogTitle className="flex items-center gap-2 flex-wrap">
+              <span>Engagement {engagement.numero}</span>
+              {getStatutBadge(engagement.statut)}
+              {isSurMarche ? (
+                <Badge variant="outline" className="gap-1 bg-blue-50">
+                  <FileText className="h-3 w-3" />
+                  Sur marché
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1">
+                  Hors marché
+                </Badge>
               )}
-            </div>
-          </DialogHeader>
+              {isLocked && (
+                <Badge variant="outline" className="gap-1">
+                  <Lock className="h-3 w-3" />
+                  Verrouillé
+                </Badge>
+              )}
+            </DialogTitle>
+            {/* QR code pour engagements validés */}
+            {engagement.statut === 'valide' && engagement.visa_dg_date && (
+              <QRCodeGenerator
+                reference={engagement.numero}
+                type="ENGAGEMENT"
+                dateValidation={engagement.visa_dg_date}
+                validateur={
+                  (engagement.visa_dg_user_id && visaProfiles[engagement.visa_dg_user_id]) || 'DG'
+                }
+                size="sm"
+                showHash
+              />
+            )}
+          </div>
+        </DialogHeader>
 
-          {/* Barre chaîne : Passation ↔ Engagement ↔ Liquidation */}
-          <EngagementChainNav engagement={engagement} onCloseDialog={() => onOpenChange(false)} />
+        {/* Barre chaîne : Passation <-> Engagement <-> Liquidation */}
+        <EngagementChainNav engagement={engagement} onCloseDialog={() => onOpenChange(false)} />
 
-          <ScrollArea className="max-h-[70vh] pr-4">
-            <Tabs defaultValue="informations" className="w-full">
-              <TabsList className="grid w-full grid-cols-6 mb-4">
-                <TabsTrigger value="informations" className="gap-1 text-xs">
-                  <FileText className="h-3.5 w-3.5" />
-                  Informations
-                </TabsTrigger>
-                <TabsTrigger value="budget" className="gap-1 text-xs">
-                  <Calculator className="h-3.5 w-3.5" />
-                  Budget
-                </TabsTrigger>
-                <TabsTrigger value="validation" className="gap-1 text-xs">
-                  <User className="h-3.5 w-3.5" />
-                  Validation
-                </TabsTrigger>
-                <TabsTrigger value="documents" className="gap-1 text-xs">
-                  <FolderOpen className="h-3.5 w-3.5" />
-                  Documents
-                </TabsTrigger>
-                <TabsTrigger value="liquidations" className="gap-1 text-xs">
-                  <Receipt className="h-3.5 w-3.5" />
-                  Liquidations
-                </TabsTrigger>
-                <TabsTrigger value="chaine" className="gap-1 text-xs">
-                  <Link2 className="h-3.5 w-3.5" />
-                  Chaîne
-                </TabsTrigger>
-              </TabsList>
+        <ScrollArea className="max-h-[70vh] pr-4">
+          <Tabs defaultValue="informations" className="w-full">
+            <TabsList className="grid w-full grid-cols-6 mb-4">
+              <TabsTrigger value="informations" className="gap-1 text-xs">
+                <FileText className="h-3.5 w-3.5" />
+                Informations
+              </TabsTrigger>
+              <TabsTrigger value="budget" className="gap-1 text-xs">
+                <Calculator className="h-3.5 w-3.5" />
+                Budget
+              </TabsTrigger>
+              <TabsTrigger value="validation" className="gap-1 text-xs">
+                <User className="h-3.5 w-3.5" />
+                Validation
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="gap-1 text-xs">
+                <FolderOpen className="h-3.5 w-3.5" />
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="liquidations" className="gap-1 text-xs">
+                <Receipt className="h-3.5 w-3.5" />
+                Liquidations
+              </TabsTrigger>
+              <TabsTrigger value="chaine" className="gap-1 text-xs">
+                <Link2 className="h-3.5 w-3.5" />
+                Chaîne
+              </TabsTrigger>
+            </TabsList>
 
-              {/* ===== ONGLET 1 — INFORMATIONS ===== */}
-              <TabsContent value="informations" className="space-y-4">
-                {/* Informations générales */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Informations générales
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Référence :</span>
-                        <span className="ml-2 font-medium">{engagement.numero}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Exercice :</span>
-                        <span className="ml-2 font-medium">{engagement.exercice || '—'}</span>
-                      </div>
+            {/* ===== ONGLET 1 — INFORMATIONS ===== */}
+            <TabsContent value="informations" className="space-y-4">
+              {/* Informations générales */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Informations générales
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Référence :</span>
+                      <span className="ml-2 font-medium">{engagement.numero}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Exercice :</span>
+                      <span className="ml-2 font-medium">{engagement.exercice || '—'}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Objet :</span>
+                      <p className="mt-1 font-medium">{engagement.objet}</p>
+                    </div>
+                    {engagement.budget_line?.direction && (
                       <div className="col-span-2">
-                        <span className="text-muted-foreground">Objet :</span>
-                        <p className="mt-1 font-medium">{engagement.objet}</p>
-                      </div>
-                      {engagement.budget_line?.direction && (
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">Direction :</span>
-                          <span className="ml-2 font-medium">
-                            {engagement.budget_line.direction.sigle
-                              ? `${engagement.budget_line.direction.sigle} — ${engagement.budget_line.direction.label}`
-                              : engagement.budget_line.direction.label}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Montants */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Montants</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="text-center p-3 bg-muted rounded-lg">
-                        <div className="text-muted-foreground text-xs">Montant HT</div>
-                        <div className="font-bold text-sm">
-                          {engagement.montant_ht ? formatCurrency(engagement.montant_ht) : 'N/A'}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-muted rounded-lg">
-                        <div className="text-muted-foreground text-xs">
-                          TVA ({engagement.tva || 0}%)
-                        </div>
-                        <div className="font-bold text-sm">
-                          {engagement.montant_ht && engagement.tva
-                            ? formatCurrency(engagement.montant_ht * (engagement.tva / 100))
-                            : 'N/A'}
-                        </div>
-                      </div>
-                      <div className="text-center p-3 bg-primary/10 rounded-lg">
-                        <div className="text-primary text-xs font-medium">Montant engagé</div>
-                        <div className="font-bold text-primary">
-                          {formatCurrency(engagement.montant)}
-                        </div>
-                      </div>
-                    </div>
-                    {isSurMarche && engagement.marche && (
-                      <div className="mt-3 p-3 bg-muted/50 rounded-lg text-sm">
-                        <span className="text-muted-foreground">Montant du marché :</span>
-                        <span className="ml-2 font-bold">
-                          {formatCurrency(engagement.marche.montant)}
+                        <span className="text-muted-foreground">Direction :</span>
+                        <span className="ml-2 font-medium">
+                          {engagement.budget_line.direction.sigle
+                            ? `${engagement.budget_line.direction.sigle} — ${engagement.budget_line.direction.label}`
+                            : engagement.budget_line.direction.label}
                         </span>
-                        {engagement.marche.numero && (
-                          <span className="ml-2 text-muted-foreground">
-                            (Réf. {engagement.marche.numero})
-                          </span>
-                        )}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Dégagement (si montant_degage > 0) */}
-                {(engagement.montant_degage || 0) > 0 && (
-                  <Card className="border-orange-500/50">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-orange-700 flex items-center gap-2">
-                        <MinusCircle className="h-4 w-4" />
-                        Dégagement
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Montant dégagé :</span>
-                          <span className="ml-2 font-bold text-orange-600">
-                            {formatCurrency(engagement.montant_degage || 0)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Montant net :</span>
-                          <span className="ml-2 font-bold text-primary">
-                            {formatCurrency(engagement.montant - (engagement.montant_degage || 0))}
-                          </span>
-                        </div>
-                        {engagement.motif_degage && (
-                          <div className="col-span-2">
-                            <span className="text-muted-foreground">Motif :</span>
-                            <p className="mt-1">{engagement.motif_degage}</p>
-                          </div>
-                        )}
-                        {engagement.degage_at && (
-                          <div>
-                            <span className="text-muted-foreground">Date :</span>
-                            <span className="ml-2">
-                              {format(new Date(engagement.degage_at), 'dd MMMM yyyy', {
-                                locale: fr,
-                              })}
-                            </span>
-                          </div>
-                        )}
+              {/* Montants */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Montants</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-muted-foreground text-xs">Montant HT</div>
+                      <div className="font-bold text-sm">
+                        {engagement.montant_ht ? formatCurrency(engagement.montant_ht) : 'N/A'}
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Fournisseur / Prestataire */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      {isSurMarche ? 'Prestataire' : 'Fournisseur'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="col-span-2">
-                        <span className="text-muted-foreground">Raison sociale :</span>
-                        <span className="ml-2 font-medium">
-                          {prestataire?.raison_sociale || engagement.fournisseur || 'N/A'}
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-muted-foreground text-xs">
+                        TVA ({engagement.tva || 0}%)
+                      </div>
+                      <div className="font-bold text-sm">
+                        {engagement.montant_ht && engagement.tva
+                          ? formatCurrency(engagement.montant_ht * (engagement.tva / 100))
+                          : 'N/A'}
+                      </div>
+                    </div>
+                    <div className="text-center p-3 bg-primary/10 rounded-lg">
+                      <div className="text-primary text-xs font-medium">Montant engagé</div>
+                      <div className="font-bold text-primary">
+                        {formatCurrency(engagement.montant)}
+                      </div>
+                    </div>
+                  </div>
+                  {isSurMarche && engagement.marche && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg text-sm">
+                      <span className="text-muted-foreground">Montant du marché :</span>
+                      <span className="ml-2 font-bold">
+                        {formatCurrency(engagement.marche.montant)}
+                      </span>
+                      {engagement.marche.numero && (
+                        <span className="ml-2 text-muted-foreground">
+                          (Réf. {engagement.marche.numero})
                         </span>
-                      </div>
-                      {prestataire?.rccm && (
-                        <div>
-                          <span className="text-muted-foreground">RCCM :</span>
-                          <span className="ml-2 font-medium">{prestataire.rccm}</span>
-                        </div>
-                      )}
-                      {prestataire?.nif && (
-                        <div>
-                          <span className="text-muted-foreground">NIF :</span>
-                          <span className="ml-2 font-medium">{prestataire.nif}</span>
-                        </div>
-                      )}
-                      {prestataire?.contact_telephone && (
-                        <div>
-                          <span className="text-muted-foreground">Téléphone :</span>
-                          <span className="ml-2 font-medium">{prestataire.contact_telephone}</span>
-                        </div>
-                      )}
-                      {prestataire?.contact_email && (
-                        <div>
-                          <span className="text-muted-foreground">Email :</span>
-                          <span className="ml-2 font-medium">{prestataire.contact_email}</span>
-                        </div>
-                      )}
-                      {prestataire?.adresse && (
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">Adresse :</span>
-                          <span className="ml-2">{prestataire.adresse}</span>
-                        </div>
-                      )}
-                      {!prestataire && !engagement.fournisseur && (
-                        <p className="col-span-2 text-muted-foreground italic">
-                          Aucun fournisseur renseigné
-                        </p>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </CardContent>
+              </Card>
 
-                {/* Dates et métadonnées */}
-                <Card>
+              {/* Dégagement (si montant_degage > 0) */}
+              {(engagement.montant_degage || 0) > 0 && (
+                <Card className="border-orange-500/50">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4" />
-                      Dates et traçabilité
+                    <CardTitle className="text-sm text-orange-700 flex items-center gap-2">
+                      <MinusCircle className="h-4 w-4" />
+                      Dégagement
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Date de création :</span>
-                        <span className="ml-2 font-medium">
-                          {format(new Date(engagement.created_at), 'dd MMMM yyyy', { locale: fr })}
+                        <span className="text-muted-foreground">Montant dégagé :</span>
+                        <span className="ml-2 font-bold text-orange-600">
+                          {formatCurrency(engagement.montant_degage || 0)}
                         </span>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Date d'engagement :</span>
-                        <span className="ml-2 font-medium">
-                          {format(new Date(engagement.date_engagement), 'dd MMMM yyyy', {
-                            locale: fr,
-                          })}
+                        <span className="text-muted-foreground">Montant net :</span>
+                        <span className="ml-2 font-bold text-primary">
+                          {formatCurrency(engagement.montant - (engagement.montant_degage || 0))}
                         </span>
                       </div>
-                      {engagement.visa_dg_date && (
+                      {engagement.motif_degage && (
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground">Motif :</span>
+                          <p className="mt-1">{engagement.motif_degage}</p>
+                        </div>
+                      )}
+                      {engagement.degage_at && (
                         <div>
-                          <span className="text-muted-foreground">Date de validation :</span>
-                          <span className="ml-2 font-medium">
-                            {format(new Date(engagement.visa_dg_date), 'dd MMMM yyyy', {
+                          <span className="text-muted-foreground">Date :</span>
+                          <span className="ml-2">
+                            {format(new Date(engagement.degage_at), 'dd MMMM yyyy', {
                               locale: fr,
                             })}
                           </span>
                         </div>
                       )}
-                      {engagement.created_by && (
-                        <div>
-                          <span className="text-muted-foreground">Créé par :</span>
-                          <span className="ml-2 font-medium">
-                            {visaProfiles[engagement.created_by] ||
-                              engagement.creator?.full_name ||
-                              '—'}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </CardContent>
                 </Card>
+              )}
 
-                {/* Motif rejet */}
-                {engagement.statut === 'rejete' && engagement.motif_rejet && (
-                  <Card className="border-destructive/50">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-destructive flex items-center gap-2">
-                        <XCircle className="h-4 w-4" />
-                        Motif du rejet
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">{engagement.motif_rejet}</p>
-                    </CardContent>
-                  </Card>
-                )}
+              {/* Fournisseur / Prestataire */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    {isSurMarche ? 'Prestataire' : 'Fournisseur'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Raison sociale :</span>
+                      <span className="ml-2 font-medium">
+                        {prestataire?.raison_sociale || engagement.fournisseur || 'N/A'}
+                      </span>
+                    </div>
+                    {prestataire?.rccm && (
+                      <div>
+                        <span className="text-muted-foreground">RCCM :</span>
+                        <span className="ml-2 font-medium">{prestataire.rccm}</span>
+                      </div>
+                    )}
+                    {prestataire?.nif && (
+                      <div>
+                        <span className="text-muted-foreground">NIF :</span>
+                        <span className="ml-2 font-medium">{prestataire.nif}</span>
+                      </div>
+                    )}
+                    {prestataire?.contact_telephone && (
+                      <div>
+                        <span className="text-muted-foreground">Téléphone :</span>
+                        <span className="ml-2 font-medium">{prestataire.contact_telephone}</span>
+                      </div>
+                    )}
+                    {prestataire?.contact_email && (
+                      <div>
+                        <span className="text-muted-foreground">Email :</span>
+                        <span className="ml-2 font-medium">{prestataire.contact_email}</span>
+                      </div>
+                    )}
+                    {prestataire?.adresse && (
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground">Adresse :</span>
+                        <span className="ml-2">{prestataire.adresse}</span>
+                      </div>
+                    )}
+                    {!prestataire && !engagement.fournisseur && (
+                      <p className="col-span-2 text-muted-foreground italic">
+                        Aucun fournisseur renseigné
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-                {/* Motif différé */}
-                {engagement.statut === 'differe' && engagement.motif_differe && (
-                  <Card className="border-yellow-500/50">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm text-yellow-700 flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4" />
-                        Motif du report
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">{engagement.motif_differe}</p>
-                      {engagement.deadline_correction && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Date de reprise prévue :{' '}
-                          {format(new Date(engagement.deadline_correction), 'dd/MM/yyyy', {
+              {/* Dates et métadonnées */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4" />
+                    Dates et traçabilité
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Date de création :</span>
+                      <span className="ml-2 font-medium">
+                        {format(new Date(engagement.created_at), 'dd MMMM yyyy', { locale: fr })}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Date d'engagement :</span>
+                      <span className="ml-2 font-medium">
+                        {format(new Date(engagement.date_engagement), 'dd MMMM yyyy', {
+                          locale: fr,
+                        })}
+                      </span>
+                    </div>
+                    {engagement.visa_dg_date && (
+                      <div>
+                        <span className="text-muted-foreground">Date de validation :</span>
+                        <span className="ml-2 font-medium">
+                          {format(new Date(engagement.visa_dg_date), 'dd MMMM yyyy', {
                             locale: fr,
                           })}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
-              {/* ===== ONGLET 2 — BUDGET ===== */}
-              <TabsContent value="budget" className="space-y-4">
-                {/* Imputation budgétaire */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Hash className="h-4 w-4" />
-                      Imputation budgétaire
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Ligne budgétaire :</span>
-                        <span className="ml-2 font-medium">
-                          {engagement.budget_line?.code || 'N/A'}
                         </span>
                       </div>
+                    )}
+                    {engagement.created_by && (
                       <div>
-                        <span className="text-muted-foreground">Libellé :</span>
+                        <span className="text-muted-foreground">Créé par :</span>
                         <span className="ml-2 font-medium">
-                          {engagement.budget_line?.label || 'N/A'}
+                          {visaProfiles[engagement.created_by] ||
+                            engagement.creator?.full_name ||
+                            '—'}
                         </span>
                       </div>
-                      {engagement.budget_line?.dotation_initiale != null && (
-                        <div>
-                          <span className="text-muted-foreground">Dotation initiale :</span>
-                          <span className="ml-2 font-medium">
-                            {formatCurrency(engagement.budget_line.dotation_initiale)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Motif rejet */}
+              {engagement.statut === 'rejete' && engagement.motif_rejet && (
+                <Card className="border-destructive/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-destructive flex items-center gap-2">
+                      <XCircle className="h-4 w-4" />
+                      Motif du rejet
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{engagement.motif_rejet}</p>
                   </CardContent>
                 </Card>
+              )}
 
-                {/* Multi-lignes (Prompt 13) */}
-                {engagement.is_multi_ligne && engagementLignes.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Hash className="h-4 w-4" />
-                        Ventilation multi-lignes
-                        <Badge variant="outline" className="ml-auto">
-                          {engagementLignes.length} ligne{engagementLignes.length > 1 ? 's' : ''}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {engagementLignes.map((ligne) => {
-                          const pct =
-                            engagement.montant > 0
-                              ? ((ligne.montant / engagement.montant) * 100).toFixed(1)
-                              : '0';
-                          return (
-                            <div
-                              key={ligne.id}
-                              className="flex items-center justify-between p-2 rounded border text-sm"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <span className="font-medium">
-                                  {ligne.budget_line?.code || 'N/A'}
-                                </span>
-                                <span className="text-muted-foreground ml-2 truncate">
-                                  {ligne.budget_line?.label || ''}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-3 shrink-0">
-                                <Badge variant="outline" className="font-mono">
-                                  {pct}%
-                                </Badge>
-                                <span className="font-medium">{formatCurrency(ligne.montant)}</span>
-                              </div>
-                            </div>
-                          );
+              {/* Motif différé */}
+              {engagement.statut === 'differe' && engagement.motif_differe && (
+                <Card className="border-yellow-500/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-yellow-700 flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      Motif du report
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{engagement.motif_differe}</p>
+                    {engagement.deadline_correction && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Date de reprise prévue :{' '}
+                        {format(new Date(engagement.deadline_correction), 'dd/MM/yyyy', {
+                          locale: fr,
                         })}
-                        <div className="flex items-center justify-between p-2 bg-muted rounded text-sm font-bold">
-                          <span>TOTAL</span>
-                          <span>{formatCurrency(engagement.montant)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Indicateur de disponibilité budgétaire */}
-                <IndicateurBudget
-                  availability={availability}
-                  isLoading={isCheckingBudget}
-                  budgetLine={
-                    engagement.budget_line
-                      ? { code: engagement.budget_line.code, label: engagement.budget_line.label }
-                      : null
-                  }
-                  mode="consultation"
-                />
-
-                {/* Historique des mouvements (virements) */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Receipt className="h-4 w-4" />
-                      Mouvements sur cette ligne
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {creditTransfers.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        Aucun virement exécuté sur cette ligne.
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
-                        {creditTransfers.map((ct) => {
-                          const isReceived = ct.to_budget_line_id === engagement.budget_line_id;
-                          return (
-                            <div
-                              key={ct.id}
-                              className="flex items-center justify-between text-sm p-2 rounded border"
-                            >
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={
-                                    isReceived
-                                      ? 'bg-green-50 text-green-700 border-green-200'
-                                      : 'bg-red-50 text-red-700 border-red-200'
-                                  }
-                                >
-                                  {isReceived ? 'Reçu' : 'Émis'}
-                                </Badge>
-                                <span className="text-muted-foreground">
-                                  {format(new Date(ct.created_at), 'dd/MM/yyyy', { locale: fr })}
-                                </span>
-                              </div>
-                              <span
-                                className={`font-medium ${isReceived ? 'text-green-600' : 'text-red-600'}`}
-                              >
-                                {isReceived ? '+' : '−'}
-                                {formatCurrency(ct.amount)}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Autres engagements sur la même ligne */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Autres engagements sur cette ligne
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingOthers ? (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Chargement...
-                      </div>
-                    ) : otherEngagements.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        Aucun autre engagement sur cette ligne.
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
-                        {otherEngagements.map((eng) => (
-                          <div
-                            key={eng.id}
-                            className="flex items-center justify-between text-sm p-2 rounded border"
-                          >
-                            <div className="flex-1 min-w-0">
-                              <span className="font-medium">{eng.numero}</span>
-                              <span className="text-muted-foreground ml-2 truncate">
-                                {eng.objet.substring(0, 40)}
-                                {eng.objet.length > 40 ? '…' : ''}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {getStatutBadge(eng.statut)}
-                              <span className="font-medium">{formatCurrency(eng.montant)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* ===== ONGLET 3 — VALIDATION ===== */}
-              <TabsContent value="validation" className="space-y-4">
-                {/* Timeline visuelle compacte */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Progression de la validation</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex justify-center py-4">
-                    <EngagementValidationTimeline
-                      currentStep={engagement.current_step || 0}
-                      statut={engagement.statut}
-                      validationSteps={[]}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Détail par étape (depuis les colonnes visa) */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      Détail des visas
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {visaDetails.map((step) => {
-                        // Déterminer si le rejet est survenu à cette étape
-                        const isRejectedAtThisStep =
-                          engagement.statut === 'rejete' &&
-                          !step.isCompleted &&
-                          visaDetails.filter((s) => s.isCompleted).length === step.order - 1;
-
-                        return (
-                          <div
-                            key={step.order}
-                            className={`flex items-start gap-3 p-3 rounded-lg ${
-                              step.isCompleted
-                                ? 'bg-green-50 dark:bg-green-950/20'
-                                : isRejectedAtThisStep
-                                  ? 'bg-destructive/10'
-                                  : 'bg-muted/50'
-                            }`}
-                          >
-                            {step.isCompleted ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                            ) : isRejectedAtThisStep ? (
-                              <XCircle className="h-5 w-5 text-destructive mt-0.5" />
-                            ) : (
-                              <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-                            )}
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium text-sm">
-                                  Étape {step.order} : {step.label}
-                                </span>
-                                <Badge
-                                  variant="outline"
-                                  className={
-                                    step.isCompleted
-                                      ? 'bg-green-100 text-green-700 border-green-200'
-                                      : isRejectedAtThisStep
-                                        ? 'bg-destructive/10 text-destructive'
-                                        : ''
-                                  }
-                                >
-                                  {step.isCompleted
-                                    ? 'Validé'
-                                    : isRejectedAtThisStep
-                                      ? 'Rejeté'
-                                      : 'En attente'}
-                                </Badge>
-                              </div>
-                              {step.date && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {format(new Date(step.date), 'dd/MM/yyyy à HH:mm', {
-                                    locale: fr,
-                                  })}
-                                  {step.validatorName && ` — par ${step.validatorName}`}
-                                </div>
-                              )}
-                              {step.commentaire && (
-                                <p className="text-xs text-muted-foreground mt-1 italic">
-                                  « {step.commentaire} »
-                                </p>
-                              )}
-                              {isRejectedAtThisStep && engagement.motif_rejet && (
-                                <p className="text-xs text-destructive mt-1 italic">
-                                  « {engagement.motif_rejet} »
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Journal d'activité */}
-                {engagement.dossier_id && (
-                  <DossierTimeline
-                    dossierId={engagement.dossier_id}
-                    entityType="engagement"
-                    entityId={engagement.id}
-                    maxItems={20}
-                    showFilters={true}
-                  />
-                )}
-              </TabsContent>
-
-              {/* ===== ONGLET 4 — DOCUMENTS ===== */}
-              <TabsContent value="documents" className="space-y-4">
-                {/* Bon d'engagement PDF */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Printer className="h-4 w-4" />
-                      Bon d'engagement
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      disabled={isGeneratingPDF}
-                      onClick={async () => {
-                        setIsGeneratingPDF(true);
-                        try {
-                          await generateBonEngagementPDF(engagement);
-                          toast.success('PDF généré avec succès');
-                        } catch (error) {
-                          toast.error('Erreur lors de la génération du PDF', {
-                            description: error instanceof Error ? error.message : 'Erreur inconnue',
-                          });
-                        } finally {
-                          setIsGeneratingPDF(false);
-                        }
-                      }}
-                    >
-                      {isGeneratingPDF ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4" />
-                      )}
-                      Télécharger le bon d'engagement (PDF)
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => setShowPrintDialog(true)}
-                    >
-                      <Printer className="h-4 w-4" />
-                      Aperçu / Imprimer
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Pièces jointes */}
-                <DossierGED
-                  entityType="engagement"
-                  entityId={engagement.id}
-                  dossierId={engagement.dossier_id || undefined}
-                  reference={engagement.numero}
-                  exercice={engagement.exercice || undefined}
-                  etape="engagement"
-                  showChecklist={true}
-                  readOnly={engagement.statut === 'valide'}
-                />
-
-                {/* Checklist des pièces */}
-                <EngagementChecklist
-                  engagementId={engagement.id}
-                  canEdit={engagement.statut !== 'valide'}
-                />
-
-                {/* Lien vers contrat/marché si sur_marche */}
-                {isSurMarche && engagement.passation_marche_id && (
-                  <>
-                    <Separator />
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => {
-                        onOpenChange(false);
-                        navigate(
-                          `/execution/passation-marche?detail=${engagement.passation_marche_id}`
-                        );
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Voir le contrat / marché source
-                    </Button>
-                  </>
-                )}
-              </TabsContent>
-
-              {/* ===== ONGLET 5 — LIQUIDATIONS ===== */}
-              <TabsContent value="liquidations" className="space-y-4">
-                {(() => {
-                  const activeLiquidations = engLiquidations.filter((l) => l.statut !== 'rejete');
-                  const totalLiquide = activeLiquidations.reduce((sum, l) => sum + l.montant, 0);
-                  const tauxConsommation =
-                    engagement.montant > 0
-                      ? Math.min(Math.round((totalLiquide / engagement.montant) * 100), 100)
-                      : 0;
-                  const restant = engagement.montant - totalLiquide;
-                  const progressColorClass =
-                    tauxConsommation > 95
-                      ? '[&>div]:bg-destructive'
-                      : tauxConsommation >= 80
-                        ? '[&>div]:bg-warning'
-                        : '';
-
-                  return (
-                    <>
-                      {/* Résumé avec barre de progression */}
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <Receipt className="h-4 w-4" />
-                            Consommation de l'engagement
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="grid grid-cols-3 gap-3 text-sm">
-                            <div className="text-center p-3 bg-muted rounded-lg">
-                              <div className="text-muted-foreground text-xs">Montant engagé</div>
-                              <div className="font-bold">{formatCurrency(engagement.montant)}</div>
-                            </div>
-                            <div className="text-center p-3 bg-primary/10 rounded-lg">
-                              <div className="text-muted-foreground text-xs">Total liquidé</div>
-                              <div className="font-bold text-primary">
-                                {formatCurrency(totalLiquide)}
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  ({tauxConsommation}%) — {activeLiquidations.length} liquidation
-                                  {activeLiquidations.length > 1 ? 's' : ''}
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className={`text-center p-3 rounded-lg ${restant <= 0 ? 'bg-green-50 dark:bg-green-950/20' : 'bg-muted'}`}
-                            >
-                              <div className="text-muted-foreground text-xs">Restant</div>
-                              <div className={`font-bold ${restant <= 0 ? 'text-green-600' : ''}`}>
-                                {formatCurrency(Math.max(restant, 0))}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <Progress
-                              value={tauxConsommation}
-                              className={`h-3 ${progressColorClass}`}
-                            />
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>0%</span>
-                              <span>100%</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Tableau des liquidations */}
-                      <Card>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            Liste des liquidations
-                            <Badge variant="outline" className="ml-auto">
-                              {engLiquidations.length}
-                            </Badge>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          {isLoadingLiquidations ? (
-                            <div className="flex items-center gap-2 text-muted-foreground py-4">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              Chargement...
-                            </div>
-                          ) : engLiquidations.length === 0 ? (
-                            <div className="text-center py-6 space-y-3">
-                              <Receipt className="h-8 w-8 mx-auto text-muted-foreground opacity-50" />
-                              <p className="text-sm text-muted-foreground">
-                                Aucune liquidation sur cet engagement
-                              </p>
-                              {engagement.statut === 'valide' && (
-                                <Button
-                                  size="sm"
-                                  className="gap-2"
-                                  onClick={() => {
-                                    onOpenChange(false);
-                                    navigate(`/liquidations?sourceEngagement=${engagement.id}`);
-                                  }}
-                                >
-                                  <ArrowRight className="h-4 w-4" />
-                                  Créer une liquidation
-                                </Button>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              {engLiquidations.map((liq) => {
-                                const liqPct =
-                                  engagement.montant > 0
-                                    ? Math.round((liq.montant / engagement.montant) * 100)
-                                    : 0;
-                                return (
-                                  <div
-                                    key={liq.id}
-                                    className="flex items-center justify-between p-2 rounded border text-sm hover:bg-muted/50 cursor-pointer transition-colors"
-                                    onClick={() => {
-                                      onOpenChange(false);
-                                      navigate(`/liquidations?detail=${liq.id}`);
-                                    }}
-                                  >
-                                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                                      <span className="font-medium shrink-0">{liq.numero}</span>
-                                      <span className="text-muted-foreground truncate text-xs">
-                                        {liq.reference_facture || '—'}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-3 shrink-0">
-                                      <span className="font-mono text-xs">
-                                        {formatCurrency(liq.montant)}
-                                      </span>
-                                      <Badge variant="outline" className="font-mono text-xs">
-                                        {liqPct}%
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        {format(new Date(liq.date_liquidation), 'dd/MM/yyyy', {
-                                          locale: fr,
-                                        })}
-                                      </span>
-                                      {getStatutBadge(liq.statut)}
-                                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* Bouton créer si engagement validé et restant > 0 */}
-                          {engLiquidations.length > 0 &&
-                            engagement.statut === 'valide' &&
-                            restant > 0 && (
-                              <>
-                                <Separator className="my-3" />
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full gap-2"
-                                  onClick={() => {
-                                    onOpenChange(false);
-                                    navigate(`/liquidations?sourceEngagement=${engagement.id}`);
-                                  }}
-                                >
-                                  <ArrowRight className="h-4 w-4" />
-                                  Créer une liquidation ({formatCurrency(restant)} disponible)
-                                </Button>
-                              </>
-                            )}
-                        </CardContent>
-                      </Card>
-                    </>
-                  );
-                })()}
-              </TabsContent>
-
-              {/* ===== ONGLET 6 — CHAÎNE DE LA DÉPENSE ===== */}
-              <TabsContent value="chaine" className="space-y-4">
-                {engagement.dossier_id ? (
-                  <DossierStepTimeline
-                    dossierId={engagement.dossier_id}
-                    highlightStep="engagement"
-                    compact={false}
-                    showNavigation
-                    showAmounts
-                    onStepClick={(step, entityId) => {
-                      if (!entityId) return;
-                      onOpenChange(false);
-                      switch (step) {
-                        case 'sef':
-                          navigate(`/notes-sef?detail=${entityId}`);
-                          break;
-                        case 'aef':
-                          navigate(`/notes-aef?detail=${entityId}`);
-                          break;
-                        case 'imputation':
-                          navigate(`/execution/imputation?detail=${entityId}`);
-                          break;
-                        case 'expression_besoin':
-                          navigate(`/execution/expression-besoin?detail=${entityId}`);
-                          break;
-                        case 'passation_marche':
-                          navigate(`/execution/passation-marche?detail=${entityId}`);
-                          break;
-                        case 'liquidation':
-                          navigate(`/liquidations?detail=${entityId}`);
-                          break;
-                        case 'ordonnancement':
-                          navigate(`/ordonnancements?detail=${entityId}`);
-                          break;
-                        case 'reglement':
-                          navigate(`/reglements?detail=${entityId}`);
-                          break;
-                      }
-                    }}
-                  />
-                ) : (
-                  <Card>
-                    <CardContent className="py-8 text-center text-muted-foreground">
-                      <Link2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p>Chaîne de la dépense non disponible</p>
-                      <p className="text-sm">Cet engagement n'est pas lié à un dossier.</p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Navigation rapide */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Link2 className="h-4 w-4" />
-                      Navigation rapide
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {engagement.passation_marche_id && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start gap-2"
-                        onClick={() => {
-                          onOpenChange(false);
-                          navigate(
-                            `/execution/passation-marche?detail=${engagement.passation_marche_id}`
-                          );
-                        }}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Voir la passation de marché
-                        {engagement.marche?.numero && (
-                          <span className="text-muted-foreground ml-auto">
-                            ({engagement.marche.numero})
-                          </span>
-                        )}
-                      </Button>
-                    )}
-                    {engagement.expression_besoin_id && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start gap-2"
-                        onClick={() => {
-                          onOpenChange(false);
-                          navigate(
-                            `/execution/expression-besoin?detail=${engagement.expression_besoin_id}`
-                          );
-                        }}
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        Voir l'expression de besoin
-                        {engagement.expression_besoin?.numero && (
-                          <span className="text-muted-foreground ml-auto">
-                            ({engagement.expression_besoin.numero})
-                          </span>
-                        )}
-                      </Button>
-                    )}
-
-                    {/* Bouton "Créer la liquidation" si engagement validé */}
-                    {engagement.statut === 'valide' && (
-                      <>
-                        <Separator />
-                        <Button
-                          className="w-full gap-2"
-                          onClick={() => {
-                            onOpenChange(false);
-                            navigate(`/liquidations?sourceEngagement=${engagement.id}`);
-                          }}
-                        >
-                          <ArrowRight className="h-4 w-4" />
-                          Créer la liquidation
-                        </Button>
-                      </>
-                    )}
-
-                    {!engagement.passation_marche_id && !engagement.expression_besoin_id && (
-                      <p className="text-sm text-muted-foreground">
-                        Aucun lien avec une passation ou expression de besoin.
                       </p>
                     )}
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+              )}
+            </TabsContent>
 
-      {/* Dialog impression */}
-      <EngagementPrintDialog
-        engagement={engagement}
-        open={showPrintDialog}
-        onOpenChange={setShowPrintDialog}
-      />
-    </>
+            {/* ===== ONGLET 2 — BUDGET ===== */}
+            <TabsContent value="budget">
+              <EngagementDetailsBudget
+                engagement={engagement}
+                availability={availability}
+                isCheckingBudget={isCheckingBudget}
+                creditTransfers={creditTransfers}
+                otherEngagements={otherEngagements}
+                isLoadingOthers={isLoadingOthers}
+              />
+            </TabsContent>
+
+            {/* ===== ONGLET 3 — VALIDATION ===== */}
+            <TabsContent value="validation">
+              <EngagementDetailsValidation engagement={engagement} visaDetails={visaDetails} />
+            </TabsContent>
+
+            {/* ===== ONGLET 4 — DOCUMENTS ===== */}
+            <TabsContent value="documents">
+              <EngagementDetailsDocuments
+                engagement={engagement}
+                onCloseDialog={() => onOpenChange(false)}
+              />
+            </TabsContent>
+
+            {/* ===== ONGLET 5 — LIQUIDATIONS ===== */}
+            <TabsContent value="liquidations">
+              <EngagementDetailsLiquidations
+                engagement={engagement}
+                engLiquidations={engLiquidations}
+                isLoadingLiquidations={isLoadingLiquidations}
+                onCloseDialog={() => onOpenChange(false)}
+              />
+            </TabsContent>
+
+            {/* ===== ONGLET 6 — CHAÎNE DE LA DÉPENSE ===== */}
+            <TabsContent value="chaine">
+              <EngagementDetailsChain
+                engagement={engagement}
+                onCloseDialog={() => onOpenChange(false)}
+              />
+            </TabsContent>
+          </Tabs>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }

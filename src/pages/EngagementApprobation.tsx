@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
+import { usePermissions } from '@/hooks/usePermissions';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ import {
   BudgetAvailability,
   VALIDATION_STEPS,
 } from '@/hooks/useEngagements';
+import { isRoleForStep } from '@/lib/engagement/engagementRbac';
 import { useRBAC } from '@/contexts/RBACContext';
 import { useCanValidateEngagement } from '@/hooks/useDelegations';
 import { useExercice } from '@/contexts/ExerciceContext';
@@ -46,25 +48,18 @@ import { fr } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/utils';
 
 // Map profil_fonctionnel to validation step role
+// Note : DAAF n'est PAS mappé ici car le même profil couvre 2 étapes :
+//   - Sous-Dir DAAF (étape 1) et Directeur DAAF (étape 3)
+// La distinction se fait via user_roles en DB (fallback ci-dessous)
 function getUserStepRole(profilFonctionnel: string): string | null {
   switch (profilFonctionnel) {
     case 'CB':
       return 'CB';
-    case 'DAAF':
-      return 'DAF';
     case 'DG':
       return 'DG';
     default:
       return null;
   }
-}
-
-// SAF is special — it's identified by user_roles table, not profil_fonctionnel
-// We handle SAF through user_roles check in the hook
-
-function getStepOrder(role: string): number {
-  const step = VALIDATION_STEPS.find((s) => s.role === role);
-  return step?.order ?? 0;
 }
 
 function getStepLabel(role: string): string {
@@ -115,28 +110,17 @@ export default function EngagementApprobation() {
   }, [rbac.isAdmin, rbac.user?.profilFonctionnel, canValidateViaDelegation, delegatorInfo]);
 
   // Check user_roles table for validation roles (SAF, CB, DAF, DG)
-  const [userRoleFromDB, setUserRoleFromDB] = useState<string | null>(null);
-  useEffect(() => {
-    if (!rbac.user?.id) return;
-    import('@/integrations/supabase/client').then(({ supabase }) => {
-      supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', rbac.user?.id ?? '')
-        .in('role', ['SAF', 'CB', 'DAF', 'DG', 'ADMIN'])
-        .then(({ data }) => {
-          if (data && data.length > 0) {
-            // Priority: ADMIN > DG > DAF > CB > SAF
-            const roles = data.map((r) => r.role);
-            if (roles.includes('ADMIN')) setUserRoleFromDB('ALL');
-            else if (roles.includes('DG')) setUserRoleFromDB('DG');
-            else if (roles.includes('DAF')) setUserRoleFromDB('DAF');
-            else if (roles.includes('CB')) setUserRoleFromDB('CB');
-            else if (roles.includes('SAF')) setUserRoleFromDB('SAF');
-          }
-        });
-    });
-  }, [rbac.user?.id]);
+  const { userRoles } = usePermissions();
+  const userRoleFromDB = useMemo(() => {
+    if (!userRoles?.length) return null;
+    const roleSet = new Set(userRoles.map((r: { role: string }) => r.role));
+    if (roleSet.has('ADMIN')) return 'ALL';
+    if (roleSet.has('DG')) return 'DG';
+    if (roleSet.has('DAF')) return 'DAF';
+    if (roleSet.has('CB')) return 'CB';
+    if (roleSet.has('DAAF')) return 'DAAF';
+    return null;
+  }, [userRoles]);
 
   const effectiveRole = useMemo(() => {
     if (userStepRole === 'ALL') return 'ALL';
@@ -145,22 +129,20 @@ export default function EngagementApprobation() {
     return null;
   }, [userStepRole, userRoleFromDB]);
 
-  const effectiveStepOrder = effectiveRole === 'ALL' ? 0 : getStepOrder(effectiveRole || '');
-
   // Can this user access this page?
   const canAccess = rbac.isAdmin || effectiveRole !== null;
 
   // Engagements pending THIS user's specific visa
+  // Utilise isRoleForStep pour que DAAF voie ses engagements aux étapes 1 ET 3
   const engagementsForMyVisa = useMemo(() => {
     if (!effectiveRole) return [];
-    // All statuts that mean "in validation pipeline"
     const validationStatuts = ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf'];
     return engagements.filter((eng) => {
       if (!validationStatuts.includes(eng.statut)) return false;
       if (effectiveRole === 'ALL') return true;
-      return eng.current_step === effectiveStepOrder;
+      return isRoleForStep(eng.statut, effectiveRole);
     });
-  }, [engagements, effectiveRole, effectiveStepOrder]);
+  }, [engagements, effectiveRole]);
 
   // Historically validated/rejected by this role (for history tab)
   const [allValidationSteps, setAllValidationSteps] = useState<Map<string, ValidationStepData[]>>(
@@ -256,19 +238,32 @@ export default function EngagementApprobation() {
 
   const filteredForMyVisa = filterBySearch(engagementsForMyVisa);
 
-  // History: engagements that passed through this step
+  // History: engagements that passed through steps this role can validate
   const historique = useMemo(() => {
     if (!effectiveRole || effectiveRole === 'ALL') {
       return engagements.filter((e) => e.statut === 'valide' || e.statut === 'rejete').slice(0, 50);
     }
+    // Trouver les étapes que ce rôle peut valider (DAAF = étapes 1 et 3)
+    const myStepOrders = VALIDATION_STEPS.filter((s) =>
+      isRoleForStep(
+        s.visaStatut === 'visa_saf'
+          ? 'soumis'
+          : s.visaStatut === 'visa_cb'
+            ? 'visa_saf'
+            : s.visaStatut === 'visa_daaf'
+              ? 'visa_cb'
+              : 'visa_daaf',
+        effectiveRole
+      )
+    ).map((s) => s.order);
     return engagements.filter((eng) => {
       const steps = allValidationSteps.get(eng.id) || [];
       return steps.some(
         (s) =>
-          s.step_order === effectiveStepOrder && (s.status === 'valide' || s.status === 'rejete')
+          myStepOrders.includes(s.step_order) && (s.status === 'valide' || s.status === 'rejete')
       );
     });
-  }, [engagements, effectiveRole, effectiveStepOrder, allValidationSteps]);
+  }, [engagements, effectiveRole, allValidationSteps]);
 
   const filteredHistorique = filterBySearch(historique);
 

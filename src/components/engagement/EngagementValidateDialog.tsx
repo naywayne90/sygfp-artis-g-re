@@ -87,7 +87,7 @@ function ValidationTimeline({ currentStep }: { currentStep: number }) {
   );
 }
 
-// Panneau SAF — Complétude des données + résumé docs
+// Panneau Sous-Dir DAAF — Complétude des données + résumé docs
 function SAFPanel({ engagement }: { engagement: Engagement }) {
   const completeness = checkEngagementCompleteness(engagement);
   const { checklistStatus, isLoading: docsLoading } = useEngagementDocuments(engagement.id);
@@ -278,10 +278,10 @@ function DAAFPanel({ engagement }: { engagement: Engagement }) {
       </div>
 
       <div className="rounded-lg border divide-y">
-        {/* Visa SAF */}
+        {/* Visa Sous-Dir DAAF */}
         <div className="p-3 flex items-center justify-between">
           <div className="text-sm">
-            <span className="font-medium">Visa SAF</span>
+            <span className="font-medium">Visa Sous-Dir DAAF</span>
             {engagement.visa_saf_commentaire && (
               <p className="text-xs text-muted-foreground mt-0.5">
                 {engagement.visa_saf_commentaire}
@@ -342,7 +342,7 @@ function DGPanel({ engagement }: { engagement: Engagement }) {
       <div className="rounded-lg border divide-y">
         {[
           {
-            label: 'Visa SAF',
+            label: 'Visa Sous-Dir DAAF',
             date: engagement.visa_saf_date,
             comment: engagement.visa_saf_commentaire,
           },
@@ -543,7 +543,7 @@ export function EngagementValidateDialog({
     ? checkEngagementCompleteness(engagement)
     : { isComplete: true, missingFields: [] };
 
-  // Bloquer le visa SAF si données incomplètes
+  // Bloquer le visa Sous-Dir DAAF si données incomplètes
   const isSAFBlocked = stepNumber === 1 && !completeness.isComplete;
   // Bloquer le visa CB si crédits insuffisants (single ou multi-lignes)
   const isCBBlocked =

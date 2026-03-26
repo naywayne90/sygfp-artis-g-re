@@ -18,7 +18,7 @@ export function buildChainSteps(engagement: Engagement): ChainStep[] {
   const hasPM = !!engagement.passation_marche_id;
   const isValide = engagement.statut === 'valide';
 
-  return [
+  const steps: ChainStep[] = [
     {
       key: 'passation',
       label: 'Passation',
@@ -44,4 +44,18 @@ export function buildChainSteps(engagement: Engagement): ChainStep[] {
       subtitle: isValide ? 'Créer' : null,
     },
   ];
+
+  // Pour les engagements hors-marché, remplacer Passation par Expression de Besoin
+  if (!hasPM && engagement.expression_besoin_id) {
+    steps[0] = {
+      key: 'expression_besoin',
+      label: 'Expression de Besoin',
+      iconName: 'Gavel',
+      status: 'completed',
+      url: `/execution/expression-besoin?detail=${engagement.expression_besoin_id}`,
+      subtitle: engagement.expression_besoin?.numero || null,
+    };
+  }
+
+  return steps;
 }

@@ -60,7 +60,10 @@ const getStatusBadge = (statut: string | null, _workflowStatus: string | null) =
       label: 'Soumis',
       className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     },
-    visa_saf: { label: 'Visa SAF', className: 'bg-blue-100 text-blue-700 border-blue-200' },
+    visa_saf: {
+      label: 'Visa Sous-Dir DAAF',
+      className: 'bg-blue-100 text-blue-700 border-blue-200',
+    },
     visa_cb: { label: 'Visa CB', className: 'bg-blue-100 text-blue-700 border-blue-200' },
     visa_daaf: { label: 'Visa DAAF', className: 'bg-blue-100 text-blue-700 border-blue-200' },
     valide: { label: 'Validé', className: 'bg-success/10 text-success border-success/20' },

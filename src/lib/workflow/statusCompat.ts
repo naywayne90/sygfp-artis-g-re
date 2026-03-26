@@ -217,7 +217,7 @@ export const SOUS_STATUT_LABELS: Record<SousStatut, string> = {
 // ============================================
 
 export const ETAPES_VALIDATION = {
-  1: { role: 'SAF', label: 'SAF' },
+  1: { role: 'DAAF', label: 'Sous-Dir DAAF' },
   2: { role: 'CB', label: 'Contrôleur Budgétaire' },
   3: { role: 'DAAF', label: 'DAAF' },
   4: { role: 'DG', label: 'Directeur Général' },

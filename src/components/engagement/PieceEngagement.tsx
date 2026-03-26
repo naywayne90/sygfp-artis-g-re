@@ -250,7 +250,7 @@ export const PieceEngagement = forwardRef<HTMLDivElement, PieceEngagementProps>(
         {/* 4 Signatures */}
         <div className="grid grid-cols-4 gap-4 mt-12 pt-8 border-t border-black">
           <div className="text-center">
-            <p className="font-bold text-xs mb-16">Le SAF</p>
+            <p className="font-bold text-xs mb-16">Le Sous-Dir DAAF</p>
             <p className="border-t border-black pt-2 text-xs">Visa</p>
             {engagement.visa_saf_date && (
               <p className="text-xs text-gray-500 mt-1">

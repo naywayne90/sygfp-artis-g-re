@@ -6,7 +6,7 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 
 // Étapes de validation workflow
 export const VALIDATION_STEPS = [
-  { order: 1, role: 'SAF', label: 'Service Administratif et Financier' },
+  { order: 1, role: 'DAAF', label: 'Sous-Directeur DAAF' },
   { order: 2, role: 'CB', label: 'Contrôleur Budgétaire' },
   { order: 3, role: 'DAF', label: 'Directeur Administratif et Financier' },
   { order: 4, role: 'DG', label: 'Directeur Général' },

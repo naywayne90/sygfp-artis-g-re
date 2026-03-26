@@ -7,6 +7,8 @@ import { useAuditLog } from '@/hooks/useAuditLog';
 import type { Json } from '@/integrations/supabase/types';
 import { checkValidationPermission } from '@/hooks/useCheckValidationPermission';
 import { generateARTIReference, ETAPE_CODES } from '@/lib/notes-sef/referenceService';
+import { useEngagementDeferResume } from '@/hooks/useEngagementDeferResume';
+import { useEngagementDegage } from '@/hooks/useEngagementDegage';
 
 export type TypeEngagement = 'sur_marche' | 'hors_marche';
 
@@ -207,8 +209,8 @@ export interface ExpressionValidee {
 export const VALIDATION_STEPS = [
   {
     order: 1,
-    role: 'SAF',
-    label: 'Service Administratif et Financier',
+    role: 'DAAF',
+    label: 'Sous-Directeur DAAF',
     visaStatut: 'visa_saf',
     visaPrefix: 'visa_saf',
   },
@@ -706,7 +708,7 @@ export function useEngagements() {
       const { data: safUsers } = await supabase
         .from('user_roles')
         .select('user_id')
-        .eq('role', 'SAF');
+        .eq('role', 'DAAF');
 
       if (safUsers?.length && submittedEng) {
         await supabase.from('notifications').insert(
@@ -743,7 +745,7 @@ export function useEngagements() {
       // Get current engagement with statut
       const { data: engagement, error: fetchError } = await supabase
         .from('budget_engagements')
-        .select('statut, current_step, numero, created_by, budget_line_id, montant')
+        .select('statut, current_step, numero, created_by, budget_line_id, montant, updated_at')
         .eq('id', id)
         .single();
 
@@ -753,6 +755,19 @@ export function useEngagements() {
       const stepNumber = getStepFromStatut(engagement?.statut);
       if (stepNumber === 0)
         throw new Error(`Statut "${engagement?.statut}" ne permet pas de validation`);
+
+      // Vérification documents obligatoires (étape 1 uniquement)
+      if (stepNumber === 1) {
+        const { data: docCheck } = await supabase.rpc('check_engagement_documents_complete', {
+          p_engagement_id: id,
+        });
+        if (docCheck && !docCheck.complete && docCheck.total > 0) {
+          const missing = (docCheck.missing as string[]) || [];
+          throw new Error(
+            `Documents obligatoires manquants : ${missing.join(', ')}. Veuillez compléter la checklist avant de valider.`
+          );
+        }
+      }
 
       const stepInfo = VALIDATION_STEPS[stepNumber - 1];
       if (!stepInfo) throw new Error(`Étape de validation ${stepNumber} invalide`);
@@ -790,7 +805,8 @@ export function useEngagements() {
       };
 
       // Update engagement — le trigger impose la transition de statut
-      const { error } = await supabase
+      // Optimistic locking : vérifier que updated_at n'a pas changé
+      const { data: updateResult, error } = await supabase
         .from('budget_engagements')
         .update({
           statut: stepInfo.visaStatut,
@@ -798,9 +814,16 @@ export function useEngagements() {
           workflow_status: isLastStep ? 'termine' : 'en_validation',
           ...visaColumns,
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('updated_at', engagement.updated_at)
+        .select('id');
 
       if (error) throw error;
+      if (!updateResult || updateResult.length === 0) {
+        throw new Error(
+          'Cet engagement a été modifié par un autre utilisateur. Veuillez recharger la page.'
+        );
+      }
 
       // NOTE: Le trigger AFTER fn_audit_engagement_visa crée automatiquement
       // le record engagement_validations + audit_logs. Pas besoin de le faire ici.
@@ -913,7 +936,7 @@ export function useEngagements() {
       // Get current engagement
       const { data: engagement } = await supabase
         .from('budget_engagements')
-        .select('statut, current_step, numero, created_by, budget_line_id')
+        .select('statut, current_step, numero, created_by, budget_line_id, updated_at')
         .eq('id', id)
         .single();
 
@@ -931,16 +954,24 @@ export function useEngagements() {
       }
 
       // Update engagement — le trigger exige motif_rejet pour la transition vers rejete
-      const { error } = await supabase
+      // Optimistic locking : vérifier que updated_at n'a pas changé
+      const { data: updateResult, error } = await supabase
         .from('budget_engagements')
         .update({
           statut: 'rejete',
           workflow_status: 'rejete',
           motif_rejet: reason,
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('updated_at', engagement?.updated_at ?? '')
+        .select('id');
 
       if (error) throw error;
+      if (!updateResult || updateResult.length === 0) {
+        throw new Error(
+          'Cet engagement a été modifié par un autre utilisateur. Veuillez recharger la page.'
+        );
+      }
 
       // NOTE: Le trigger AFTER fn_audit_engagement_visa crée automatiquement
       // le record engagement_validations. Pas besoin de le faire ici.
@@ -1016,194 +1047,11 @@ export function useEngagements() {
     },
   });
 
-  // Defer engagement
-  const deferMutation = useMutation({
-    mutationFn: async ({
-      id,
-      motif,
-      dateReprise,
-    }: {
-      id: string;
-      motif: string;
-      dateReprise?: string;
-    }) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
+  // Defer / Resume (extrait dans useEngagementDeferResume.ts)
+  const { deferEngagement, resumeEngagement, isDeferring, isResuming } = useEngagementDeferResume();
 
-      // Get current step pour déterminer le rôle requis
-      const { data: engagement } = await supabase
-        .from('budget_engagements')
-        .select('current_step, numero, created_by')
-        .eq('id', id)
-        .single();
-
-      const currentStep = engagement?.current_step || 1;
-      const requiredRole = VALIDATION_STEPS[currentStep - 1]?.role;
-      if (!requiredRole) throw new Error(`Étape de validation ${currentStep} invalide`);
-
-      // Vérifier la permission via RPC unifiée
-      const permCheck = await checkValidationPermission(user.id, 'engagements', requiredRole);
-      if (!permCheck.isAllowed) {
-        throw new Error(`Permission insuffisante pour différer à l'étape ${requiredRole}.`);
-      }
-
-      const { error } = await supabase
-        .from('budget_engagements')
-        .update({
-          statut: 'differe',
-          workflow_status: 'differe',
-          motif_differe: motif,
-          date_differe: new Date().toISOString(),
-          deadline_correction: dateReprise || null,
-          differe_by: user.id,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      await logAction({
-        entityType: 'engagement',
-        entityId: id,
-        action: 'defer',
-        newValues: { motif, dateReprise },
-      });
-
-      // Notifier le créateur du report
-      if (engagement?.created_by) {
-        await supabase.from('notifications').insert({
-          user_id: engagement.created_by,
-          type: 'differe',
-          title: 'Engagement différé',
-          message: `L'engagement ${engagement.numero} a été différé : ${motif}`,
-          entity_type: 'engagement',
-          entity_id: id,
-        });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engagements'] });
-      toast.success('Engagement différé');
-    },
-    onError: (error: Error) => {
-      toast.error("Erreur lors du report de l'engagement", {
-        description: error.message,
-      });
-    },
-  });
-
-  // Resume deferred engagement
-  const resumeMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('budget_engagements')
-        .update({
-          statut: 'soumis',
-          workflow_status: 'en_validation',
-          date_differe: null,
-          motif_differe: null,
-          deadline_correction: null,
-          differe_by: null,
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      await logAction({
-        entityType: 'engagement',
-        entityId: id,
-        action: 'resume',
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engagements'] });
-      toast.success('Engagement repris');
-    },
-    onError: (error: Error) => {
-      toast.error("Erreur lors de la reprise de l'engagement", {
-        description: error.message,
-      });
-    },
-  });
-
-  // Dégagement (total ou partiel) — DAAF/ADMIN uniquement (Prompt 8)
-  const degageMutation = useMutation({
-    mutationFn: async ({ id, montant, motif }: { id: string; montant: number; motif: string }) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('Non authentifié');
-
-      // Récupérer l'engagement
-      const { data: engagement, error: fetchError } = await supabase
-        .from('budget_engagements')
-        .select('statut, montant, montant_degage, budget_line_id, numero, created_by')
-        .eq('id', id)
-        .single();
-
-      if (fetchError || !engagement) throw new Error('Engagement introuvable');
-
-      if (engagement.statut !== 'valide')
-        throw new Error('Seuls les engagements validés peuvent être dégagés');
-
-      const montantRestant = engagement.montant - (engagement.montant_degage || 0);
-      if (montant <= 0) throw new Error('Le montant à dégager doit être supérieur à 0');
-      if (montant > montantRestant)
-        throw new Error(
-          `Le montant à dégager (${montant.toLocaleString('fr-FR')} FCFA) dépasse le montant restant (${montantRestant.toLocaleString('fr-FR')} FCFA)`
-        );
-
-      const nouveauMontantDegage = (engagement.montant_degage || 0) + montant;
-
-      // Mettre à jour l'engagement — statut reste 'valide'
-      const { error: updateError } = await supabase
-        .from('budget_engagements')
-        .update({
-          montant_degage: nouveauMontantDegage,
-          motif_degage: motif,
-          degage_by: user.id,
-          degage_at: new Date().toISOString(),
-        })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-
-      // Impact budget : géré automatiquement par le trigger DB
-      // trg_recalc_elop_engagements recalcule budget_lines.total_engage
-      // quand montant_degage change sur budget_engagements
-
-      await logAction({
-        entityType: 'engagement',
-        entityId: id,
-        action: 'degage',
-        newValues: { montant, motif, total: nouveauMontantDegage >= engagement.montant },
-      });
-
-      // Notifier le créateur
-      if (engagement.created_by) {
-        const isTotal = nouveauMontantDegage >= engagement.montant;
-        await supabase.from('notifications').insert({
-          user_id: engagement.created_by,
-          type: 'degagement',
-          title: isTotal ? 'Dégagement total' : 'Dégagement partiel',
-          message: `L'engagement ${engagement.numero} a été ${isTotal ? 'totalement dégagé' : `partiellement dégagé (${montant.toLocaleString('fr-FR')} FCFA)`} : ${motif}`,
-          entity_type: 'engagement',
-          entity_id: id,
-        });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['engagements'] });
-      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
-      toast.success('Dégagement effectué avec succès');
-    },
-    onError: (error: Error) => {
-      toast.error('Erreur lors du dégagement', {
-        description: error.message,
-      });
-    },
-  });
+  // Dégagement (extrait dans useEngagementDegage.ts)
+  const { degageEngagement, isDegaging } = useEngagementDegage();
 
   // Update engagement (for locked fields with justification)
   const updateMutation = useMutation({
@@ -1323,14 +1171,16 @@ export function useEngagements() {
     submitEngagement: submitMutation.mutateAsync,
     validateEngagement: validateMutation.mutateAsync,
     rejectEngagement: rejectMutation.mutateAsync,
-    deferEngagement: deferMutation.mutateAsync,
-    resumeEngagement: resumeMutation.mutateAsync,
+    deferEngagement,
+    resumeEngagement,
     updateEngagement: updateMutation.mutateAsync,
-    degageEngagement: degageMutation.mutateAsync,
+    degageEngagement,
     isCreating: createMutation.isPending,
     isSubmitting: submitMutation.isPending,
     isValidating: validateMutation.isPending,
-    isDegaging: degageMutation.isPending,
+    isDeferring,
+    isResuming,
+    isDegaging,
   };
 }
 

@@ -192,7 +192,8 @@ function useCanValidateModule(scope: string, directRoles: string[]) {
     },
   });
 
-  const hasDirectRole = directRoles.some((role) => (userRoles as string[] | undefined)?.includes(role)) ?? false;
+  const hasDirectRole =
+    directRoles.some((role) => (userRoles as string[] | undefined)?.includes(role)) ?? false;
   const isAdmin = userRoles?.includes('ADMIN');
   const hasDelegation = hasDelegationFor(scope);
   const delegatorInfo = getDelegatorInfo(scope);
@@ -209,10 +210,10 @@ function useCanValidateModule(scope: string, directRoles: string[]) {
 
 /**
  * Hook pour vérifier la capacité de valider les Engagements
- * Rôles directs : CB (Contrôleur Budgétaire)
+ * Rôles directs : CB, DAAF, DAF, DG (circuit Sous-Dir DAAF → CB → DAAF → DG)
  */
 export function useCanValidateEngagement() {
-  return useCanValidateModule('engagements', ['CB', 'CONTROLEUR_BUDGETAIRE']);
+  return useCanValidateModule('engagements', ['CB', 'DAAF', 'DAF', 'DG']);
 }
 
 /**

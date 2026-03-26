@@ -108,7 +108,7 @@ export default function Engagements() {
     isDAF || isAdmin || ['DAAF', 'DAF', 'DG', 'ADMIN'].some((r) => userRoleList.includes(r));
 
   // Rôle principal (codes user_roles) pour filtrage RBAC du menu Actions
-  const ROLE_PRIORITY = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'SAF', 'OPERATEUR'] as const;
+  const ROLE_PRIORITY = ['ADMIN', 'DG', 'DAAF', 'DAF', 'CB', 'OPERATEUR'] as const;
   const userRole = ROLE_PRIORITY.find((r) => userRoleList.includes(r)) || userRoleList[0] || null;
 
   // Filtrage par direction : rôles centraux voient tout, agents voient leur direction

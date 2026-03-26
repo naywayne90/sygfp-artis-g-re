@@ -60,7 +60,7 @@ export function fmtDateExport(iso: string | null | undefined): string {
 export function statutLabel(statut: string | null | undefined): string {
   const labels: Record<string, string> = {
     soumis: 'Soumis',
-    visa_saf: 'Visa SAF',
+    visa_saf: 'Visa Sous-Dir DAAF',
     visa_cb: 'Visa CB',
     visa_daaf: 'Visa DAAF',
     valide: 'Validé',
@@ -227,7 +227,7 @@ function doExportExcel(
     'Direction',
     'Statut',
     'Date engagement',
-    'Visa SAF',
+    'Visa Sous-Dir DAAF',
     'Visa CB',
     'Visa DAAF',
     'Validation DG',
@@ -423,7 +423,7 @@ function doExportCSV(
     'Direction',
     'Statut',
     'Date engagement',
-    'Visa SAF',
+    'Visa Sous-Dir DAAF',
     'Visa CB',
     'Visa DAAF',
     'Validation DG',

@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
   Loader2,
@@ -692,6 +693,66 @@ export function EngagementForm({
                     })()}
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Budget availability — détail par ligne (multi-lignes) */}
+              {isMultiLigneForm && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Détail budgétaire par ligne
+                  </Label>
+                  <div className="space-y-2">
+                    {selectedLines.map((line, idx) => {
+                      const isSuffisant = line.montant <= line.disponible_net;
+                      const progressPercent =
+                        line.disponible_net > 0
+                          ? Math.min(Math.round((line.montant / line.disponible_net) * 100), 100)
+                          : line.montant > 0
+                            ? 100
+                            : 0;
+                      return (
+                        <Card
+                          key={line.id}
+                          className={
+                            isSuffisant
+                              ? 'border-green-200 bg-green-50/30'
+                              : 'border-destructive bg-destructive/5'
+                          }
+                        >
+                          <CardContent className="pt-3 pb-3 space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-mono text-muted-foreground truncate">
+                                {idx + 1}. {line.code} — {line.label}
+                              </span>
+                              <Badge
+                                variant={isSuffisant ? 'default' : 'destructive'}
+                                className={isSuffisant ? 'bg-green-600 hover:bg-green-700' : ''}
+                              >
+                                {isSuffisant ? 'Suffisant' : 'Insuffisant'}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-4 text-xs">
+                              <div>
+                                <span className="text-muted-foreground">Montant ventilé :</span>{' '}
+                                <span className="font-medium">{formatCurrency(line.montant)}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Disponible net :</span>{' '}
+                                <span className="font-medium">
+                                  {formatCurrency(line.disponible_net)}
+                                </span>
+                              </div>
+                            </div>
+                            <Progress
+                              value={progressPercent}
+                              className={`h-2 ${isSuffisant ? '[&>div]:bg-green-600' : '[&>div]:bg-destructive'}`}
+                            />
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
 
               <Separator />

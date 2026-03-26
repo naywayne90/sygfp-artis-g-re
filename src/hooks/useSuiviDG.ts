@@ -631,7 +631,7 @@ export function useSuiviDG() {
 
       // Engagements (pas de direction_id — table liée via budget_line_id)
       const engEtapeMap: Record<string, { etape: string; role: string }> = {
-        soumis: { etape: 'Visa SAF', role: 'SAF' },
+        soumis: { etape: 'Visa Sous-Dir DAAF', role: 'DAAF' },
         visa_saf: { etape: 'Visa CB', role: 'CB' },
         visa_cb: { etape: 'Visa DAAF', role: 'DAAF' },
         visa_daaf: { etape: 'Visa DG', role: 'DG' },

@@ -74,9 +74,9 @@ const createMockEngagement = (overrides: Partial<Engagement> = {}): Engagement =
   tva: 18,
   fournisseur: 'Test Fournisseur',
   date_engagement: '2026-01-15',
-  statut: 'brouillon',
-  workflow_status: 'en_attente',
-  current_step: 0,
+  statut: 'soumis',
+  workflow_status: 'en_validation',
+  current_step: 1,
   budget_line_id: 'bl-001',
   expression_besoin_id: 'eb-001',
   marche_id: null,
@@ -143,7 +143,7 @@ describe('VALIDATION_STEPS', () => {
   });
 
   it('devrait avoir les bons rôles', () => {
-    expect(VALIDATION_STEPS.map((s) => s.role)).toEqual(['SAF', 'CB', 'DAF', 'DG']);
+    expect(VALIDATION_STEPS.map((s) => s.role)).toEqual(['DAAF', 'CB', 'DAF', 'DG']);
   });
 
   it('chaque étape devrait avoir un label non vide', () => {
@@ -209,8 +209,9 @@ describe('getStepFromStatut', () => {
     expect(getStepFromStatut('visa_daaf')).toBe(4);
   });
 
-  it('brouillon → 0', () => {
+  it('statut inconnu → 0', () => {
     expect(getStepFromStatut('brouillon')).toBe(0);
+    expect(getStepFromStatut('inexistant')).toBe(0);
   });
 
   it('valide → 0', () => {
@@ -297,7 +298,7 @@ describe('checkEngagementCompleteness', () => {
 // ===========================================================================
 describe('Filter helpers', () => {
   const engagements = [
-    createMockEngagement({ id: '1', statut: 'brouillon', workflow_status: 'en_attente' }),
+    createMockEngagement({ id: '1', statut: 'soumis', workflow_status: 'en_validation' }),
     createMockEngagement({ id: '2', statut: 'soumis', workflow_status: 'en_validation' }),
     createMockEngagement({ id: '3', statut: 'visa_saf', workflow_status: 'en_validation' }),
     createMockEngagement({ id: '4', statut: 'visa_cb', workflow_status: 'en_validation' }),
@@ -311,7 +312,7 @@ describe('Filter helpers', () => {
 
   it('filterAValider retourne les engagements en cours de validation (soumis + visa_*)', () => {
     const result = filterAValider(engagements);
-    expect(result).toHaveLength(4);
+    expect(result).toHaveLength(5);
     result.forEach((e) => {
       expect((VALIDATION_STATUTS as readonly string[]).includes(e.statut || '')).toBe(true);
     });
@@ -434,14 +435,14 @@ describe('Budget availability', () => {
 // 4. Engagement statut workflow (updated with visa statuts)
 // ===========================================================================
 describe('Engagement statut workflow', () => {
-  it('statut initial est brouillon', () => {
+  it('statut initial est soumis (création directe, pas de brouillon)', () => {
     const eng = createMockEngagement();
-    expect(eng.statut).toBe('brouillon');
-    expect(eng.workflow_status).toBe('en_attente');
-    expect(eng.current_step).toBe(0);
+    expect(eng.statut).toBe('soumis');
+    expect(eng.workflow_status).toBe('en_validation');
+    expect(eng.current_step).toBe(1);
   });
 
-  it('soumission: brouillon → soumis', () => {
+  it('soumission: engagement créé en soumis, prêt pour visa Sous-Dir DAAF', () => {
     const eng = createMockEngagement({
       statut: 'soumis',
       workflow_status: 'en_validation',
@@ -541,7 +542,6 @@ describe('Engagement statut workflow', () => {
 
   it('statuts valides sont reconnus', () => {
     const validStatuts = [
-      'brouillon',
       'soumis',
       'visa_saf',
       'visa_cb',
@@ -799,8 +799,9 @@ describe('fmtDateExport', () => {
 // 10. Export helpers — statutLabel
 // ===========================================================================
 describe('statutLabel', () => {
-  it('traduit brouillon', () => {
+  it('statut inconnu retourne la valeur brute', () => {
     expect(statutLabel('brouillon')).toBe('brouillon');
+    expect(statutLabel('inconnu')).toBe('inconnu');
   });
 
   it('traduit soumis', () => {
@@ -808,7 +809,7 @@ describe('statutLabel', () => {
   });
 
   it('traduit visa_saf', () => {
-    expect(statutLabel('visa_saf')).toBe('Visa SAF');
+    expect(statutLabel('visa_saf')).toBe('Visa Sous-Dir DAAF');
   });
 
   it('traduit visa_cb', () => {
@@ -1049,8 +1050,8 @@ describe('isRoleForStep', () => {
     expect(isRoleForStep('visa_daaf', 'ADMIN')).toBe(true);
   });
 
-  it('SAF agit sur soumis', () => {
-    expect(isRoleForStep('soumis', 'SAF')).toBe(true);
+  it('DAAF (Sous-Dir) agit sur soumis', () => {
+    expect(isRoleForStep('soumis', 'DAAF')).toBe(true);
   });
 
   it('OPERATEUR agit sur soumis', () => {
@@ -1073,8 +1074,8 @@ describe('isRoleForStep', () => {
     expect(isRoleForStep('visa_daaf', 'DG')).toBe(true);
   });
 
-  it('SAF ne peut pas agir sur visa_saf', () => {
-    expect(isRoleForStep('visa_saf', 'SAF')).toBe(false);
+  it('DAAF ne peut pas agir sur visa_saf (étape suivante = CB)', () => {
+    expect(isRoleForStep('visa_saf', 'DAAF')).toBe(false);
   });
 
   it('CB ne peut pas agir sur soumis', () => {
@@ -1090,7 +1091,7 @@ describe('isRoleForStep', () => {
   });
 
   it('retourne false si statut brouillon', () => {
-    expect(isRoleForStep('brouillon', 'SAF')).toBe(false);
+    expect(isRoleForStep('brouillon', 'DAAF')).toBe(false);
   });
 
   it('retourne false si statut valide', () => {
@@ -1098,11 +1099,11 @@ describe('isRoleForStep', () => {
   });
 
   it('retourne false si statut rejete', () => {
-    expect(isRoleForStep('rejete', 'SAF')).toBe(false);
+    expect(isRoleForStep('rejete', 'DAAF')).toBe(false);
   });
 
   it('retourne false si statut null', () => {
-    expect(isRoleForStep(null, 'SAF')).toBe(false);
+    expect(isRoleForStep(null, 'DAAF')).toBe(false);
   });
 });
 
@@ -1182,8 +1183,8 @@ describe("QR code — condition d'affichage", () => {
     expect(showQR).toBe(true);
   });
 
-  it('engagement brouillon → QR masqué', () => {
-    const engagement = { statut: 'brouillon', visa_dg_date: null, visa_dg_user_id: null };
+  it('engagement non validé → QR masqué', () => {
+    const engagement = { statut: 'soumis', visa_dg_date: null, visa_dg_user_id: null };
     const showQR = engagement.statut === 'valide' && !!engagement.visa_dg_date;
     expect(showQR).toBe(false);
   });
@@ -1428,7 +1429,7 @@ describe('EngagementChainNav — buildChainSteps', () => {
     tva: null,
     fournisseur: null,
     date_engagement: '2026-01-15',
-    statut: 'brouillon' as string | null,
+    statut: 'soumis' as string | null,
     workflow_status: null,
     current_step: null,
     budget_line_id: 'bl-1',
@@ -1467,7 +1468,7 @@ describe('EngagementChainNav — buildChainSteps', () => {
     is_multi_ligne: null,
   };
 
-  it('engagement brouillon sans passation → passation unavailable, liquidation unavailable', () => {
+  it('engagement soumis sans passation → passation unavailable, liquidation unavailable', () => {
     const steps = buildChainSteps(baseEngagement);
     expect(steps).toHaveLength(3);
     expect(steps[0].key).toBe('passation');
@@ -2464,5 +2465,127 @@ describe('EngagementLigne — type et structure', () => {
     expect(uniqueLineIds.size).toBe(3);
     const totalMontant = lignes.reduce((acc, l) => acc + l.montant, 0);
     expect(totalMontant).toBe(10_000_000);
+  });
+});
+
+// ===========================================================================
+// Dégagement validation
+// ===========================================================================
+describe('Dégagement validation', () => {
+  // Helper to simulate dégagement validation
+  function validateDegage(
+    engagement: { montant: number; montant_degage: number | null; statut: string },
+    montant: number,
+    motif: string
+  ): { valid: boolean; error?: string; nouveauTotal?: number } {
+    if (engagement.statut !== 'valide')
+      return { valid: false, error: 'Seuls les engagements validés peuvent être dégagés' };
+    if (montant <= 0) return { valid: false, error: 'Le montant doit être supérieur à 0' };
+    const restant = engagement.montant - (engagement.montant_degage || 0);
+    if (montant > restant) return { valid: false, error: 'Montant dépasse le restant' };
+    if (!motif.trim()) return { valid: false, error: 'Motif obligatoire' };
+    return { valid: true, nouveauTotal: (engagement.montant_degage || 0) + montant };
+  }
+
+  it('dégagement partiel valide', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, 300_000, 'Réduction de périmètre');
+    expect(result.valid).toBe(true);
+    expect(result.nouveauTotal).toBe(300_000);
+  });
+
+  it('dégagement total valide (montant = restant)', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, 1_000_000, 'Annulation complète');
+    expect(result.valid).toBe(true);
+    expect(result.nouveauTotal).toBe(1_000_000);
+  });
+
+  it('overflow (montant > restant) → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: 600_000, statut: 'valide' };
+    const result = validateDegage(eng, 500_000, 'Trop');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Montant dépasse le restant');
+  });
+
+  it('montant zéro → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, 0, 'Motif');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Le montant doit être supérieur à 0');
+  });
+
+  it('montant négatif → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, -100, 'Motif');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Le montant doit être supérieur à 0');
+  });
+
+  it('motif vide → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, 300_000, '');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Motif obligatoire');
+  });
+
+  it('motif avec espaces uniquement → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const result = validateDegage(eng, 300_000, '   ');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Motif obligatoire');
+  });
+
+  it('engagement non validé → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'soumis' };
+    const result = validateDegage(eng, 300_000, 'Motif valide');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Seuls les engagements validés peuvent être dégagés');
+  });
+
+  it('engagement rejeté → erreur', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'rejete' };
+    const result = validateDegage(eng, 300_000, 'Motif valide');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Seuls les engagements validés peuvent être dégagés');
+  });
+
+  it('dégagement cumulatif (2 successifs)', () => {
+    const eng = { montant: 1_000_000, montant_degage: null, statut: 'valide' };
+    const r1 = validateDegage(eng, 300_000, 'Premier dégagement');
+    expect(r1.valid).toBe(true);
+    expect(r1.nouveauTotal).toBe(300_000);
+
+    // Simule le 2e dégagement après le 1er
+    const engAfter = { ...eng, montant_degage: r1.nouveauTotal! };
+    const r2 = validateDegage(engAfter, 400_000, 'Deuxième dégagement');
+    expect(r2.valid).toBe(true);
+    expect(r2.nouveauTotal).toBe(700_000);
+  });
+
+  it('dégagement cumulatif — le 3e dépasse le restant', () => {
+    const eng = { montant: 1_000_000, montant_degage: 700_000, statut: 'valide' };
+    const result = validateDegage(eng, 400_000, 'Trop cumulé');
+    expect(result.valid).toBe(false);
+    expect(result.error).toBe('Montant dépasse le restant');
+  });
+
+  it('RBAC: isRoleForStep pour les rôles autorisés à dégager', () => {
+    // Les rôles DAAF, DG et ADMIN sont les rôles typiques pouvant dégager
+    // Vérifie que isRoleForStep reconnaît bien ces rôles pour les étapes de validation
+    const degageRoles = ['DAAF', 'DG'];
+    degageRoles.forEach((role) => {
+      // DAAF peut valider à l'étape soumis (step 1) et visa_cb (step 3)
+      // DG peut valider à l'étape visa_daaf (step 4)
+      const canValidateSomeStep = ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf'].some((statut) =>
+        isRoleForStep(statut, role)
+      );
+      expect(canValidateSomeStep).toBe(true);
+    });
+  });
+
+  it('RBAC: CB peut valider mais à son étape uniquement', () => {
+    expect(isRoleForStep('visa_saf', 'CB')).toBe(true);
+    expect(isRoleForStep('soumis', 'CB')).toBe(false);
   });
 });
