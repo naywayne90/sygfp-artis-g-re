@@ -685,10 +685,11 @@ export default function ScanningEngagement() {
       </Tabs>
 
       {/* Detail Dialog */}
-      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog} modal={false}>
         <DialogContent
           className="max-w-3xl max-h-[90vh] overflow-y-auto"
           onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>
