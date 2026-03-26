@@ -1,15 +1,15 @@
 /**
- * InlineDocumentUpload — Upload inline avec react-dropzone
+ * InlineDocumentUpload — Upload avec un VRAI bouton visible
  *
- * Utilise react-dropzone (deja installe) pour un file picker fiable
- * dans tous les navigateurs + drag-and-drop.
+ * Approche simple et fiable : un <label> qui enveloppe un bouton visible
+ * avec un <input type="file"> a l'interieur du label.
+ * Le navigateur ouvre nativement le file picker quand on clique sur le label.
+ * Pas de hack CSS, pas de dropzone, pas de JavaScript pour ouvrir le picker.
  */
 
 import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
 import { cn } from '@/lib/utils';
-import { Upload, CheckCircle2, Loader2, FileText, X, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Upload, CheckCircle2, Loader2, FileText, X, AlertCircle, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE } from '@/hooks/useEngagementDocuments';
@@ -48,13 +48,22 @@ export function InlineDocumentUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
       if (!file) return;
 
+      // Reset input
+      e.target.value = '';
+
+      // Validate
+      if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+        setError('Format non accepté (PDF, JPG, PNG, GIF, WEBP)');
+        toast.error('Format non accepté. Utilisez PDF, JPG, PNG, GIF ou WEBP.');
+        return;
+      }
       if (file.size > MAX_FILE_SIZE) {
-        setError('Fichier trop volumineux (max 10 Mo).');
+        setError('Trop volumineux (max 10 Mo)');
         toast.error('Fichier trop volumineux (max 10 Mo).');
         return;
       }
@@ -76,7 +85,7 @@ export function InlineDocumentUpload({
         onUploadSuccess(documentId, filePath, file.name, file.size, file.type);
         toast.success(`${label} ajouté`);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur lors du téléversement';
+        const msg = err instanceof Error ? err.message : 'Erreur';
         setError(msg);
         toast.error(msg);
       } finally {
@@ -86,22 +95,9 @@ export function InlineDocumentUpload({
     [documentId, engagementId, label, onUploadSuccess]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/gif': ['.gif'],
-      'image/webp': ['.webp'],
-    },
-    maxFiles: 1,
-    multiple: false,
-    disabled: disabled || isUploading || isFourni,
-    noKeyboard: true,
-  });
+  const inputId = `scan-file-${documentId}`;
 
-  // Document deja fourni
+  // Document deja fourni — affichage vert
   if (isFourni) {
     return (
       <div className="flex items-center gap-3 p-3 rounded-lg border border-green-200 bg-green-50/50">
@@ -123,43 +119,28 @@ export function InlineDocumentUpload({
           )}
         </div>
         {onRemove && !disabled && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
+            type="button"
             onClick={() => onRemove(documentId)}
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+            className="h-7 w-7 flex items-center justify-center rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
           >
             <X className="h-4 w-4" />
-          </Button>
+          </button>
         )}
       </div>
     );
   }
 
-  // Zone d'upload avec react-dropzone
+  // Document a fournir — avec VRAI bouton visible
   return (
     <div
-      {...getRootProps()}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200',
-        isDragActive && 'border-primary bg-primary/5 scale-[1.01]',
-        !isDragActive &&
-          !error &&
-          'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30',
-        error && 'border-destructive/50 bg-destructive/5',
-        isUploading && 'opacity-70 cursor-wait',
-        disabled && 'opacity-50 cursor-not-allowed'
+        'flex items-center gap-3 p-3 rounded-lg border',
+        error ? 'border-destructive/50 bg-destructive/5' : 'border-muted-foreground/20 bg-muted/20',
+        isUploading && 'opacity-70'
       )}
     >
-      <input {...getInputProps()} />
-
-      {isUploading ? (
-        <Loader2 className="h-5 w-5 text-primary animate-spin shrink-0" />
-      ) : error ? (
-        <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
-      ) : (
-        <Upload className="h-5 w-5 text-muted-foreground shrink-0" />
-      )}
+      <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -170,18 +151,41 @@ export function InlineDocumentUpload({
             </span>
           )}
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {isUploading
-            ? 'Téléversement en cours...'
-            : error
-              ? error
-              : isDragActive
-                ? 'Déposez le fichier ici'
-                : 'Glissez un fichier ici ou cliquez pour sélectionner'}
-        </p>
+        {error && <p className="text-xs text-destructive mt-0.5">{error}</p>}
       </div>
 
-      <FileText className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+      {/* VRAI bouton visible — le label enveloppe le bouton + l'input */}
+      <label
+        htmlFor={disabled || isUploading ? undefined : inputId}
+        className={cn(
+          'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+          'bg-primary text-primary-foreground hover:bg-primary/90',
+          'cursor-pointer select-none',
+          (disabled || isUploading) && 'opacity-50 cursor-not-allowed'
+        )}
+      >
+        {isUploading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Paperclip className="h-4 w-4" />
+        )}
+        {isUploading ? 'Envoi...' : 'Choisir'}
+        <input
+          id={inputId}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.webp"
+          onChange={handleFileChange}
+          disabled={disabled || isUploading}
+          style={{
+            position: 'absolute',
+            width: 1,
+            height: 1,
+            opacity: 0,
+            overflow: 'hidden',
+            clip: 'rect(0,0,0,0)',
+          }}
+        />
+      </label>
     </div>
   );
 }
