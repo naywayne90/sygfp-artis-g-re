@@ -40,6 +40,7 @@ import {
   FileCheck,
   FileX,
   Upload,
+  X,
   Filter,
   FolderOpen,
   Send,
@@ -684,85 +685,95 @@ export default function ScanningEngagement() {
         </TabsContent>
       </Tabs>
 
-      {/* Detail Dialog */}
-      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog} modal={false}>
-        <DialogContent
-          className="max-w-3xl max-h-[90vh] overflow-y-auto"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
-        >
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ScanLine className="h-5 w-5" />
-              {selectedEngagement?.numero} - Documents
-            </DialogTitle>
-            <DialogDescription>{selectedEngagement?.objet}</DialogDescription>
-          </DialogHeader>
-
-          {selectedEngagement && (
-            <div className="space-y-6">
-              {/* Engagement info */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="text-sm text-muted-foreground">Fournisseur</p>
-                  <p className="font-medium">{selectedEngagement.fournisseur || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Montant</p>
-                  <p className="font-medium">{formatCurrency(selectedEngagement.montant)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Direction</p>
-                  <p className="font-medium">{selectedEngagement.direction_libelle || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Date engagement</p>
-                  <p className="font-medium">
-                    {format(new Date(selectedEngagement.date_engagement), 'dd MMMM yyyy', {
-                      locale: fr,
-                    })}
-                  </p>
-                </div>
+      {/* Detail Panel — PAS de Dialog/Portal pour que input[file] fonctionne */}
+      {showDetailDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black/50" onClick={() => setShowDetailDialog(false)} />
+          {/* Panel */}
+          <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-background border rounded-lg shadow-xl p-6 mx-4">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <ScanLine className="h-5 w-5" />
+                  {selectedEngagement?.numero} - Documents
+                </h2>
+                <p className="text-sm text-muted-foreground">{selectedEngagement?.objet}</p>
               </div>
-
-              {/* Checklist */}
-              <EngagementChecklist
-                engagementId={selectedEngagement.id}
-                canEdit={selectedEngagement.statut === 'soumis'}
-                showProgress={true}
-                onCompletenessChange={handleChecklistChange}
-                blockSubmitIfIncomplete={true}
-              />
-            </div>
-          )}
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
-              Fermer
-            </Button>
-            {selectedEngagement?.statut === 'soumis' && (
-              <Button
-                onClick={handleSubmit}
-                disabled={!isChecklistComplete || submitMutation.isPending}
-                className="gap-2"
+              <button
+                onClick={() => setShowDetailDialog(false)}
+                className="rounded-sm opacity-70 hover:opacity-100 transition-opacity"
               >
-                {submitMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Soumission...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" />
-                    Soumettre pour validation
-                  </>
-                )}
-              </Button>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {selectedEngagement && (
+              <div className="space-y-6">
+                {/* Engagement info */}
+                <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Fournisseur</p>
+                    <p className="font-medium">{selectedEngagement.fournisseur || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Montant</p>
+                    <p className="font-medium">{formatCurrency(selectedEngagement.montant)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Direction</p>
+                    <p className="font-medium">{selectedEngagement.direction_libelle || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date engagement</p>
+                    <p className="font-medium">
+                      {format(new Date(selectedEngagement.date_engagement), 'dd MMMM yyyy', {
+                        locale: fr,
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Checklist */}
+                <EngagementChecklist
+                  engagementId={selectedEngagement.id}
+                  canEdit={selectedEngagement.statut === 'soumis'}
+                  showProgress={true}
+                  onCompletenessChange={handleChecklistChange}
+                  blockSubmitIfIncomplete={true}
+                />
+              </div>
             )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
+                Fermer
+              </Button>
+              {selectedEngagement?.statut === 'soumis' && (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!isChecklistComplete || submitMutation.isPending}
+                  className="gap-2"
+                >
+                  {submitMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Soumission...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Soumettre pour validation
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
