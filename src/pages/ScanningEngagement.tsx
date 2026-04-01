@@ -25,13 +25,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search,
@@ -48,6 +50,9 @@ import {
   AlertTriangle,
   RefreshCw,
   Building,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Activity,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -60,6 +65,7 @@ import { formatCurrency } from '@/lib/utils';
 import { EngagementChecklist } from '@/components/engagement/EngagementChecklist';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { ExportButtons } from '@/components/etats/ExportButtons';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import { ExportColumn } from '@/lib/export';
 
 // Types
@@ -98,6 +104,15 @@ interface ActiviteOption {
   code: string;
   libelle: string;
 }
+
+type SortField =
+  | 'numero'
+  | 'objet'
+  | 'fournisseur'
+  | 'montant'
+  | 'dotation_initiale'
+  | 'disponible';
+type SortDirection = 'asc' | 'desc';
 
 const getDocumentStatusBadge = (
   provided: number,
@@ -141,8 +156,13 @@ export default function ScanningEngagement() {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedEngagement, setSelectedEngagement] = useState<ScanningEngagement | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [isChecklistComplete, setIsChecklistComplete] = useState(false);
   const [_isChecklistVerified, _setIsChecklistVerified] = useState(false);
+  const [sortField, setSortField] = useState<SortField>('numero');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Fetch directions for filter
   const { data: directions = [] } = useQuery({
@@ -194,6 +214,7 @@ export default function ScanningEngagement() {
             id,
             code,
             dotation_initiale,
+            total_engage,
             direction:directions(id, code, label),
             activite:activites(id, code, libelle),
             os:objectifs_strategiques(id, code, libelle)
@@ -263,8 +284,8 @@ export default function ScanningEngagement() {
           activite_libelle: activite?.libelle || null,
           budget_line_code: budgetLine?.code || null,
           dotation_initiale: budgetLine?.dotation_initiale || 0,
-          cumul_engagements: 0, // Could be calculated if needed
-          disponible: budgetLine?.dotation_initiale || 0,
+          cumul_engagements: budgetLine?.total_engage || 0,
+          disponible: (budgetLine?.dotation_initiale || 0) - (budgetLine?.total_engage || 0),
           os_code: os?.code || null,
           documents_count: stats.total,
           documents_provided: stats.provided,
@@ -282,9 +303,10 @@ export default function ScanningEngagement() {
       const { error } = await supabase
         .from('budget_engagements')
         .update({
-          statut: 'soumis',
-          workflow_status: 'pending',
+          statut: 'visa_saf',
+          workflow_status: 'en_validation',
           current_step: 1,
+          documents_complets: true,
         })
         .eq('id', engagementId);
 
@@ -293,14 +315,14 @@ export default function ScanningEngagement() {
       await logAction({
         entityType: 'engagement',
         entityId: engagementId,
-        action: 'SUBMIT',
-        newValues: { statut: 'soumis' },
+        action: 'SUBMIT_SCANNING',
+        newValues: { statut: 'visa_saf', documents_complets: true },
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scanning-engagements'] });
       queryClient.invalidateQueries({ queryKey: ['engagements'] });
-      toast.success('Engagement soumis pour validation');
+      toast.success('Documents validés — engagement transmis pour visa SAF');
       setShowDetailDialog(false);
       setSelectedEngagement(null);
     },
@@ -357,8 +379,54 @@ export default function ScanningEngagement() {
     });
   }, [engagements, searchQuery, selectedDirection, selectedActivite, selectedStatus]);
 
-  // Filter soumis engagements
-  const soumisEngagements = filteredEngagements.filter((e) => e.statut === 'soumis');
+  // Filter soumis engagements (à scanner) + tri
+  const soumisEngagements = useMemo(() => {
+    const filtered = filteredEngagements.filter((e) => e.statut === 'soumis');
+    return [...filtered].sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'numero':
+          comparison = a.numero.localeCompare(b.numero);
+          break;
+        case 'objet':
+          comparison = (a.objet || '').localeCompare(b.objet || '');
+          break;
+        case 'fournisseur':
+          comparison = (a.fournisseur || '').localeCompare(b.fournisseur || '');
+          break;
+        case 'montant':
+          comparison = a.montant - b.montant;
+          break;
+        case 'dotation_initiale':
+          comparison = a.dotation_initiale - b.dotation_initiale;
+          break;
+        case 'disponible':
+          comparison = a.disponible - b.disponible;
+          break;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [filteredEngagements, sortField, sortDirection]);
+
+  // Sort handler
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Sort icon
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />;
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="h-3 w-3 ml-1" />
+    ) : (
+      <ArrowDown className="h-3 w-3 ml-1" />
+    );
+  };
 
   // Stats
   const totalEngagements = filteredEngagements.length;
@@ -375,6 +443,12 @@ export default function ScanningEngagement() {
     setShowDetailDialog(true);
   };
 
+  const handleCloseDetail = () => {
+    setShowDetailDialog(false);
+    setSelectedEngagement(null);
+    queryClient.invalidateQueries({ queryKey: ['scanning-engagements'] });
+  };
+
   const handleChecklistChange = (isComplete: boolean, isVerified: boolean) => {
     setIsChecklistComplete(isComplete);
     _setIsChecklistVerified(isVerified);
@@ -382,7 +456,14 @@ export default function ScanningEngagement() {
 
   const handleSubmit = () => {
     if (selectedEngagement && isChecklistComplete) {
+      setShowConfirmDialog(true);
+    }
+  };
+
+  const handleConfirmSubmit = () => {
+    if (selectedEngagement) {
       submitMutation.mutate(selectedEngagement.id);
+      setShowConfirmDialog(false);
     }
   };
 
@@ -391,6 +472,7 @@ export default function ScanningEngagement() {
     setSelectedDirection('all');
     setSelectedActivite('all');
     setSelectedStatus('all');
+    setPage(1);
   };
 
   // Export columns definition
@@ -404,8 +486,6 @@ export default function ScanningEngagement() {
     { key: 'cumul_engagements', label: 'Cumul', type: 'currency' },
     { key: 'disponible', label: 'Disponible', type: 'currency' },
     { key: 'direction_code', label: 'Direction', type: 'text' },
-    { key: 'activite_code', label: 'Code Activité', type: 'text' },
-    { key: 'os_code', label: 'N° OS', type: 'text' },
     { key: 'statut', label: 'Statut', type: 'text' },
   ];
 
@@ -596,22 +676,62 @@ export default function ScanningEngagement() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Numéro</TableHead>
-                      <TableHead>Objet</TableHead>
-                      <TableHead>Fournisseur</TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('numero')}
+                      >
+                        <span className="flex items-center">
+                          Numéro <SortIcon field="numero" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('objet')}
+                      >
+                        <span className="flex items-center">
+                          Objet <SortIcon field="objet" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('fournisseur')}
+                      >
+                        <span className="flex items-center">
+                          Fournisseur <SortIcon field="fournisseur" />
+                        </span>
+                      </TableHead>
                       <TableHead>Direction</TableHead>
-                      <TableHead className="text-right">Dotation</TableHead>
+                      <TableHead
+                        className="text-right cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('dotation_initiale')}
+                      >
+                        <span className="flex items-center justify-end">
+                          Dotation <SortIcon field="dotation_initiale" />
+                        </span>
+                      </TableHead>
                       <TableHead className="text-right hidden lg:table-cell">Cumul</TableHead>
-                      <TableHead className="text-right hidden lg:table-cell">Disponible</TableHead>
-                      <TableHead className="text-right">Montant</TableHead>
-                      <TableHead className="hidden xl:table-cell">Code Act.</TableHead>
-                      <TableHead className="hidden xl:table-cell">N° OS</TableHead>
+                      <TableHead
+                        className="text-right cursor-pointer hover:bg-muted/50 hidden lg:table-cell"
+                        onClick={() => handleSort('disponible')}
+                      >
+                        <span className="flex items-center justify-end">
+                          Disponible <SortIcon field="disponible" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="text-right cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleSort('montant')}
+                      >
+                        <span className="flex items-center justify-end">
+                          Montant <SortIcon field="montant" />
+                        </span>
+                      </TableHead>
                       <TableHead className="text-center">Documents</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {soumisEngagements.map((eng) => (
+                    {soumisEngagements.slice((page - 1) * pageSize, page * pageSize).map((eng) => (
                       <TableRow key={eng.id}>
                         <TableCell>
                           <div>
@@ -650,12 +770,6 @@ export default function ScanningEngagement() {
                         <TableCell className="text-right font-medium">
                           {formatCurrency(eng.montant)}
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.activite_code || '-'}
-                        </TableCell>
-                        <TableCell className="hidden xl:table-cell text-muted-foreground">
-                          {eng.os_code || '-'}
-                        </TableCell>
                         <TableCell className="text-center">
                           {getDocumentStatusBadge(
                             eng.documents_provided,
@@ -682,6 +796,20 @@ export default function ScanningEngagement() {
               )}
             </CardContent>
           </Card>
+
+          {soumisEngagements.length > 0 && (
+            <NotesPagination
+              page={page}
+              pageSize={pageSize}
+              total={soumisEngagements.length}
+              totalPages={Math.ceil(soumisEngagements.length / pageSize)}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
+          )}
         </TabsContent>
       </Tabs>
 
@@ -689,7 +817,7 @@ export default function ScanningEngagement() {
       {showDetailDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Overlay */}
-          <div className="fixed inset-0 bg-black/50" onClick={() => setShowDetailDialog(false)} />
+          <div className="fixed inset-0 bg-black/50" onClick={handleCloseDetail} />
           {/* Panel */}
           <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-background border rounded-lg shadow-xl p-6 mx-4">
             {/* Header */}
@@ -702,7 +830,7 @@ export default function ScanningEngagement() {
                 <p className="text-sm text-muted-foreground">{selectedEngagement?.objet}</p>
               </div>
               <button
-                onClick={() => setShowDetailDialog(false)}
+                onClick={handleCloseDetail}
                 className="rounded-sm opacity-70 hover:opacity-100 transition-opacity"
               >
                 <X className="h-4 w-4" />
@@ -748,7 +876,7 @@ export default function ScanningEngagement() {
 
             {/* Footer */}
             <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowDetailDialog(false)}>
+              <Button variant="outline" onClick={handleCloseDetail}>
                 Fermer
               </Button>
               {selectedEngagement?.statut === 'soumis' && (
@@ -774,6 +902,36 @@ export default function ScanningEngagement() {
           </div>
         </div>
       )}
+
+      {/* Confirmation de soumission */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              Confirmer la soumission
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de transmettre l'engagement{' '}
+              <strong>{selectedEngagement?.numero}</strong> pour visa SAF. Tous les documents
+              obligatoires sont fournis. Cette action sera enregistrée dans l'historique.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit} disabled={submitMutation.isPending}>
+              {submitMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Soumission...
+                </>
+              ) : (
+                'Confirmer la soumission'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -128,6 +128,8 @@ const RoadmapDashboard = lazy(() => import('./pages/planification/RoadmapDashboa
 const ProjetsList = lazy(() => import('./pages/planification/ProjetsList'));
 const ProjetDetail = lazy(() => import('./pages/planification/ProjetDetail'));
 const RoadmapDirection = lazy(() => import('./pages/planification/RoadmapDirection'));
+const LivrablesCentralises = lazy(() => import('./pages/planification/LivrablesCentralises'));
+const MesTaches = lazy(() => import('./pages/planification/MesTaches'));
 
 // Pages Execution
 const TaskExecutionPage = lazy(() => import('./pages/execution/TaskExecutionPage'));
@@ -324,6 +326,11 @@ const App = () => (
                 />
                 <Route path="/planification/roadmap-dashboard" element={<RoadmapDashboard />} />
                 <Route path="/planification/roadmap-direction" element={<RoadmapDirection />} />
+                <Route
+                  path="/planification/livrables-centralises"
+                  element={<LivrablesCentralises />}
+                />
+                <Route path="/planification/mes-taches" element={<MesTaches />} />
                 <Route path="/planification/projets" element={<ProjetsList />} />
                 <Route path="/planification/projets/:id" element={<ProjetDetail />} />
                 <Route path="/planification/execution-physique" element={<TaskExecutionPage />} />

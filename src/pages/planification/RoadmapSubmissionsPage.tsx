@@ -1,10 +1,9 @@
 /**
  * Page de gestion des soumissions de feuilles de route
- * Liste avec filtres, actions de validation/rejet
+ * Liste avec filtres, actions de validation/rejet, export, pagination
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   FileCheck,
-  Filter,
   RefreshCw,
   Eye,
   CheckCircle2,
@@ -39,11 +37,16 @@ import {
   Building2,
   FileSpreadsheet,
   AlertTriangle,
+  Send,
+  ArrowRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { formatCurrency } from '@/lib/utils';
+import { ExportButtons } from '@/components/etats/ExportButtons';
+import { ExportColumn } from '@/lib/export';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   useRoadmapSubmissions,
   useSubmissionDirections,
@@ -51,45 +54,40 @@ import {
 } from '@/hooks/useRoadmapSubmissions';
 import { RoadmapSubmissionDetailDialog } from '@/components/planification/RoadmapSubmissionDetail';
 
-// Configuration des statuts
 const STATUS_CONFIG: Record<
   SubmissionStatus,
   { label: string; color: string; icon: React.ReactNode }
 > = {
   soumis: {
-    label: 'Soumis',
-    color: 'bg-gray-100 text-gray-800',
+    label: 'En attente',
+    color: 'bg-warning/10 text-warning border-warning/20',
     icon: <Clock className="h-3 w-3" />,
   },
   en_revision: {
     label: 'En révision',
-    color: 'bg-orange-100 text-orange-800',
+    color: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
     icon: <RotateCcw className="h-3 w-3" />,
   },
   valide: {
     label: 'Validé',
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-success/10 text-success border-success/20',
     icon: <CheckCircle2 className="h-3 w-3" />,
   },
   rejete: {
     label: 'Rejeté',
-    color: 'bg-red-100 text-red-800',
+    color: 'bg-destructive/10 text-destructive border-destructive/20',
     icon: <XCircle className="h-3 w-3" />,
   },
 };
 
 export default function RoadmapSubmissionsPage() {
-  const _navigate = useNavigate();
-
-  // Filtres
   const [directionFilter, setDirectionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchFilter, setSearchFilter] = useState('');
-
-  // Dialog détail
   const [selectedSubmissionId, setSelectedSubmissionId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
-  // Données
   const { data: directions = [] } = useSubmissionDirections();
   const {
     submissions,
@@ -121,7 +119,6 @@ export default function RoadmapSubmissionsPage() {
     staleTime: 30_000,
   });
 
-  // Directions n'ayant pas soumis de feuille de route
   const submittedDirectionIds = new Set(
     submissions.map((s: { direction_id: string }) => s.direction_id)
   );
@@ -129,77 +126,110 @@ export default function RoadmapSubmissionsPage() {
     (d: { id: string }) => !submittedDirectionIds.has(d.id)
   );
 
-  // Calcul du délai en jours depuis la soumission
   const getAgingDays = (submission: { submitted_at: string | null; created_at: string }) => {
     const refDate = submission.submitted_at || submission.created_at;
     return Math.ceil((Date.now() - new Date(refDate).getTime()) / (1000 * 60 * 60 * 24));
   };
 
-  // Formatage montant
-  const formatMontant = (montant: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'XOF',
-      maximumFractionDigits: 0,
-    }).format(montant);
-  };
+  const totalPages = Math.ceil(submissions.length / pageSize);
+  const paginatedData = submissions.slice((page - 1) * pageSize, page * pageSize);
+
+  // Export
+  const exportColumns: ExportColumn[] = [
+    { key: 'direction_code', label: 'Direction', type: 'text' },
+    { key: 'libelle', label: 'Libellé', type: 'text' },
+    { key: 'nb_activites', label: 'Activités', type: 'text' },
+    { key: 'montant_total', label: 'Montant', type: 'currency' },
+    { key: 'status', label: 'Statut', type: 'text' },
+    { key: 'submitted_at', label: 'Date soumission', type: 'date' },
+  ];
+  const exportData = submissions.map((s: Record<string, unknown>) => ({
+    ...s,
+    direction_code: (s.direction as Record<string, unknown>)?.code || '',
+  }));
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <PageHeader
-        title="Soumissions Feuilles de Route"
-        description="Validation et suivi des feuilles de route par direction"
-        breadcrumbs={[
-          { label: 'Planification', href: '/planification/budget' },
-          { label: 'Soumissions' },
-        ]}
-        actions={
-          <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="page-title flex items-center gap-2">
+            <FileCheck className="h-6 w-6" />
+            Soumissions Feuilles de Route
+          </h1>
+          <p className="page-description">
+            Validation et suivi des feuilles de route par direction
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <ExportButtons
+            data={exportData as unknown as Record<string, unknown>[]}
+            columns={exportColumns}
+            filename="soumissions_feuilles_route"
+            title="Soumissions Feuilles de Route"
+            showCopy
+            showPrint
+          />
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+            className="gap-2"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Actualiser
           </Button>
-        }
-      />
+        </div>
+      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      {/* KPI */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-sm text-muted-foreground">Total</div>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Total</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
           </CardContent>
         </Card>
-        <Card className="border-yellow-200 bg-yellow-50/50">
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-yellow-600">{stats.soumis}</div>
-            <div className="text-sm text-muted-foreground">En attente</div>
+        <Card className={stats.soumis > 0 ? 'border-warning/30 bg-warning/5' : ''}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">En attente</p>
+                <p className="text-2xl font-bold text-warning">{stats.soumis}</p>
+              </div>
+              <Send className="h-8 w-8 text-warning/30" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-orange-200 bg-orange-50/50">
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-orange-600">{stats.en_revision}</div>
-            <div className="text-sm text-muted-foreground">En révision</div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">En révision</p>
+            <p className="text-2xl font-bold text-blue-600">{stats.en_revision}</p>
           </CardContent>
         </Card>
-        <Card className="border-green-200 bg-green-50/50">
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-green-600">{stats.valide}</div>
-            <div className="text-sm text-muted-foreground">Validés</div>
+        <Card className={stats.valide > 0 ? 'border-success/30' : ''}>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Validés</p>
+            <p className="text-2xl font-bold text-success">{stats.valide}</p>
           </CardContent>
         </Card>
-        <Card className="border-red-200 bg-red-50/50">
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-red-600">{stats.rejete}</div>
-            <div className="text-sm text-muted-foreground">Rejetés</div>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Rejetés</p>
+            <p className="text-2xl font-bold text-destructive">{stats.rejete}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Alerte directions non soumises */}
       {missingDirections.length > 0 && (
-        <Card className="border-l-4 border-l-amber-500">
+        <Card className="border-l-4 border-l-warning">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-amber-700">
+            <div className="flex items-center gap-2 text-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-medium">
                 {missingDirections.length} direction(s) n&apos;ont pas encore soumis de feuille de
@@ -219,69 +249,71 @@ export default function RoadmapSubmissionsPage() {
 
       {/* Filtres */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Filtres
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="w-64">
-              <Select value={directionFilter} onValueChange={setDirectionFilter}>
-                <SelectTrigger>
-                  <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <SelectValue placeholder="Direction" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les directions</SelectItem>
-                  {directions.map((dir) => (
-                    <SelectItem key={dir.id} value={dir.id}>
-                      {dir.code} - {dir.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <CardContent className="pt-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="relative md:col-span-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher par libellé ou direction..."
+                value={searchFilter}
+                onChange={(e) => {
+                  setSearchFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-9"
+              />
             </div>
-            <div className="w-48">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="soumis">Soumis</SelectItem>
-                  <SelectItem value="soumis">En attente</SelectItem>
-                  <SelectItem value="en_revision">En révision</SelectItem>
-                  <SelectItem value="valide">Validés</SelectItem>
-                  <SelectItem value="rejete">Rejetés</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
+            <Select
+              value={directionFilter}
+              onValueChange={(v) => {
+                setDirectionFilter(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Direction" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les directions</SelectItem>
+                {directions.map((dir) => (
+                  <SelectItem key={dir.id} value={dir.id}>
+                    {dir.code} - {dir.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="soumis">En attente</SelectItem>
+                <SelectItem value="en_revision">En révision</SelectItem>
+                <SelectItem value="valide">Validés</SelectItem>
+                <SelectItem value="rejete">Rejetés</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Table des soumissions */}
+      {/* Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileCheck className="h-5 w-5" />
+            <FileSpreadsheet className="h-5 w-5" />
             Soumissions
           </CardTitle>
           <CardDescription>
-            Cliquez sur une soumission pour voir les détails et effectuer les actions
+            {submissions.length} soumission(s) — cliquez sur une ligne pour voir les détails
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -290,12 +322,21 @@ export default function RoadmapSubmissionsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : submissions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <FileSpreadsheet className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Aucune soumission trouvée</p>
-              <p className="text-sm mt-2">
-                Les soumissions seront créées lors de l'import des feuilles de route
+            <div className="text-center py-16 text-muted-foreground">
+              <FileSpreadsheet className="h-16 w-16 mx-auto mb-6 opacity-30" />
+              <p className="text-lg font-medium mb-2">Aucune soumission trouvée</p>
+              <p className="text-sm max-w-md mx-auto">
+                Les directions soumettent leurs feuilles de route via l'import d'activités ou depuis
+                leur espace direction.
               </p>
+              <Button
+                variant="outline"
+                className="mt-6 gap-2"
+                onClick={() => window.open('/planification/feuilles-route', '_blank')}
+              >
+                <ArrowRight className="h-4 w-4" />
+                Aller à l'Import Activités
+              </Button>
             </div>
           ) : (
             <Table>
@@ -306,15 +347,16 @@ export default function RoadmapSubmissionsPage() {
                   <TableHead className="text-right">Activités</TableHead>
                   <TableHead className="text-right">Montant</TableHead>
                   <TableHead>Statut</TableHead>
-                  <TableHead>Soumis par</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="hidden md:table-cell">Soumis par</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
                   <TableHead>Délai</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {submissions.map((submission) => {
+                {paginatedData.map((submission) => {
                   const statusConfig = STATUS_CONFIG[submission.status as SubmissionStatus];
+                  const days = getAgingDays(submission);
                   return (
                     <TableRow
                       key={submission.id}
@@ -323,54 +365,52 @@ export default function RoadmapSubmissionsPage() {
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{submission.direction?.code || '—'}</span>
+                          <Badge variant="outline">{submission.direction?.code || '—'}</Badge>
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground mt-1 truncate max-w-[150px]">
                           {submission.direction?.label}
                         </div>
                       </TableCell>
                       <TableCell className="max-w-[200px]">
                         <div className="truncate font-medium">{submission.libelle}</div>
-                        {submission.description && (
-                          <div className="text-sm text-muted-foreground truncate">
-                            {submission.description}
-                          </div>
-                        )}
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         {submission.nb_activites}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
-                        {formatMontant(submission.montant_total)}
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(submission.montant_total)}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${statusConfig.color} gap-1`}>
+                        <Badge variant="outline" className={statusConfig.color + ' gap-1'}>
                           {statusConfig.icon}
                           {statusConfig.label}
                         </Badge>
                       </TableCell>
-                      <TableCell>{submission.submitted_by_profile?.full_name || '—'}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                        {submission.submitted_by_profile?.full_name || '—'}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                         {submission.submitted_at
-                          ? format(new Date(submission.submitted_at), 'dd/MM/yyyy', {
-                              locale: fr,
-                            })
-                          : format(new Date(submission.created_at), 'dd/MM/yyyy', {
-                              locale: fr,
-                            })}
+                          ? format(new Date(submission.submitted_at), 'dd/MM/yyyy', { locale: fr })
+                          : format(new Date(submission.created_at), 'dd/MM/yyyy', { locale: fr })}
                       </TableCell>
                       <TableCell>
-                        {(() => {
-                          const days = getAgingDays(submission);
-                          const colorClass =
-                            days > 14
-                              ? 'bg-red-100 text-red-800 hover:bg-red-100'
-                              : days >= 7
-                                ? 'bg-orange-100 text-orange-800 hover:bg-orange-100'
-                                : 'bg-green-100 text-green-800 hover:bg-green-100';
-                          return <Badge className={colorClass}>{days} j</Badge>;
-                        })()}
+                        {days > 14 ? (
+                          <Badge variant="destructive" className="text-xs gap-0.5">
+                            <Clock className="h-3 w-3" />
+                            {days}j
+                          </Badge>
+                        ) : days >= 7 ? (
+                          <Badge
+                            variant="outline"
+                            className="bg-warning/10 text-warning border-warning/20 text-xs gap-0.5"
+                          >
+                            <Clock className="h-3 w-3" />
+                            {days}j
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">{days}j</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -394,6 +434,21 @@ export default function RoadmapSubmissionsPage() {
         </CardContent>
       </Card>
 
+      {/* Pagination */}
+      {submissions.length > 0 && (
+        <NotesPagination
+          page={page}
+          pageSize={pageSize}
+          total={submissions.length}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            setPage(1);
+          }}
+        />
+      )}
+
       {/* Dialog de détail */}
       <RoadmapSubmissionDetailDialog
         submissionId={selectedSubmissionId}
@@ -402,19 +457,14 @@ export default function RoadmapSubmissionsPage() {
           if (!open) setSelectedSubmissionId(null);
         }}
         onValidate={(comment) => {
-          if (selectedSubmissionId) {
-            validate({ submissionId: selectedSubmissionId, comment });
-          }
+          if (selectedSubmissionId) validate({ submissionId: selectedSubmissionId, comment });
         }}
         onReject={(reason) => {
-          if (selectedSubmissionId) {
-            reject({ submissionId: selectedSubmissionId, reason });
-          }
+          if (selectedSubmissionId) reject({ submissionId: selectedSubmissionId, reason });
         }}
         onRequestRevision={(comment) => {
-          if (selectedSubmissionId) {
+          if (selectedSubmissionId)
             requestRevision({ submissionId: selectedSubmissionId, comment });
-          }
         }}
         isValidating={isValidating}
         isRejecting={isRejecting}

@@ -187,7 +187,7 @@ export function useRoadmapSubmissions(filters?: SubmissionFilters) {
 
       const stats: SubmissionStats = {
         total: data.length,
-        brouillon: data.filter((s) => s.status === 'soumis').length,
+        brouillon: data.filter((s) => s.status === 'brouillon').length,
         soumis: data.filter((s) => s.status === 'soumis').length,
         en_revision: data.filter((s) => s.status === 'en_revision').length,
         valide: data.filter((s) => s.status === 'valide').length,

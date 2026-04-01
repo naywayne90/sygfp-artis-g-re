@@ -103,7 +103,7 @@ export default function ProjetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { exercice } = useExercice();
-  const { plans, isLoading: plansLoading, updatePlan, deletePlan } = usePlansTravail();
+  const { plans, isLoading: plansLoading, deletePlan, submitPlan } = usePlansTravail();
   const {
     taches,
     stats,
@@ -220,8 +220,7 @@ export default function ProjetDetail() {
   const handleSoumettre = async () => {
     if (!plan) return;
     try {
-      await updatePlan({ id: plan.id, statut: 'soumis' });
-      toast.success('Plan soumis pour validation');
+      await submitPlan(plan.id);
     } catch {
       toast.error('Erreur lors de la soumission');
     }
@@ -292,10 +291,10 @@ export default function ProjetDetail() {
             <Pencil className="h-4 w-4 mr-2" />
             Modifier
           </Button>
-          {plan.statut === 'soumis' && (
+          {(plan.statut === 'brouillon' || plan.statut === 'rejete') && (
             <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={handleSoumettre}>
               <Send className="h-4 w-4 mr-2" />
-              Soumettre
+              Soumettre pour validation
             </Button>
           )}
           <AlertDialog>
@@ -496,6 +495,33 @@ export default function ProjetDetail() {
                   <Progress value={pctBudget} className="mt-1" />
                 </div>
               </div>
+
+              {/* Alerte dépassement budget */}
+              {(() => {
+                const totalPrevu = taches.reduce((sum, t) => sum + (t.budget_prevu || 0), 0);
+                const depassement = totalPrevu > plan.budget_alloue && plan.budget_alloue > 0;
+                return totalPrevu > 0 ? (
+                  <div
+                    className={`p-3 rounded-lg border mt-4 ${depassement ? 'bg-destructive/10 border-destructive/30' : 'bg-success/10 border-success/30'}`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">
+                        Total budgets prévus des tâches :{' '}
+                        <strong>{formatCurrency(totalPrevu)}</strong>
+                      </span>
+                      {depassement ? (
+                        <span className="text-sm text-destructive font-medium">
+                          Dépassement de {formatCurrency(totalPrevu - plan.budget_alloue)}
+                        </span>
+                      ) : plan.budget_alloue > 0 ? (
+                        <span className="text-sm text-success font-medium">
+                          Marge : {formatCurrency(plan.budget_alloue - totalPrevu)}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
               {taches.length > 0 && (
                 <>

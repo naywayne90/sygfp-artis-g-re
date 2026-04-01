@@ -55,6 +55,7 @@ import {
   LayoutDashboard,
   Eye,
   ScanLine,
+  ListChecks,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -164,8 +165,11 @@ const FEUILLE_ROUTE_ITEMS = [
   { title: 'Tableau de Bord', url: '/planification/roadmap-dashboard', icon: LayoutDashboard },
   { title: 'Mon Espace Direction', url: '/planification/roadmap-direction', icon: Map },
   { title: 'Projets & Plans', url: '/planification/projets', icon: FolderKanban },
+  { title: 'Mes Tâches', url: '/planification/mes-taches', icon: ListChecks },
+  { title: 'Livrables', url: '/planification/livrables-centralises', icon: FileCheck },
   { title: 'Soumissions', url: '/planification/soumissions-feuilles-route', icon: CheckSquare },
   { title: 'Import Activités', url: '/planification/feuilles-route', icon: Upload },
+  { title: 'Historique Imports', url: '/planification/historique-imports', icon: History },
 ];
 
 const PARTENAIRES_ITEMS = [
@@ -499,24 +503,35 @@ export function SidebarV2() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {visibleFeuilleRouteItems.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                      <NavLink
-                        to={item.url}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
-                          isActive(item.url)
-                            ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                        )}
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {visibleFeuilleRouteItems.map((item) => {
+                  const badgeCount =
+                    item.url === '/planification/soumissions-feuilles-route'
+                      ? badges?.roadmapSoumissions || 0
+                      : item.url === '/planification/projets'
+                        ? badges?.roadmapPlansBrouillon || 0
+                        : item.url === '/planification/roadmap-dashboard'
+                          ? badges?.roadmapTachesEnRetard || 0
+                          : 0;
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                        <NavLink
+                          to={item.url}
+                          className={cn(
+                            'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                            isActive(item.url)
+                              ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                          )}
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span className="flex-1">{item.title}</span>}
+                          {!collapsed && badgeCount > 0 && <BadgeCounter count={badgeCount} />}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -565,24 +580,33 @@ export function SidebarV2() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {visibleGestionItems.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                      <NavLink
-                        to={item.url}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
-                          isActive(item.url)
-                            ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent'
-                        )}
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {visibleGestionItems.map((item) => {
+                  const badgeCount =
+                    item.url === '/execution/scanning-engagement'
+                      ? badges?.scanningEngagements || 0
+                      : item.url === '/execution/scanning-liquidation'
+                        ? badges?.scanningLiquidations || 0
+                        : 0;
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+                        <NavLink
+                          to={item.url}
+                          className={cn(
+                            'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors text-sm',
+                            isActive(item.url)
+                              ? 'bg-sidebar-primary text-sidebar-primary-foreground'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent'
+                          )}
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span className="flex-1">{item.title}</span>}
+                          {!collapsed && badgeCount > 0 && <BadgeCounter count={badgeCount} />}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

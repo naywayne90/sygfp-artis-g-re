@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * FeuilleRouteImport - Composant d'import des feuilles de route par direction
  *
@@ -11,22 +10,22 @@
  * - Historique et rollback
  */
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -34,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -42,13 +41,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Upload,
   FileSpreadsheet,
@@ -64,29 +58,29 @@ import {
   Loader2,
   Info,
   Building2,
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { useFeuilleRouteImport, RowValidation, ColumnMapping } from "@/hooks/useFeuilleRouteImport";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useRoadmapDiff } from "@/hooks/useRoadmapDiff";
-import { RoadmapDiffViewer } from "./RoadmapDiffViewer";
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { useFeuilleRouteImport, RowValidation, ColumnMapping } from '@/hooks/useFeuilleRouteImport';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useRoadmapDiff } from '@/hooks/useRoadmapDiff';
+import { RoadmapDiffViewer } from './RoadmapDiffViewer';
 
 // Étapes du wizard
-type Step = "upload" | "mapping" | "preview" | "diff" | "import" | "result";
+type Step = 'upload' | 'mapping' | 'preview' | 'diff' | 'import' | 'result';
 
 const STEPS: { key: Step; label: string; description: string }[] = [
-  { key: "upload", label: "Fichier", description: "Sélectionner le fichier" },
-  { key: "mapping", label: "Mapping", description: "Associer les colonnes" },
-  { key: "preview", label: "Aperçu", description: "Vérifier les données" },
-  { key: "diff", label: "Comparaison", description: "Analyser les changements" },
-  { key: "import", label: "Appliquer", description: "Appliquer les changements" },
+  { key: 'upload', label: 'Fichier', description: 'Sélectionner le fichier' },
+  { key: 'mapping', label: 'Mapping', description: 'Associer les colonnes' },
+  { key: 'preview', label: 'Aperçu', description: 'Vérifier les données' },
+  { key: 'diff', label: 'Comparaison', description: 'Analyser les changements' },
+  { key: 'import', label: 'Appliquer', description: 'Appliquer les changements' },
 ];
 
 export function FeuilleRouteImport() {
   const { exercice, exerciceId, isReadOnly } = useExercice();
-  const [currentStep, setCurrentStep] = useState<Step>("upload");
+  const [currentStep, setCurrentStep] = useState<Step>('upload');
   const [showHistory, setShowHistory] = useState(false);
 
   const {
@@ -125,9 +119,9 @@ export function FeuilleRouteImport() {
 
     try {
       await parseFile(uploadedFile);
-      setCurrentStep("mapping");
+      setCurrentStep('mapping');
     } catch (error) {
-      console.error("Parse error:", error);
+      console.error('Parse error:', error);
     }
   };
 
@@ -136,38 +130,38 @@ export function FeuilleRouteImport() {
       return;
     }
     await validateRows();
-    setCurrentStep("preview");
+    setCurrentStep('preview');
   };
 
   const handleImport = async () => {
-    setCurrentStep("import");
+    setCurrentStep('import');
     try {
       await executeImport();
       // Après l'import, calculer le diff
       if (currentBatchId && selectedDirection && exerciceId) {
         try {
           await calculateDiff(currentBatchId, selectedDirection, exerciceId);
-          setCurrentStep("diff");
+          setCurrentStep('diff');
         } catch (diffError) {
-          console.error("Erreur calcul diff:", diffError);
-          setCurrentStep("result");
+          console.error('Erreur calcul diff:', diffError);
+          setCurrentStep('result');
         }
       } else {
-        setCurrentStep("result");
+        setCurrentStep('result');
       }
     } catch {
-      setCurrentStep("preview");
+      setCurrentStep('preview');
     }
   };
 
   // Handler pour quand l'application des changements est terminée
   const handleDiffApplyComplete = () => {
-    setCurrentStep("result");
+    setCurrentStep('result');
   };
 
   const handleReset = () => {
     reset();
-    setCurrentStep("upload");
+    setCurrentStep('upload');
   };
 
   if (isReadOnly) {
@@ -185,22 +179,25 @@ export function FeuilleRouteImport() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Import Feuilles de Route</h2>
-          <p className="text-muted-foreground">
-            Importez les activités par direction depuis un fichier Excel ou CSV
+          <h1 className="page-title flex items-center gap-2">
+            <Upload className="h-6 w-6" />
+            Import Activités
+          </h1>
+          <p className="page-description">
+            Chargement des activités par direction depuis un fichier Excel ou CSV
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowHistory(true)}>
-            <History className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={() => setShowHistory(true)} className="gap-2">
+            <History className="h-4 w-4" />
             Historique
           </Button>
           {file && (
-            <Button variant="outline" onClick={handleReset}>
-              <RefreshCcw className="h-4 w-4 mr-2" />
-              Nouveau
+            <Button variant="outline" onClick={handleReset} className="gap-2">
+              <RefreshCcw className="h-4 w-4" />
+              Réinitialiser
             </Button>
           )}
         </div>
@@ -215,12 +212,12 @@ export function FeuilleRouteImport() {
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors",
+                      'w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors',
                       currentStep === step.key
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? 'bg-primary text-primary-foreground border-primary'
                         : STEPS.findIndex((s) => s.key === currentStep) > index
-                        ? "bg-green-500 text-white border-green-500"
-                        : "bg-muted text-muted-foreground border-muted"
+                          ? 'bg-green-500 text-white border-green-500'
+                          : 'bg-muted text-muted-foreground border-muted'
                     )}
                   >
                     {STEPS.findIndex((s) => s.key === currentStep) > index ? (
@@ -235,10 +232,10 @@ export function FeuilleRouteImport() {
                 {index < STEPS.length - 1 && (
                   <div
                     className={cn(
-                      "flex-1 h-0.5 mx-4",
+                      'flex-1 h-0.5 mx-4',
                       STEPS.findIndex((s) => s.key === currentStep) > index
-                        ? "bg-green-500"
-                        : "bg-muted"
+                        ? 'bg-green-500'
+                        : 'bg-muted'
                     )}
                   />
                 )}
@@ -249,7 +246,7 @@ export function FeuilleRouteImport() {
       </Card>
 
       {/* Step Content */}
-      {currentStep === "upload" && (
+      {currentStep === 'upload' && (
         <UploadStep
           directions={directions}
           selectedDirection={selectedDirection}
@@ -258,39 +255,40 @@ export function FeuilleRouteImport() {
         />
       )}
 
-      {currentStep === "mapping" && (
+      {currentStep === 'mapping' && (
         <MappingStep
           headers={headers}
           mapping={mapping}
           onMappingChange={setMapping}
           onNext={handleMappingComplete}
-          onBack={() => setCurrentStep("upload")}
+          onBack={() => setCurrentStep('upload')}
           rawDataCount={rawData.length}
         />
       )}
 
-      {currentStep === "preview" && (
+      {currentStep === 'preview' && (
         <PreviewStep
           validatedRows={validatedRows}
           stats={stats}
           onRowActionChange={updateRowAction}
           onImport={handleImport}
-          onBack={() => setCurrentStep("mapping")}
+          onBack={() => setCurrentStep('mapping')}
           isImporting={isImporting}
         />
       )}
 
-      {currentStep === "import" && (
+      {currentStep === 'import' && (
         <ImportingStep stats={stats} isCalculatingDiff={isCalculating} />
       )}
 
-      {currentStep === "diff" && currentBatchId && selectedDirection && (
+      {currentStep === 'diff' && currentBatchId && selectedDirection && (
         <Card>
           <CardHeader>
             <CardTitle>4. Analyser et appliquer les changements</CardTitle>
             <CardDescription>
-              Comparez les données importées avec les données existantes et sélectionnez les changements à appliquer.
-              Les suppressions désactivent les activités sans les supprimer définitivement.
+              Comparez les données importées avec les données existantes et sélectionnez les
+              changements à appliquer. Les suppressions désactivent les activités sans les supprimer
+              définitivement.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -303,7 +301,7 @@ export function FeuilleRouteImport() {
         </Card>
       )}
 
-      {currentStep === "result" && (
+      {currentStep === 'result' && (
         <ResultStep
           stats={stats}
           batchId={currentBatchId}
@@ -349,7 +347,7 @@ function UploadStep({
         {/* Direction Selection */}
         <div className="space-y-2">
           <Label>Direction *</Label>
-          <Select value={selectedDirection || ""} onValueChange={onDirectionChange}>
+          <Select value={selectedDirection || ''} onValueChange={onDirectionChange}>
             <SelectTrigger className="w-full max-w-md">
               <SelectValue placeholder="Sélectionner une direction" />
             </SelectTrigger>
@@ -373,10 +371,10 @@ function UploadStep({
           <Label>Fichier à importer *</Label>
           <div
             className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+              'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
               selectedDirection
-                ? "hover:border-primary cursor-pointer"
-                : "opacity-50 cursor-not-allowed"
+                ? 'hover:border-primary cursor-pointer'
+                : 'opacity-50 cursor-not-allowed'
             )}
           >
             <input
@@ -390,8 +388,8 @@ function UploadStep({
             <label
               htmlFor="file-upload"
               className={cn(
-                "flex flex-col items-center gap-4",
-                selectedDirection ? "cursor-pointer" : "cursor-not-allowed"
+                'flex flex-col items-center gap-4',
+                selectedDirection ? 'cursor-pointer' : 'cursor-not-allowed'
               )}
             >
               <div className="p-4 bg-primary/10 rounded-full">
@@ -414,8 +412,12 @@ function UploadStep({
           <AlertDescription>
             Le fichier doit contenir au minimum les colonnes:
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong>Code imputation</strong> - Identifiant unique de l'activité</li>
-              <li><strong>Libellé</strong> - Description de l'activité</li>
+              <li>
+                <strong>Code imputation</strong> - Identifiant unique de l'activité
+              </li>
+              <li>
+                <strong>Libellé</strong> - Description de l'activité
+              </li>
             </ul>
             Colonnes optionnelles: Action, Montant prévu, Responsable, Dates
           </AlertDescription>
@@ -447,14 +449,34 @@ function MappingStep({
     required: boolean;
     description: string;
   }> = [
-    { key: "code_imput", label: "Code imputation", required: true, description: "Identifiant unique" },
-    { key: "libelle", label: "Libellé", required: true, description: "Description de l'activité" },
-    { key: "action_code", label: "Code action", required: false, description: "Code de l'action parente" },
-    { key: "montant_prevu", label: "Montant prévu", required: false, description: "Budget alloué" },
-    { key: "description", label: "Description", required: false, description: "Détails supplémentaires" },
-    { key: "responsable", label: "Responsable", required: false, description: "Personne en charge" },
-    { key: "date_debut", label: "Date début", required: false, description: "Date de démarrage" },
-    { key: "date_fin", label: "Date fin", required: false, description: "Date d'échéance" },
+    {
+      key: 'code_imput',
+      label: 'Code imputation',
+      required: true,
+      description: 'Identifiant unique',
+    },
+    { key: 'libelle', label: 'Libellé', required: true, description: "Description de l'activité" },
+    {
+      key: 'action_code',
+      label: 'Code action',
+      required: false,
+      description: "Code de l'action parente",
+    },
+    { key: 'montant_prevu', label: 'Montant prévu', required: false, description: 'Budget alloué' },
+    {
+      key: 'description',
+      label: 'Description',
+      required: false,
+      description: 'Détails supplémentaires',
+    },
+    {
+      key: 'responsable',
+      label: 'Responsable',
+      required: false,
+      description: 'Personne en charge',
+    },
+    { key: 'date_debut', label: 'Date début', required: false, description: 'Date de démarrage' },
+    { key: 'date_fin', label: 'Date fin', required: false, description: "Date d'échéance" },
   ];
 
   const isValid = mapping.code_imput && mapping.libelle;
@@ -489,7 +511,7 @@ function MappingStep({
                 </TooltipProvider>
               </Label>
               <Select
-                value={mapping[field.key] || ""}
+                value={mapping[field.key] || ''}
                 onValueChange={(value) =>
                   onMappingChange({ ...mapping, [field.key]: value || null })
                 }
@@ -542,8 +564,16 @@ function PreviewStep({
   isImporting,
 }: {
   validatedRows: RowValidation[];
-  stats: { total: number; toCreate: number; toUpdate: number; toSkip: number; duplicates: number; errors: number; warnings: number } | null;
-  onRowActionChange: (rowIndex: number, action: RowValidation["action"]) => void;
+  stats: {
+    total: number;
+    toCreate: number;
+    toUpdate: number;
+    toSkip: number;
+    duplicates: number;
+    errors: number;
+    warnings: number;
+  } | null;
+  onRowActionChange: (rowIndex: number, action: RowValidation['action']) => void;
   onImport: () => void;
   onBack: () => void;
   isImporting: boolean;
@@ -563,24 +593,14 @@ function PreviewStep({
         {stats && (
           <div className="grid grid-cols-5 gap-4">
             <StatCard label="Total" value={stats.total} icon={FileSpreadsheet} />
-            <StatCard
-              label="À créer"
-              value={stats.toCreate}
-              icon={Plus}
-              variant="success"
-            />
+            <StatCard label="À créer" value={stats.toCreate} icon={Plus} variant="success" />
             <StatCard
               label="Doublons"
               value={stats.duplicates}
               icon={SkipForward}
               variant="warning"
             />
-            <StatCard
-              label="Erreurs"
-              value={stats.errors}
-              icon={XCircle}
-              variant="error"
-            />
+            <StatCard label="Erreurs" value={stats.errors} icon={XCircle} variant="error" />
             <StatCard
               label="Avertissements"
               value={stats.warnings}
@@ -607,13 +627,13 @@ function PreviewStep({
                 <TableRow
                   key={row.rowIndex}
                   className={cn(
-                    !row.validation.isValid && "bg-red-50",
-                    row.isDuplicate && row.action === "skip" && "bg-yellow-50"
+                    !row.validation.isValid && 'bg-red-50',
+                    row.isDuplicate && row.action === 'skip' && 'bg-yellow-50'
                   )}
                 >
                   <TableCell className="font-mono text-sm">{row.rowIndex}</TableCell>
-                  <TableCell className="font-mono">{row.code_imput || "-"}</TableCell>
-                  <TableCell className="max-w-[300px] truncate">{row.libelle || "-"}</TableCell>
+                  <TableCell className="font-mono">{row.code_imput || '-'}</TableCell>
+                  <TableCell className="max-w-[300px] truncate">{row.libelle || '-'}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       {row.validation.errors.map((err, i) => (
@@ -623,13 +643,20 @@ function PreviewStep({
                         </Badge>
                       ))}
                       {row.validation.warnings.map((warn, i) => (
-                        <Badge key={i} variant="outline" className="text-xs text-amber-600 border-amber-200">
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="text-xs text-amber-600 border-amber-200"
+                        >
                           <AlertTriangle className="h-3 w-3 mr-1" />
                           {warn}
                         </Badge>
                       ))}
                       {row.validation.isValid && !row.isDuplicate && (
-                        <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                        <Badge
+                          variant="outline"
+                          className="text-xs text-green-600 border-green-200"
+                        >
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Valide
                         </Badge>
@@ -640,7 +667,7 @@ function PreviewStep({
                     <Select
                       value={row.action}
                       onValueChange={(value) =>
-                        onRowActionChange(row.rowIndex, value as RowValidation["action"])
+                        onRowActionChange(row.rowIndex, value as RowValidation['action'])
                       }
                       disabled={!row.validation.isValid}
                     >
@@ -665,8 +692,8 @@ function PreviewStep({
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Doublons détectés</AlertTitle>
             <AlertDescription>
-              {stats.duplicates} ligne(s) ont été détectées comme doublons et seront ignorées.
-              Vous pouvez réimporter ce fichier sans risque de duplication.
+              {stats.duplicates} ligne(s) ont été détectées comme doublons et seront ignorées. Vous
+              pouvez réimporter ce fichier sans risque de duplication.
             </AlertDescription>
           </Alert>
         )}
@@ -699,7 +726,7 @@ function PreviewStep({
 // Step 4: Importing
 function ImportingStep({
   stats,
-  isCalculatingDiff = false
+  isCalculatingDiff = false,
 }: {
   stats: { total: number; toCreate: number } | null;
   isCalculatingDiff?: boolean;
@@ -711,13 +738,12 @@ function ImportingStep({
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <div className="text-center">
             <h3 className="text-lg font-medium">
-              {isCalculatingDiff ? "Analyse des changements..." : "Import en cours..."}
+              {isCalculatingDiff ? 'Analyse des changements...' : 'Import en cours...'}
             </h3>
             <p className="text-muted-foreground">
               {isCalculatingDiff
-                ? "Calcul des différences avec les données existantes"
-                : `${stats?.toCreate || 0} activités en cours d'importation`
-              }
+                ? 'Calcul des différences avec les données existantes'
+                : `${stats?.toCreate || 0} activités en cours d'importation`}
             </p>
           </div>
           <Progress value={isCalculatingDiff ? 75 : 50} className="w-64" />
@@ -754,9 +780,7 @@ function ResultStep({
               {stats?.toCreate || 0} activités importées avec succès
             </p>
             {stats && stats.toSkip > 0 && (
-              <p className="text-sm text-amber-600 mt-1">
-                {stats.toSkip} doublons ignorés
-              </p>
+              <p className="text-sm text-amber-600 mt-1">{stats.toSkip} doublons ignorés</p>
             )}
           </div>
 
@@ -797,22 +821,22 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  variant = "default",
+  variant = 'default',
 }: {
   label: string;
   value: number;
   icon: React.ElementType;
-  variant?: "default" | "success" | "warning" | "error";
+  variant?: 'default' | 'success' | 'warning' | 'error';
 }) {
   const variantStyles = {
-    default: "bg-muted",
-    success: "bg-green-100 text-green-700",
-    warning: "bg-amber-100 text-amber-700",
-    error: "bg-red-100 text-red-700",
+    default: 'bg-muted',
+    success: 'bg-green-100 text-green-700',
+    warning: 'bg-amber-100 text-amber-700',
+    error: 'bg-red-100 text-red-700',
   };
 
   return (
-    <div className={cn("p-4 rounded-lg text-center", variantStyles[variant])}>
+    <div className={cn('p-4 rounded-lg text-center', variantStyles[variant])}>
       <Icon className="h-5 w-5 mx-auto mb-2" />
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-xs">{label}</div>
@@ -867,41 +891,38 @@ function ImportHistoryDialog({
             <TableBody>
               {history.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-mono text-sm">
-                    {item.nom_fichier}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{item.nom_fichier}</TableCell>
                   <TableCell>
-                    {item.started_at && format(new Date(item.started_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                    {item.started_at &&
+                      format(new Date(item.started_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       <span className="text-green-600">{item.nb_lignes_importees}</span>
-                      {" / "}
+                      {' / '}
                       <span>{item.nb_lignes_total}</span>
                       {item.nb_lignes_erreur > 0 && (
-                        <span className="text-red-600 ml-1">
-                          ({item.nb_lignes_erreur} err)
-                        </span>
+                        <span className="text-red-600 ml-1">({item.nb_lignes_erreur} err)</span>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        item.statut === "termine"
-                          ? "default"
-                          : item.statut === "erreur"
-                          ? "destructive"
-                          : item.statut === "annule"
-                          ? "secondary"
-                          : "outline"
+                        item.statut === 'termine'
+                          ? 'default'
+                          : item.statut === 'erreur'
+                            ? 'destructive'
+                            : item.statut === 'annule'
+                              ? 'secondary'
+                              : 'outline'
                       }
                     >
                       {item.statut}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {item.statut === "termine" && (
+                    {item.statut === 'termine' && (
                       <Button
                         variant="ghost"
                         size="sm"

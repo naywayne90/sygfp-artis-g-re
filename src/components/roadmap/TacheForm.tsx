@@ -122,7 +122,7 @@ export function TacheForm({
     queryFn: async () => {
       const { data, error } = await (supabase.from('sous_activites') as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         .select('id, code, libelle, activite_id')
-        .eq('est_actif', true)
+        .eq('est_active', true)
         .order('code');
       if (error) throw error;
       return data ?? [];

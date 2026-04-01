@@ -1,6 +1,6 @@
 # AGENT_CONTEXT.md — Contexte complet SYGFP
 
-## Etat au 24/03/2026
+## Etat au 01/04/2026
 
 ### Modules certifies
 
@@ -9,30 +9,60 @@
 - Engagement — **Certifie 100/100** (231 unit + 60 E2E)
 - Liquidation — **Certifie 100/100** (104 unit + 60 E2E)
 
-### Modules recents (session 22-24/03/2026)
+### Modules recents (session 31/03 - 01/04/2026)
 
-- Types Supabase regeneres + 106 erreurs corrigees
-- Parametrage complet: 22 modules admin (8 nouveaux, restructure sidebar)
-- **Feuille de Route** : 5 pages (Dashboard, Direction, Projets, Soumissions, Import)
-  - Workflow: Direction soumet → CB + Charge de Mission valident → DG consulte
-  - Livrables: planifie → soumis → valide/rejete
-  - Notifications automatiques (triggers DB)
-- **Suivi DG** : Module complet de suivi des validations
-  - 5 onglets: Vue d'ensemble, Circuit Validation, Par Direction, En attente, Historique
-  - Pipeline 9 etapes avec barres de progression
-  - Matrice de validation (qui valide quoi, noms des personnes)
-  - Table operations filtrables avec progression X/9
-  - Acces DG + ADMIN uniquement
-- Documentation mise a jour: 21 fichiers MODULE\_\*.md + PROJECT_STATUS.md + CLAUDE.md
+#### Scanning Engagement — Complete + teste
+
+- Bugs corriges: mutation soumis→visa_saf (au lieu de soumis→soumis), cumul/disponible avec total_engage
+- Ameliorations: tri colonnes cliquables, pagination NotesPagination, AlertDialog confirmation, auto-refresh cache
+- Colonnes Code Act./N° OS retirees (vides), badges sidebar (2)
+- Document parasite "hkjn," nettoye en BD
+
+#### Scanning Liquidation — Complete + teste (10 ameliorations)
+
+- Bugs corriges: memes que Scanning Engagement + formatMontant→formatCurrency
+- Ameliorations majeures:
+  - Onglet "Numerises" (historique des liquidations traitees)
+  - Badge anciennete (jours depuis creation, rouge >10j)
+  - Selection multiple (checkboxes + barre action)
+  - Numero cliquable → ouvre panneau
+  - Custom panel (div) au lieu de Dialog (focus trap fix pour react-dropzone)
+  - Filtre fournisseur dedie
+  - Colonne Ref. Facture
+  - Badge Service fait (SF ✓ / SF ✗)
+  - Raccourci Ctrl+Enter pour soumettre
+  - Total montants en bas du tableau
+
+#### Feuille de Route — Corrections critiques + nouvelles pages
+
+- **BUG 1 corrige**: CHECK constraint plans_travail — ajoute statuts 'soumis' et 'rejete'
+- **BUG 2 corrige**: Colonnes os_id (FK objectifs_strategiques) et priorite ajoutees en BD
+- **BUG 3 corrige**: Stats brouillon comptait 'soumis' dans useRoadmapSubmissions
+- **BUG 4 corrige**: Bouton Soumettre invisible (condition inversee soumis→brouillon)
+- **BUG 5 corrige**: Dropdown sous-activites vide (est_actif→est_active typo)
+- Workflow: submitPlan/approvePlan/rejectPlan/activatePlan dans usePlansTravail
+- Validation budget: alerte depassement dans ProjetDetail (sum taches vs plan)
+- **Nouvelle page**: Livrables Centralises (3 onglets, filtres, export, tri, validation/rejet)
+- **Nouvelle page**: Mes Taches (KPI, filtres statut/priorite, tri colonnes, barres avancement)
+- Sidebar: 8 entrees (ajout Mes Taches, Livrables, Historique Imports + badges)
+
+#### Sidebar badges ajoutes
+
+- Scanning Engagements: nombre d'engagements soumis
+- Scanning Liquidations: nombre de liquidations soumises
+- Projets & Plans: nombre de plans brouillon
+- Soumissions: nombre de soumissions en attente
+- Tableau de Bord: nombre de taches en retard
 
 ### Prochaines etapes
 
 1. **Ordonnancement** (~10 prompts) — voir `docs/TRANSITION_VERS_ORDONNANCEMENT.md`
 2. **Reglement** (~10 prompts)
+3. **Feuille de Route P2** — Vue par OS, RACI complet UI, suivi trimestriel
 
 ## Rappels techniques
 
-- Build OK | TSC 0 erreurs | Vitest 704/704 PASS
+- Build OK | TSC 0 erreurs | Vitest 713/713 PASS
 - Hook ordonnancement: useOrdonnancements (~461 lignes, mature)
 - Table: ordonnancements (50+ colonnes, 3 363 records migres)
 - Workflow ordonnancement: DAF (1) → DG signature (2)
@@ -40,7 +70,7 @@
 
 ## Metriques
 
-125 pages | 426 composants | 179 hooks | 19 services | 103 routes | 281 migrations | 12 Edge Functions | 704 tests | 71 E2E specs | 201 tables | 671 RLS | 50 items sidebar
+127 pages | 428 composants | 179 hooks | 19 services | 105 routes | 283 migrations | 12 Edge Functions | 713 tests | 71 E2E specs | 201 tables | 671 RLS | 55 items sidebar
 
 ## Comptes test
 

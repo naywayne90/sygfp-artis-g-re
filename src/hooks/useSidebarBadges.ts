@@ -44,6 +44,15 @@ export interface SidebarBadges {
   // Virements
   virementsEnAttente: number;
 
+  // Scanning (dossiers soumis en attente de documents)
+  scanningEngagements: number;
+  scanningLiquidations: number;
+
+  // Feuille de Route
+  roadmapSoumissions: number;
+  roadmapPlansBrouillon: number;
+  roadmapTachesEnRetard: number;
+
   // Total global (pour indicateur header)
   totalATraiter: number;
 
@@ -71,6 +80,11 @@ export function useSidebarBadges() {
         ordoRes,
         reglementsRes,
         virementsRes,
+        scanningEngRes,
+        scanningLiqRes,
+        roadmapSoumissionsRes,
+        roadmapPlansRes,
+        roadmapTachesRes,
       ] = await Promise.all([
         // Notes SEF
         supabase
@@ -156,6 +170,39 @@ export function useSidebarBadges() {
           .select('id', { count: 'exact', head: true })
           .eq('exercice', exercice)
           .eq('status', 'pending'),
+
+        // Scanning Engagements (soumis = en attente de numérisation)
+        supabase
+          .from('budget_engagements')
+          .select('id', { count: 'exact', head: true })
+          .eq('exercice', exercice)
+          .eq('statut', 'soumis'),
+
+        // Scanning Liquidations (soumis = en attente de numérisation)
+        supabase
+          .from('budget_liquidations')
+          .select('id', { count: 'exact', head: true })
+          .eq('exercice', exercice)
+          .eq('statut', 'soumis'),
+
+        // Roadmap: Soumissions en attente
+        supabase
+          .from('roadmap_submissions')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'soumis'),
+
+        // Roadmap: Plans brouillon
+        supabase
+          .from('plans_travail')
+          .select('id', { count: 'exact', head: true })
+          .eq('statut', 'brouillon'),
+
+        // Roadmap: Tâches en retard
+        supabase
+          .from('taches')
+          .select('id', { count: 'exact', head: true })
+          .lt('date_fin', new Date().toISOString().split('T')[0])
+          .not('statut', 'in', '("termine","annule")'),
       ]);
 
       // Calcul des compteurs
@@ -198,6 +245,11 @@ export function useSidebarBadges() {
 
       const reglementsATraiter = reglementsRes.count || 0;
       const virementsEnAttente = virementsRes.count || 0;
+      const scanningEngagements = scanningEngRes.count || 0;
+      const scanningLiquidations = scanningLiqRes.count || 0;
+      const roadmapSoumissions = roadmapSoumissionsRes.count || 0;
+      const roadmapPlansBrouillon = roadmapPlansRes.count || 0;
+      const roadmapTachesEnRetard = roadmapTachesRes.count || 0;
 
       // Total global pour l'indicateur header
       const totalATraiter =
@@ -230,6 +282,11 @@ export function useSidebarBadges() {
         ordoEnSignature,
         reglementsATraiter,
         virementsEnAttente,
+        scanningEngagements,
+        scanningLiquidations,
+        roadmapSoumissions,
+        roadmapPlansBrouillon,
+        roadmapTachesEnRetard,
         totalATraiter,
         lastUpdated: new Date(),
       };

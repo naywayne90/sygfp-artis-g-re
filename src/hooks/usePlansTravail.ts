@@ -107,6 +107,98 @@ export function usePlansTravail(directionId?: string) {
     },
   });
 
+  // Workflow: Soumettre un plan (brouillon → soumis)
+  const submitPlan = useMutation({
+    mutationFn: async (id: string) => {
+      const plan = query.data?.find((p) => p.id === id);
+      if (!plan) throw new Error('Plan non trouvé');
+      if (plan.statut !== 'brouillon' && plan.statut !== 'rejete') {
+        throw new Error('Seul un plan en brouillon ou rejeté peut être soumis');
+      }
+      const { error } = await supabaseUntyped
+        .from('plans_travail')
+        .update({ statut: 'soumis' })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
+      toast.success('Plan soumis pour validation');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
+    },
+  });
+
+  // Workflow: Valider un plan (soumis → valide)
+  const approvePlan = useMutation({
+    mutationFn: async ({ id, comment: _comment }: { id: string; comment?: string }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { error } = await supabaseUntyped
+        .from('plans_travail')
+        .update({
+          statut: 'valide',
+          validateur_id: user?.id,
+          date_validation: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
+      toast.success('Plan validé');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
+    },
+  });
+
+  // Workflow: Rejeter un plan (soumis → rejete)
+  const rejectPlan = useMutation({
+    mutationFn: async ({ id, motif }: { id: string; motif: string }) => {
+      if (!motif.trim()) throw new Error('Le motif de rejet est obligatoire');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { error } = await supabaseUntyped
+        .from('plans_travail')
+        .update({
+          statut: 'rejete',
+          validateur_id: user?.id,
+          date_validation: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
+      toast.success('Plan rejeté');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
+    },
+  });
+
+  // Workflow: Activer un plan (valide → en_cours)
+  const activatePlan = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabaseUntyped
+        .from('plans_travail')
+        .update({ statut: 'en_cours' })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans-travail'] });
+      toast.success('Plan activé');
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
+    },
+  });
+
   return {
     plans: query.data ?? [],
     isLoading: query.isLoading,
@@ -114,7 +206,12 @@ export function usePlansTravail(directionId?: string) {
     createPlan: createMutation.mutateAsync,
     updatePlan: updateMutation.mutateAsync,
     deletePlan: deleteMutation.mutateAsync,
+    submitPlan: submitPlan.mutateAsync,
+    approvePlan: approvePlan.mutateAsync,
+    rejectPlan: rejectPlan.mutateAsync,
+    activatePlan: activatePlan.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isSubmitting: submitPlan.isPending,
   };
 }

@@ -30,6 +30,8 @@ React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query
 | ------------------------ | ---------- | ------- | -------------------------------------------- |
 | Budget/Planification     | Production | 52 unit | `docs/modules/MODULE_BUDGET.md`              |
 | Feuille de Route         | Production | -       | `docs/modules/MODULE_FEUILLE_ROUTE.md`       |
+| Scanning Engagement      | Production | -       | -                                            |
+| Scanning Liquidation     | Production | -       | -                                            |
 | Suivi DG                 | Production | -       | `docs/modules/MODULE_SUIVI_DG.md`            |
 | Tresorerie               | Production | -       | `docs/modules/MODULE_TRESORERIE.md`          |
 | Recettes                 | Production | -       | `docs/modules/MODULE_RECETTES.md`            |
@@ -81,7 +83,7 @@ Voir `docs/CONVENTIONS.md` sections 10-19 pour toutes les regles frontend detail
 ```bash
 npx tsc --noEmit         # 0 erreurs TypeScript
 npx vite build           # Build OK
-npx vitest run           # 704/704 tests PASS (au 24/03/2026)
+npx vitest run           # 713/713 tests PASS (au 01/04/2026)
 ```
 
 **INTERDIT :**
@@ -178,7 +180,14 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8080   # 200 = serveur O
 | `http://localhost:8080/planification/historique-imports`         | Historique Imports       |
 | `http://localhost:8080/contractualisation/comptabilite-matiere`  | Comptabilite Matiere     |
 
-Toutes ces routes ont ete testees le 24/03/2026 : **38/38 OK, 0 erreurs critiques**.
+Toutes ces routes ont ete testees le 01/04/2026 : **40/40 OK, 0 erreurs critiques**.
+
+**Nouvelles routes ajoutees (01/04/2026) :**
+
+| URL                                                         | Page attendue         |
+| ----------------------------------------------------------- | --------------------- |
+| `http://localhost:8080/planification/livrables-centralises` | Livrables Centralises |
+| `http://localhost:8080/planification/mes-taches`            | Mes Taches            |
 
 ## 7. MCP disponibles
 
@@ -223,4 +232,4 @@ Toutes ces routes ont ete testees le 24/03/2026 : **38/38 OK, 0 erreurs critique
 
 ### Metriques cles (24/03/2026)
 
-125 pages | 426 composants | 179 hooks | 201 tables | 671 RLS policies | 281 migrations | 12 Edge Functions | 704 tests unitaires | 71 specs E2E | 103 routes | 50 items sidebar
+127 pages | 428 composants | 179 hooks | 201 tables | 671 RLS policies | 283 migrations | 12 Edge Functions | 713 tests unitaires | 71 specs E2E | 105 routes | 55 items sidebar
