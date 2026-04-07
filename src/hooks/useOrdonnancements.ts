@@ -713,7 +713,7 @@ export function useOrdonnancements() {
         if (ordData?.liquidation_id) {
           await supabase
             .from('budget_liquidations')
-            .update({ is_locked: true })
+            .update({ code_locked: true })
             .eq('id', ordData.liquidation_id);
 
           const { data: liqData } = await supabase
@@ -725,7 +725,7 @@ export function useOrdonnancements() {
           if (liqData?.engagement_id) {
             await supabase
               .from('budget_engagements')
-              .update({ is_locked: true })
+              .update({ code_locked: true })
               .eq('id', liqData.engagement_id);
           }
         }

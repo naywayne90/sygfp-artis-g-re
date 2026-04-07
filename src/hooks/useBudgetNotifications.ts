@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { toast } from 'sonner';
 import { useCallback } from 'react';
+import { r2Storage } from '@/services/r2Storage';
 
 // ============================================
 // TYPES
@@ -446,20 +447,14 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
       category?: string;
       description?: string;
     }) => {
-      // Upload via edge function R2
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('entityType', 'budget_notification');
-      formData.append('entityId', notificationId);
+      // Upload via le service R2 (qui parle JSON à la fonction r2-storage,
+      // contrairement à FormData qui était rejeté en 502 par await req.json())
+      const path = r2Storage.generatePath('budget_notification', notificationId, file.name);
+      const { data: uploadResult, error: uploadError } = await r2Storage.upload(file, path);
 
-      const { data: uploadResult, error: uploadError } = await supabase.functions.invoke(
-        'r2-storage',
-        {
-          body: formData,
-        }
-      );
-
-      if (uploadError) throw uploadError;
+      if (uploadError || !uploadResult) {
+        throw new Error(uploadError || "Échec de l'upload R2");
+      }
 
       // Créer l'enregistrement
       const { data, error } = await supabase
@@ -467,12 +462,12 @@ export function useBudgetNotifications(filters?: NotificationFilters) {
         .insert({
           entity_type: 'budget_notification',
           entity_id: notificationId,
-          filename: uploadResult.filename,
+          filename: uploadResult.key.split('/').pop() ?? file.name,
           original_filename: file.name,
           file_type: file.type,
           file_size: file.size,
-          file_url: uploadResult.url,
-          checksum: uploadResult.checksum,
+          file_url: uploadResult.key,
+          checksum: null,
           category,
           description,
           uploaded_by: (await supabase.auth.getUser()).data.user?.id,
