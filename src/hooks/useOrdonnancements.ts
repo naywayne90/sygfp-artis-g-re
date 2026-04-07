@@ -12,12 +12,10 @@ export const VALIDATION_STEPS = [
   { order: 4, role: 'DG', label: 'Directeur Général' },
 ];
 
-// Étapes de signature
+// Étapes de signature (aligné avec le schéma DB ordonnancement_signatures: colonnes role, required)
 export const SIGNATURE_STEPS = [
-  { order: 1, role: 'CB', label: 'Contrôleur Budgétaire' },
-  { order: 2, role: 'DAF', label: 'Directeur Administratif et Financier' },
-  { order: 3, role: 'DG', label: 'Directeur Général (Ordonnateur)' },
-  { order: 4, role: 'AC', label: 'Agent Comptable' },
+  { order: 1, role: 'DAAF', label: 'Directeur Administratif et Financier' },
+  { order: 2, role: 'DG', label: 'Directeur Général (Ordonnateur)' },
 ];
 
 export const MODES_PAIEMENT = [
@@ -55,40 +53,6 @@ export interface SignatureData {
   qr_code_data?: string;
   signed_at: string;
 }
-
-// Generate hash for document signature verification
-const generateSignatureHash = (data: {
-  ordonnancementId: string;
-  numero: string;
-  montant: number;
-  beneficiaire: string;
-  signataire: string;
-  signedAt: string;
-}): string => {
-  // Simple hash based on critical data - in production use crypto library
-  const payload = `${data.ordonnancementId}|${data.numero}|${data.montant}|${data.beneficiaire}|${data.signataire}|${data.signedAt}`;
-  // Base64 encode for now - replace with proper cryptographic hash in production
-  return btoa(payload).slice(0, 32);
-};
-
-// Generate QR code data for verification
-const generateQRCodeData = (data: {
-  numero: string;
-  montant: number;
-  beneficiaire: string;
-  hash: string;
-  signedAt: string;
-}): string => {
-  return JSON.stringify({
-    type: 'ORDONNANCEMENT_SYGFP',
-    ref: data.numero,
-    montant: data.montant,
-    beneficiaire: data.beneficiaire,
-    hash: data.hash,
-    date: data.signedAt,
-    v: '1.0',
-  });
-};
 
 export function useOrdonnancements() {
   const queryClient = useQueryClient();
@@ -175,6 +139,9 @@ export function useOrdonnancements() {
         )
         .eq('statut', 'valide')
         .eq('exercice', exercice)
+        // Exclut les liquidations migrées à montant=0 qui pollueraient le select
+        // et permettraient de créer un ordonnancement bancal (audit 2026-04-07)
+        .gt('montant', 0)
         .order('date_liquidation', { ascending: false });
 
       if (error) throw error;
@@ -559,27 +526,32 @@ export function useOrdonnancements() {
   // Soumettre à la signature (après validation complète)
   const submitToSignature = useMutation({
     mutationFn: async (id: string) => {
-      // Create signature steps
-      const signatureSteps = SIGNATURE_STEPS.map((step) => ({
-        ordonnancement_id: id,
-        signataire_role: step.role,
-        signataire_label: step.label,
-        signature_order: step.order,
-        status: 'pending',
-      }));
+      // Vérifier si des signatures existent déjà
+      const { data: existing } = await supabase
+        .from('ordonnancement_signatures')
+        .select('id')
+        .eq('ordonnancement_id', id);
 
-      const { error: sigError } = await (supabase
-        .from('ordonnancement_signatures' as any)
-        .insert(signatureSteps) as any);
+      if (!existing || existing.length === 0) {
+        // Créer les étapes de signature (DAAF puis DG)
+        const signatureSteps = SIGNATURE_STEPS.map((step) => ({
+          ordonnancement_id: id,
+          role: step.role,
+          required: true,
+        }));
 
-      if (sigError) throw sigError;
+        const { error: sigError } = await supabase
+          .from('ordonnancement_signatures')
+          .insert(signatureSteps);
+
+        if (sigError) throw sigError;
+      }
 
       const { error } = await supabase
         .from('ordonnancements')
         .update({
           statut: 'en_signature',
           workflow_status: 'en_signature',
-          signature_status: 'in_progress',
         })
         .eq('id', id);
 
@@ -591,7 +563,7 @@ export function useOrdonnancements() {
         entityId: id,
         action: 'SUBMIT_TO_SIGNATURE',
         oldValues: { statut: 'valide' },
-        newValues: { statut: 'en_signature', signature_status: 'in_progress' },
+        newValues: { statut: 'en_signature' },
       });
     },
     onSuccess: () => {
@@ -606,6 +578,13 @@ export function useOrdonnancements() {
   // Supprimer un ordonnancement (soumis uniquement)
   const deleteOrdonnancement = useMutation({
     mutationFn: async (id: string) => {
+      // Récupérer les infos avant suppression pour l'audit
+      const { data: oldData } = await supabase
+        .from('ordonnancements')
+        .select('numero, montant, beneficiaire, statut')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('ordonnancements')
         .delete()
@@ -613,6 +592,19 @@ export function useOrdonnancements() {
         .eq('statut', 'soumis');
 
       if (error) throw error;
+
+      // Audit log
+      await logAction({
+        entityType: 'ordonnancement',
+        entityId: id,
+        action: 'DELETE',
+        oldValues: {
+          numero: oldData?.numero,
+          montant: oldData?.montant,
+          beneficiaire: oldData?.beneficiaire,
+          statut: oldData?.statut,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
@@ -645,95 +637,73 @@ export function useOrdonnancements() {
     return data;
   };
 
-  // Signer un ordonnancement (avec génération hash et QR)
+  // Signer un ordonnancement (par rôle : DAAF puis DG)
   const signOrdonnancement = useMutation({
     mutationFn: async ({
       ordonnancementId,
-      signatureOrder,
+      role,
+      comments: signComments,
     }: {
       ordonnancementId: string;
-      signatureOrder: number;
+      role: string;
+      comments?: string;
     }) => {
-      // Get ordonnancement data for hash generation
-      const { data: ordonnancement, error: ordError } = await supabase
-        .from('ordonnancements')
-        .select('numero, montant, beneficiaire')
-        .eq('id', ordonnancementId)
-        .single();
-
-      if (ordError) throw ordError;
-
       // Get current user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
-      // Get user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
-
       const signedAt = new Date().toISOString();
 
-      // Generate signature hash
-      const signatureHash = generateSignatureHash({
-        ordonnancementId,
-        numero: ordonnancement.numero,
-        montant: ordonnancement.montant,
-        beneficiaire: ordonnancement.beneficiaire,
-        signataire: profile?.full_name || user.email || '',
-        signedAt,
-      });
-
-      // Generate QR code data
-      const qrCodeData = generateQRCodeData({
-        numero: ordonnancement.numero,
-        montant: ordonnancement.montant,
-        beneficiaire: ordonnancement.beneficiaire,
-        hash: signatureHash,
-        signedAt,
-      });
-
-      // Update signature record
-      const { error: sigError } = await (supabase
-        .from('ordonnancement_signatures' as any)
+      // Update signature record by role
+      const { error: sigError } = await supabase
+        .from('ordonnancement_signatures')
         .update({
-          status: 'signed',
           signed_at: signedAt,
           signed_by: user.id,
-          signature_hash: signatureHash,
-          qr_code_data: qrCodeData,
+          comments: signComments || null,
         })
         .eq('ordonnancement_id', ordonnancementId)
-        .eq('signature_order', signatureOrder) as any);
+        .eq('role', role);
 
       if (sigError) throw sigError;
 
-      // Check if all signatures are complete
-      const currentSignatureStep = SIGNATURE_STEPS.find((s) => s.order === signatureOrder);
-      const isLastSignature = signatureOrder >= SIGNATURE_STEPS.length;
+      // Update the denormalized columns on ordonnancements
+      const signatureUpdate: Record<string, string> = {};
+      if (role === 'DAAF') {
+        signatureUpdate.signed_daaf_at = signedAt;
+        signatureUpdate.signed_daaf_by = user.id;
+      } else if (role === 'DG') {
+        signatureUpdate.signed_dg_at = signedAt;
+        signatureUpdate.signed_dg_by = user.id;
+      }
 
-      if (isLastSignature) {
-        // All signatures complete - mark as ORDONNANCÉ
+      if (Object.keys(signatureUpdate).length > 0) {
+        await supabase.from('ordonnancements').update(signatureUpdate).eq('id', ordonnancementId);
+      }
+
+      // Check if all signatures are complete
+      const { data: allSigs } = await supabase
+        .from('ordonnancement_signatures')
+        .select('role, signed_by')
+        .eq('ordonnancement_id', ordonnancementId);
+
+      const allSigned = allSigs && allSigs.length > 0 && allSigs.every((s) => s.signed_by);
+
+      if (allSigned) {
+        // All signatures complete — mark as ORDONNANCÉ
         const { error: updateError } = await supabase
           .from('ordonnancements')
           .update({
             statut: 'ordonnance',
             workflow_status: 'ordonnance',
-            signature_status: 'complete',
-            signature_hash: signatureHash,
-            qr_code_data: qrCodeData,
-            date_ordonnancement: signedAt,
           })
           .eq('id', ordonnancementId);
 
         if (updateError) throw updateError;
 
         // Lock previous steps (engagement, liquidation)
-        // This is done by updating the related records to prevent modification
         const { data: ordData } = await supabase
           .from('ordonnancements')
           .select('liquidation_id')
@@ -741,13 +711,11 @@ export function useOrdonnancements() {
           .single();
 
         if (ordData?.liquidation_id) {
-          // Mark liquidation as locked
           await supabase
             .from('budget_liquidations')
             .update({ is_locked: true })
             .eq('id', ordData.liquidation_id);
 
-          // Get and lock engagement
           const { data: liqData } = await supabase
             .from('budget_liquidations')
             .select('engagement_id')
@@ -764,21 +732,18 @@ export function useOrdonnancements() {
       }
 
       // Audit log
+      const currentStep = SIGNATURE_STEPS.find((s) => s.role === role);
       await logAction({
         entityType: 'ordonnancement',
         entityId: ordonnancementId,
         action: 'SIGN',
         newValues: {
-          signature_order: signatureOrder,
-          signature_role: currentSignatureStep?.role,
-          signature_label: currentSignatureStep?.label,
-          signature_hash: signatureHash,
-          is_final_signature: isLastSignature,
-          new_status: isLastSignature ? 'ordonnance' : 'en_signature',
+          signature_role: role,
+          signature_label: currentStep?.label,
+          is_final_signature: allSigned,
+          new_status: allSigned ? 'ordonnance' : 'en_signature',
         },
       });
-
-      return { signatureHash, qrCodeData };
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['ordonnancements'] });
@@ -794,8 +759,8 @@ export function useOrdonnancements() {
 
   // Get signatures for an ordonnancement
   const getSignatures = async (ordonnancementId: string) => {
-    const { data, error } = await (supabase
-      .from('ordonnancement_signatures' as any)
+    const { data, error } = await supabase
+      .from('ordonnancement_signatures')
       .select(
         `
         *,
@@ -806,7 +771,7 @@ export function useOrdonnancements() {
       `
       )
       .eq('ordonnancement_id', ordonnancementId)
-      .order('signature_order', { ascending: true }) as any);
+      .order('created_at', { ascending: true });
 
     if (error) throw error;
     return data;

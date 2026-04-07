@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -10,21 +10,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useOrdonnancementSignatures } from "@/hooks/useOrdonnancementSignatures";
-import { 
-  FileSignature, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+} from '@/components/ui/dialog';
+import {
+  useOrdonnancementSignatures,
+  OrdonnancementSignature,
+} from '@/hooks/useOrdonnancementSignatures';
+import {
+  FileSignature,
+  CheckCircle,
+  XCircle,
+  Clock,
   Eye,
   FileText,
   Loader2,
   AlertCircle,
-  User
-} from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+  User,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ParapheurInternProps {
   ordonnancementId: string;
@@ -33,18 +36,26 @@ interface ParapheurInternProps {
 }
 
 const PIECE_ICONS: Record<string, string> = {
-  mandat: "📜",
-  liquidation: "📋",
-  engagement: "📄",
-  facture: "🧾",
-  pv_reception: "✅",
-  autre: "📎",
+  mandat: '📜',
+  liquidation: '📋',
+  engagement: '📄',
+  facture: '🧾',
+  pv_reception: '✅',
+  autre: '📎',
 };
 
-export function ParapheurIntern({ 
-  ordonnancementId, 
+function getSignatureStatus(
+  sig: OrdonnancementSignature
+): 'signed' | 'rejected' | 'pending' | 'waiting' {
+  if (sig.signed_by && sig.comments?.startsWith('REJETÉ:')) return 'rejected';
+  if (sig.signed_by) return 'signed';
+  return 'pending';
+}
+
+export function ParapheurIntern({
+  ordonnancementId,
   ordonnancementNumero,
-  canSign = false 
+  canSign = false,
 }: ParapheurInternProps) {
   const {
     signatures,
@@ -59,12 +70,13 @@ export function ParapheurIntern({
     rejectSignature,
     isSigning,
     isRejecting,
+    getRoleLabel,
   } = useOrdonnancementSignatures(ordonnancementId);
 
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [comments, setComments] = useState("");
-  const [rejectReason, setRejectReason] = useState("");
+  const [comments, setComments] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
 
   if (isLoading) {
     return (
@@ -80,7 +92,7 @@ export function ParapheurIntern({
     if (currentSignature) {
       sign({ signatureId: currentSignature.id, comments: comments || undefined });
       setShowSignDialog(false);
-      setComments("");
+      setComments('');
     }
   };
 
@@ -88,7 +100,7 @@ export function ParapheurIntern({
     if (currentSignature && rejectReason) {
       rejectSignature({ signatureId: currentSignature.id, reason: rejectReason });
       setShowRejectDialog(false);
-      setRejectReason("");
+      setRejectReason('');
     }
   };
 
@@ -103,9 +115,7 @@ export function ParapheurIntern({
                 <FileSignature className="h-5 w-5" />
                 Parapheur - {ordonnancementNumero}
               </CardTitle>
-              <CardDescription>
-                Circuit de signature du mandat de paiement
-              </CardDescription>
+              <CardDescription>Circuit de signature du mandat de paiement</CardDescription>
             </div>
             {allSigned ? (
               <Badge className="bg-success/10 text-success border-success/20">
@@ -134,39 +144,37 @@ export function ParapheurIntern({
             <FileText className="h-4 w-4" />
             Pièces jointes au parapheur
           </CardTitle>
-          <CardDescription>
-            Documents à vérifier avant signature
-          </CardDescription>
+          <CardDescription>Documents à vérifier avant signature</CardDescription>
         </CardHeader>
         <CardContent>
           {pieces.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Aucune pièce attachée
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune pièce attachée</p>
           ) : (
             <div className="space-y-2">
-              {pieces.filter(p => p.included_in_parapheur).map((piece) => (
-                <div
-                  key={piece.id}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{PIECE_ICONS[piece.piece_type] || "📎"}</span>
-                    <div>
-                      <p className="font-medium text-sm">{piece.piece_label}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {piece.piece_type.replace("_", " ")}
-                      </p>
+              {pieces
+                .filter((p) => p.included_in_parapheur)
+                .map((piece) => (
+                  <div
+                    key={piece.id}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-muted/30"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{PIECE_ICONS[piece.piece_type] || '📎'}</span>
+                      <div>
+                        <p className="font-medium text-sm">{piece.piece_label}</p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {piece.piece_type.replace('_', ' ')}
+                        </p>
+                      </div>
                     </div>
+                    {piece.file_path && (
+                      <Button size="sm" variant="ghost">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Voir
+                      </Button>
+                    )}
                   </div>
-                  {piece.file_path && (
-                    <Button size="sm" variant="ghost">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Voir
-                    </Button>
-                  )}
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </CardContent>
@@ -182,90 +190,97 @@ export function ParapheurIntern({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {signatures.map((sig, _index) => (
-              <div
-                key={sig.id}
-                className={`
-                  flex items-center gap-4 p-4 rounded-lg border
-                  ${sig.status === "signed" 
-                    ? "bg-success/5 border-success/20" 
-                    : sig.status === "rejected"
-                    ? "bg-destructive/5 border-destructive/20"
-                    : sig.status === "pending" && currentSignature?.id === sig.id
-                    ? "bg-warning/5 border-warning/20"
-                    : "bg-muted/30"
-                  }
-                `}
-              >
-                {/* Step indicator */}
-                <div className={`
-                  flex items-center justify-center w-10 h-10 rounded-full border-2
-                  ${sig.status === "signed" 
-                    ? "bg-success/10 border-success text-success"
-                    : sig.status === "rejected"
-                    ? "bg-destructive/10 border-destructive text-destructive"
-                    : sig.status === "pending"
-                    ? "bg-warning/10 border-warning text-warning"
-                    : "bg-muted border-muted-foreground/30 text-muted-foreground"
-                  }
-                `}>
-                  {sig.status === "signed" ? (
-                    <CheckCircle className="h-5 w-5" />
-                  ) : sig.status === "rejected" ? (
-                    <XCircle className="h-5 w-5" />
-                  ) : sig.status === "pending" ? (
-                    <Clock className="h-5 w-5" />
-                  ) : (
-                    <span className="font-semibold">{sig.signature_order}</span>
-                  )}
-                </div>
+            {signatures.map((sig) => {
+              const status = getSignatureStatus(sig);
+              const roleLabel = getRoleLabel(sig.role);
 
-                {/* Signature info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{sig.signataire_label}</p>
-                    <Badge variant="outline" className="text-xs">
-                      {sig.signataire_role}
-                    </Badge>
-                  </div>
-                  {sig.status === "signed" && sig.signed_at && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Signé le {format(new Date(sig.signed_at), "dd/MM/yyyy à HH:mm", { locale: fr })}
-                      {sig.signer?.full_name && ` par ${sig.signer.full_name}`}
-                    </p>
-                  )}
-                  {sig.status === "rejected" && sig.rejection_reason && (
-                    <p className="text-xs text-destructive mt-1">
-                      Motif: {sig.rejection_reason}
-                    </p>
-                  )}
-                  {sig.comments && (
-                    <p className="text-xs text-muted-foreground italic mt-1">
-                      "{sig.comments}"
-                    </p>
-                  )}
-                </div>
-
-                {/* Status badge */}
-                <Badge 
-                  variant="outline"
-                  className={
-                    sig.status === "signed" 
-                      ? "bg-success/10 text-success"
-                      : sig.status === "rejected"
-                      ? "bg-destructive/10 text-destructive"
-                      : sig.status === "pending"
-                      ? "bg-warning/10 text-warning"
-                      : ""
-                  }
+              return (
+                <div
+                  key={sig.id}
+                  className={`
+                    flex items-center gap-4 p-4 rounded-lg border
+                    ${
+                      status === 'signed'
+                        ? 'bg-success/5 border-success/20'
+                        : status === 'rejected'
+                          ? 'bg-destructive/5 border-destructive/20'
+                          : status === 'pending' && currentSignature?.id === sig.id
+                            ? 'bg-warning/5 border-warning/20'
+                            : 'bg-muted/30'
+                    }
+                  `}
                 >
-                  {sig.status === "signed" ? "Signé" 
-                    : sig.status === "rejected" ? "Rejeté"
-                    : sig.status === "pending" ? "En attente"
-                    : "À venir"}
-                </Badge>
-              </div>
-            ))}
+                  {/* Step indicator */}
+                  <div
+                    className={`
+                    flex items-center justify-center w-10 h-10 rounded-full border-2
+                    ${
+                      status === 'signed'
+                        ? 'bg-success/10 border-success text-success'
+                        : status === 'rejected'
+                          ? 'bg-destructive/10 border-destructive text-destructive'
+                          : status === 'pending'
+                            ? 'bg-warning/10 border-warning text-warning'
+                            : 'bg-muted border-muted-foreground/30 text-muted-foreground'
+                    }
+                  `}
+                  >
+                    {status === 'signed' ? (
+                      <CheckCircle className="h-5 w-5" />
+                    ) : status === 'rejected' ? (
+                      <XCircle className="h-5 w-5" />
+                    ) : (
+                      <Clock className="h-5 w-5" />
+                    )}
+                  </div>
+
+                  {/* Signature info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{roleLabel}</p>
+                      <Badge variant="outline" className="text-xs">
+                        {sig.role}
+                      </Badge>
+                    </div>
+                    {status === 'signed' && sig.signed_at && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Signé le{' '}
+                        {format(new Date(sig.signed_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                        {sig.signer?.full_name && ` par ${sig.signer.full_name}`}
+                      </p>
+                    )}
+                    {status === 'rejected' && sig.comments && (
+                      <p className="text-xs text-destructive mt-1">
+                        Motif: {sig.comments.replace('REJETÉ: ', '')}
+                      </p>
+                    )}
+                    {status === 'signed' && sig.comments && !sig.comments.startsWith('REJETÉ:') && (
+                      <p className="text-xs text-muted-foreground italic mt-1">"{sig.comments}"</p>
+                    )}
+                  </div>
+
+                  {/* Status badge */}
+                  <Badge
+                    variant="outline"
+                    className={
+                      status === 'signed'
+                        ? 'bg-success/10 text-success'
+                        : status === 'rejected'
+                          ? 'bg-destructive/10 text-destructive'
+                          : status === 'pending'
+                            ? 'bg-warning/10 text-warning'
+                            : ''
+                    }
+                  >
+                    {status === 'signed'
+                      ? 'Signé'
+                      : status === 'rejected'
+                        ? 'Rejeté'
+                        : 'En attente'}
+                  </Badge>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -280,13 +295,13 @@ export function ParapheurIntern({
                 <div>
                   <p className="font-medium">Votre signature est requise</p>
                   <p className="text-sm text-muted-foreground">
-                    En tant que {currentSignature.signataire_label}
+                    En tant que {getRoleLabel(currentSignature.role)}
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowRejectDialog(true)}
                   className="text-destructive hover:text-destructive"
                 >
@@ -309,7 +324,8 @@ export function ParapheurIntern({
           <DialogHeader>
             <DialogTitle>Confirmer la signature</DialogTitle>
             <DialogDescription>
-              Vous êtes sur le point de signer ce mandat en tant que {currentSignature?.signataire_label}.
+              Vous êtes sur le point de signer ce mandat en tant que{' '}
+              {currentSignature ? getRoleLabel(currentSignature.role) : ''}.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -360,9 +376,9 @@ export function ParapheurIntern({
             <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
               Annuler
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleReject} 
+            <Button
+              variant="destructive"
+              onClick={handleReject}
               disabled={isRejecting || !rejectReason.trim()}
             >
               {isRejecting ? (

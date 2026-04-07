@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import {
   CreditCard,
   FileText,
@@ -22,10 +22,18 @@ import {
   QrCode,
   Lock,
   GitBranch,
+  Send,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useOrdonnancements, VALIDATION_STEPS, MODES_PAIEMENT } from '@/hooks/useOrdonnancements';
+import { formatCurrency } from '@/lib/utils';
+import {
+  useOrdonnancements,
+  VALIDATION_STEPS,
+  SIGNATURE_STEPS,
+  MODES_PAIEMENT,
+} from '@/hooks/useOrdonnancements';
 import { OrdonnancementSignatures } from './OrdonnancementSignatures';
 import { ParapheurIntern } from './ParapheurIntern';
 import { OrdonnancementTimeline } from './OrdonnancementTimeline';
@@ -34,6 +42,7 @@ import { DossierGED } from '@/components/ged';
 import { DossierStepTimeline } from '@/components/shared/DossierStepTimeline';
 
 interface OrdonnancementDetailsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ordonnancement: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -83,20 +92,20 @@ const getValidationStatusIcon = (status: string) => {
   }
 };
 
-const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
 export function OrdonnancementDetails({
   ordonnancement,
   open,
   onOpenChange,
 }: OrdonnancementDetailsProps) {
-  const { getValidations } = useOrdonnancements();
+  const { getValidations, submitToSignature } = useOrdonnancements();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [validations, setValidations] = useState<any[]>([]);
 
   useEffect(() => {
     if (open && ordonnancement?.id) {
       getValidations(ordonnancement.id).then(setValidations);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getValidations est recréé à chaque rendu, l'inclure causerait une boucle infinie
   }, [open, ordonnancement?.id]);
 
   const engagement = ordonnancement?.liquidation?.engagement;
@@ -151,7 +160,23 @@ export function OrdonnancementDetails({
                     <h3 className="text-xl font-bold">{ordonnancement?.numero || '—'}</h3>
                     <p className="text-muted-foreground">{ordonnancement?.objet}</p>
                   </div>
-                  {getStatusBadge(ordonnancement?.statut || ordonnancement?.workflow_status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(ordonnancement?.statut || ordonnancement?.workflow_status)}
+                    {ordonnancement?.statut === 'valide' && (
+                      <Button
+                        size="sm"
+                        onClick={() => submitToSignature.mutateAsync(ordonnancement.id)}
+                        disabled={submitToSignature.isPending}
+                      >
+                        {submitToSignature.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <Send className="h-4 w-4 mr-2" />
+                        )}
+                        Soumettre à la signature
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Statut ORDONNANCÉ avec signature */}
@@ -204,6 +229,31 @@ export function OrdonnancementDetails({
                               </p>
                             </div>
                           )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Statut EN SIGNATURE avec progression */}
+                {ordonnancement?.statut === 'en_signature' && (
+                  <Card className="border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-start gap-3">
+                        <FileSignature className="h-6 w-6 text-indigo-600 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="font-bold text-indigo-700 text-lg">En cours de signature</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Le circuit de signature est en cours. Consultez l'onglet Parapheur pour
+                            suivre l'avancement.
+                          </p>
+                          <div className="flex gap-2 flex-wrap">
+                            {SIGNATURE_STEPS.map((step) => (
+                              <Badge key={step.order} variant="outline" className="text-xs">
+                                {step.order}. {step.label}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -296,7 +346,7 @@ export function OrdonnancementDetails({
                       <div>
                         <span className="text-muted-foreground">Montant ordonnancé:</span>
                         <p className="font-bold text-lg text-primary">
-                          {formatMontant(ordonnancement?.montant || 0)}
+                          {formatCurrency(ordonnancement?.montant || 0)}
                         </p>
                       </div>
                       <div>
@@ -426,6 +476,7 @@ export function OrdonnancementDetails({
                 showChecklist={true}
                 readOnly={
                   ordonnancement?.statut === 'valide' ||
+                  ordonnancement?.statut === 'en_signature' ||
                   ordonnancement?.statut === 'transmis' ||
                   ordonnancement?.statut === 'ordonnance'
                 }

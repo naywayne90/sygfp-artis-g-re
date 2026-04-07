@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import {
   Table,
@@ -27,15 +26,16 @@ import {
   Trash2,
   Printer,
   Play,
+  FileSignature,
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import { OrdonnancementDetails } from './OrdonnancementDetails';
 import { OrdonnancementValidateDialog } from './OrdonnancementValidateDialog';
 import { OrdonnancementRejectDialog } from './OrdonnancementRejectDialog';
 import { OrdonnancementDeferDialog } from './OrdonnancementDeferDialog';
 import { OrdrePayer } from './OrdrePayer';
 import { useOrdonnancements, VALIDATION_STEPS } from '@/hooks/useOrdonnancements';
+import { formatCurrency } from '@/lib/utils';
+import { NotesPagination } from '@/components/shared/NotesPagination';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,6 +48,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface OrdonnancementListProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ordonnancements: any[];
   filter?: string;
   canValidate?: boolean;
@@ -68,6 +69,15 @@ const getStatusBadge = (status: string) => {
       label: 'Rejeté',
       className: 'bg-destructive/10 text-destructive border-destructive/20',
     },
+    en_signature: {
+      label: 'En signature',
+      className:
+        'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200',
+    },
+    ordonnance: {
+      label: 'ORDONNANCÉ',
+      className: 'bg-green-600 text-white border-green-700 font-bold',
+    },
     differe: { label: 'Différé', className: 'bg-orange-100 text-orange-700 border-orange-200' },
     transmis: { label: 'Transmis', className: 'bg-primary/10 text-primary border-primary/20' },
   };
@@ -79,16 +89,20 @@ const getStatusBadge = (status: string) => {
   );
 };
 
-const formatMontant = (montant: number) => new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-
 export function OrdonnancementList({
   ordonnancements,
   filter,
   canValidate = true,
 }: OrdonnancementListProps) {
-  const { submitOrdonnancement, validateStep, deleteOrdonnancement, resumeOrdonnancement } =
-    useOrdonnancements();
+  const {
+    submitOrdonnancement,
+    validateStep: _validateStep,
+    deleteOrdonnancement,
+    resumeOrdonnancement,
+    submitToSignature,
+  } = useOrdonnancements();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedOrdonnancement, setSelectedOrdonnancement] = useState<any>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showValidateDialog, setShowValidateDialog] = useState(false);
@@ -97,12 +111,18 @@ export function OrdonnancementList({
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
   // Filtrer selon le filtre
   const filteredOrdonnancements = ordonnancements.filter((ord) => {
     if (!filter || filter === 'tous') return true;
     if (filter === 'a_valider')
       return ord.statut === 'soumis' || ord.workflow_status === 'en_validation';
     if (filter === 'valides') return ord.statut === 'valide';
+    if (filter === 'en_signature') return ord.statut === 'en_signature';
+    if (filter === 'ordonnances') return ord.statut === 'ordonnance';
     if (filter === 'rejetes') return ord.statut === 'rejete';
     if (filter === 'differes') return ord.statut === 'differe';
     return true;
@@ -124,6 +144,7 @@ export function OrdonnancementList({
     await resumeOrdonnancement.mutateAsync(id);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getCurrentStep = (ord: any) => {
     const currentStep = ord.current_step || 1;
     return VALIDATION_STEPS.find((s) => s.order === currentStep);
@@ -151,14 +172,14 @@ export function OrdonnancementList({
               </TableCell>
             </TableRow>
           ) : (
-            filteredOrdonnancements.map((ord) => (
+            filteredOrdonnancements.slice((page - 1) * pageSize, page * pageSize).map((ord) => (
               <TableRow key={ord.id}>
                 <TableCell className="font-medium">{ord.numero || '—'}</TableCell>
                 <TableCell>{ord.beneficiaire}</TableCell>
                 <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                   {ord.objet}
                 </TableCell>
-                <TableCell className="text-right">{formatMontant(ord.montant)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(ord.montant)}</TableCell>
                 <TableCell className="capitalize">{ord.mode_paiement}</TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1">
@@ -166,6 +187,11 @@ export function OrdonnancementList({
                     {ord.workflow_status === 'en_validation' && (
                       <span className="text-xs text-muted-foreground">
                         Étape: {getCurrentStep(ord)?.label}
+                      </span>
+                    )}
+                    {ord.statut === 'en_signature' && (
+                      <span className="text-xs text-muted-foreground">
+                        Circuit de signature en cours
                       </span>
                     )}
                   </div>
@@ -189,15 +215,21 @@ export function OrdonnancementList({
                       </DropdownMenuItem>
 
                       {ord.statut === 'valide' && (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedOrdonnancement(ord);
-                            setShowPrintDialog(true);
-                          }}
-                        >
-                          <Printer className="mr-2 h-4 w-4" />
-                          Ordre de payer
-                        </DropdownMenuItem>
+                        <>
+                          <DropdownMenuItem onClick={() => submitToSignature.mutateAsync(ord.id)}>
+                            <FileSignature className="mr-2 h-4 w-4" />
+                            Soumettre à la signature
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedOrdonnancement(ord);
+                              setShowPrintDialog(true);
+                            }}
+                          >
+                            <Printer className="mr-2 h-4 w-4" />
+                            Ordre de payer
+                          </DropdownMenuItem>
+                        </>
                       )}
 
                       <DropdownMenuSeparator />
@@ -268,6 +300,20 @@ export function OrdonnancementList({
           )}
         </TableBody>
       </Table>
+
+      {filteredOrdonnancements.length > pageSize && (
+        <NotesPagination
+          page={page}
+          pageSize={pageSize}
+          total={filteredOrdonnancements.length}
+          totalPages={Math.ceil(filteredOrdonnancements.length / pageSize)}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      )}
 
       {/* Dialogs */}
       {selectedOrdonnancement && (

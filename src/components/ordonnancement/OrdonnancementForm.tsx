@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertCircle, Calculator, CreditCard, FileText, Building2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatCurrency } from '@/lib/utils';
 import {
   useOrdonnancements,
   MODES_PAIEMENT,
@@ -64,7 +65,7 @@ export function OrdonnancementForm({
 
   const { validateImputation, logImputationWarning } = useImputationValidation();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase inferred type trop complexe pour les joins imbriqués
   const [selectedLiquidation, setSelectedLiquidation] = useState<any>(null);
   const [availability, setAvailability] = useState({
     montantLiquide: 0,
@@ -153,12 +154,12 @@ export function OrdonnancementForm({
       form.reset();
       setImputationJustification('');
       onOpenChange(false);
-    } catch {
-      // Error handled by mutation
+    } catch (err) {
+      // Le toast d'erreur est déjà affiché par createOrdonnancement.onError.
+      // On log pour diagnostic sans masquer complètement l'échec.
+      console.error('[OrdonnancementForm] submit failed:', err);
     }
   };
-
-  const formatMontant = (value: number) => new Intl.NumberFormat('fr-FR').format(value);
 
   const montantActuel = watchedMontant || 0;
   const cumul = availability.ordonnancementsAnterieurs + montantActuel;
@@ -208,7 +209,7 @@ export function OrdonnancementForm({
                           {liquidationsValidees.map((liq) => (
                             <SelectItem key={liq.id} value={liq.id}>
                               {liq.numero} - {liq.engagement?.objet?.substring(0, 50)}... (
-                              {formatMontant(liq.montant)} FCFA)
+                              {formatCurrency(liq.montant)})
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -287,22 +288,22 @@ export function OrdonnancementForm({
                     <div className="p-3 bg-primary/10 rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(A) Montant liquidé</p>
                       <p className="font-bold text-primary">
-                        {formatMontant(availability.montantLiquide)}
+                        {formatCurrency(availability.montantLiquide)}
                       </p>
                     </div>
                     <div className="p-3 bg-secondary/10 rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(B) Ord. antérieurs</p>
                       <p className="font-bold">
-                        {formatMontant(availability.ordonnancementsAnterieurs)}
+                        {formatCurrency(availability.ordonnancementsAnterieurs)}
                       </p>
                     </div>
                     <div className="p-3 bg-warning/10 rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(C) Actuel</p>
-                      <p className="font-bold text-warning">{formatMontant(montantActuel)}</p>
+                      <p className="font-bold text-warning">{formatCurrency(montantActuel)}</p>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-xs text-muted-foreground mb-1">(D) Cumul (B+C)</p>
-                      <p className="font-bold">{formatMontant(cumul)}</p>
+                      <p className="font-bold">{formatCurrency(cumul)}</p>
                     </div>
                     <div
                       className={`p-3 rounded-lg ${isOverBudget ? 'bg-destructive/10' : 'bg-success/10'}`}
@@ -311,7 +312,7 @@ export function OrdonnancementForm({
                       <p
                         className={`font-bold ${isOverBudget ? 'text-destructive' : 'text-success'}`}
                       >
-                        {formatMontant(restant)}
+                        {formatCurrency(restant)}
                       </p>
                     </div>
                   </div>
@@ -321,7 +322,7 @@ export function OrdonnancementForm({
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         Le montant dépasse le restant à ordonnancer. Maximum autorisé:{' '}
-                        {formatMontant(availability.restantAOrdonnancer)} FCFA
+                        {formatCurrency(availability.restantAOrdonnancer)}
                       </AlertDescription>
                     </Alert>
                   )}

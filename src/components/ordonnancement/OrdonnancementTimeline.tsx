@@ -2,7 +2,7 @@
  * OrdonnancementTimeline - Timeline du workflow d'ordonnancement
  *
  * Affiche l'historique des étapes du workflow:
- * CRÉATION → SOUMISSION → VALIDATION (SAF→CB→DAF→DG) → SIGNATURE (CB→DAF→DG→AC) → ORDONNANCÉ
+ * CRÉATION → SOUMISSION → VALIDATION (DAAF→CB→DAF→DG) → SIGNATURE (DAAF→DG) → ORDONNANCÉ
  *
  * Avec dates, acteurs et statut de signature
  */
@@ -22,8 +22,6 @@ import {
   Users,
   FileSignature,
   CreditCard,
-  Shield,
-  QrCode,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -38,7 +36,6 @@ interface TimelineStep {
   date?: string | null;
   actor?: string | null;
   comment?: string | null;
-  hash?: string | null;
 }
 
 interface OrdonnancementRecord {
@@ -51,19 +48,21 @@ interface OrdonnancementRecord {
 }
 
 interface ValidationRecord {
-  role?: string;
-  statut?: string;
-  date_validation?: string;
-  validated_by_name?: string;
-  commentaire?: string;
+  step_order: number;
+  role: string;
+  status: string | null;
+  validated_at: string | null;
+  validated_by: string | null;
+  comments: string | null;
+  validated_by_profile?: { id: string; full_name: string | null } | null;
 }
 
 interface SignatureRecord {
   role?: string;
-  statut?: string;
-  signed_at?: string;
-  signed_by_name?: string;
-  hash?: string;
+  signed_by?: string | null;
+  signed_at?: string | null;
+  comments?: string | null;
+  signed_by_profile?: { id: string; full_name: string | null } | null;
 }
 
 interface OrdonnancementTimelineProps {
@@ -156,18 +155,17 @@ export function OrdonnancementTimeline({
 
     if (isInSignature || ordonnancement.workflow_status === 'valide') {
       SIGNATURE_STEPS.forEach((step) => {
-        const signature = signatures.find((s) => s.signature_order === step.order);
-        const isSigned = signature?.status === 'signed';
+        const signature = signatures.find((s) => s.role === step.role);
+        const isSigned = !!signature?.signed_by;
         const isPending = !isSigned && ordonnancement.statut === 'en_signature';
 
         steps.push({
-          key: `signature_${step.order}`,
+          key: `signature_${step.role}`,
           label: `Signature ${step.role}`,
           icon: FileSignature,
           status: isSigned ? 'signed' : isPending ? 'current' : 'pending',
           date: signature?.signed_at,
           actor: signature?.signed_by_profile?.full_name,
-          hash: signature?.signature_hash,
         });
       });
     }
@@ -179,9 +177,7 @@ export function OrdonnancementTimeline({
         label: 'ORDONNANCÉ',
         icon: CheckCircle2,
         status: 'completed',
-        date: ordonnancement.date_ordonnancement,
-        hash: ordonnancement.signature_hash,
-        comment: ordonnancement.qr_code_data ? 'QR Code généré' : undefined,
+        date: ordonnancement.signed_dg_at || ordonnancement.updated_at,
       });
     } else if (ordonnancement.statut === 'rejete') {
       steps.push({
@@ -264,9 +260,6 @@ export function OrdonnancementTimeline({
                         </p>
                       )}
                       {step.actor && <p className="text-xs">Par: {step.actor}</p>}
-                      {step.hash && (
-                        <p className="text-xs font-mono">Hash: {step.hash.slice(0, 12)}...</p>
-                      )}
                       {step.comment && <p className="text-xs max-w-xs">{step.comment}</p>}
                     </div>
                   </TooltipContent>
@@ -356,12 +349,6 @@ export function OrdonnancementTimeline({
                         <span>{step.actor}</span>
                       </div>
                     )}
-                    {step.hash && (
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-3 w-3" />
-                        <span className="font-mono text-xs">Hash: {step.hash}</span>
-                      </div>
-                    )}
                     {step.comment && (
                       <p className="text-sm mt-2 p-2 bg-muted/50 rounded text-foreground">
                         {step.comment}
@@ -373,19 +360,6 @@ export function OrdonnancementTimeline({
             );
           })}
         </div>
-
-        {/* QR Code section if ordonnancé */}
-        {ordonnancement.statut === 'ordonnance' && ordonnancement.qr_code_data && (
-          <div className="mt-4 p-4 border rounded-lg bg-muted/30">
-            <div className="flex items-center gap-2 mb-2">
-              <QrCode className="h-4 w-4 text-primary" />
-              <span className="font-medium text-sm">Données de vérification</span>
-            </div>
-            <div className="text-xs font-mono bg-background p-2 rounded overflow-x-auto">
-              {ordonnancement.qr_code_data}
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
