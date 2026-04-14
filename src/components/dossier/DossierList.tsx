@@ -29,6 +29,10 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Ban,
+  PlayCircle,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { Dossier } from '@/hooks/useDossiers';
 import { DossierEmptyState } from './DossierEmptyState';
@@ -66,6 +70,8 @@ interface DossierListProps {
   searchTerm?: string;
   onReset?: () => void;
   onCreate?: () => void;
+  onBlock?: (dossier: Dossier) => void;
+  onUnblock?: (dossier: Dossier) => void;
 }
 
 const STATUT_COLORS: Record<string, string> = {
@@ -82,15 +88,30 @@ const STATUT_LABELS: Record<string, string> = {
   suspendu: 'Suspendu',
 };
 
+// Libellés normalisés pour la colonne Étape.
+// Couvre toutes les variantes (snake_case DB + anciens libellés legacy)
+// afin d'éviter l'affichage brut de valeurs comme "note_sef" ou "imputation".
 const ETAPE_LABELS: Record<string, string> = {
   note: 'Note',
+  note_sef: 'Note SEF',
+  note_aef: 'Note AEF',
+  note_dg: 'Note AEF',
+  imputation: 'Imputation',
   expression_besoin: 'Expression besoin',
+  passation_marche: 'Passation marché',
   marche: 'Marché',
   engagement: 'Engagement',
   liquidation: 'Liquidation',
   ordonnancement: 'Ordonnancement',
   reglement: 'Règlement',
 };
+
+// Normalise une valeur d'étape quelle que soit sa casse ou ses variations.
+function normalizeEtape(raw: string | null | undefined): string {
+  if (!raw) return '—';
+  const key = String(raw).toLowerCase().trim().replace(/\s+/g, '_');
+  return ETAPE_LABELS[key] || raw;
+}
 
 const TYPE_COLORS: Record<string, string> = {
   AEF: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
@@ -111,26 +132,38 @@ export function DossierList({
   onPageChange,
   onPageSizeChange,
   onSort,
-  sortField: _sortField,
-  sortDirection: _sortDirection,
+  sortField,
+  sortDirection,
   hasFilters = false,
   searchTerm = '',
   onReset,
   onCreate,
+  onBlock,
+  onUnblock,
 }: DossierListProps) {
   const totalPages = Math.ceil(pagination.total / pagination.pageSize);
 
-  const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="-ml-3 h-8 data-[state=open]:bg-accent"
-      onClick={() => onSort(field)}
-    >
-      {children}
-      <ArrowUpDown className="ml-2 h-4 w-4" />
-    </Button>
-  );
+  const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => {
+    const isActive = sortField === field;
+    const ArrowIcon =
+      isActive && sortDirection === 'asc'
+        ? ArrowUp
+        : isActive && sortDirection === 'desc'
+          ? ArrowDown
+          : ArrowUpDown;
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-3 h-8 data-[state=open]:bg-accent"
+        onClick={() => onSort(field)}
+        aria-sort={isActive ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+      >
+        {children}
+        <ArrowIcon className={`ml-2 h-4 w-4 ${isActive ? 'text-primary' : 'opacity-60'}`} />
+      </Button>
+    );
+  };
 
   if (loading) {
     return (
@@ -256,7 +289,7 @@ export function DossierList({
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="font-normal">
-                    {ETAPE_LABELS[dossier.etape_courante] || dossier.etape_courante}
+                    {normalizeEtape(dossier.etape_courante)}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -300,6 +333,25 @@ export function DossierList({
                         <UserPlus className="h-4 w-4 mr-2" />
                         Assigner à...
                       </DropdownMenuItem>
+                      {(onBlock || onUnblock) && <DropdownMenuSeparator />}
+                      {onBlock && dossier.statut_global !== 'suspendu' && (
+                        <DropdownMenuItem
+                          onClick={() => onBlock(dossier)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          Bloquer
+                        </DropdownMenuItem>
+                      )}
+                      {onUnblock && dossier.statut_global === 'suspendu' && (
+                        <DropdownMenuItem
+                          onClick={() => onUnblock(dossier)}
+                          className="text-emerald-600 focus:text-emerald-600"
+                        >
+                          <PlayCircle className="h-4 w-4 mr-2" />
+                          Débloquer
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

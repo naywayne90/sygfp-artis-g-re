@@ -74,11 +74,14 @@ export default function Recherche() {
   const currentYear = new Date().getFullYear();
   const exercices = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
-  // Fetch dossiers when filters change
+  // Fetch dossiers when filters or tri change
   useEffect(() => {
-    fetchDossiers(filters, pagination.page, pagination.pageSize);
+    fetchDossiers(filters, pagination.page, pagination.pageSize, {
+      field: sortField,
+      direction: sortDirection,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, sortField, sortDirection]);
 
   // Gérer le paramètre URL ?dossier=xxx pour ouvrir directement les détails
   useEffect(() => {
@@ -109,26 +112,36 @@ export default function Recherche() {
 
   const handlePageChange = useCallback(
     (page: number) => {
-      fetchDossiers(filters, page, pagination.pageSize);
+      fetchDossiers(filters, page, pagination.pageSize, {
+        field: sortField,
+        direction: sortDirection,
+      });
     },
-    [filters, pagination.pageSize, fetchDossiers]
+    [filters, pagination.pageSize, sortField, sortDirection, fetchDossiers]
   );
 
   const handlePageSizeChange = useCallback(
     (pageSize: number) => {
-      fetchDossiers(filters, 1, pageSize);
+      fetchDossiers(filters, 1, pageSize, {
+        field: sortField,
+        direction: sortDirection,
+      });
     },
-    [filters, fetchDossiers]
+    [filters, sortField, sortDirection, fetchDossiers]
   );
 
+  // Clic colonne triable : bascule asc/desc si même colonne, sinon desc par défaut.
+  // Le useEffect ci-dessus déclenche automatiquement fetchDossiers après changement.
   const handleSort = useCallback(
     (field: string) => {
-      const newDirection = sortField === field && sortDirection === 'desc' ? 'asc' : 'desc';
-      setSortField(field);
-      setSortDirection(newDirection);
-      // In a real implementation, we would pass sort params to fetchDossiers
+      if (sortField === field) {
+        setSortDirection((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+      } else {
+        setSortField(field);
+        setSortDirection('desc');
+      }
     },
-    [sortField, sortDirection]
+    [sortField]
   );
 
   const handleReset = useCallback(() => {
@@ -504,6 +517,8 @@ export default function Recherche() {
             onAttach={handleAttachDossier}
             onChangeStatus={handleChangeStatusDossier}
             onAssign={handleAssignDossier}
+            onBlock={handleBlockDossier}
+            onUnblock={handleUnblockDossier}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
             onSort={handleSort}

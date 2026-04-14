@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { useAuditLog } from "@/hooks/useAuditLog";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 export interface Dossier {
   id: string;
@@ -90,18 +90,18 @@ export interface DossierStats {
 }
 
 const DEFAULT_FILTERS: DossierFilters = {
-  search: "",
-  direction_id: "",
+  search: '',
+  direction_id: '',
   exercice: null,
-  statut: "",
-  etape: "",
-  type_dossier: "",
-  date_debut: "",
-  date_fin: "",
+  statut: '',
+  etape: '',
+  type_dossier: '',
+  date_debut: '',
+  date_fin: '',
   montant_min: null,
   montant_max: null,
-  beneficiaire_id: "",
-  created_by: "",
+  beneficiaire_id: '',
+  created_by: '',
   en_retard: false,
   mes_dossiers: false,
 };
@@ -109,8 +109,12 @@ const DEFAULT_FILTERS: DossierFilters = {
 export function useDossiers() {
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [loading, setLoading] = useState(true);
-  const [directions, setDirections] = useState<{ id: string; code: string; label: string; sigle: string | null }[]>([]);
-  const [beneficiaires, setBeneficiaires] = useState<{ id: string; raison_sociale: string | null }[]>([]);
+  const [directions, setDirections] = useState<
+    { id: string; code: string; label: string; sigle: string | null }[]
+  >([]);
+  const [beneficiaires, setBeneficiaires] = useState<
+    { id: string; raison_sociale: string | null }[]
+  >([]);
   const [users, setUsers] = useState<{ id: string; full_name: string | null; email: string }[]>([]);
   const [stats, setStats] = useState<DossierStats>({
     total: 0,
@@ -132,125 +136,155 @@ export function useDossiers() {
   const { exercice } = useExercice();
   const { logAction } = useAuditLog();
 
-  const fetchDossiers = useCallback(async (filters?: Partial<DossierFilters>, page = 1, pageSize = 20) => {
-    setLoading(true);
-    try {
-      const appliedFilters = { ...DEFAULT_FILTERS, ...filters };
-      
-      let query = supabase
-        .from("dossiers")
-        .select(`
+  const fetchDossiers = useCallback(
+    async (
+      filters?: Partial<DossierFilters>,
+      page = 1,
+      pageSize = 20,
+      sort?: { field: string; direction: 'asc' | 'desc' }
+    ) => {
+      setLoading(true);
+      try {
+        const appliedFilters = { ...DEFAULT_FILTERS, ...filters };
+
+        // Whitelist des champs triables (protection contre les injections de colonne).
+        // Les clés acceptées incluent les noms UI (numero, montant, modifie) ET
+        // les noms DB directs (montant_estime, updated_at) pour la robustesse.
+        const SORTABLE_FIELDS: Record<string, string> = {
+          numero: 'numero',
+          reference: 'numero',
+          montant: 'montant_estime',
+          montant_estime: 'montant_estime',
+          updated_at: 'updated_at',
+          modifie: 'updated_at',
+          created_at: 'created_at',
+        };
+        const sortField = sort?.field
+          ? (SORTABLE_FIELDS[sort.field] ?? 'updated_at')
+          : 'updated_at';
+        const sortAsc = sort?.direction === 'asc';
+
+        let query = supabase
+          .from('dossiers')
+          .select(
+            `
           *,
           direction:directions(code, label, sigle),
           demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
           beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
           creator:profiles!dossiers_created_by_fkey(full_name)
-        `, { count: "exact" })
-        .order("updated_at", { ascending: false });
+        `,
+            { count: 'exact' }
+          )
+          .order(sortField, { ascending: sortAsc, nullsFirst: false });
 
-      // Filtre exercice (priorité: filtre explicite > exercice courant)
-      if (appliedFilters.exercice) {
-        query = query.eq("exercice", appliedFilters.exercice);
-      } else if (exercice) {
-        query = query.eq("exercice", exercice);
-      }
-
-      // Direction
-      if (appliedFilters.direction_id) {
-        query = query.eq("direction_id", appliedFilters.direction_id);
-      }
-
-      // Statut
-      if (appliedFilters.statut) {
-        query = query.eq("statut_global", appliedFilters.statut);
-      }
-
-      // Étape
-      if (appliedFilters.etape) {
-        query = query.eq("etape_courante", appliedFilters.etape);
-      }
-
-      // Type dossier
-      if (appliedFilters.type_dossier) {
-        query = query.eq("type_dossier", appliedFilters.type_dossier);
-      }
-
-      // Bénéficiaire
-      if (appliedFilters.beneficiaire_id) {
-        query = query.eq("beneficiaire_id", appliedFilters.beneficiaire_id);
-      }
-
-      // Créateur
-      if (appliedFilters.created_by) {
-        query = query.eq("created_by", appliedFilters.created_by);
-      }
-
-      // Mes dossiers (demandeur_id ou created_by = user courant)
-      if (appliedFilters.mes_dossiers) {
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          query = query.or(`demandeur_id.eq.${userData.user.id},created_by.eq.${userData.user.id}`);
+        // Filtre exercice (priorité: filtre explicite > exercice courant)
+        if (appliedFilters.exercice) {
+          query = query.eq('exercice', appliedFilters.exercice);
+        } else if (exercice) {
+          query = query.eq('exercice', exercice);
         }
+
+        // Direction
+        if (appliedFilters.direction_id) {
+          query = query.eq('direction_id', appliedFilters.direction_id);
+        }
+
+        // Statut
+        if (appliedFilters.statut) {
+          query = query.eq('statut_global', appliedFilters.statut);
+        }
+
+        // Étape
+        if (appliedFilters.etape) {
+          query = query.eq('etape_courante', appliedFilters.etape);
+        }
+
+        // Type dossier
+        if (appliedFilters.type_dossier) {
+          query = query.eq('type_dossier', appliedFilters.type_dossier);
+        }
+
+        // Bénéficiaire
+        if (appliedFilters.beneficiaire_id) {
+          query = query.eq('beneficiaire_id', appliedFilters.beneficiaire_id);
+        }
+
+        // Créateur
+        if (appliedFilters.created_by) {
+          query = query.eq('created_by', appliedFilters.created_by);
+        }
+
+        // Mes dossiers (demandeur_id ou created_by = user courant)
+        if (appliedFilters.mes_dossiers) {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            query = query.or(
+              `demandeur_id.eq.${userData.user.id},created_by.eq.${userData.user.id}`
+            );
+          }
+        }
+
+        // Plage de dates
+        if (appliedFilters.date_debut) {
+          query = query.gte('created_at', appliedFilters.date_debut);
+        }
+        if (appliedFilters.date_fin) {
+          query = query.lte('created_at', appliedFilters.date_fin + 'T23:59:59');
+        }
+
+        // Fourchette de montant
+        if (appliedFilters.montant_min !== null) {
+          query = query.gte('montant_estime', appliedFilters.montant_min);
+        }
+        if (appliedFilters.montant_max !== null) {
+          query = query.lte('montant_estime', appliedFilters.montant_max);
+        }
+
+        // Recherche globale (numéro, objet)
+        if (appliedFilters.search) {
+          const searchTerm = appliedFilters.search.toLowerCase();
+          query = query.or(`numero.ilike.%${searchTerm}%,objet.ilike.%${searchTerm}%`);
+        }
+
+        // Pagination
+        const from = (page - 1) * pageSize;
+        const to = from + pageSize - 1;
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
+
+        if (error) throw error;
+
+        setDossiers(data || []);
+        setPagination({
+          page,
+          pageSize,
+          total: count || 0,
+        });
+
+        // Calculer les stats
+        calculateStats(data || []);
+      } catch (error: any) {
+        toast({
+          title: 'Erreur',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-
-      // Plage de dates
-      if (appliedFilters.date_debut) {
-        query = query.gte("created_at", appliedFilters.date_debut);
-      }
-      if (appliedFilters.date_fin) {
-        query = query.lte("created_at", appliedFilters.date_fin + "T23:59:59");
-      }
-
-      // Fourchette de montant
-      if (appliedFilters.montant_min !== null) {
-        query = query.gte("montant_estime", appliedFilters.montant_min);
-      }
-      if (appliedFilters.montant_max !== null) {
-        query = query.lte("montant_estime", appliedFilters.montant_max);
-      }
-
-      // Recherche globale (numéro, objet)
-      if (appliedFilters.search) {
-        const searchTerm = appliedFilters.search.toLowerCase();
-        query = query.or(`numero.ilike.%${searchTerm}%,objet.ilike.%${searchTerm}%`);
-      }
-
-      // Pagination
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-      
-      setDossiers(data || []);
-      setPagination({
-        page,
-        pageSize,
-        total: count || 0,
-      });
-
-      // Calculer les stats
-      calculateStats(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [exercice, toast]);
+    },
+    [exercice, toast]
+  );
 
   const calculateStats = (data: Dossier[]) => {
     const newStats: DossierStats = {
       total: data.length,
-      en_cours: data.filter((d) => d.statut_global === "en_cours").length,
-      termines: data.filter((d) => d.statut_global === "termine").length,
-      annules: data.filter((d) => d.statut_global === "annule").length,
-      suspendus: data.filter((d) => d.statut_global === "suspendu").length,
+      en_cours: data.filter((d) => d.statut_global === 'en_cours').length,
+      termines: data.filter((d) => d.statut_global === 'termine').length,
+      annules: data.filter((d) => d.statut_global === 'annule').length,
+      suspendus: data.filter((d) => d.statut_global === 'suspendu').length,
       montant_total: data.reduce((sum, d) => sum + (d.montant_estime || 0), 0),
       montant_engage: data.reduce((sum, d) => sum + (d.montant_engage || 0), 0),
       montant_liquide: data.reduce((sum, d) => sum + (d.montant_liquide || 0), 0),
@@ -261,26 +295,26 @@ export function useDossiers() {
 
   const fetchDirections = async () => {
     const { data } = await supabase
-      .from("directions")
-      .select("id, code, label, sigle")
-      .eq("est_active", true)
-      .order("label");
+      .from('directions')
+      .select('id, code, label, sigle')
+      .eq('est_active', true)
+      .order('label');
     setDirections(data || []);
   };
 
   const fetchBeneficiaires = async () => {
     const result = await supabase
-      .from("prestataires")
-      .select("id, raison_sociale")
-      .order("raison_sociale");
+      .from('prestataires')
+      .select('id, raison_sociale')
+      .order('raison_sociale');
     setBeneficiaires((result.data || []) as { id: string; raison_sociale: string }[]);
   };
 
   const fetchUsers = async () => {
     const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, email")
-      .order("full_name");
+      .from('profiles')
+      .select('id, full_name, email')
+      .order('full_name');
     setUsers(data || []);
   };
 
@@ -294,47 +328,49 @@ export function useDossiers() {
   }) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
+
       const { data, error } = await supabase
-        .from("dossiers")
+        .from('dossiers')
         .insert({
           objet: dossier.objet,
           direction_id: dossier.direction_id || null,
           demandeur_id: dossier.demandeur_id || null,
           beneficiaire_id: dossier.beneficiaire_id || null,
-          type_dossier: dossier.type_dossier || "AEF",
+          type_dossier: dossier.type_dossier || 'AEF',
           montant_estime: dossier.montant_estime || 0,
           exercice: exercice || new Date().getFullYear(),
           created_by: userData.user?.id,
         } as any)
-        .select(`
+        .select(
+          `
           *,
           direction:directions(code, label, sigle),
           demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
           beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
           creator:profiles!dossiers_created_by_fkey(full_name)
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: { objet: data.objet, numero: data.numero } as any,
       });
 
       // Créer l'étape initiale (note)
-      await supabase.from("dossier_etapes").insert({
+      await supabase.from('dossier_etapes').insert({
         dossier_id: data.id,
-        type_etape: "note",
-        statut: "en_attente",
+        type_etape: 'note',
+        statut: 'en_attente',
         created_by: userData.user?.id,
       } as any);
 
       toast({
-        title: "Dossier créé",
+        title: 'Dossier créé',
         description: `Numéro: ${data.numero}`,
       });
 
@@ -342,9 +378,9 @@ export function useDossiers() {
       return data;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return null;
     }
@@ -355,36 +391,40 @@ export function useDossiers() {
       const oldDossier = dossiers.find((d) => d.id === id);
 
       const { data, error } = await supabase
-        .from("dossiers")
+        .from('dossiers')
         .update(updates)
-        .eq("id", id)
-        .select(`
+        .eq('id', id)
+        .select(
+          `
           *,
           direction:directions(code, label, sigle),
           demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
           beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
           creator:profiles!dossiers_created_by_fkey(full_name)
-        `)
+        `
+        )
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: id,
-        action: "update",
-        oldValues: oldDossier ? { objet: oldDossier.objet, statut: oldDossier.statut_global } as any : null,
+        action: 'update',
+        oldValues: oldDossier
+          ? ({ objet: oldDossier.objet, statut: oldDossier.statut_global } as any)
+          : null,
         newValues: { objet: data.objet, statut: data.statut_global } as any,
       });
 
       setDossiers((prev) => prev.map((d) => (d.id === id ? data : d)));
-      toast({ title: "Dossier mis à jour" });
+      toast({ title: 'Dossier mis à jour' });
       return data;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return null;
     }
@@ -397,24 +437,26 @@ export function useDossiers() {
   const getDossierById = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from("dossiers")
-        .select(`
+        .from('dossiers')
+        .select(
+          `
           *,
           direction:directions(code, label, sigle),
           demandeur:profiles!dossiers_demandeur_id_fkey(full_name, email),
           beneficiaire:prestataires!dossiers_beneficiaire_id_fkey(raison_sociale),
           creator:profiles!dossiers_created_by_fkey(full_name)
-        `)
-        .eq("id", id)
+        `
+        )
+        .eq('id', id)
         .single();
 
       if (error) throw error;
       return data;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return null;
     }
@@ -423,21 +465,23 @@ export function useDossiers() {
   const getDossierEtapes = async (dossierId: string) => {
     try {
       const { data, error } = await supabase
-        .from("dossier_etapes")
-        .select(`
+        .from('dossier_etapes')
+        .select(
+          `
           *,
           creator:profiles!dossier_etapes_created_by_fkey(full_name)
-        `)
-        .eq("dossier_id", dossierId)
-        .order("created_at", { ascending: true });
+        `
+        )
+        .eq('dossier_id', dossierId)
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data || [];
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return [];
     }
@@ -455,11 +499,13 @@ export function useDossiers() {
       const { data: userData } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
-        .from("dossier_etapes")
-        .insert([{
-          ...etape,
-          created_by: userData.user?.id,
-        }])
+        .from('dossier_etapes')
+        .insert([
+          {
+            ...etape,
+            created_by: userData.user?.id,
+          },
+        ])
         .select()
         .single();
 
@@ -467,23 +513,23 @@ export function useDossiers() {
 
       // Mettre à jour l'étape courante du dossier
       await supabase
-        .from("dossiers")
+        .from('dossiers')
         .update({ etape_courante: etape.type_etape })
-        .eq("id", etape.dossier_id);
+        .eq('id', etape.dossier_id);
 
       await logAction({
-        entityType: "dossier_etape",
+        entityType: 'dossier_etape',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: data,
       });
 
       return data;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return null;
     }
@@ -492,21 +538,23 @@ export function useDossiers() {
   const getDossierDocuments = async (dossierId: string) => {
     try {
       const { data, error } = await supabase
-        .from("dossier_documents")
-        .select(`
+        .from('dossier_documents')
+        .select(
+          `
           *,
           uploader:profiles!dossier_documents_uploaded_by_fkey(full_name)
-        `)
-        .eq("dossier_id", dossierId)
-        .order("created_at", { ascending: false });
+        `
+        )
+        .eq('dossier_id', dossierId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return [];
     }
@@ -526,30 +574,32 @@ export function useDossiers() {
       const { data: userData } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
-        .from("dossier_documents")
-        .insert([{
-          ...doc,
-          uploaded_by: userData.user?.id,
-        }])
+        .from('dossier_documents')
+        .insert([
+          {
+            ...doc,
+            uploaded_by: userData.user?.id,
+          },
+        ])
         .select()
         .single();
 
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier_document",
+        entityType: 'dossier_document',
         entityId: data.id,
-        action: "create",
+        action: 'create',
         newValues: { file_name: doc.file_name, categorie: doc.categorie },
       });
 
-      toast({ title: "Document ajouté" });
+      toast({ title: 'Document ajouté' });
       return data;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return null;
     }
@@ -557,26 +607,23 @@ export function useDossiers() {
 
   const deleteDocument = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from("dossier_documents")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from('dossier_documents').delete().eq('id', id);
 
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier_document",
+        entityType: 'dossier_document',
         entityId: id,
-        action: "delete",
+        action: 'delete',
       });
 
-      toast({ title: "Document supprimé" });
+      toast({ title: 'Document supprimé' });
       return true;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -585,8 +632,8 @@ export function useDossiers() {
   const bloquerDossier = async (dossierId: string, motif: string) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
-      const { error } = await supabase.rpc("bloquer_dossier", {
+
+      const { error } = await supabase.rpc('bloquer_dossier', {
         p_dossier_id: dossierId,
         p_motif: motif,
         p_user_id: userData.user?.id,
@@ -595,20 +642,20 @@ export function useDossiers() {
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: dossierId,
-        action: "update",
-        newValues: { motif_blocage: motif, statut_global: "bloque" },
+        action: 'update',
+        newValues: { motif_blocage: motif, statut_global: 'bloque' },
       });
 
-      toast({ title: "Dossier bloqué" });
+      toast({ title: 'Dossier bloqué' });
       fetchDossiers();
       return true;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
@@ -617,8 +664,8 @@ export function useDossiers() {
   const debloquerDossier = async (dossierId: string, commentaire: string) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
-      const { error } = await supabase.rpc("debloquer_dossier", {
+
+      const { error } = await supabase.rpc('debloquer_dossier', {
         p_dossier_id: dossierId,
         p_commentaire: commentaire,
         p_user_id: userData.user?.id,
@@ -627,20 +674,20 @@ export function useDossiers() {
       if (error) throw error;
 
       await logAction({
-        entityType: "dossier",
+        entityType: 'dossier',
         entityId: dossierId,
-        action: "update",
-        newValues: { commentaire_deblocage: commentaire, statut_global: "en_cours" },
+        action: 'update',
+        newValues: { commentaire_deblocage: commentaire, statut_global: 'en_cours' },
       });
 
-      toast({ title: "Dossier débloqué" });
+      toast({ title: 'Dossier débloqué' });
       fetchDossiers();
       return true;
     } catch (error: any) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
       return false;
     }
