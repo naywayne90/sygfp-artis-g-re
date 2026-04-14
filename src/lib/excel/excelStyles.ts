@@ -3,7 +3,7 @@
  * Conforme à la charte graphique ARTI
  */
 
-import type { CellStyle } from 'xlsx';
+type CellStyle = Record<string, unknown>;
 
 // ============================================================================
 // COULEURS

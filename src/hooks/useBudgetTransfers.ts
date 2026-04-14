@@ -36,6 +36,8 @@ export interface BudgetTransfer {
   to_dotation_apres: number | null;
   to_disponible_avant: number | null;
   to_disponible_apres: number | null;
+  decision_file_url: string | null;
+  decision_file_name: string | null;
   from_line?: { code: string; label: string; dotation_initiale: number } | null;
   to_line?: { code: string; label: string; dotation_initiale: number } | null;
   requested_by_profile?: { full_name: string } | null;
@@ -90,6 +92,203 @@ export interface BudgetHistory {
 }
 
 // ============================================================================
+// Pure logic (testable — exportée via __testing__ en bas de fichier)
+// ============================================================================
+
+/**
+ * Calcule les statistiques agrégées d'une liste de transferts.
+ * Pure : ne dépend que des données passées en argument.
+ */
+/**
+ * Workflow 2 niveaux CB → DG :
+ *   en_attente (créé) → approuve (CB valide) → execute (DG exécute)
+ *                                           ↘ rejete (CB ou DG refuse)
+ *
+ * `pending` (compteur CB) = en_attente
+ * `validated` (compteur DG) = approuve (CB a signé, attend DG)
+ */
+function computeStats(transfers: BudgetTransfer[] | undefined | null): TransferStats {
+  const list = transfers ?? [];
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  return {
+    pending: list.filter((t) => t.status === 'en_attente').length,
+    validated: list.filter((t) => t.status === 'approuve').length,
+    executed: list.filter((t) => t.status === 'execute').length,
+    rejected: list.filter((t) => t.status === 'rejete').length,
+    cancelled: 0, // workflow simplifié : plus d'état "annule"
+    executedThisMonth: list.filter((t) => {
+      if (t.status !== 'execute' || !t.executed_at) return false;
+      const execDate = new Date(t.executed_at);
+      return execDate.getMonth() === currentMonth && execDate.getFullYear() === currentYear;
+    }).length,
+    totalExecutedAmount: list
+      .filter((t) => t.status === 'execute')
+      .reduce((sum, t) => sum + t.amount, 0),
+    totalPendingAmount: list
+      .filter((t) => t.status === 'en_attente' || t.status === 'approuve')
+      .reduce((sum, t) => sum + t.amount, 0),
+    totalAmount: list.reduce((sum, t) => sum + t.amount, 0),
+    virementsCount: list.filter((t) => t.type_transfer === 'virement').length,
+    ajustementsCount: list.filter((t) => t.type_transfer === 'ajustement').length,
+  };
+}
+
+/**
+ * Calcule le solde disponible d'une ligne budgétaire compte tenu des virements.
+ * Formule : (dotation_modifiee || dotation_initiale) + virements_reçus - virements_émis - total_engagé
+ * Pure : uniquement arithmétique, pas d'I/O.
+ */
+function computeAvailableBalance(params: {
+  dotationInitiale: number | null | undefined;
+  dotationModifiee?: number | null | undefined;
+  totalEngage: number | null | undefined;
+  virementsEmis: number;
+  virementsRecus: number;
+}): number {
+  const dotation = params.dotationModifiee || params.dotationInitiale || 0;
+  const engaged = params.totalEngage || 0;
+  return dotation + params.virementsRecus - params.virementsEmis - engaged;
+}
+
+/**
+ * Vérifie si un solde couvre un montant demandé et retourne le message
+ * d'erreur exact utilisé par la mutation de création.
+ */
+function checkSufficientBalance(
+  disponible: number,
+  amount: number
+): { ok: boolean; message?: string } {
+  if (disponible >= amount) return { ok: true };
+  const fmt = new Intl.NumberFormat('fr-FR');
+  return {
+    ok: false,
+    message: `Solde insuffisant : ${fmt.format(disponible)} FCFA disponibles, ${fmt.format(amount)} FCFA demandés`,
+  };
+}
+
+/**
+ * Plafond LOLF : un virement ne peut pas dépasser 10 % de la dotation initiale
+ * de la ligne source, cumulé sur l'exercice (règle publique française reprise
+ * par l'ARTI). L'ajustement n'est PAS concerné (il modifie la dotation elle-même
+ * et passe par un arrêté séparé).
+ *
+ * Règle : somme(virements déjà émis executed) + nouveau montant ≤ 10 % × dotation_initiale
+ *
+ * Constante exportée pour qu'elle soit ajustable si l'ARTI change le seuil.
+ */
+export const VIREMENT_CEILING_RATIO = 0.1; // 10 %
+
+interface CheckCeilingParams {
+  /** Dotation initiale de la ligne source (base du plafond) */
+  dotationInitiale: number | null | undefined;
+  /** Somme des virements déjà exécutés en sortie depuis cette ligne sur l'exercice */
+  totalVirementsEmisExecutes: number;
+  /** Montant du nouveau virement envisagé */
+  nouveauMontant: number;
+  /** Ratio de plafond (défaut 0.1 = 10 %) — surchargeable pour tests/dérogations */
+  ratio?: number;
+}
+
+interface CheckCeilingResult {
+  ok: boolean;
+  message?: string;
+  /** Plafond absolu en FCFA (dotation × ratio) */
+  ceiling: number;
+  /** Total cumulé si le nouveau virement était accepté */
+  cumulativeWouldBe: number;
+  /** Pourcentage cumulé si accepté */
+  cumulativeRatio: number;
+}
+
+/**
+ * Vérifie le plafond LOLF 10 % avant création d'un virement.
+ *
+ * Cas acceptés :
+ *   - dotation_initiale <= 0 → on refuse (pas de dotation = pas de virement possible)
+ *   - cumul après virement ≤ plafond → ok
+ *
+ * Cas refusés :
+ *   - cumul après virement > plafond → erreur avec message FCFA explicite
+ *
+ * NB : l'ajustement (type_transfer='ajustement') NE DOIT PAS être passé à cette
+ * fonction. La responsabilité de filtrer sur le type appartient à l'appelant.
+ */
+export function checkVirementCeiling(params: CheckCeilingParams): CheckCeilingResult {
+  const ratio = params.ratio ?? VIREMENT_CEILING_RATIO;
+  const dotation = params.dotationInitiale ?? 0;
+  const emis = params.totalVirementsEmisExecutes;
+  const amount = params.nouveauMontant;
+
+  // Cas dégénéré : pas de dotation initiale → impossible de virer quoi que ce soit
+  if (dotation <= 0) {
+    return {
+      ok: false,
+      ceiling: 0,
+      cumulativeWouldBe: emis + amount,
+      cumulativeRatio: Infinity,
+      message:
+        "Plafond virements : la ligne source n'a pas de dotation initiale — aucun virement possible.",
+    };
+  }
+
+  const ceiling = dotation * ratio;
+  const cumulativeWouldBe = emis + amount;
+  // Arrondi à 4 décimales pour éviter les drifts IEEE 754 en tests et affichage
+  const cumulativeRatio = Math.round((cumulativeWouldBe / dotation) * 10000) / 10000;
+
+  if (cumulativeWouldBe <= ceiling) {
+    return { ok: true, ceiling, cumulativeWouldBe, cumulativeRatio };
+  }
+
+  const fmt = new Intl.NumberFormat('fr-FR');
+  const pctFmt = new Intl.NumberFormat('fr-FR', {
+    style: 'percent',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return {
+    ok: false,
+    ceiling,
+    cumulativeWouldBe,
+    cumulativeRatio,
+    message:
+      `Plafond virements dépassé : le cumul atteindrait ${fmt.format(cumulativeWouldBe)} FCFA ` +
+      `(${pctFmt.format(cumulativeRatio)}) pour une limite de ${fmt.format(ceiling)} FCFA ` +
+      `(${pctFmt.format(ratio)} de la dotation initiale). Virements déjà exécutés : ${fmt.format(emis)} FCFA.`,
+  };
+}
+
+/**
+ * Matrice des transitions de statut autorisées — workflow 2 niveaux CB → DG.
+ *
+ *   en_attente ──(CB approuve)──▶ approuve ──(DG exécute)──▶ execute
+ *        │                            │
+ *        └──(CB rejette)──┐           └──(DG rejette)──┐
+ *                         ▼                            ▼
+ *                       rejete                       rejete
+ *
+ * États terminaux : execute, rejete (aucune transition sortante).
+ * Pas de "brouillon" : un virement est "soumis" (en_attente) dès la création.
+ */
+const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
+  en_attente: ['approuve', 'rejete'],
+  approuve: ['execute', 'rejete'],
+  execute: [],
+  rejete: [],
+};
+
+function isTransitionValid(from: string | null | undefined, to: string): boolean {
+  if (!from) return false;
+  const allowed = ALLOWED_TRANSITIONS[from];
+  if (!allowed) return false;
+  return allowed.includes(to);
+}
+
+// ============================================================================
 // Main Hook
 // ============================================================================
 
@@ -133,34 +332,8 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     enabled: !!exercice,
   });
 
-  // Computed stats
-  const stats: TransferStats = {
-    pending:
-      transfers?.filter((t) => ['en_attente', 'soumis'].includes(t.status || '')).length || 0,
-    validated:
-      transfers?.filter((t) => ['approuve', 'valide'].includes(t.status || '')).length || 0,
-    executed: transfers?.filter((t) => t.status === 'execute').length || 0,
-    rejected: transfers?.filter((t) => t.status === 'rejete').length || 0,
-    cancelled: transfers?.filter((t) => t.status === 'annule').length || 0,
-    executedThisMonth:
-      transfers?.filter((t) => {
-        if (t.status !== 'execute' || !t.executed_at) return false;
-        const execDate = new Date(t.executed_at);
-        const now = new Date();
-        return (
-          execDate.getMonth() === now.getMonth() && execDate.getFullYear() === now.getFullYear()
-        );
-      }).length || 0,
-    totalExecutedAmount:
-      transfers?.filter((t) => t.status === 'execute').reduce((sum, t) => sum + t.amount, 0) || 0,
-    totalPendingAmount:
-      transfers
-        ?.filter((t) => ['en_attente', 'soumis', 'valide', 'approuve'].includes(t.status || ''))
-        .reduce((sum, t) => sum + t.amount, 0) || 0,
-    totalAmount: transfers?.reduce((sum, t) => sum + t.amount, 0) || 0,
-    virementsCount: transfers?.filter((t) => t.type_transfer === 'virement').length || 0,
-    ajustementsCount: transfers?.filter((t) => t.type_transfer === 'ajustement').length || 0,
-  };
+  // Computed stats (délégué à la fonction pure `computeStats` — couvert par les tests unitaires)
+  const stats: TransferStats = computeStats(transfers);
 
   // Create transfer
   const createMutation = useMutation({
@@ -185,16 +358,30 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
           .eq('to_budget_line_id', data.from_budget_line_id)
           .eq('status', 'execute');
 
-        const dotation = fromLine?.dotation_modifiee || fromLine?.dotation_initiale || 0;
-        const engaged = fromLine?.total_engage || 0;
-        const emis = virementsEmis?.reduce((s, v) => s + v.amount, 0) || 0;
-        const recus = virementsRecus?.reduce((s, v) => s + v.amount, 0) || 0;
-        const disponible = dotation + recus - emis - engaged;
+        const emisTotal = virementsEmis?.reduce((s, v) => s + v.amount, 0) || 0;
 
-        if (disponible < data.amount) {
-          throw new Error(
-            `Solde insuffisant : ${new Intl.NumberFormat('fr-FR').format(disponible)} FCFA disponibles, ${new Intl.NumberFormat('fr-FR').format(data.amount)} FCFA demandés`
-          );
+        const disponible = computeAvailableBalance({
+          dotationInitiale: fromLine?.dotation_initiale,
+          dotationModifiee: fromLine?.dotation_modifiee,
+          totalEngage: fromLine?.total_engage,
+          virementsEmis: emisTotal,
+          virementsRecus: virementsRecus?.reduce((s, v) => s + v.amount, 0) || 0,
+        });
+
+        const balanceCheck = checkSufficientBalance(disponible, data.amount);
+        if (!balanceCheck.ok) {
+          throw new Error(balanceCheck.message);
+        }
+
+        // Plafond LOLF 10 % de la dotation initiale (cumulatif sur l'exercice).
+        // Seulement pour les virements — l'ajustement est hors scope.
+        const ceilingCheck = checkVirementCeiling({
+          dotationInitiale: fromLine?.dotation_initiale,
+          totalVirementsEmisExecutes: emisTotal,
+          nouveauMontant: data.amount,
+        });
+        if (!ceilingCheck.ok) {
+          throw new Error(ceilingCheck.message);
         }
       }
 
@@ -216,7 +403,7 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
           motif: data.motif,
           justification_renforcee: data.justification_renforcee,
           exercice: exercice || new Date().getFullYear(),
-          // status defaults to 'soumis' via DB default
+          status: 'en_attente', // workflow 2 niveaux : directement soumis au CB
         })
         .select()
         .single();
@@ -244,60 +431,41 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     },
   });
 
-  // Submit for validation
-  const submitMutation = useMutation({
+  // Niveau 1 — CB approuve (en_attente → approuve)
+  const approveCbMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('credit_transfers')
-        .update({ status: 'soumis' })
-        .eq('id', id);
-      if (error) throw error;
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData?.user?.id;
 
-      await supabase.from('audit_logs').insert({
-        entity_type: 'credit_transfer',
-        entity_id: id,
-        action: 'transfer_submitted',
-        exercice: exercice || new Date().getFullYear(),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
-      toast.success('Demande soumise pour validation');
-    },
-    onError: (error: Error) => {
-      toast.error('Erreur lors de la soumission : ' + error.message);
-    },
-  });
-
-  // Validate
-  const validateMutation = useMutation({
-    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('credit_transfers')
         .update({
-          status: 'valide',
+          status: 'approuve',
           approved_at: new Date().toISOString(),
+          approved_by: userId ?? null,
         })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('status', 'en_attente'); // garde-fou : empêche de ré-approuver un virement déjà traité
       if (error) throw error;
 
       await supabase.from('audit_logs').insert({
         entity_type: 'credit_transfer',
         entity_id: id,
-        action: 'transfer_validated',
+        action: 'transfer_approved_cb',
         exercice: exercice || new Date().getFullYear(),
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
-      toast.success('Virement validé avec succès');
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      toast.success('Virement approuvé par le CB — en attente du DG');
     },
     onError: (error: Error) => {
-      toast.error('Erreur de validation : ' + error.message);
+      toast.error("Erreur d'approbation CB : " + error.message);
     },
   });
 
-  // Reject
+  // Reject — accessible depuis les deux niveaux (CB sur en_attente, DG sur approuve)
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase
@@ -306,7 +474,8 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
           status: 'rejete',
           rejection_reason: reason,
         })
-        .eq('id', id);
+        .eq('id', id)
+        .in('status', ['en_attente', 'approuve']); // impossible de rejeter un virement déjà exécuté
       if (error) throw error;
 
       await supabase.from('audit_logs').insert({
@@ -319,6 +488,7 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       toast.success('Virement rejeté');
     },
     onError: (error: Error) => {
@@ -326,11 +496,49 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     },
   });
 
-  // Execute
+  // Niveau 2 — DG exécute (approuve → execute)
+  // Le RPC `execute_credit_transfer` est SECURITY DEFINER : il vérifie le statut
+  // `approuve`, transfère effectivement les montants sur `budget_lines` et log l'audit.
+  //
+  // Upload facultatif de la décision DG (PJ) avant exécution : le fichier est
+  // stocké dans le bucket `sygfp-attachments` sous `credit-transfers/decisions/<id>/`
+  // et les colonnes `decision_file_url` / `decision_file_name` sont patchées AVANT
+  // l'appel RPC pour garantir la traçabilité même si l'exécution échoue après.
   const executeMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, decisionFile }: { id: string; decisionFile?: File | null }) => {
+      const { data: userData } = await supabase.auth.getUser();
+
+      // 1. Upload de la décision DG si fournie
+      if (decisionFile) {
+        const sanitizedName = decisionFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storagePath = `credit-transfers/decisions/${id}/${Date.now()}_${sanitizedName}`;
+        const { error: uploadError } = await supabase.storage
+          .from('sygfp-attachments')
+          .upload(storagePath, decisionFile, { upsert: false });
+        if (uploadError) {
+          throw new Error(`Upload de la décision DG impossible : ${uploadError.message}`);
+        }
+        const { data: urlData } = supabase.storage
+          .from('sygfp-attachments')
+          .getPublicUrl(storagePath);
+
+        const { error: patchError } = await supabase
+          .from('credit_transfers')
+          .update({
+            decision_file_url: urlData.publicUrl,
+            decision_file_name: decisionFile.name,
+          })
+          .eq('id', id)
+          .eq('status', 'approuve'); // garde-fou : on ne patche que si toujours en attente DG
+        if (patchError) {
+          throw new Error(`Enregistrement de la décision DG impossible : ${patchError.message}`);
+        }
+      }
+
+      // 2. Exécution effective (transfert des montants + audit RPC)
       const { data: result, error } = await supabase.rpc('execute_credit_transfer', {
         p_transfer_id: id,
+        p_user_id: userData?.user?.id ?? undefined,
       });
       if (error) throw error;
       const res = result as { success: boolean; error?: string; code?: string };
@@ -341,40 +549,11 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
       queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
       queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
       queryClient.invalidateQueries({ queryKey: ['budget-movements-journal'] });
-      toast.success('Virement exécuté avec succès - les montants ont été transférés');
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      toast.success('Virement exécuté — les montants ont été transférés');
     },
     onError: (error: Error) => {
       toast.error("Erreur d'exécution : " + error.message);
-    },
-  });
-
-  // Cancel
-  const cancelMutation = useMutation({
-    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { error } = await supabase
-        .from('credit_transfers')
-        .update({
-          status: 'annule',
-          cancelled_at: new Date().toISOString(),
-          cancel_reason: reason,
-        })
-        .eq('id', id);
-      if (error) throw error;
-
-      await supabase.from('audit_logs').insert({
-        entity_type: 'credit_transfer',
-        entity_id: id,
-        action: 'transfer_cancelled',
-        new_values: { reason },
-        exercice: exercice || new Date().getFullYear(),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['budget-transfers'] });
-      toast.success('Virement annulé');
-    },
-    onError: (error: Error) => {
-      toast.error('Erreur : ' + error.message);
     },
   });
 
@@ -384,17 +563,13 @@ export function useBudgetTransfers(filters?: BudgetTransferFilters) {
     error,
     stats,
     createTransfer: createMutation.mutate,
-    submitTransfer: submitMutation.mutate,
-    validateTransfer: validateMutation.mutate,
+    approveTransferCb: approveCbMutation.mutate,
     rejectTransfer: rejectMutation.mutate,
     executeTransfer: executeMutation.mutate,
-    cancelTransfer: cancelMutation.mutate,
     isCreating: createMutation.isPending,
-    isSubmitting: submitMutation.isPending,
-    isValidating: validateMutation.isPending,
+    isApprovingCb: approveCbMutation.isPending,
     isExecuting: executeMutation.isPending,
     isRejecting: rejectMutation.isPending,
-    isCancelling: cancelMutation.isPending,
   };
 }
 
@@ -452,3 +627,18 @@ export function useBudgetLineAvailable(budgetLineId?: string) {
 
   return { ...data, isLoading };
 }
+
+// ============================================================================
+// Export des fonctions pures pour les tests unitaires.
+// Ne pas importer depuis l'UI — utiliser les hooks ci-dessus.
+// ============================================================================
+
+export const __testing__ = {
+  computeStats,
+  computeAvailableBalance,
+  checkSufficientBalance,
+  checkVirementCeiling,
+  isTransitionValid,
+  ALLOWED_TRANSITIONS,
+  VIREMENT_CEILING_RATIO,
+};

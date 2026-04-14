@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { Fragment, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -479,8 +479,8 @@ export default function GestionAutorisations() {
                         ? // Afficher groupé par catégorie
                           Array.from(groupedActions.entries()).map(
                             ([category, categoryActions]) => (
-                              <>
-                                <tr key={`header-${category}`} className="bg-muted/30">
+                              <Fragment key={category}>
+                                <tr className="bg-muted/30">
                                   <td
                                     colSpan={(roles?.length || 0) + 1}
                                     className="p-2 font-semibold text-sm"
@@ -521,7 +521,7 @@ export default function GestionAutorisations() {
                                     ))}
                                   </tr>
                                 ))}
-                              </>
+                              </Fragment>
                             )
                           )
                         : // Afficher les actions filtrées

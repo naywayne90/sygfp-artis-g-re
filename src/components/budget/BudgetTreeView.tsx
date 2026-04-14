@@ -31,6 +31,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { BudgetLineWithRelations, getDisplayBudgetCode } from '@/hooks/useBudgetLines';
+import { StatutBadge } from '@/components/shared/StatutBadge';
+import { BudgetCodeSegments } from '@/components/budget/BudgetCodeSegments';
 import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
 
@@ -78,26 +80,8 @@ const getVersionBadge = (version: string) => {
   }
 };
 
-const getStatusBadge = (status: string | null) => {
-  switch (status) {
-    case 'soumis':
-      return (
-        <Badge variant="default" className="bg-blue-500">
-          Soumis
-        </Badge>
-      );
-    case 'valide':
-      return (
-        <Badge variant="default" className="bg-green-500">
-          Validé
-        </Badge>
-      );
-    case 'rejete':
-      return <Badge variant="destructive">Rejeté</Badge>;
-    default:
-      return <Badge variant="secondary">Soumis</Badge>;
-  }
-};
+// Le rendu du badge est délégué au composant partagé <StatutBadge />
+// (gère les 7 statuts unifiés + fallback "Soumis" pour les lignes legacy).
 
 const getLevelColor = (level: string) => {
   switch (level) {
@@ -326,14 +310,14 @@ export function BudgetTreeView({
                       >
                         {hasChildren ? (
                           isExpanded ? (
-                            <ChevronDown className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <ChevronDown className="h-4 w-4 mr-1 text-muted-foreground shrink-0" />
                           ) : (
-                            <ChevronRight className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <ChevronRight className="h-4 w-4 mr-1 text-muted-foreground shrink-0" />
                           )
                         ) : (
-                          <span className="w-5" />
+                          <span className="w-5 shrink-0" />
                         )}
-                        <span>{displayCode.code}</span>
+                        <BudgetCodeSegments code={displayCode.code} />
                         {getVersionBadge(displayCode.version)}
                       </div>
                     </TableCell>
@@ -345,7 +329,7 @@ export function BudgetTreeView({
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>{line.direction?.code || '-'}</TableCell>
+                    <TableCell>{line.direction?.sigle || line.direction?.code || '-'}</TableCell>
                     <TableCell className="text-right font-mono">
                       {formatCurrency(dotation)}
                     </TableCell>
@@ -357,7 +341,9 @@ export function BudgetTreeView({
                     >
                       {formatCurrency(available)}
                     </TableCell>
-                    <TableCell>{getStatusBadge(line.statut)}</TableCell>
+                    <TableCell>
+                      <StatutBadge statut={line.statut} size="sm" />
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

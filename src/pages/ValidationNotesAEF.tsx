@@ -66,6 +66,7 @@ import {
   FileSpreadsheet,
   FileDown,
   Download,
+  Eye,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { NoteAEFEntity } from '@/lib/notes-aef/types';
@@ -84,6 +85,7 @@ export default function ValidationNotesAEF() {
   const canValidateDAAF = hasAnyRole(['ADMIN', 'DAAF']);
   const canValidateDG = hasAnyRole(['ADMIN', 'DG']);
   const canValidate = canValidateDAAF || canValidateDG;
+  const canImpute = hasAnyRole(['ADMIN', 'CB', 'DAAF']);
 
   // Mutations hook
   const { validateNote, rejectNote, deferNote, resumeNote, checkBudgetAvailability } =
@@ -830,15 +832,27 @@ export default function ValidationNotesAEF() {
                             : '—'}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => handleGoToImputation(note.id)}
-                            className="gap-1"
-                          >
-                            <ArrowRight className="h-3 w-3" />
-                            Imputer
-                          </Button>
+                          {canImpute ? (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handleGoToImputation(note.id)}
+                              className="gap-1"
+                            >
+                              <ArrowRight className="h-3 w-3" />
+                              Imputer
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleGoToDetail(note.id)}
+                              className="gap-1"
+                            >
+                              <Eye className="h-3 w-3" />
+                              Voir
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

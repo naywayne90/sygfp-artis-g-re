@@ -1,31 +1,33 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { SecteurSelect } from "@/components/admin/programmatique/SecteurSelect";
-import { usePrestaireRequests } from "@/hooks/usePrestataires";
-import { Building2, CheckCircle, Send } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { SecteurSelect } from '@/components/admin/programmatique/SecteurSelect';
+import { usePrestaireRequests } from '@/hooks/usePrestataires';
+import { Building2, CheckCircle, Send, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function DemandePrestataire() {
   const { createRequest } = usePrestaireRequests();
+  const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
 
   const [formData, setFormData] = useState({
-    raison_sociale: "",
-    email: "",
-    telephone: "",
-    adresse: "",
-    ninea: "",
-    rccm: "",
-    cc: "",
-    code_comptable: "",
-    rib_banque: "",
-    rib_numero: "",
-    rib_cle: "",
+    raison_sociale: '',
+    email: '',
+    telephone: '',
+    adresse: '',
+    ninea: '',
+    rccm: '',
+    cc: '',
+    code_comptable: '',
+    rib_banque: '',
+    rib_numero: '',
+    rib_cle: '',
     secteur_principal_id: null as string | null,
     secteur_secondaire_id: null as string | null,
   });
@@ -34,12 +36,12 @@ export default function DemandePrestataire() {
     e.preventDefault();
 
     if (!formData.raison_sociale.trim()) {
-      toast.error("La raison sociale est obligatoire");
+      toast.error('La raison sociale est obligatoire');
       return;
     }
 
     if (!formData.email && !formData.telephone) {
-      toast.error("Au moins un contact (email ou téléphone) est obligatoire");
+      toast.error('Au moins un contact (email ou téléphone) est obligatoire');
       return;
     }
 
@@ -57,7 +59,7 @@ export default function DemandePrestataire() {
       rib_cle: formData.rib_cle || null,
       secteur_principal_id: formData.secteur_principal_id,
       secteur_secondaire_id: formData.secteur_secondaire_id,
-      source: "INTERNE",
+      source: 'INTERNE',
     });
 
     setSubmitted(true);
@@ -71,8 +73,8 @@ export default function DemandePrestataire() {
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Demande enregistrée !</h2>
             <p className="text-muted-foreground mb-4">
-              Votre demande d'enregistrement a été soumise avec succès.
-              Elle sera examinée par les Services Généraux.
+              Votre demande d'enregistrement a été soumise avec succès. Elle sera examinée par les
+              Services Généraux.
             </p>
             <Button onClick={() => setSubmitted(false)} variant="outline">
               Nouvelle demande
@@ -86,6 +88,16 @@ export default function DemandePrestataire() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="page-header">
+        <div className="flex items-center gap-3 mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/contractualisation/prestataires')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Retour
+          </Button>
+        </div>
         <h1 className="page-title">Demande d'enregistrement Prestataire</h1>
         <p className="page-description">
           Remplissez ce formulaire pour demander l'enregistrement d'un nouveau prestataire
@@ -100,9 +112,7 @@ export default function DemandePrestataire() {
             </div>
             <div>
               <CardTitle>Informations du Prestataire</CardTitle>
-              <CardDescription>
-                Les champs marqués d'un * sont obligatoires
-              </CardDescription>
+              <CardDescription>Les champs marqués d'un * sont obligatoires</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -134,7 +144,10 @@ export default function DemandePrestataire() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="email">
-                  Email <Badge variant="outline" className="ml-2 text-xs">Au moins 1 contact requis</Badge>
+                  Email{' '}
+                  <Badge variant="outline" className="ml-2 text-xs">
+                    Au moins 1 contact requis
+                  </Badge>
                 </Label>
                 <Input
                   id="email"
@@ -248,7 +261,7 @@ export default function DemandePrestataire() {
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={createRequest.isPending}>
                 <Send className="h-4 w-4 mr-2" />
-                {createRequest.isPending ? "Envoi en cours..." : "Soumettre la demande"}
+                {createRequest.isPending ? 'Envoi en cours...' : 'Soumettre la demande'}
               </Button>
             </div>
           </form>

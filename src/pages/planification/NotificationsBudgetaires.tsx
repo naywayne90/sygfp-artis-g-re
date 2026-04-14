@@ -88,7 +88,8 @@ export default function NotificationsBudgetaires() {
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [statutFilter, setStatutFilter] = useState<NotificationStatut | 'all'>('all');
-  const [origineFondsFilter, setOrigineFondsFilter] = useState<string>('');
+  // Sentinel '__all__' = aucune origine sélectionnée (Radix SelectItem n'accepte pas value="")
+  const [origineFondsFilter, setOrigineFondsFilter] = useState<string>('__all__');
 
   // Dialogs
   const [showFormDialog, setShowFormDialog] = useState(false);
@@ -119,7 +120,7 @@ export default function NotificationsBudgetaires() {
     isDeleting,
   } = useBudgetNotifications({
     statut: statutFilter,
-    origine_fonds_id: origineFondsFilter || undefined,
+    origine_fonds_id: origineFondsFilter === '__all__' ? undefined : origineFondsFilter,
     search: searchTerm,
   });
 
@@ -303,7 +304,7 @@ export default function NotificationsBudgetaires() {
                   <SelectValue placeholder="Origine fonds" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes origines</SelectItem>
+                  <SelectItem value="__all__">Toutes origines</SelectItem>
                   {activeSources?.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.libelle}

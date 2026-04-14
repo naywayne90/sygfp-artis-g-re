@@ -21,7 +21,6 @@ interface BudgetFiltersProps {
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Tous les statuts' },
   { value: 'soumis', label: 'Soumis' },
-  { value: 'soumis', label: 'Soumis' },
   { value: 'valide', label: 'Validé' },
   { value: 'rejete', label: 'Rejeté' },
 ];
@@ -47,7 +46,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
     queryFn: async () => {
       const { data } = await supabase
         .from('directions')
-        .select('id, code, label')
+        .select('id, code, sigle, label')
         .eq('est_active', true)
         .order('label');
       return data || [];
@@ -228,7 +227,7 @@ export function BudgetFilters({ filters, onFiltersChange }: BudgetFiltersProps) 
               <SelectItem value="all">Toutes les directions</SelectItem>
               {directions?.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
-                  {d.code} - {d.label}
+                  {d.sigle || d.code} - {d.label}
                 </SelectItem>
               ))}
             </SelectContent>

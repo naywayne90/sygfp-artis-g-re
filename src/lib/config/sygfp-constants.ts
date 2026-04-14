@@ -343,6 +343,12 @@ export function getStatutBadge(statut: string | null | undefined): BadgeConfig {
   // Normaliser le statut (lowercase, trim)
   const normalized = statut.toLowerCase().trim();
 
+  // Compatibilité legacy : "brouillon" / "draft" → "Soumis"
+  // Règle métier ARTI : plus de brouillon dans SYGFP, tout est soumis à la création.
+  if (normalized === 'brouillon' || normalized === 'draft') {
+    return STATUT_BADGES[STATUTS.SOUMIS];
+  }
+
   // Chercher une correspondance exacte
   const exactMatch = STATUT_BADGES[normalized as StatutType];
   if (exactMatch) return exactMatch;

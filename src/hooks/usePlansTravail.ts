@@ -36,6 +36,7 @@ export function usePlansTravail(directionId?: string) {
       return (data ?? []) as unknown as PlanTravail[];
     },
     enabled: !!exerciceId,
+    staleTime: 30_000,
   });
 
   const createMutation = useMutation({

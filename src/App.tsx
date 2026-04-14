@@ -3,7 +3,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { ExerciceProvider } from '@/contexts/ExerciceContext';
 import { RBACProvider } from '@/contexts/RBACContext';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -138,10 +138,14 @@ const ImputationPage = lazy(() => import('./pages/execution/ImputationPage'));
 const DashboardExecution = lazy(() => import('./pages/execution/DashboardExecution'));
 const PassationMarche = lazy(() => import('./pages/execution/PassationMarche'));
 const PassationApprobation = lazy(() => import('./pages/execution/PassationApprobation'));
+const SuiviDirections = lazy(() => import('./pages/execution/SuiviDirections'));
 const DashboardDGPage = lazy(() => import('./pages/execution/DashboardDGPage'));
 const DashboardDirectionPage = lazy(() => import('./pages/execution/DashboardDirectionPage'));
 const DashboardDMG = lazy(() => import('./pages/DashboardDMG'));
 const DashboardFinancier = lazy(() => import('./pages/DashboardFinancier'));
+const TableauBordDGP = lazy(() => import('./pages/TableauBordDGP'));
+const ReportingDGBF = lazy(() => import('./pages/ReportingDGBF'));
+const SuiviPrestataires = lazy(() => import('./pages/SuiviPrestataires'));
 
 // Pages Gestion Tâches
 const EtatExecutionTachesPage = lazy(
@@ -175,8 +179,15 @@ const ReamenementsImputations = lazy(() => import('./pages/budget/ReamenementsIm
 
 // Pages Contractualisation
 const Prestataires = lazy(() => import('./pages/contractualisation/Prestataires'));
+const DemandePrestataire = lazy(() => import('./pages/contractualisation/DemandePrestataire'));
+const ValidationPrestataires = lazy(
+  () => import('./pages/contractualisation/ValidationPrestataires')
+);
 const Contrats = lazy(() => import('./pages/contractualisation/Contrats'));
 const ComptabiliteMatiere = lazy(() => import('./pages/contractualisation/ComptabiliteMatiere'));
+const RapprochementMarcheContrat = lazy(
+  () => import('./pages/contractualisation/RapprochementMarcheContrat')
+);
 
 // ============================================
 // CONFIGURATION
@@ -192,12 +203,15 @@ const queryClient = new QueryClient({
 });
 
 /**
- * Layout wrapper avec Suspense + ErrorBoundary pour le lazy loading
+ * Layout wrapper avec Suspense + ErrorBoundary pour le lazy loading.
+ * key={location.pathname} sur ErrorBoundary => reset automatique sur changement de route
+ * (sinon une erreur sur une page reste affichée même après navigation vers une autre).
  */
 function LayoutWrapper() {
+  const location = useLocation();
   return (
     <AppLayout>
-      <ErrorBoundary>
+      <ErrorBoundary key={location.pathname}>
         <Suspense fallback={<LoadingSpinner />}>
           <Outlet />
         </Suspense>
@@ -384,8 +398,20 @@ const App = () => (
                 {/* Suivi DG */}
                 <Route path="/suivi-dg" element={<SuiviDG />} />
 
+                {/* Suivi Directions */}
+                <Route path="/execution/suivi-directions" element={<SuiviDirections />} />
+
                 {/* États d'exécution */}
                 <Route path="/etats-execution" element={<EtatsExecution />} />
+
+                {/* Tableau de Bord DGP */}
+                <Route path="/tableau-bord-dgp" element={<TableauBordDGP />} />
+
+                {/* Reporting DGBF */}
+                <Route path="/reporting-dgbf" element={<ReportingDGBF />} />
+
+                {/* Suivi Prestataires */}
+                <Route path="/suivi-prestataires" element={<SuiviPrestataires />} />
 
                 {/* Espace Direction */}
                 <Route path="/espace-direction" element={<EspaceDirection />} />
@@ -424,10 +450,22 @@ const App = () => (
 
                 {/* Contractualisation */}
                 <Route path="/contractualisation/prestataires" element={<Prestataires />} />
+                <Route
+                  path="/contractualisation/demande-prestataire"
+                  element={<DemandePrestataire />}
+                />
+                <Route
+                  path="/contractualisation/validation-prestataires"
+                  element={<ValidationPrestataires />}
+                />
                 <Route path="/contractualisation/contrats" element={<Contrats />} />
                 <Route
                   path="/contractualisation/comptabilite-matiere"
                   element={<ComptabiliteMatiere />}
+                />
+                <Route
+                  path="/contractualisation/rapprochement"
+                  element={<RapprochementMarcheContrat />}
                 />
 
                 {/* 404 */}

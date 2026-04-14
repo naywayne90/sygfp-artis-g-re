@@ -58,6 +58,7 @@ const formatCurrency = (amount: number) =>
   }).format(amount) + ' FCFA';
 
 const STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  brouillon: 'outline',
   soumis: 'secondary',
   valide: 'default',
   en_cours: 'default',
@@ -142,7 +143,7 @@ export default function ProjetsList() {
     date_debut: '',
     date_fin: '',
     budget_alloue: 0,
-    statut: 'soumis' as PlanTravailStatut,
+    statut: 'brouillon' as PlanTravailStatut,
   });
 
   const stats = useMemo(
@@ -208,7 +209,8 @@ export default function ProjetsList() {
 
   const handleOpenCreate = () => {
     setEditingPlan(null);
-    const nextNum = String(plans.length + 1).padStart(3, '0');
+    const maxNum = Math.max(0, ...plans.map((p) => parseInt(p.code?.split('-').pop() || '0', 10)));
+    const nextNum = String(maxNum + 1).padStart(3, '0');
     const autoCode = `PT-${exercice || 2026}-${nextNum}`;
     setFormData({
       code: autoCode,
@@ -221,7 +223,7 @@ export default function ProjetsList() {
       date_debut: '',
       date_fin: '',
       budget_alloue: 0,
-      statut: 'soumis',
+      statut: 'brouillon',
     });
     setFormOpen(true);
   };
@@ -400,6 +402,7 @@ export default function ProjetsList() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="brouillon">Brouillon</SelectItem>
             <SelectItem value="soumis">Soumis</SelectItem>
             <SelectItem value="valide">Valide</SelectItem>
             <SelectItem value="en_cours">En cours</SelectItem>
@@ -444,7 +447,9 @@ export default function ProjetsList() {
                       <TableCell className="max-w-[200px] truncate">{plan.libelle}</TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {plan.direction?.code ?? plan.direction_id.slice(0, 8)}
+                          {plan.direction?.sigle ||
+                            plan.direction?.code ||
+                            plan.direction_id.slice(0, 8)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
@@ -547,6 +552,7 @@ export default function ProjetsList() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="brouillon">Brouillon</SelectItem>
                     <SelectItem value="soumis">Soumis</SelectItem>
                     <SelectItem value="valide">Valide</SelectItem>
                     <SelectItem value="en_cours">En cours</SelectItem>

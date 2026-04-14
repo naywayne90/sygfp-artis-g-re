@@ -63,7 +63,6 @@ interface StepCardProps {
   icon: React.ComponentType<{ className?: string }>;
   stats: {
     soumis?: { count: number; montant: number };
-    soumis?: { count: number; montant: number };
     valide?: { count: number; montant: number };
     signe?: { count: number; montant: number };
     en_signature?: { count: number; montant: number };

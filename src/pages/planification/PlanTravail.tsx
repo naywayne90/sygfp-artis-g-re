@@ -472,9 +472,9 @@ export default function PlanTravail() {
               {data.length} élément(s) - {totalLines} ligne(s) - Total:{' '}
               {formatCurrency(totalDotation)}
               {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 text-xs">
+                <span className="ml-2 inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
                   Filtré
-                </Badge>
+                </span>
               )}
             </CardDescription>
           </div>
@@ -874,9 +874,9 @@ export default function PlanTravail() {
                   {filteredLines.length} ligne(s) - Total:{' '}
                   {formatCurrency(detailTotals.dotationModifiee)}
                   {hasActiveFilters && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
+                    <span className="ml-2 inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
                       Filtré
-                    </Badge>
+                    </span>
                   )}
                 </CardDescription>
               </div>
@@ -924,7 +924,9 @@ export default function PlanTravail() {
                               {line.label}
                             </TableCell>
                             <TableCell>
-                              <span className="text-xs">{line.direction?.code || '-'}</span>
+                              <span className="text-xs">
+                                {line.direction?.sigle || line.direction?.code || '-'}
+                              </span>
                             </TableCell>
                             <TableCell>
                               <span className="text-xs">

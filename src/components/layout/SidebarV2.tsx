@@ -56,6 +56,7 @@ import {
   Eye,
   ScanLine,
   ListChecks,
+  Scale,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -76,6 +77,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { cn } from '@/lib/utils';
 import { useSidebarBadges } from '@/hooks/useSidebarBadges';
 import { useRBAC } from '@/contexts/RBACContext';
+import {
+  getTodoCountForItem,
+  getTotalTodoForRole,
+  type RoleFlags,
+} from '@/lib/config/sidebarTodoMapping';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import logoArti from '@/assets/logo-arti.jpg';
 
 // ============================================
@@ -169,12 +176,17 @@ const FEUILLE_ROUTE_ITEMS = [
   { title: 'Livrables', url: '/planification/livrables-centralises', icon: FileCheck },
   { title: 'Soumissions', url: '/planification/soumissions-feuilles-route', icon: CheckSquare },
   { title: 'Import Activités', url: '/planification/feuilles-route', icon: Upload },
-  { title: 'Historique Imports', url: '/planification/historique-imports', icon: History },
 ];
 
 const PARTENAIRES_ITEMS = [
   { title: 'Prestataires', url: '/contractualisation/prestataires', icon: Building2 },
-  { title: 'Contrats', url: '/contractualisation/contrats', icon: FileSignature },
+  {
+    title: 'Contrats',
+    url: '/contractualisation/contrats',
+    icon: FileSignature,
+    badgeKey: 'contratsExpirent' as const,
+  },
+  { title: 'Rapprochement M/C', url: '/contractualisation/rapprochement', icon: Scale },
 ];
 
 const GESTION_ITEMS = [
@@ -188,8 +200,12 @@ const GESTION_ITEMS = [
 
 const RAPPORTS_ITEMS = [
   { title: 'Suivi DG', url: '/suivi-dg', icon: Eye },
+  { title: 'Suivi Directions', url: '/execution/suivi-directions', icon: Building2 },
   { title: "États d'exécution", url: '/etats-execution', icon: BarChart3 },
   { title: 'Alertes Budgétaires', url: '/alertes-budgetaires', icon: Target },
+  { title: 'Tableau de Bord DGP', url: '/tableau-bord-dgp', icon: Clock },
+  { title: 'Reporting DGBF', url: '/reporting-dgbf', icon: BarChart3 },
+  { title: 'Suivi Prestataires', url: '/suivi-prestataires', icon: Users },
 ];
 
 const PARAMETRAGE_REFERENTIELS = [
@@ -258,10 +274,23 @@ export function SidebarV2() {
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { data: badges } = useSidebarBadges();
-  const { canAccess, isAdmin } = useRBAC();
+  const { canAccess, isAdmin, isDG, isCB, isDAF, isTresorerie, isDirecteur, hasRole } = useRBAC();
 
   const [chaineOpen, setChaineOpen] = useState(true);
   const [parametrageOpen, setParametrageOpen] = useState(false);
+
+  // Construction des flags de rôle pour le calcul "À traiter"
+  const roleFlags: RoleFlags = {
+    isAdmin,
+    isDG,
+    isCB,
+    isDAF,
+    isTresorerie,
+    isDirecteur,
+    hasSAF: hasRole('SAF'),
+    hasSDCT: hasRole('SDCT'),
+    hasSDPM: hasRole('SDPM'),
+  };
 
   // Filter menu items by RBAC permissions
   const visibleChaineDepense = CHAINE_DEPENSE.filter((item) => canAccess(item.url));
@@ -283,13 +312,12 @@ export function SidebarV2() {
     ...PARAMETRAGE_SYSTEME,
   ].some((item) => isActive(item.url));
 
-  // Total badges chaîne de dépense (only visible items)
-  const chaineTotalBadge = badges
-    ? visibleChaineDepense.reduce(
-        (sum, item) => sum + (item.badgeKey ? badges[item.badgeKey] || 0 : 0),
-        0
-      )
-    : 0;
+  // Total "À traiter par moi" pour la chaîne de dépense (role-aware)
+  const chaineTotalBadge = getTotalTodoForRole(
+    badges,
+    roleFlags,
+    visibleChaineDepense.map((i) => i.url)
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r-0 bg-sidebar">
@@ -406,7 +434,8 @@ export function SidebarV2() {
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {visibleChaineDepense.map((item) => {
-                          const badgeCount = item.badgeKey && badges ? badges[item.badgeKey] : 0;
+                          // Compteur "À traiter par moi" (filtré par rôle)
+                          const badgeCount = getTodoCountForItem(item.url, badges, roleFlags);
                           return (
                             <SidebarMenuSubItem key={item.url}>
                               <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
@@ -430,7 +459,23 @@ export function SidebarV2() {
                                     </span>
                                     <span>{item.title}</span>
                                   </div>
-                                  <BadgeCounter count={badgeCount} />
+                                  {badgeCount > 0 && (
+                                    <TooltipProvider delayDuration={300}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span data-testid={`sidebar-badge-${item.url}`}>
+                                            <BadgeCounter count={badgeCount} />
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right">
+                                          <p className="text-xs">
+                                            {badgeCount} dossier{badgeCount > 1 ? 's' : ''} à
+                                            traiter par vous
+                                          </p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
                                 </NavLink>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -456,16 +501,8 @@ export function SidebarV2() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {visibleBudgetItems.map((item) => {
-                  const typedItem = item as {
-                    badgeKey?: string;
-                    title: string;
-                    url: string;
-                    icon: typeof Wallet;
-                  };
-                  const badgeCount =
-                    typedItem.badgeKey && badges
-                      ? Number(badges[typedItem.badgeKey as keyof typeof badges]) || 0
-                      : 0;
+                  // Compteur role-aware : les virements ne comptent que pour CB/ADMIN
+                  const badgeCount = getTodoCountForItem(item.url, badges, roleFlags);
                   return (
                     <SidebarMenuItem key={item.url}>
                       <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
@@ -482,7 +519,20 @@ export function SidebarV2() {
                             <item.icon className="h-4 w-4 shrink-0" />
                             {!collapsed && <span>{item.title}</span>}
                           </div>
-                          {!collapsed && <BadgeCounter count={badgeCount} />}
+                          {!collapsed && badgeCount > 0 && (
+                            <TooltipProvider delayDuration={300}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span data-testid={`sidebar-badge-${item.url}`}>
+                                    <BadgeCounter count={badgeCount} />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="right">
+                                  <p className="text-xs">{badgeCount} à traiter par vous</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

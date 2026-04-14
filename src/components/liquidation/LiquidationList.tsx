@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Liquidation, VALIDATION_STEPS } from '@/hooks/useLiquidations';
+import { computeDGP } from '@/hooks/useDGP';
+import { computePenaliteRetard } from '@/hooks/usePenalitesRetard';
 import { formatCurrency } from '@/lib/utils';
 import {
   MoreHorizontal,
@@ -33,8 +35,10 @@ import {
   ClipboardCheck,
   FileDown,
   Truck,
+  Timer,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UrgentLiquidationToggle } from '@/components/liquidations/UrgentLiquidationToggle';
 import { UrgentLiquidationBadge } from '@/components/liquidations/UrgentLiquidationBadge';
 
@@ -87,6 +91,11 @@ const getStatusBadge = (statut: string | null) => {
       className:
         'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
     },
+    validé_cf: {
+      label: 'Visa CB',
+      className:
+        'bg-cyan-100 text-cyan-700 border-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-700',
+    },
     validé_dg: { label: 'Validé DG', className: 'bg-success/10 text-success border-success/20' },
     rejete: {
       label: 'Rejeté',
@@ -124,6 +133,9 @@ function LiquidationRowSkeleton({ showUrgentColumn = true }: { showUrgentColumn?
       </TableCell>
       <TableCell className="text-right">
         <Skeleton className="h-4 w-24 ml-auto" />
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <Skeleton className="h-5 w-10" />
       </TableCell>
       <TableCell className="hidden lg:table-cell">
         <Skeleton className="h-4 w-20" />
@@ -195,6 +207,15 @@ export function LiquidationList({
           <TableHead>Engagement</TableHead>
           <TableHead className="hidden md:table-cell">Fournisseur</TableHead>
           <TableHead className="text-right">Montant</TableHead>
+          <TableHead className="hidden sm:table-cell">
+            <div
+              className="flex items-center gap-1"
+              title="Délai Global de Paiement (art. 132/139)"
+            >
+              <Timer className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">DGP</span>
+            </div>
+          </TableHead>
           <TableHead className="hidden lg:table-cell">Date service fait</TableHead>
           <TableHead>Étape</TableHead>
           <TableHead>Statut</TableHead>
@@ -211,6 +232,7 @@ export function LiquidationList({
               const isSoumis = statut === 'soumis';
               const isCertifieSF = statut === 'certifié_sf';
               const isValideDAAF = statut === 'validé_daaf';
+              const isValideCF = statut === 'validé_cf';
               const isValideDG = statut === 'validé_dg';
               const isDiffere = statut === 'differe';
               const canSubmitThis = isSoumis || isCertifieSF;
@@ -267,6 +289,92 @@ export function LiquidationList({
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {formatCurrency(liquidation.montant)}
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {(() => {
+                      const dateDebut = liquidation.submitted_at ?? liquidation.created_at;
+                      const dgp = computeDGP(liquidation.montant, dateDebut, statut);
+                      // Pénalités de retard d'exécution
+                      const eng = liquidation.engagement;
+                      const dureeExec = eng?.marche?.duree_execution ?? null;
+                      const dateDebExec =
+                        eng?.marche?.date_signature ?? eng?.date_engagement ?? null;
+                      const pen = computePenaliteRetard(
+                        liquidation.montant,
+                        dureeExec,
+                        dateDebExec,
+                        liquidation.service_fait_date,
+                        liquidation.penalites_montant ?? 0,
+                        liquidation.penalites_taux_journalier ?? 0.1
+                      );
+                      const hasPenalite = pen.statut === 'en_retard' || pen.statut === 'appliquee';
+                      return (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex flex-col items-start gap-0.5 cursor-help">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-[11px] px-1.5 py-0.5 font-mono ${dgp.couleur} ${dgp.couleurTexte}`}
+                                >
+                                  {dgp.label}
+                                </Badge>
+                                {dgp.interetsMoratoires > 0 && (
+                                  <span className="text-[10px] font-medium text-red-600 whitespace-nowrap">
+                                    {formatCurrency(dgp.interetsMoratoires)}
+                                  </span>
+                                )}
+                                {hasPenalite && (
+                                  <span className="text-[10px] font-medium text-amber-600 whitespace-nowrap">
+                                    Pén. {formatCurrency(pen.montantPenalite)}
+                                  </span>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-[280px]">
+                              <div className="text-xs space-y-1">
+                                <p className="font-semibold">Délai Global de Paiement</p>
+                                <p>Délai : {dgp.delaiMaxJours}j (art. 132/139)</p>
+                                <p>
+                                  Écoulé : {dgp.joursEcoules}j / {dgp.delaiMaxJours}j
+                                </p>
+                                {dgp.interetsMoratoires > 0 && (
+                                  <>
+                                    <hr className="border-red-200 my-1" />
+                                    <p className="text-red-600 font-semibold">
+                                      Intérêts moratoires (art. 142)
+                                    </p>
+                                    <p className="text-red-600">
+                                      {dgp.interetsDetail.joursRetard}j ×{' '}
+                                      {formatCurrency(dgp.interetsDetail.montantJournalier)}/j
+                                    </p>
+                                    <p className="text-red-700 font-bold">
+                                      = {formatCurrency(dgp.interetsMoratoires)}
+                                    </p>
+                                  </>
+                                )}
+                                {hasPenalite && (
+                                  <>
+                                    <hr className="border-amber-200 my-1" />
+                                    <p className="text-amber-600 font-semibold">
+                                      Pénalité retard exécution (art. 145)
+                                    </p>
+                                    <p className="text-amber-600">
+                                      {pen.joursRetard}j × {pen.tauxJournalier}% ×{' '}
+                                      {formatCurrency(pen.montantBase)}
+                                    </p>
+                                    <p className="text-amber-700 font-bold">
+                                      = {formatCurrency(pen.montantPenalite)}
+                                      {pen.plafondAtteint && ' (plafonné)'}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     {liquidation.service_fait_date
@@ -363,8 +471,27 @@ export function LiquidationList({
                           </>
                         )}
 
-                        {/* ═══ DG : Valider/Rejeter (si étape DG = validé_daaf) ═══ */}
-                        {(userRole === 'DG' || isAdmin) && isValideDAAF && (
+                        {/* ═══ CB : Visa Contrôleur Budgétaire (si étape CB = validé_daaf) ═══ */}
+                        {(userRole === 'CB' || isAdmin) && isValideDAAF && (
+                          <>
+                            <DropdownMenuSeparator />
+                            {onValidate && (
+                              <DropdownMenuItem onClick={() => onValidate(liquidation.id)}>
+                                <CheckCircle className="mr-2 h-4 w-4 text-cyan-600" />
+                                Visa CB
+                              </DropdownMenuItem>
+                            )}
+                            {onReject && (
+                              <DropdownMenuItem onClick={() => onReject(liquidation.id)}>
+                                <XCircle className="mr-2 h-4 w-4 text-destructive" />
+                                Rejeter (CB)
+                              </DropdownMenuItem>
+                            )}
+                          </>
+                        )}
+
+                        {/* ═══ DG : Valider/Rejeter (si étape DG = validé_cf) ═══ */}
+                        {(userRole === 'DG' || isAdmin) && isValideCF && (
                           <>
                             <DropdownMenuSeparator />
                             {onValidate && (

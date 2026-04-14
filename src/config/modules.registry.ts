@@ -271,11 +271,11 @@ export const MODULES_REGISTRY: ModuleConfig[] = [
     canonicalOrder: 3,
     status: 'ready',
     isEnabled: true,
-    roles: ['sdct', 'daaf', 'cb'],
+    roles: ['daaf', 'saf', 'cb', 'dg', 'admin'],
     requiredCapabilities: ['imputation.create', 'imputation.validate'],
     step: 3,
     stepCode: STEP_CODES.IMPUTATION,
-    description: 'Imputation budgétaire',
+    description: 'Imputation budgétaire (saisie chaîne DAAF, visa CB)',
   },
   {
     id: 'expression-besoin',

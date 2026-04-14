@@ -135,9 +135,14 @@ export function usePermissions() {
     return isAdmin || hasAnyRole(['DG', 'DIRECTEUR']) || hasPermission('notes_aef_validate');
   };
 
-  // Vérifier si l'utilisateur peut imputer (CB uniquement)
+  // Vérifier si l'utilisateur peut imputer (chaîne DAAF : DAAF + SAF + Chef de Service Budget).
+  // Le CB ne fait que viser a posteriori (RGCP CI / Décret 98-716).
   const canImpute = (): boolean => {
-    return isAdmin || hasRole('CB') || hasPermission('imputation_create');
+    return (
+      isAdmin ||
+      hasAnyRole(['DAAF', 'DAF', 'SAF', 'CHEF_SERVICE_BUDGET']) ||
+      hasPermission('imputation_create')
+    );
   };
 
   // Vérifier si l'utilisateur peut valider un engagement (CB uniquement)

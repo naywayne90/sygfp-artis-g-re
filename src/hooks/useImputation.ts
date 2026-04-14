@@ -473,7 +473,7 @@ export function useImputation() {
         exercice: exercice || new Date().getFullYear(),
         created_by: user.id,
         etape_courante: 'imputation',
-        statut_global: 'impute',
+        statut_global: 'en_cours',
       };
 
       const { data: dossier, error: dossierError } = await supabase

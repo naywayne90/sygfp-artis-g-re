@@ -511,16 +511,19 @@ function MappingStep({
                 </TooltipProvider>
               </Label>
               <Select
-                value={mapping[field.key] || ''}
+                value={mapping[field.key] || '__none__'}
                 onValueChange={(value) =>
-                  onMappingChange({ ...mapping, [field.key]: value || null })
+                  onMappingChange({
+                    ...mapping,
+                    [field.key]: value === '__none__' ? null : value,
+                  })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner une colonne" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Non mappé --</SelectItem>
+                  <SelectItem value="__none__">-- Non mappé --</SelectItem>
                   {headers.map((header) => (
                     <SelectItem key={header} value={header}>
                       {header}

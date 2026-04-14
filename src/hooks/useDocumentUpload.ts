@@ -2,11 +2,11 @@
  * Hook unifié pour l'upload de documents avec nommage standardisé
  */
 
-import { useState, useCallback } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { storage } from "@/services/storage";
-import type { StorageObject, UploadResult } from "@/services/storage";
+import { useState, useCallback } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { storage } from '@/services/storage';
+import type { StorageObject, UploadResult } from '@/services/storage';
 
 export interface DocumentUploadOptions {
   entityType: string;
@@ -42,21 +42,22 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
 
   // Query for listing files
   const filesQuery = useQuery({
-    queryKey: ["documents", entityType, entityId, exercice],
+    queryKey: ['documents', entityType, entityId, exercice],
     queryFn: async () => {
       if (!entityType || !entityId) return [];
-      
+
       const prefix = exercice
         ? `${exercice}/${entityType}/${entityId}`
         : `${entityType}/${entityId}`;
-      
+
       const { data, error } = await storage.list(prefix);
-      
+
       if (error) {
-        console.error("Failed to list documents:", error);
+        // R2 indisponible (env vars / 502 edge fn) → dégradation graceful : liste vide
+        console.warn('[documents] R2 unavailable, returning empty list:', error);
         return [];
       }
-      
+
       return data || [];
     },
     enabled: !!entityType && !!entityId,
@@ -66,13 +67,13 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
   const uploadMutation = useMutation({
     mutationFn: async (params: UploadParams) => {
       const { file, typePiece, reference = defaultReference } = params;
-      
+
       if (!entityType || !entityId) {
-        throw new Error("entityType and entityId are required for upload");
+        throw new Error('entityType and entityId are required for upload');
       }
-      
+
       if (!reference) {
-        throw new Error("reference is required for standard naming");
+        throw new Error('reference is required for standard naming');
       }
 
       const path = storage.generatePath({
@@ -89,7 +90,7 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
       });
 
       if (error || !data) {
-        throw new Error(error || "Upload failed");
+        throw new Error(error || 'Upload failed');
       }
 
       return data;
@@ -97,9 +98,9 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
     onSuccess: (result) => {
       setUploadProgress(0);
       queryClient.invalidateQueries({
-        queryKey: ["documents", entityType, entityId, exercice],
+        queryKey: ['documents', entityType, entityId, exercice],
       });
-      toast.success("Document uploadé avec succès");
+      toast.success('Document uploadé avec succès');
       onUploadSuccess?.(result);
     },
     onError: (error: Error) => {
@@ -113,18 +114,18 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
   const deleteMutation = useMutation({
     mutationFn: async (key: string) => {
       const { data: _data, error } = await storage.delete(key);
-      
+
       if (error) {
         throw new Error(error);
       }
-      
+
       return key;
     },
     onSuccess: (key) => {
       queryClient.invalidateQueries({
-        queryKey: ["documents", entityType, entityId, exercice],
+        queryKey: ['documents', entityType, entityId, exercice],
       });
-      toast.success("Document supprimé");
+      toast.success('Document supprimé');
       onDeleteSuccess?.(key);
     },
     onError: (error: Error) => {
@@ -137,22 +138,22 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
   const download = useCallback(async (key: string, filename: string) => {
     try {
       const { data: url, error } = await storage.getDownloadUrl(key);
-      
+
       if (error || !url) {
-        toast.error("Erreur lors du téléchargement");
+        toast.error('Erreur lors du téléchargement');
         return;
       }
 
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
       link.download = filename;
-      link.target = "_blank";
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error("Download error:", err);
-      toast.error("Erreur lors du téléchargement");
+      console.error('Download error:', err);
+      toast.error('Erreur lors du téléchargement');
     }
   }, []);
 
@@ -160,7 +161,7 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
   const getPreviewUrl = useCallback(async (key: string): Promise<string | null> => {
     const { data, error } = await storage.getDownloadUrl(key, 3600);
     if (error) {
-      console.error("Failed to get preview URL:", error);
+      console.error('Failed to get preview URL:', error);
       return null;
     }
     return data;
@@ -189,7 +190,7 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
 
     // Refetch
     refetch: filesQuery.refetch,
-    
+
     // Provider info
     providerName: storage.getProviderName(),
   };
@@ -199,7 +200,7 @@ export function useDocumentUpload(options: DocumentUploadOptions) {
  * Helper to extract filename from storage key
  */
 export function extractFilename(key: string): string {
-  const parts = key.split("/");
+  const parts = key.split('/');
   return parts[parts.length - 1];
 }
 

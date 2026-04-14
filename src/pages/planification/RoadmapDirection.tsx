@@ -43,6 +43,7 @@ const formatCurrency = (amount: number) =>
   }).format(amount) + ' FCFA';
 
 const STATUT_COLORS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  brouillon: 'outline',
   soumis: 'secondary',
   valide: 'default',
   en_cours: 'default',
@@ -164,10 +165,11 @@ export default function RoadmapDirection() {
           (existing.avgAvancement * (existing.taskCount - 1) + (t.avancement || 0)) /
           existing.taskCount;
       } else {
+        const fullNameParts = t.responsable.full_name?.split(' ') ?? [];
         map.set(key, {
           id: t.responsable.id,
-          nom: t.responsable.last_name ?? '',
-          prenom: t.responsable.first_name ?? '',
+          nom: t.responsable.last_name ?? fullNameParts.slice(1).join(' ') ?? '',
+          prenom: t.responsable.first_name ?? fullNameParts[0] ?? '',
           taskCount: 1,
           avgAvancement: t.avancement || 0,
         });
@@ -194,12 +196,27 @@ export default function RoadmapDirection() {
     [plans]
   );
 
+  // Set of tache ids belonging to this direction (to catch livrables whose tache has no plan_travail_id)
+  const directionTacheIds = useMemo(
+    () => new Set(directionTaches.map((t) => t.id)),
+    [directionTaches]
+  );
+
   const directionLivrables = useMemo(
     () =>
-      (livrables || []).filter(
-        (l) => l.tache?.plan_travail_id && directionPlanIds.has(l.tache.plan_travail_id)
-      ),
-    [livrables, directionPlanIds]
+      (livrables || []).filter((l) => {
+        if (l.tache?.plan_travail_id) {
+          // Primary path: livrable belongs to a tache linked to a plan of this direction
+          return directionPlanIds.has(l.tache.plan_travail_id);
+        }
+        // Fallback: livrable's tache exists but has no plan_travail_id — include if tache itself
+        // belongs to this direction's task list
+        if (l.tache_id && directionTacheIds.has(l.tache_id)) {
+          return true;
+        }
+        return false;
+      }),
+    [livrables, directionPlanIds, directionTacheIds]
   );
   const livrablesSummary = useMemo(
     () => ({
@@ -348,7 +365,10 @@ export default function RoadmapDirection() {
                 </div>
               </div>
               {submissionSummary.soumis > 0 && (
-                <Button size="sm" onClick={() => navigate('/planification/projets')}>
+                <Button
+                  size="sm"
+                  onClick={() => navigate('/planification/soumissions-feuilles-route')}
+                >
                   Finaliser et soumettre
                 </Button>
               )}

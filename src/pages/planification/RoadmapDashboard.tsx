@@ -208,6 +208,7 @@ export default function RoadmapDashboard() {
       {
         code: string;
         nom: string;
+        brouillon: number;
         soumis: number;
         valide: number;
         enCours: number;
@@ -220,6 +221,7 @@ export default function RoadmapDashboard() {
         byDirection.set(dirId, {
           code: plan.direction?.code || plan.direction?.sigle || '?',
           nom: plan.direction?.label || 'Direction',
+          brouillon: 0,
           soumis: 0,
           valide: 0,
           enCours: 0,
@@ -227,7 +229,8 @@ export default function RoadmapDashboard() {
       }
       const entry = byDirection.get(dirId);
       if (!entry) continue;
-      if (plan.statut === 'soumis') entry.soumis++;
+      if (plan.statut === 'brouillon') entry.brouillon++;
+      else if (plan.statut === 'soumis') entry.soumis++;
       else if (plan.statut === 'en_cours') entry.enCours++;
       else if (plan.statut === 'valide') entry.valide++;
     }
@@ -447,6 +450,7 @@ export default function RoadmapDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Direction</TableHead>
+                  <TableHead>Brouillon</TableHead>
                   <TableHead>Soumis</TableHead>
                   <TableHead>Valide</TableHead>
                   <TableHead>En cours</TableHead>
@@ -456,6 +460,13 @@ export default function RoadmapDashboard() {
                 {submissionOverview.map((dir) => (
                   <TableRow key={dir.code}>
                     <TableCell className="font-medium">{dir.nom}</TableCell>
+                    <TableCell>
+                      {dir.brouillon > 0 ? (
+                        <Badge className="bg-gray-100 text-gray-800">{dir.brouillon}</Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
                     <TableCell>
                       {dir.soumis > 0 ? (
                         <Badge className="bg-amber-100 text-amber-800">{dir.soumis}</Badge>

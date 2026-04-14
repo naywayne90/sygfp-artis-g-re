@@ -107,19 +107,20 @@ export function useNoteAccessControl(
   // - Utilisateurs de la même direction peuvent voir
   const canView = isAdmin || isDG || isCB || isCreator || isSameDirection;
 
-  // Droits d'édition (soumis uniquement par créateur)
-  const canEdit = (isCreator || isAdmin) && statut === 'soumis';
-
-  // Droits de suppression (soumis uniquement par créateur ou admin)
-  const canDelete = (isCreator || isAdmin) && statut === 'soumis';
-
-  // Droits de soumission (déjà soumis à la création)
-  const canSubmit = (isCreator || isAdmin) && statut === 'soumis';
-
   // Droits de validation (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
+  // Calculé en premier car il conditionne les droits d'édition
   const canValidate =
     (isDG || isAdmin || hasDGDelegation || hasInterimDG) &&
     ['soumis', 'a_valider'].includes(statut);
+
+  // Droits d'édition (créateur ou admin, mais PAS quand l'utilisateur est en position de valideur)
+  const canEdit = (isCreator || isAdmin) && statut === 'soumis' && !canValidate;
+
+  // Droits de suppression (créateur ou admin, mais pas en position de valideur)
+  const canDelete = (isCreator || isAdmin) && statut === 'soumis' && !canValidate;
+
+  // Droits de soumission (créateur ou admin, mais pas en position de valideur)
+  const canSubmit = (isCreator || isAdmin) && statut === 'soumis' && !canValidate;
 
   // Droits de rejet (DG/Admin/délégataire DG/intérimaire DG pour notes soumises)
   const canReject =

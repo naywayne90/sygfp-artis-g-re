@@ -26,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   FileCheck,
+  FileText,
   RefreshCw,
   Eye,
   CheckCircle2,
@@ -58,6 +59,11 @@ const STATUS_CONFIG: Record<
   SubmissionStatus,
   { label: string; color: string; icon: React.ReactNode }
 > = {
+  brouillon: {
+    label: 'Brouillon',
+    color: 'bg-muted/50 text-muted-foreground border-muted',
+    icon: <FileText className="h-3 w-3" />,
+  },
   soumis: {
     label: 'En attente',
     color: 'bg-warning/10 text-warning border-warning/20',
@@ -125,6 +131,9 @@ export default function RoadmapSubmissionsPage() {
   const missingDirections = allDirections.filter(
     (d: { id: string }) => !submittedDirectionIds.has(d.id)
   );
+  // Afficher l'alerte seulement si au moins une soumission existe ET qu'il manque des directions
+  // Si aucune soumission n'existe, on ne peut pas conclure que des directions sont "en retard"
+  const shouldShowAlert = !isLoading && submissions.length > 0 && missingDirections.length > 0;
 
   const getAgingDays = (submission: { submitted_at: string | null; created_at: string }) => {
     const refDate = submission.submitted_at || submission.created_at;
@@ -143,10 +152,13 @@ export default function RoadmapSubmissionsPage() {
     { key: 'status', label: 'Statut', type: 'text' },
     { key: 'submitted_at', label: 'Date soumission', type: 'date' },
   ];
-  const exportData = submissions.map((s: Record<string, unknown>) => ({
-    ...s,
-    direction_code: (s.direction as Record<string, unknown>)?.code || '',
-  }));
+  const exportData = submissions.map((s) => {
+    const dir = (s as unknown as { direction?: { code?: string; sigle?: string } }).direction;
+    return {
+      ...s,
+      direction_code: dir?.sigle || dir?.code || '',
+    };
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -226,7 +238,7 @@ export default function RoadmapSubmissionsPage() {
       </div>
 
       {/* Alerte directions non soumises */}
-      {missingDirections.length > 0 && (
+      {shouldShowAlert && (
         <Card className="border-l-4 border-l-warning">
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-warning">
@@ -365,7 +377,9 @@ export default function RoadmapSubmissionsPage() {
                     >
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline">{submission.direction?.code || '—'}</Badge>
+                          <Badge variant="outline">
+                            {submission.direction?.sigle || submission.direction?.code || '—'}
+                          </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1 truncate max-w-[150px]">
                           {submission.direction?.label}

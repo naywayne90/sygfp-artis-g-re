@@ -366,7 +366,7 @@ export default function EspaceDirection() {
                 <Edit className="h-4 w-4 text-orange-500" />
                 <span className="text-sm text-muted-foreground">Soumis</span>
               </div>
-              <p className="text-2xl font-bold mt-1">{stats.soumiss}</p>
+              <p className="text-2xl font-bold mt-1">{stats.soumis}</p>
             </CardContent>
           </Card>
           <Card>

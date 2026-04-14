@@ -52,7 +52,7 @@ export interface BudgetLineWithRelations {
   parent_id: string | null;
   created_at: string;
   updated_at: string;
-  direction?: { label: string; code: string } | null;
+  direction?: { label: string; code: string; sigle?: string | null } | null;
   objectif_strategique?: { libelle: string; code: string } | null;
   mission?: { libelle: string; code: string } | null;
   action?: { libelle: string; code: string } | null;
@@ -109,7 +109,7 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
         .select(
           `
           *,
-          direction:directions(label, code),
+          direction:directions(label, code, sigle),
           objectif_strategique:objectifs_strategiques(libelle, code),
           mission:missions(libelle, code),
           action:actions(libelle, code),
@@ -321,6 +321,30 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
     },
   });
 
+  // Validate many (bulk)
+  const validateManyMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      if (ids.length === 0) return 0;
+      const { error } = await supabase
+        .from('budget_lines')
+        .update({
+          statut: 'valide',
+          validated_at: new Date().toISOString(),
+        })
+        .in('id', ids);
+
+      if (error) throw error;
+      return ids.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ['budget-lines'] });
+      toast.success(`${count} ligne(s) validée(s)`);
+    },
+    onError: (error: Error) => {
+      toast.error('Erreur: ' + error.message);
+    },
+  });
+
   // Reject
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
@@ -395,11 +419,13 @@ export function useBudgetLines(filters?: BudgetLineFilters) {
     updateBudgetLine: updateMutation.mutate,
     submitBudgetLine: submitMutation.mutate,
     validateBudgetLine: validateMutation.mutate,
+    validateManyBudgetLines: validateManyMutation.mutate,
     rejectBudgetLine: rejectMutation.mutate,
     deleteBudgetLine: (id: string) => deleteMutation.mutate({ id }),
     regenerateCodesV2: regenerateCodesMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isValidatingMany: validateManyMutation.isPending,
     isRegenerating: regenerateCodesMutation.isPending,
   };
 }

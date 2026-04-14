@@ -248,7 +248,6 @@ export default function Reamenagement() {
             <SelectContent>
               <SelectItem value="all">Tous les statuts</SelectItem>
               <SelectItem value="soumis">Soumis</SelectItem>
-              <SelectItem value="soumis">Soumis</SelectItem>
               <SelectItem value="valide">Validé</SelectItem>
               <SelectItem value="execute">Exécuté</SelectItem>
               <SelectItem value="rejete">Rejeté</SelectItem>

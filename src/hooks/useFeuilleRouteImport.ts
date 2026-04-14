@@ -375,6 +375,7 @@ export function useFeuilleRouteImport() {
         exercice_id: exerciceId,
         plan_travail_id: null, // Can be linked later
         est_active: true,
+        statut: 'planifie',
         import_batch_id: batchId,
         // Metadata stored as JSONB if needed
       }));

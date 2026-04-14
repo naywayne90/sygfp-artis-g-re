@@ -321,7 +321,8 @@ export default function ScanningLiquidation() {
           direction_libelle: direction?.label || null,
           dotation_initiale: budgetLine?.dotation_initiale || 0,
           cumul_engagements: budgetLine?.total_engage || 0,
-          disponible: (budgetLine?.dotation_initiale || 0) - (budgetLine?.total_engage || 0),
+          disponible:
+            Number(budgetLine?.dotation_initiale || 0) - Number(budgetLine?.total_engage || 0),
           activite_code: activite?.code || null,
           os_code: os?.code || null,
           documents_count: stats.total,

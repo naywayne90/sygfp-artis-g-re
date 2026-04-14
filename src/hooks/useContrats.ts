@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useExercice } from '@/contexts/ExerciceContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { toast } from 'sonner';
 
 export const TYPES_CONTRAT = [
@@ -80,6 +81,7 @@ export interface Contrat {
   date_fin: string | null;
   delai_execution: number | null;
   statut: string;
+  observations: string | null;
   dossier_id: string | null;
   engagement_id: string | null;
   exercice: number;
@@ -156,6 +158,7 @@ export function useContratAvenants(contratId: string | null) {
 export function useContrats() {
   const { exercice } = useExercice();
   const queryClient = useQueryClient();
+  const { logAction } = useAuditLog();
 
   // Contrats
   const contrats = useQuery({
@@ -164,7 +167,7 @@ export function useContrats() {
       if (!exercice) return [];
       const { data, error } = await supabase
         .from('contrats' as any)
-        .select('*')
+        .select('*, prestataire:prestataires(raison_sociale), marche:marches(numero, objet)')
         .eq('exercice', exercice)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -182,24 +185,11 @@ export function useContrats() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Generate atomic sequence number
-      const { data: seqData, error: seqError } = await supabase.rpc('get_next_sequence', {
-        p_doc_type: 'CONTRAT',
-        p_exercice: exercice || new Date().getFullYear(),
-        p_direction_code: null,
-        p_scope: 'global',
-      });
-
-      if (seqError) throw seqError;
-      if (!seqData || seqData.length === 0) throw new Error('Échec génération numéro');
-
-      const numero = seqData[0].full_code;
-
+      // Le trigger trg_generate_contrat_numero génère le numéro automatiquement
       const { data, error } = await supabase
         .from('contrats' as any)
         .insert([
           {
-            numero,
             prestataire_id: contrat.prestataire_id,
             type_contrat: contrat.type_contrat,
             objet: contrat.objet,
@@ -215,6 +205,7 @@ export function useContrats() {
             statut: contrat.statut || 'soumis',
             dossier_id: contrat.dossier_id,
             engagement_id: contrat.engagement_id,
+            observations: contrat.observations || null,
             exercice,
             created_by: user?.id,
           },
@@ -222,6 +213,26 @@ export function useContrats() {
         .select()
         .single();
       if (error) throw error;
+
+      const generatedNumero = (data as any).numero;
+
+      await logAction({
+        entityType: 'contrat',
+        entityId: (data as any).id,
+        action: 'create',
+        module: 'contractualisation',
+        entityCode: generatedNumero,
+        newValues: {
+          numero: generatedNumero,
+          objet: contrat.objet,
+          type_contrat: contrat.type_contrat,
+          montant_initial: contrat.montant_initial,
+          prestataire_id: contrat.prestataire_id,
+          statut: contrat.statut || 'soumis',
+        },
+        resume: `Création du contrat ${generatedNumero}`,
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -236,6 +247,13 @@ export function useContrats() {
   // Modifier contrat
   const updateContrat = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Contrat> & { id: string }) => {
+      // Capturer l'état avant modification pour l'audit
+      const { data: before } = await supabase
+        .from('contrats' as any)
+        .select('numero, statut, montant_actuel')
+        .eq('id', id)
+        .single();
+
       const { data, error } = await supabase
         .from('contrats' as any)
         .update(updates)
@@ -243,6 +261,23 @@ export function useContrats() {
         .select()
         .single();
       if (error) throw error;
+
+      const isStatusChange = updates.statut && before && (before as any).statut !== updates.statut;
+      await logAction({
+        entityType: 'contrat',
+        entityId: id,
+        action: isStatusChange ? 'update' : 'update',
+        module: 'contractualisation',
+        entityCode: (before as any)?.numero,
+        oldValues: before
+          ? { statut: (before as any).statut, montant_actuel: (before as any).montant_actuel }
+          : undefined,
+        newValues: updates as Record<string, unknown>,
+        resume: isStatusChange
+          ? `Changement statut contrat ${(before as any)?.numero}: ${(before as any)?.statut} → ${updates.statut}`
+          : `Modification du contrat ${(before as any)?.numero}`,
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -394,15 +429,34 @@ export function useContrats() {
       if (error) throw error;
 
       // Mettre à jour le contrat si avenant signé
-      if (avenant.statut === 'signe' && avenant.nouveau_montant) {
-        await supabase
-          .from('contrats' as any)
-          .update({
-            montant_actuel: avenant.nouveau_montant,
-            date_fin: avenant.nouvelle_date_fin || undefined,
-          })
-          .eq('id', avenant.contrat_id);
+      if (avenant.statut === 'signe') {
+        const contratUpdate: Record<string, unknown> = {};
+        if (avenant.nouveau_montant) contratUpdate.montant_actuel = avenant.nouveau_montant;
+        if (avenant.nouvelle_date_fin) contratUpdate.date_fin = avenant.nouvelle_date_fin;
+        if (avenant.nouveau_delai) contratUpdate.delai_execution = avenant.nouveau_delai;
+        if (Object.keys(contratUpdate).length > 0) {
+          await supabase
+            .from('contrats' as any)
+            .update(contratUpdate)
+            .eq('id', avenant.contrat_id);
+        }
       }
+
+      await logAction({
+        entityType: 'contrat',
+        entityId: avenant.contrat_id,
+        action: 'create',
+        module: 'contractualisation',
+        newValues: {
+          type: 'avenant',
+          numero_avenant: nextNumero,
+          type_avenant: avenant.type_avenant,
+          objet: avenant.objet,
+          montant_modification: avenant.montant_modification,
+          nouveau_montant: avenant.nouveau_montant,
+        },
+        resume: `Avenant n°${nextNumero} créé — ${avenant.type_avenant}`,
+      });
 
       return data;
     },

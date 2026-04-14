@@ -34,7 +34,7 @@ export interface DemandeAchat {
   montant_estime?: number;
   exercice: number;
   created_at: string;
-  direction?: { label: string; code: string };
+  direction?: { label: string; code: string; sigle?: string | null };
   lignes?: DemandeAchatLigne[];
 }
 
@@ -237,7 +237,7 @@ export function useApprovisionnement() {
         .select(
           `
           *,
-          direction:directions(label, code),
+          direction:directions(label, code, sigle),
           lignes:demande_achat_lignes(*, article:articles(*))
         `
         )

@@ -164,7 +164,8 @@ export function RoadmapSubmissionDetailDialog({
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span className="font-semibold">
-                    {submission.direction?.code} - {submission.direction?.label}
+                    {submission.direction?.sigle || submission.direction?.code} -{' '}
+                    {submission.direction?.label}
                   </span>
                 </div>
                 <p className="text-lg font-medium">{submission.libelle}</p>

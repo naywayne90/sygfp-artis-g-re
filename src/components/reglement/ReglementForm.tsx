@@ -153,19 +153,24 @@ export function ReglementForm({
   }, [preselectedOrdonnancementId, ordonnancementsValides, form]);
 
   // Charger l'ordonnancement sélectionné et calculer la disponibilité
+  // Dépend uniquement de watchedOrdonnancementId pour ne pas réinitialiser
+  // la justification à chaque refetch de ordonnancementsValides (TanStack Query
+  // recrée le tableau à chaque refetch, ce qui réinitialisait imputationJustification).
   useEffect(() => {
     if (watchedOrdonnancementId) {
       const ord = ordonnancementsValides.find((o) => o.id === watchedOrdonnancementId);
       setSelectedOrdonnancement(ord);
 
       calculateReglementAvailability(watchedOrdonnancementId).then(setAvailability);
+      // Reset justification uniquement lors d'un changement réel d'ordonnancement
+      setImputationJustification('');
     } else {
       setSelectedOrdonnancement(null);
       setAvailability(null);
+      setImputationJustification('');
     }
-    // Reset justification quand l'ordonnancement change
-    setImputationJustification('');
-  }, [watchedOrdonnancementId, ordonnancementsValides, calculateReglementAvailability]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedOrdonnancementId]);
 
   // Trouver le compte sélectionné
   const selectedCompte = comptesDisponibles.find((c) => c.value === watchedCompte);

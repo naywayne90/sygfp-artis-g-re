@@ -18,7 +18,7 @@ import type {
 export const CREATE_PERMISSIONS: Record<ModuleCode, ProfilFonctionnel[]> = {
   notes_sef: ['Admin', 'Operationnel', 'Validateur'],
   notes_aef: ['Admin', 'Validateur'], // Généré automatiquement après validation SEF
-  imputation: ['Admin', 'Controleur'], // CB uniquement
+  imputation: ['Admin', 'Validateur', 'Operationnel'], // Chaîne DAAF (DAAF + SAF). Le CB ne crée pas (RGCP CI).
   expression_besoin: ['Admin', 'Operationnel'],
   passation_marche: ['Admin', 'Operationnel'],
   engagement: ['Admin', 'Controleur'],
@@ -61,9 +61,11 @@ export const VALIDATION_PERMISSIONS: Record<
     description: 'Directeur ou DG valide les Notes AEF',
   },
   IMP: {
-    roles: ['CB', 'ADMIN'],
-    profilFonctionnel: ['Admin', 'Controleur'],
-    description: 'Le CB valide les imputations',
+    roles: ['DAAF', 'DAF', 'DG', 'ADMIN'],
+    roleHierarchique: ['Chef de Service', 'Sous-Directeur', 'Directeur', 'DG'],
+    profilFonctionnel: ['Admin', 'Validateur'],
+    description:
+      'Le DAAF (Ordonnateur Délégué) valide les imputations. SAF et Chef de Service Budget préparent. Le CB ne fait que viser a posteriori (RGCP CI / Décret 98-716).',
   },
   EXP: {
     roles: ['DAAF', 'DG', 'ADMIN'],

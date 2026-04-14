@@ -14275,6 +14275,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      reglements_audit_log: {
+        Row: {
+          action: string;
+          changed_at: string;
+          changed_by: string | null;
+          id: string;
+          new_data: Json | null;
+          old_data: Json | null;
+          reglement_id: string;
+        };
+        Insert: {
+          action: string;
+          changed_at?: string;
+          changed_by?: string | null;
+          id?: string;
+          new_data?: Json | null;
+          old_data?: Json | null;
+          reglement_id: string;
+        };
+        Update: {
+          action?: string;
+          changed_at?: string;
+          changed_by?: string | null;
+          id?: string;
+          new_data?: Json | null;
+          old_data?: Json | null;
+          reglement_id?: string;
+        };
+        Relationships: [];
+      };
       reglements: {
         Row: {
           banque_arti: string | null;
@@ -14297,6 +14327,14 @@ export type Database = {
           reference_paiement: string | null;
           statut: string | null;
           updated_at: string | null;
+          vise_at: string | null;
+          vise_hash: string | null;
+          vise_ip: string | null;
+          vise_par: string | null;
+          statut_rapprochement: string;
+          mouvement_bancaire_id: string | null;
+          rapproche_at: string | null;
+          rapproche_par: string | null;
         };
         Insert: {
           banque_arti?: string | null;
@@ -14319,6 +14357,14 @@ export type Database = {
           reference_paiement?: string | null;
           statut?: string | null;
           updated_at?: string | null;
+          vise_at?: string | null;
+          vise_hash?: string | null;
+          vise_ip?: string | null;
+          vise_par?: string | null;
+          statut_rapprochement?: string;
+          mouvement_bancaire_id?: string | null;
+          rapproche_at?: string | null;
+          rapproche_par?: string | null;
         };
         Update: {
           banque_arti?: string | null;
@@ -14341,6 +14387,14 @@ export type Database = {
           reference_paiement?: string | null;
           statut?: string | null;
           updated_at?: string | null;
+          vise_at?: string | null;
+          vise_hash?: string | null;
+          vise_ip?: string | null;
+          vise_par?: string | null;
+          statut_rapprochement?: string;
+          mouvement_bancaire_id?: string | null;
+          rapproche_at?: string | null;
+          rapproche_par?: string | null;
         };
         Relationships: [
           {
@@ -21206,6 +21260,35 @@ export type Database = {
         Args: { p_role_code: string; p_user_id: string };
         Returns: boolean;
       };
+      viser_reglement: {
+        Args: { p_reglement_id: string; p_payload_hash: string; p_ip?: string | null };
+        Returns: Database['public']['Tables']['reglements']['Row'];
+      };
+      rapprocher_reglement: {
+        Args: { p_reglement_id: string; p_mouvement_id: string; p_force_ecart?: boolean };
+        Returns: Database['public']['Tables']['reglements']['Row'];
+      };
+      suggerer_rapprochements_auto: {
+        Args: { p_exercice?: number | null };
+        Returns: {
+          reglement_id: string;
+          reglement_numero: string;
+          reglement_montant: number;
+          reglement_reference: string | null;
+          mouvement_id: string;
+          mouvement_reference: string;
+          mouvement_montant: number;
+          match_score: number;
+        }[];
+      };
+      get_reglement_traceability: {
+        Args: { p_reglement_id: string };
+        Returns: Json;
+      };
+      get_reglements_delais: {
+        Args: { p_exercice?: number | null };
+        Returns: Json;
+      };
       validate_budget: {
         Args: { p_exercice: number; p_user_id: string };
         Returns: Json;
@@ -21340,7 +21423,8 @@ export type Database = {
         | 'SDPM'
         | 'TRESORERIE'
         | 'COMPTABILITE'
-        | 'CHARGE_MISSION';
+        | 'CHARGE_MISSION'
+        | 'CHEF_SERVICE_BUDGET';
       log_action_type:
         | 'CREATE'
         | 'SUBMIT'
@@ -21512,6 +21596,7 @@ export const Constants = {
         'TRESORERIE',
         'COMPTABILITE',
         'CHARGE_MISSION',
+        'CHEF_SERVICE_BUDGET',
       ],
       log_action_type: [
         'CREATE',

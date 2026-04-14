@@ -71,6 +71,15 @@ import { ChaineDepenseCompact } from '@/components/workflow/ChaineDepenseCompact
 import { formatCurrency } from '@/lib/utils';
 import { formatMontant } from '@/lib/config/sygfp-constants';
 import { QRCodeCanvas } from 'qrcode.react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 // ============================================
 // TYPES
@@ -190,6 +199,19 @@ const getActionDescription = (
     upload_echec: { title: "Échec de l'upload", detail: commentaire || undefined },
     'passage à valider': { title: `${actorName} a transmis la note au DG` },
     passage_a_valider: { title: `${actorName} a transmis la note au DG` },
+    // Actions anglaises du workflow engine
+    SUBMIT: { title: `${actorName} a soumis la note pour validation` },
+    VALIDATE: { title: `${actorName} a validé la note`, detail: 'Dossier créé automatiquement' },
+    REJECT: {
+      title: `${actorName} a rejeté la note`,
+      detail: commentaire ? `Motif: ${commentaire}` : undefined,
+    },
+    DEFER: { title: `${actorName} a différé la note`, detail: commentaire || undefined },
+    RESUBMIT: { title: `${actorName} a re-soumis la note` },
+    APPROVE: { title: `${actorName} a approuvé la note` },
+    VALIDATE_DG: { title: `${actorName} a validé la note (DG)` },
+    SUBMIT_TO_SIGNATURE: { title: `${actorName} a soumis la note à la signature` },
+    SUBMIT_SCANNING: { title: `${actorName} a soumis le scan` },
   };
 
   return descriptions[action] || { title: action, detail: commentaire || undefined };
@@ -228,6 +250,16 @@ const getActionIcon = (action: string) => {
     reference_generated: <FileText className="h-4 w-4 text-primary" />,
     'passage à valider': <Send className="h-4 w-4 text-warning" />,
     passage_a_valider: <Send className="h-4 w-4 text-warning" />,
+    // Actions anglaises du workflow engine
+    SUBMIT: <Send className="h-4 w-4 text-blue-500" />,
+    VALIDATE: <CheckCircle className="h-4 w-4 text-success" />,
+    REJECT: <XCircle className="h-4 w-4 text-destructive" />,
+    DEFER: <Clock className="h-4 w-4 text-warning" />,
+    RESUBMIT: <Send className="h-4 w-4 text-blue-500" />,
+    APPROVE: <CheckCircle className="h-4 w-4 text-success" />,
+    VALIDATE_DG: <Shield className="h-4 w-4 text-success" />,
+    SUBMIT_TO_SIGNATURE: <Send className="h-4 w-4 text-primary" />,
+    SUBMIT_SCANNING: <FileText className="h-4 w-4 text-primary" />,
   };
   return icons[action] || <History className="h-4 w-4" />;
 };
@@ -258,6 +290,7 @@ export default function NoteSEFDetail() {
   const [savingChanges, setSavingChanges] = useState(false);
   const [rejectingNote, setRejectingNote] = useState<NoteSEF | null>(null);
   const [deferringNote, setDeferringNote] = useState<NoteSEF | null>(null);
+  const [confirmValidation, setConfirmValidation] = useState(false);
   const [validating, setValidating] = useState(false);
   const [resubmitting, setResubmitting] = useState(false);
 
@@ -832,8 +865,8 @@ export default function NoteSEFDetail() {
         <PrintButton entityType="note_sef" entityId={note.id} label="Imprimer" />
       </PageHeader>
 
-      {/* Actions bar pour soumis */}
-      {(canModify || canSubmit) && !isEditing && (
+      {/* Actions bar pour soumis — masquée si le DG a déjà sa barre de décision */}
+      {(canModify || canSubmit) && !isEditing && !(canValidateNote || canValidateDeferredNote) && (
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="py-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -857,54 +890,107 @@ export default function NoteSEFDetail() {
         </Card>
       )}
 
-      {/* Actions bar DG - Validation */}
+      {/* Bannière + Actions DG — Validation */}
+      {accessLoading &&
+        !canValidateNote &&
+        !canValidateDeferredNote &&
+        !canModify &&
+        !canSubmit && (
+          <Card className="border-muted">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Chargement des permissions...</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
       {(canValidateNote || canValidateDeferredNote) && !isEditing && (
-        <Card className="border-success/30 bg-success/5">
-          <CardContent className="py-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-success">Décision DG :</span>
+        <div className="space-y-3">
+          {/* Bannière "Action requise" */}
+          <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <AlertDescription className="ml-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <span className="font-semibold text-amber-800 dark:text-amber-300">
+                    Action requise — Cette note attend votre décision
+                  </span>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-amber-700 dark:text-amber-400">
+                    <span className="flex items-center gap-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      {note.direction?.label || note.direction?.sigle || 'Direction'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <User className="h-3.5 w-3.5" />
+                      {note.demandeur
+                        ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim() ||
+                          'Demandeur'
+                        : 'Demandeur'}
+                    </span>
+                    {note.montant_estime != null && note.montant_estime > 0 && (
+                      <span className="flex items-center gap-1 font-medium">
+                        <Banknote className="h-3.5 w-3.5" />
+                        {formatMontant(note.montant_estime)}
+                      </span>
+                    )}
+                    {note.urgence && note.urgence !== 'normale' && (
+                      <span>{getUrgenceBadge(note.urgence)}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
 
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleValidate}
-                disabled={validating}
-                className="gap-2 bg-success hover:bg-success/90"
-              >
-                {validating ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle className="h-4 w-4" />
+          {/* Boutons de décision DG */}
+          <Card className="border-success/30 bg-gradient-to-r from-success/5 to-success/10 sticky top-2 z-10">
+            <CardContent className="py-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-success" />
+                  <span className="font-semibold text-success">Décision DG</span>
+                </div>
+                <Separator orientation="vertical" className="h-8 hidden sm:block" />
+
+                <Button
+                  onClick={() => setConfirmValidation(true)}
+                  disabled={validating}
+                  className="gap-2 bg-success hover:bg-success/90 text-white px-6 h-10"
+                >
+                  {validating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4" />
+                  )}
+                  Valider la note
+                </Button>
+
+                {canValidateNote && (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setDeferringNote(note)}
+                      className="gap-2 border-warning/50 text-warning hover:bg-warning/10 h-10"
+                    >
+                      <Clock className="h-4 w-4" />
+                      Différer
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setRejectingNote(note)}
+                      className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10 h-10"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Rejeter
+                    </Button>
+                  </>
                 )}
-                Valider
-              </Button>
-
-              {/* Différer/Rejeter uniquement si pas déjà différé */}
-              {canValidateNote && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDeferringNote(note)}
-                    className="gap-2 border-warning/50 text-warning hover:bg-warning/10"
-                  >
-                    <Clock className="h-4 w-4" />
-                    Différer
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setRejectingNote(note)}
-                    className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    Rejeter
-                  </Button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* CTA Créer/ouvrir Note AEF après validation */}
@@ -918,8 +1004,12 @@ export default function NoteSEFDetail() {
                   <p className="font-medium text-success">Note validée</p>
                   <p className="text-sm text-muted-foreground">
                     {note.dossier_id
-                      ? `Dossier créé automatiquement. Vous pouvez créer la Note AEF associée.`
-                      : 'Vous pouvez maintenant créer la Note AEF associée'}
+                      ? isDG
+                        ? 'Dossier créé automatiquement.'
+                        : 'Dossier créé automatiquement. Vous pouvez créer la Note AEF associée.'
+                      : isDG
+                        ? 'Note validée avec succès.'
+                        : 'Vous pouvez maintenant créer la Note AEF associée.'}
                   </p>
                 </div>
               </div>
@@ -930,10 +1020,12 @@ export default function NoteSEFDetail() {
                     Voir le dossier
                   </Button>
                 )}
-                <Button onClick={handleCreateNoteAEF} className="gap-2">
-                  <FilePlus className="h-4 w-4" />
-                  Créer Note AEF
-                </Button>
+                {!isDG && (
+                  <Button onClick={handleCreateNoteAEF} className="gap-2">
+                    <FilePlus className="h-4 w-4" />
+                    Créer Note AEF
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -1329,9 +1421,11 @@ export default function NoteSEFDetail() {
                       ({attachments.length}/{MAX_PJ})
                     </span>
                   </CardTitle>
-                  <CardDescription className="mt-1">
-                    {MAX_PJ} fichiers max &bull; 10 Mo par fichier
-                  </CardDescription>
+                  {canModify && (
+                    <CardDescription className="mt-1">
+                      {MAX_PJ} fichiers max &bull; 10 Mo par fichier
+                    </CardDescription>
+                  )}
                 </div>
                 {canModify && (
                   <div>
@@ -1567,6 +1661,64 @@ export default function NoteSEFDetail() {
         note={deferringNote}
         onConfirm={handleDefer}
       />
+
+      {/* Dialog de confirmation de validation */}
+      <Dialog open={confirmValidation} onOpenChange={setConfirmValidation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la validation</DialogTitle>
+            <DialogDescription>
+              Vous êtes sur le point de valider cette note. Un dossier sera automatiquement créé et
+              la note passera à l'étape suivante.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Objet</span>
+              <span className="font-medium text-right max-w-[60%] truncate">{note?.objet}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Direction</span>
+              <span>{note?.direction?.label || note?.direction?.sigle || '—'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Demandeur</span>
+              <span>
+                {note?.demandeur
+                  ? `${note.demandeur.first_name || ''} ${note.demandeur.last_name || ''}`.trim() ||
+                    '—'
+                  : '—'}
+              </span>
+            </div>
+            {note?.montant_estime != null && note.montant_estime > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Montant estimé</span>
+                <span className="font-semibold">{formatMontant(note.montant_estime)}</span>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmValidation(false)}>
+              Annuler
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmValidation(false);
+                handleValidate();
+              }}
+              disabled={validating}
+              className="gap-2 bg-success hover:bg-success/90"
+            >
+              {validating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle className="h-4 w-4" />
+              )}
+              Confirmer la validation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

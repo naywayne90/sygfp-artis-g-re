@@ -20,7 +20,7 @@ React 18 + TypeScript + Vite (port 8080) | Tailwind + shadcn/ui | TanStack Query
 | 4   | Expression Besoin    | Production           | E2E                   | `docs/modules/MODULE_EXPRESSION_BESOIN.md` |
 | 5   | **Passation Marche** | **Certifie 100/100** | **94 unit + 66 E2E**  | `docs/modules/MODULE_MARCHES.md`           |
 | 6   | **Engagement**       | **Certifie 100/100** | **231 unit + 60 E2E** | `docs/modules/MODULE_ENGAGEMENTS.md`       |
-| 7   | **Liquidation**      | **Certifie 100/100** | **104 unit + 60 E2E** | `docs/modules/MODULE_LIQUIDATIONS.md`      |
+| 7   | **Liquidation**      | **Certifie 100/100** | **105 unit + 60 E2E** | `docs/modules/MODULE_LIQUIDATIONS.md`      |
 | 8   | Ordonnancement       | Production (legacy)  | E2E                   | `docs/modules/MODULE_ORDONNANCEMENTS.md`   |
 | 9   | Reglement            | Production (legacy)  | 138 E2E               | `docs/modules/MODULE_REGLEMENTS.md`        |
 
@@ -83,7 +83,7 @@ Voir `docs/CONVENTIONS.md` sections 10-19 pour toutes les regles frontend detail
 ```bash
 npx tsc --noEmit         # 0 erreurs TypeScript
 npx vite build           # Build OK
-npx vitest run           # 713/713 tests PASS (au 01/04/2026)
+npx vitest run           # 795/795 tests PASS (au 05/04/2026)
 ```
 
 **INTERDIT :**
@@ -213,11 +213,28 @@ Details : `docs/PROJECT_STATUS.md` section 14.1 et `docs/modules/MODULE_MARCHES.
 
 ## 8. Comptes test
 
-| Email             | Password  | Role               |
-| ----------------- | --------- | ------------------ |
-| dg@arti.ci        | Test2026! | DG / Validateur    |
-| daaf@arti.ci      | Test2026! | DAAF / Validateur  |
-| agent.dsi@arti.ci | Test2026! | DSI / Operationnel |
+| Email             | Password  | Role / Direction            |
+| ----------------- | --------- | --------------------------- |
+| admin@arti.ci     | Test2026! | Super Admin (ADMIN)         |
+| dg@arti.ci        | Test2026! | DG / Validateur             |
+| cb@arti.ci        | Test2026! | Controleur Budgetaire (CB)  |
+| daaf@arti.ci      | Test2026! | DAAF / Validateur           |
+| dmg@arti.ci       | Test2026! | Dir. Moyens Generaux (DMG)  |
+| dsi@arti.ci       | Test2026! | Dir. Systemes Info (DSI)    |
+| dcp@arti.ci       | Test2026! | Dir. Comm & Partenariats    |
+| tresorier@arti.ci | Test2026! | Tresorier (TRESORERIE)      |
+| sdpm@arti.ci      | Test2026! | Sous-Dir Passation Marches  |
+| sdct@arti.ci      | Test2026! | Sous-Dir Controle Technique |
+| saf@arti.ci       | Test2026! | Sous-Dir DAAF (SAF)         |
+| cm@arti.ci        | Test2026! | Comptabilite Matiere (CM)   |
+| dcsti@arti.ci     | Test2026! | Dir. DCSTI                  |
+| dcz@arti.ci       | Test2026! | Dir. Controle Zones (DCZ)   |
+| dgpecrp@arti.ci   | Test2026! | Dir. DGPECRP                |
+| dp@arti.ci        | Test2026! | Dir. Planification (DP)     |
+| dq@arti.ci        | Test2026! | Dir. Qualite (DQ)           |
+| drrn@arti.ci      | Test2026! | Dir. Reglementation (DRRN)  |
+| dsesp@arti.ci     | Test2026! | Dir. Securite Peage (DSESP) |
+| agent.dsi@arti.ci | Test2026! | Agent DSI / Operationnel    |
 
 **Supabase :** `tjagvgqthlibdpvztvaf.supabase.co` — Dashboard: `artiabidjan@yahoo.com` / `VEGet@9008`
 **GitHub :** `naywayne90/sygfp-artis-g-re`
@@ -241,4 +258,4 @@ Details : `docs/PROJECT_STATUS.md` section 14.1 et `docs/modules/MODULE_MARCHES.
 
 ### Metriques cles (24/03/2026)
 
-127 pages | 428 composants | 179 hooks | 201 tables | 671 RLS policies | 283 migrations | 12 Edge Functions | 713 tests unitaires | 71 specs E2E | 105 routes | 55 items sidebar
+127 pages | 428 composants | 179 hooks | 201 tables | 671 RLS policies | 283 migrations | 12 Edge Functions | 795 tests unitaires | 71 specs E2E | 105 routes | 55 items sidebar

@@ -44,6 +44,8 @@ import {
   FileText,
   FileDown,
   AlertTriangle,
+  Timer,
+  Scale,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NotesPagination } from '@/components/shared/NotesPagination';
@@ -63,6 +65,8 @@ import { TrancheInfo, LiquidationUserRole } from '@/components/liquidation/Liqui
 import { Progress } from '@/components/ui/progress';
 import { formatCurrency } from '@/lib/utils';
 import { useUrgentLiquidations } from '@/hooks/useUrgentLiquidations';
+import { useDGPBatch, computeDGPStats } from '@/hooks/useDGP';
+import { usePenaliteRetardBatch, computePenaliteStats } from '@/hooks/usePenalitesRetard';
 import { useLiquidationExport } from '@/hooks/useLiquidationExport';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRBAC } from '@/contexts/RBACContext';
@@ -74,11 +78,13 @@ import { LiquidationRejectDialog } from '@/components/liquidation/LiquidationRej
 import { LiquidationDeferDialog } from '@/components/liquidation/LiquidationDeferDialog';
 import { LiquidationValidateDialog } from '@/components/liquidation/LiquidationValidateDialog';
 import { UrgentLiquidationList } from '@/components/liquidations/UrgentLiquidationList';
+import { BordereauEnvoiDialog } from '@/components/liquidation/BordereauEnvoiDialog';
 import { PermissionGuard, usePermissionCheck } from '@/components/auth/PermissionGuard';
 import { useCanValidateLiquidation } from '@/hooks/useDelegations';
 import { useExercice } from '@/contexts/ExerciceContext';
 import { WorkflowStepIndicator } from '@/components/workflow/WorkflowStepIndicator';
 import { ModuleHelp, MODULE_HELP_CONFIG } from '@/components/help/ModuleHelp';
+import { useRBAC } from '@/contexts/RBACContext';
 import { toast } from 'sonner';
 
 export default function Liquidations() {
@@ -103,7 +109,9 @@ export default function Liquidations() {
     switch (activeTab) {
       case 'a_valider':
       case 'validation_daaf':
-        return ['soumis', 'validé_daaf'];
+        return ['soumis', 'validé_daaf', 'validé_cf'];
+      case 'validation_cf':
+        return 'validé_daaf';
       case 'validees':
         return 'validé_dg';
       case 'rejetees':
@@ -178,15 +186,25 @@ export default function Liquidations() {
     return 'AGENT';
   }, [isAdminUser, hasRole, hasAnyRole]);
 
-  // Handle sourceEngagement URL parameter
+  // RBAC: only DAF/ADMIN can create liquidations
+  const { canCreate: canCreateRBAC } = useRBAC();
+  const canCreateLiquidation = canCreateRBAC('liquidation');
+
+  // Handle sourceEngagement URL parameter — RBAC guard
   useEffect(() => {
     const sourceEngId = searchParams.get('sourceEngagement');
     if (sourceEngId) {
+      if (!canCreateLiquidation) {
+        toast.error("Vous n'avez pas les droits pour créer une liquidation.");
+        searchParams.delete('sourceEngagement');
+        setSearchParams(searchParams, { replace: true });
+        return;
+      }
       setShowCreateDialog(true);
       searchParams.delete('sourceEngagement');
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, canCreateLiquidation]);
 
   // Reset page quand onglet, recherche ou filtre urgent changent
   useEffect(() => {
@@ -236,6 +254,66 @@ export default function Liquidations() {
     }
     return map;
   }, [lightData, engagementsValides]);
+
+  // Pénalités de retard d'exécution — art. 145-147 Code Marchés Publics CI
+  const penaliteLightData = useMemo(() => {
+    if (!lightData) return [];
+    return lightData.map((liq) => ({
+      id: liq.id,
+      montant: liq.montant,
+      duree_execution: liq.engagement?.marche?.duree_execution ?? null,
+      date_debut_execution:
+        liq.engagement?.marche?.date_signature ?? liq.engagement?.date_engagement ?? null,
+      service_fait_date: liq.service_fait_date,
+      penalites_montant: liq.penalites_montant,
+      penalites_taux_journalier: liq.penalites_taux_journalier,
+    }));
+  }, [lightData]);
+  const penaliteMap = usePenaliteRetardBatch(penaliteLightData);
+  const penaliteStats = useMemo(() => computePenaliteStats(penaliteMap), [penaliteMap]);
+  const penalitesEnRetard = useMemo(() => {
+    const result: Array<{
+      id: string;
+      numero: string;
+      joursRetard: number;
+      montantPenalite: number;
+    }> = [];
+    penaliteMap.forEach((info, id) => {
+      if (info.statut === 'en_retard') {
+        const liq = (lightData ?? []).find((l) => l.id === id);
+        if (liq) {
+          result.push({
+            id,
+            numero: liq.numero,
+            joursRetard: info.joursRetard,
+            montantPenalite: info.montantPenalite,
+          });
+        }
+      }
+    });
+    return result.sort((a, b) => b.joursRetard - a.joursRetard);
+  }, [penaliteMap, lightData]);
+
+  // Délai Global de Paiement (DGP) — art. 132/139 Code Marchés Publics CI
+  const dgpMap = useDGPBatch(lightData ?? []);
+  const dgpStats = useMemo(() => computeDGPStats(dgpMap), [dgpMap]);
+  const dgpHorsDelai = useMemo(() => {
+    const result: Array<{ id: string; numero: string; joursRetard: number; interets: number }> = [];
+    dgpMap.forEach((info, id) => {
+      if (info.statut === 'hors_delai' && !info.estTermine) {
+        const liq = (lightData ?? []).find((l) => l.id === id);
+        if (liq) {
+          result.push({
+            id,
+            numero: liq.numero,
+            joursRetard: Math.abs(info.joursRestants),
+            interets: info.interetsMoratoires,
+          });
+        }
+      }
+    });
+    return result.sort((a, b) => b.joursRetard - a.joursRetard);
+  }, [dgpMap, lightData]);
 
   // Pagination — données déjà paginées par le serveur
   const totalPages = Math.ceil(total / pageSize);
@@ -397,6 +475,91 @@ export default function Liquidations() {
         </Alert>
       )}
 
+      {/* Alerte DGP — Liquidations hors délai + intérêts moratoires automatiques (art. 132/139/142) */}
+      {dgpHorsDelai.length > 0 && (
+        <Alert className="border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
+          <Timer className="h-4 w-4 text-red-600" />
+          <AlertTitle className="text-red-800 dark:text-red-300">
+            {dgpHorsDelai.length} liquidation(s) hors Délai Global de Paiement — Intérêts moratoires
+            en cours
+          </AlertTitle>
+          <AlertDescription className="text-red-700 dark:text-red-400">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+              {dgpHorsDelai.slice(0, 5).map((l) => (
+                <span key={l.id} className="font-mono text-sm">
+                  {l.numero} <span className="text-red-500">(+{l.joursRetard}j</span>
+                  {l.interets > 0 && (
+                    <span className="text-red-600 font-semibold">
+                      {' '}
+                      · {formatCurrency(l.interets)}
+                    </span>
+                  )}
+                  <span className="text-red-500">)</span>
+                </span>
+              ))}
+              {dgpHorsDelai.length > 5 && (
+                <span className="text-sm">et {dgpHorsDelai.length - 5} autre(s)...</span>
+              )}
+            </div>
+            {dgpStats.totalInteretsMoratoires > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+                <span className="font-bold text-red-700">
+                  Total intérêts moratoires (art. 142) :{' '}
+                  {formatCurrency(dgpStats.totalInteretsMoratoires)}
+                </span>
+                {dgpStats.expositionJournaliere > 0 && (
+                  <span className="text-red-500 text-xs">
+                    Exposition : +{formatCurrency(dgpStats.expositionJournaliere)}/jour
+                  </span>
+                )}
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Alerte Pénalités de retard d'exécution — art. 145-147 */}
+      {penalitesEnRetard.length > 0 && (
+        <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <Scale className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800 dark:text-amber-300">
+            {penalitesEnRetard.length} liquidation(s) avec retard d'exécution — Pénalités
+            applicables (art. 145-147)
+          </AlertTitle>
+          <AlertDescription className="text-amber-700 dark:text-amber-400">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+              {penalitesEnRetard.slice(0, 5).map((l) => (
+                <span key={l.id} className="font-mono text-sm">
+                  {l.numero} <span className="text-amber-500">(+{l.joursRetard}j</span>
+                  {l.montantPenalite > 0 && (
+                    <span className="text-amber-600 font-semibold">
+                      {' '}
+                      · {formatCurrency(l.montantPenalite)}
+                    </span>
+                  )}
+                  <span className="text-amber-500">)</span>
+                </span>
+              ))}
+              {penalitesEnRetard.length > 5 && (
+                <span className="text-sm">et {penalitesEnRetard.length - 5} autre(s)...</span>
+              )}
+            </div>
+            {penaliteStats.totalPenalitesAuto > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+                <span className="font-bold text-amber-700">
+                  Total pénalités calculées : {formatCurrency(penaliteStats.totalPenalitesAuto)}
+                </span>
+                {penaliteStats.penalitesNonAppliquees > 0 && (
+                  <span className="text-amber-500 text-xs">
+                    Non appliquées : {formatCurrency(penaliteStats.penalitesNonAppliquees)}
+                  </span>
+                )}
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Page Header */}
       <PageHeader
         title="Liquidations"
@@ -486,7 +649,7 @@ export default function Liquidations() {
       </Card>
 
       {/* Stats Cards — depuis useLiquidationCounts (requête légère) */}
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
@@ -549,6 +712,84 @@ export default function Liquidations() {
             </div>
           </CardContent>
         </Card>
+        <Card className={dgpStats.horsDelai > 0 ? 'border-red-300 dark:border-red-800' : ''}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Hors délai DGP</p>
+                <p className={`text-2xl font-bold ${dgpStats.horsDelai > 0 ? 'text-red-600' : ''}`}>
+                  {dgpStats.horsDelai}
+                </p>
+                {dgpStats.horsDelai > 0 && (
+                  <p className="text-xs text-red-500 mt-0.5">~{dgpStats.delaiMoyen}j moy.</p>
+                )}
+              </div>
+              <Timer
+                className={`h-8 w-8 ${dgpStats.horsDelai > 0 ? 'text-red-500/70' : 'text-muted-foreground/50'}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className={
+            dgpStats.totalInteretsMoratoires > 0
+              ? 'border-red-400 bg-red-50/50 dark:bg-red-950/20 dark:border-red-800'
+              : ''
+          }
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Intérêts moratoires</p>
+                <p
+                  className={`text-lg font-bold ${dgpStats.totalInteretsMoratoires > 0 ? 'text-red-600' : ''}`}
+                >
+                  {formatCurrency(dgpStats.totalInteretsMoratoires)}
+                </p>
+                {dgpStats.expositionJournaliere > 0 && (
+                  <p className="text-[10px] text-red-500 mt-0.5">
+                    +{formatCurrency(dgpStats.expositionJournaliere)}/jour
+                  </p>
+                )}
+              </div>
+              <AlertTriangle
+                className={`h-8 w-8 ${dgpStats.totalInteretsMoratoires > 0 ? 'text-red-500/70' : 'text-muted-foreground/50'}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        <Card
+          className={
+            penaliteStats.enRetard > 0
+              ? 'border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800'
+              : ''
+          }
+        >
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Pénalités retard</p>
+                <p
+                  className={`text-lg font-bold ${penaliteStats.enRetard > 0 ? 'text-amber-600' : ''}`}
+                >
+                  {penaliteStats.enRetard > 0
+                    ? formatCurrency(penaliteStats.totalPenalitesAuto)
+                    : '0'}
+                </p>
+                {penaliteStats.penalitesNonAppliquees > 0 && (
+                  <p className="text-[10px] text-amber-500 mt-0.5">
+                    {penaliteStats.penalitesNonAppliquees > 0
+                      ? `${penaliteStats.enRetard} en retard`
+                      : ''}
+                  </p>
+                )}
+              </div>
+              <Scale
+                className={`h-8 w-8 ${penaliteStats.enRetard > 0 ? 'text-amber-500/70' : 'text-muted-foreground/50'}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Tabs */}
@@ -572,6 +813,10 @@ export default function Liquidations() {
               <TabsTrigger value="validation_daaf" className="text-secondary gap-1">
                 <Shield className="h-3 w-3" />
                 Validation DAAF ({counts?.a_valider ?? 0})
+              </TabsTrigger>
+              <TabsTrigger value="validation_cf" className="text-cyan-600 gap-1">
+                <Shield className="h-3 w-3" />
+                Visa CB
               </TabsTrigger>
               <TabsTrigger value="urgentes" className={urgentCount > 0 ? 'text-red-600' : ''}>
                 <Flame className={`h-3 w-3 mr-1 ${urgentCount > 0 ? 'animate-pulse' : ''}`} />
@@ -648,10 +893,23 @@ export default function Liquidations() {
                                 )}
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button size="sm" onClick={() => setShowCreateDialog(true)}>
-                                  <Receipt className="mr-2 h-4 w-4" />
-                                  {progress ? 'Nouvelle tranche' : 'Liquider'}
-                                </Button>
+                                {canCreateLiquidation ? (
+                                  <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                                    <Receipt className="mr-2 h-4 w-4" />
+                                    {progress ? 'Nouvelle tranche' : 'Liquider'}
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      navigate(`/engagements?detail=${eng.id}`);
+                                    }}
+                                  >
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    Voir engagement
+                                  </Button>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
@@ -769,6 +1027,32 @@ export default function Liquidations() {
               />
             </TabsContent>
 
+            {/* Onglet Visa CB — Contrôleur Budgétaire (step 2) */}
+            <TabsContent value="validation_cf">
+              <LiquidationList
+                liquidations={liquidations}
+                onView={handleView}
+                onValidate={canValidateLiquidationFinal ? handleValidate : undefined}
+                onReject={canRejectLiquidationFinal ? handleReject : undefined}
+                onExportAttestation={handleExportAttestation}
+                trancheMap={trancheMap}
+                isLoading={isLoading}
+                isFetching={isFetching}
+                userRole={effectiveUserRole}
+              />
+              <NotesPagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
+            </TabsContent>
+
             {/* Onglet Urgentes */}
             <TabsContent value="urgentes">
               <UrgentLiquidationList
@@ -781,8 +1065,13 @@ export default function Liquidations() {
               />
             </TabsContent>
 
-            {/* Onglet Validées avec action Ordonnancement — pagination serveur */}
+            {/* Onglet Validées — Bordereau d'envoi + action Ordonnancement — pagination serveur */}
             <TabsContent value="validees">
+              {liquidations.length > 0 && (
+                <div className="flex items-center justify-end mb-4">
+                  <BordereauEnvoiDialog liquidations={liquidations} exercice={String(exercice)} />
+                </div>
+              )}
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -825,14 +1114,18 @@ export default function Liquidations() {
                                 <Eye className="mr-2 h-4 w-4" />
                                 Voir détails
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleCreateOrdonnancement(liq.id)}
-                                className="text-primary"
-                              >
-                                <FileSignature className="mr-2 h-4 w-4" />
-                                Créer ordonnancement
-                              </DropdownMenuItem>
+                              {canCreateRBAC('ordonnancement') && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => handleCreateOrdonnancement(liq.id)}
+                                    className="text-primary"
+                                  >
+                                    <FileSignature className="mr-2 h-4 w-4" />
+                                    Créer ordonnancement
+                                  </DropdownMenuItem>
+                                </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>

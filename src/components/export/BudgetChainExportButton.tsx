@@ -58,10 +58,13 @@ const STEP_LABELS: Record<ExportStep, string> = {
   reglement: 'Règlements',
 };
 
+// Sentinel '__all__' = filtre désactivé. Radix SelectItem n'accepte pas value="".
+const ALL_STATUTS = '__all__';
+const ALL_DIRECTIONS = '__all__';
+
 const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string }[]> = {
   expression: [
-    { value: '', label: 'Tous les statuts' },
-    { value: 'soumis', label: 'Soumis' },
+    { value: ALL_STATUTS, label: 'Tous les statuts' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
@@ -69,31 +72,28 @@ const DEFAULT_STATUT_OPTIONS: Record<ExportStep, { value: string; label: string 
     { value: 'satisfaite', label: 'Satisfaite' },
   ],
   engagement: [
-    { value: '', label: 'Tous les statuts' },
-    { value: 'soumis', label: 'Soumis' },
+    { value: ALL_STATUTS, label: 'Tous les statuts' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
     { value: 'differe', label: 'Différé' },
   ],
   liquidation: [
-    { value: '', label: 'Tous les statuts' },
-    { value: 'soumis', label: 'Soumis' },
+    { value: ALL_STATUTS, label: 'Tous les statuts' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
     { value: 'differe', label: 'Différé' },
   ],
   ordonnancement: [
-    { value: '', label: 'Tous les statuts' },
-    { value: 'soumis', label: 'Soumis' },
+    { value: ALL_STATUTS, label: 'Tous les statuts' },
     { value: 'soumis', label: 'Soumis' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
     { value: 'differe', label: 'Différé' },
   ],
   reglement: [
-    { value: '', label: 'Tous les statuts' },
+    { value: ALL_STATUTS, label: 'Tous les statuts' },
     { value: 'valide', label: 'Validé' },
     { value: 'rejete', label: 'Rejeté' },
   ],
@@ -129,9 +129,11 @@ export function BudgetChainExportButton({
   };
 
   const handleFilterChange = (key: keyof ExportFilters, value: string) => {
+    // Sentinels Radix => undefined côté filtres réels
+    const cleaned = value === ALL_STATUTS || value === ALL_DIRECTIONS ? undefined : value;
     setFilters((prev) => ({
       ...prev,
-      [key]: value || undefined,
+      [key]: cleaned || undefined,
     }));
   };
 
@@ -179,7 +181,7 @@ export function BudgetChainExportButton({
               </Label>
               <div className="col-span-3">
                 <Select
-                  value={filters.statut || ''}
+                  value={filters.statut || ALL_STATUTS}
                   onValueChange={(value) => handleFilterChange('statut', value)}
                 >
                   <SelectTrigger>
@@ -203,14 +205,14 @@ export function BudgetChainExportButton({
               </Label>
               <div className="col-span-3">
                 <Select
-                  value={filters.directionId || ''}
+                  value={filters.directionId || ALL_DIRECTIONS}
                   onValueChange={(value) => handleFilterChange('directionId', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Toutes les directions" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toutes les directions</SelectItem>
+                    <SelectItem value={ALL_DIRECTIONS}>Toutes les directions</SelectItem>
                     {directions.map((dir) => (
                       <SelectItem key={dir.id} value={dir.id}>
                         {dir.sigle || dir.label}

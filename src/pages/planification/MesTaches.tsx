@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,7 +137,7 @@ export default function MesTaches() {
           cmp = a.avancement - b.avancement;
           break;
         case 'date_fin':
-          cmp = (a.date_fin || '9999').localeCompare(b.date_fin || '9999');
+          cmp = (a.date_fin || '2099-12-31').localeCompare(b.date_fin || '2099-12-31');
           break;
         case 'priorite':
           cmp = (PRIORITE_ORDER[a.priorite] || 0) - (PRIORITE_ORDER[b.priorite] || 0);
@@ -167,9 +168,13 @@ export default function MesTaches() {
   const paginatedData = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   // Count overdue
-  const enRetardCount = taches.filter(
-    (t) => t.date_fin && t.date_fin < today && t.statut !== 'termine' && t.statut !== 'annule'
-  ).length;
+  const enRetardCount = useMemo(
+    () =>
+      taches.filter(
+        (t) => t.date_fin && t.date_fin < today && t.statut !== 'termine' && t.statut !== 'annule'
+      ).length,
+    [taches, today]
+  );
 
   const isOverdue = (t: { date_fin: string | null; statut: string }) =>
     t.date_fin && t.date_fin < today && t.statut !== 'termine' && t.statut !== 'annule';
@@ -201,7 +206,9 @@ export default function MesTaches() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Total actives</p>
-            <p className="text-2xl font-bold">{stats.total - stats.annule}</p>
+            <p className="text-2xl font-bold">
+              {stats.total - stats.annule - (stats.termine || 0)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -325,6 +332,7 @@ export default function MesTaches() {
                       Tâche <SortIcon field="libelle" />
                     </span>
                   </TableHead>
+                  <TableHead>Plan</TableHead>
                   <TableHead>Responsable</TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-muted/50"
@@ -368,6 +376,18 @@ export default function MesTaches() {
                           <div className="text-xs text-muted-foreground truncate max-w-[250px]">
                             {t.sous_activite.code} — {t.sous_activite.libelle}
                           </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm font-mono">
+                        {t.plan_travail_id ? (
+                          <Link
+                            to={`/planification/projets/${t.plan_travail_id}`}
+                            className="hover:underline text-primary"
+                          >
+                            {t.plan_travail_id.slice(0, 8)}
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm">

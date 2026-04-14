@@ -174,6 +174,7 @@ export function useProjetTaches(sousActiviteId?: string, planTravailId?: string)
     stats,
     isLoading: query.isLoading,
     error: query.error,
+    refetch: query.refetch,
     createTache: createMutation.mutateAsync,
     updateTache: updateMutation.mutateAsync,
     updateAvancement: updateAvancementMutation.mutateAsync,

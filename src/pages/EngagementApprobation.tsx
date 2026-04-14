@@ -113,7 +113,7 @@ export default function EngagementApprobation() {
   const { userRoles } = usePermissions();
   const userRoleFromDB = useMemo(() => {
     if (!userRoles?.length) return null;
-    const roleSet = new Set(userRoles.map((r: { role: string }) => r.role));
+    const roleSet = new Set(userRoles.map((r: string) => r));
     if (roleSet.has('ADMIN')) return 'ALL';
     if (roleSet.has('DG')) return 'DG';
     if (roleSet.has('DAF')) return 'DAF';

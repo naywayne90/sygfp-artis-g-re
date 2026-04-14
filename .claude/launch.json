@@ -4,8 +4,8 @@
   "configurations": [
     {
       "name": "SYGFP Dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["/tmp/start-sygfp.sh"],
       "port": 8080
     },
     {

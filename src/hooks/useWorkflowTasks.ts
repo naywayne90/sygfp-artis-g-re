@@ -1,13 +1,30 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useExercice } from "@/contexts/ExerciceContext";
-import { usePermissions } from "./usePermissions";
-import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useExercice } from '@/contexts/ExerciceContext';
+import { usePermissions } from './usePermissions';
+import { toast } from 'sonner';
 
 export interface WorkflowTask {
   id: string;
-  task_type: 'validation' | 'correction' | 'signature' | 'paiement' | 'imputation' | 'approbation' | 'verification' | 'autre';
-  entity_type: 'note_sef' | 'note_aef' | 'imputation' | 'engagement' | 'liquidation' | 'ordonnancement' | 'reglement' | 'virement' | 'marche';
+  task_type:
+    | 'validation'
+    | 'correction'
+    | 'signature'
+    | 'paiement'
+    | 'imputation'
+    | 'approbation'
+    | 'verification'
+    | 'autre';
+  entity_type:
+    | 'note_sef'
+    | 'note_aef'
+    | 'imputation'
+    | 'engagement'
+    | 'liquidation'
+    | 'ordonnancement'
+    | 'reglement'
+    | 'virement'
+    | 'marche';
   entity_id: string;
   entity_code: string;
   entity_title: string | null;
@@ -30,9 +47,9 @@ export interface WorkflowTask {
   updated_at: string;
   exercice: number;
   // Relations
-  direction?: { id: string; code: string; label: string } | null;
+  direction?: { id: string; code: string; label: string; sigle?: string | null } | null;
   dossier?: { id: string; numero: string; objet: string } | null;
-  assignee?: { id: string; nom: string; prenom: string } | null;
+  assignee?: { id: string; first_name: string | null; last_name: string | null } | null;
 }
 
 export interface TaskFilters {
@@ -48,66 +65,68 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
   const { exercice } = useExercice();
   const { userRoles, userId } = usePermissions();
   const queryClient = useQueryClient();
-  
+
   // Récupérer la direction de l'utilisateur
   const { data: userProfile } = useQuery({
-    queryKey: ["user-profile-direction", userId],
+    queryKey: ['user-profile-direction', userId],
     queryFn: async () => {
       if (!userId) return null;
       const { data } = await supabase
-        .from("profiles")
-        .select("direction_id")
-        .eq("id", userId)
+        .from('profiles')
+        .select('direction_id')
+        .eq('id', userId)
         .single();
       return data;
     },
     enabled: !!userId,
   });
-  
+
   const userDirectionId = userProfile?.direction_id || null;
 
   const query = useQuery({
-    queryKey: ["workflow-tasks", exercice, filters, userRoles, userId],
+    queryKey: ['workflow-tasks', exercice, filters, userRoles, userId],
     queryFn: async (): Promise<WorkflowTask[]> => {
       if (!exercice) return [];
 
       let query = supabase
-        .from("workflow_tasks")
-        .select(`
+        .from('workflow_tasks')
+        .select(
+          `
           *,
-          direction:directions(id, code, label),
+          direction:directions(id, code, label, sigle),
           dossier:dossiers(id, numero, objet),
-          assignee:profiles!workflow_tasks_assignee_user_id_fkey(id, nom, prenom)
-        `)
-        .eq("exercice", exercice)
-        .order("due_date", { ascending: true, nullsFirst: false });
+          assignee:profiles!workflow_tasks_assignee_user_id_fkey(id, first_name, last_name)
+        `
+        )
+        .eq('exercice', exercice)
+        .order('due_date', { ascending: true, nullsFirst: false });
 
       // Filtre par statut
       if (filters.status === 'open') {
-        query = query.in("status", ["open", "in_progress"]);
+        query = query.in('status', ['open', 'in_progress']);
       } else if (filters.status === 'done') {
-        query = query.eq("status", "done");
+        query = query.eq('status', 'done');
       }
 
       // Filtre par priorité
       if (filters.priority && filters.priority !== 'all') {
-        query = query.eq("priority", filters.priority);
+        query = query.eq('priority', filters.priority);
       }
 
       // Filtre par type d'entité
       if (filters.entity_type && filters.entity_type !== 'all') {
-        query = query.eq("entity_type", filters.entity_type);
+        query = query.eq('entity_type', filters.entity_type);
       }
 
       // Filtre par type de tâche
       if (filters.task_type && filters.task_type !== 'all') {
-        query = query.eq("task_type", filters.task_type);
+        query = query.eq('task_type', filters.task_type);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching workflow tasks:", error);
+        console.error('Error fetching workflow tasks:', error);
         return [];
       }
 
@@ -115,15 +134,15 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
 
       // Filtrage côté client selon le scope
       if (filters.scope === 'mine') {
-        tasks = tasks.filter(t => t.assignee_user_id === userId);
+        tasks = tasks.filter((t) => t.assignee_user_id === userId);
       } else if (filters.scope === 'my_role') {
-        tasks = tasks.filter(t => {
-          if (userRoles.includes("ADMIN") || userRoles.includes("DG")) return true;
+        tasks = tasks.filter((t) => {
+          if (userRoles.includes('ADMIN') || userRoles.includes('DG')) return true;
           return userRoles.includes(t.assignee_role);
         });
       } else if (filters.scope === 'my_direction') {
-        tasks = tasks.filter(t => {
-          if (userRoles.includes("ADMIN") || userRoles.includes("DG")) return true;
+        tasks = tasks.filter((t) => {
+          if (userRoles.includes('ADMIN') || userRoles.includes('DG')) return true;
           return t.direction_id === userDirectionId;
         });
       }
@@ -135,7 +154,7 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        tasks = tasks.filter(t => {
+        tasks = tasks.filter((t) => {
           if (!t.due_date) return false;
           const dueDate = new Date(t.due_date);
 
@@ -153,7 +172,7 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
       }
 
       // Exclure les tâches créées par l'utilisateur (séparation des tâches) pour validation
-      tasks = tasks.filter(task => {
+      tasks = tasks.filter((task) => {
         if (task.task_type === 'validation' && task.created_by === userId) {
           return false;
         }
@@ -169,50 +188,58 @@ export function useWorkflowTasks(filters: TaskFilters = { scope: 'my_role', stat
   const takeTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
       const { error } = await supabase
-        .from("workflow_tasks")
-        .update({ 
-          status: "in_progress", 
+        .from('workflow_tasks')
+        .update({
+          status: 'in_progress',
           assignee_user_id: userId,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq("id", taskId);
-      
+        .eq('id', taskId);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Tâche prise en charge");
-      queryClient.invalidateQueries({ queryKey: ["workflow-tasks"] });
+      toast.success('Tâche prise en charge');
+      queryClient.invalidateQueries({ queryKey: ['workflow-tasks'] });
     },
     onError: (error) => {
-      toast.error("Erreur lors de la prise en charge");
+      toast.error('Erreur lors de la prise en charge');
       console.error(error);
-    }
+    },
   });
 
   // Mutation pour compléter une tâche
   const completeTaskMutation = useMutation({
-    mutationFn: async ({ taskId, action, comment }: { taskId: string; action: string; comment?: string }) => {
+    mutationFn: async ({
+      taskId,
+      action,
+      comment,
+    }: {
+      taskId: string;
+      action: string;
+      comment?: string;
+    }) => {
       const { error } = await supabase
-        .from("workflow_tasks")
-        .update({ 
-          status: "done", 
+        .from('workflow_tasks')
+        .update({
+          status: 'done',
           action_taken: action,
           completed_at: new Date().toISOString(),
           completed_by: userId,
-          completion_comment: comment
+          completion_comment: comment,
         })
-        .eq("id", taskId);
-      
+        .eq('id', taskId);
+
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Tâche terminée");
-      queryClient.invalidateQueries({ queryKey: ["workflow-tasks"] });
+      toast.success('Tâche terminée');
+      queryClient.invalidateQueries({ queryKey: ['workflow-tasks'] });
     },
     onError: (error) => {
-      toast.error("Erreur lors de la complétion");
+      toast.error('Erreur lors de la complétion');
       console.error(error);
-    }
+    },
   });
 
   return {
@@ -232,31 +259,31 @@ export function useWorkflowTasksStats() {
   const { userRoles, userId: _userId } = usePermissions();
 
   return useQuery({
-    queryKey: ["workflow-tasks-stats", exercice, userRoles],
+    queryKey: ['workflow-tasks-stats', exercice, userRoles],
     queryFn: async () => {
       if (!exercice) return null;
 
       const { data, error } = await supabase
-        .from("workflow_tasks")
-        .select("id, task_type, entity_type, status, priority, due_date, assignee_role")
-        .eq("exercice", exercice)
-        .in("status", ["open", "in_progress"]);
+        .from('workflow_tasks')
+        .select('id, task_type, entity_type, status, priority, due_date, assignee_role')
+        .eq('exercice', exercice)
+        .in('status', ['open', 'in_progress']);
 
       if (error) {
-        console.error("Error fetching task stats:", error);
+        console.error('Error fetching task stats:', error);
         return null;
       }
 
       const now = new Date();
-      const tasks = (data || []).filter(t => {
-        if (userRoles.includes("ADMIN") || userRoles.includes("DG")) return true;
+      const tasks = (data || []).filter((t) => {
+        if (userRoles.includes('ADMIN') || userRoles.includes('DG')) return true;
         return userRoles.includes(t.assignee_role);
       });
 
       return {
         total: tasks.length,
-        overdue: tasks.filter(t => t.due_date && new Date(t.due_date) < now).length,
-        today: tasks.filter(t => {
+        overdue: tasks.filter((t) => t.due_date && new Date(t.due_date) < now).length,
+        today: tasks.filter((t) => {
           if (!t.due_date) return false;
           const due = new Date(t.due_date);
           const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -265,24 +292,24 @@ export function useWorkflowTasksStats() {
           return due >= today && due < tomorrow;
         }).length,
         byType: {
-          validation: tasks.filter(t => t.task_type === 'validation').length,
-          signature: tasks.filter(t => t.task_type === 'signature').length,
-          paiement: tasks.filter(t => t.task_type === 'paiement').length,
-          approbation: tasks.filter(t => t.task_type === 'approbation').length,
+          validation: tasks.filter((t) => t.task_type === 'validation').length,
+          signature: tasks.filter((t) => t.task_type === 'signature').length,
+          paiement: tasks.filter((t) => t.task_type === 'paiement').length,
+          approbation: tasks.filter((t) => t.task_type === 'approbation').length,
         },
         byEntity: {
-          notes: tasks.filter(t => t.entity_type.includes('note')).length,
-          engagements: tasks.filter(t => t.entity_type === 'engagement').length,
-          liquidations: tasks.filter(t => t.entity_type === 'liquidation').length,
-          ordonnancements: tasks.filter(t => t.entity_type === 'ordonnancement').length,
-          reglements: tasks.filter(t => t.entity_type === 'reglement').length,
-          virements: tasks.filter(t => t.entity_type === 'virement').length,
+          notes: tasks.filter((t) => t.entity_type.includes('note')).length,
+          engagements: tasks.filter((t) => t.entity_type === 'engagement').length,
+          liquidations: tasks.filter((t) => t.entity_type === 'liquidation').length,
+          ordonnancements: tasks.filter((t) => t.entity_type === 'ordonnancement').length,
+          reglements: tasks.filter((t) => t.entity_type === 'reglement').length,
+          virements: tasks.filter((t) => t.entity_type === 'virement').length,
         },
         byPriority: {
-          urgente: tasks.filter(t => t.priority === 'urgente').length,
-          haute: tasks.filter(t => t.priority === 'haute').length,
-          normale: tasks.filter(t => t.priority === 'normale').length,
-          basse: tasks.filter(t => t.priority === 'basse').length,
+          urgente: tasks.filter((t) => t.priority === 'urgente').length,
+          haute: tasks.filter((t) => t.priority === 'haute').length,
+          normale: tasks.filter((t) => t.priority === 'normale').length,
+          basse: tasks.filter((t) => t.priority === 'basse').length,
         },
       };
     },

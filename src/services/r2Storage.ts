@@ -30,7 +30,8 @@ class R2StorageService {
       });
 
       if (error) {
-        console.error('R2 Edge Function Error:', error);
+        // Edge function indisponible (502 / env R2 manquantes) — pas une vraie erreur applicative
+        console.warn('[r2-storage] edge function unavailable:', error.message);
         return { data: null, error: error.message };
       }
 
@@ -40,7 +41,7 @@ class R2StorageService {
 
       return { data: data as T, error: null };
     } catch (err) {
-      console.error('R2 Service Error:', err);
+      console.warn('[r2-storage] service error:', err);
       return { data: null, error: err instanceof Error ? err.message : 'Unknown error' };
     }
   }

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { StatutBadge } from '@/components/shared/StatutBadge';
 import { BudgetLineWithRelations } from '@/hooks/useBudgetLines';
 import { useBudgetLineELOP } from '@/hooks/useBudgetLineELOP';
 import { useBudgetLineAudit } from '@/hooks/useBudgetLineAudit';
@@ -36,26 +38,8 @@ const formatDate = (dateStr: string | null) => {
   });
 };
 
-const getStatusBadge = (status: string | null) => {
-  switch (status) {
-    case 'soumis':
-      return (
-        <Badge variant="default" className="bg-blue-500">
-          Soumis
-        </Badge>
-      );
-    case 'valide':
-      return (
-        <Badge variant="default" className="bg-green-500">
-          Validé
-        </Badge>
-      );
-    case 'rejete':
-      return <Badge variant="destructive">Rejeté</Badge>;
-    default:
-      return <Badge variant="secondary">Soumis</Badge>;
-  }
-};
+// Le rendu du badge est délégué au composant partagé <StatutBadge />
+// (gère les 7 statuts unifiés + fallback "Soumis" pour les lignes legacy).
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -107,7 +91,7 @@ function TabInformations({ line }: { line: BudgetLineWithRelations }) {
             <InfoRow label="Niveau" value={line.level} />
             <InfoRow label="Exercice" value={line.exercice} />
             <InfoRow label="Source" value={line.source_financement} />
-            <InfoRow label="Statut" value={getStatusBadge(line.statut)} />
+            <InfoRow label="Statut" value={<StatutBadge statut={line.statut} size="sm" />} />
           </CardContent>
         </Card>
 
@@ -119,7 +103,11 @@ function TabInformations({ line }: { line: BudgetLineWithRelations }) {
           <CardContent className="space-y-0">
             <InfoRow
               label="Direction"
-              value={line.direction ? `${line.direction.code} - ${line.direction.label}` : null}
+              value={
+                line.direction
+                  ? `${line.direction.sigle || line.direction.code} - ${line.direction.label}`
+                  : null
+              }
             />
             <InfoRow
               label="Obj. Stratégique"
@@ -439,6 +427,17 @@ export function BudgetLineDetailSheet({
   budgetLine,
   defaultTab = 'informations',
 }: BudgetLineDetailSheetProps) {
+  // Tabs contrôlées : quand on ouvre le sheet via le drill-down d'une cellule
+  // (p.ex. clic sur "Engagé" → tab "consommation"), on veut forcer la valeur
+  // même si le composant est resté monté après une fermeture précédente.
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(defaultTab);
+    }
+  }, [open, defaultTab, budgetLine?.id]);
+
   if (!budgetLine) return null;
 
   return (
@@ -451,7 +450,7 @@ export function BudgetLineDetailSheet({
           </SheetTitle>
         </SheetHeader>
 
-        <Tabs defaultValue={defaultTab} className="px-6 pb-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 pb-6">
           <TabsList className="w-full">
             <TabsTrigger value="informations" className="flex-1">
               Informations

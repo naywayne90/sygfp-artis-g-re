@@ -51,6 +51,7 @@ export function useRoadmapDashboard() {
       return (data ?? []) as unknown as PlanTravail[];
     },
     enabled: !!exerciceId,
+    staleTime: 30000,
   });
 
   const tachesQuery = useQuery({
@@ -68,6 +69,7 @@ export function useRoadmapDashboard() {
       return (data ?? []) as unknown as Tache[];
     },
     enabled: !!exercice,
+    staleTime: 30000,
   });
 
   const plans = plansQuery.data ?? [];

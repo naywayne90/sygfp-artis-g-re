@@ -30,18 +30,18 @@
 
 ### 1.2 Tests E2E Playwright — 60/60 PASS
 
-| Section                         | Tests                                                                        | Resultat |
-| ------------------------------- | ---------------------------------------------------------------------------- | -------- |
-| BASE (1-5)                      | Page charge, KPIs, onglets, barre chaine, sidebar                            | 5/5 PASS |
-| FILTRES (6-12)                  | Recherche, statut, urgent toggle, combo, reset, pagination, tri              | 7/7 PASS |
-| CREATION (13-20)                | Formulaire, engagement selector, pre-remplissage, totale/partielle, PJ       | 8/8 PASS |
-| CALCULS FISCAUX (21-28)         | TVA 18%, AIRSI 5%, BNC, penalites, net temps reel, FCFA, retenues coherence  | 8/8 PASS |
-| CERTIFICATION SF (29-33)        | Docs obligatoires, badge, certification base, urgent toggle, motif           | 5/5 PASS |
-| VALIDATION (34-40)              | Onglet a valider, DAAF, DG (>= 50M), rejet motif, RBAC, timeline 2 etapes    | 7/7 PASS |
-| LIQUIDATIONS PARTIELLES (41-45) | Multi-tranche, cumul <= engagement, blocage, progression, 100% liquide       | 5/5 PASS |
-| DETAIL 6 ONGLETS (46-51)        | Infos, Calculs, Service Fait, Documents/GED, Historique, Chaine              | 6/6 PASS |
-| EXPORTS + SECURITE (52-57)      | Excel 3 feuilles, PDF synthese, RLS direction, DG tout, QR code, Attestation | 6/6 PASS |
-| NON-REGRESSION (58-60)          | /engagements OK, /ordonnancements OK, /reglements OK                         | 3/3 PASS |
+| Section                         | Tests                                                                         | Resultat |
+| ------------------------------- | ----------------------------------------------------------------------------- | -------- |
+| BASE (1-5)                      | Page charge, KPIs, onglets, barre chaine, sidebar                             | 5/5 PASS |
+| FILTRES (6-12)                  | Recherche, statut, urgent toggle, combo, reset, pagination, tri               | 7/7 PASS |
+| CREATION (13-20)                | Formulaire, engagement selector, pre-remplissage, totale/partielle, PJ        | 8/8 PASS |
+| CALCULS FISCAUX (21-28)         | TVA 18%, AIRSI 5%, BNC, penalites, net temps reel, FCFA, retenues coherence   | 8/8 PASS |
+| CERTIFICATION SF (29-33)        | Docs obligatoires, badge, certification base, urgent toggle, motif            | 5/5 PASS |
+| VALIDATION (34-40)              | Onglet a valider, DAAF, CB, DG (>= 50M), rejet motif, RBAC, timeline 3 etapes | 7/7 PASS |
+| LIQUIDATIONS PARTIELLES (41-45) | Multi-tranche, cumul <= engagement, blocage, progression, 100% liquide        | 5/5 PASS |
+| DETAIL 6 ONGLETS (46-51)        | Infos, Calculs, Service Fait, Documents/GED, Historique, Chaine               | 6/6 PASS |
+| EXPORTS + SECURITE (52-57)      | Excel 3 feuilles, PDF synthese, RLS direction, DG tout, QR code, Attestation  | 6/6 PASS |
+| NON-REGRESSION (58-60)          | /engagements OK, /ordonnancements OK, /reglements OK                          | 3/3 PASS |
 
 ### 1.3 Suite complete du projet
 
@@ -78,7 +78,7 @@
 | Certification service fait (date + PJ)            | 7       | 7/7         |
 | PJ obligatoires (facture + BL/PV)                 | 5       | 5/5         |
 | Flag reglement urgent + motif + notification DMG  | 7       | 7/7         |
-| Validation DAAF + DG (si seuil >= 50M)            | 10      | 10/10       |
+| Validation DAAF + CB + DG (si seuil >= 50M)       | 10      | 10/10       |
 | Impact budget (liquide += net_a_payer)            | 5       | 5/5         |
 | Liquidations partielles (multi-tranches, <= eng.) | 7       | 7/7         |
 | Detail 6 onglets                                  | 5       | 5/5         |
@@ -103,7 +103,7 @@
 - [x] Certification service fait (date + certificateur + PJ obligatoires)
 - [x] PJ obligatoires (facture + bon de livraison + PV de reception)
 - [x] Flag reglement urgent + motif (min 10 car.) + notification DMG/DG/DAAF
-- [x] Validation DAAF + DG (si montant >= 50 000 000 FCFA)
+- [x] Validation DAAF + CB (Controleur Budgetaire) + DG (si montant >= 50 000 000 FCFA)
 - [x] Impact budget (trigger `trg_recalc_elop_liquidations` → `total_liquide`)
 - [x] Liquidations partielles (N tranches par engagement, controle cumul <= montant_engage)
 - [x] Detail 6 onglets (Infos, Calculs Fiscaux, Service Fait, Documents/GED, Historique, Chaine)
@@ -111,7 +111,7 @@
 - [x] RLS par role (3 policies : SELECT/INSERT/UPDATE, direction-aware, TRESORERIE)
 - [x] QR code sur liquidation validee DG (reference + date + validateur)
 - [x] Exports Excel 3 feuilles (Liste + Detail Fiscal + Suivi par Engagement) + CSV + PDF
-- [x] Notifications par etape (soumission DAAF, visa DAAF→DG, validation finale→createur+direction+tresorerie)
+- [x] Notifications par etape (soumission DAAF, visa DAAF→CB, visa CB→DG, validation finale→createur+direction+tresorerie)
 - [x] Tableau de bord DAAF enrichi (4 KPI cards + ventilation prestataire + ventilation direction)
 - [x] 60 tests Playwright massifs (10 sections)
 - [x] Non-regression : 7 modules precedents OK (Passation, Engagement, EB, Structure, SEF, AEF, Imputation)
@@ -128,18 +128,18 @@
 
 ### 3.2 Tables de support
 
-| Table                     | Description                                    |
-| ------------------------- | ---------------------------------------------- |
-| `liquidation_validations` | Historique des validations par etape (DAAF/DG) |
-| `liquidation_attachments` | Pieces jointes (facture, BL, PV, attestation)  |
-| `budget_engagements`      | Engagements (FK `engagement_id`)               |
-| `budget_lines`            | Lignes budgetaires (via engagement)            |
-| `directions`              | Directions (via budget_line)                   |
-| `prestataires`            | Prestataires/fournisseurs (via marche)         |
-| `marches`                 | Marches publics (via engagement)               |
-| `documents_generes`       | QR codes et documents PDF generes              |
-| `notifications`           | Notifications par etape de validation          |
-| `audit_logs`              | Historique des actions (before/after)          |
+| Table                     | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| `liquidation_validations` | Historique des validations par etape (DAAF/CB/DG) |
+| `liquidation_attachments` | Pieces jointes (facture, BL, PV, attestation)     |
+| `budget_engagements`      | Engagements (FK `engagement_id`)                  |
+| `budget_lines`            | Lignes budgetaires (via engagement)               |
+| `directions`              | Directions (via budget_line)                      |
+| `prestataires`            | Prestataires/fournisseurs (via marche)            |
+| `marches`                 | Marches publics (via engagement)                  |
+| `documents_generes`       | QR codes et documents PDF generes                 |
+| `notifications`           | Notifications par etape de validation             |
+| `audit_logs`              | Historique des actions (before/after)             |
 
 ### 3.3 Total
 

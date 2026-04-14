@@ -353,8 +353,8 @@ export function NoteAEFList({
                   {showActions && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2 justify-end">
-                        {/* Bouton Imputer visible directement pour les notes a_imputer */}
-                        {note.statut === 'a_imputer' && !note.imputed_at && (
+                        {/* Bouton Imputer visible directement pour les notes a_imputer (CB/DAAF uniquement) */}
+                        {canImpute && note.statut === 'a_imputer' && !note.imputed_at && (
                           <Button
                             size="sm"
                             variant="default"
@@ -440,8 +440,8 @@ export function NoteAEFList({
                                 </>
                               )}
 
-                            {/* Actions pour A_IMPUTER - Bouton Imputer principal */}
-                            {note.statut === 'a_imputer' && !note.imputed_at && (
+                            {/* Actions pour A_IMPUTER - Bouton Imputer principal (CB/DAAF uniquement) */}
+                            {canImpute && note.statut === 'a_imputer' && !note.imputed_at && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -451,7 +451,7 @@ export function NoteAEFList({
                                   <CreditCard className="mr-2 h-4 w-4" />
                                   Imputer
                                 </DropdownMenuItem>
-                                {canImpute && onImpute && (
+                                {onImpute && (
                                   <DropdownMenuItem onClick={() => onImpute(note)}>
                                     <ArrowRight className="mr-2 h-4 w-4" />
                                     Imputation rapide

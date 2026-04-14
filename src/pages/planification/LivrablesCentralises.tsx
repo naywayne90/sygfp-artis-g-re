@@ -84,6 +84,11 @@ const STATUT_CONFIG: Record<string, { label: string; color: string; icon: typeof
     color: 'bg-destructive/10 text-destructive border-destructive/20',
     icon: XCircle,
   },
+  en_retard: {
+    label: 'En retard',
+    color: 'bg-red-100 text-red-800 border-red-200',
+    icon: Clock,
+  },
 };
 
 type SortField = 'nom' | 'date_prevue' | 'statut';
@@ -143,7 +148,7 @@ export default function LivrablesCentralises() {
           cmp = a.nom.localeCompare(b.nom);
           break;
         case 'date_prevue':
-          cmp = (a.date_prevue || '9999').localeCompare(b.date_prevue || '9999');
+          cmp = (a.date_prevue || '2099-12-31').localeCompare(b.date_prevue || '2099-12-31');
           break;
         case 'statut':
           cmp = a.statut.localeCompare(b.statut);
@@ -180,11 +185,16 @@ export default function LivrablesCentralises() {
   };
 
   const handleReject = () => {
-    if (rejectTarget && rejectMotif.trim()) {
-      rejectLivrable.mutate({ id: rejectTarget.id, motif: rejectMotif });
-      setRejectTarget(null);
-      setRejectMotif('');
-    }
+    if (!rejectTarget || !rejectMotif.trim()) return;
+    rejectLivrable.mutate(
+      { id: rejectTarget.id, motif: rejectMotif },
+      {
+        onSuccess: () => {
+          setRejectTarget(null);
+          setRejectMotif('');
+        },
+      }
+    );
   };
 
   // Export columns

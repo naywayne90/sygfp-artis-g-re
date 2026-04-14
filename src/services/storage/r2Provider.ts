@@ -3,19 +3,26 @@
  * Uses existing r2Storage service through Edge Function
  */
 
-import { supabase } from "@/integrations/supabase/client";
-import type { IStorageProvider, StorageResult, StorageObject, UploadResult, PathParams } from "./types";
-import { generateStandardName } from "./namingService";
+import { supabase } from '@/integrations/supabase/client';
+import type {
+  IStorageProvider,
+  StorageResult,
+  StorageObject,
+  UploadResult,
+  PathParams,
+} from './types';
+import { generateStandardName } from './namingService';
 
 export class R2StorageProvider implements IStorageProvider {
   private async callEdgeFunction<T>(body: Record<string, unknown>): Promise<StorageResult<T>> {
     try {
-      const { data, error } = await supabase.functions.invoke("r2-storage", {
+      const { data, error } = await supabase.functions.invoke('r2-storage', {
         body,
       });
 
       if (error) {
-        console.error("R2 Edge Function Error:", error);
+        // Edge function indisponible (502 / env R2 manquantes) — pas une vraie erreur applicative
+        console.warn('[r2-storage] edge function unavailable:', error.message);
         return { data: null, error: error.message };
       }
 
@@ -25,8 +32,8 @@ export class R2StorageProvider implements IStorageProvider {
 
       return { data: data as T, error: null };
     } catch (err) {
-      console.error("R2 Service Error:", err);
-      return { data: null, error: err instanceof Error ? err.message : "Unknown error" };
+      console.warn('[r2-storage] service error:', err);
+      return { data: null, error: err instanceof Error ? err.message : 'Unknown error' };
     }
   }
 
@@ -41,28 +48,28 @@ export class R2StorageProvider implements IStorageProvider {
       key: string;
       bucket: string;
     }>({
-      action: "getUploadUrl",
+      action: 'getUploadUrl',
       key: path,
-      contentType: file.type || "application/octet-stream",
+      contentType: file.type || 'application/octet-stream',
     });
 
     if (urlError || !urlData) {
-      return { data: null, error: urlError || "Failed to get upload URL" };
+      return { data: null, error: urlError || 'Failed to get upload URL' };
     }
 
     // Step 2: Upload directly to R2 using presigned URL
     try {
       const xhr = new XMLHttpRequest();
-      
+
       const uploadPromise = new Promise<void>((resolve, reject) => {
-        xhr.upload.addEventListener("progress", (event) => {
+        xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable && onProgress) {
             const percent = Math.round((event.loaded / event.total) * 100);
             onProgress(percent);
           }
         });
 
-        xhr.addEventListener("load", () => {
+        xhr.addEventListener('load', () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
@@ -70,13 +77,13 @@ export class R2StorageProvider implements IStorageProvider {
           }
         });
 
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"));
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during upload'));
         });
       });
 
-      xhr.open("PUT", urlData.uploadUrl);
-      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      xhr.open('PUT', urlData.uploadUrl);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
       xhr.send(file);
 
       await uploadPromise;
@@ -92,20 +99,20 @@ export class R2StorageProvider implements IStorageProvider {
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : "Upload failed",
+        error: err instanceof Error ? err.message : 'Upload failed',
       };
     }
   }
 
   async getDownloadUrl(key: string, expiresIn = 3600): Promise<StorageResult<string>> {
     const { data, error } = await this.callEdgeFunction<{ downloadUrl: string }>({
-      action: "getDownloadUrl",
+      action: 'getDownloadUrl',
       key,
       expiresIn,
     });
 
     if (error || !data) {
-      return { data: null, error: error || "Failed to get download URL" };
+      return { data: null, error: error || 'Failed to get download URL' };
     }
 
     return { data: data.downloadUrl, error: null };
@@ -113,7 +120,7 @@ export class R2StorageProvider implements IStorageProvider {
 
   async delete(key: string): Promise<StorageResult<boolean>> {
     const { data, error } = await this.callEdgeFunction<{ success: boolean }>({
-      action: "deleteObject",
+      action: 'deleteObject',
       key,
     });
 
@@ -126,12 +133,12 @@ export class R2StorageProvider implements IStorageProvider {
 
   async list(prefix?: string): Promise<StorageResult<StorageObject[]>> {
     const { data, error } = await this.callEdgeFunction<{ objects: StorageObject[] }>({
-      action: "listObjects",
+      action: 'listObjects',
       prefix,
     });
 
     if (error || !data) {
-      return { data: null, error: error || "Failed to list objects" };
+      return { data: null, error: error || 'Failed to list objects' };
     }
 
     return { data: data.objects, error: null };
@@ -139,7 +146,7 @@ export class R2StorageProvider implements IStorageProvider {
 
   generatePath(params: PathParams): string {
     const { entityType, entityId, filename, exercice, reference, typePiece } = params;
-    
+
     // If reference and typePiece provided, use standard naming
     if (reference && typePiece) {
       const { standardName } = generateStandardName({
@@ -147,21 +154,21 @@ export class R2StorageProvider implements IStorageProvider {
         typePiece,
         originalFilename: filename,
       });
-      
+
       if (exercice) {
         return `${exercice}/${entityType}/${entityId}/${standardName}`;
       }
       return `${entityType}/${entityId}/${standardName}`;
     }
-    
+
     // Fallback to timestamp-based naming
     const timestamp = Date.now();
-    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-    
+    const safeFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+
     if (exercice) {
       return `${entityType}/${exercice}/${entityId}/${timestamp}_${safeFilename}`;
     }
-    
+
     return `${entityType}/${entityId}/${timestamp}_${safeFilename}`;
   }
 

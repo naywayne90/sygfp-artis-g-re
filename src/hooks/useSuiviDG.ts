@@ -190,8 +190,16 @@ const PIPELINE_CONFIG = [
 // HELPERS
 // ============================================
 
-function getEntityUrl(entityType: string, _entityId: string): string {
-  return ENTITY_URL_MAP[entityType] || '/';
+// Notes SEF/AEF ont des pages détail dédiées (/notes-sef/:id, /notes-aef/:id)
+// Les autres modules utilisent des Sheet/Dialog inline sur la page liste
+const DETAIL_ROUTE_MODULES = new Set(['notes_sef', 'notes_dg', 'notes_aef']);
+
+function getEntityUrl(entityType: string, entityId: string): string {
+  const base = ENTITY_URL_MAP[entityType] || '/';
+  if (DETAIL_ROUTE_MODULES.has(entityType) && entityId) {
+    return `${base}/${entityId}`;
+  }
+  return base;
 }
 
 function computeDelaiJours(dateStr: string): number {
@@ -370,8 +378,8 @@ export function useSuiviDG() {
           ? Math.round(allDates.reduce((sum, d) => sum + computeDelaiJours(d), 0) / allDates.length)
           : 0;
 
-      // Opérations en retard (> 5 jours)
-      const enRetard = allDates.filter((d) => computeDelaiJours(d) > 5).length;
+      // Opérations en retard (> 7 jours = SLA dépassé)
+      const enRetard = allDates.filter((d) => computeDelaiJours(d) > 7).length;
 
       const totalValideesMois = logsValidMois.count || 0;
       const totalTraiteesMois = logsTotalMois.count || 0;
@@ -494,11 +502,11 @@ export function useSuiviDG() {
     staleTime: 300_000, // 5 min — données de config
   });
 
-  // 3. Suivi par direction (basé sur notes_sef qui ont direction_id + expressions_besoin)
+  // 3. Suivi par direction (basé sur les modules ayant direction_id)
   const directionsQuery = useQuery({
     queryKey: ['suivi-dg-directions', exercice],
     queryFn: async (): Promise<DirectionSuivi[]> => {
-      const [dirsRes, sefRes, ebRes] = await Promise.all([
+      const [dirsRes, sefRes, aefRes, impRes, ebRes] = await Promise.all([
         supabase
           .from('directions')
           .select(
@@ -512,6 +520,16 @@ export function useSuiviDG() {
           .eq('exercice', exercice)
           .in('statut', ['soumis', 'a_valider_dg']),
         supabase
+          .from('notes_dg')
+          .select('direction_id, montant_estime, created_at')
+          .eq('exercice', exercice)
+          .in('statut', ['soumis', 'a_valider']),
+        supabase
+          .from('imputations')
+          .select('direction_id, montant, created_at')
+          .eq('exercice', exercice)
+          .eq('statut', 'a_valider'),
+        supabase
           .from('expressions_besoin')
           .select('direction_id, montant_estime, created_at')
           .eq('exercice', exercice)
@@ -520,26 +538,41 @@ export function useSuiviDG() {
 
       const dirs = dirsRes.data || [];
       const sefData = sefRes.data || [];
+      const aefData = aefRes.data || [];
+      const impData = impRes.data || [];
       const ebData = ebRes.data || [];
 
       return dirs
         .map((dir): DirectionSuivi => {
           const responsable = dir.responsable as unknown as { full_name: string | null } | null;
           const sefItems = sefData.filter((s) => s.direction_id === dir.id);
+          const aefItems = aefData.filter((a) => a.direction_id === dir.id);
+          const impItems = impData.filter((i) => i.direction_id === dir.id);
           const ebItems = ebData.filter((e) => e.direction_id === dir.id);
 
-          const totalEnAttente = sefItems.length + ebItems.length;
+          const totalEnAttente =
+            sefItems.length + aefItems.length + impItems.length + ebItems.length;
           const montantEnAttente =
             sefItems.reduce((sum, s) => sum + (s.montant_estime || 0), 0) +
+            aefItems.reduce((sum, a) => sum + (a.montant_estime || 0), 0) +
+            impItems.reduce((sum, i) => sum + (i.montant || 0), 0) +
             ebItems.reduce((sum, e) => sum + (e.montant_estime || 0), 0);
 
           // Urgence basée sur le plus vieux document
           const allDates = [
             ...sefItems.map((s) => s.created_at),
+            ...aefItems.map((a) => a.created_at),
+            ...impItems.map((i) => i.created_at),
             ...ebItems.map((e) => e.created_at),
           ].filter(Boolean);
           const maxDelai =
             allDates.length > 0 ? Math.max(...allDates.map((d) => computeDelaiJours(d))) : 0;
+
+          const parModule: Record<string, number> = {};
+          if (sefItems.length > 0) parModule['Notes SEF'] = sefItems.length;
+          if (aefItems.length > 0) parModule['Notes AEF'] = aefItems.length;
+          if (impItems.length > 0) parModule['Imputations'] = impItems.length;
+          if (ebItems.length > 0) parModule['Expr. Besoin'] = ebItems.length;
 
           return {
             directionId: dir.id,
@@ -547,10 +580,7 @@ export function useSuiviDG() {
             directionSigle: dir.sigle,
             directionLabel: dir.label,
             responsableNom: responsable?.full_name || null,
-            parModule: {
-              'Notes SEF': sefItems.length,
-              'Expr. Besoin': ebItems.length,
-            },
+            parModule,
             totalEnAttente,
             montantEnAttente,
             urgence: totalEnAttente === 0 ? 'vert' : computeUrgence(maxDelai),
@@ -568,38 +598,76 @@ export function useSuiviDG() {
   const operationsQuery = useQuery({
     queryKey: ['suivi-dg-operations', exercice],
     queryFn: async (): Promise<OperationEnAttente[]> => {
-      const [sefRes, engRes, liqRes, ordoRes] = await Promise.all([
-        supabase
-          .from('notes_sef')
-          .select(
-            'id, reference_pivot, objet, direction_id, montant_estime, statut, created_at, directions!notes_sef_direction_id_fkey(code, label)'
-          )
-          .eq('exercice', exercice)
-          .in('statut', ['soumis', 'a_valider_dg'])
-          .order('created_at', { ascending: true })
-          .limit(100),
-        supabase
-          .from('budget_engagements')
-          .select('id, numero, objet, montant, statut, created_at')
-          .eq('exercice', exercice)
-          .in('statut', ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf'])
-          .order('created_at', { ascending: true })
-          .limit(100),
-        supabase
-          .from('budget_liquidations')
-          .select('id, numero, montant, statut, created_at')
-          .eq('exercice', exercice)
-          .in('statut', ['soumis', 'certifié_sf'])
-          .order('created_at', { ascending: true })
-          .limit(100),
-        supabase
-          .from('ordonnancements')
-          .select('id, numero, objet, montant, statut, created_at')
-          .eq('exercice', exercice)
-          .in('statut', ['soumis', 'en_attente', 'en_signature'])
-          .order('created_at', { ascending: true })
-          .limit(100),
-      ]);
+      const [sefRes, aefRes, impRes, ebRes, pmRes, engRes, liqRes, ordoRes, reglRes] =
+        await Promise.all([
+          supabase
+            .from('notes_sef')
+            .select(
+              'id, reference_pivot, objet, direction_id, montant_estime, statut, created_at, directions!notes_sef_direction_id_fkey(code, label)'
+            )
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'a_valider_dg'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('notes_dg')
+            .select('id, reference, objet, montant_estime, statut, created_at')
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'a_valider'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('imputations')
+            .select('id, reference, objet, montant, statut, created_at')
+            .eq('exercice', exercice)
+            .eq('statut', 'a_valider')
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('expressions_besoin')
+            .select(
+              'id, reference, objet, montant_estime, statut, created_at, direction_id, directions!expressions_besoin_direction_id_fkey(code, label)'
+            )
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'verifie'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('passation_marche')
+            .select('id, reference, objet, montant_estime, statut, created_at')
+            .eq('exercice', exercice)
+            .in('statut', ['attribue'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('budget_engagements')
+            .select('id, numero, objet, montant, statut, created_at')
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'visa_saf', 'visa_cb', 'visa_daaf'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('budget_liquidations')
+            .select('id, numero, montant, statut, created_at')
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'certifié_sf'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('ordonnancements')
+            .select('id, numero, objet, montant, statut, created_at')
+            .eq('exercice', exercice)
+            .in('statut', ['soumis', 'en_attente', 'en_signature'])
+            .order('created_at', { ascending: true })
+            .limit(100),
+          supabase
+            .from('reglements')
+            .select('id, numero, montant, statut, created_at')
+            .eq('exercice', exercice)
+            .eq('statut', 'en_attente')
+            .order('created_at', { ascending: true })
+            .limit(100),
+        ]);
 
       const ops: OperationEnAttente[] = [];
 
@@ -620,11 +688,112 @@ export function useSuiviDG() {
           validateurNom: null,
           delaiJours: delai,
           montant: item.montant_estime,
-          slaDepasse: delai > 5,
+          slaDepasse: delai > 7,
           priorite: delai > 7 ? 'haute' : 'normale',
           createdAt: item.created_at,
           entityUrl: getEntityUrl('notes_sef', item.id),
           stepActuel: MODULE_STEP_MAP['notes_sef'],
+          stepTotal: 9,
+        });
+      }
+
+      // Notes AEF (notes_dg)
+      for (const item of (aefRes.data || []) as any[]) {
+        const delai = computeDelaiJours(item.created_at);
+        ops.push({
+          id: item.id,
+          reference: item.reference || '—',
+          entityTitle: item.objet,
+          module: 'notes_dg',
+          moduleLabel: 'Note AEF',
+          directionCode: '—',
+          directionLabel: '—',
+          etapeActuelle: item.statut === 'a_valider' ? 'Validation DG' : 'Soumis',
+          validateurRole: item.statut === 'a_valider' ? 'DG' : 'DIRECTEUR',
+          validateurNom: null,
+          delaiJours: delai,
+          montant: item.montant_estime,
+          slaDepasse: delai > 7,
+          priorite: delai > 7 ? 'haute' : 'normale',
+          createdAt: item.created_at,
+          entityUrl: getEntityUrl('notes_dg', item.id),
+          stepActuel: MODULE_STEP_MAP['notes_dg'],
+          stepTotal: 9,
+        });
+      }
+
+      // Imputations
+      for (const item of impRes.data || []) {
+        const delai = computeDelaiJours(item.created_at);
+        ops.push({
+          id: item.id,
+          reference: item.reference || '—',
+          entityTitle: item.objet,
+          module: 'imputations',
+          moduleLabel: 'Imputation',
+          directionCode: '—',
+          directionLabel: '—',
+          etapeActuelle: 'Validation DAAF',
+          validateurRole: 'DAAF',
+          validateurNom: null,
+          delaiJours: delai,
+          montant: item.montant,
+          slaDepasse: delai > 7,
+          priorite: delai > 7 ? 'haute' : 'normale',
+          createdAt: item.created_at,
+          entityUrl: getEntityUrl('imputations', item.id),
+          stepActuel: MODULE_STEP_MAP['imputations'],
+          stepTotal: 9,
+        });
+      }
+
+      // Expressions de Besoin
+      for (const item of (ebRes.data || []) as any[]) {
+        const dir = item.directions as unknown as { code: string; label: string } | null;
+        const delai = computeDelaiJours(item.created_at);
+        ops.push({
+          id: item.id,
+          reference: item.reference || '—',
+          entityTitle: item.objet,
+          module: 'expressions_besoin',
+          moduleLabel: 'Expression Besoin',
+          directionCode: dir?.code || '—',
+          directionLabel: dir?.label || '—',
+          etapeActuelle: item.statut === 'verifie' ? 'Validation DAF' : 'Vérification',
+          validateurRole: item.statut === 'verifie' ? 'DAF' : 'CB',
+          validateurNom: null,
+          delaiJours: delai,
+          montant: item.montant_estime,
+          slaDepasse: delai > 7,
+          priorite: delai > 7 ? 'haute' : 'normale',
+          createdAt: item.created_at,
+          entityUrl: getEntityUrl('expressions_besoin', item.id),
+          stepActuel: MODULE_STEP_MAP['expressions_besoin'],
+          stepTotal: 9,
+        });
+      }
+
+      // Passation Marché
+      for (const item of (pmRes.data || []) as any[]) {
+        const delai = computeDelaiJours(item.created_at);
+        ops.push({
+          id: item.id,
+          reference: item.reference || '—',
+          entityTitle: item.objet,
+          module: 'passation_marche',
+          moduleLabel: 'Passation Marché',
+          directionCode: '—',
+          directionLabel: '—',
+          etapeActuelle: 'Approbation DG',
+          validateurRole: 'DG',
+          validateurNom: null,
+          delaiJours: delai,
+          montant: item.montant_estime,
+          slaDepasse: delai > 7,
+          priorite: delai > 7 ? 'haute' : 'normale',
+          createdAt: item.created_at,
+          entityUrl: getEntityUrl('passation_marche', item.id),
+          stepActuel: MODULE_STEP_MAP['passation_marche'],
           stepTotal: 9,
         });
       }
@@ -652,7 +821,7 @@ export function useSuiviDG() {
           validateurNom: null,
           delaiJours: delai,
           montant: item.montant,
-          slaDepasse: delai > 5,
+          slaDepasse: delai > 7,
           priorite: delai > 7 ? 'haute' : 'normale',
           createdAt: item.created_at,
           entityUrl: getEntityUrl('budget_engagements', item.id),
@@ -677,7 +846,7 @@ export function useSuiviDG() {
           validateurNom: null,
           delaiJours: delai,
           montant: item.montant,
-          slaDepasse: delai > 5,
+          slaDepasse: delai > 7,
           priorite: delai > 7 ? 'haute' : 'normale',
           createdAt: item.created_at,
           entityUrl: getEntityUrl('budget_liquidations', item.id),
@@ -710,11 +879,36 @@ export function useSuiviDG() {
           validateurNom: null,
           delaiJours: delai,
           montant: item.montant,
-          slaDepasse: delai > 5,
+          slaDepasse: delai > 7,
           priorite: delai > 7 ? 'haute' : 'normale',
           createdAt: item.created_at,
           entityUrl: getEntityUrl('ordonnancements', item.id),
           stepActuel: MODULE_STEP_MAP['ordonnancements'],
+          stepTotal: 9,
+        });
+      }
+
+      // Règlements
+      for (const item of reglRes.data || []) {
+        const delai = computeDelaiJours(item.created_at);
+        ops.push({
+          id: item.id,
+          reference: item.numero || '—',
+          entityTitle: null,
+          module: 'reglements',
+          moduleLabel: 'Règlement',
+          directionCode: '—',
+          directionLabel: '—',
+          etapeActuelle: 'Paiement Trésorerie',
+          validateurRole: 'TRESORIER',
+          validateurNom: null,
+          delaiJours: delai,
+          montant: item.montant,
+          slaDepasse: delai > 7,
+          priorite: delai > 7 ? 'haute' : 'normale',
+          createdAt: item.created_at,
+          entityUrl: getEntityUrl('reglements', item.id),
+          stepActuel: MODULE_STEP_MAP['reglements'],
           stepTotal: 9,
         });
       }

@@ -222,7 +222,9 @@ export function DemandeAchatList() {
                       {format(new Date(demande.date_demande), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{demande.objet}</TableCell>
-                    <TableCell>{demande.direction?.code || '-'}</TableCell>
+                    <TableCell>
+                      {demande.direction?.sigle || demande.direction?.code || '-'}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={demande.urgence === 'urgente' ? 'destructive' : 'secondary'}>
                         {demande.urgence}
